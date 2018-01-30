@@ -45,21 +45,25 @@
                                 </td>
                                 <td width="10%">
                                     <input type="checkbox" 
-                                            ng-model="track.showValueGrid">
+                                            ng-model="track.showValueGrid"
+                                            ng-disabled="track.type != 'Log Track'">
                                 </td>
                                 <td width="10%">
                                     <input type="checkbox" 
-                                            ng-model="track.showDepthGrid">
+                                            ng-model="track.showDepthGrid"
+                                            ng-disabled="track.type != 'Log Track'">
                                 </td>
                                 <td width="10%">
                                     <input type="number" step="any" 
                                             ng-model="track.majorTicks"
-                                            class="form-control wi-form-control">
+                                            class="form-control wi-form-control"
+                                            ng-disabled="track.type != 'Log Track'">
                                 </td>
                                 <td width="10%">
                                     <input type="number" step="any" 
                                             ng-model="track.minorTicks"
-                                            class="form-control wi-form-control">
+                                            class="form-control wi-form-control"
+                                            ng-disabled="track.type != 'Log Track'">
                                 </td>
                                 <td width="10%">
                                     <input type="number" step="any" 
@@ -71,13 +75,14 @@
                                     <input type="number" step="any"
                                             ng-model="track.zoomFactor"
                                             class="form-control wi-form-control"
-                                            ng-disabled="track.type != 'log-track'">
+                                            ng-disabled="track.type != 'Log Track'">
                                 </td>
                                 <td width="10%">
                                     <div class="float-left">
                                         <button ng-click="wiModal.colorTrack(track);"
                                                 ng-style="{'background-color':track.color}"
-                                                class="form-control wi-form-control width-80px thick-border">
+                                                class="form-control wi-form-control width-80px thick-border"
+                                                ng-disabled="track.type == 'Object Track'">
                                         </button>
                                     </div>
                                 </td>
