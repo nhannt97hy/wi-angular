@@ -2463,7 +2463,8 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
     function ModalController($scope, close) {
         let self = this;
         let wiD3Ctr = wiLogplot.getwiD3Ctrl();
-        this.depthRange = wiD3Ctr.getDepthRange();
+        // this.depthRange = wiD3Ctr.getDepthRange();
+        this.depthRange = [wiD3Ctr.getMinDepth(), wiD3Ctr.getMaxDepth()];
 
         this.verifyRange = function () {
             if (self.depthRange[0] < wiD3Ctr.getMinDepth()) self.depthRange[0] = wiD3Ctr.getMinDepth();
