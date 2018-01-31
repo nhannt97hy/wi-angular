@@ -3643,9 +3643,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 if(plot.cropDisplay) {
                                     logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
                                 } else {
-                                    logplotCtrl.handlers.ViewWholeWellButtonClicked();
+                                    // logplotCtrl.handlers.ViewWholeWellButtonClicked();
                                 }
-                            },500);
+                            });
                             self.isReady = true;
                             wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
                             self.plotAll();

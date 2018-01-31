@@ -30,16 +30,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.onReady = function() {
         if (self.onRefWindCtrlReady) self.onRefWindCtrlReady(self);
-        let sensor = new ResizeSensor(document.getElementById(self.name), function () {
-            refresh();
-        });
-        function handler () {
-            if (!sensor || !sensor.detach) return;
-            sensor.detach();
-            sensor = new ResizeSensor(document.getElementById(self.name), function () {
-                refresh();
-            });
-        }
         self.resizeHandler = function (event) {
             let parentCtrl = getParentCtrl();
             let model = event.model;
@@ -47,13 +37,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 if (parentCtrl.idCrossplot && model.type == 'crossplot') return;
                 if (parentCtrl.idHistogram && model.type == 'histogram') return;
                 let comboviewId = +self.containerName.replace('comboview', '');
-                if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
+                if (model.type == 'comboview' && comboviewId == model.properties.id) refresh();
             } else {
                 if (parentCtrl.idCrossplot && (model.type != 'crossplot' || model.id != parentCtrl.idCrossplot)) return;
                 if (parentCtrl.idHistogram && (model.type != 'histogram' || model.id != parentCtrl.idHistogram)) return;
-                handler();
+                refresh();
             }
-            
         }
         document.addEventListener('resize', self.resizeHandler);
         self.svg = getRefCurveContainer().append('svg')

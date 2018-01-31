@@ -40,11 +40,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     function getData(){
-        let len = self.depthArr[self.currentIndex].length;        
+        let len = self.depthArr[self.currentIndex].length;
         if(self.first < 0) self.first = 0;
-        if(self.first + buffer + threshold > len) self.first = len - buffer - threshold;        
+        if(self.first + threshold > len) self.first = len - threshold;
         console.log('getData', self.first);
-        self.loaded = self.depthArr[self.currentIndex].slice(self.first, self.first + threshold);        
+        self.loaded = self.depthArr[self.currentIndex].slice(self.first, self.first + threshold);
     }
 
     function loadUp(cb){
@@ -59,7 +59,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     
     function loadDown(cb){
         let len = self.depthArr[self.currentIndex].length;
-        if(self.first + buffer + threshold != len){
+        if(self.first + threshold != len){
             self.first += buffer;
             $timeout(function(){
                 getData()
@@ -85,7 +85,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     spinner.hide();
                     self.loaded = self.depthArr[self.currentIndex].slice(0,threshold);
                     self.first = 0;
-                });  
+                });
             })
         }else{
             self.loaded = self.depthArr[self.currentIndex].slice(0,threshold);
@@ -156,13 +156,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }], function(err, ret){
                     self.onChangeWell();
                 })
-                
             }, 0);
         });
 
         angular.element(document).ready(function(){
             self.onChangeWell(true);
-            
             let fcBody = $(".fix-column > .tbody");
             let rcBody = $(".rest-columns > .tbody");
             let rcHead = $(".rest-columns > .thead");
@@ -202,12 +200,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let rcBody = $(".rest-columns > .tbody");
         let scroll = padding + 1;
         self.indexInput = Math.round(self.indexInput);
-        
         if(self.indexInput <= 0){
             self.first = 0;
             scroll = 0;
         }else if(self.indexInput >= self.depthArr[self.currentIndex].length - 1){
-            self.first = self.depthArr[self.currentIndex].length - buffer - threshold;
+            self.first = self.depthArr[self.currentIndex].length - threshold;
             scroll = threshold;
         }else{
             self.first = self.indexInput < padding - 1 ? 0 : self.indexInput - padding - 1;
@@ -217,6 +214,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         $timeout(function(){
             getData();
             rcBody.scrollTop(scroll * 30);
+            self.indexInput = null;
         })
     }
 
@@ -224,12 +222,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let rcBody = $(".rest-columns > .tbody");
         let scroll = padding + 1;
         let indexInput = Math.round((self.depthInput - self.SelectedWell.topDepth)/self.SelectedWell.step);
-        
         if(indexInput <= 0){
             self.first = 0;
             scroll = 0;
         }else if(indexInput >= self.depthArr[self.currentIndex].length - 1){
-            self.first = self.depthArr[self.currentIndex].length - buffer - threshold;
+            self.first = self.depthArr[self.currentIndex].length - threshold;
             scroll = threshold;
         }else{
             self.first = indexInput < padding - 1 ? 0 : indexInput - padding - 1;
@@ -239,6 +236,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         $timeout(function(){
             getData();
             rcBody.scrollTop(scroll * 30);
+        self.depthInput = null;
         })
     }
 
@@ -296,7 +294,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         modifiedCurves = self.curvesData[self.currentIndex].filter(c => {
                 return c.edit;
             });
-        
         if(modifiedCurves.length){
             DialogUtils.saveCurvesDialog(ModalService, modifiedCurves, function(){
                 console.log('save curves successed!');
