@@ -6,7 +6,8 @@
         ng-class='{"item-active": item.data.selected}'
         data="{{wiBaseTreeview.config[$index].id}}"
         wi-right-click="wiBaseTreeview.onClick($index, $event); wiBaseTreeview.showContextMenuFunction($event, $index)"
-        wi-element-ready="wiBaseTreeview.onReadyFunction();">
+        wi-element-ready="wiBaseTreeview.onReadyFunction();"
+        ng-hide="item.data.hide">
         <div class="wi-parent-content">
             <div class="icon-expanded"
                 ng-click="wiBaseTreeview.onCollapse($index)">
@@ -19,9 +20,9 @@
             <div ng-click="wiBaseTreeview.onClick($index, $event)"
                 ng-dblclick="wiBaseTreeview.onDoubleClick($index);">
                 <div class="display-inline-block margin-right-0_5em"><span class="{{item.data.icon}}"></span></div>
+                <span ng-if="wiBaseTreeview.isShowParentName && item.parentData">{{item.parentData.label}} /</span>
+                <span ng-if="wiBaseTreeview.isShowParentName && item.parentDataArr" ng-repeat="parentData in item.parentDataArr">{{parentData.label}} /&nbsp;</span>
                 <span title="{{item.data.label}}">{{item.data.label}}</span>
-                <span ng-if="wiBaseTreeview.isShowParentName && item.parentData">/ {{item.parentData.label}}</span>
-                <span ng-if="wiBaseTreeview.isShowParentName && item.parentDataArr" ng-repeat="parentData in item.parentDataArr">/ {{parentData.label}}&nbsp;</span>
                 <div class="pull-right actions">
                     <wi-button ng-repeat="action in item.actions" icon="{{action.icon}}" handler="action.handler" label="{{action.label}}"></wi-button>
                 </div>

@@ -2,13 +2,50 @@ const componentName = 'wiExplorerTreeview';
 const moduleName = 'wi-explorer-treeview';
 const wiBaseTreeview = require('./wi-base-treeview');
 
-function WiExpTreeController($controller, wiComponentService, wiApiService) {
+function WiExpTreeController($controller, wiComponentService, wiApiService, $timeout, $scope) {
 
     let self = this;
 
     this.$onInit = function () {
         window.__WIEXPTREE = self;
     };
+
+    function filterF(input, strCp, parent, lastChild){
+        parent.unshift(input);
+        input.data.hide = true;
+        if((input.data.label).toLowerCase().includes(strCp.toLowerCase())){
+            if(parent && parent.length){
+                parent.forEach(p => {
+                    p.data.childExpanded = true;
+                    p.data.hide = false;
+                })
+            }
+        }else{
+            if(!input.children || !input.children.length){
+                parent.shift();
+                if(lastChild){
+                    parent.shift();
+                }
+            }
+        }
+        if(input.children && input.children.length){
+            input.children.forEach((child, i) => {
+                filterF(child,strCp,parent, i == input.children.length - 1)
+                }
+            )
+        }
+    }
+
+    $scope.$watch(() => this.filterBy,(value) => {
+        if(this.config && this.config.length){
+            this.config.forEach((c, i) => {
+                let parent = new Array()
+                    filterF(c, value, parent);
+                    }
+                )
+            }
+        }
+    )
 
     this.onReady = function () {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -72,12 +109,6 @@ function WiExpTreeController($controller, wiComponentService, wiApiService) {
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 
-    // let WiBaseTreeController = new wiBaseTreeview.controller();
-    // for (const key in WiBaseTreeController) {
-    //     if (WiBaseTreeController.hasOwnProperty(key) && !this[key]) {
-    //         this[key] = WiBaseTreeController[key];
-    //     }
-    // }
 }
 
 let app = angular.module(moduleName, [wiBaseTreeview.name]);
@@ -88,7 +119,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         config: '<',
-        container: '<'
+        container: '<',
+        filterBy: '@'
     }
 });
 exports.name = moduleName;
