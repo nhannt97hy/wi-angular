@@ -4,6 +4,7 @@ const createFormCtrlName = 'createFormController';
 const retrainFormCtrlName = 'retrainFormController';
 const predictFormCtrlName = 'predictFormController';
 const listModelFormCtrlName = 'listModelController';
+const username = window.localStorage.getItem('username');
 
 let wipm = angular.module(moduleName, []);
 
@@ -32,6 +33,7 @@ wipm.controller(controllerName, function($scope){
 })
 
 wipm.controller(createFormCtrlName, function($http){
+    console.log('user: ', username);
     var self = this;
     this.name = "Model";
     this.description = "Description"
@@ -101,7 +103,8 @@ wipm.controller(createFormCtrlName, function($http){
                 units: "",
                 data: self.data,
                 target: self.target,
-                description: self.description
+                description: self.description,
+                user_created: username
             }
             if (payload.type == 'dnn'){
                 payload.units = self.units;
@@ -113,7 +116,7 @@ wipm.controller(createFormCtrlName, function($http){
             }
             $http({
                 method: 'POST',
-                url: 'http://localhost:3000/store/api/model/new',
+                url: 'http://localhost:3002/store/api/model/new',
                 data: payload
             }).then(function(response){
                     console.log('create model:', response.data);
@@ -127,7 +130,7 @@ wipm.controller(createFormCtrlName, function($http){
                     }
                 return;
             }, function(error){
-                toastr.error(JSON.stringify(error), '');
+                toastr.error('Call store api create model error!', '');
                 return;
             })
         }
@@ -137,7 +140,7 @@ wipm.controller(retrainFormCtrlName, function($http){
     var self = this;    
     $http({
         method: 'GET',
-        url: 'http://localhost:3000/store/api/model/list'
+        url: 'http://localhost:3002/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             console.log('retrain: ', res);
@@ -196,7 +199,7 @@ wipm.controller(retrainFormCtrlName, function($http){
                         }
                         $http({
                             method: 'PUT',
-                            url: 'http://localhost:3000/store/api/model/retrain/' + self.model.id,
+                            url: 'http://localhost:3002/store/api/model/retrain/' + self.model.id,
                             data: payload
                         }).then(function(response){
                                 $(".load").remove();
@@ -209,7 +212,7 @@ wipm.controller(retrainFormCtrlName, function($http){
                                 }
                             return;
                         }, function(error){
-                            toastr.error(JSON.stringify(error), '');
+                            toastr.error('Call store api retrain error', '');
                             return;
                         })
                     }
@@ -217,7 +220,7 @@ wipm.controller(retrainFormCtrlName, function($http){
             }
             return;
     }, function(error){
-            toastr.error(JSON.stringify(error), '');
+            toastr.error('Call store api get list model error', '');
             return;
     })
 })
@@ -250,7 +253,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
     }
     $http({
         method: 'GET',
-        url: 'http://localhost:3000/store/api/model/list'
+        url: 'http://localhost:3002/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             if(res.statusCode == 400){
@@ -281,7 +284,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
                         }
                         $http({
                             method: 'POST',
-                            url: 'http://localhost:3000/store/api/predict',
+                            url: 'http://localhost:3002/store/api/predict',
                             data: payload
                         }).then(function(response){
                                 $(".load").remove();
@@ -296,7 +299,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
                                 }
                             return;
                         }, function(error){
-                            toastr.error(JSON.stringify(error), '');
+                            toastr.error("Call store api predict error", '');
                             return;
                         })
                     }
@@ -304,7 +307,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
             }
             return;
     }, function(error){
-            toastr.error(JSON.stringify(error), '');
+            toastr.error('Call store api get list model error', '');
             return;
     })
 })
@@ -312,7 +315,7 @@ wipm.controller(listModelFormCtrlName, function($http){
     var self = this;
     $http({
         method: 'GET',
-        url: 'http://localhost:3000/store/api/model/list'
+        url: 'http://localhost:3002/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             console.log('delete: ', res);
@@ -325,7 +328,7 @@ wipm.controller(listModelFormCtrlName, function($http){
                     $("table").css('opacity', '0.5');
                     $http({
                         method: 'DELETE',
-                        url: 'http://localhost:3000/store/api/model/delete/' + id,
+                        url: 'http://localhost:3002/store/api/model/delete/' + id,
                     }).then(function(response){
                             $(".load").remove();
                             $("table").css('opacity', '1');
@@ -338,14 +341,14 @@ wipm.controller(listModelFormCtrlName, function($http){
                             }
                         return;
                     }, function(error){
-                        toastr.error(JSON.stringify(error), '');
+                        toastr.error('Call store api delete model error', '');
                         return;
                     })
                 }
             }
             return;
         }, function(error){
-            toastr.error(JSON.stringify(error), '');
+            toastr.error('Call store api get list model error', '');
             return;
     })
 });

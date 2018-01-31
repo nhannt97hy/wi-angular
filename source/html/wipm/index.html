@@ -1,5 +1,5 @@
 <div class="container-fluid" id="container" ng-controller="wipmController">
-    <h2 class="content-heading" style="border-bottom: none">WIPM</h2>
+    <h3 class='content-heading' style="text-align:left; font-style: italic">WIPM</h3>
     <div class="row">
         <div class="col-sm-3" id="left">
             <ul class="nav nav-pills">
@@ -14,6 +14,26 @@
             @@include('./retrainForm.html')
             @@include('./predictForm.html')
             @@include('./listModel.html')
+               
+            <!-- <div class="container-fluid" ng-if="result" ng-controller="result as result">
+                <h3>Result</h3>
+                <div ng-if="!result.predict">
+                    {{result.result}}
+                </div>
+
+                <table ng-if="result.predict" class="table table-bordered " style="width: 25%">
+                    <thead>
+                        <tr>
+                            <th style="width: 100%">Target</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        <tr ng-repeat="e in result.target">
+                            <td style="width: 100%">{{e}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>      -->
         </div>
     </div>
 </div>
