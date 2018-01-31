@@ -1155,6 +1155,7 @@ exports.importLASDialog = function (ModalService) {
                             }
                         })
                         .catch(function (err) {
+                            spinner.hide();
                             console.log('err', err);
                             self.isDisabled = false;
                             utils.error(err);
@@ -1185,6 +1186,7 @@ exports.importLASDialog = function (ModalService) {
                                 }
                             })
                             .catch(function (err) {
+                                spinner.hide();
                                 console.log('err', err);
                                 self.isDisabled = false;
                                 utils.error(err);
@@ -1210,6 +1212,7 @@ exports.importLASDialog = function (ModalService) {
                         }
                     })
                     .catch(function (err) {
+                        spinner.hide();
                         console.log('err', err);
                         self.isDisabled = false;
                         utils.error(err);
