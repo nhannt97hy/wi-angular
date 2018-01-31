@@ -1130,6 +1130,8 @@ exports.importLASDialog = function (ModalService) {
             }
             payloadParams.file = self.lasFile;
 
+            let spinner = wiComponentService.getComponent('SPINNER');
+            spinner.show();
             if(self.selectedDataset){
                 DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
                     if(!yes){
@@ -1141,13 +1143,14 @@ exports.importLASDialog = function (ModalService) {
                             if (well) {
                                 setTimeout(function() {
                                     utils.refreshProjectState()
-                                    .then(function () {
-                                        close(well, 500);
-                                    })
-                                    .catch(function () {
-                                        self.isDisabled = false;
-                                        utils.error(err);
-                                    });
+                                        .then(function () {
+                                            close(well, 500);
+                                        })
+                                        .catch(function () {
+                                            self.isDisabled = false;
+                                            utils.error(err);
+                                        });
+                                    spinner.hide();
                                 }, 2000);
                             }
                         })
@@ -1170,13 +1173,14 @@ exports.importLASDialog = function (ModalService) {
                                 if (well) {
                                     setTimeout(function() {
                                         utils.refreshProjectState()
-                                        .then(function () {
-                                            close(well, 500);
-                                        })
-                                        .catch(function () {
-                                            self.isDisabled = false;
-                                            utils.error(err);
-                                        });
+                                            .then(function () {
+                                                close(well, 500);
+                                            })
+                                            .catch(function () {
+                                                self.isDisabled = false;
+                                                utils.error(err);
+                                            });
+                                        spinner.hide();
                                     }, 2000);
                                 }
                             })
@@ -1201,6 +1205,7 @@ exports.importLASDialog = function (ModalService) {
                                         self.isDisabled = false;
                                         utils.error(err);
                                     });
+                                spinner.hide();
                             }, 2000)
                         }
                     })
