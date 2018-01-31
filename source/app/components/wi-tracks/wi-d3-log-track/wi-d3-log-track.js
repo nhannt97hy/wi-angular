@@ -453,7 +453,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             let currentShading = _currentTrack.getCurrentShading();
             let shadingOptions = currentShading.getProperties();
             let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-            this.shadingList = _currentTrack.getShadings();
 
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
                 let request = angular.copy(options);
@@ -939,16 +938,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             label: "Shading Properties",
             icon: "shading-properties-16x16",
             handler: function () {
-                let currentShading = _currentTrack.getCurrentShading();
-                console.log("Shading Properties", currentShading);
-                DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
-                    if (props) {
-                        console.log('logTrackPropertiesData', props);
-                    }
-                }, {
-                    tabs: ['false', 'false', 'true'],
-                    shadingOnly: true
-                });
+                shadingProperties();
             }
         },
             {
@@ -971,14 +961,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });*/
     }
     function _shadingOnDoubleClick() {
+        shadingProperties();
+        // Prevent track properties dialog from opening
+        d3.event.stopPropagation();
+    }
+    function shadingProperties () {
         _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        console.log('Shading double clicked');
         let currentShading = _currentTrack.getCurrentShading();
         let shadingOptions = currentShading.getProperties();
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-        this.shadingList = _currentTrack.getShadings();
 
-        console.log("Shading Properties", currentShading);
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
             let request = angular.copy(options);
             if(options.idLeftLine == -3) {
@@ -1029,9 +1021,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 });
             });
         }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
-        // Prevent track properties dialog from opening
-        d3.event.stopPropagation();
-    }
+    };
+
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
