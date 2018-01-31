@@ -1130,6 +1130,8 @@ exports.importLASDialog = function (ModalService) {
             }
             payloadParams.file = self.lasFile;
 
+            let spinner = wiComponentService.getComponent('SPINNER');
+            spinner.show();
             if(self.selectedDataset){
                 DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
                     if(!yes){
@@ -1141,17 +1143,19 @@ exports.importLASDialog = function (ModalService) {
                             if (well) {
                                 setTimeout(function() {
                                     utils.refreshProjectState()
-                                    .then(function () {
-                                        close(well, 500);
-                                    })
-                                    .catch(function () {
-                                        self.isDisabled = false;
-                                        utils.error(err);
-                                    });
+                                        .then(function () {
+                                            close(well, 500);
+                                        })
+                                        .catch(function () {
+                                            self.isDisabled = false;
+                                            utils.error(err);
+                                        });
+                                    spinner.hide();
                                 }, 2000);
                             }
                         })
                         .catch(function (err) {
+                            spinner.hide();
                             console.log('err', err);
                             self.isDisabled = false;
                             utils.error(err);
@@ -1170,17 +1174,19 @@ exports.importLASDialog = function (ModalService) {
                                 if (well) {
                                     setTimeout(function() {
                                         utils.refreshProjectState()
-                                        .then(function () {
-                                            close(well, 500);
-                                        })
-                                        .catch(function () {
-                                            self.isDisabled = false;
-                                            utils.error(err);
-                                        });
+                                            .then(function () {
+                                                close(well, 500);
+                                            })
+                                            .catch(function () {
+                                                self.isDisabled = false;
+                                                utils.error(err);
+                                            });
+                                        spinner.hide();
                                     }, 2000);
                                 }
                             })
                             .catch(function (err) {
+                                spinner.hide();
                                 console.log('err', err);
                                 self.isDisabled = false;
                                 utils.error(err);
@@ -1201,10 +1207,12 @@ exports.importLASDialog = function (ModalService) {
                                         self.isDisabled = false;
                                         utils.error(err);
                                     });
+                                spinner.hide();
                             }, 2000)
                         }
                     })
                     .catch(function (err) {
+                        spinner.hide();
                         console.log('err', err);
                         self.isDisabled = false;
                         utils.error(err);
@@ -2463,13 +2471,22 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
     function ModalController($scope, close) {
         let self = this;
         let wiD3Ctr = wiLogplot.getwiD3Ctrl();
-        this.depthRange = wiD3Ctr.getDepthRange();
+        // this.depthRange = wiD3Ctr.getDepthRange();
+        this.depthRange = [wiD3Ctr.getMinDepth(), wiD3Ctr.getMaxDepth()];
+
+        this.verifyRange = function () {
+            if (self.depthRange[0] < wiD3Ctr.getMinDepth()) self.depthRange[0] = wiD3Ctr.getMinDepth();
+            if (self.depthRange[1] > wiD3Ctr.getMaxDepth()) self.depthRange[1] = wiD3Ctr.getMaxDepth();
+        }
 
         this.onOkButtonClicked = function () {
-            console.log(self.depthRange);
-            wiD3Ctr.setDepthRange(self.depthRange);
-            wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
-            close(self);
+            self.verifyRange();
+            wiLogplot.getSlidingbarCtrl().resetView();
+            setTimeout(() => {
+                wiD3Ctr.setDepthRange(self.depthRange);
+                wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
+                close(self);
+            });
         }
         this.onCancelButtonClicked = function () {
             //wiD3Ctr.setDepthRange(self.depthRange);

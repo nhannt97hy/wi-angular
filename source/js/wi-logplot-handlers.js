@@ -144,26 +144,6 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 }
 
-function scaleTo1(rangeUnit, wiLogplot, wiComponentService) {
-    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let wiD3Ctrl = wiLogplot.getwiD3Ctrl();
-    let wiSlidingbarCtrl = wiLogplot.getSlidingbarCtrl();
-    let maxDepth = wiD3Ctrl.getMaxDepth();
-    let minDepth = wiD3Ctrl.getMinDepth();
-    let realLengthCm = (maxDepth - minDepth) * 100;
-    let dpCm = utils.getDpcm();
-    let trackHeight = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`).height();
-    let trackHeightCm = trackHeight / dpCm;
-    let trackRealLengthCm = trackHeightCm * rangeUnit;
-    let rangeHandlerByPercent = (trackRealLengthCm / realLengthCm) * 100;
-    // console.log('scale handler', rangeHandlerByPercent, trackRealLengthCm, realLengthCm);
-    if (rangeHandlerByPercent > 100) {
-        rangeHandlerByPercent = 100;
-    }
-
-    wiSlidingbarCtrl.updateRangeSlidingHandler(rangeHandlerByPercent);
-}
-
 exports.ScalePreviousState = function (top, bottom) {
     let wiLogplot = this.wiLogplot;
     let track = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`);
@@ -269,11 +249,8 @@ exports.RangeSpecificButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
-    let timeoutFunc = this.$timeout;
     DialogUtils.rangeSpecificDialog(this.ModalService, this.wiLogplot, function () {
-        timeoutFunc(function () {
-            wiLogplot.getSlidingbarCtrl().scaleView();
-        }, 1000);
+        wiLogplot.getSlidingbarCtrl().scaleView();
     });
 }
 
