@@ -56,7 +56,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             })
         }
     }
-    
+
     function loadDown(cb){
         let len = self.depthArr[self.currentIndex].length;
         if(self.first + threshold != len){
@@ -69,6 +69,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.onChangeWell = function (clear) {
         getDatasets();
+        self.focus = null;
         self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id});
         if(!self.depthArr[self.currentIndex].length){
             spinner.show();
@@ -110,7 +111,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         })
     }
-    
+
     this.$onInit = function () {
         wiComponentService.putComponent('WCL', self);
         self.isShowRefWin = false;
@@ -169,12 +170,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 if(rcBody.scrollTop() < (padding * 30) && rcBody.scrollTop() < currentScroll){
                     console.log('up');
                     loadUp(function(){
+                        self.focus = null;
                         rcBody.scrollTop(buffer * 30);
                     });
                 }
                 if(rcBody[0].scrollHeight - Math.round(rcBody.scrollTop() + rcBody.innerHeight()) < (padding * 30) && rcBody.scrollTop() > currentScroll){
                     console.log('Down');
                     loadDown(function(){
+                        self.focus = null;
                         rcBody.scrollTop(rcBody[0].scrollHeight - rcBody.innerHeight() - buffer * 30);
                     });
                 }
@@ -182,7 +185,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 fcBody.scrollTop(rcBody.scrollTop());
                 rcHead.scrollLeft(rcBody.scrollLeft());
             }
-            rcBody.scroll(_.throttle(onScroll, 100));
+            rcBody.scroll(_.debounce(onScroll, 100));
             document.addEventListener('keydown', function(event){
                 if(event.ctrlKey && event.keyCode == 71){
                     event.preventDefault();
@@ -203,16 +206,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if(self.indexInput <= 0){
             self.first = 0;
             scroll = 0;
+            self.focus = scroll;
         }else if(self.indexInput >= self.depthArr[self.currentIndex].length - 1){
             self.first = self.depthArr[self.currentIndex].length - threshold;
             scroll = threshold;
+            self.focus = scroll - 1;
         }else{
-            self.first = self.indexInput < padding - 1 ? 0 : self.indexInput - padding - 1;
-            scroll = self.indexInput < padding + 1 ? 0 : padding + 1;
+            self.first = self.indexInput < padding * 2 ? 0 : self.indexInput - padding * 2;
+            scroll = self.indexInput < padding * 2 ? 0 : padding * 2;
+            self.focus = self.indexInput < padding * 2 ? self.indexInput : padding * 2;
         }
 
         $timeout(function(){
             getData();
+            if(self.first < self.indexInput - padding * 2 && self.indexInput < self.depthArr[self.currentIndex].length - 1){
+                scroll = self.indexInput - self.first;
+                self.focus = scroll;
+            }
             rcBody.scrollTop(scroll * 30);
             self.indexInput = null;
         })
@@ -225,18 +235,25 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if(indexInput <= 0){
             self.first = 0;
             scroll = 0;
+            self.focus = scroll;
         }else if(indexInput >= self.depthArr[self.currentIndex].length - 1){
             self.first = self.depthArr[self.currentIndex].length - threshold;
             scroll = threshold;
+            self.focus = scroll - 1;
         }else{
-            self.first = indexInput < padding - 1 ? 0 : indexInput - padding - 1;
-            scroll = indexInput < padding + 1 ? 0 : padding + 1;
+            self.first = indexInput < padding * 2 ? 0 : indexInput - padding * 2;
+            scroll = indexInput < padding * 2 ? 0 : padding * 2;
+            self.focus = indexInput < padding * 2 ? indexInput : padding * 2;
         }
 
         $timeout(function(){
             getData();
+            if(self.first < indexInput - padding * 2 && indexInput < self.depthArr[self.currentIndex].length - 1){
+                scroll = indexInput - self.first;
+                self.focus = scroll;
+            }
             rcBody.scrollTop(scroll * 30);
-        self.depthInput = null;
+            self.depthInput = null;
         })
     }
 
