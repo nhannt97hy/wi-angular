@@ -159,6 +159,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
+        if(!self.contextMenu) {
+            commonCtxMenu = commonCtxMenu || self.buildContextMenu(contextMenu_constantItems);
+            self.contextMenu = commonCtxMenu;
+        }
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {
@@ -203,6 +207,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.getOrderKey = getOrderKey;
     this.setContextMenu = function (ctxMenu) {
+        if(!ctxMenu) {
+            self.contextMenu = commonCtxMenu;
+        }
         self.contextMenu = ctxMenu;
     }
 
@@ -651,7 +658,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiLogplot: self.wiLogplotCtrl
         });
 
-        // subcribe with wiComponentService
+        // subscribe with wiComponentService
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
