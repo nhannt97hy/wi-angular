@@ -1316,51 +1316,6 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 };
 exports.openLogplotTab = openLogplotTab;
 
-/*exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-    let selectWellProject = findWellProjectById(idWell, project);
-    if (!selectWellProject) return;
-
-    if (!Array.isArray(selectWellProject.plots) || selectWellProject.plots.length === 0) {
-        selectWellProject.plots = [];
-        selectWellProject.plots.push(logplot);
-        return;
-    }
-
-    for (let plot of selectWellProject.plots) {
-        if (!Array.isArray(project.wells)) {
-            project.wells = [];
-            project.wells.push(well);
-        } else {
-
-        }
-    }
-
-    let isNewPlot = true;
-    for (let i = 0; i < selectWellProject.plots.length; i++) {
-        if (selectWellProject.plots[i].idPlot == logplot.idPlot) {
-            selectWellProject.plots[i] = logplot;
-            isNewPlot = false;
-        }
-    }
-    if (isNewPlot) {
-        selectWellProject.plots.push(logplot);
-    }
-
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
-}
-
-function findWellProjectById(idWell, project) {
-    if (!project || !Array.isArray(project.wells)) return;
-    for (let well of project.wells) {
-        if (well.idWell == idWell) {
-            return well;
-        }
-    }
-
-    return null;
-}*/
 function getCurrentWell(type) {
     let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
     if(!currentWell){

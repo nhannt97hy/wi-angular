@@ -185,18 +185,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             var containerId = "#" + self.name + 'HistogramY';
             var elem = $(containerId);
             var innerElem = $(containerId + ' .transform-group');
-            let sensor = new ResizeSensor(elem[0], function() {
+            function handler() {
                 innerElem.css('width', elem[0].clientHeight + 'px');
                 innerElem.css('height', elem[0].clientWidth + 'px');
-            });
-    
-            function handler () {
-                if (!sensor || !sensor.detach) return;
-                sensor.detach();
-                sensor = new ResizeSensor(elem[0], function() {
-                    innerElem.css('width', elem[0].clientHeight + 'px');
-                    innerElem.css('height', elem[0].clientWidth + 'px');
-                });
+                self.xHistogram.doPlot();
+                self.yHistogram.doPlot();
             }
             self.resizeHandlerHis = function (event) {
                 let model = event.model;
@@ -231,7 +224,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let pointSet = self.crossplotModel.properties.pointsets[0];
             if(pointSet.idCurveX && pointSet.idCurveY){
                 self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
-                wiApiService.editCrossplot(self.crossplotModel.properties);                
+                saveCrossplot();
                 if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
                 $timeout(function(){
                     if(pointSet.idCurveZ){
@@ -344,7 +337,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (menuItem) {
             menuItem.checked = self.crossplotModel.properties.referenceDisplay;
         }
-        wiApiService.editCrossplot(self.crossplotModel.properties);
+        saveCrossplot();
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
 
