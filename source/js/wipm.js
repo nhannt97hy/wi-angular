@@ -116,7 +116,7 @@ wipm.controller(createFormCtrlName, function($http){
             }
             $http({
                 method: 'POST',
-                url: 'http://localhost:3002/store/api/model/new',
+                url: 'http://54.169.13.92:3000/store/api/model/new',
                 data: payload
             }).then(function(response){
                     console.log('create model:', response.data);
@@ -140,7 +140,7 @@ wipm.controller(retrainFormCtrlName, function($http){
     var self = this;    
     $http({
         method: 'GET',
-        url: 'http://localhost:3002/store/api/model/list/' + username
+        url: 'http://54.169.13.92:3000/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             console.log('retrain: ', res);
@@ -199,7 +199,7 @@ wipm.controller(retrainFormCtrlName, function($http){
                         }
                         $http({
                             method: 'PUT',
-                            url: 'http://localhost:3002/store/api/model/retrain/' + self.model.id,
+                            url: 'http://54.169.13.92:3000/store/api/model/retrain/' + self.model.id,
                             data: payload
                         }).then(function(response){
                                 $(".load").remove();
@@ -253,7 +253,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
     }
     $http({
         method: 'GET',
-        url: 'http://localhost:3002/store/api/model/list/' + username
+        url: 'http://54.169.13.92:3000/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             if(res.statusCode == 400){
@@ -284,7 +284,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
                         }
                         $http({
                             method: 'POST',
-                            url: 'http://localhost:3002/store/api/predict',
+                            url: 'http://54.169.13.92:3000/store/api/predict',
                             data: payload
                         }).then(function(response){
                                 $(".load").remove();
@@ -315,7 +315,7 @@ wipm.controller(listModelFormCtrlName, function($http){
     var self = this;
     $http({
         method: 'GET',
-        url: 'http://localhost:3002/store/api/model/list/' + username
+        url: 'http://54.169.13.92:3000/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             console.log('delete: ', res);
@@ -328,7 +328,7 @@ wipm.controller(listModelFormCtrlName, function($http){
                     $("table").css('opacity', '0.5');
                     $http({
                         method: 'DELETE',
-                        url: 'http://localhost:3002/store/api/model/delete/' + id,
+                        url: 'http://54.169.13.92:3000/store/api/model/delete/' + id,
                     }).then(function(response){
                             $(".load").remove();
                             $("table").css('opacity', '1');
