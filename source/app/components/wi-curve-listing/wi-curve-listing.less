@@ -58,11 +58,11 @@ wi-curve-listing{
         .depth{
             background: lightgray;
         }
-        .fix-column > .thead > .trow{
-            >:first-child{
-                width: 90px;
-            }
-        }
+        // .fix-column > .thead > .trow{
+        //     >:first-child{
+        //         width: 90px;
+        //     }
+        // }
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none;
@@ -73,9 +73,9 @@ wi-curve-listing{
         .fix-column > .tbody > .trow{
             margin-top: -10px;
             margin-bottom: 10px;
-            >:first-child{
-                width: 90px;
-            }
+            // >:first-child{
+            //     width: 90px;
+            // }
         }
         .fix-column > .tbody >:first-child{
             margin-top: 0px;
@@ -117,11 +117,22 @@ wi-curve-listing{
         }
         .tcol{
             display: inline-block;
-            width: 110px;
+            width: 100px;
             height: 30px;
             border: 1px solid #ddd;
             font-size: 14px;
             padding: 2px 8px;
+            position: relative;
+        }
+        .resizeH{
+            position: absolute;
+            top: 0px;
+            right: -4px;
+            width: 10px;
+            height: 100%;
+            border: none;
+            background-color: transparent;
+            cursor: col-resize;
         }
     }
     .nanValue{
