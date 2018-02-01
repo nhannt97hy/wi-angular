@@ -303,7 +303,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.onAddCurveButtonClicked = function(){
         console.log('onAddCurveButtonClicked');
-        DialogUtils.addCurveDialog(ModalService);
+        DialogUtils.addCurveDialog(ModalService, self.SelectedWell);
     }
     this.onSaveButtonClicked = function(){
         console.log('onSaveButtonClicked');

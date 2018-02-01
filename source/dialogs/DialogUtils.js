@@ -8237,22 +8237,42 @@ exports.TVDConversionDialog = function (ModalService) {
         });
     });
 }
-exports.addCurveDialog = function (ModalService) {
+exports.addCurveDialog = function (ModalService, Selwell) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout){
         let self = this;
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.wellArr = utils.findWells().filter(well => {
-            return well.children.find(c => c.type == 'dataset');
-        });
-        if(!self.SelectedWell){
-            self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+
+        this.wellArr = utils.findWells();
+        if(Selwell){
+            self.SelectedWell = Selwell;
         }else{
-            self.SelectedWell = self.wellArr.find(function(well){
-                return well.id == self.SelectedWell.id;
-            })
+            if(selectedNodes && selectedNodes.length){
+                switch (selectedNodes[0].type){
+                    case 'well':
+                    self.SelectedWell = selectedNodes[0];
+                    break;
+
+                    case 'dataset':
+                    self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                    self.datasetName = selectedNodes[0];
+                    break;
+
+                    case 'curve':
+                    self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                    break;
+
+                    default:
+                    self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0] : null;
+                }
+            }
+            else {
+                self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+            }
         }
+
         this.datasets = [];
         this.curves = [];
         this.families = utils.getListFamily();
@@ -8266,7 +8286,7 @@ exports.addCurveDialog = function (ModalService) {
                         self.datasets.push(child);
                     if(i== self.SelectedWell.children.length -1){
                         if(self.datasets && self.datasets.length!= 0){
-                            self.datasetName = self.datasets[0].id;
+                            if(!self.datasetName) self.datasetName = self.datasets[0].id;
                             self.datasets.forEach(function(child){
                                 child.children.forEach(function (curve) {
                                     if (curve.type == 'curve') {
@@ -8282,7 +8302,7 @@ exports.addCurveDialog = function (ModalService) {
 
         this.onWellChanged();
         this.onFamilyChanged = function () {
-            self.unit = self.selectedFamily.unit;
+            self.unit = self.selectedFamily.family_spec.length ? self.selectedFamily.family_spec[0] : null;
         }
         this.onFamilyChanged();
         this.onRunButtonClicked = function () {

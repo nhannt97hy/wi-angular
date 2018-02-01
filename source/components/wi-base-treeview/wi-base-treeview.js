@@ -1,12 +1,51 @@
 const componentName = 'wiBaseTreeview';
 const moduleName = 'wi-base-treeview';
 
-function WiBaseTreeController(wiComponentService) {
+function WiBaseTreeController(wiComponentService, $scope) {
     let self = this;
 
     this.$onInit = function () {
         wiComponentService.putComponent(self.name, self);
+        $scope.$watch(() => this.filter,(value) => {
+            if(value != undefined){
+                if(this.config && this.config.length){
+                    this.config.forEach((c, i) => {
+                        let parent = new Array()
+                            filterF(c, value, parent);
+                            }
+                        )
+                    }
+                }
+            }
+        )
     };
+
+    function filterF(input, strCp, parent, lastChild){
+        parent.unshift(input);
+        input.data.hide = true;
+        if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
+            if(parent && parent.length){
+                parent.forEach(p => {
+                    p.data.childExpanded = true;
+                    p.data.hide = false;
+                })
+            }
+        }else{
+            if(!input.children || !input.children.length){
+                parent.shift();
+                if(lastChild){
+                    parent.shift();
+                }
+            }
+        }
+        if(input.children && input.children.length){
+            input.children.forEach((child, i) => {
+                filterF(child, strCp, parent, i == input.children.length - 1)
+                }
+            )
+        }
+    }
+
 
     this.onCollapse = function ($index) {
         if (this.config[$index].children) {
@@ -97,7 +136,8 @@ app.component(componentName, {
         onClickFunction: '<',
         onDoubleClickFunction: '<',
         showContextMenuFunction: '<',
-        isShowParentName: '<'
+        isShowParentName: '<',
+        filter: '@'
     }
 });
 exports.controller = WiBaseTreeController;
