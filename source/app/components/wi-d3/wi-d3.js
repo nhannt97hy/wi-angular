@@ -158,6 +158,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // return self.trackComponents.find(function(component) { return component.name == trackName});
     }
     this.showContextMenu = function (event) {
+        console.log('contextMenu is opened');
         if (event.button != 2) return;
         if(!self.contextMenu) {
             commonCtxMenu = commonCtxMenu || self.buildContextMenu(contextMenu_constantItems);
@@ -986,11 +987,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 if(plot.cropDisplay) {
                                     logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
                                 } else {
-                                    logplotCtrl.handlers.ViewWholeWellButtonClicked();
+                                    // logplotCtrl.handlers.ViewWholeWellButtonClicked();
                                 }
-                            },500);
+                            });
                             self.isReady = true;
                             wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
+                            self.plotAll();
+                            updateSlider();
                         });
                     }
                 });
@@ -1008,7 +1011,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     };
 
     /* private method*/
-    function generateHtml (trackProperties) {
+    function generateHtml(trackProperties) {
         let d3Ctrl_String = ' wi-d3-ctrl="'+ componentName +'" ';
         // let orderNum_String = ' data-order-num="'+ track.orderNum +'" ';
         let commonStyle_String = ' style="display: flex; flex-direction: column; outline: none;" ';
