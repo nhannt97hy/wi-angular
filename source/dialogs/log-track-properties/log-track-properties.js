@@ -254,6 +254,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             line.symbolName = lineProps.symbolOptions.symbolStyle.symbolName;
             line.symbolSize = lineProps.symbolOptions.symbolStyle.symbolSize;
             line.symbolStrokeStyle = lineProps.symbolOptions.symbolStyle.symbolStrokeStyle;
+            delete line.lineCurve._data;
             return line;
         }
         function updateCurvesTab(updateCurvesTabCb) {
