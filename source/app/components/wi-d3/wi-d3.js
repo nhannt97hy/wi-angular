@@ -130,6 +130,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
         graph.rearrangeTracks(self);
         self.updateScale();
+        updateSlider();
     }
     this.tooltip = function (on) {
         if (on === undefined) return _tooltip;
@@ -584,6 +585,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $(`[name=`+ component.controller.name +`]`).remove();
         self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
         // wiComponentService.putComponent(name, null);
+        updateSlider();
     }
     this.getTracks = function () {
         return _tracks;
@@ -733,7 +735,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let wiD3Ctrl = self;
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
-                function (plot) {
+                function (plot, err) {
+                console.log("getLogplot", plot);
+                    if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
                     }
@@ -878,7 +882,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 if (!trackProps[idx].zoneset) {
                                     async.setImmediate(_cb);
                                 }
-                                wiApiService.getZoneSet(trackProps[idx].zone/set.idZoneSet, function (zoneset) {
+                                wiApiService.getZoneSet(trackProps[idx].zoneset.idZoneSet, function (zoneset) {
                                     for (let zone of zoneset.zones) {
                                         wiD3Ctrl.addZoneToTrack(aTrack, zone);
                                     }
@@ -888,14 +892,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 _cb();
                             }
                             else if (aTrack.type == "image-track") {
+                                /*
                                 wiApiService.getImagesOfTrack(trackProps[idx].idImageTrack, function (images) {
-                                    /*
                                     for (let img of images) {
                                         wiD3Ctrl.addImageZoneToTrack(aTrack, img);
                                     }
-                                    */
                                     _cb();
                                 });
+                                */
+                                _cb();
                             }
                             else if (aTrack.type == "object-track") {
                                 if(!trackProps[idx].object_of_tracks || !trackProps[idx].object_of_tracks.length) {
@@ -964,7 +969,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                             })
                                                         });
                                                     } else {
-                                                        wiD3Ctrl.removeAnObjectOfObjectTrack(aTrack, anObject);
+                                                        wiD3Ctrl.getComponentCtrlByViTrack(aTrack).removeAnObjectOfObjectTrack(anObject);
                                                     }
                                                 });
                                                 break;
@@ -1378,7 +1383,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
                 else if (drawing.isObject()) {
                     // Send api before deleting
-                    removeAnObjectOfObjectTrack();
+                    getComponentCtrlByViTrack(track).removeAnObjectOfObjectTrack();
                 }
 
                 return;

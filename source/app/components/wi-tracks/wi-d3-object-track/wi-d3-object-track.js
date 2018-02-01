@@ -226,9 +226,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
 
         return object;
     }
-    this.removeAnObjectOfObjectTrack = function () {
-        removeAnObjectOfObjectTrack();
-    }
+    this.removeAnObjectOfObjectTrack = removeAnObjectOfObjectTrack;
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -289,13 +287,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         objectProperties();
         d3.event.stopPropagation();
     }
-    function removeAnObjectOfObjectTrack() {
+    function removeAnObjectOfObjectTrack(objectToRemove) {
         let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         if(!_currentTrack.isObjectTrack() || (_currentTrack.isObjectTrack() && !_currentTrack.getCurrentDrawing)) {
             console.log('not an object track');
             return;
         }
-        let object = _currentTrack.getCurrentDrawing();
+        let object = objectToRemove || _currentTrack.getCurrentDrawing();
         console.log("Removing: ", object);
         wiApiService.removeObjectOfObjectTrack(object.id, function () {
             switch (object.currentDraw) {

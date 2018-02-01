@@ -1130,6 +1130,8 @@ exports.importLASDialog = function (ModalService) {
             }
             payloadParams.file = self.lasFile;
 
+            let spinner = wiComponentService.getComponent('SPINNER');
+            spinner.show();
             if(self.selectedDataset){
                 DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
                     if(!yes){
@@ -1141,17 +1143,19 @@ exports.importLASDialog = function (ModalService) {
                             if (well) {
                                 setTimeout(function() {
                                     utils.refreshProjectState()
-                                    .then(function () {
-                                        close(well, 500);
-                                    })
-                                    .catch(function () {
-                                        self.isDisabled = false;
-                                        utils.error(err);
-                                    });
+                                        .then(function () {
+                                            close(well, 500);
+                                        })
+                                        .catch(function () {
+                                            self.isDisabled = false;
+                                            utils.error(err);
+                                        });
+                                    spinner.hide();
                                 }, 2000);
                             }
                         })
                         .catch(function (err) {
+                            spinner.hide();
                             console.log('err', err);
                             self.isDisabled = false;
                             utils.error(err);
@@ -1170,17 +1174,19 @@ exports.importLASDialog = function (ModalService) {
                                 if (well) {
                                     setTimeout(function() {
                                         utils.refreshProjectState()
-                                        .then(function () {
-                                            close(well, 500);
-                                        })
-                                        .catch(function () {
-                                            self.isDisabled = false;
-                                            utils.error(err);
-                                        });
+                                            .then(function () {
+                                                close(well, 500);
+                                            })
+                                            .catch(function () {
+                                                self.isDisabled = false;
+                                                utils.error(err);
+                                            });
+                                        spinner.hide();
                                     }, 2000);
                                 }
                             })
                             .catch(function (err) {
+                                spinner.hide();
                                 console.log('err', err);
                                 self.isDisabled = false;
                                 utils.error(err);
@@ -1201,10 +1207,12 @@ exports.importLASDialog = function (ModalService) {
                                         self.isDisabled = false;
                                         utils.error(err);
                                     });
+                                spinner.hide();
                             }, 2000)
                         }
                     })
                     .catch(function (err) {
+                        spinner.hide();
                         console.log('err', err);
                         self.isDisabled = false;
                         utils.error(err);
@@ -2463,13 +2471,22 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
     function ModalController($scope, close) {
         let self = this;
         let wiD3Ctr = wiLogplot.getwiD3Ctrl();
-        this.depthRange = wiD3Ctr.getDepthRange();
+        // this.depthRange = wiD3Ctr.getDepthRange();
+        this.depthRange = [wiD3Ctr.getMinDepth(), wiD3Ctr.getMaxDepth()];
+
+        this.verifyRange = function () {
+            if (self.depthRange[0] < wiD3Ctr.getMinDepth()) self.depthRange[0] = wiD3Ctr.getMinDepth();
+            if (self.depthRange[1] > wiD3Ctr.getMaxDepth()) self.depthRange[1] = wiD3Ctr.getMaxDepth();
+        }
 
         this.onOkButtonClicked = function () {
-            console.log(self.depthRange);
-            wiD3Ctr.setDepthRange(self.depthRange);
-            wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
-            close(self);
+            self.verifyRange();
+            wiLogplot.getSlidingbarCtrl().resetView();
+            setTimeout(() => {
+                wiD3Ctr.setDepthRange(self.depthRange);
+                wiD3Ctr.adjustSlidingBarFromDepthRange(self.depthRange);
+                close(self);
+            });
         }
         this.onCancelButtonClicked = function () {
             //wiD3Ctr.setDepthRange(self.depthRange);
@@ -6097,7 +6114,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 break;
             }
         }else{
-            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
         }
         self.idWell = self.wellModel.id;
         refresh();
@@ -6150,7 +6167,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
-            self.wells = utils.findWells();            
+            self.wells = utils.findWells();
             $timeout(function(){
                 refresh(function(){
                 });
@@ -6263,220 +6280,9 @@ exports.curveAverageDialog = function (ModalService, callback) {
     });
 }
 
-exports.curveRescaleDialog = function (ModalService, callback) {
-    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
-        let self = this;
-        window.curveRe = this;
-        this.applyingInProgress = false;
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-
-        this.curves = [];
-        this.wells = utils.findWells();
-        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        if( selectedNodes && selectedNodes[0].type == 'well') this.wellModel = selectedNodes[0];
-        else this.wellModel = angular.copy(self.wells[0]);
-        this.datasets = this.wellModel.children;
-        this.curves = this.wellModel.children[0].children;
-        if( selectedNodes && selectedNodes.length && selectedNodes[0].type == 'curve') {
-            console.log("SELECTED_NODES");
-            this.curveModel = setLinePropertiesIfNull(selectedNodes[0]);
-            this.wellModel = utils.findWellByCurve(self.curveModel.id);
-        }
-        else this.curveModel = setLinePropertiesIfNull(angular.copy(self.curves[0]));
-
-        this.idWell = this.wellModel.id;
-
-        self.logInput = false;
-
-
-        defaultDepth();
-
-        this.defaultDepth = defaultDepth;
-        function defaultDepth () {
-            self.topDepth = self.wellModel.topDepth;
-            self.bottomDepth = self.wellModel.bottomDepth;
-        }
-
-        function setLinePropertiesIfNull (curve) {
-            let resCurve = curve;
-            if(resCurve.lineProperties == null) {
-                let lineProperties = {
-                    minScale: 0,
-                    maxScale: 1
-                }
-                resCurve.lineProperties = lineProperties;
-            }
-            return resCurve;
-        };
-
-        this.outputObj = getOutput(this.curveModel);
-        function getOutput (curveModel) {
-            return {
-                idDataset: curveModel.properties.idDataset,
-                curve: curveModel.properties.name,
-                unit: curveModel.properties.unit,
-                leftScale: curveModel.lineProperties.minScale,
-                rightScale: curveModel.lineProperties.maxScale,
-                logOutput: false
-            }
-        }
-        this.selectedWell = selectedWell;
-        function selectedWell (idWell) {
-            self.wellModel = utils.findWellById(idWell);
-            defaultDepth();
-            self.curves = self.wellModel.children[0].children;
-            self.curveModel = setLinePropertiesIfNull(self.curves[0]);
-            self.datasets = self.wellModel.children;
-            self.logInput = false;
-            self.outputObj = getOutput(self.curveModel);
-        }
-        this.onChangeCurve = function (curveModel) {
-            self.curveModel = setLinePropertiesIfNull(curveModel);
-            $timeout(function(){
-                self.outputObj = getOutput(self.curveModel);
-            }, 100);
-        }
-        this.defaultDepth = function () {
-            self.topDepth = self.wellModel.topDepth;
-            self.bottomDepth = self.wellModel.bottomDepth;
-        }
-        function refresh (cb) {
-            self.datasets = [];
-            self.availableCurves = [];
-            self.wellModel = utils.findWellById(self.idWell);
-            selectedWell(self.idWell);
-            if(cb) cb();
-        }
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
-            self.applyingInProgress = false;
-            self.wells = utils.findWells();            
-            $timeout(function(){
-                refresh(function(){
-                });
-            }, 100);
-        });
-        function run () {
-            if (self.applyingInProgress) return;
-            self.applyingInProgress = true;
-            if(self.topDepth < self.wellModel.topDepth ||
-                self.bottomDepth > self.wellModel.bottomDepth)
-                dialogUtils.errorMessageDialog(ModalService, "Input invalid [" + self.wellModel.topDepth + "," + self.wellModel.bottomDepth+ "]" );
-            let inputData = [];
-            let outputData = [];
-            let yTop = Math.round((
-                self.topDepth - self.wellModel.topDepth)
-            /self.wellModel.step);
-            let yBottom = Math.round((
-                self.bottomDepth - self.wellModel.topDepth)
-            /self.wellModel.step);
-
-            function linearToLinearX (a, b, c, y, z) {
-                return (c - a) * (z - y) / (b - a) + y;
-            }
-            function linearToLogarithmX (a, b, c, y, z) {
-                return Math.pow(Math.E, (c - a) * (Math.log(z) - Math.log(y)) / ( b- a) + Math.log(y));
-            }
-            function logarithmToLinearX (a, b, c, y, z) {
-                return (Math.log(c) - Math.log(a)) * (z - y) / (Math.log(b) - Math.log(a)) + y
-            }
-            function logarithmToLogarithmX (a, b, c, y, z) {
-                return Math.pow(Math.E, (Math.log(c) - Math.log(a)) * (Math.log(z) - Math.log(y)) / (Math.log(b) - Math.log(a)) + log(y));
-
-            }
-            async.parallel([
-                function(callback){
-                    wiApiService.dataCurve(self.curveModel.id, function (dataCurve){
-                        inputData = dataCurve.map(d => parseFloat(d.x));
-                        callback();
-                    });
-                }],
-                function(err, results) {
-                    let len = inputData.length;
-
-                    for(let i = 0; i < len; i++) {
-                        if (inputData[i] == null || isNaN(inputData[i])) outputData.push(NaN);
-                        if (!self.logInput && !self.outputObj.logOutput) {
-                            outputData.push(linearToLinearX(self.curveModel.lineProperties.minScale,
-                                self.curveModel.lineProperties.maxScale,
-                                inputData[i],
-                                self.outputObj.leftScale,
-                                self.outputObj.rightScale));
-                        } else if (!self.logInput && self.outputObj.logOutput) {
-                            outputData.push(linearToLogarithmX(self.curveModel.lineProperties.minScale,
-                                self.curveModel.lineProperties.maxScale,
-                                inputData[i],
-                                self.outputObj.leftScale,
-                                self.outputObj.rightScale));
-                        } else if (self.logInput && !self.outputObj.logOutput) {
-                            outputData.push(logarithmToLinearX(self.curveModel.lineProperties.minScale,
-                                self.curveModel.lineProperties.maxScale,
-                                inputData[i],
-                                self.outputObj.leftScale,
-                                self.outputObj.rightScale));
-                        } else if (self.logInput && self.outputObj.logOutput) {
-                            outputData.push(logarithmToLogarithmX(self.curveModel.lineProperties.minScale,
-                                self.curveModel.lineProperties.maxScale,
-                                inputData[i],
-                                self.outputObj.leftScale,
-                                self.outputObj.rightScale));
-                        };
-                    };
-                    console.log("outputData", inputData, outputData);
-                    let request = {
-                        idDataset: self.outputObj.idDataset,
-                        curveName: self.outputObj.curve,
-                        unit: self.outputObj.unit,
-                        idDesCurve: self.curveModel.id,
-                        data: utils.getDataTopBottomRange(outputData, yTop, yBottom)
-                    }
-                    if(self.outputObj.curve == self.curveModel.properties.name) {
-                        dialogUtils.confirmDialog(ModalService, "WARNING", "OverWrite!", function (ret) {
-                            if(ret) {
-                                delete request.curveName;
-                                delete request.unit;
-                                wiApiService.processingDataCurve(request, function(res) {
-                                    console.log("processingDataCurve", res);
-                                    utils.refreshProjectState();
-                                    self.applyingInProgress = false;
-                                })
-                            }
-                        });
-                    }
-                    else {
-                        delete request.idDesCurve;
-                        if (self.curveModel.properties.idFamily)
-                            request.idFamily = self.curveModel.properties.idFamily;
-                        wiApiService.processingDataCurve(request, function(res) {
-                            console.log("processingDataCurve", res);
-                            utils.refreshProjectState();
-                            self.applyingInProgress = false;
-                        })
-                    }
-                })
-}
-this.onRunButtonClicked = function () {
-    run();
-}
-this.onCancelButtonClicked = function () {
-    close(null, 100);
-};
-}
-
-    ModalService.showModal({
-        templateUrl: "curve-rescale/curve-rescale-modal.html",
-        controller: ModalController,
-        controllerAs: 'wiModal'
-    }).then(function (modal) {
-        initModal(modal);
-        //$(modal.element[0].children[0]).draggable();
-        modal.close.then(function (ret) {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
-            callback(ret);
-        });
-    });
-}
+let curveRescaleDialogModule = require('./curve-rescale.js');
+curveRescaleDialogModule.setInitFunc(initModal);
+exports.curveRescaleDialog = curveRescaleDialogModule.curveRescaleDialog;
 
 exports.curveComrarisonDialog = function (ModalService, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
@@ -6520,7 +6326,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
 
                 default:
                 self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
-                break;               
+                break;
             }
         }
         else {
@@ -6719,7 +6525,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        
+
         this.refresh = function(cb){
             self.wellArr = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
@@ -6730,15 +6536,15 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                         case 'well':
                         self.SelectedWell = selectedNodes[0];
                         break;
-        
+
                         case 'dataset':
                         self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
                         break;
-        
+
                         case 'curve':
                         self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
                         break;
-        
+
                         default:
                         self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0] : null;
                     }
@@ -6983,7 +6789,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
                 case 'well':
                 self.wellModel = selectedNodes[0];
                 break;
-                
+
                 case 'dataset':
                 self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
                 break;
@@ -6998,7 +6804,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
                 break;
             }
         }else{
-            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
         }
 
         getInfo();
@@ -7066,7 +6872,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.process = false;
-            self.wells = utils.findWells();            
+            self.wells = utils.findWells();
             $timeout(function(){
                 refresh();
             }, 100);
@@ -7176,13 +6982,13 @@ exports.mergeCurveDialog = function (ModalService) {
                 case 'curve':
                 self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
                 break;
-                
+
                 default:
                 self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
                 break;
             }
         }else{
-            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
         }
 
         self.idWell = self.wellModel.id;
@@ -7235,7 +7041,7 @@ exports.mergeCurveDialog = function (ModalService) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
-            self.wells = utils.findWells();            
+            self.wells = utils.findWells();
             $timeout(function(){
                 refresh(function(){
                 });
@@ -7361,7 +7167,7 @@ exports.fillDataGapsDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        
+
         function refresh(cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
@@ -7372,15 +7178,15 @@ exports.fillDataGapsDialog = function(ModalService){
                         case 'well':
                         self.selectedWell = selectedNodes[0];
                         break;
-        
+
                         case 'dataset':
                         self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
                         break;
-        
+
                         case 'curve':
                         self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
                         break;
-        
+
                         default:
                         self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
                     }
@@ -7643,7 +7449,7 @@ exports.curveDerivativeDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        
+
         this.refresh = function (cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
@@ -7654,15 +7460,15 @@ exports.curveDerivativeDialog = function(ModalService){
                         case 'well':
                         self.selectedWell = selectedNodes[0];
                         break;
-        
+
                         case 'dataset':
                         self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
                         break;
-        
+
                         case 'curve':
                         self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
                         break;
-        
+
                         default:
                         self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
                     }
@@ -10607,261 +10413,303 @@ exports.badholeCoalSaltDialog = function(ModalService) {
 }
 
 exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback ) {
-	function ModalController(close, wiApiService, $timeout, wiComponentService) {
-	  let self = this;
-	  let applyingInProgress = false;
-	  window.depthS = this;
-	  let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-	  let DialogUtils = wiComponentService.getComponent(
-		wiComponentService.DIALOG_UTILS
-	  );
+    function ModalController(close, wiApiService, $timeout, wiComponentService) {
+        let self = this;
+        let applyingInProgress = false;
+        window.depthS = this;
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let DialogUtils = wiComponentService.getComponent(
+        wiComponentService.DIALOG_UTILS );
 
-	  this.SelWell = SelWell;
-	  this.ShiftCurve = ShiftCurve;
-	  this.shiftMode = "1";
-	  (this.other = false), (this.ShowTrack = false), (this.ShowResult = false);
-	  this.suffix = "_ds";
-	  this.datasets = [];
-	  this.curves = [];
-	  this.shiftedTable = [];
+        this.SelWell = SelWell;
+        this.ShiftCurve = ShiftCurve;
+        this.shiftMode = "1";
+        (this.other = false), (this.ShowTrack = false), (this.ShowResult = false);
+        this.suffix = "_ds";
+        this.datasets = [];
+        this.curves = [];
+        this.shiftedTable = [];
 
-	  this.onWellChange = function() {
-		self.datasets.length = 0;
-		self.curves.length = 0;
-		if (self.SelWell) {
-		  self.SelWell.children.forEach(function(child, i) {
-			if (child.type == "dataset") self.datasets.push(child);
-			if (i == self.SelWell.children.length - 1) {
-			  self.datasets.forEach(function(child) {
-				child.children.forEach(function(item) {
-				  if (item.type == "curve") {
-					let d = item;
-					d.flag = false;
-					self.curves.push(d);
-				  }
-				});
-			  });
-			}
-		  });
-		  self.selectedDataset = self.datasets[0];
-		  self.RefCurve = self.curves[0];
-		}
-	  };
+        this.onWellChange = function() {
+        self.datasets.length = 0;
+        self.curves.length = 0;
+        if (self.SelWell) {
+            self.SelWell.children.forEach(function(child, i) {
+            if (child.type == "dataset") self.datasets.push(child);
+            if (i == self.SelWell.children.length - 1) {
+                self.datasets.forEach(function(child) {
+                child.children.forEach(function(item) {
+                    if (item.type == "curve") {
+                    let d = item;
+                    d.flag = false;
+                    self.curves.push(d);
+                    }
+                });
+                });
+            }
+            });
+            self.selectedDataset = self.datasets[0];
+            self.RefCurve = self.curves[0];
+        }
+        };
 
-	  this.onWellChange();
-	  wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
-		self.applyingInProgress = false;
-		$timeout(function() {
-		  self.onWellChange();
-		});
-	  });
+        this.onWellChange();
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+            self.applyingInProgress = false;
+            $timeout(function() {
+                self.onWellChange();
+            });
+        });
 
-	  this.onChangeDepth = function(index, depth){
-		  let point = self.shiftedTable[index];
-		  point.origin = point.origin >= self.SelWell.topDepth ? point.origin : self.SelWell.topDepth;
-		  if(depth){
-			  point.change = point.shifted - point.origin;
-		  }else{
-			  point.shifted = point.origin + point.change;
-		  }
-		  point.shifted = point.shifted <= self.SelWell.bottomDepth ? point.shifted : self.SelWell.bottomDepth;
-	  }
+        this.onChangeDepth = function(index, depth) {
+            let point = self.shiftedTable[index];
+            point.origin = point.origin >= self.SelWell.topDepth ? point.origin : self.SelWell.topDepth;
+            if (depth) {
+                point.change = point.shifted - point.origin;
+            } else {
+                point.shifted = point.origin + point.change;
+            }
+            point.shifted = point.shifted <= self.SelWell.bottomDepth ? point.shifted : self.SelWell.bottomDepth;
+        };
 
-	  this.delete = function( index ) {
-		  self.shiftedTable.splice(index,1);
-	  }
+        this.delete = function(index) {
+            self.shiftedTable.splice(index, 1);
+        };
 
-	  this.addShifted = function() {
-		  self.shiftedTable.push(
-			  {
-				  name: "Shift point " + self.shiftedTable.length,
-				  origin: self.shiftedTable.length ? self.shiftedTable[self.shiftedTable.length - 1].shifted : self.SelWell.topDepth,
-				  shifted: self.shiftedTable.length ? self.shiftedTable[self.shiftedTable.length - 1].shifted : self.SelWell.topDepth,
-				  change: 0,
-				  id: Math.random()
-				}
-		  )
-	  }
+        this.addShifted = function() {
+            self.shiftedTable.push({
+                name: "Shift point " + self.shiftedTable.length,
+                origin: self.shiftedTable.length
+                ? self.shiftedTable[self.shiftedTable.length - 1].shifted
+                : self.SelWell.topDepth,
+                shifted: self.shiftedTable.length
+                ? self.shiftedTable[self.shiftedTable.length - 1].shifted
+                : self.SelWell.topDepth,
+                change: 0,
+                id: Math.random()
+            });
+        };
 
-	  this.checked = false;
-	  this.select = function(curve) {
-		curve.flag = !curve.flag;
-	  };
-	  this.checkAll = function() {
-		self.checked = !self.checked;
-		self.curves.forEach(function(curve) {
-		  curve.flag = self.checked;
-		});
-	  };
-	  this.CurveF = function(curve){
-		  return curve.id != self.ShiftCurve.idCurve;
-	  }
+        this.checked = false;
+        this.select = function(curve) {
+            curve.flag = !curve.flag;
+        };
+        this.checkAll = function() {
+            self.checked = !self.checked;
+            self.curves.forEach(function(curve) {
+                curve.flag = self.checked;
+            });
+        };
+        this.CurveF = function(curve) {
+            return curve.id != self.ShiftCurve.idCurve;
+        };
 
-	  function validate(callback){
-		  async.each(self.shiftedTable,(point, cb) => {
-			  point.flag = false;
-			  if(point.origin < self.SelWell.topDepth || point.shifted > self.SelWell.bottomDepth){
-				point.flag = true;
-			  }
-			  let below = self.shiftedTable.find(p => p.origin >= point.origin && p.id != point.id);
-			  if(below){
-				  if(point.origin == below.origin) point.flag = true;
-				  if((point.shifted  + self.SelWell.step > below.shifted) || (point.origin  + self.SelWell.step > below.origin))
-					point.flag = true;
-			  }
-			  cb();
-		  }, function(err){
-			  let flag = self.shiftedTable.find(p => p.flag == true);
-			  callback(!flag);
-		  })
+        function validate(callback) {
+        if (self.shiftedTable && self.shiftedTable.length) {
+            async.each(
+            self.shiftedTable,
+            (point, cb) => {
+                point.flag = false;
+                if ( point.origin < self.SelWell.topDepth || point.shifted > self.SelWell.bottomDepth ) {
+                    point.flag = true;
+                }
+                let below = self.shiftedTable.find(
+                    p => p.origin >= point.origin && p.id != point.id
+                );
+                if (below) {
+                    if (point.origin == below.origin) point.flag = true;
+                    if (
+                        point.shifted + self.SelWell.step > below.shifted ||
+                        point.origin + self.SelWell.step > below.origin
+                    )
+                        point.flag = true;
+                }
+                cb();
+            },
+            function(err) {
+                let flag = self.shiftedTable.find(p => p.flag == true);
+                callback(!flag);
+            }
+            );
+        } else {
+            callback(false);
+        }
+        }
 
-	  }
+        this.onImportButtonClicked = function() {
+        console.log("Import");
+        if (self.ImportFile) {
+            self.shiftedTable.length = 0;
+            if (self.ImportFile.type.match("text")) {
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                let lines = this.result.split("\n");
+                if (lines[0].trim() == "Depth Shift File") {
+                let line1 = lines[1].trim().split(",");
+                if (line1.length == 1) {
+                    let len = parseInt(line1[0]);
+                    len = len <= lines.length - 2 ? len : lines.length - 2;
+                    for (let i = 0; i < len; i++) {
+                    let ele = lines[i + 2].trim().split(",");
+                    if (ele.length >= 3)
+                        self.shiftedTable.push({
+                        name: ele[0],
+                        origin: parseFloat(ele[1]) || 0,
+                        shifted: parseFloat(ele[2]) || 0,
+                        change: parseFloat(ele[2]) - parseFloat(ele[1]) || 0,
+                        id: Math.random()
+                        });
+                    }
+                } else {
+                    utils.error("Import error! Invalid Format!");
+                }
+                } else {
+                utils.error("Import error! Not Depth Shifts File");
+                }
+            };
+            reader.readAsText(self.ImportFile);
+            } else {
+            utils.error("Supported text file(.txt) only!");
+            delete self.ImportFile;
+            }
+        }
+        };
 
-	  this.onImportButtonClicked = function() {
-		  console.log("Import");
-		  if (self.ImportFile) {
-			  self.shiftedTable.length = 0;
-			  if (self.ImportFile.type.match("text")) {
-				let reader = new FileReader();
-				reader.onload = function(event) {
-				  let lines = this.result.split("\n");
-				  if(lines[0].trim() == "Depth Shift File"){
-					  let line1 = lines[1]
-					  .trim()
-					  .split(',');
-					  if(line1.length == 1){
-						  let len = parseInt(line1[0]);
-						  len = len <= lines.length - 2 ? len : lines.length - 2;
-						  for (let i = 0; i < len; i++) {
-							let ele = lines[i + 2].trim().split(',');
-							if (ele.length >=3) self.shiftedTable.push({
-								name: ele[0],
-								origin: parseFloat(ele[1]) || 0,
-								shifted: parseFloat(ele[2]) || 0,
-								change: parseFloat(ele[2]) - parseFloat(ele[1]) || 0,
-								id: Math.random()
-							});
-						  }
-					  }else{
-						  utils.error("Import error! Invalid Format!");
-					  }
-				  }else{
-					  utils.error("Import error! Not Depth Shifts File");
-				  }
-				};
-				reader.readAsText(self.ImportFile);
-			  } else {
-				utils.error("Supported text file(.txt) only!");
-				delete self.ImportFile;
-			  }
-			}
-	  }
+        this.onExportButtonClicked = function() {
+        console.log("Export");
+        if (self.shiftedTable.length) {
+            let text = "Depth Shift File\r\n" + self.shiftedTable.length + "\r\n";
+            self.shiftedTable.forEach(point => {
+            text =
+                text +
+                point.name +
+                "," +
+                point.origin +
+                "," +
+                point.shifted +
+                "\r\n";
+            });
+            let blob = new Blob([text], {
+            type: "text"
+            });
+            let a = document.createElement("a");
+            let fileName = "depth shift.txt";
+            a.download = fileName;
+            a.href = URL.createObjectURL(blob);
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            a.parentNode.removeChild(a);
+        } else {
+            utils.error("Export error!");
+        }
+        };
 
-	  this.onExportButtonClicked = function() {
-		  console.log("Export");
-		  if(self.shiftedTable.length){
-			  let text = 'Depth Shift File\r\n' + self.shiftedTable.length + '\r\n';
-			  self.shiftedTable.forEach(point => {
-				text = text + point.name + ',' + point.origin + ',' + point.shifted + '\r\n';
-			  })
-			  let blob = new Blob([text], {
-				type: 'text'
-			  });
-			  let a = document.createElement('a');
-			  let fileName = 'depth shift.txt';
-			  a.download = fileName;
-			  a.href = URL.createObjectURL(blob);
-			  a.style.display = 'none';
-			  document.body.appendChild(a);
-			  a.click();
-			  a.parentNode.removeChild(a);
-			}else{
-			  utils.error("Export error!");
-			}
-      }
+        function saveCurve(data) {
+            let payload = {
+                CurveName: self.ShiftCurve.name + self.suffix,
+                idDataset: self.selectedDataset.id,
+                data: data,
+                unit: self.ShiftCurve.unit
+            };
+            payload.idDesCurve = self.curves.find(
+                c => c.name == payload.CurveName && c.idDataset == payload.idDataset
+            ).id;
+            if (payload.idDesCurve) {
+                delete payload.CurveName;
+            } else {
+                delete payload.idDesCurve;
+            }
+        }
 
-      function toIndex(depth){
-          return Math.round((depth - self.SelWell.topDepth)/self.SelWell.step);
-      }
+        function toIndex(depth) {
+        return Math.round((depth - self.SelWell.topDepth) / self.SelWell.step);
+        }
 
-      function run(){
-            wiApiService.dataCurve(self.ShiftCurve.idCurve, function(dataCurve){
-                let data  = dataCurve.map(d => {return {y: parseInt(d.y),x: parseFloat(d.x)}});
-                let origin2d = [];
-                let shift2d = [];
-                async.sortBy(self.shiftedTable, function(point, cb){
-                    cb(null, point.origin);
-                }, function(err, result){
-                    for ( let i = 0; i <= result.length; i++){
-                        let start = function(type){
-                            return result[i - 1] ? toIndex(result[i - 1][type]) + 1 : 0;
-                            }
-                        let end = function(type){
-                            return result[i] ? toIndex(result[i][type]) + 1 : data.length;
-                            }
-                        let originArr = data.slice(start('origin'), end('origin'));
-                        let shiftedArr = data.slice(start('shifted'), end('shifted'));
-                        origin2d.push(originArr)
-                        shift2d.push(angular.copy(shiftedArr))
-                        }
-                        shift2d.forEach((array, idx) => {
-                            let origin = origin2d[idx];
-                            array[0].x = origin[0].x;
-                            array[array.length - 1].x = origin[origin.length - 1].x;
-                            for(let i = 1; i < array.length - 1; i++){
-                                let index = Math.round((i + 1) * origin.length / array.length);
-                                array[i].x = origin[index - 1].x;
-                            }
-                            console.log(array);
-                        })
+        function run() {
+        wiApiService.dataCurve(self.ShiftCurve.idCurve, function(dataCurve) {
+            let data = dataCurve.map(d => {
+            return { y: parseInt(d.y), x: parseFloat(d.x) };
+            });
+            let origin2d = [];
+            let shift2d = [];
+            async.sortBy(
+            self.shiftedTable,
+            function(point, cb) {
+                cb(null, point.origin);
+            },
+            function(err, result) {
+                for (let i = 0; i <= result.length; i++) {
+                let start = function(type) {
+                    return result[i - 1] ? toIndex(result[i - 1][type]) + 1 : 0;
+                };
+                let end = function(type) {
+                    return result[i] ? toIndex(result[i][type]) + 1 : data.length;
+                };
+                let originArr = data.slice(start("origin"), end("origin"));
+                let shiftedArr = data.slice(start("shifted"), end("shifted"));
+                origin2d.push(originArr);
+                shift2d.push(angular.copy(shiftedArr));
+                }
+                shift2d.forEach((array, idx) => {
+                let origin = origin2d[idx];
+                array[0].x = origin[0].x;
+                array[array.length - 1].x = origin[origin.length - 1].x;
+                for (let i = 1; i < array.length - 1; i++) {
+                    let index = Math.round((i + 1) * origin.length / array.length);
+                    array[i].x = origin[index - 1].x;
+                }
+                console.log(array);
+                });
 
-                        let out = [];
-                        shift2d.forEach(a => {
-                            out = out.concat(a);
-                        })
-                        console.log(out);
-                    })
-                })
-      }
+                let out = [];
+                shift2d.forEach(a => {
+                out = out.concat(a);
+                });
+                console.log(out);
+            }
+            );
+        });
+        }
 
-	  this.onApplyButtonClicked = function() {
-		console.log("Apply");
-		validate(valid => {
-			if(valid){
-				run();
-			}else{
-				utils.error("Shift point(s) invalid!");
-			}
-		})
-	  };
+        this.onApplyButtonClicked = function() {
+        console.log("Apply");
+        // validate(valid => {
+        // 	if(valid){
+        // 		run();
+        // 	}else{
+        // 		utils.error("Shift point(s) invalid!");
+        // 	}
+        // })
+        };
 
-	  this.onRunButtonClicked = function() {
-		console.log("Run");
-		validate(valid => {
-			if(valid){
-				run();
-			}else{
-				utils.error("Shift point(s) invalid!");
-			}
-		})
-	  };
+        this.onRunButtonClicked = function() {
+        console.log("Run");
+        validate(valid => {
+            if (valid) {
+            run();
+            } else {
+            utils.error("Shift point(s) invalid!");
+            }
+        });
+        };
 
-	  this.onCancelButtonClicked = function() {
-		close(null);
-	  };
-	}
+        this.onCancelButtonClicked = function() {
+        close(null);
+        };
+    }
 
-	ModalService.showModal({
-	  templateUrl: "depth-shift/depth-shift-modal.html",
-	  controller: ModalController,
-	  controllerAs: "wiModal"
-	}).then(function(modal) {
-	  initModal(modal);
-	  modal.close.then(function(data) {
-		$(".modal-backdrop")
-		  .last()
-		  .remove();
-		$("body").removeClass("modal-open");
-	  });
-	});
-  };
+    ModalService.showModal({
+        templateUrl: "depth-shift/depth-shift-modal.html",
+        controller: ModalController,
+        controllerAs: "wiModal"
+    }).then(function(modal) {
+        initModal(modal);
+        modal.close.then(function(data) {
+        $(".modal-backdrop")
+            .last()
+            .remove();
+        $("body").removeClass("modal-open");
+        });
+    });
+};

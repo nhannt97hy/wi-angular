@@ -61,14 +61,14 @@ wi-curve-listing{
         .fix-column > .thead > .trow{
             >:first-child{
                 width: 90px;
-                input[type=number]::-webkit-inner-spin-button, 
-                input[type=number]::-webkit-outer-spin-button { 
-                    -webkit-appearance: none;
-                    -moz-appearance: none;
-                    appearance: none;
-                    margin: 0; 
-                }
             }
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            margin: 0; 
         }
         .fix-column > .tbody > .trow{
             margin-top: -10px;
@@ -104,6 +104,17 @@ wi-curve-listing{
         .rest-columns > .thead > .trow > :first-child{
             margin-left: 0;
         }
+        .rest-columns > .tbody > .trow > .tcol{
+            &:hover{
+                background: cornsilk;
+                input, input:focus{
+                    background: cornsilk;
+                }
+            }
+            input:focus{
+                background: cornsilk;
+            }
+        }
         .tcol{
             display: inline-block;
             width: 110px;
@@ -114,6 +125,12 @@ wi-curve-listing{
         }
     }
     .nanValue{
+        background: indianred;
+        input{
+            background: indianred;
+        }
+    }
+    .focus{
         background: steelblue;
     }
     .editor{
