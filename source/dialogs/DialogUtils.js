@@ -2759,7 +2759,7 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             let message = "The value must be between ";
             let isValidValue = true;
             switch (label) {
-                case 1: 
+                case 1:
                     message += "0 and 255";
                     if((!value && value != 0) || value > 255 || value < 0) {
                         isValidValue = false;
@@ -5740,7 +5740,7 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
             if(typeof self.ref_Curves_Arr[index].flag === 'undefined') {
                 self.ref_Curves_Arr[index].flag = self._FEDIT;
             }
-            
+
             let curve = self.curvesArr.find(c => c.id == self.ref_Curves_Arr[index].idCurve);
             self.ref_Curves_Arr[index].curve = curve.properties;
             let family = curve.lineProperties;
@@ -6113,7 +6113,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
                 break;
             }
         }else{
-            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
         }
         self.idWell = self.wellModel.id;
         refresh();
@@ -6166,7 +6166,7 @@ exports.curveAverageDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
-            self.wells = utils.findWells();            
+            self.wells = utils.findWells();
             $timeout(function(){
                 refresh(function(){
                 });
@@ -6325,7 +6325,7 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
 
                 default:
                 self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
-                break;               
+                break;
             }
         }
         else {
@@ -6524,7 +6524,7 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        
+
         this.refresh = function(cb){
             self.wellArr = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
@@ -6535,15 +6535,15 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
                         case 'well':
                         self.SelectedWell = selectedNodes[0];
                         break;
-        
+
                         case 'dataset':
                         self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
                         break;
-        
+
                         case 'curve':
                         self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
                         break;
-        
+
                         default:
                         self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0] : null;
                     }
@@ -6788,7 +6788,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
                 case 'well':
                 self.wellModel = selectedNodes[0];
                 break;
-                
+
                 case 'dataset':
                 self.wellModel = utils.findWellById(selectedNodes[0].properties.idWell);
                 break;
@@ -6803,7 +6803,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
                 break;
             }
         }else{
-            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
         }
 
         getInfo();
@@ -6871,7 +6871,7 @@ exports.splitCurveDialog = function (ModalService, callback) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.process = false;
-            self.wells = utils.findWells();            
+            self.wells = utils.findWells();
             $timeout(function(){
                 refresh();
             }, 100);
@@ -6981,13 +6981,13 @@ exports.mergeCurveDialog = function (ModalService) {
                 case 'curve':
                 self.wellModel = utils.findWellByCurve(selectedNodes[0].id);
                 break;
-                
+
                 default:
                 self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
                 break;
             }
         }else{
-            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;            
+            self.wellModel = self.wells && self.wells.length ? angular.copy(self.wells[0]) : null;
         }
 
         self.idWell = self.wellModel.id;
@@ -7040,7 +7040,7 @@ exports.mergeCurveDialog = function (ModalService) {
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
-            self.wells = utils.findWells();            
+            self.wells = utils.findWells();
             $timeout(function(){
                 refresh(function(){
                 });
@@ -7166,7 +7166,7 @@ exports.fillDataGapsDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        
+
         function refresh(cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
@@ -7177,15 +7177,15 @@ exports.fillDataGapsDialog = function(ModalService){
                         case 'well':
                         self.selectedWell = selectedNodes[0];
                         break;
-        
+
                         case 'dataset':
                         self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
                         break;
-        
+
                         case 'curve':
                         self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
                         break;
-        
+
                         default:
                         self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
                     }
@@ -7448,7 +7448,7 @@ exports.curveDerivativeDialog = function(ModalService){
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-        
+
         this.refresh = function (cb) {
             self.wells = utils.findWells().filter(well => {
                 return well.children.find(c => c.type == 'dataset');
@@ -7459,15 +7459,15 @@ exports.curveDerivativeDialog = function(ModalService){
                         case 'well':
                         self.selectedWell = selectedNodes[0];
                         break;
-        
+
                         case 'dataset':
                         self.selectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
                         break;
-        
+
                         case 'curve':
                         self.selectedWell = utils.findWellByCurve(selectedNodes[0].id);
                         break;
-        
+
                         default:
                         self.selectedWell = self.wells && self.wells.length ? self.wells[0] : null;
                     }
@@ -8236,22 +8236,42 @@ exports.TVDConversionDialog = function (ModalService) {
         });
     });
 }
-exports.addCurveDialog = function (ModalService) {
+exports.addCurveDialog = function (ModalService, Selwell) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout){
         let self = this;
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.wellArr = utils.findWells().filter(well => {
-            return well.children.find(c => c.type == 'dataset');
-        });
-        if(!self.SelectedWell){
-            self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+
+        this.wellArr = utils.findWells();
+        if(Selwell){
+            self.SelectedWell = Selwell;
         }else{
-            self.SelectedWell = self.wellArr.find(function(well){
-                return well.id == self.SelectedWell.id;
-            })
+            if(selectedNodes && selectedNodes.length){
+                switch (selectedNodes[0].type){
+                    case 'well':
+                    self.SelectedWell = selectedNodes[0];
+                    break;
+
+                    case 'dataset':
+                    self.SelectedWell = utils.findWellById(selectedNodes[0].properties.idWell);
+                    self.datasetName = selectedNodes[0];
+                    break;
+
+                    case 'curve':
+                    self.SelectedWell = utils.findWellByCurve(selectedNodes[0].id);
+                    break;
+
+                    default:
+                    self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0] : null;
+                }
+            }
+            else {
+                self.SelectedWell = self.wellArr && self.wellArr.length ? self.wellArr[0]: null;
+            }
         }
+
         this.datasets = [];
         this.curves = [];
         this.families = utils.getListFamily();
@@ -8265,7 +8285,7 @@ exports.addCurveDialog = function (ModalService) {
                         self.datasets.push(child);
                     if(i== self.SelectedWell.children.length -1){
                         if(self.datasets && self.datasets.length!= 0){
-                            self.datasetName = self.datasets[0].id;
+                            if(!self.datasetName) self.datasetName = self.datasets[0].id;
                             self.datasets.forEach(function(child){
                                 child.children.forEach(function (curve) {
                                     if (curve.type == 'curve') {
@@ -8281,7 +8301,7 @@ exports.addCurveDialog = function (ModalService) {
 
         this.onWellChanged();
         this.onFamilyChanged = function () {
-            self.unit = self.selectedFamily.unit;
+            self.unit = self.selectedFamily.family_spec.length ? self.selectedFamily.family_spec[0] : null;
         }
         this.onFamilyChanged();
         this.onRunButtonClicked = function () {
@@ -9116,7 +9136,7 @@ exports.curveFilterDialog = function(ModalService){
                     self.curveData[idx] = parseFloat(out.toFixed(4));
                     async.setImmediate(callback);
                 }else{
-                    async.setImmediate(callback);                    
+                    async.setImmediate(callback);
                 }
             },function(err){
                 console.log('Done!');
@@ -9163,8 +9183,8 @@ exports.curveFilterDialog = function(ModalService){
                     self.curveData[idx] = parseFloat(out.toFixed(4));
                     async.setImmediate(callback);
                 }else{
-                    async.setImmediate(callback);                    
-                }                
+                    async.setImmediate(callback);
+                }
             },function(err){
                 console.log('Done!');
                 saveCurve(self.curveData);
@@ -9221,7 +9241,7 @@ exports.curveFilterDialog = function(ModalService){
         function customFilter(){
             console.log('customFilter');
             async.eachOfSeries(self.curveData, (depth, idx, callback) => {
-                if(idx >= _top && idx <= _bottom){                
+                if(idx >= _top && idx <= _bottom){
                     let len = (self.numLevel - 1)/2;
                     let start = idx - len;
                     start = start > 0 ? start : 0;
@@ -9242,7 +9262,7 @@ exports.curveFilterDialog = function(ModalService){
                     self.curveData[idx] = parseFloat(out.toFixed(4));
                     async.setImmediate(callback);
                 }else{
-                    async.setImmediate(callback);                
+                    async.setImmediate(callback);
                 }
             },function(err){
                 console.log('Done!');
