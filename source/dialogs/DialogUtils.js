@@ -1404,8 +1404,10 @@ exports.importMultiLASDialog = function (ModalService, callback) {
             wiApiService.uploadMultiFiles(payloadParams)
             .then(function (wells) {
                 console.log('wells response', wells);
-                utils.refreshProjectState();
-                return close(wells, 500);
+                setTimeout(function () {
+                    utils.refreshProjectState();
+                    return close(wells, 500);
+                }, 2000);
             })
             .catch(function (err) {
                 console.log('err', err);
