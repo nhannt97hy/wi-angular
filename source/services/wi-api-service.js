@@ -57,7 +57,7 @@ const CREATE_WELL = '/project/well/new';
 const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
 const INFO_WELL = '/project/well/info';
-const DUPLICATE_WELL = '/projetc/well/duplicate';
+const DUPLICATE_WELL = '/project/well/duplicate';
 
 const CREATE_DATASET = '/project/well/dataset/new';
 const EDIT_DATASET = '/project/well/dataset/edit';
