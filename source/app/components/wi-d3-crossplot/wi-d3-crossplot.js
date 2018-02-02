@@ -165,13 +165,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.xHistogram = graph.createHistogram(self.histogramModelX, well.step,
                     well.topDepth,
                     well.bottomDepth, elem);
-    
+
             let zoneCtrl = self.getZoneCtrl();
             if (!zoneCtrl) return;
             let activeZones = zoneCtrl.getActiveZones();
             self.xHistogram.setZoneSet(activeZones);
             self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
-    
+
             self.xHistogram.doPlot();
         },time)
     }
@@ -209,13 +209,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.yHistogram = graph.createHistogram(self.histogramModelY, well.step,
                     well.topDepth,
                     well.bottomDepth, innerElem[0]);
-    
+
             let zoneCtrl = self.getZoneCtrl();
             if (!zoneCtrl) return;
             let activeZones = zoneCtrl.getActiveZones();
             self.yHistogram.setZoneSet(activeZones);
             self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
-    
+
             self.yHistogram.doPlot();
         },time)
     }
@@ -249,7 +249,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getModel = function(){
         return self.crossplotModel;
     }
-    
+
     this.getZoneCtrl = function () {
         if (self.wiCrossplotCtrl) {
             return self.wiCrossplotCtrl.getWiZoneCtrl();
@@ -451,7 +451,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
                         //if (callback) callback(crossplotProps);
 
-                        self.crossplotModel.properties = crossplotProps;                        
+                        self.crossplotModel.properties = crossplotProps;
                         self.linkModels();
                         if (crossplotProps.pointSet.idZoneSet) {
                             crossplotProps.pointSet.zones = self.zoneArr.map(function(zone) {
@@ -764,6 +764,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.hisContextMenu);
     }
+
+    this.removeVisualizeCrossplot = function() {
+        if (self.viCrossplot && self.viCrossplot.destroy) {
+            self.viCrossplot.destroy();
+            self.viCrossplot = null;
+
+            let crossplotProps = angular.copy(self.crossplotModel.properties);
+            if (crossplotProps.pointsets && crossplotProps.pointsets.length) {
+                crossplotProps.pointSet = crossplotProps.pointsets[0];
+                crossplotProps.pointSet.idCurveX = null;
+                crossplotProps.pointSet.idCurveY = null;
+            }
+            self.createVisualizeCrossplot(null, null, crossplotProps);
+        }
+    }
+
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (self.viCrossplot && self.viCrossplot.pointSet) return;
         if (!config) {

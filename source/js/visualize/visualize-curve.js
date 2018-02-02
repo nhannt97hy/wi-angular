@@ -325,6 +325,7 @@ Curve.prototype.getTransformX = function() {
  * @param {Boolean} highlight
  */
 Curve.prototype.doPlot = function(highlight, keepPrevious) {
+    //console.log('doPlot', this.constructor.name, this.name);
     let self = this;
     //let rect = this.root.node().getBoundingClientRect();
     let rect = Utils.getBoundingClientDimension(this.root.node());
@@ -365,7 +366,7 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
     });
     if ((this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative') ||
         (this.displayAs != 'Cumulative' && this.prevProps.displayAs == 'Cumulative') && this.track) {
-        this.prevProps.displayAs = 'Cumulative';
+        this.prevProps.displayAs = this.displayAs;
         let cCurves = this.track.getCurves().filter(function(curve) {
             return curve.displayAs == 'Cumulative';
         });
