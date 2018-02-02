@@ -373,6 +373,13 @@ exports.DuplicateButtonClicked = function (type) {
                             next();
                         });
                     });
+                } else if (type === 'well'){
+                    wiApiService.duplicateWell(selectedNode.properties.idWell, function (response) {
+                        $timeout(function () {
+                            utils.refreshProjectState();
+                            next();
+                        });
+                    });
                 }
             }, function (err) {
                 if (err) {

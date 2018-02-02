@@ -319,7 +319,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         handler: function () {
                             utils.renameWell();
                         }
-                    }, {
+                    },{
+                        name: "DuplicateCurve",
+                        label: "Duplicate",
+                        icon: "copy-16x16",
+                        handler: function () {
+                            self.handlers.DuplicateButtonClicked('well');
+                        }
+                    },
+                    {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
