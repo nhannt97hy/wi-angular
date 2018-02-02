@@ -71,20 +71,20 @@
 				</div>
 			</div>
 		</div>
-		<div class="rest-columns">
+		<div class="rest-columns"
+		ng-mousemove="wiCurveListing.onResizing($event)"
+		ng-mouseup="wiCurveListing.onResizeEnd($event)">
 			<div class="thead">
 				<div class="trow">
 					<div class="tcol curve{{curve.id}}" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.datasetName}}
 						<div class="resizeH" ng-mousedown='wiCurveListing.onResizeStart($event, "curve"+curve.id)'
-						ng-mousemove="wiCurveListing.onResizing($event)"
-						ng-mouseup="wiCurveListing.onResizeEnd($event)"></div>
+						></div>
 					</div>
 				</div>
 				<div class="trow">
 					<div class="tcol curve{{curve.id}}" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.name}}
 						<div class="resizeH" ng-mousedown='wiCurveListing.onResizeStart($event, "curve"+curve.id)'
-						ng-mousemove="wiCurveListing.onResizing($event)"
-						ng-mouseup="wiCurveListing.onResizeEnd($event)"></div>
+						></div>
 					</div>
 				</div>
 			</div>

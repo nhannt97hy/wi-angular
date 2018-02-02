@@ -267,7 +267,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         _dom.css('border-right', '3px solid gray');
     }
     this.onResizing = function($event) {
-        if ($event.buttons) {
+        if ($event.buttons && _dom) {
             var offsetX = $event.clientX - _x;
             _x = $event.clientX;
             let newW = _dom.width() + offsetX;
@@ -277,12 +277,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.onResizeEnd = function($event) {
         console.log('mouse up');
+        if(_dom){
             var offsetX = $event.clientX - _x;
             _x = $event.clientX;
             let newW = _dom.width() + offsetX;
             newW = (newW < minWidth) ? minWidth : newW;
             _dom.width(newW);
             _dom.css('border-right', '1px solid #ddd');
+            _dom = null;
+        }
     }
 
     this.onCurveSelectClick = function(SelCurve){
