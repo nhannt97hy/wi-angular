@@ -1284,7 +1284,7 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
         curveY.maxX = pointSet.scaleTop;
         pointSet.intervalDepthTop = objectProps.intervalDepthTop;
         pointSet.intervalDepthBottom = objectProps.intervalDepthBottom;
-        
+
         let crossplotConfig = {
             curve1 : curveX,
             curve2 : curveY,
@@ -1930,7 +1930,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
     shadingObj.fill.varShading.palette = variableShadingStyle.fill.varShading.palName;
     shadingObj.positiveFill.varShading.palette = variableShadingStyle.positiveFill.varShading.palName;
     shadingObj.negativeFill.varShading.palette = variableShadingStyle.negativeFill.varShading.palName;
-    
+
     if (shadingObj.shadingStyle == 'pattern') {
         shadingObj.fill.display = fillPatternStyles.fill.display;
         shadingObj.positiveFill.display = fillPatternStyles.positiveFill.display;
@@ -2082,7 +2082,7 @@ exports.createCrossplot = function (idWell, crossplotName, callback, crossTempla
                 // for crosstemplate
                 if (crossplot.foundCurveX && crossplot.foundCurveY) {
                     console.log('found all curves');
-                } 
+                }
                 else {
                     let curveX = crossplot.foundCurveX ? "Curve X: FOUND" : "Curve X: NOT FOUND<br>";
                     let curveY = crossplot.foundCurveY ? "Curve Y: FOUND" : "Curve Y: NOT FOUND<br>";
@@ -2546,7 +2546,8 @@ exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDelet
                 let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
                 let pointSet = wiD3CrossplotCtrl.getPointSet(wiD3CrossplotCtrl.crossplotModel.properties);
                 if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
-                    layoutManager.removeTabWithModel(crossplotModel);
+                    //layoutManager.removeTabWithModel(crossplotModel);
+                    wiD3CrossplotCtrl.removeVisualizeCrossplot();
                 } else if (idCurve == pointSet.idCurveZ) {
                     wiD3CrossplotCtrl.updateAll();
                 }
