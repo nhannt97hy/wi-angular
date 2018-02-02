@@ -10573,13 +10573,15 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
                     for (let i = 0; i < len; i++) {
                     let ele = lines[i + 2].trim().split(",");
                     if (ele.length >= 3)
-                        self.shiftedTable.push({
-                        name: ele[0],
-                        origin: parseFloat(ele[1]) || 0,
-                        shifted: parseFloat(ele[2]) || 0,
-                        change: parseFloat(ele[2]) - parseFloat(ele[1]) || 0,
-                        id: Math.random()
-                        });
+                        $timeout(() => {
+                            self.shiftedTable.push({
+                                name: ele[0],
+                                origin: parseFloat(ele[1]) || 0,
+                                shifted: parseFloat(ele[2]) || 0,
+                                change: parseFloat(ele[2]) - parseFloat(ele[1]) || 0,
+                                id: Math.random()
+                            });
+                        })
                     }
                 } else {
                     utils.error("Import error! Invalid Format!");
@@ -10628,19 +10630,24 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
 
         function saveCurve(data) {
             let payload = {
-                CurveName: self.ShiftCurve.name + self.suffix,
+                curveName: self.ShiftCurve.name + self.suffix,
                 idDataset: self.selectedDataset.id,
                 data: data,
                 unit: self.ShiftCurve.unit
             };
-            payload.idDesCurve = self.curves.find(
-                c => c.name == payload.CurveName && c.idDataset == payload.idDataset
-            ).id;
-            if (payload.idDesCurve) {
-                delete payload.CurveName;
+            let curve = self.curves.find(
+                c => c.name == payload.curveName && c.idDataset == payload.idDataset
+            );
+            if (curve) {
+                payload.idDesCurve = curve.id;
+                delete payload.curveName;
             } else {
                 delete payload.idDesCurve;
             }
+
+            wiApiService.processingDataCurve(payload, function(){
+                utils.refreshProjectState();
+            })
         }
 
         function toIndex(depth) {
@@ -10680,7 +10687,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
                     let index = Math.round((i + 1) * origin.length / array.length);
                     array[i].x = origin[index - 1].x;
                 }
-                console.log(array);
+                // console.log(array);
                 });
 
                 let out = [];
@@ -10688,6 +10695,7 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
                 out = out.concat(a);
                 });
                 console.log(out);
+                saveCurve(out.map(d => parseFloat(d.x)));
             }
             );
         });
@@ -10705,14 +10713,27 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
         };
 
         this.onRunButtonClicked = function() {
-        console.log("Run");
-        validate(valid => {
-            if (valid) {
-            run();
-            } else {
-            utils.error("Shift point(s) invalid!");
-            }
-        });
+            if(self.applyingInProgress) return;
+            self.applyingInProgress = true;
+            console.log("Run");
+            validate(valid => {
+                if (valid) {
+                    let curve = self.curves.find(c => c.name == ShiftCurve.name + self.suffix && c.properties.idDataset == self.selectedDataset.id);
+                    if(curve){
+                        DialogUtils.confirmDialog(ModalService, "Save Curve", "Overwrite Curve?", (ret) => {
+                            if(ret){
+                                run();
+                            }else{
+                                self.applyingInProgress = false;
+                            }
+                        })
+                    }else{
+                        run();
+                    }
+                } else {
+                    utils.error("Shift point(s) invalid!");
+                }
+            });
         };
 
         this.onCancelButtonClicked = function() {
