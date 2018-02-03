@@ -9,17 +9,25 @@
 	margin: 0px;
 }
 #left{
-	background: linear-gradient(to top, #ffffff 13%, #fafafc 42%, #f0f1f5 100%);
+	border: 1px solid #ccc;
+	// background: linear-gradient(to top, #ffffff 13%, #fafafc 42%, #f0f1f5 100%);
 }
 #left ul{
 	padding: 0px;
 	margin-left: 10px;
 	margin-right: 10px;
 }
+
 #left li{
 	list-style: none;
-	padding: 15px;
+	padding: 5px;
 	border-bottom: 0.5px solid #a8aab4;
+}
+.nav-pilss, .nav-pills>li {
+	float: none;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+    background-color: #cccccc;
 }
 #left a{
     font-size: 16px;
