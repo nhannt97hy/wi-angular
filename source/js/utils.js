@@ -561,10 +561,10 @@ function createCurveModel (curve) {
 }
 exports.createCurveModel = createCurveModel;
 
-function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel) {
+function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) {
     let curveModel = createCurveModel(curve);
     let dModel = datasetModel || getModel('dataset', curve.idDataset);
-    let wModel = wellModel || getModel('well', datasetModel.properties.idWell);
+    let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
         curveModel.parentDataArr = [dModel.data, wModel.data];
     });
@@ -620,10 +620,10 @@ function createDatasetModel (dataset) {
 }
 exports.createDatasetModel = createDatasetModel;
 
-function datasetToTreeConfig(dataset, isDeleted, wellModel) {
+function datasetToTreeConfig(dataset, isDeleted, wellModel, treeRoot) {
     let datasetModel = createDatasetModel(dataset);
     let wM = wellModel;
-    if (!wM) wM = getModel('well', dataset.idWell);
+    if (!wM) wM = getModel('well', dataset.idWell, treeRoot);
     setTimeout(() => {
         datasetModel.parentData = wM.data;
     });
@@ -1664,20 +1664,22 @@ function sortProjectData(projectData) {
     });
 }
 
-let refreshProjectState = function () {
+let refreshProjectState = function (idProject) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let dom = document.getElementById('treeContent');
 
-    if (!project) return;
+    if (!project && !idProject) return;
 
     return new Promise(function (resolve, reject) {
         let payload = {
-            idProject: project.idProject
+            idProject: idProject || project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
-        let ScrollTmp = dom.scrollTop;
-        window.localStorage.setItem('scrollTmp', ScrollTmp);
+        if (dom) {
+            let ScrollTmp = dom.scrollTop;
+            window.localStorage.setItem('scrollTmp', ScrollTmp);
+        }
         wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
             sortProjectData(projectRefresh);
 

@@ -253,6 +253,7 @@ app.component(componentName, {
     bindings: {
         isRoot: '<',
         name: '<',
+        contextmenuholder: '<',
         config: '<',
         container: '<',
         isShowParentName: '<',

@@ -1,0 +1,23 @@
+<div class="panel panel-default" style='height:100%;margin:0;'>
+    <div class="panel-heading">
+        <h4 style='display: inline;margin-right: 1em;'>Inventory</h4>
+        <button type="button" class="btn btn-default"
+            data-toggle="tooltip"
+            title="Refresh inventory"
+            ng-click="wiiExplorer.refreshInventory()">
+            <i class="fa fa-refresh"></i>
+        </button>
+        <button class="btn btn-default"
+            data-toggle="tooltip"
+            title="Toggle Well name/File name"
+            ng-click="wiiExplorer.switchLabelTooltip()">
+            <i class="fa fa-exchange"></i>
+        </button>
+    </div>
+    <div class="panel-body">
+        <wi-scroll up-trigger="wiiExplorer.upTrigger" down-trigger="wiiExplorer.downTrigger">
+            <wi-treeview contextmenuholder="wiiExplorer.name" name="wiiExplorer.treeViewName" config="wiiExplorer.treeConfig" container="wiiExplorer">
+            </wi-treeview>
+        </wi-scroll>
+    </div>
+</div>

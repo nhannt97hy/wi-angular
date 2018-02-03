@@ -12,6 +12,26 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
     this.$onInit = function () {
         wiComponentService.putComponent('wiInventory', self);
     };
+    this.getProjectList = function(wiItemDropdownCtrl) {
+        wiApiService.getProjectList(null, function(projectList) {
+            console.log(projectList);
+            wiItemDropdownCtrl.items = projectList.map(function(prj) {
+                return {
+                    data: {
+                        label: prj.name
+                    },
+                    properties: prj
+                };
+            });
+        });
+    }
+    this.projectChanged = function(projectProps) {
+        let refreshPromise = utils.refreshProjectState(projectProps.idProject);
+        refreshPromise && refreshPromise.then(projectLoaded => {
+            projectModel = modelFrom(projectLoaded);
+            self.projectConfig = [projectModel];
+        });
+    }
 
     function importModelExistedDialog(ModalService, callback) {
         function ModalController($scope, close, wiComponentService) {
@@ -56,7 +76,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
 
     let projectModel;
     function refreshProject() {
-        utils.refreshProjectState().then(projectLoaded => {
+        let refreshPromise = utils.refreshProjectState();
+        refreshPromise && refreshPromise.then(projectLoaded => {
             projectModel = modelFrom(projectLoaded);
             self.projectConfig = [projectModel];
         });

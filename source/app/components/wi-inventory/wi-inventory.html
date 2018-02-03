@@ -14,13 +14,6 @@
         position:relative;
     }
 </style>
-<div class="inventory-toolbar-wrapper">
-	<wi-toolbar>
-		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
-		<wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert All" handler="wiInventory.onRevertAllButtonClicked" ng-if="!!wiInventory.importItems.length"></wi-button>
-		<wi-button icon="reload-16x16" layout="icon-left" type="small" label='Refresh' tooltip="Refresh" handler="wiInventory.onRevertAllButtonClicked" ng-if="!wiInventory.importItems.length"></wi-button>
-	</wi-toolbar>
-</div>
 <div class="inventory-main" style="display:flex;flex-direction:row;">
     <div class="inventory-side">
         <wi-inventory-treeview name="projectTreeview" config="wiInventory.projectConfig" container="wiInventory" selected-node="wiInventory.projectSelectedNode"></wi-inventory-treeview>
@@ -36,7 +29,17 @@
         <wi-inventory-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-inventory-treeview>
     </div>
 </div>
-
+<div class="inventory-toolbar-wrapper">
+    <wi-toolbar>
+        <wi-item-dropdown class='height34px' style="width:15em;" icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
+        </wi-item-dropdown>
+    </wi-toolbar>
+    <wi-toolbar>
+		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
+		<wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert All" handler="wiInventory.onRevertAllButtonClicked" ng-if="!!wiInventory.importItems.length"></wi-button>
+		<wi-button icon="reload-16x16" layout="icon-left" type="small" label='Refresh' tooltip="Refresh" handler="wiInventory.onRevertAllButtonClicked" ng-if="!wiInventory.importItems.length"></wi-button>
+	</wi-toolbar>
+</div>
 <!--
 <div class="inventory-main container-fluid">
     <div id="left-inventory" class="col-xs-5">

@@ -58,6 +58,13 @@ let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
 let wiStages = require('./wi-stages');
 
+let wiItemList = require('./wi-item-list');
+let wiItemDropdown = require('./wi-item-dropdown');
+
+let wiiExplorer = require('./wii-explorer');
+let wiiItems = require('./wii-items');
+let wiiProperties = require('./wii-properties');
+
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
 
@@ -89,7 +96,7 @@ let wiDepth = require('./wi-depth.model');
 let wiCurve = require('./wi-curve.model');
 let wiDataset = require('./wi-dataset.model');
 let wiProperty = require('./wi-property.model');
-//let wiListview = require('./wi-listview.model');
+let wiListview = require('./wi-listview.model');
 let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
 let wiWell = require('./wi-well.model');
@@ -102,6 +109,7 @@ let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 let wiChunkedUploadService = require('./wi-chunked-upload-service');
 let wiBatchApiService = require('./wi-batch-api-service');
+let wiOnlineInvService = require('./wi-online-inv-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
@@ -142,6 +150,8 @@ let app = angular.module('wiapp',
         wiComboview.name,
         wiD3Comboview.name,
         wiStages.name,
+        wiItemList.name,
+        wiItemDropdown.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -153,7 +163,7 @@ let app = angular.module('wiapp',
         wiCurve.name,
         wiDataset.name,
         wiProperty.name,
-        //wiListview.name,
+        wiListview.name,
         wiTreeConfig.name,
         wiTreeItem.name,
         wiWell.name,
@@ -164,6 +174,7 @@ let app = angular.module('wiapp',
         wiComponentService.name,
         wiChunkedUploadService.name,
         wiBatchApiService.name,
+        wiOnlineInvService.name,
 
         wiCanvasRect.name,
         wiZone.name,
@@ -176,6 +187,11 @@ let app = angular.module('wiapp',
         wiProgressBar.name,
 
         wiConditionNode.name,
+
+        wiiExplorer.name,
+        wiiItems.name,
+        wiiProperties.name,
+
         ngInfiniteScroll,
         wipm.name,
         'angularModalService',
@@ -189,7 +205,7 @@ let app = angular.module('wiapp',
         'angularjs-dropdown-multiselect'
     ]);
 
-function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService) {
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -200,6 +216,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         ModalService,
         wiApiService,
         wiChunkedUploadService,
+        wiOnlineInvService,
         $timeout
     };
     // Logplot Handlers
@@ -283,7 +300,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.preventDuplicates = true;
 
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService) {
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService) {
     let functionBindingProp = {
         $scope,
         wiComponentService,
@@ -295,7 +312,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService);
+    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
             onInit();
@@ -307,7 +324,13 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     $scope.helpClick = function() {
         console.log('Help clicked');
     }
+    $scope.onItemSelect = function(viewIndex, modelIndex, selectedItem) {
+        console.log(viewIndex, modelIndex, selectedItem);
+    }
     function onInit() {
+        //$timeout(function() { handlers.InventoryInspectionButtonClicked(); }, 500);
+        wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS).InventoryInspectionButtonClicked();
+        /*
         layoutManager.getRoot().addChild({
             type: 'component',
             id: 'import-block',
@@ -317,6 +340,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
             },
             title: 'Title'
         });
+        */
     }
 });
 app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope) {
@@ -415,6 +439,64 @@ app.controller('runImport', function($scope, $rootScope, $timeout) {
         return socket;
     }
 });
+
+app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
+    console.log('InventoryInspect');
+    $scope.labelToggle;
+    $scope.onWellListScrollTop = function(wiItemListCtrl) {
+        return new Promise(function() {
+            if (!wiItemListCtrl.items.length) {
+                resolve(0);
+            }
+            else {
+                let wells = wiItemListCtrl.items;
+                wiOnlineInvService.listWells({
+                    start: wells[0].properties.idWell, 
+                    limit: 10, 
+                    forward: false
+                }, function(listOfWells) {
+                    $timeout(function() {
+                        console.log(listOfWells);
+                        for (let well of listOfWells) {
+                            let wellModel = utils.wellToTreeConfig(well);
+                            wellModel.data.toggle = $scope.labelToggle;
+                            wells.unshift(wellModel);
+                            wells.pop();
+                        }
+                        resolve(listOfWells.length);
+                    });
+                });
+            }
+        });
+    }
+    $scope.onWellListScrollBottom = function(wiItemListCtrl) {
+        return new Promise(function() {
+            if (!wiItemListCtrl.items.length) {
+                resolve(0);
+            }
+            else {
+                let wells = wiItemListCtrl.items;
+                wiOnlineInvService.listWells({
+                    start: wells[wells.length - 1].properties.idWell, 
+                    limit: 10, 
+                    forward: true
+                }, function(listOfWells) {
+                    $timeout(function() {
+                        console.log(listOfWells);
+                        for (let well of listOfWells) {
+                            let wellModel = utils.wellToTreeConfig(well);
+                            wellModel.data.toggle = $scope.labelToggle;
+                            wells.push(wellModel);
+                            wells.shift();
+                        }
+                        resolve(listOfWells.length);
+                    });
+                });
+            }
+        });
+    }
+});
+
 app.filter('datetimeFormat', function() {
     return function(timestamp) {
         var date = new Date(timestamp);

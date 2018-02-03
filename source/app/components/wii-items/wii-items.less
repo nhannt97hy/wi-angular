@@ -1,0 +1,40 @@
+wii-items {
+  .panel-body {
+    padding: 0;
+  }
+  table {
+    width: 100%;
+    tr {
+      height: 2em;
+      border-bottom: 1px solid #eeeeee;
+      cursor: pointer;
+      td {
+        padding: 0 12px;
+        border-right: 1px solid #eeeeee;
+        &.unit {
+          width: 5%;
+          input {
+            width: 100%;
+          }
+        }
+        input {
+          border: 0;
+          background-color: transparent;
+          width: 90%;
+        }
+      }
+      th {
+        padding: 0 30px;
+        border-right: 1px solid #eeeeee;
+      }
+    }
+    tr:first-child {
+      border-top: 1px solid #eeeeee;
+      background-color: #f8f8f8;
+      cursor: default;
+    }
+    tr.active {
+      background-color: #eeeeee;
+    }
+  }
+}
