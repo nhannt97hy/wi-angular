@@ -53,12 +53,12 @@
 				</div>
 				<div class="trow">
 					<div class="tcol">
-						<input type="number" class='form-control wi-form-control editor' 
+						<input type="number" class='form-control wi-form-control editor'
 						ng-model="wiCurveListing.indexInput" placeholder="Go to ..."
 						wi-enter='wiCurveListing.goToIndex()' min="0">
 					</div>
 					<div class="tcol">
-						<input type="number" class='form-control wi-form-control editor' 
+						<input type="number" class='form-control wi-form-control editor'
 						ng-model="wiCurveListing.depthInput" placeholder="Go to ..."
 						wi-enter='wiCurveListing.goToDepth()' min="0" id="depthInput">
 					</div>
@@ -66,23 +66,31 @@
 			</div>
 			<div class="tbody">
 				<div ng-repeat="row in wiCurveListing.loaded track by $index" class="trow">
-					<div class="tcol">{{$index + wiCurveListing.first}}</div>
+					<div class="tcol" ng-class="{focus:$index == wiCurveListing.focus}">{{$index + wiCurveListing.first}}</div>
 					<div class="tcol depth">{{wiCurveListing.depthArr[wiCurveListing.currentIndex][$index + wiCurveListing.first]}}</div>
 				</div>
 			</div>
 		</div>
-		<div class="rest-columns">
+		<div class="rest-columns"
+		ng-mousemove="wiCurveListing.onResizing($event)"
+		ng-mouseup="wiCurveListing.onResizeEnd($event)">
 			<div class="thead">
 				<div class="trow">
-					<div class="tcol" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.datasetName}}</div>
+					<div class="tcol curve{{curve.id}}" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.datasetName}}
+						<div class="resizeH" ng-mousedown='wiCurveListing.onResizeStart($event, "curve"+curve.id)'
+						></div>
+					</div>
 				</div>
 				<div class="trow">
-					<div class="tcol" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.name}}</div>
+					<div class="tcol curve{{curve.id}}" ng-repeat="curve in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if="curve.show">{{curve.name}}
+						<div class="resizeH" ng-mousedown='wiCurveListing.onResizeStart($event, "curve"+curve.id)'
+						></div>
+					</div>
 				</div>
 			</div>
 			<div id="output" class="tbody">
 				<div ng-repeat="row in wiCurveListing.loaded track by $index" ng-init="parentId = $index" class="trow">
-					<div  class="tcol" ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
+					<div  class="tcol curve{{col.id}}" ng-repeat="col in wiCurveListing.curvesData[wiCurveListing.currentIndex]" ng-if='col.show'
 					ng-class="{'nanValue': wiCurveListing.isNaN(col.data[parentId + wiCurveListing.first])}">
 						<input type="number" class='form-control wi-form-control editor' ng-model="col.data[parentId + wiCurveListing.first]" step="any" ng-change="col.edit = true;wiCurveListing.onModifyCurve(col.id);">
 					</div>

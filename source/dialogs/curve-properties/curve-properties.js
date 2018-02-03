@@ -18,7 +18,7 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
 
         let extentY = currentCurve.getExtentY();
 
-        if (currentCurve.line && (currentCurve.dislayMode == 'Line' || currentCurve.dislayMode == 'Both')) {
+        if (currentCurve.line && (currentCurve.displayMode == 'Line' || currentCurve.displayMode == 'Both')) {
             this.lineOptions = {
                 display: true,
                 lineStyle: {
@@ -37,7 +37,7 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
                 }
             }
         }
-        if (currentCurve.symbol && (currentCurve.dislayMode == 'Symbol' || currentCurve.dislayMode == 'Both')) {
+        if (currentCurve.symbol && (currentCurve.displayMode == 'Symbol' || currentCurve.displayMode == 'Both')) {
             this.symbolOptions = {
                 display: true,
                 symbolStyle: {
@@ -85,13 +85,14 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
             logLinear: ["Linear", "Logarithmic"],
             displayAs: ["Normal", "Cumulative", "Mirror", "Pid"]
         };
-
+        this.displayLine = displayLine;
         function displayLine(lineOptions, symbolOptions) {
+
             let sample = $('#sample')[0];
             let context = sample.getContext('2d');
             context.clearRect(0, 0, sample.width, sample.height);
-            var x = [5, 50, 100, 150, 195];
-            var y = [180, 40, 20, 40, 180];
+            var x = [5, 25, 50, 100, 150, 175, 195];
+            var y = [180, 100, 40, 20, 40, 110, 180];
 
             function drawSegment(context, x1, y1, x2, y2) {
                 let lineColor = lineOptions.lineStyle.lineColor;
@@ -107,22 +108,35 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
             }
 
             function drawSymbol(context, x, y, style) {
+                let helper = new graph.CanvasHelper(context, {
+                                strokeStyle: style.symbolStyle.symbolFillStyle,
+                                fillStyle: style.symbolStyle.symbolFillStyle,
+                                lineWidth: style.symbolStyle.symbolLineWidth,
+                                lineDash: style.symbolStyle.symbolLineDash,
+                                size: style.symbolStyle.symbolSize
+                });
                 switch (style.symbolStyle.symbolName) {
-                    case "circle":
-                    context.beginPath();
-                    context.strokeStyle = style.symbolStyle.symbolFillStyle;
-                    context.fillStyle = style.symbolStyle.symbolFillStyle;
-                    context.lineWidth = style.symbolStyle.symbolLineWidth;
-                    context.setLineDash(style.symbolStyle.symbolLineDash);
-                    context.arc(x, y, style.symbolStyle.symbolSize / 2, 0, 2 * Math.PI);
-                    context.closePath();
-                    context.stroke();
-                    context.fill();
-                    break;
-                    case "square":
-                    break;
+                    case 'circle': 
+                        helper.circle(x, y);
+                        break;
+                    case 'cross': 
+                        helper.cross(x, y);
+                        break;
+                    case 'diamond': 
+                        helper.diamond(x, y);
+                        break;
+                    case 'plus': 
+                        helper.plus(x, y);
+                        break;
+                    case 'square': 
+                        helper.square(x, y);
+                        break;
+                    case 'star': 
+                        helper.star(x, y);
+                        break;
+                    default:
+                        break;
                 }
-                console.log('Draw symbol');
             }
             for (let i = 0; i < x.length - 1; i++) {
                 if (lineOptions && lineOptions.display)
@@ -130,8 +144,7 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
             }
             for (let i = 0; i < x.length; i++) {
                 if (symbolOptions && symbolOptions.display) {
-                    console.log(self.symbolOptions);
-                    drawSymbol(context, x[i], y[i], self.symbolOptions);
+                    drawSymbol(context, x[i], y[i], symbolOptions);
                 }
             }
 
@@ -288,23 +301,24 @@ function curvePropertiesDialog (ModalService, wiComponentService, wiApiService, 
         controllerAs: "wiModal"
     }).then(function (modal) {
         initModal(modal);
-        thisModalController.drawSample();
-        switch (thisModalController.curveOptions.displayMode) {
-            case "Line":
-            thisModalController.disabledByLine();
-            break;
-            case "Symbol":
-            thisModalController.disabledBySymbol();
-            break;
-            case "Both":
-            thisModalController.disabledByBoth();
-            break;
-            case "None":
-            thisModalController.disabledByNone();
-            break;
+        thisModalController.displayLine(thisModalController.lineOptions, thisModalController.symbolOptions);
+
+        switch (thisModalController.curveOptions.displayMode.toLowerCase()) {
+            case "line":
+                thisModalController.disabledByLine();
+                break;
+            case "symbol":
+                thisModalController.disabledBySymbol();
+                break;
+            case "both":
+                thisModalController.disabledByBoth();
+                break;
+            case "none":
+                thisModalController.disabledByNone();
+                break;
             default:
-            console.log("Error: NULL");
-            break;
+                console.log("Error: NULL");
+                break;
         }
         modal.close.then(function (ret) {
             $('.modal-backdrop').last().remove();

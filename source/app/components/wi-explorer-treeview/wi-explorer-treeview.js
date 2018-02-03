@@ -2,7 +2,7 @@ const componentName = 'wiExplorerTreeview';
 const moduleName = 'wi-explorer-treeview';
 const wiBaseTreeview = require('./wi-base-treeview');
 
-function WiExpTreeController($controller, wiComponentService, wiApiService) {
+function WiExpTreeController($controller, wiComponentService, wiApiService, $timeout, $scope) {
 
     let self = this;
 
@@ -29,11 +29,9 @@ function WiExpTreeController($controller, wiComponentService, wiApiService) {
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if (!Array.isArray(selectedNodes)) selectedNodes = [];
         if (!$event.shiftKey) {
-            if (selectedNodes.length) {
-                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
-                    if ($event.type == 'contextmenu' && selectedNodes.includes(node)) return this.container.selectHandler(node);
-                    this.container.unselectAllNodes();
-                }
+            if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                if ($event.type == 'contextmenu' && selectedNodes.includes(node)) return this.container.selectHandler(node);
+                this.container.unselectAllNodes();
             }
             this.container.selectHandler(node);
         } else {
@@ -74,12 +72,6 @@ function WiExpTreeController($controller, wiComponentService, wiApiService) {
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 
-    // let WiBaseTreeController = new wiBaseTreeview.controller();
-    // for (const key in WiBaseTreeController) {
-    //     if (WiBaseTreeController.hasOwnProperty(key) && !this[key]) {
-    //         this[key] = WiBaseTreeController[key];
-    //     }
-    // }
 }
 
 let app = angular.module(moduleName, [wiBaseTreeview.name]);
@@ -90,7 +82,8 @@ app.component(componentName, {
     bindings: {
         name: '@',
         config: '<',
-        container: '<'
+        container: '<',
+        filter: '@'
     }
 });
 exports.name = moduleName;

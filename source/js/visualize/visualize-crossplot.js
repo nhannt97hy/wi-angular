@@ -495,6 +495,10 @@ Crossplot.prototype.adjustSize = function() {
         .attr('height', rect.height);
 }
 
+Crossplot.prototype.destroy = function() {
+    this.bodyContainer.remove();
+}
+
 Crossplot.prototype.doPlot = function(){
     var self = this;
     if (self.timerHandle) {

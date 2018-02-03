@@ -254,6 +254,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             line.symbolName = lineProps.symbolOptions.symbolStyle.symbolName;
             line.symbolSize = lineProps.symbolOptions.symbolStyle.symbolSize;
             line.symbolStrokeStyle = lineProps.symbolOptions.symbolStyle.symbolStrokeStyle;
+            delete line.lineCurve._data;
             return line;
         }
         function updateCurvesTab(updateCurvesTabCb) {
@@ -468,7 +469,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                 changed: changed.created,
                 setName: false,
                 idTrack: currentTrack.id,
-                idControlCurve: utils.getAllCurvesOfWell(this.well)[0].id,
+                idControlCurve: null,
                 name: 'xx_yy',
                 shadingStyle: "pattern",
                 isNegPosFill: false,
@@ -558,6 +559,10 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         };
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
+                if (!item.idControlCurve) {
+                    item.idControlCurve = (item.leftLine.id > 0) ? 
+                                            item.leftLine.idCurve : item.rightLine.idCurve;
+                }
                 let request = angular.copy(item);
 
                 if(item.idLeftLine == -3) {

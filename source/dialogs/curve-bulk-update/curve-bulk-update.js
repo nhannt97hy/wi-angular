@@ -105,6 +105,7 @@ function curveBulkUpdateDialog (ModalService, logTracks) {
                     currentCurve.setProperties(line);
 
                     currentTrack.plotCurve(currentCurve);
+                    currentTrack.doPlot();
                     if (cb) cb();
                 })
             }, function(err) {

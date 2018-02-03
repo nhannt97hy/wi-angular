@@ -4,11 +4,11 @@ const moduleName = 'wi-slidingbar';
 const MIN_RANGE = 1;
 
 function actual(selector, dim) {
-    const tabElement = $(`div[style*="display: none"]`).has(selector);
-    if (!tabElement) return $(selector)[dim]();
-    tabElement.css({display: 'block'});
+    const tabElement = $(`.lm_item_container[style*="display: none"]`).has(selector);
+    if (!tabElement.length) return $(selector)[dim]();
+    tabElement.css({ display: 'block' });
     const result = $(selector)[dim]();
-    tabElement.css({display: 'none'});
+    tabElement.css({ display: 'none' });
     return result;
 }
 
@@ -196,7 +196,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         }
         wiApiService.editLogplot(newLogplot, null, { silent: true });
     }, 1000);
-    
+
     function getHandleId() {
         return '#sliding-handle' + self.name;
     }
@@ -210,6 +210,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.onReady = function () {
         let logPlotName = self.name.replace('Slidingbar', '');
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
+        this.logPlotCtrl = logPlotCtrl;
         let parentHeight = actual(self.contentId, 'height');
         //parentHeight = $(self.contentId).height();
         //self.parentHeight = parentHeight;
@@ -280,7 +281,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             _viCurve && _viCurve.doPlot();
         });
 
-        function handler () {
+        function handler() {
+            self.refreshHandler();
+            _viCurve && _viCurve.doPlot();
             if (!sensor || !sensor.detach) return;
             sensor.detach();
             sensor = new ResizeSensor($(self.contentId), function () {
@@ -306,11 +309,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         $(`wi-slidingbar[name=${self.name}]`).on('mouseover', function () {
             dragMan.wiSlidingBarCtrl = self;
-            dragMan.wiD3Ctrl = null;
         });
-
         $(`wi-slidingbar[name=${self.name}]`).on('mouseleave', function () {
             dragMan.wiSlidingBarCtrl = null;
+            dragMan.wiD3Ctrl = null;
         });
     };
 
@@ -370,6 +372,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.refreshHandler = function () {
         //parentHeight = $(self.contentId).height();
+        _doScaleView(self.slidingBarState);
         self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
     }
 
@@ -470,6 +473,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         self.slidingBarState.top0 = 0;
         self.slidingBarState.range0 = 100.;
         _doScaleView(self.slidingBarState);
+        saveStateToServer();
         return;
 
         let defaultParentHeight = actual($(self.contentId).parent().parent(), 'height');
