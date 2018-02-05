@@ -200,10 +200,20 @@ function shadingToTreeConfig(shading, paletteList) {
 
 exports.shadingToTreeConfig = shadingToTreeConfig;
 
-function zoneToTreeConfig(zone) {
+function zoneToTreeConfig(zone, options = {}) {
     var zoneModel = new Object();
-    zoneModel.name = 'zone';
-    zoneModel.type = 'zone';
+    setTimeout(() => {
+        let zoneSetModel = getModel('zoneset', zone.idZoneSet);
+        let wellModel = getModel('well', zoneSetModel.properties.idWell);
+        zoneModel.parentDataArr = [wellModel.data, zoneSetModel.data];
+    });
+    if (options.isDeleted) {
+        zoneModel.name = 'zone-deleted-child';
+        zoneModel.type = 'zone-deleted-child';
+    } else {
+        zoneModel.name = 'zone';
+        zoneModel.type = 'zone';
+    }
     zoneModel.id = zone.idZone;
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
@@ -225,10 +235,8 @@ function zoneToTreeConfig(zone) {
 
 exports.zoneToTreeConfig = zoneToTreeConfig;
 
-function zoneSetToTreeConfig(zoneSet) {
+function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
-    zoneSetModel.name = 'zoneset';
-    zoneSetModel.type = 'zoneset';
     zoneSetModel.id = zoneSet.idZoneSet;
     zoneSetModel.properties = {
         idWell: zoneSet.idWell,
@@ -240,6 +248,13 @@ function zoneSetToTreeConfig(zoneSet) {
         icon: 'project-16x16-edit',
         label: zoneSet.name
     }
+    if (options.isDeleted) {
+        zoneSetModel.name = 'zoneset-deleted-child';
+        zoneSetModel.type = 'zoneset-deleted-child';
+        return zoneSetModel;
+    }
+    zoneSetModel.name = 'zoneset';
+    zoneSetModel.type = 'zoneset';
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
     zoneSet.zones.forEach(function (zone) {
@@ -561,7 +576,7 @@ function curveToTreeConfig(curve, isDeleted) {
     setTimeout(() => {
         let datasetModel = getModel('dataset', curve.idDataset);
         let wellModel = getModel('well', datasetModel.properties.idWell);
-        curveModel.parentDataArr = [datasetModel.data, wellModel.data];
+        curveModel.parentDataArr = [wellModel.data, datasetModel.data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
@@ -714,6 +729,29 @@ function createCurvesNode(parent) {
     return curvesModel;
 }
 
+function createZonesNode(parent, options = {}) {
+    let zonesModel = new Object();
+    if (options.isDeleted) {
+        zonesModel.name = 'zones-deleted';
+        zonesModel.type = 'zones-deleted';
+    }
+    zonesModel.data = {
+        childExpanded: false,
+        icon: 'zone-table-16x16',
+        label: "Zones",
+        isCollection: true
+    }
+    zonesModel.properties = {
+        totalItems: parent.curves.length
+    }
+    zonesModel.children = new Array();
+    if (!parent.zones) return zonesModel;
+    parent.zones.forEach(function (zone) {
+        zonesModel.children.push(zoneToTreeConfig(zone, { isDeleted: true }));
+    });
+    return zonesModel;
+}
+
 function createLogplotsNode(parent, options = {}) {
     let plotsModel = new Object();
     plotsModel.data = {
@@ -825,23 +863,40 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-function createZoneSetsNode(well) {
+function createZoneSetsNode(parent, options = {}) {
     let zoneSetsModel = new Object();
-    zoneSetsModel.name = 'zonesets';
-    zoneSetsModel.type = 'zonesets';
-    zoneSetsModel.data = {
-        childExpanded: false,
-        icon: 'user-define-16x16',
-        label: "User Defined"
-    };
-    zoneSetsModel.properties = {
-        idWell: well.idWell
+    if (options.isDeleted) {
+        zoneSetsModel.name = 'zonesets-deleted';
+        zoneSetsModel.type = 'zonesets-deleted';
+        zoneSetsModel.data = {
+            childExpanded: false,
+            icon: 'user-define-16x16',
+            label: "Zone Sets"
+        };
+    } else {
+        zoneSetsModel.name = 'zonesets';
+        zoneSetsModel.type = 'zonesets';
+        zoneSetsModel.data = {
+            childExpanded: false,
+            icon: 'user-define-16x16',
+            label: "User Defined"
+        };
     }
     zoneSetsModel.children = new Array();
-    if (!well.zonesets) return zoneSetsModel;
-    well.zonesets.forEach(function (zoneSet) {
-        zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
-    });
+    if (!parent || !parent.zonesets) return zoneSetsModel;
+    zoneSetsModel.properties = {
+        idWell: parent.idWell,
+        totalItems: parent.zonesets.length
+    }
+    if (options.isDeleted) {
+        parent.zonesets.forEach(function (zoneSet) {
+            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet, { isDeleted: true }));
+        });
+    } else {
+        parent.zonesets.forEach(function (zoneSet) {
+            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+        });
+    }
     return zoneSetsModel;
 }
 
@@ -1057,6 +1112,8 @@ function updateDustbinConfig(dustbin) {
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
     dustbinModel.children.push(createCurvesNode(dustbin));
+    dustbinModel.children.push(createZoneSetsNode(dustbin, {isDeleted: true}));
+    dustbinModel.children.push(createZonesNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createLogplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createCrossplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createHistogramsNode(dustbin, { isDeleted: true }));
