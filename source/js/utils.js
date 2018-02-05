@@ -200,10 +200,20 @@ function shadingToTreeConfig(shading, paletteList) {
 
 exports.shadingToTreeConfig = shadingToTreeConfig;
 
-function zoneToTreeConfig(zone) {
+function zoneToTreeConfig(zone, options = {}) {
     var zoneModel = new Object();
-    zoneModel.name = 'zone';
-    zoneModel.type = 'zone';
+    setTimeout(() => {
+        let zoneSetModel = getModel('zoneset', zone.idZoneSet);
+        let wellModel = getModel('well', zoneSetModel.properties.idWell);
+        zoneModel.parentDataArr = [wellModel.data, zoneSetModel.data];
+    });
+    if (options.isDeleted) {
+        zoneModel.name = 'zone-deleted-child';
+        zoneModel.type = 'zone-deleted-child';
+    } else {
+        zoneModel.name = 'zone';
+        zoneModel.type = 'zone';
+    }
     zoneModel.id = zone.idZone;
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
@@ -225,10 +235,8 @@ function zoneToTreeConfig(zone) {
 
 exports.zoneToTreeConfig = zoneToTreeConfig;
 
-function zoneSetToTreeConfig(zoneSet) {
+function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
-    zoneSetModel.name = 'zoneset';
-    zoneSetModel.type = 'zoneset';
     zoneSetModel.id = zoneSet.idZoneSet;
     zoneSetModel.properties = {
         idWell: zoneSet.idWell,
@@ -240,6 +248,13 @@ function zoneSetToTreeConfig(zoneSet) {
         icon: 'project-16x16-edit',
         label: zoneSet.name
     }
+    if (options.isDeleted) {
+        zoneSetModel.name = 'zoneset-deleted-child';
+        zoneSetModel.type = 'zoneset-deleted-child';
+        return zoneSetModel;
+    }
+    zoneSetModel.name = 'zoneset';
+    zoneSetModel.type = 'zoneset';
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
     zoneSet.zones.forEach(function (zone) {
@@ -561,7 +576,7 @@ function curveToTreeConfig(curve, isDeleted) {
     setTimeout(() => {
         let datasetModel = getModel('dataset', curve.idDataset);
         let wellModel = getModel('well', datasetModel.properties.idWell);
-        curveModel.parentDataArr = [datasetModel.data, wellModel.data];
+        curveModel.parentDataArr = [wellModel.data, datasetModel.data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
@@ -714,6 +729,29 @@ function createCurvesNode(parent) {
     return curvesModel;
 }
 
+function createZonesNode(parent, options = {}) {
+    let zonesModel = new Object();
+    if (options.isDeleted) {
+        zonesModel.name = 'zones-deleted';
+        zonesModel.type = 'zones-deleted';
+    }
+    zonesModel.data = {
+        childExpanded: false,
+        icon: 'zone-table-16x16',
+        label: "Zones",
+        isCollection: true
+    }
+    zonesModel.properties = {
+        totalItems: parent.curves.length
+    }
+    zonesModel.children = new Array();
+    if (!parent.zones) return zonesModel;
+    parent.zones.forEach(function (zone) {
+        zonesModel.children.push(zoneToTreeConfig(zone, { isDeleted: true }));
+    });
+    return zonesModel;
+}
+
 function createLogplotsNode(parent, options = {}) {
     let plotsModel = new Object();
     plotsModel.data = {
@@ -825,23 +863,40 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-function createZoneSetsNode(well) {
+function createZoneSetsNode(parent, options = {}) {
     let zoneSetsModel = new Object();
-    zoneSetsModel.name = 'zonesets';
-    zoneSetsModel.type = 'zonesets';
-    zoneSetsModel.data = {
-        childExpanded: false,
-        icon: 'user-define-16x16',
-        label: "User Defined"
-    };
-    zoneSetsModel.properties = {
-        idWell: well.idWell
+    if (options.isDeleted) {
+        zoneSetsModel.name = 'zonesets-deleted';
+        zoneSetsModel.type = 'zonesets-deleted';
+        zoneSetsModel.data = {
+            childExpanded: false,
+            icon: 'user-define-16x16',
+            label: "Zone Sets"
+        };
+    } else {
+        zoneSetsModel.name = 'zonesets';
+        zoneSetsModel.type = 'zonesets';
+        zoneSetsModel.data = {
+            childExpanded: false,
+            icon: 'user-define-16x16',
+            label: "User Defined"
+        };
     }
     zoneSetsModel.children = new Array();
-    if (!well.zonesets) return zoneSetsModel;
-    well.zonesets.forEach(function (zoneSet) {
-        zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
-    });
+    if (!parent || !parent.zonesets) return zoneSetsModel;
+    zoneSetsModel.properties = {
+        idWell: parent.idWell,
+        totalItems: parent.zonesets.length
+    }
+    if (options.isDeleted) {
+        parent.zonesets.forEach(function (zoneSet) {
+            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet, { isDeleted: true }));
+        });
+    } else {
+        parent.zonesets.forEach(function (zoneSet) {
+            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+        });
+    }
     return zoneSetsModel;
 }
 
@@ -1057,6 +1112,8 @@ function updateDustbinConfig(dustbin) {
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
     dustbinModel.children.push(createCurvesNode(dustbin));
+    dustbinModel.children.push(createZoneSetsNode(dustbin, {isDeleted: true}));
+    dustbinModel.children.push(createZonesNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createLogplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createCrossplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createHistogramsNode(dustbin, { isDeleted: true }));
@@ -2533,7 +2590,8 @@ exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDelet
                 let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
                 let pointSet = wiD3CrossplotCtrl.getPointSet(wiD3CrossplotCtrl.crossplotModel.properties);
                 if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
-                    layoutManager.removeTabWithModel(crossplotModel);
+                    //layoutManager.removeTabWithModel(crossplotModel);
+                    wiD3CrossplotCtrl.removeVisualizeCrossplot();
                 } else if (idCurve == pointSet.idCurveZ) {
                     wiD3CrossplotCtrl.updateAll();
                 }
@@ -2879,23 +2937,110 @@ function updateWiCurveListingOnModelDeleted(model){
 }
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
-function calVSHfromGR(well, grCurve, matrix, shale){
-    let result = new Array();
+function calVSHfromGR(well, grCurve, matrix, shale, type, callback){
     let length = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
+    let result = new Array(length);
+    let curvesData = {};
+
+    function getDepth(){
+        let depth = new Array(length);
+        for(i = 0; i < length; i++){
+            depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
+        }
+        return depth;
+    }
 
     function getData(idCurve, callback){
-        __GLOBAL.wiApiService.dataCurve(idCurve, function(data){
+        if(idCurve){
+            __GLOBAL.wiApiService.dataCurve(idCurve, function(data){
+                callback(data.map(d => parseFloat(d.x)));
+            })
+        }else{
+            let data = getDepth();
             callback(data);
+        }
+    }
+    
+    async.series([function(cb){
+        // get data from input
+        getData(grCurve.id, function(data){
+            curvesData['grCurve'] = data;
+            if(matrix.type == 'curve'){
+                getData(matrix.value.id, function(data){
+                    curvesData['matrix'] = data;
+                    if(shale.type == 'curve'){
+                        getData(shale.value.id, function(data){
+                            curvesData['shale'] = data;
+                            cb();
+                        })
+                    }else{
+                        curvesData['shale'] = new Array(length).fill(shale.value);
+                        cb();
+                    }
+                })
+            }else{
+                curvesData['matrix'] = new Array(length).fill(matrix.value);
+                if(shale.type == 'curve'){
+                    getData(shale.value.id, function(data){
+                        curvesData['shale'] = data;
+                        cb();
+                    })
+                }else{
+                    curvesData['shale'] = new Array(length).fill(shale.value);
+                    cb();
+                }
+            }
         })
-    }
+    },
+    function(cb){
+        // cal GR index
+        for(let i = 0; i < length; i++){
+            result[i] = (curvesData['grCurve'][i] - curvesData['matrix'][i])/(curvesData['shale'][i] - curvesData['matrix'][i]);
+        }
+        cb();
+    },
+    function(cb){
+        // cal VSH by type
+        switch(type){
+            case 'Linear':
+            cb();
+            break;
 
-    if(grCurve.id){
-        // real curve
-    }else{
-        //depth curve
-    }
+            case 'Clavier':
+            result = result.map(d => {return 1.7 - Math.sqrt(3.38 - Math.pow(d + 0.7, 2))});
+            cb();
+            break;
+
+            case 'Tertiary':
+            result = result.map(d => {return 0.083 * (Math.pow(2, 3.7 * d) - 1)});
+            cb();
+            break;
+
+            case 'Larionov':
+            result = result.map(d => {return 0.33 * (Math.pow(2, 3.7 * d) - 1)});
+            cb();
+            break;
+
+            case 'Stieber1':
+            result = result.map(d => {return d / (2 - d)});
+            cb();
+            break;
+
+            case 'Stieber3':
+            result = result.map(d => {return d / (3 - 2 * d)});
+            cb();
+            break;
+
+            case 'Stieber2':
+            result = result.map(d => {return d / (4 - 3 * d)});
+            cb();
+            break;
+        }
+    }], function(err){
+        console.log(result);
+        callback(result);
+    })
 }
-
 exports.calVSHfromGR = calVSHfromGR;
 
 function emitEvent (eventName, eventData) {
@@ -2910,3 +3055,9 @@ function listenEvent (eventName, callback) {
     })
 }
 exports.listenEvent = listenEvent;
+function swapValue (a, b) {
+    let t = a;
+    a = b;
+    b = t;
+}
+exports.swapValue = swapValue;

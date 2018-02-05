@@ -195,6 +195,9 @@ LogTrack.prototype.getCurrentMarker = function() {
 LogTrack.prototype.getCurves = function() {
     return this.drawings.filter(function(d) {
         return d.isCurve();
+    })
+    .sort(function (c1, c2) {
+        return (c1.orderNum + c1.name).localeCompare(c2.orderNum + c2.name);
     });
 }
 

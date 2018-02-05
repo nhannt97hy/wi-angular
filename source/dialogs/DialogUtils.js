@@ -2473,13 +2473,13 @@ exports.rangeSpecificDialog = function (ModalService, wiLogplot, callback) {
     function ModalController($scope, close) {
         let self = this;
         let wiD3Ctr = wiLogplot.getwiD3Ctrl();
-        // this.depthRange = wiD3Ctr.getDepthRange();
-        this.depthRange = [wiD3Ctr.getMinDepth(), wiD3Ctr.getMaxDepth()];
+        this.depthRange = wiD3Ctr.getDepthRange();
 
         this.verifyRange = function () {
             if (self.depthRange[0] < wiD3Ctr.getMinDepth()) self.depthRange[0] = wiD3Ctr.getMinDepth();
             if (self.depthRange[1] > wiD3Ctr.getMaxDepth()) self.depthRange[1] = wiD3Ctr.getMaxDepth();
         }
+        this.verifyRange();
 
         this.onOkButtonClicked = function () {
             self.verifyRange();
@@ -2758,43 +2758,35 @@ exports.colorPickerDialog = function (ModalService, currentColor, callback) {
             }
         };
         self.checkColorValue = function(value, label) {
-            let message = "The value must be between ";
             let isValidValue = true;
             switch (label) {
-                case 1:
-                    message += "0 and 255";
-                    if((!value && value != 0) || value > 255 || value < 0) {
+                case 'red': case 'green': case 'blue':
+                    self.currentColor[label[0]] = value === undefined ? 0:(value < 0 ? 0:(value > 255 ? 255:value));
+                    if(value === undefined || value > 255 || value < 0) {
                         isValidValue = false;
                     }
                     break;
-                case 2:
-                    message += "0 and 1";
-                    if((!value && value != 0) || value > 1 || value < 0) {
+                case 'alpha':
+                    self.currentColor[label[0]] = value === undefined ? 0:(value < 0 ? 0:(value > 1 ? 1:value));
+                    if(value === undefined || value > 1 || value < 0) {
                         isValidValue = false;
                     }
                     break;
             }
-            if(isValidValue) {
-                self.errorMessage = null;
-            } else {
-                self.errorMessage = message;
-                toastr.error(self.errorMessage, 'Range Error');
+            if(!isValidValue) {
+                $('#'+label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                $('#'+label).css('box-shadow', '');
+                }, 255)
             }
-            return isValidValue;
-        }
-        self.isValidColor = function (color) {
-            return self.checkColorValue(color.r, 1) && self.checkColorValue(color.g, 1) &&
-                    self.checkColorValue(color.b, 1) && self.checkColorValue(color.a, 2);
         }
         self.saveColorCustom = function () {
             let colorString = JSON.stringify(self.CpCustoms);
             $window.localStorage.setItem('colorCustoms', colorString);
         };
         this.onOkButtonClicked = function () {
-            if(self.isValidColor(self.currentColor)) {
                 self.saveColorCustom();
                 close(colorToString(self.currentColor));
-            }
         }
         this.onCancelButtonClicked = function () {
             close();
