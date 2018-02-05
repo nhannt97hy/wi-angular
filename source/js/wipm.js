@@ -1,4 +1,5 @@
-const storeApi = 'http://54.169.13.92:3002/store/api';
+const HOST = '54.169.13.92';
+const PORT = 3002;
 const moduleName = 'wipm';
 const controllerName = 'wipmController';
 const createFormCtrlName = 'createFormController';
@@ -27,13 +28,26 @@ wipm.directive('onReadFile', function ($parse) {
         }
     };
 });
-
-wipm.controller(controllerName, function($scope){
+wipm.service('token', function(){
+    let payload;
+    let username;
+    let decode = function(token){
+        payload = JSON.parse(atob(token.split('.')[1]));
+        return payload;
+    }
+    return {
+        decode: decode,
+        username: username
+    }
+})
+wipm.controller(controllerName, function($scope, token){
+    payload = token.decode(window.localStorage.getItem('token'));
+    token.username = payload.username;
     $scope.create = true;
     $scope.retrain = $scope.predict = $scope.list = $scope.result = false;
 })
 
-wipm.controller(createFormCtrlName, function($http){
+wipm.controller(createFormCtrlName, function($http, token){
     var self = this;
     this.name = "Model";
     this.description = "Description"
@@ -92,7 +106,6 @@ wipm.controller(createFormCtrlName, function($http){
         }
     }
     this.create_model = function(){
-        
         if(self.name && self.type && self.data && self.target && self.description){
             $("form").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
             $("form").css('opacity', '0.5');
@@ -104,7 +117,7 @@ wipm.controller(createFormCtrlName, function($http){
                 data: self.data,
                 target: self.target,
                 description: self.description,
-                user_created: username
+                user_created: token.username
             }
             if (payload.type == 'dnn'){
                 payload.units = self.units;
@@ -116,7 +129,7 @@ wipm.controller(createFormCtrlName, function($http){
             }
             $http({
                 method: 'POST',
-                url: storeApi + '/model/new',
+                url: 'http://'+HOST+':'+PORT + '/store/api/model/new',
                 data: payload
             }).then(function(response){
                     console.log('create model:', response.data);
@@ -136,11 +149,11 @@ wipm.controller(createFormCtrlName, function($http){
         }
     }
 })
-wipm.controller(retrainFormCtrlName, function($http){
+wipm.controller(retrainFormCtrlName, function($http, token){
     var self = this;    
     $http({
         method: 'GET',
-        url: storeApi + '/model/list/' + username
+        url: 'http://' + HOST+':'+PORT+ '/store/api/model/list/' + token.username
     }).then(function(response){
             var res = response.data;
             console.log('retrain: ', res);
@@ -199,12 +212,13 @@ wipm.controller(retrainFormCtrlName, function($http){
                         }
                         $http({
                             method: 'PUT',
-                            url: storeApi + '/model/retrain/' + self.model.id,
+                            url: 'http://'+HOST+':'+PORT +'/store/api/model/retrain/' + self.model.id,
                             data: payload
                         }).then(function(response){
                                 $(".load").remove();
                                 $("form").css('opacity', '1');
                                 var res = response.data;
+                                console.log(res);
                                 if(res.statusCode == 200){
                                     toastr.success('Retrain model success!', '');
                                 }else{
@@ -224,7 +238,7 @@ wipm.controller(retrainFormCtrlName, function($http){
             return;
     })
 })
-wipm.controller(predictFormCtrlName, function($http,  wiApiService){
+wipm.controller(predictFormCtrlName, function($http,  wiApiService, token){
     var self = this; 
     this.project;
     wiApiService.getProjectInfo(1, function(projectInfo){
@@ -253,7 +267,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
     }
     $http({
         method: 'GET',
-        url: storeApi + '/model/list/' + username
+        url: 'http://'+HOST+':'+PORT + '/store/api/model/list/' + token.username
     }).then(function(response){
             var res = response.data;
             if(res.statusCode == 400){
@@ -284,7 +298,7 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
                         }
                         $http({
                             method: 'POST',
-                            url: storeApi + '/predict',
+                            url: 'http://'+HOST+':'+PORT + '/store/api/predict',
                             data: payload
                         }).then(function(response){
                                 $(".load").remove();
@@ -311,11 +325,11 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
             return;
     })
 })
-wipm.controller(listModelFormCtrlName, function($http){
+wipm.controller(listModelFormCtrlName, function($http, token){
     var self = this;
     $http({
         method: 'GET',
-        url: storeApi + '/model/list/' + username
+        url: 'http://'+HOST+':'+PORT + '/store/api/model/list/' + token.username
     }).then(function(response){
             var res = response.data;
             console.log('delete: ', res);
@@ -328,7 +342,7 @@ wipm.controller(listModelFormCtrlName, function($http){
                     $("table").css('opacity', '0.5');
                     $http({
                         method: 'DELETE',
-                        url: storeApi + '/model/delete/' + id,
+                        url: 'http://'+HOST+':'+PORT + '/store/api/model/delete/' + id,
                     }).then(function(response){
                             $(".load").remove();
                             $("table").css('opacity', '1');
