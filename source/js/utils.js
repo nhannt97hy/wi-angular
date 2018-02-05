@@ -2911,3 +2911,10 @@ function calVSHfromGR(well, grCurve, matrix, shale){
 }
 
 exports.calVSHfromGR = calVSHfromGR;
+
+function swapValue (a, b) {
+    let t = a;
+    a = b;
+    b = t;
+}
+exports.swapValue = swapValue;
