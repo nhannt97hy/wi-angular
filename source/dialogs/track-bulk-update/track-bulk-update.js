@@ -10,6 +10,7 @@ function trackBulkUpdateDialog (ModalService, allTracks) {
 
         this.tracks = [];
         this.sumWidth = 0;
+        this.widthOfLogplot = utils.pixelToInch($(".logplot-main-content").width()).toFixed(4);
 
         allTracks.forEach(function(t) {
             self.tracks.push(getTrackProps(t));
@@ -27,7 +28,9 @@ function trackBulkUpdateDialog (ModalService, allTracks) {
             this.tracks.forEach(function(track) {
                 self.sumWidth += track.width;
             });
+            self.sumWidth = self.sumWidth.toFixed(4);
         };
+        this.sumWidth = this.sumWidth.toFixed(4);
 
         console.log("tracks", this.tracks, allTracks);
         function getLogTrack (track) {

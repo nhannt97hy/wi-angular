@@ -45,6 +45,7 @@ source/app/components/wi-explorer/template/toolbar/*
 
 # VSCode
 .vscode
+.eslintrc.json
 
 # Yarn
 yarn.lock
