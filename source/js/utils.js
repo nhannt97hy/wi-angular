@@ -144,7 +144,6 @@ function lineToTreeConfig(line) {
         symbol: null,
         orderNum: line.orderNum
     };
-    let temp = line.displayMode.toLowerCase().trim();
     lineModel.data.line = {
         dash: eval(line.lineStyle),
         color: line.lineColor,
@@ -163,11 +162,6 @@ function lineToTreeConfig(line) {
 
 function shadingToTreeConfig(shading, paletteList) {
     let shadingModel = new Object();
-
-    function getValPal(palName) {
-        console.log("getPal", paletteList.palName);
-        return paletteList.palName;
-    };
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
     shadingModel.idRightLine = shading.idRightLine;
@@ -1083,7 +1077,6 @@ exports.projectToTreeConfig = function (project) {
     return projectModel;
 }
 
-
 function dustbinToTreeConfig(dustbin) {
     var dustbinModel = new Object();
     dustbinModel.type = 'dustbin';
@@ -1096,8 +1089,6 @@ function dustbinToTreeConfig(dustbin) {
         selected: false
     };
     dustbinModel.children = new Array();
-
-    let wiComponentService = __GLOBAL.wiComponentService;
     if (dustbin) {
         updateDustbinConfig(dustbin);
     }
@@ -1107,7 +1098,6 @@ function dustbinToTreeConfig(dustbin) {
 exports.dustbinToTreeConfig = dustbinToTreeConfig;
 
 function updateDustbinConfig(dustbin) {
-    let wiComponentService = __GLOBAL.wiComponentService;
     let dustbinModel = dustbinToTreeConfig();
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
@@ -1373,16 +1363,16 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 };
 exports.openLogplotTab = openLogplotTab;
 
-function getCurrentWell(type) {
-    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+function getCurrentWell() {
+    let currentWell = getSelectedPath().find(node => node.type == 'well');
     if(!currentWell){
-        utils.error("Please select well first!");
+        toastr.error("Please select well first!");
         return;
     }
     return currentWell;
 }
 exports.getCurrentWell = getCurrentWell;
-function getStaticNode(type, options) {
+function getStaticNode(type) {
     if (!type) return;
     let wiComponentService = __GLOBAL.wiComponentService;
     let currentWell = getSelectedPath().find(node => node.type == 'well');
@@ -1473,7 +1463,7 @@ function findZoneSetById(idZoneSet) {
     return zoneSet;
 }
 
-exports.findDatasetById = findDatasetById;
+exports.findZoneSetById = findZoneSetById;
 
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -1739,8 +1729,6 @@ exports.createDataset = function (name) {
 }
 
 exports.exportCurve = function () {
-    let wiComponentService = __GLOBAL.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
     let wiApiService = __GLOBAL.wiApiService;
@@ -1815,15 +1803,12 @@ exports.pasteCurve = function () {
     if (selectedNode.type != 'curve' && selectedNode.type != 'dataset') return;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let wiApiService = __GLOBAL.wiApiService;
-    let currentDatasetName = "";
     let currentDataset;
     if (selectedNode.type == 'curve') {
         // selectedNode is Curve
         currentDataset = findDatasetById(selectedNode.properties.idDataset);
-        currentDatasetName = currentDataset.properties.name;
     } else {
         // selectedNode is Dataset
-        currentDatasetName = selectedNode.properties.name;
         currentDataset = selectedNode;
     }
     // if copying
