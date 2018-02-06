@@ -81,6 +81,7 @@ app.factory(wiServiceName, function () {
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         HISTORYSTATE: 'HISTORY_STATE',
+        PETROPHYSICS: 'PETROPHYSICS',
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         // MOMENT: 'moment',
