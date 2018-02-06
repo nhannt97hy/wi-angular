@@ -1,15 +1,25 @@
 <div class="modal fade" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg" ng-style="wiModal.modalSize">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"><span class="images-properties-16x16"></span>&nbsp;Curve bulk update</h4>
+                <div class="row">
+                    <h4 class="modal-title col-sm-10"><span class="images-properties-16x16"></span>&nbsp;Curve bulk update</h4>
+                    <div class="col-sm-2">
+                        <button type="button" ng-click="wiModal.zoomInDialog();" class="btn btn-default">
+                            <span class="zoom-in-16x16"></span>
+                        </button>
+                        <button type="button" ng-click="wiModal.zoomOutDialog();" class="btn btn-default">
+                            <span class="zoom-out-16x16"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body modalScroll">
+            <div class="modal-body modalScroll" ng-style="wiModal.maxHeightModal">
                 <p></p>
                 <form class='form-horizontal form-condensed'>
                     <table class="text-on-table table table-bordered curveTable scrollTable">
-                        <thead>
+                        <thead class="background-header-table">
                             <tr>
                                 <th rowspan="2" width="5%">Use</th>
                                 <th rowspan="2" width="10%">Track</th>
@@ -29,7 +39,7 @@
                             </tr>
                         </thead>
                         <tbody ng-repeat="track in wiModal.tracks">
-                            <tr ng-repeat="line in track.lines">
+                            <tr ng-repeat="line in track.lines" ng-if="track.use">
                                 <td width="5%" rowspan="{{track.lines.length}}"
                                     ng-hide="$index>0">
                                     <input type="checkbox" 
@@ -82,6 +92,25 @@
                                         <option value="Linear">Linear</option>
                                     </select>
                                 </td>
+                            </tr>
+                            <tr ng-if="!track.use || !track.lines.length">
+                                <td width="5%">
+                                    <input type="checkbox" 
+                                            ng-model="track.use"
+                                            ng-change="wiModal.unCheck(track)">
+                                </td>
+                                <td width="10%">
+                                    {{track.name}}
+                                </td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="5%"></td>
+                                <td width="10%"></td>
                             </tr>
                         </tbody>
                     </table>
