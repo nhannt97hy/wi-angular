@@ -8,7 +8,7 @@
             <div class="modal-body dialog-style">
                 <p></p>
                 <form class='form-horizontal form-condensed'>
-                    <table class="text-on-table table table-bordered">
+                    <table class="text-on-table table table-bordered scrollTable">
                         <thead class="background-header-table">
                             <tr>
                                 <th rowspan="2" width="5%"></th>
@@ -78,19 +78,18 @@
                                             ng-disabled="track.type != 'Log Track'">
                                 </td>
                                 <td width="10%">
-                                    <div class="float-left">
-                                        <button ng-click="wiModal.colorTrack(track);"
-                                                ng-style="{'background-color':track.color}"
-                                                class="form-control wi-form-control width-80px thick-border"
-                                                ng-disabled="track.type == 'Object Track'">
-                                        </button>
-                                    </div>
+                                    <button ng-click="wiModal.colorTrack(track);"
+                                            ng-style="{'background-color':track.color}"
+                                            class="form-control wi-form-control width-80px thick-border"
+                                            ng-disabled="track.type == 'Object Track'">
+                                    </button>
                                 </td>
                             </tr>
                             <tr style="background: #EBEDEF;">
-                                <td colspan="7" style="text-align: right;">Sum of width</td>
-                                <td style="text-align: center;">{{wiModal.sumWidth}}</td>
-                                <td colspan="2"></td>
+                                <td colspan="7" style="text-align: right;">Sum of widths/ Logplot Width</td>
+                                <td style="text-align: left;" colspan="3">
+                                    {{wiModal.sumWidth}} / {{wiModal.widthOfLogplot}} (inchs)
+                                </td>
                             </tr>
                         </tbody>
                     </table>
