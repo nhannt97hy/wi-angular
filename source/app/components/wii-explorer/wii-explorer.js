@@ -18,7 +18,9 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         self.treeConfig = [oUtils.initInventory()];
     }
 
-    this.unselectAllNodes = function () {
+    this.unselectAllNodes = unselectAllNodes;
+
+    function unselectAllNodes() {
         self.treeConfig.forEach(function (item) {
             utils.visit(item, function (node) {
                 if (node.data) node.data.selected = false;
@@ -27,8 +29,52 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
     }
 
+    this.clickFunction = function($index, $event, node) {
+        node.$index = $index;
+        if (!node) {
+            unselectAllNodes();
+            return;
+        }
+        wiComponentService.emit('update-properties', node);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if (!Array.isArray(selectedNodes)) selectedNodes = [];
+        if (!$event.shiftKey) {
+            if (selectedNodes.length) {
+                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes();
+                }
+            }
+            selectHandler(node);
+        } else {
+            // shift key
+            if (selectedNodes.length) {
+                if (selectedNodes.includes(node)) return;
+                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes();
+                    selectHandler(node);
+                } else {
+                    if (node.$index < selectedNodes[0].$index) {
+                        let fromIndex = node.$index;
+                        let toIndex = selectedNodes[0].$index;
+                        unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            selectHandler(this.config[i], true);
+                        }
+                    } else {
+                        let fromIndex = selectedNodes[0].$index;
+                        let toIndex = node.$index;
+                        unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            selectHandler(this.config[i], true);
+                        }
+                    }
+                }
+            }
+        }
+    }
     // Select tree node handler
-    this.selectHandler = function (currentNode, noLoadData) {
+    this.selectHandler = selectHandler;
+    function selectHandler(currentNode, noLoadData) {
         function bareSelectHandler() {
             wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
             wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
@@ -97,7 +143,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         })
     }
 
-    this.getDefaultTreeviewCtxMenu = function ($index, treeViewCtrl) {
+    function getDefaultTreeviewCtxMenu($index, treeViewCtrl) {
         return [
             {
                 name: "Expand",
@@ -131,7 +177,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         ]
     }
 
-    this.getItemTreeviewCtxMenu = function (nodeType, treeViewCtrl) {
+    function getItemTreeviewCtxMenu(nodeType, treeViewCtrl) {
         let selectedNode = utils.getSelectedNode(self.treeConfig[0]);
         switch (nodeType) {
             case 'file':
@@ -265,6 +311,16 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
     this.ImportWellTopButtonClicked = function () {
         console.log('ImportWellTopButtonClicked');
+    }
+    this.showContextMenu = function($event, $index) {
+        console.log('node', self.config[$index]);
+        let container = self.container;
+        let defaultContextMenu = [], itemContextMenu = [];
+        defaultContextMenu = getDefaultTreeviewCtxMenu($index, self);
+        let nodeType = self.config[$index].type;
+        itemContextMenu = container.getItemTreeviewCtxMenu(nodeType, self);
+        let contextMenu = itemContextMenu.concat(defaultContextMenu);
+        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 }
 

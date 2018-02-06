@@ -105,8 +105,8 @@ function WiBaseTreeController(wiComponentService, $scope) {
         }
     }
 
-    this.onClick = function ($index, $event) {
-        this.onClickFunction && this.onClickFunction($index, $event);
+    this.onClick = function ($index, $event, node) {
+        this.onClickFunction && this.onClickFunction($index, $event, node);
     }
 
     this.onDoubleClick = function ($index) {

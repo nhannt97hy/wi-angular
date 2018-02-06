@@ -340,7 +340,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
             //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
             if (currentNode.data) {
-                currentNode.data.selected = true;
+                $timeout(function() { currentNode.data.selected = true; });
                 let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
                 if (!Array.isArray(selectedNodes)) selectedNodes = [];
                 if (!selectedNodes.includes(currentNode)) {
