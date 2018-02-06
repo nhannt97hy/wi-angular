@@ -23,6 +23,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
                         this.container.unselectAllNodes();
                     }
                 }
+                self.selectedNode = node;
                 this.container.selectHandler(node);
             } else {
                 // shift key
@@ -257,7 +258,8 @@ app.component(componentName, {
         config: '<',
         container: '<',
         isShowParentName: '<',
-        onClick:'<'
+        onClick:'<',
+        selectedNode: '='
     }
 });
 

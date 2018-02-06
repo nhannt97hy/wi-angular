@@ -104,27 +104,49 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     refreshInventory();
 
     this.onConfigClick = function () {
-        console.log(this.projectSelectedNode, this.inventorySelectedNode);
-        if (!this.projectSelectedNode || !this.inventorySelectedNode) return;
-        this.importValid = false;
-        switch (this.inventorySelectedNode.type) {
+        console.log(self.projectSelectedNode, self.inventorySelectedNode);
+        if (!self.projectSelectedNode || !self.inventorySelectedNode) return;
+        self.importValid = false;
+        switch (self.inventorySelectedNode.type) {
             case 'well':
-                if (this.projectSelectedNode.type == 'project' || this.projectSelectedNode.type == 'well') self.importValid = true;
+                if (self.projectSelectedNode.type == 'project' || self.projectSelectedNode.type == 'well') self.importValid = true;
                 break;
             case 'dataset':
-                if (this.projectSelectedNode.type == 'well' || this.projectSelectedNode.type == 'dataset') self.importValid = true;
+                if (self.projectSelectedNode.type == 'well' || self.projectSelectedNode.type == 'dataset') self.importValid = true;
                 break;
             case 'curve':
-                if (this.projectSelectedNode.type == 'dataset' || this.projectSelectedNode.type == 'curve') self.importValid = true;
+                if (self.projectSelectedNode.type == 'dataset' || self.projectSelectedNode.type == 'curve') self.importValid = true;
                 break;
             default:
-                this.importValid = false;
+                self.importValid = false;
                 break;
         }
         $scope.$apply();
     }
+
+    function transformModelProperties(modelProps) {
+        if(modelProps.well_headers && modelProps.well_headers.length) {
+            modelProps.well_headers.forEach(function(wellheader) {
+                switch (wellheader.header) {
+                    case 'STRT': 
+                        modelProps.topDepth = wellheader.value;
+                        break;
+                    case 'STOP': 
+                        modelProps.bottomDepth = wellheader.value;
+                        break;
+                    case 'STEP':
+                        modelProps.step = wellheader.value;
+                        break;
+                    default:
+
+                }
+            })
+        }
+        return modelProps;
+    }
+
     function importModel(model, desParentModel) {
-        let itemProps = angular.copy(model.properties);
+        let itemProps = angular.copy(transformModelProperties(model.properties));
         let importedModel;
         if (model.type == 'well') {
             importedModel = utils.createWellModel(itemProps);
@@ -149,6 +171,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         if (!self.importValid) return;
         let desParentModel = self.projectSelectedNode;
         let model = self.inventorySelectedNode;
+        console.log("THANG Debug: ", desParentModel, model);
         if (self.projectSelectedNode.type == model.type) {
             desParentModel = utils.getParentByModel(self.projectSelectedNode.type, self.projectSelectedNode.id, null, projectModel);
         } else {
@@ -206,8 +229,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 let wellPayload = {
                     idProject: item.parent.idProject,
                     name: item.properties.name,
-                    topDepth: item.properties.start,
-                    bottomDepth: item.properties.stop,
+                    topDepth: item.properties.topDepth,
+                    bottomDepth: item.properties.bottomDepth,
                     step: item.properties.step,
                 }
                 wiApiService.createWell(wellPayload, function (newWell, err) {
@@ -243,6 +266,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         })
     }
     this.onLoadButtonClicked = function () {
+        console.log("THANG Debug: ", self.importItems);
         async.eachSeries(self.importItems, function (item, next) {
             importProcess(item).then(res => {
                 next();
@@ -323,7 +347,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                     selectedNodes.push(currentNode);
                 }
                 wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
-                self.getWiiItems().getWiiProperties().emptyList();
+                // self.getWiiItems().getWiiProperties().emptyList();
+                self.onConfigClick();
             }
         }
 
