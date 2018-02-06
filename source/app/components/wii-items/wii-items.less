@@ -1,9 +1,30 @@
 wii-items {
+  .panel-default {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0px;
+  }
   .panel-body {
     padding: 0;
+    flex: 1;
+    position: relative;
   }
   table {
+	background: none;
+	border: none;
     width: 100%;
+    tbody {
+        position:absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    tr:first-child {
+        height: 1.2em;
+        th { font-size: 12px; }
+    }
     tr {
       height: 2em;
       border-bottom: 1px solid #eeeeee;

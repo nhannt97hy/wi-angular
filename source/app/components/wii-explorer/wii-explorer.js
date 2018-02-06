@@ -3,6 +3,7 @@ const moduleName = 'wii-explorer';
 
 function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnlineInvService) {
     let self = this;
+    window.WIIEXPLORER = self;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let oUtils = require('./oinv-utils');
     oUtils.setGlobalObj({
@@ -66,6 +67,10 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         oUtils.updateInventory();
     }
 
+    this.getDisplayField = function() {
+        return self.labelToggle?"filename":"name";
+    }
+
     this.switchLabelTooltip = function() {
         self.labelToggle = !self.labelToggle;
         self.treeConfig[0].children.forEach(function(node) {
@@ -85,7 +90,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     this.deleteWell = function (wellModel) {
         if (!wellModel) return;
         if (wellModel.type != 'well') return;
-        wiApiService.deleteWell(wellModel.properties.idWell, function () {
+        wiOnlineInvService.deleteWell(wellModel.properties.idWell, function () {
             //utils.updateWells(wellModel.properties.idFile);
             oUtils.updateWellsDebounce();
             self.getWiiItems().emptyItems();
@@ -127,7 +132,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
 
     this.getItemTreeviewCtxMenu = function (nodeType, treeViewCtrl) {
-        let selectedNode = oUtils.getSelectedNode();
+        let selectedNode = utils.getSelectedNode(self.treeConfig[0]);
         switch (nodeType) {
             case 'file':
                 return [
@@ -171,7 +176,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         console.log("upTrigger");
         let wells = self.treeConfig[0].children;
         if (wells.length) {
-            wiApiService.listWells({
+            wiOnlineInvService.listWells({
                 start: wells[0].properties.idWell, 
                 limit: 10, 
                 forward: false
@@ -195,7 +200,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         console.log("downTrigger");
         let wells = self.treeConfig[0].children;
         if (wells.length) {
-            wiApiService.listWells({
+            wiOnlineInvService.listWells({
                 start: wells[wells.length - 1].properties.idWell, 
                 limit: 10, 
                 forward: true
@@ -215,6 +220,52 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         else if (cb) cb(0);
     }
 
+    function selectFile(callback, isMulti = true) {
+        let fileInput = document.createElement('input');
+        fileInput.style.display = 'none';
+        fileInput.type = 'file';
+        if (isMulti) fileInput.setAttribute('multiple', 'true');
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        fileInput.addEventListener('change', function (event) {
+            document.body.removeChild(fileInput);
+            console.log(fileInput.files);
+            if (callback) callback(fileInput.files);
+        });
+    }
+
+    this.ImportASCIIButtonClicked = function () {
+        console.log('ImportASCIIButtonClicked');
+    }
+    this.ImportLASButtonClicked = function () {
+        selectFile(function (files) {
+            console.log(files);
+            if (files) {
+                wiOnlineInvService.uploadFiles(files, function (response) {
+                    console.log('upload files done', response);
+                    if (response === 'UPLOAD FILES FAILED') {
+                        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+                        DialogUtils.errorMessageDialog(ModalService, "Some errors while upload file!");
+                    } else {
+                        oUtils.updateInventory();
+                    }
+                })
+            }
+        });
+    }
+
+    this.ImportDLISButtonClicked = function () {
+        console.log('ImportDLISButtonClicked');
+    }
+    this.Interval_CoreLoaderButtonClicked = function () {
+        console.log('Interval_CoreLoaderButtonClicked'); 
+    }
+    this.ImportWellHeaderButtonClicked = function () {
+        console.log('ImportWellHeaderButtonClicked');
+    }
+    this.ImportWellTopButtonClicked = function () {
+        console.log('ImportWellTopButtonClicked');
+    }
 }
 
 let app = angular.module(moduleName, []);

@@ -1,0 +1,24 @@
+<style>
+    .scroll-container {
+        overflow-x: hidden;
+        overflow-y: scroll;
+        width: 100%;
+        //height: 400px;
+    }
+    .scroll-busy {
+        text-align: center;
+        padding: 0.5em 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        position:absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+</style>
+<div style="position:relative;flex:1;display:flex;">
+    <div style='padding-left:0.5em;flex:1;'  ng-transclude class="scroll-container">
+    </div>
+    <div ng-show="wiScroll.busy" class="scroll-busy">
+        Loading ...
+    </div>
+</div>

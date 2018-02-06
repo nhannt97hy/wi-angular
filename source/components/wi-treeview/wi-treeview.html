@@ -19,7 +19,7 @@
             <div ng-click="wiTreeview.onClick($index, $event, item)"
                 ng-dblclick="wiTreeview.onDoubleClick($index)">
                 <div class="display-inline-block margin-right-0_5em"><span class="{{item.data.icon}}"></span></div>
-                <span>{{item.data.label}}</span>
+                <span>{{item.data.toggle?item.data.tooltip:item.data.label}}</span>
                 <span ng-if="wiTreeview.isShowParentName && item.parentData">/ {{item.parentData.label}}</span>
             </div>
         </div>

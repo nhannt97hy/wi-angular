@@ -1,6 +1,6 @@
-<div class="panel panel-default" style='height:100%;margin:0;'>
+<div style='display:flex;flex-direction:column;height:100%;margin-bottom:0;' class="panel panel-default" style='height:100%;margin:0;'>
     <div class="panel-heading">
-        <h4 style='display: inline;margin-right: 1em;'>Inventory</h4>
+        <h4 style='margin-right: 1em;'>Inventory</h4>
         <button type="button" class="btn btn-default"
             data-toggle="tooltip"
             title="Refresh inventory"
@@ -13,9 +13,30 @@
             ng-click="wiiExplorer.switchLabelTooltip()">
             <i class="fa fa-exchange"></i>
         </button>
+        <div class="dropdown">
+            <button style="height: 100%;"
+                class="btn btn-default dropdown-toggle" 
+                type="button" data-toggle="dropdown">
+                <span class='ti-import'></span>&nbsp;
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><wi-button name="ImportASCIIButton" icon="ascii-import-16x16" label="Import ASCII" layout="icon-left" type="small" class="height-auto" container="explorer" handler="wiiExplorer.ImportASCIIButtonClicked"></wi-button></li>
+
+                <li><wi-button name="ImportLASButton" icon="las-import-16x16" label="Import LAS" layout="icon-left" type="small" class="height-auto" container="explorer" handler="wiiExplorer.ImportLASButtonClicked"></wi-button></li>
+
+                <li><wi-button name="ImportDLISButton" icon="dlis-import-16x16" label="Import DLIS" layout="icon-left" type="small" class="height-auto" container="explorer" handler="wiiExplorer.ImportDLISButtonClicked"></wi-button></li>
+
+                <li><wi-button name="Interval/CoreLoaderButton" icon="load-16x16" label="Interval/Core Loader" layout="icon-left" type="small" class="height-auto" container="explorer" handler="wiiExplorer.Interval_CoreLoaderButtonClicked"></wi-button></li>
+
+                <li><wi-button name="ImportWellHeaderButton" icon="las-import-16x16" label="Import Well Header" layout="icon-left" type="small" class="height-auto" container="explorer" handler="wiiExplorer.ImportWellHeaderButtonClicked"></wi-button></li>
+
+                <li><wi-button name="ImportWellTopButton" icon="las-import-16x16" label="Import Well Top" layout="icon-left" type="small" class="height-auto" container="explorer" handler="wiiExplorer.ImportWellTopButtonClicked"></wi-button></li>
+            </ul>
+        </div>
     </div>
-    <div class="panel-body">
-        <wi-scroll up-trigger="wiiExplorer.upTrigger" down-trigger="wiiExplorer.downTrigger">
+    <div style='flex:1;display:flex;padding:0px;' class="panel-body">
+        <wi-scroll style='flex:1;display:flex;flex-direction:column;' up-trigger="wiiExplorer.upTrigger" down-trigger="wiiExplorer.downTrigger">
             <wi-treeview contextmenuholder="wiiExplorer.name" name="wiiExplorer.treeViewName" config="wiiExplorer.treeConfig" container="wiiExplorer">
             </wi-treeview>
         </wi-scroll>

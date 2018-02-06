@@ -3,6 +3,7 @@ const moduleName = 'wii-items';
 
 function Controller($scope, $timeout, wiComponentService, wiOnlineInvService) {
     let self = this;
+    window.WIIITEMS = self;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let oUtils = require('./oinv-utils.js');
     oUtils.setGlobalObj({
@@ -78,10 +79,11 @@ function Controller($scope, $timeout, wiComponentService, wiOnlineInvService) {
     }
 
     this.deleteItem = function (item) {
+        let inventory = wiComponentService.getComponent('INVENTORY');
         if (!item) return;
         wiOnlineInvService.deleteCurve(item.properties.idCurve, function () {
-            utils.updateCurves(item.properties.idDataset).then(function () {
-                wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, utils.getSelectedNode());
+            oUtils.updateCurves(item.properties.idDataset).then(function () {
+                wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, utils.getSelectedNode(inventory));
                 self.getWiiProperties().emptyList();
                 $scope.$apply();
             })

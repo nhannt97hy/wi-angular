@@ -1091,12 +1091,6 @@ function visit(node, callback, options) {
 
 exports.visit = visit;
 
-exports.getSelectedNode = getSelectedNode;
-
-function getSelectedNode() {
-    return getSelectedPath().pop();
-}
-
 exports.getSelectedProjectNode = getSelectedProjectNode;
 
 function getSelectedProjectNode() {
@@ -2903,6 +2897,11 @@ function updateWiCurveListingOnModelDeleted(model){
             return;
     }
 }
+function getSelectedNode(rootNode) {
+    return getSelectedPath(null, rootNode).pop();
+}
+
+exports.getSelectedNode = getSelectedNode;
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
 function calVSHfromGR(well, grCurve, matrix, shale){
