@@ -85,7 +85,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     const removables = ['group', 'zoneset', 'zone', 'comboview'];
-    const recyclables = ['well', 'dataset', 'curve', 'logplot', 'crossplot', 'histogram'];
+    const recyclables = ['well', 'dataset', 'curve', 'zoneset', 'zone', 'logplot', 'crossplot', 'histogram'];
     let isValid = false;
     if (removables.includes(selectedNodes[0].type) || recyclables.includes(selectedNodes[0].type)) isValid = true;
     if (!Array.isArray(selectedNodes) || !isValid) return;
