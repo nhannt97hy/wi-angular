@@ -5,7 +5,7 @@ const moduleName = 'wi-online-inv-service';
 let app = angular.module(moduleName, []);
 
 //const BASE_URL = 'http://inv.sflow.me';
-const BASE_URL = 'http://13.229.66.151';
+const BASE_URL = 'http://13.250.177.181';
 // const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
@@ -19,6 +19,8 @@ const UPLOAD_FILES = '/upload/lases';
 // const FILE_INFO = '/user/file/info';
 // const EDIT_FILE = '/user/file/edit';
 // const DELETE_FILE = '/user/file/delete';
+
+const GET_INVENTORY = '/user/fullinfo';
 
 const LIST_WELLS = '/user/wells';
 const WELL_INFO = '/user/well/info';
@@ -278,6 +280,10 @@ Service.prototype.uploadFiles = function (files, callback) {
             console.log(err);
             callback(err);
         })
+}
+
+Service.prototype.getInventory = function (callback) {
+    this.post(GET_INVENTORY, {}, callback);
 }
 
 // well apis

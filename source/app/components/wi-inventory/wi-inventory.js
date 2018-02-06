@@ -1,12 +1,18 @@
 const componentName = 'wiInventory';
 const moduleName = 'wi-inventory';
 
-function Controller($scope, wiComponentService, wiApiService, ModalService) {
+function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService, ModalService, $timeout) {
     modalService = ModalService;
     let self = this;
     window.inv =this;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+    let oUtils = require('./oinv-utils');
+    oUtils.setGlobalObj({
+        wiComponentService, wiOnlineInvService, $timeout
+    });
+
     let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
     this.$onInit = function () {
@@ -84,12 +90,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
     }
     let inventoryModel;
     function refreshInventory() {
-        wiApiService.getInventory(inventory => {
+        self.inventoryConfig = [oUtils.initInventory()];
+        /*
+        wiOnlineInvService.getInventory(inventory => {
             inventoryModel = modelFrom(inventory);
             self.inventoryConfig = [inventoryModel];
             inventoryModel.type = 'inventory';
             inventoryModel.data.label = 'Inventory';
-        })
+        });
+        */
     }
     refreshProject();
     refreshInventory();
@@ -254,6 +263,95 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         self.projectSelectedNode = null;
         self.importValid = false;
     };
+
+    this.upTrigger = function(cb) {
+        console.log("upTrigger");
+        let wells = self.inventoryConfig[0].children;
+        if (wells.length) {
+            wiOnlineInvService.listWells({
+                start: wells[0].properties.idWell, 
+                limit: 10, 
+                forward: false
+            }, function(listOfWells) {
+                $timeout(function() {
+                    console.log(listOfWells);
+                    for (let well of listOfWells) {
+                        let wellModel = wellToTreeConfig(well);
+                        wellModel.data.toggle = self.labelToggle;
+                        wells.unshift(wellModel);
+                        wells.pop();
+                    }
+                    if (cb) cb(listOfWells.length);
+                });
+            });
+        }
+        else if (cb) cb(0);
+    }
+    this.downTrigger = function(cb) {
+        console.log("downTrigger");
+        let wells = self.inventoryConfig[0].children;
+        if (wells.length) {
+            wiOnlineInvService.listWells({
+                start: wells[wells.length - 1].properties.idWell, 
+                limit: 10, 
+                forward: true
+            }, function(listOfWells) {
+                $timeout(function() {
+                    console.log(listOfWells);
+                    for (let well of listOfWells) {
+                        let wellModel = wellToTreeConfig(well);
+                        wellModel.data.toggle = self.labelToggle;
+                        wells.push(wellModel);
+                        wells.shift();
+                    }
+                    if (cb) cb(listOfWells.length);
+                });
+            });
+        }
+        else if (cb) cb(0);
+    }
+
+    this.selectHandler = function (currentNode, noLoadData) {
+        function bareSelectHandler() {
+            //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
+            //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
+            if (currentNode.data) {
+                currentNode.data.selected = true;
+                let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                if (!Array.isArray(selectedNodes)) selectedNodes = [];
+                if (!selectedNodes.includes(currentNode)) {
+                    selectedNodes.push(currentNode);
+                }
+                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+                self.getWiiItems().getWiiProperties().emptyList();
+            }
+        }
+
+        if (currentNode.type == 'well' && !noLoadData) {
+            oUtils.updateDatasets(currentNode.id, self.inventoryConfig[0]).then(function(datasetsModel) {
+                async.each(datasetsModel, function(dModel, done) {
+                    oUtils.updateCurves(dModel.id, self.inventoryConfig[0]).then(function() {
+                        done();
+                    });
+                }, function(error) {
+                    bareSelectHandler();
+                });
+            });
+        }
+        else {
+            bareSelectHandler();
+        }
+    }
+    
+    this.unselectAllNodes = function () {
+        self.inventoryConfig.forEach(function (item) {
+            utils.visit(item, function (node) {
+                if (node.data) node.data.selected = false;
+            });
+        });
+        wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+    }
+
 }
 
 let app = angular.module(moduleName, []);

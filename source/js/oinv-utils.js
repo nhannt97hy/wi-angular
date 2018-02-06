@@ -35,14 +35,15 @@ exports.updateWellsDebounce = updateWellsDebounce;
 exports.getAllChildrenCurves = getAllChildrenCurves;
 
 
-function updateWells(start) {
+function updateWells(start, rootNode) {
+    let inventory = wiComponentService.getComponent('INVENTORY');
+    if (rootNode) inventory = rootNode;
     let s = start;
     if (isNaN(s)) s = 0;
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     return new Promise(function (resolve, reject) {
         wiOnlineInvService.listWells({start:s,limit: 50, forward:true}, function (listWells) {
-            let inventory = wiComponentService.getComponent('INVENTORY');
             let preWellsModel = angular.copy(inventory.children) || [];
             inventory.children = [];
             if (!listWells.length) {
@@ -79,9 +80,10 @@ function initInventory() {
     return inventoryModel;
 }
 
-function updateDatasets(idWell) {
+function updateDatasets(idWell, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let inventory = wiComponentService.getComponent('INVENTORY');
+    if (rootNode) inventory = rootNode;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     return new Promise(function (resolve, reject) {
         let wellModel = utils.getModel('well', idWell, inventory);
@@ -110,9 +112,10 @@ function updateDatasets(idWell) {
         });
     })
 }
-function updateCurves(idDataset) {
+function updateCurves(idDataset, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let inventory = wiComponentService.getComponent('INVENTORY');
+    if (rootNode) inventory = rootNode;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     return new Promise(function (resolve, reject) {
         let datasetModel = utils.getModel('dataset', idDataset, inventory);
