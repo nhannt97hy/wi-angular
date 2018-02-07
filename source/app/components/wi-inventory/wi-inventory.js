@@ -167,24 +167,41 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     }
 
     this.importItems = [];
+    this.inventorySelectedNodes = [];
     this.importButtonClicked = function () {
-        let model = self.inventorySelectedNode; // assume it is a well
-        if (!model) {
-            toastr.error('select well please');
-            return;
+        // let model = self.inventorySelectedNode; // assume it is a well
+        self.inventorySelectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        self.inventorySelectedNodes.forEach(function(model) {
+            if(model.type != 'well') {
+                model = utils.getParentByModel(model.type, model.id, 'well', self.inventoryConfig[0]);
+            }
+            if(!model.children || !model.children.length) {
+                selectHandler(model, false, self.inventoryConfig, function() {
+                    pendingModel(model);
+                });
+            } else {
+                pendingModel(model);
+            }
+        })
+
+        function pendingModel(model) {
+            if (!model) {
+                toastr.error('select well please');
+                return;
+            }
+            let importedModel = cloneModel(model);
+            let existingWell = self.importItems.find(function(item) {
+                return item.name == importedModel.name;
+            });
+            if (existingWell) {
+                toastr.info('Well already added for importing');
+            }
+            else self.importItems.push(importedModel);
         }
-        let importedModel = cloneModel(model);
-        let existingWell = self.importItems.find(function(item) {
-            return item.name == importedModel.name;
-        });
-        if (existingWell) {
-            toastr.info('Well already added for importing');
-        }
-        else self.importItems.push(importedModel);
     }
-    
+
     this.revertButtonClicked = function () {
-        let revertModel = self.projectSelectedNode;
+        console.log("revertButonClicked");
     }
 
     function getImportPayload(model) {
@@ -234,8 +251,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 }
                 wiApiService.createWell(wellPayload, function (newWell, err) {
                     if (err) {
-                        reject(err);
-                        return;
+                        newWell = err.content;
                     }
                     oUtils.updateParentNode(item, newWell);
                     wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
@@ -266,7 +282,6 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         })
     }
     this.onLoadButtonClicked = function () {
-        console.log("THANG Debug: ", self.importItems);
         async.eachSeries(self.importItems, function (item, next) {
             importProcess(item).then(res => {
                 next();
@@ -339,7 +354,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     }
 
     this.selectHandler = selectHandler;
-    function selectHandler(currentNode, noLoadData, rootNode) {
+    function selectHandler(currentNode, noLoadData, rootNode, callback) {
         function bareSelectHandler() {
             //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
             //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
@@ -365,15 +380,18 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                         });
                     }, function(error) {
                         bareSelectHandler();
+                        callback && callback();
                     });
                 });
             }
             else {
                 bareSelectHandler();
+                callback && callback();
             }
         }
         else {
             bareSelectHandler();
+            callback && callback();
         }
     }
     
