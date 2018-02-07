@@ -122,7 +122,9 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 self.importValid = false;
                 break;
         }
-        $scope.$apply();
+        $timeout(function(){
+            $scope.$apply();
+        })
     }
 
     function transformModelProperties(modelProps) {
@@ -191,6 +193,10 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             }
         }
     }
+    
+    this.revertButtonClicked = function () {
+        let revertModel = self.projectSelectedNode;
+    }
 
     function getImportPayload(model) {
         let payload = [];
@@ -237,8 +243,15 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 wiApiService.createWell(wellPayload, function (newWell, err) {
                     if (err) {
                         reject(err);
+                        return;
                     }
+                    oUtils.updateParentNode(item, newWell);
+                    /*
                     item.properties = newWell;
+                    item.children.forEach(function(dataset) {
+                        dataset.parent = item.properties;
+                    })
+                    */
                     wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
                         if (err) {
                             reject(err);

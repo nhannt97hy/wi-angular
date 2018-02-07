@@ -33,6 +33,7 @@ exports.updateDatasets = updateDatasets;
 exports.updateWells = updateWells;
 exports.updateWellsDebounce = updateWellsDebounce;
 exports.getAllChildrenCurves = getAllChildrenCurves;
+exports.updateParentNode = updateParentNode;
 
 
 function updateWells(start, rootNode) {
@@ -194,5 +195,12 @@ function getAllChildrenCurves(node) {
         curves = curves.concat(getAllChildrenCurves(child));
     })
     return curves;
+}
+
+function updateParentNode(parentNode, newProperties) {
+    parentNode.properties = newProperties;
+    parentNode.children.forEach(function(child) {
+        child.parent = parentNode.properties;
+    })
 }
 
