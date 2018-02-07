@@ -122,7 +122,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 self.importValid = false;
                 break;
         }
-        $timeout(function(){
+        $timeout(function() {
             $scope.$apply();
         })
     }
@@ -148,50 +148,39 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         return modelProps;
     }
 
-    function importModel(model, desParentModel) {
-        let itemProps = angular.copy(transformModelProperties(model.properties));
-        let importedModel;
-        if (model.type == 'well') {
-            importedModel = utils.createWellModel(itemProps);
-        } else if (model.type == 'dataset') {
-            importedModel = utils.createDatasetModel(itemProps);
-        } else if (model.type == 'curve') {
-            importedModel = utils.createCurveModel(itemProps)
+    function cloneModel(srcModel) {
+        let itemProps = transformModelProperties(srcModel.properties);
+        let destModel;
+        if (srcModel.type == 'well') {
+            destModel = utils.createWellModel(itemProps);
+        } else if (srcModel.type == 'dataset') {
+            destModel = utils.createDatasetModel(itemProps);
+        } else if (srcModel.type == 'curve') {
+            destModel = utils.createCurveModel(itemProps)
         }
-        importedModel.parent = angular.copy(desParentModel.properties);
-        importedModel.isImported = true;
-        desParentModel.children.push(importedModel);
-        if (Array.isArray(model.children) && model.children.length) {
-            model.children.forEach(childModel => {
-                importModel(childModel, importedModel);
-            })
+        if (Array.isArray(srcModel.children) && srcModel.children.length) {
+            srcModel.children.forEach(function(childModel) {
+                destModel.children.push(cloneModel(childModel));
+            });
         }
-        return importedModel;
+        return destModel;
     }
 
     this.importItems = [];
     this.importButtonClicked = function () {
-        if (!self.importValid) return;
-        let desParentModel = self.projectSelectedNode;
-        let model = self.inventorySelectedNode;
-        console.log("THANG Debug: ", desParentModel, model);
-        if (self.projectSelectedNode.type == model.type) {
-            desParentModel = utils.getParentByModel(self.projectSelectedNode.type, self.projectSelectedNode.id, null, projectModel);
-        } else {
-            desParentModel.data.childExpanded = true;
+        let model = self.inventorySelectedNode; // assume it is a well
+        if (!model) {
+            toastr.error('select well please');
+            return;
         }
-        let sameNameExisted = desParentModel.children.find(c => c.name == model.name);
-        if (sameNameExisted) {
-            importModelExistedDialog(ModalService, function () {
-                console.log('conflict', model);
-            });
-        } else {
-            if (desParentModel.isImported) {
-                importModel(model, desParentModel);
-            } else {
-                self.importItems.push(importModel(model, desParentModel));
-            }
+        let importedModel = cloneModel(model);
+        let existingWell = self.importItems.find(function(item) {
+            return item.name == importedModel.name;
+        });
+        if (existingWell) {
+            toastr.info('Well already added for importing');
         }
+        else self.importItems.push(importedModel);
     }
     
     this.revertButtonClicked = function () {
@@ -232,9 +221,12 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
 
     function importProcess(item) {
         return new Promise((resolve, reject) => {
+            if (!self.projectConfig || !self.projectConfig.length) {
+                return reject(new Error('No project for import'));
+            }
             if (item.type == 'well') {
                 let wellPayload = {
-                    idProject: item.parent.idProject,
+                    idProject: self.projectConfig[0].properties.idProject,
                     name: item.properties.name,
                     topDepth: item.properties.topDepth,
                     bottomDepth: item.properties.bottomDepth,
@@ -246,12 +238,6 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                         return;
                     }
                     oUtils.updateParentNode(item, newWell);
-                    /*
-                    item.properties = newWell;
-                    item.children.forEach(function(dataset) {
-                        dataset.parent = item.properties;
-                    })
-                    */
                     wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
                         if (err) {
                             reject(err);
@@ -288,7 +274,10 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 next(err);
             })
         }, (err) => {
-            if (err) return console.error(err);
+            if (err) {
+                toastr.error('Error:' + err.message);
+                return console.error(err);
+            }
             // self.importItems.length = 0;
             self.onRevertAllButtonClicked();
         })
@@ -350,7 +339,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     }
 
     this.selectHandler = selectHandler;
-    function selectHandler(currentNode, noLoadData) {
+    function selectHandler(currentNode, noLoadData, rootNode) {
         function bareSelectHandler() {
             //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
             //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
@@ -368,15 +357,20 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         }
 
         if (currentNode.type == 'well' && !noLoadData) {
-            oUtils.updateDatasets(currentNode.id, self.inventoryConfig[0]).then(function(datasetsModel) {
-                async.each(datasetsModel, function(dModel, done) {
-                    oUtils.updateCurves(dModel.id, self.inventoryConfig[0]).then(function() {
-                        done();
+            if (rootNode === self.inventoryConfig) {
+                oUtils.updateDatasets(currentNode.id, self.inventoryConfig[0]).then(function(datasetsModel) {
+                    async.each(datasetsModel, function(dModel, done) {
+                        oUtils.updateCurves(dModel.id, self.inventoryConfig[0]).then(function() {
+                            done();
+                        });
+                    }, function(error) {
+                        bareSelectHandler();
                     });
-                }, function(error) {
-                    bareSelectHandler();
                 });
-            });
+            }
+            else {
+                bareSelectHandler();
+            }
         }
         else {
             bareSelectHandler();
@@ -384,8 +378,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     }
     
     this.unselectAllNodes = unselectAllNodes;
-    function unselectAllNodes() {
-        self.inventoryConfig.forEach(function (item) {
+    function unselectAllNodes(rootNode) {
+        rootNode.forEach(function (item) {
             utils.visit(item, function (node) {
                 if (node.data) node.data.selected = false;
             });
@@ -393,48 +387,56 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
     }
     this.selectInventoryNode = function(node) {
-        self.inventorySelectedNode = node;
+        //self.inventorySelectedNode = node;
+        let parentWell = utils.getParentByModel(node.type, node.id, 'well', self.inventoryConfig[0]);
+        self.inventorySelectedNode = parentWell;
     }
     this.selectProjectNode = function(node) {
         self.projectSelectedNode = node;
     }
-    this.clickFunction = function ($index, $event, node) {
+    this.invClickFunction = function($index, $event, node) {
+        clickFunction($index, $event, node, self.inventoryConfig);
+    }
+    this.prjClickFunction = function($index, $event, node) {
+        clickFunction($index, $event, node, self.projectConfig);
+    }
+    function clickFunction($index, $event, node, rootNode) {
         node.$index = $index;
         if (!node) {
-            unselectAllNodes();
+            unselectAllNodes(rootNode);
             return;
         }
-        wiComponentService.emit('update-properties', node);
+        //wiComponentService.emit('update-properties', node);
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if (!Array.isArray(selectedNodes)) selectedNodes = [];
         if (!$event.shiftKey) {
             if (selectedNodes.length) {
                 if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
-                    unselectAllNodes();
+                    unselectAllNodes(rootNode);
                 }
             }
-            selectHandler(node);
+            selectHandler(node, false, rootNode);
         } else {
             // shift key
             if (selectedNodes.length) {
                 if (selectedNodes.includes(node)) return;
                 if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
-                    unselectAllNodes();
-                    selectHandler(node);
+                    unselectAllNodes(rootNode);
+                    selectHandler(node, false, rootNode);
                 } else {
                     if (node.$index < selectedNodes[0].$index) {
                         let fromIndex = node.$index;
                         let toIndex = selectedNodes[0].$index;
-                        unselectAllNodes();
+                        unselectAllNodes(rootNode);
                         for (let i = fromIndex; i <= toIndex; i++) {
-                            selectHandler(this.config[i], true);
+                            selectHandler(rootNode[0].children[i], true, rootNode);
                         }
                     } else {
                         let fromIndex = selectedNodes[0].$index;
                         let toIndex = node.$index;
-                        unselectAllNodes();
+                        unselectAllNodes(rootNode);
                         for (let i = fromIndex; i <= toIndex; i++) {
-                            selectHandler(this.config[i], true);
+                            selectHandler(rootNode[0].children[i], true, rootNode);
                         }
                     }
                 }

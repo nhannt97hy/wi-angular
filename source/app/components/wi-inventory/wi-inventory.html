@@ -2,7 +2,7 @@
     .inventory-side {
         display:flex;
         padding:0;
-        flex-basis: calc(50% - 30px);
+        flex-basis: calc(32% - 30px);
         border: 1px solid #ccc;
         border-radius: 5px;
         overflow: hidden;
@@ -18,23 +18,35 @@
 </style>
 <div class="inventory-main" style="display:flex;flex-direction:row;">
     <div class="inventory-side">
-            <wi-base-treeview name="projectTreeview" 
-                config="wiInventory.projectConfig" 
-                container="wiInventory" 
-                on-click-function="wiInventory.clickFunction"
-                on-select-function="wiInventory.selectProjectNode">
-            </wi-base-treeview>
+        <wi-base-treeview name="projectTreeview" 
+            config="wiInventory.projectConfig" 
+            container="wiInventory" 
+            on-click-function="wiInventory.prjClickFunction"
+            on-select-function="wiInventory.selectProjectNode">
+        </wi-base-treeview>
         <!--<wi-inventory-treeview name="projectTreeview" config="wiInventory.projectConfig" container="wiInventory" selected-node="wiInventory.projectSelectedNode"></wi-inventory-treeview>-->
     </div>
     <div class="inventory-center">
+        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
+            title="import" ng-click='wiInventory.onLoadButtonClicked()'>
+            <span class="arrow-left-16x16"></span>
+        </button>
+    </div>
+    <div class='inventory-side'>
+        <wi-base-treeview name="pendingPrjTreeview" 
+            config="wiInventory.importItems" 
+            container="wiInventory" 
+            on-click-function="wiInventory.pendingPrjClickFunction"
+            on-select-function="wiInventory.selectPendingPrjNode">
+        </wi-base-treeview>
+    </div>
+    <div class="inventory-center">
         <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:40%;left:50%;transform:translate(-50%, -50%);"
-            title="import" ng-click='wiInventory.importButtonClicked()'
-            ng-class="{'disabled': !wiInventory.importValid}">
+            title="import" ng-click='wiInventory.importButtonClicked()' >
             <span class="arrow-left-16x16"></span>
         </button>
         <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:60%;left:50%;transform:translate(-50%, -50%);"
-            title="revert" ng-click='wiInventory.revertButtonClicked()'
-            ng-class="{'disabled': false || !wiInventory.importValid}">
+            title="revert" ng-click='wiInventory.revertButtonClicked()'>
             <span class="arrow-right-16x16"></span>
         </button>
     </div>
@@ -43,7 +55,7 @@
             <wi-base-treeview name="inventoryTreeview" 
                 config="wiInventory.inventoryConfig" 
                 container="wiInventory" 
-                on-click-function="wiInventory.clickFunction"
+                on-click-function="wiInventory.invClickFunction"
                 on-select-function="wiInventory.selectInventoryNode">
             </wi-base-treeview>
             <!--<wi-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-treeview>-->
