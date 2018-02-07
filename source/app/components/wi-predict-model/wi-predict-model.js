@@ -1,40 +1,47 @@
-const storeApi = 'http://54.169.13.92:3002/store/api';
-const moduleName = 'wipm';
-const controllerName = 'wipmController';
-const createFormCtrlName = 'createFormController';
-const retrainFormCtrlName = 'retrainFormController';
-const predictFormCtrlName = 'predictFormController';
-const listModelFormCtrlName = 'listModelController';
-// let username = window.localStorage.getItem('username');
+const HOST = '54.169.13.92';
+const PORT = 3002;
 
-let wipm = angular.module(moduleName, []);
+const componentName = 'wiPredictModel';
+const moduleName = 'wi-predict-model';
 
-wipm.directive('onReadFile', function ($parse) {
-    return {
-        restrict: 'A',
-        scope: false,
-        link: function(scope, element, attrs) {
-            var fn = $parse(attrs.onReadFile);
-            element.on('change', function(onChangeEvent) {
-                var reader = new FileReader();
-                reader.onload = function(onLoadEvent) {
-                    scope.$apply(function() {
-                        fn(scope, {$fileContent:onLoadEvent.target.result});
-                    });
-                };
-                reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
-            });
-        }
-    };
+const moduleCreateModel = 'create-model';
+const componentCreateModel = 'createModel';
+const moduleRetrainModel = 'retrain-model';
+const componentRetrainModel = 'retrainModel';
+const modulePredict = 'predict';
+const componentPredict = 'predict';
+const moduleListModel = 'list-model';
+const componentListModel = 'listModel';
+
+let token = window.localStorage.getItem('token');
+let username;
+if(token)
+    username = JSON.parse(atob(token.split('.')[1])).username;
+
+function WipmController(wiComponentService, wiApiService){
+    let self = this;
+    this.create = true;
+    this.retrain = this.predict = this.list = false;
+}
+
+let app = angular.module(moduleName, [
+    moduleCreateModel,
+    moduleRetrainModel,
+    modulePredict,
+    moduleListModel
+]);
+
+app.component(componentName, {
+    templateUrl: 'wi-predict-model.html',
+    controller: WipmController,
+    controllerAs: 'wipmCtrl'
 });
 
-wipm.controller(controllerName, function($scope){
-    $scope.create = true;
-    $scope.retrain = $scope.predict = $scope.list = $scope.result = false;
-})
+exports.name = moduleName;
 
-wipm.controller(createFormCtrlName, function($http){
-    var self = this;
+/* Create */
+function createModelCtrl($http, wiApiService, wiComponentService){
+    let self = this;
     this.name = "Model";
     this.description = "Description"
     this.types = [{
@@ -67,35 +74,9 @@ wipm.controller(createFormCtrlName, function($http){
     this.remove_layer = function(x){
         self.units.splice(x, 1);
     }
-    this.read_data = function($fileContent){
-        var string = $fileContent.split('\n');
-        self.data = [];
-        for( let i=0; i < string.length - 1; i++){
-            let str = string[i].split(',');
-            var arr = [];
-            for( let j=0; j < str.length; j++){
-                arr.push(parseFloat(str[j]))
-            }
-            self.data.push(arr);
-        }
-    }
-    this.read_target = function($fileContent){
-        var string = $fileContent.split('\n');
-        self.target = [];
-        for( let i=0; i < string.length - 1; i++){
-            let str = string[i].split(',');
-            var arr = [];
-            for( let j=0; j < str.length; j++){
-                arr.push(parseFloat(str[j]))
-            }
-            self.target.push(arr);
-        }
-    }
     this.create_model = function(){
-        
         if(self.name && self.type && self.data && self.target && self.description){
-            $("form").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
-            $("form").css('opacity', '0.5');
+            wiComponentService.getComponent('SPINNER').show();
             payload = {
                 name: self.name,
                 type: self.type,
@@ -116,12 +97,11 @@ wipm.controller(createFormCtrlName, function($http){
             }
             $http({
                 method: 'POST',
-                url: storeApi + '/model/new',
+                url: 'http://'+HOST+':'+PORT + '/store/api/model/new',
                 data: payload
             }).then(function(response){
                     console.log('create model:', response.data);
-                    $(".load").remove();
-                    $("form").css('opacity', '1');
+                    wiComponentService.getComponent('SPINNER').hide();
                     var res = response.data;
                     if(res.statusCode == 200){
                         toastr.success('Create model success!', '');
@@ -135,15 +115,27 @@ wipm.controller(createFormCtrlName, function($http){
             })
         }
     }
-})
-wipm.controller(retrainFormCtrlName, function($http){
-    var self = this;    
+}
+
+angular.module(moduleCreateModel, []);
+
+app.component(componentCreateModel, {
+    templateUrl: 'template/create-model.html', 
+    controller: createModelCtrl,
+    controllerAs: 'createCtrl'
+});
+
+/* Retrain */
+function retrainModelCtrl($http, wiApiService, wiComponentService){
+    let self = this;
+    wiComponentService.getComponent('SPINNER').show();   
     $http({
         method: 'GET',
-        url: storeApi + '/model/list/' + username
+        url: 'http://' + HOST+':'+PORT+ '/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
             console.log('retrain: ', res);
+            wiComponentService.getComponent('SPINNER').hide();
             if(res.statusCode == 400){
                 toastr.error(res.body + '\n Load page again!', 'danger');
             }else{
@@ -162,34 +154,10 @@ wipm.controller(retrainFormCtrlName, function($http){
                         self.rnd = false;
                     }
                 }
-                self.read_data = function($fileContent){
-                    var string = $fileContent.split('\n');
-                    self.data = [];
-                    for( let i=0; i < string.length - 1; i++){
-                        let str = string[i].split(',');
-                        var arr = [];
-                        for( let j=0; j < str.length; j++){
-                            arr.push(parseFloat(str[j]))
-                        }
-                        self.data.push(arr);
-                    }
-                }
-                self.read_target = function($fileContent){
-                    var string = $fileContent.split('\n');
-                    self.target = [];
-                    for( let i=0; i < string.length - 1; i++){
-                        let str = string[i].split(',');
-                        var arr = [];
-                        for( let j=0; j < str.length; j++){
-                            arr.push(parseFloat(str[j]))
-                        }
-                        self.target.push(arr);
-                    }
-                }
+                
                 self.retrain = function(){
                     if(self.data && self.target){
-                        $("form").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
-                        $("form").css('opacity', '0.5');
+                        wiComponentService.getComponent('SPINNER').show();
                         payload = {
                             model_id: self.model.id,
                             model_type: self.model.type,
@@ -199,12 +167,12 @@ wipm.controller(retrainFormCtrlName, function($http){
                         }
                         $http({
                             method: 'PUT',
-                            url: storeApi + '/model/retrain/' + self.model.id,
+                            url: 'http://'+HOST+':'+PORT +'/store/api/model/retrain/' + self.model.id,
                             data: payload
                         }).then(function(response){
-                                $(".load").remove();
-                                $("form").css('opacity', '1');
+                            wiComponentService.getComponent('SPINNER').hide();
                                 var res = response.data;
+                                console.log(res);
                                 if(res.statusCode == 200){
                                     toastr.success('Retrain model success!', '');
                                 }else{
@@ -223,9 +191,70 @@ wipm.controller(retrainFormCtrlName, function($http){
             toastr.error('Call store api get list model error', '');
             return;
     })
-})
-wipm.controller(predictFormCtrlName, function($http,  wiApiService){
-    var self = this; 
+}
+
+angular.module(moduleRetrainModel, []);
+
+app.component(componentRetrainModel, {
+    templateUrl: 'template/retrain-model.html', 
+    controller: retrainModelCtrl,
+    controllerAs: 'retrainCtrl'
+});
+
+/* List */
+function listModelCtrl($http, wiComponentService){
+    let self = this;
+    wiComponentService.getComponent('SPINNER').show();
+    $http({
+        method: 'GET',
+        url: 'http://'+HOST+':'+PORT + '/store/api/model/list/' + username
+    }).then(function(response){
+            var res = response.data;
+            wiComponentService.getComponent('SPINNER').hide();
+            console.log('delete: ', res);
+            if(res.statusCode == 400){
+                toastr.error(res.body + '\n Load page again!', '');
+            }else{
+                self.models = res;
+                self.delete = function(index, id){
+                    wiComponentService.getComponent('SPINNER').show();
+                    $http({
+                        method: 'DELETE',
+                        url: 'http://'+HOST+':'+PORT + '/store/api/model/delete/' + id,
+                    }).then(function(response){
+                        wiComponentService.getComponent('SPINNER').hide();
+                            var res = response.data;
+                            if(res.statusCode == 200){
+                                self.models.splice(index, 1);
+                                toastr.success('Delete model success!', '');
+                            }else{
+                                toastr.error(res.body.message, '');
+                            }
+                        return;
+                    }, function(error){
+                        toastr.error('Call store api delete model error', '');
+                        return;
+                    })
+                }
+            }
+            return;
+        }, function(error){
+            toastr.error('Call store api get list model error', '');
+            return;
+    })
+}
+
+angular.module(moduleListModel, []);
+
+app.component(componentListModel, {
+    templateUrl: 'template/list-model.html', 
+    controller: listModelCtrl,
+    controllerAs: 'listCtrl'
+});
+
+/* predict */
+function predictCtrl($http,  wiApiService, wiComponentService){
+    let self = this;
     this.project;
     wiApiService.getProjectInfo(1, function(projectInfo){
         wiApiService.getProject(projectInfo, function(project){
@@ -238,6 +267,9 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
             self.curve = self.curves[0];
         })
     });  
+    wiApiService.dataCurve(2, function(data){
+        console.log('dataCurve: ', data);
+    })
     this.changeWell = function(){
         self.datasets = self.well.datasets;
         self.dataset = self.datasets[0];
@@ -251,32 +283,22 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
     this.changeCurve = function(){
         console.log('change curve: ', self.curve);
     }
+    wiComponentService.getComponent('SPINNER').show();
     $http({
         method: 'GET',
-        url: storeApi + '/model/list/' + username
+        url: 'http://'+HOST+':'+PORT + '/store/api/model/list/' + username
     }).then(function(response){
             var res = response.data;
+            wiComponentService.getComponent('SPINNER').hide();
             if(res.statusCode == 400){
                 toastr.error(res.body + '\n Load page again!', '');
             }else{
                 self.models = res;
                 self.model = self.models[0];
-                // self.read_data = function($fileContent){
-                //     var string = $fileContent.split('\n');
-                //     self.data = [];
-                //     for( let i=0; i < string.length - 1; i++){
-                //         let str = string[i].split(',');
-                //         var arr = [];
-                //         for( let j=0; j < str.length; j++){
-                //             arr.push(parseFloat(str[j]))
-                //         }
-                //         self.data.push(arr);
-                //     }
-                // }
+                
                 self.predict = function(){
                     if(self.curve){
-                        $("form").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
-                        $("form").css('opacity', '0.5');
+                        wiComponentService.getComponent('SPINNER').show();
                         payload = {
                             model_id: self.model.id,
                             model_type: self.model.type,
@@ -284,11 +306,10 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
                         }
                         $http({
                             method: 'POST',
-                            url: storeApi + '/predict',
+                            url: 'http://'+HOST+':'+PORT + '/store/api/predict',
                             data: payload
                         }).then(function(response){
-                                $(".load").remove();
-                                $("form").css('opacity', '1');
+                            wiComponentService.getComponent('SPINNER').hide();
                                 var res = response.data;
                                 console.log('predict:', res);
                                 if(res.statusCode == 200){
@@ -310,46 +331,12 @@ wipm.controller(predictFormCtrlName, function($http,  wiApiService){
             toastr.error('Call store api get list model error', '');
             return;
     })
-})
-wipm.controller(listModelFormCtrlName, function($http){
-    var self = this;
-    $http({
-        method: 'GET',
-        url: storeApi + '/model/list/' + username
-    }).then(function(response){
-            var res = response.data;
-            console.log('delete: ', res);
-            if(res.statusCode == 400){
-                toastr.error(res.body + '\n Load page again!', '');
-            }else{
-                self.models = res;
-                self.delete = function(index, id){
-                    $("table").append("<div class='load' style='position: absolute; z-index: 1000; top: 300px; left: 500px;'></div>");
-                    $("table").css('opacity', '0.5');
-                    $http({
-                        method: 'DELETE',
-                        url: storeApi + '/model/delete/' + id,
-                    }).then(function(response){
-                            $(".load").remove();
-                            $("table").css('opacity', '1');
-                            var res = response.data;
-                            if(res.statusCode == 200){
-                                self.models.splice(index, 1);
-                                toastr.success('Delete model success!', '');
-                            }else{
-                                toastr.error(res.body.message, '');
-                            }
-                        return;
-                    }, function(error){
-                        toastr.error('Call store api delete model error', '');
-                        return;
-                    })
-                }
-            }
-            return;
-        }, function(error){
-            toastr.error('Call store api get list model error', '');
-            return;
-    })
+}
+
+angular.module(modulePredict, []);
+
+app.component(componentPredict, {
+    templateUrl: 'template/predict.html', 
+    controller: predictCtrl,
+    controllerAs: 'predictCtrl'
 });
-exports.name = moduleName;

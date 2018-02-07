@@ -1,0 +1,63 @@
+<form  id="create">
+    <h3>Create model</h3>
+    <div class="form-group form-inline">
+        <label class="control-label col-sm-3">Model name</label>
+        <input class="form-control wi-form-control" type="text" class="form-control" ng-model="createCtrl.name" autofocus required>
+    </div>
+    <div class="form-group form-inline">
+        <label class="control-label control-label col-sm-3">Model type</label>
+        <select class="form-control wi-form-control" ng-model="createCtrl.type" 
+                ng-options="x.type as x.name for x in createCtrl.types"
+                ng-change="createCtrl.changeType(createCtrl.type)" required>
+        </select>
+    </div>
+    <div class="form-group form-inline container-fluid" ng-show="createCtrl.dnn" style="margin: 0; padding-left: 0">
+        <label class="control-label col-sm-3">Unit for Multi Perceptrons</label>
+        <div class="col-sm-9" style="padding: 0">
+            <div style="margin-bottom: 8px; " ng-repeat="x in createCtrl.units">
+                <select class="form-control wi-form-control">
+                    <option value="sigmoid">Sigmoid</option>
+                    <option value="tanh">Tanh</option>
+                    <option value="softmax">Softmax</option>
+                </select>	
+                <input class="form-control wi-form-control" type="number" ng-model="x.n_nodes" required>
+                <a class="remove" ng-click="createCtrl.remove_layer($index)">&times;</a>
+            </div>
+            <a ng-click="createCtrl.add_layer()" 
+                class="btn btn-default" 
+                style="margin-bottom: 8px; color: black; text-decoration: none">
+                Add layer
+            </a>
+        </div>
+    </div>				
+    <div class="form-group form-inline" ng-show="createCtrl.dnn || createCtrl.lnr">
+        <label class="control-label col-sm-3">Number of epoch</label>
+        <input class="form-control wi-form-control" type="number" ng-model="createCtrl.params['n_epochs']">
+    </div>
+    <div class="form-group form-inline" ng-show="createCtrl.lnr">
+        <label class="control-label col-sm-3">Learning rate</label>
+        <input class="form-control wi-form-control" type="number" step="0.001" ng-model="createCtrl.params['learning_rate']"  required>
+    </div>
+    <div class="form-group form-inline" ng-show="createCtrl.lnr">
+        <label class="control-label col-sm-3">Feature range</label>
+        <input class="form-control wi-form-control" type="number" step="0.1" ng-model="createCtrl.params['feature_range'][0]"  required>
+        <input class="form-control wi-form-control" type="number" step="0.1" ng-model="createCtrl.params['feature_range'][1]"  required>
+    </div>
+    <div class="form-group form-inline" ng-show="createCtrl.lnr">
+        <label class="control-label col-sm-3">Batch size</label>
+        <input class="form-control wi-form-control" type="number" step="10" ng-model="createCtrl.params['batch_size']" id="batch_size">
+    </div>
+    <div class="form-group form-inline" >
+        <label class="control-label col-sm-3">Dataset</label>
+        <label> Data <input class="form-control wi-form-control" type="file" id="data" accept=".csv" on-read-file="createCtrl.read_data($fileContent)"  required="true"></label>
+        <label> Target <input class="form-control wi-form-control" type="file" id="target" accept=".csv" on-read-file="createCtrl.read_target($fileContent)"  required="true"></label>
+    </div>
+    <div class="form-group form-inline">
+        <label class="control-label col-sm-3">Description</label>
+        <input class="form-control wi-form-control" type="text" ng-model="createCtrl.description" class="form-control"  required />
+    </div>
+    <div class="form-group  form-inline">
+        <button type="submit" class="btn btn-primary" ng-click="createCtrl.create_model()">Create</button>
+    </div>
+    <!-- <wi-button icon='exit-32x32' label='test-test' handler='handlers.testGetData'></wi-button> -->
+</form>

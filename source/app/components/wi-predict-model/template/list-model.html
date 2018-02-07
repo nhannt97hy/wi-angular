@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-if="list" ng-controller="listModelController as list" id="list">
+<div class="container-fluid" id="list">
     <h3>List model</h3>
     <table class="table table-bordered wipm-table">
         <thead>
@@ -13,7 +13,7 @@
                 <th width="10%">Delete</th>
         </thead>
         <tbody>
-            <tr ng-repeat="x in list.models">
+            <tr ng-repeat="x in listCtrl.models">
                 <!-- <td width="12.5%">{{ x.id }}</td> -->
                 <td width="12.5%">{{ x.name }}</td>
                 <td width="12.5%">{{ x.type }}</td>
@@ -22,7 +22,7 @@
                 <td width="12.5%">{{ x.description }}</td>
                 <td width="15%">{{ x.updatedAt }}</td>
                 <td width="10%">
-                    <button type="button" class="btn btn-mall btn-danger" ng-click="list.delete($index, x.id)" style="padding: 0px 5px">X</button>
+                    <button type="button" class="btn btn-mall btn-danger" ng-click="listCtrl.delete($index, x.id)" style="padding: 0px 5px">X</button>
                 </td>
             </tr>
         </tbody>

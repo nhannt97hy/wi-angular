@@ -114,7 +114,7 @@ let wiOnlineInvService = require('./wi-online-inv-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
-let wipm = require('./wipm.js');
+let wipm = require('./wi-predict-model');
 
 let app = angular.module('wiapp',
     [
