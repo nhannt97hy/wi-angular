@@ -10793,3 +10793,34 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
         });
     });
 };
+
+exports.curveFamilyDialog = function (ModalService, curveModel, listFamily, callback) {
+    function ModalController(close) {
+        this.familyGroups = {};
+        this.selectedFamily = listFamily.find(f => f.idFamily === curveModel.properties.idFamily);
+        listFamily.forEach(family => {
+            const groupKey = _.snakeCase(family.familyGroup);
+            if (!this.familyGroups[groupKey]) this.familyGroups[groupKey] = [];
+            this.familyGroups[groupKey].push(family);
+            if (family === this.selectedFamily) this.selectedGroup = this.familyGroups[groupKey];
+        })
+        this.onOkButtonClicked = function () {
+            close(this.selectedFamily);
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+    }
+    ModalService.showModal({
+        templateUrl: 'curve-family/curve-family-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function(ret){
+            if(callback) callback(ret);
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        })
+    })
+}

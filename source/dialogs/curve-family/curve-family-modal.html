@@ -1,0 +1,51 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Edit Family</h4>
+            </div>
+            <div class="modal-body">
+                <style>
+                  .list-group {
+                    max-height: 70vh;
+                    overflow: auto;
+                  }
+                  .list-group-item {
+                    cursor: pointer;
+                  }
+                  .list-group-item.active {
+                    background-color: #f0f0f0;
+                  }
+                </style>
+                <div style="display: flex">
+                    <div style="flex:1; margin: 0 5px;">
+                        <h4 style="text-align: center">Family group</h4>
+                        <ul class="list-group">
+                            <li ng-repeat="group in wiModal.familyGroups" ng-click="wiModal.selectedGroup = group"
+                              class="list-group-item" ng-class="{active: group[0].familyGroup==wiModal.selectedGroup[0].familyGroup}">
+                              {{group[0].familyGroup}}
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="flex:1; margin: 0 5px;">
+                        <h4 style="text-align: center">Family</h4>
+                        <ul class="list-group">
+                            <li ng-repeat="family in wiModal.selectedGroup" ng-click="wiModal.selectedFamily = family"
+                              class="list-group-item" ng-class="{active: family == wiModal.selectedFamily}">
+                              {{family.name}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span
+                    class="close-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

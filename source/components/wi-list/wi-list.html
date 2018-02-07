@@ -17,6 +17,7 @@
                 <option value="{{undefined}}">&nbsp;</option>
                 <option ng-repeat="option in item.options" ng-value="option.value">{{option.label}}</option>
             </select>
+            <button ng-if="item.type == 'action'" ng-click="item.handle()">{{item.valueLabel}}</button>
         </td>
     </tr>
 </table>

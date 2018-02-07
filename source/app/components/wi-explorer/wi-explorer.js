@@ -357,11 +357,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, WiWe
                         label: wellModels[0].properties.idGroup? "Move To Group": "Add To Group",
                         icon: "plus-16x16",
                         class: 'has-more',
-                        handler: function () {
-                            DialogUtils.groupManagerDialog(ModalService, function () {
-                                utils.refreshProjectState();
-                            })
-                        },
                         childContextMenu: groupsContextMenu
                     });
                 }
