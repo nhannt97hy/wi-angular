@@ -237,7 +237,13 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                     if (err) {
                         reject(err);
                     }
+                    oUtils.updateParentNode(item, newWell);
+                    /*
                     item.properties = newWell;
+                    item.children.forEach(function(dataset) {
+                        dataset.parent = item.properties;
+                    })
+                    */
                     wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
                         if (err) {
                             reject(err);
