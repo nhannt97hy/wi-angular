@@ -4,7 +4,8 @@ const moduleName = 'wi-inventory';
 function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService, ModalService, $timeout) {
     modalService = ModalService;
     let self = this;
-    window.inv =this;
+
+    window.__INV = self;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
@@ -335,7 +336,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         else if (cb) cb(0);
     }
 
-    this.selectHandler = function (currentNode, noLoadData) {
+    this.selectHandler = selectHandler;
+    function selectHandler(currentNode, noLoadData) {
         function bareSelectHandler() {
             //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
             //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
@@ -368,7 +370,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         }
     }
     
-    this.unselectAllNodes = function () {
+    this.unselectAllNodes = unselectAllNodes;
+    function unselectAllNodes() {
         self.inventoryConfig.forEach(function (item) {
             utils.visit(item, function (node) {
                 if (node.data) node.data.selected = false;
@@ -376,7 +379,55 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         });
         wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
     }
-
+    this.selectInventoryNode = function(node) {
+        self.inventorySelectedNode = node;
+    }
+    this.selectProjectNode = function(node) {
+        self.projectSelectedNode = node;
+    }
+    this.clickFunction = function ($index, $event, node) {
+        node.$index = $index;
+        if (!node) {
+            unselectAllNodes();
+            return;
+        }
+        wiComponentService.emit('update-properties', node);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if (!Array.isArray(selectedNodes)) selectedNodes = [];
+        if (!$event.shiftKey) {
+            if (selectedNodes.length) {
+                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes();
+                }
+            }
+            selectHandler(node);
+        } else {
+            // shift key
+            if (selectedNodes.length) {
+                if (selectedNodes.includes(node)) return;
+                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes();
+                    selectHandler(node);
+                } else {
+                    if (node.$index < selectedNodes[0].$index) {
+                        let fromIndex = node.$index;
+                        let toIndex = selectedNodes[0].$index;
+                        unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            selectHandler(this.config[i], true);
+                        }
+                    } else {
+                        let fromIndex = selectedNodes[0].$index;
+                        let toIndex = node.$index;
+                        unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            selectHandler(this.config[i], true);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);

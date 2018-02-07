@@ -5,7 +5,7 @@
     <div class="wi-parent-node" type="{{wiBaseTreeview.config[$index].type}}"
         ng-class='{"item-active": item.data.selected}'
         data="{{wiBaseTreeview.config[$index].id}}"
-        wi-right-click="wiBaseTreeview.onClick($index, $event, item); wiBaseTreeview.showContextMenuFunction($event, $index)"
+        wi-right-click="wiBaseTreeview.onClick($index, $event, item); wiBaseTreeview.showContextMenuFunction($event, $index, item)"
         wi-element-ready="wiBaseTreeview.onReadyFunction();"
         ng-hide="item.data.hide">
         <div class="wi-parent-content">
@@ -44,7 +44,8 @@
             on-click-function='wiBaseTreeview.onClickFunction',
             on-double-click-function='wiBaseTreeview.onDoubleClickFunction',
             show-context-menu-function='wiBaseTreeview.showContextMenuFunction'
-            is-show-parent-name="item.data.isCollection">
+            is-show-parent-name="item.data.isCollection"
+            on-select-function="wiBaseTreeview.onSelectFunction">
         </wi-base-treeview>
     </div>
 </div>

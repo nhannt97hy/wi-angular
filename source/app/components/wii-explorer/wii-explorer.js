@@ -143,35 +143,50 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         })
     }
 
-    function getDefaultTreeviewCtxMenu($index, treeViewCtrl) {
+    function expandAll(treeNode) {
+        if(!treeNode.data) return;
+        treeNode.data.childExpanded = true;
+        
+        treeNode.children && treeNode.children.length && treeNode.children.forEach(function(childNode) {
+            expandAll(childNode);
+        });
+    }
+    function collapseAll(treeNode) {
+        if(!treeNode.data) return;
+        treeNode.data.childExpanded = false;
+        treeNode.children && treeNode.children.length && treeNode.children.forEach(function(childNode) {
+            collapseAll(childNode);
+        });
+    }
+    function getDefaultTreeviewCtxMenu(treeNode) {
         return [
             {
                 name: "Expand",
                 label: "Expand",
                 icon: "expand-16x16",
                 handler: function () {
-                    treeViewCtrl.expand($index);
+                    treeNode.data.childExpanded = true;
                 }
             }, {
                 name: "Collapse",
                 label: "Collapse",
                 icon: "collapse-16x16",
                 handler: function () {
-                    treeViewCtrl.collapse($index);
+                    treeNode.data.childExpanded = false;
                 }
             }, {
                 name: "ExpandAll",
                 label: "Expand All",
                 icon: "expand-all-16x16",
                 handler: function () {
-                    treeViewCtrl.expandAll(self.treeConfig);
+                    expandAll(treeNode);
                 }
             }, {
                 name: "CollapseAll",
                 label: "Collapse All",
                 icon: "collapse-all-16x16",
                 handler: function () {
-                    treeViewCtrl.collapseAll(self.treeConfig);
+                    collapseAll(treeNode);
                 }
             }
         ]
@@ -312,13 +327,12 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     this.ImportWellTopButtonClicked = function () {
         console.log('ImportWellTopButtonClicked');
     }
-    this.showContextMenu = function($event, $index) {
-        console.log('node', self.config[$index]);
-        let container = self.container;
+    this.showContextMenu = function($event, $index, node) {
+        console.log('node', node);
         let defaultContextMenu = [], itemContextMenu = [];
-        defaultContextMenu = getDefaultTreeviewCtxMenu($index, self);
-        let nodeType = self.config[$index].type;
-        itemContextMenu = container.getItemTreeviewCtxMenu(nodeType, self);
+        defaultContextMenu = getDefaultTreeviewCtxMenu(node);
+        let nodeType = node.type;
+        itemContextMenu = getItemTreeviewCtxMenu(nodeType, self);
         let contextMenu = itemContextMenu.concat(defaultContextMenu);
         wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
