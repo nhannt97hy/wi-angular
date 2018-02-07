@@ -213,7 +213,7 @@
                                                     <ui-select ng-model="curve.lineCurve"
                                                                 ng-change="wiModal.onSelectCurve(); wiModal.onChangeCurve(curve._index);">
                                                         <ui-select-match placeholder='Select a curve'>{{curve.lineCurve.properties.name}}</ui-select-match>
-                                                        <ui-select-choices group-by="'datasetName'"
+                                                        <ui-select-choices group-by="wiModal.groupFn"
                                                                     repeat='c as c in wiModal.curvesArr | filter: {name:$select.search}'>
                                                                     <div class="padding-left-20px">{{c.properties.name}}</div>
                                                         </ui-select-choices>
@@ -335,7 +335,7 @@
                                                                 ng-change="wiModal.onChangeShading($index); wiModal.onSelectRightLine();
                                                                 wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.rightLine.name}}</ui-select-match>
-                                                        <ui-select-choices group-by="'datasetName'"
+                                                        <ui-select-choices group-by="wiModal.groupFn"
                                                                     repeat='c as c in wiModal.curveList | filter: $select.search'>
                                                                     <div class="padding-left-20px">{{c.name}}</div>
                                                         </ui-select-choices>
@@ -346,7 +346,7 @@
                                                                 ng-change="wiModal.onChangeShading($index); wiModal.onSelectLeftLine();
                                                                 wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.leftLine.name}}</ui-select-match>
-                                                        <ui-select-choices group-by="'datasetName'"
+                                                        <ui-select-choices group-by="wiModal.groupFn"
                                                                     repeat='c as c in wiModal.leftLimit | filter: $select.search'>
                                                                     <div class="padding-left-20px">{{c.name}}</div>
                                                         </ui-select-choices>

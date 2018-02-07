@@ -67,3 +67,20 @@ function calPorosityFromDensity(density, vsh, matrix = 2.65, shale = 2.4, fluid 
     callback(result);
 }
 exports.calPorosityFromDensity = calPorosityFromDensity;
+
+function calSaturationArchie(Rt, porosity, a = 1, m = 2, n = 2, Rw = 0.03, callback){
+    let SW = new Array(), SH = new Array(), SW_UNCL = new Array(), BVW = new Array();
+    for(let i = 0; i < Rt.length; i++){
+        SW_UNCL[i] = Math.pow((a * Rw)/(Rt[i] * Math.pow(porosity[i], m), (1/n)));
+        SW[i] = parseFloat(SW_UNCL[i].clamp(0,1).toFixed(4));
+        SH[i] = 1 - SW[i];
+        BVW[i] = SW[i] * porosity[i];
+    }
+    callback({
+        'water_saturation': SW,
+        'hydrocarbon_saturation': SH,
+        'water_saturation_unclipped': SW_UNCL,
+        'bulk_volume_water': BVW
+    })
+}
+exports.calSaturationArchie = calSaturationArchie;

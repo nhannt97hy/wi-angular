@@ -39,7 +39,7 @@
                                     <ui-select ng-model="wiModal.shadingOptions.rightLine"
                                                 ng-change="wiModal.onSelectRightLine();">
                                         <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.rightLine.name}}</ui-select-match>
-                                        <ui-select-choices group-by="'datasetName'"
+                                        <ui-select-choices group-by="wiModal.groupFn"
                                                     repeat='c as c in wiModal.curveList | filter: $select.search'>
                                                     <div class="padding-left-20px">{{c.name}}</div>
                                         </ui-select-choices>
@@ -49,7 +49,7 @@
                                     <ui-select ng-model="wiModal.shadingOptions.leftLine"
                                                 ng-change="wiModal.setLimit2(); wiModal.onSelectLeftLine();">
                                         <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.leftLine.name}}</ui-select-match>
-                                        <ui-select-choices group-by="'datasetName'"
+                                        <ui-select-choices group-by="wiModal.groupFn"
                                                     repeat='c as c in wiModal.leftLimit | filter: $select.search'>
                                                     <div class="padding-left-20px">{{c.name}}</div>
                                         </ui-select-choices>
@@ -226,7 +226,7 @@
                                 <ui-select ng-model="wiModal.variableShadingOptions.controlCurve"
                                             ng-change="wiModal.selectedControlCurve(wiModal.variableShadingOptions.controlCurve)">
                                     <ui-select-match placeholder='Select a curve'>{{wiModal.variableShadingOptions.controlCurve.properties.name}}</ui-select-match>
-                                    <ui-select-choices group-by="'datasetName'"
+                                    <ui-select-choices group-by="wiModal.groupFn"
                                                 repeat='c as c in wiModal.curves | filter: $select.search'>
                                                 <div class="padding-left-20px">{{c.properties.name}}</div>
                                     </ui-select-choices>
@@ -501,7 +501,7 @@
                                     <ui-select theme="bootstrap" ng-model="wiModal.customFillsCurrent"
                                                 ng-change="wiModal.setCustomFills()">
                                         <ui-select-match placeholder='Select template'>{{wiModal.customFillsCurrent.name}}</ui-select-match>
-                                        <ui-select-choices group-by="'datasetName'"
+                                        <ui-select-choices group-by="wiModal.groupFn"
                                                     repeat='customFills as customFills in wiModal.customFillsList | filter: $select.search'>
                                                     <div class="" style="width: 2em;">{{customFills.name}}</div>
                                         </ui-select-choices>

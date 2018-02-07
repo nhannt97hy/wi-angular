@@ -29,7 +29,7 @@
                                             <ui-select-match placeholder='Select a curve'>
                                                 {{wiModal.curveModel.properties.name}}
                                             </ui-select-match>
-                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <ui-select-choices group-by="wiModal.groupFn" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                             </ui-select-choices>
                                         </ui-select>
@@ -43,7 +43,7 @@
                                             <ui-select-match placeholder='Select a curve'>
                                                 {{wiModal.curveDensity.properties.name}}
                                             </ui-select-match>
-                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <ui-select-choices group-by="wiModal.groupFn" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                             </ui-select-choices>
                                         </ui-select>
@@ -54,7 +54,7 @@
                                             <ui-select-match placeholder='Select a curve'>
                                                 {{wiModal.curveNeutron.properties.name}}
                                             </ui-select-match>
-                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <ui-select-choices group-by="wiModal.groupFn" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                             </ui-select-choices>
                                         </ui-select>
@@ -65,7 +65,7 @@
                                             <ui-select-match placeholder='Select a curve'>
                                                 {{wiModal.curveSonic.properties.name}}
                                             </ui-select-match>
-                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <ui-select-choices group-by="wiModal.groupFn" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                             </ui-select-choices>
                                         </ui-select>

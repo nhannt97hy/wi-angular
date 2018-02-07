@@ -61,6 +61,10 @@ function curveRescaleDialog (ModalService, callback) {
             self.bottomDepth = self.wellModel.bottomDepth;
         }
 
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
+
         function setLinePropertiesIfNull (curve) {
             let resCurve = curve;
             if(resCurve.lineProperties == null) {

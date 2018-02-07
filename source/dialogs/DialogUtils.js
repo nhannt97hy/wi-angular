@@ -2989,10 +2989,10 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
                     name: '',
                     type: 'curve',
                     id: null,
-                    datasetName: '',
                     properties: {
                         name: '',
-                        idCurve: null
+                        idCurve: null,
+                        dataset: ''
                     }
                 }]
                 self.curvesOnDatasetWithBlank = blankCurve.concat(self.curvesOnDataset);
@@ -3173,6 +3173,9 @@ exports.crossplotFormatDialog = function (ModalService, wiCrossplotId, callback,
             });
         };
         this.drawIcon = utils.drawIcon;
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
@@ -4195,6 +4198,9 @@ exports.histogramFormatDialog = function (ModalService, wiHistogramId, callback,
                     });
                 })
             }
+        }
+        this.groupFn = function(item){
+            return item.properties.dataset;
         }
 
         function getTopFromWell() {
@@ -5639,7 +5645,10 @@ exports.referenceWindowsDialog = function (ModalService, well, plotModel, callba
         this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.well = well;
         this.datasets = [];
-    this.curvesArr = [];
+        this.curvesArr = [];
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         this.scaleOpt = [
             {
@@ -6394,6 +6403,9 @@ exports.curveComrarisonDialog = function (ModalService, callback) {
                 correlation: null
             });
         };
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
@@ -6597,6 +6609,9 @@ exports.curveConvolutionDialog = function(ModalService, isDeconvolution){
         }
 
         this.onWellChanged();
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
             self.applyingInProgress = false;
@@ -6842,6 +6857,9 @@ exports.splitCurveDialog = function (ModalService, callback) {
             self.idDataset = self.datasetModel.id;
         }
         this.changeNumberSplit = changeNumberSplit;
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
         function pushArrayCurve() {
             self.arrayCurve.push({
                 name: null,
@@ -7259,6 +7277,9 @@ exports.fillDataGapsDialog = function(ModalService){
             self.topDepth = self.selectedWell.topDepth;
             self.bottomDepth = self.selectedWell.bottomDepth;
         }
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         this.checked = false;
         this.select = function (curve) {
@@ -7271,7 +7292,7 @@ exports.fillDataGapsDialog = function(ModalService){
            })
         }
         this.CurveF = function(curve){
-            return !(curve.name == self.SelectedCurve.name && curve.datasetName == self.SelectedCurve.datasetName);
+            return curve.id != self.SelectedCurve.id;
         }
 
         function visit(node, data, start, visitedPath, max){
@@ -7542,6 +7563,9 @@ exports.curveDerivativeDialog = function(ModalService){
             self.firstCurve.idDataset = self.selectedDataset;
             self.secondCurve.idDataset = self.selectedDataset;
         }
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         function saveCurve(curve, reload, cb){
             let payload = angular.copy(curve);
@@ -7666,6 +7690,9 @@ exports.TVDConversionDialog = function (ModalService) {
         this.elevation = 0, this.xRef = 0, this.yRef = 0;
         this.input = [];
         this.curvesData = [];
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
         if(selectedNodes && selectedNodes.length){
@@ -8563,6 +8590,9 @@ exports.formationResistivityDialog = function (ModalService, callback) {
             }
             return {curveModel : curveModel, unit : unit};
         }
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
@@ -9023,6 +9053,9 @@ exports.curveFilterDialog = function(ModalService){
         this.onCancelButtonClicked = function(){
             close(null);
         }
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         this.onChangeCurve = function(){
             if(self.createOp == 'new') self.curveName = self.SelectedCurve.name;
@@ -9424,7 +9457,7 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
                     let dataset = self.datasets.find(function (item) {
                         return item.id == self.curvesArr[j].idDataset;
                     });
-                    self.curvesArr[j].datasetName = dataset.name;
+                    // self.curvesArr[j].datasetName = dataset.name;
                     if((self.SelectedCurve && self.SelectedCurve.id == self.curvesArr[j].idCurve) || (self.histogramProps.curveId == self.curvesArr[j].idCurve)) {
                         self.SelectedCurve = self.curvesArr[j];
                     }
@@ -9484,6 +9517,9 @@ exports.histogramForObjectTrackDialog = function (ModalService, objectConfig, ca
             }
 
             return inValid;
+        }
+        this.groupFn = function(item){
+            return item.properties.dataset;
         }
 
         this.checkNameAvailable = function () {
@@ -9620,7 +9656,7 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
                     let dataset = self.datasets.find(function (item) {
                         return item.id == self.curvesArr[j].idDataset;
                     });
-                    self.curvesArr[j].datasetName = dataset.name;
+                    // self.curvesArr[j].datasetName = dataset.name;
                 }
             }
         });
@@ -9633,6 +9669,9 @@ exports.crossplotForObjectTrackDialog = function (ModalService, objectConfig, ca
         }
         if(this.curvesArr && !this.SelectedCurveZ && this.crossplotProps.idCurveZ) {
             self.SelectedCurveZ = findCurveById(this.crossplotProps.idCurveZ);
+        }
+        this.groupFn = function(item){
+            return item.properties.dataset;
         }
 
 
@@ -10199,6 +10238,9 @@ exports.badholeCoalSaltDialog = function(ModalService) {
             }
         }
         this.selectZoneSet = selectZoneSet;
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
         function selectZoneSet(zoneSetModel) {
             self.zones = [];
             if (zoneSetModel && Object.keys(zoneSetModel).length) {
@@ -10484,6 +10526,10 @@ exports.depthShiftDialog = function( ModalService, SelWell, ShiftCurve, callback
             }
             point.shifted = point.shifted <= self.SelWell.bottomDepth ? point.shifted : self.SelWell.bottomDepth;
         };
+
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         this.delete = function(index) {
             self.shiftedTable.splice(index, 1);

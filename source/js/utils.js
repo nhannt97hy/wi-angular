@@ -551,7 +551,7 @@ function createCurveModel (curve) {
         unit: curve.unit || "NA",
         alias: curve.name
     });
-    curveModel.datasetName = curve.dataset;
+    // curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
@@ -584,7 +584,7 @@ function curveToTreeConfig(curve, isDeleted) {
             unit: curve.unit || "NA",
             alias: curve.name
         };
-        curveModel.datasetName = curve.dataset;
+        // curveModel.datasetName = curve.dataset;
         curveModel.data = {
             childExpanded: false,
             icon: 'curve-16x16',

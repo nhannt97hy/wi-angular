@@ -69,7 +69,7 @@
                                 <ui-select ng-model="wiModal.DevCurve" ng-disabled="wiModal.useType == 'file'"
                                 ng-change="wiModal.loadCurves()">
                                     <ui-select-match placeholder='Select a curve'>{{wiModal.DevCurve.properties.name}}</ui-select-match>
-                                    <ui-select-choices group-by="'datasetName'"
+                                    <ui-select-choices group-by="wiModal.groupFn"
                                     repeat='curve in wiModal.curvesArr | filter:{properties: {name:$select.search}} track by curve.id'>
                                         <div class="padding-left-20px">{{curve.properties.name}}</div>
                                     </ui-select-choices>
@@ -82,7 +82,7 @@
                                 <ui-select ng-model="wiModal.AziCurve" ng-disabled="wiModal.useType == 'file'"
                                 ng-change="wiModal.loadCurves()">
                                         <ui-select-match placeholder='Select a curve'>{{wiModal.AziCurve.properties.name}}</ui-select-match>
-                                        <ui-select-choices group-by="'datasetName'"
+                                        <ui-select-choices group-by="wiModal.groupFn"
                                         repeat='curve in wiModal.curvesArr | filter:{properties: {name:$select.search}} track by curve.id'>
                                             <div class="padding-left-20px">{{curve.properties.name}}</div>
                                         </ui-select-choices>

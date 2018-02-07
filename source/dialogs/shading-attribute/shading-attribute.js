@@ -13,6 +13,10 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
+
         this.paletteList = null;
         this.paletteName = null;
         this.curveList = currentTrack.getCurves();

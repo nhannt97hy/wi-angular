@@ -7,6 +7,9 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         wiModal = self;
 
         window.logTrack = this;
+        this.groupFn = function(item){
+            return item.properties.dataset;
+        }
 
         this.applyInProgress = false;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);

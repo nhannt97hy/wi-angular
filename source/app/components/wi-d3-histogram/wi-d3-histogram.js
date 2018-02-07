@@ -61,7 +61,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }else{
                 let curve = utils.getCurveFromId(self.histogramModel.properties.idCurve);
                 if (!curve) self.histogramModel.properties.histogramTitle = "Empty";
-                else self.histogramModel.properties.histogramTitle = well.properties.name + '.' + curve.datasetName;
+                else self.histogramModel.properties.histogramTitle = well.properties.name + '.' + curve.properties.dataset;
             }
             saveHistogramNow(function(){
                 console.log('change title');
@@ -71,7 +71,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     function getXLabel() {
         if (self.curveModel) {
-            return self.curveModel.datasetName + "." + self.curveModel.properties.name;
+            return self.curveModel.properties.dataset + "." + self.curveModel.properties.name;
         }
         return "";
     }

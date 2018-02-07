@@ -43,11 +43,11 @@ Utils.extend(Drawing, Curve);
 function Curve(config) {
     Drawing.call(this, config);
     if (typeof config != 'object') config = {};
-    let datasetName = gUtils.findDatasetById(config.idDataset) ? gUtils.findDatasetById(config.idDataset).name : null;
+    // let datasetName = gUtils.findDatasetById(config.idDataset) ? gUtils.findDatasetById(config.idDataset).name : null;
     this.id = config.id;
     this.idCurve = config.idCurve;
     this.idDataset = config.idDataset;
-    this.datasetName = datasetName;
+    this.datasetName = config.dataset;
     this.name = config.name || 'Noname';
     this.unit = config.unit || 'm3';
 
