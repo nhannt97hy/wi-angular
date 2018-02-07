@@ -24,9 +24,10 @@ img {
 .modal-body{
 	padding: 5px 25px;
 	max-height: calc(~"100% - 150px");
-	overflow: auto;
+	overflow-y: overlay;
+	overflow-x: hidden;
 	h5{
-		margin:10px 0 20px 0; 
+		margin:10px 0 20px 0;
 		position: relative;
 		width: 100%;
 		overflow: hidden;
@@ -49,8 +50,8 @@ img {
 
 .modal-footer{
 	padding: 5px 20px;
-	margin-top:0; 
-} 
+	margin-top:0;
+}
 .footer-left {
 	float: left;
 	text-align: left;
@@ -241,7 +242,7 @@ form h5:after {
 // }
 input.color-comp::-webkit-inner-spin-button,
 input.color-comp::-webkit-outer-spin-button{
-	-webkit-appearance: none; 
+	-webkit-appearance: none;
   	margin: 0;
 }
 input.color-comp {
@@ -296,7 +297,7 @@ table.shadingTable td {
 }
 table.shadingTable tr:last-child {
 	td.border {
-		border-bottom: 1px solid blue;	
+		border-bottom: 1px solid blue;
 	}
 }
 table.shadingTable td {
@@ -313,8 +314,8 @@ table.shadingTable td {
 .text-bold {
 	font-style: bolder;
 }
-.border-right { 
-    border-right: 2px solid #eee; 
+.border-right {
+    border-right: 2px solid #eee;
 
 }
 .empty {
@@ -327,8 +328,8 @@ table.shadingTable td {
 	height: 50px;
 	border: 2px dashed #ccc;
 }
-.border-right { 
-    border-right: 2px solid #eee; 
+.border-right {
+    border-right: 2px solid #eee;
 
 }
 
@@ -372,7 +373,7 @@ table.shadingTable td {
 }
 .regressionLineTable tbody tr td {
 	padding: 6px 2px;
-	text-align: center; 
+	text-align: center;
 }
 .selectPolygons {
 	// border: 1px solid #ccc;
@@ -387,7 +388,7 @@ table.shadingTable td {
 }
 .refCurveTable {
 	thead tr th {
-		text-align: center;		
+		text-align: center;
 	}
 	tbody tr td {
 		text-align: center;
@@ -395,7 +396,7 @@ table.shadingTable td {
 }
 .udlinesTable {
 	thead tr th {
-		text-align: center;		
+		text-align: center;
 	}
 	tbody tr td {
 		text-align: center;
@@ -413,7 +414,7 @@ table.shadingTable td {
 			text-align: center;
 		}
 	}
-	tbody { 
+	tbody {
 		td {
 			text-align: center;
 		}
@@ -481,7 +482,7 @@ input[type="checkbox"] {
 }
 .modalTernary {
 	thead tr th {
-		text-align: center;		
+		text-align: center;
 	}
 	tbody tr td {
 		text-align: center;
@@ -636,7 +637,7 @@ input[type=checkbox].input-check {
 	max-height: 30em;
     overflow-y: overlay;
 }
-//end import from inventory inentory dialog 
+//end import from inventory inentory dialog
 .ui-select-toggle > .caret { pointer-events: none }
 
 .ui-select-small {

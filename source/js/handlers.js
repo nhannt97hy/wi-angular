@@ -278,7 +278,12 @@ exports.BlankLogplotButtonClicked = function () {
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
+    let promptConfig = {
+        title: 'Create New Log Plot',
+        inputName: 'Log Plot Name',
+        input: 'BlankLogPlot'
+    }
+    DialogUtils.promptDialog(ModalService, promptConfig,function (logplotName) {
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function(logplot) {
                 console.log("Created new log plot", logplot);
