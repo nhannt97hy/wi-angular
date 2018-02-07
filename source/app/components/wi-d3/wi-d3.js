@@ -919,7 +919,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
-        })
+        });
+        this.logPlotCtrl.updateScale(this.scale);
     }
 
     this.setDepthRange = function (depthRange, notPlot) {
