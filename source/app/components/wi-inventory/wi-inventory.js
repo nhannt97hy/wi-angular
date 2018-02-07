@@ -121,7 +121,9 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 self.importValid = false;
                 break;
         }
-        $scope.$apply();
+        $timeout(function(){
+            $scope.$apply();
+        })
     }
 
     function transformModelProperties(modelProps) {
@@ -190,6 +192,10 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             }
         }
     }
+    
+    this.revertButtonClicked = function () {
+        let revertModel = self.projectSelectedNode;
+    }
 
     function getImportPayload(model) {
         let payload = [];
@@ -236,6 +242,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 wiApiService.createWell(wellPayload, function (newWell, err) {
                     if (err) {
                         reject(err);
+                        return;
                     }
                     oUtils.updateParentNode(item, newWell);
                     /*
