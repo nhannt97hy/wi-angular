@@ -166,7 +166,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                                 }
                             },
                             lineCurve: utils.getCurveFromId(curveInfo.idCurve),
-                            changed : curveUnchanged ? changed.updated : curve.changed
+                            changed : curveUnchanged ? changed.updated : curve.changed,
+                            orderNum: curve.orderNum
                         };
                         console.log("self.curves", self.curves);
                     });
@@ -178,6 +179,8 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                 return (self.curves[index].changed == changed.unchanged ||
                     self.curves[index].changed == changed.updated ||
                     self.curves[index].changed == changed.created);
+            }).sort(function (c1, c2) {
+                return (c1.orderNum + c1.name).localeCompare(c2.orderNum + c2.name);
             });
         }
 
@@ -191,7 +194,14 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             if (self.curves.find(c => c._index == self.__idx).changed == changed.unchanged) self.curves.find(c => c._index == self.__idx).changed = changed.updated;
         }
         this.addRowCurve = function () {
-            self.curves.push({ _index: self.curves.length, changed: changed.created });
+            let orderNums = [];
+            let key = null;
+            self.getCurves().forEach(function(c) {orderNums.push(c.orderNum)});
+            let len = orderNums.length;
+            if (!len) key = 'm';
+            else key = String.fromCharCode(orderNums[len-1].charCodeAt(0) + 1);
+            console.log("orderNums", orderNums);
+            self.curves.push({ _index: self.curves.length, changed: changed.created, orderNum: key });
             if(self.getCurves().length) {
                 self.setClickedRowCurve(self.getCurves().length-1);
             }
@@ -212,6 +222,47 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         // add blank row
         this.addRowCurve();
         this.setClickedRowCurve(0);
+
+        /*this.setClickedRowCurve = function (index) {
+            if (index < 0) return;
+            $scope.selectedRowCurve = index;
+            self.__idx = self.getCurves()[index]._index;
+            console.log(self.curves);
+        };
+*/
+        /*this.arrowUpCurve = function (){
+            let i = self.curves.find(c => c._index == self.__idx)._index;
+            // utils.swapValue(self.curves[i].orderNum, self.curves[i-1].orderNum);
+            let temp = self.curves[i].orderNum;
+            self.curves[i].orderNum = self.curves[i-1].orderNum;
+            self.curves[i-1].orderNum = temp;
+            self.setClickedRowCurve($scope.selectedRowCurve - 1);
+            self.getCurves();
+        }*/
+
+        this.arrowUpCurve = function () {
+            let _curves = self.getCurves();
+            let i = $scope.selectedRowCurve;
+            if (i == 0) return;
+            let temp = _curves[i].orderNum;
+            _curves[i].orderNum = _curves[i-1].orderNum;
+            _curves[i-1].orderNum = temp;
+            self.setClickedRowCurve(i-1);
+            if (_curves[i].changed == changed.unchanged) _curves[i].changed = changed.updated;
+            if (_curves[i-1].changed == changed.unchanged) _curves[i-1].changed = changed.updated;
+        }
+
+        this.arrowDownCurve = function () {
+            let _curves = self.getCurves();
+            let i = $scope.selectedRowCurve;
+            if (!_curves[i+1].idCurve) return;
+            let temp = _curves[i].orderNum;
+            _curves[i].orderNum = _curves[i+1].orderNum;
+            _curves[i+1].orderNum = temp;
+            self.setClickedRowCurve(i+1);
+            if (_curves[i].changed == changed.unchanged) _curves[i].changed = changed.updated;
+            if (_curves[i+1].changed == changed.unchanged) _curves[i+1].changed = changed.updated;
+        }
 
         this.onEditStyleButtonClicked = function (index, $event) {
             self.setClickedRowCurve(index);
@@ -254,6 +305,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
             line.symbolName = lineProps.symbolOptions.symbolStyle.symbolName;
             line.symbolSize = lineProps.symbolOptions.symbolStyle.symbolSize;
             line.symbolStrokeStyle = lineProps.symbolOptions.symbolStyle.symbolStrokeStyle;
+            delete line.lineCurve._data;
             return line;
         }
         function updateCurvesTab(updateCurvesTabCb) {
@@ -468,7 +520,7 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                 changed: changed.created,
                 setName: false,
                 idTrack: currentTrack.id,
-                idControlCurve: utils.getAllCurvesOfWell(this.well)[0].id,
+                idControlCurve: null,
                 name: 'xx_yy',
                 shadingStyle: "pattern",
                 isNegPosFill: false,
@@ -558,6 +610,10 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
         };
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
+                if (!item.idControlCurve) {
+                    item.idControlCurve = (item.leftLine.id > 0) ? 
+                                            item.leftLine.idCurve : item.rightLine.idCurve;
+                }
                 let request = angular.copy(item);
 
                 if(item.idLeftLine == -3) {
@@ -583,9 +639,10 @@ function logTrackPropertiesDialog (ModalService, currentTrack, wiLogplotCtrl, wi
                     options.idLeftLine = null;
                 }
                 else {
-                        request.leftFixedValue = null;
-                        request.idLeftLine = parseInt(item.leftLine.id);
-                    }
+                    request.leftFixedValue = null;
+                    request.idLeftLine = parseInt(item.leftLine.id);
+                }
+                request.palette = request.palName;
 
                 switch(item.changed) {
                     case changed.unchanged:

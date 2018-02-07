@@ -144,7 +144,6 @@ function lineToTreeConfig(line) {
         symbol: null,
         orderNum: line.orderNum
     };
-    let temp = line.displayMode.toLowerCase().trim();
     lineModel.data.line = {
         dash: eval(line.lineStyle),
         color: line.lineColor,
@@ -163,11 +162,6 @@ function lineToTreeConfig(line) {
 
 function shadingToTreeConfig(shading, paletteList) {
     let shadingModel = new Object();
-
-    function getValPal(palName) {
-        console.log("getPal", paletteList.palName);
-        return paletteList.palName;
-    };
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
     shadingModel.idRightLine = shading.idRightLine;
@@ -200,10 +194,20 @@ function shadingToTreeConfig(shading, paletteList) {
 
 exports.shadingToTreeConfig = shadingToTreeConfig;
 
-function zoneToTreeConfig(zone) {
+function zoneToTreeConfig(zone, options = {}) {
     var zoneModel = new Object();
-    zoneModel.name = 'zone';
-    zoneModel.type = 'zone';
+    setTimeout(() => {
+        let zoneSetModel = getModel('zoneset', zone.idZoneSet);
+        let wellModel = getModel('well', zoneSetModel.properties.idWell);
+        zoneModel.parentDataArr = [wellModel.data, zoneSetModel.data];
+    });
+    if (options.isDeleted) {
+        zoneModel.name = 'zone-deleted-child';
+        zoneModel.type = 'zone-deleted-child';
+    } else {
+        zoneModel.name = 'zone';
+        zoneModel.type = 'zone';
+    }
     zoneModel.id = zone.idZone;
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
@@ -225,10 +229,8 @@ function zoneToTreeConfig(zone) {
 
 exports.zoneToTreeConfig = zoneToTreeConfig;
 
-function zoneSetToTreeConfig(zoneSet) {
+function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
-    zoneSetModel.name = 'zoneset';
-    zoneSetModel.type = 'zoneset';
     zoneSetModel.id = zoneSet.idZoneSet;
     zoneSetModel.properties = {
         idWell: zoneSet.idWell,
@@ -240,6 +242,13 @@ function zoneSetToTreeConfig(zoneSet) {
         icon: 'project-16x16-edit',
         label: zoneSet.name
     }
+    if (options.isDeleted) {
+        zoneSetModel.name = 'zoneset-deleted-child';
+        zoneSetModel.type = 'zoneset-deleted-child';
+        return zoneSetModel;
+    }
+    zoneSetModel.name = 'zoneset';
+    zoneSetModel.type = 'zoneset';
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
     zoneSet.zones.forEach(function (zone) {
@@ -561,12 +570,14 @@ function createCurveModel (curve) {
 }
 exports.createCurveModel = createCurveModel;
 
-function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel) {
+function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) {
     let curveModel = createCurveModel(curve);
     let dModel = datasetModel || getModel('dataset', curve.idDataset);
-    let wModel = wellModel || getModel('well', datasetModel.properties.idWell);
+    let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
-        curveModel.parentDataArr = [dModel.data, wModel.data];
+        let datasetModel = getModel('dataset', curve.idDataset);
+        let wellModel = getModel('well', datasetModel.properties.idWell);
+        curveModel.parentDataArr = [wellModel.data, datasetModel.data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
@@ -620,10 +631,10 @@ function createDatasetModel (dataset) {
 }
 exports.createDatasetModel = createDatasetModel;
 
-function datasetToTreeConfig(dataset, isDeleted, wellModel) {
+function datasetToTreeConfig(dataset, isDeleted, wellModel, treeRoot) {
     let datasetModel = createDatasetModel(dataset);
     let wM = wellModel;
-    if (!wM) wM = getModel('well', dataset.idWell);
+    if (!wM) wM = getModel('well', dataset.idWell, treeRoot);
     setTimeout(() => {
         datasetModel.parentData = wM.data;
     });
@@ -718,6 +729,29 @@ function createCurvesNode(parent) {
         curvesModel.children.push(curveToTreeConfig(curve, true));
     });
     return curvesModel;
+}
+
+function createZonesNode(parent, options = {}) {
+    let zonesModel = new Object();
+    if (options.isDeleted) {
+        zonesModel.name = 'zones-deleted';
+        zonesModel.type = 'zones-deleted';
+    }
+    zonesModel.data = {
+        childExpanded: false,
+        icon: 'zone-table-16x16',
+        label: "Zones",
+        isCollection: true
+    }
+    zonesModel.properties = {
+        totalItems: parent.curves.length
+    }
+    zonesModel.children = new Array();
+    if (!parent.zones) return zonesModel;
+    parent.zones.forEach(function (zone) {
+        zonesModel.children.push(zoneToTreeConfig(zone, { isDeleted: true }));
+    });
+    return zonesModel;
 }
 
 function createLogplotsNode(parent, options = {}) {
@@ -831,23 +865,40 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-function createZoneSetsNode(well) {
+function createZoneSetsNode(parent, options = {}) {
     let zoneSetsModel = new Object();
-    zoneSetsModel.name = 'zonesets';
-    zoneSetsModel.type = 'zonesets';
-    zoneSetsModel.data = {
-        childExpanded: false,
-        icon: 'user-define-16x16',
-        label: "User Defined"
-    };
-    zoneSetsModel.properties = {
-        idWell: well.idWell
+    if (options.isDeleted) {
+        zoneSetsModel.name = 'zonesets-deleted';
+        zoneSetsModel.type = 'zonesets-deleted';
+        zoneSetsModel.data = {
+            childExpanded: false,
+            icon: 'user-define-16x16',
+            label: "Zone Sets"
+        };
+    } else {
+        zoneSetsModel.name = 'zonesets';
+        zoneSetsModel.type = 'zonesets';
+        zoneSetsModel.data = {
+            childExpanded: false,
+            icon: 'user-define-16x16',
+            label: "User Defined"
+        };
     }
     zoneSetsModel.children = new Array();
-    if (!well.zonesets) return zoneSetsModel;
-    well.zonesets.forEach(function (zoneSet) {
-        zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
-    });
+    if (!parent || !parent.zonesets) return zoneSetsModel;
+    zoneSetsModel.properties = {
+        idWell: parent.idWell,
+        totalItems: parent.zonesets.length
+    }
+    if (options.isDeleted) {
+        parent.zonesets.forEach(function (zoneSet) {
+            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet, { isDeleted: true }));
+        });
+    } else {
+        parent.zonesets.forEach(function (zoneSet) {
+            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+        });
+    }
     return zoneSetsModel;
 }
 
@@ -1034,7 +1085,6 @@ exports.projectToTreeConfig = function (project) {
     return projectModel;
 }
 
-
 function dustbinToTreeConfig(dustbin) {
     var dustbinModel = new Object();
     dustbinModel.type = 'dustbin';
@@ -1047,8 +1097,6 @@ function dustbinToTreeConfig(dustbin) {
         selected: false
     };
     dustbinModel.children = new Array();
-
-    let wiComponentService = __GLOBAL.wiComponentService;
     if (dustbin) {
         updateDustbinConfig(dustbin);
     }
@@ -1058,11 +1106,12 @@ function dustbinToTreeConfig(dustbin) {
 exports.dustbinToTreeConfig = dustbinToTreeConfig;
 
 function updateDustbinConfig(dustbin) {
-    let wiComponentService = __GLOBAL.wiComponentService;
     let dustbinModel = dustbinToTreeConfig();
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
     dustbinModel.children.push(createCurvesNode(dustbin));
+    dustbinModel.children.push(createZoneSetsNode(dustbin, {isDeleted: true}));
+    dustbinModel.children.push(createZonesNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createLogplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createCrossplotsNode(dustbin, { isDeleted: true }));
     dustbinModel.children.push(createHistogramsNode(dustbin, { isDeleted: true }));
@@ -1090,12 +1139,6 @@ function visit(node, callback, options) {
 }
 
 exports.visit = visit;
-
-exports.getSelectedNode = getSelectedNode;
-
-function getSelectedNode() {
-    return getSelectedPath().pop();
-}
 
 exports.getSelectedProjectNode = getSelectedProjectNode;
 
@@ -1135,63 +1178,6 @@ function getSelectedPath(foundCB, rootNode) {
     return selectedPath;
 }
 
-exports.pushProjectToExplorer = function (self, project, wiComponentService, WiTreeConfig, WiWell, $timeout) {
-    self.treeConfig = (new WiTreeConfig()).config;
-    $timeout(function () {
-        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
-        wiRootTreeviewComponent.config[0].data.label = project.name;
-        wiRootTreeviewComponent.config[0].children = [];
-    });
-    if (!project.wells) return;
-    // parse config from data
-    // inject child item to origin config
-    let wells = [];
-    for (let well of project.wells) {
-        let wiWellTemp = new WiWell(well);
-        wells.push(wiWellTemp);
-    }
-    $timeout(function () {
-        let wiRootTreeviewComponent = wiComponentService.getComponent(self.treeviewName);
-        if (wiRootTreeviewComponent) {
-            for (let well of wells) {
-                wiRootTreeviewComponent.addItemToFirst('wells', well);
-            }
-        }
-    });
-};
-
-exports.updateWellProject = updateWellProject;
-
-function updateWellProject(wiComponentService, well) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-    if (!project) return;
-    if (!Array.isArray(project.wells)) {
-        project.wells = [];
-        project.wells.push(well);
-    } else {
-        let isNewWell = true;
-        for (let i = 0; i < project.wells.length; i++) {
-            if (project.wells[i].idWell == well.idWell) {
-                project.wells[i] = well;
-                isNewWell = false;
-            }
-        }
-        if (isNewWell) {
-            project.wells.push(well);
-        }
-    }
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
-    wiComponentService.emit(wiComponentService.PROJECT_REFRESH_EVENT);
-};
-
-exports.updateWellsProject = function (wiComponentService, wells) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-    if (!project) return;
-    for (let well of wells) {
-        updateWellProject(wiComponentService, well);
-    }
-};
-
 exports.getCurveData = getCurveData;
 
 function getCurveData(apiService, idCurve, callback) {
@@ -1205,12 +1191,16 @@ function getCurveData(apiService, idCurve, callback) {
         });*/
 }
 
-//exports.getCurveDataByName = getCurveDataByName;
-
 exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
     let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-
+    let selectedObjs;
     element.draggable({
+        helper: function (event) {
+            selectedObjs = $(`.wi-parent-node[type='curve']`).filter('.item-active').clone();
+            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) return $(event.currentTarget).clone();
+            return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+        },
         start: function (event, ui) {
             dragMan.dragging = true;
             d3.selectAll('.vi-track-plot-container').style('z-index', 1);
@@ -1222,69 +1212,82 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
-            let idCurve = parseInt(ui.helper.attr('data'));
             d3.selectAll('.vi-track-plot-container').style('z-index', 'unset');
-            if (wiD3Ctrl && track) {
-                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
-                if (errorCode > 0) {
-                    apiService.createLine({
-                        idTrack: track.id,
-                        idCurve: idCurve,
-                        orderNum: track.getCurveOrderKey()
-                    }, function (line) {
-                        let lineModel = lineToTreeConfig(line);
-                        getCurveData(apiService, idCurve, function (err, data) {
-                            if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+            function handleDrop(idCurves) {
+                if (wiSlidingBarCtrl) {
+                    let idCurve = idCurves[0];
+                    let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
+                    console.log('drop curve into slidingBar', errorCode);
+                    if (errorCode > 0) {
+                        wiSlidingBarCtrl.createPreview(idCurve);
+                        let logplotModel = wiSlidingBarCtrl.logPlotCtrl.getLogplotModel();
+                        let logplotRequest = angular.copy(logplotModel.properties);
+                        logplotRequest.referenceCurve = idCurve;
+                        apiService.editLogplot(logplotRequest, function () {
+                            logplotModel.properties.referenceCurve = idCurve;
                         });
-                    });
+                    }
+                    else if (errorCode === 0) {
+                        toastr.error("Cannot drop curve from another well");
+                    }
+                    return;
                 }
-                else if (errorCode === 0) {
-                    error("Cannot drop curve from another well");
+                if (wiD3Ctrl && !track) {
+                    let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                    if (errorCode > 0) {
+                        wiD3Ctrl.addLogTrack(null, function (newViTrack) {
+                            idCurves.forEach(idCurve => {
+                                apiService.createLine({
+                                    idTrack: newViTrack.id,
+                                    idCurve: idCurve,
+                                    orderNum: newViTrack.getCurveOrderKey()
+                                }, function (line) {
+                                    let lineModel = lineToTreeConfig(line);
+                                    getCurveData(apiService, idCurve, function (err, data) {
+                                        if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                                    });
+                                });
+                            })
+                        })
+                    }
+                    else if (errorCode === 0) {
+                        toastr.error("Cannot drop curve from another well");
+                    }
+                    return;
                 }
-                return;
-            }
-            if (wiD3Ctrl && !track) {
-                let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
-                if (errorCode > 0) {
-                    wiD3Ctrl.addLogTrack(null, function (newViTrack) {
-                        apiService.createLine({
-                            idTrack: newViTrack.id,
-                            idCurve: idCurve,
-                            orderNum: newViTrack.getCurveOrderKey()
-                        }, function (line) {
-                            let lineModel = lineToTreeConfig(line);
-                            getCurveData(apiService, idCurve, function (err, data) {
-                                if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
+                if (wiD3Ctrl && track) {
+                    idCurves.forEach(idCurve => {
+                        let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                        if (errorCode > 0) {
+                            apiService.createLine({
+                                idTrack: track.id,
+                                idCurve: idCurve,
+                                orderNum: track.getCurveOrderKey()
+                            }, function (line) {
+                                let lineModel = lineToTreeConfig(line);
+                                getCurveData(apiService, idCurve, function (err, data) {
+                                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                                });
                             });
-                        });
+                        }
+                        else if (errorCode === 0) {
+                            toastr.error("Cannot drop curve from another well");
+                        }
+                        return;
                     })
                 }
-                else if (errorCode === 0) {
-                    error("Cannot drop curve from another well");
-                }
-                return;
             }
-            if (wiSlidingBarCtrl) {
-                let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
-                console.log('drop curve into slidingBar', errorCode);
-                if (errorCode > 0) {
-                    wiSlidingBarCtrl.createPreview(idCurve);
-                    let logplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
-                    let logplotRequest = angular.copy(logplotModel.properties);
-                    logplotRequest.referenceCurve = idCurve;
-                    wiApiService.editLogplot(logplotRequest, function () {
-                        logplotModel.properties.referenceCurve = idCurve;
-                    });
-                }
-                else if (errorCode === 0) {
-                    error("Cannot drop curve from another well");
-                }
+            let idCurves = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
+            if (idCurves.length) {
+                handleDrop(idCurves);
+            } else {
+                let idCurve = parseInt(ui.helper.attr('data'));
+                handleDrop([idCurve]);
             }
         },
         appendTo: 'body',
         revert: false,
         scroll: false,
-        helper: 'clone',
         containment: 'document',
         cursor: 'move',
         cursorAt: {
@@ -1362,61 +1365,16 @@ function openLogplotTab(wiComponentService, logplotModel, callback, isClosable =
 };
 exports.openLogplotTab = openLogplotTab;
 
-/*exports.updateLogplotProject = function(wiComponentService, idWell, logplot) {
-    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-
-    let selectWellProject = findWellProjectById(idWell, project);
-    if (!selectWellProject) return;
-
-    if (!Array.isArray(selectWellProject.plots) || selectWellProject.plots.length === 0) {
-        selectWellProject.plots = [];
-        selectWellProject.plots.push(logplot);
-        return;
-    }
-
-    for (let plot of selectWellProject.plots) {
-        if (!Array.isArray(project.wells)) {
-            project.wells = [];
-            project.wells.push(well);
-        } else {
-
-        }
-    }
-
-    let isNewPlot = true;
-    for (let i = 0; i < selectWellProject.plots.length; i++) {
-        if (selectWellProject.plots[i].idPlot == logplot.idPlot) {
-            selectWellProject.plots[i] = logplot;
-            isNewPlot = false;
-        }
-    }
-    if (isNewPlot) {
-        selectWellProject.plots.push(logplot);
-    }
-
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, project);
-}
-
-function findWellProjectById(idWell, project) {
-    if (!project || !Array.isArray(project.wells)) return;
-    for (let well of project.wells) {
-        if (well.idWell == idWell) {
-            return well;
-        }
-    }
-
-    return null;
-}*/
-function getCurrentWell(type) {
-    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+function getCurrentWell() {
+    let currentWell = getSelectedPath().find(node => node.type == 'well');
     if(!currentWell){
-        utils.error("Please select well first!");
+        toastr.error("Please select well first!");
         return;
     }
     return currentWell;
 }
 exports.getCurrentWell = getCurrentWell;
-function getStaticNode(type, options) {
+function getStaticNode(type) {
     if (!type) return;
     let wiComponentService = __GLOBAL.wiComponentService;
     let currentWell = getSelectedPath().find(node => node.type == 'well');
@@ -1507,7 +1465,7 @@ function findZoneSetById(idZoneSet) {
     return zoneSet;
 }
 
-exports.findDatasetById = findDatasetById;
+exports.findZoneSetById = findZoneSetById;
 
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -1664,20 +1622,22 @@ function sortProjectData(projectData) {
     });
 }
 
-let refreshProjectState = function () {
+let refreshProjectState = function (idProject) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let dom = document.getElementById('treeContent');
 
-    if (!project) return;
+    if (!project && !idProject) return;
 
     return new Promise(function (resolve, reject) {
         let payload = {
-            idProject: project.idProject
+            idProject: idProject || project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
-        let ScrollTmp = dom.scrollTop;
-        window.localStorage.setItem('scrollTmp', ScrollTmp);
+        if (dom) {
+            let ScrollTmp = dom.scrollTop;
+            window.localStorage.setItem('scrollTmp', ScrollTmp);
+        }
         wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
             sortProjectData(projectRefresh);
 
@@ -1777,8 +1737,6 @@ exports.createDataset = function (name) {
 }
 
 exports.exportCurve = function () {
-    let wiComponentService = __GLOBAL.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
     let wiApiService = __GLOBAL.wiApiService;
@@ -1853,15 +1811,12 @@ exports.pasteCurve = function () {
     if (selectedNode.type != 'curve' && selectedNode.type != 'dataset') return;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let wiApiService = __GLOBAL.wiApiService;
-    let currentDatasetName = "";
     let currentDataset;
     if (selectedNode.type == 'curve') {
         // selectedNode is Curve
         currentDataset = findDatasetById(selectedNode.properties.idDataset);
-        currentDatasetName = currentDataset.properties.name;
     } else {
         // selectedNode is Dataset
-        currentDatasetName = selectedNode.properties.name;
         currentDataset = selectedNode;
     }
     // if copying
@@ -2025,7 +1980,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
     shadingObj.fill.varShading.palette = variableShadingStyle.fill.varShading.palName;
     shadingObj.positiveFill.varShading.palette = variableShadingStyle.positiveFill.varShading.palName;
     shadingObj.negativeFill.varShading.palette = variableShadingStyle.negativeFill.varShading.palName;
-    
+
     if (shadingObj.shadingStyle == 'pattern') {
         shadingObj.fill.display = fillPatternStyles.fill.display;
         shadingObj.positiveFill.display = fillPatternStyles.positiveFill.display;
@@ -2068,10 +2023,11 @@ exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
 }
 
 function editProperty(item, callback) {
-    let selectedNode = getSelectedNode();
-    let properties = selectedNode.properties;
     let wiApiService = __GLOBAL.wiApiService;
     let wiComponentService = __GLOBAL.wiComponentService;
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    let selectedNode = selectedNodes[0];
+    let properties = selectedNode.properties;
     let newProperties = angular.copy(properties);
     newProperties[item.key] = item.value;
     if (JSON.stringify(newProperties) === JSON.stringify(properties)) return;
@@ -2091,27 +2047,40 @@ function editProperty(item, callback) {
             });
             break;
         case 'curve':
-            if (item.key == 'unit') {
-                wiApiService.familyUpdate({
-                    idFamily: properties.idFamily,
-                    idFamilySpec: item.value
-                }, function (res, err) {
-                    if (err) return;
-                    putListFamily(callback);
-                })
-                break;
-            }
-            if (item.key == 'idFamily') {
-                newProperties.unit = getListFamily().find(family => family.idFamily == newProperties.idFamily).unit;
-                selectedNode.properties.idFamily = newProperties.idFamily;
-                selectedNode.properties.unit = newProperties.unit;
-            }
-            wiApiService.editCurve(newProperties, function () {
-                refreshProjectState().then(function () {
-                    updateLinesOnCurveEdited(selectedNode);
-                    callback && callback();
-                }).catch();
+            let promises = [];
+            selectedNodes.forEach(selectedNode => {
+                properties = selectedNode.properties;
+                newProperties = angular.copy(properties);
+                newProperties[item.key] = item.value;
+                if (item.key == 'unit') {
+                    wiApiService.familyUpdate({
+                        idFamily: properties.idFamily,
+                        idFamilySpec: item.value
+                    }, function (res, err) {
+                        if (err) return;
+                        putListFamily(callback);
+                    })
+                    return;
+                }
+                if (item.key == 'idFamily') {
+                    if (!newProperties.idFamily) newProperties.idFamily = null;
+                    else {
+                        const family = getListFamily().find(family => family.idFamily == newProperties.idFamily);
+                        if (family) newProperties.unit = family.family_spec.unit;
+                    }
+                }
+                promises.push(new Promise(resolve => {
+                    wiApiService.editCurve(newProperties, function () {
+                        resolve();
+                    });
+                }));
             });
+            Promise.all(promises).then(() => {
+                refreshProjectState().then(function () {
+                    selectedNodes.forEach(n => updateLinesOnCurveEdited(n));
+                    callback && callback();
+                });
+            }).catch();
             break;
         case 'zoneset':
             wiApiService.editZoneSet(newProperties, function () {
@@ -2627,7 +2596,8 @@ exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDelet
                 let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
                 let pointSet = wiD3CrossplotCtrl.getPointSet(wiD3CrossplotCtrl.crossplotModel.properties);
                 if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
-                    layoutManager.removeTabWithModel(crossplotModel);
+                    //layoutManager.removeTabWithModel(crossplotModel);
+                    wiD3CrossplotCtrl.removeVisualizeCrossplot();
                 } else if (idCurve == pointSet.idCurveZ) {
                     wiD3CrossplotCtrl.updateAll();
                 }
@@ -2971,5 +2941,122 @@ function updateWiCurveListingOnModelDeleted(model){
             return;
     }
 }
+function getSelectedNode(rootNode) {
+    return getSelectedPath(null, rootNode).pop();
+}
+
+exports.getSelectedNode = getSelectedNode;
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
+function calVSHfromGR(well, grCurve, matrix, shale, type, callback){
+    let length = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
+    let result = new Array(length);
+    let curvesData = {};
+
+    function getDepth(){
+        let depth = new Array(length);
+        for(i = 0; i < length; i++){
+            depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
+        }
+        return depth;
+    }
+
+    function getData(idCurve, callback){
+        if(idCurve){
+            __GLOBAL.wiApiService.dataCurve(idCurve, function(data){
+                callback(data.map(d => parseFloat(d.x)));
+            })
+        }else{
+            let data = getDepth();
+            callback(data);
+        }
+    }
+    
+    async.series([function(cb){
+        // get data from input
+        getData(grCurve.id, function(data){
+            curvesData['grCurve'] = data;
+            if(matrix.type == 'curve'){
+                getData(matrix.value.id, function(data){
+                    curvesData['matrix'] = data;
+                    if(shale.type == 'curve'){
+                        getData(shale.value.id, function(data){
+                            curvesData['shale'] = data;
+                            cb();
+                        })
+                    }else{
+                        curvesData['shale'] = new Array(length).fill(shale.value);
+                        cb();
+                    }
+                })
+            }else{
+                curvesData['matrix'] = new Array(length).fill(matrix.value);
+                if(shale.type == 'curve'){
+                    getData(shale.value.id, function(data){
+                        curvesData['shale'] = data;
+                        cb();
+                    })
+                }else{
+                    curvesData['shale'] = new Array(length).fill(shale.value);
+                    cb();
+                }
+            }
+        })
+    },
+    function(cb){
+        // cal GR index
+        for(let i = 0; i < length; i++){
+            result[i] = (curvesData['grCurve'][i] - curvesData['matrix'][i])/(curvesData['shale'][i] - curvesData['matrix'][i]);
+        }
+        cb();
+    },
+    function(cb){
+        // cal VSH by type
+        switch(type){
+            case 'Linear':
+            cb();
+            break;
+
+            case 'Clavier':
+            result = result.map(d => {return 1.7 - Math.sqrt(3.38 - Math.pow(d + 0.7, 2))});
+            cb();
+            break;
+
+            case 'Tertiary':
+            result = result.map(d => {return 0.083 * (Math.pow(2, 3.7 * d) - 1)});
+            cb();
+            break;
+
+            case 'Larionov':
+            result = result.map(d => {return 0.33 * (Math.pow(2, 3.7 * d) - 1)});
+            cb();
+            break;
+
+            case 'Stieber1':
+            result = result.map(d => {return d / (2 - d)});
+            cb();
+            break;
+
+            case 'Stieber3':
+            result = result.map(d => {return d / (3 - 2 * d)});
+            cb();
+            break;
+
+            case 'Stieber2':
+            result = result.map(d => {return d / (4 - 3 * d)});
+            cb();
+            break;
+        }
+    }], function(err){
+        console.log(result);
+        callback(result);
+    })
+}
+exports.calVSHfromGR = calVSHfromGR;
+
+function swapValue (a, b) {
+    let t = a;
+    a = b;
+    b = t;
+}
+exports.swapValue = swapValue;

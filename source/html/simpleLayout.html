@@ -34,6 +34,8 @@
     <link href='css/wi-reference-window.css' rel='stylesheet'>
     <link href='css/wi-multi-input.css' rel='stylesheet'>
     <link href='css/wi-custom-input.css' rel='stylesheet'>
+    <link href='css/wi-item-list.css' rel='stylesheet'>
+    <link href='css/wi-item-dropdown.css' rel='stylesheet'>
     <link rel="stylesheet" href="css/wi-comboview.css">
     <link rel="stylesheet" href="css/wi-d3-comboview.css">
     <link rel="stylesheet" href="css/wi-inventory.css">
@@ -45,6 +47,9 @@
     <link href='css/wi-d3-crossplot.css' rel='stylesheet'>
     <link href='css/wi-d3.css' rel='stylesheet'>
     <link href='css/wi-explorer.css' rel='stylesheet'>
+    <link href='css/wii-explorer.css' rel='stylesheet'>
+    <link href='css/wii-items.css' rel='stylesheet'>
+    <link href='css/wii-properties.css' rel='stylesheet'>
     <link rel="stylesheet" href="css/wi-zone.css">
     <link rel="stylesheet" href="css/wi-container.css">
     <link rel="stylesheet" href="css/wi-user.css">
@@ -101,8 +106,11 @@
         <div class="ribbon-wrapper">
             <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
                 <wi-tab heading="Main" closable='false'>
-                    <wi-toolbar name="ExitToolbar" label="Exit" container="ribbon">
-                        <wi-button name="ImportBlockButton" icon="arrow-left-32x32" label="Import Block" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.ImportBlockButtonClicked">
+                    <wi-toolbar name="MiscToolbar" label="Miscelaneous" container="ribbon">
+                        <!--<wi-button name="InventoryInspection" icon="browse-project-32x32" label="Inventory inspection" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.ImportBlockButtonClicked">-->
+                        <wi-button name="InventoryInspection" icon="browse-project-32x32" label="Invt. Inspector" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.InventoryInspectionButtonClicked">
+                        </wi-button>
+                        <wi-button name="InventoryConnect" icon="browse-project-32x32" label="Invt. Connect" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.InventoryConnectButtonClicked">
                         </wi-button>
                         <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.WipmButtonClicked">
                         </wi-button>
@@ -253,7 +261,24 @@
     </template>
 
     <template id="well-import">
-        @@include('./well-import/index.html')
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Well import tool</h3>
+            @@include('./well-import/index.html')
+        </div>
+    </template>
+
+    <template id='online-inventory'>
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Inventory Inspection</h3>
+            @@include('./online-inventory/index.html')
+        </div>
+    </template>
+
+    <template id='inventory-connect'>
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Inventory Connect</h3>
+            <wi-inventory style='flex:1;'></wi-inventory>
+        </div>
     </template>
     
     <script src="js/simpleLayout.js.bundle.js"></script>

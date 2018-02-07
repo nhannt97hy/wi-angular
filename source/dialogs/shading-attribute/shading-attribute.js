@@ -82,6 +82,10 @@ function shadingAttributeDialog (ModalService, wiApiService, callback, shadingOp
                 }
             }
         }
+        if (!this.shadingOptions.idControlCurve) {
+            this.shadingOptions.idControlCurve = (this.shadingOptions.leftLine.id > 0) ? 
+                                                    this.shadingOptions.leftLine.idCurve : this.shadingOptions.rightLine.idCurve;
+        }
         let controlCurve = utils.getCurveFromId(this.shadingOptions.idControlCurve);
         console.log("controlCurve", this.shadingOptions.idControlCurve, controlCurve);
         

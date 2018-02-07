@@ -23,6 +23,7 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
                         this.container.unselectAllNodes();
                     }
                 }
+                self.selectedNode = node;
                 this.container.selectHandler(node);
             } else {
                 // shift key
@@ -37,14 +38,14 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
                             let toIndex = selectedNodes[0].$index;
                             this.container.unselectAllNodes();
                             for (let i = fromIndex; i <= toIndex; i++) {
-                                this.container.selectHandler(this.config[i]);
+                                this.container.selectHandler(this.config[i], true);
                             }
                         } else {
                             let fromIndex = selectedNodes[0].$index;
                             let toIndex = node.$index;
                             this.container.unselectAllNodes();
                             for (let i = fromIndex; i <= toIndex; i++) {
-                                this.container.selectHandler(this.config[i]);
+                                this.container.selectHandler(this.config[i], true);
                             }
                         }
                     }
@@ -253,10 +254,12 @@ app.component(componentName, {
     bindings: {
         isRoot: '<',
         name: '<',
+        contextmenuholder: '<',
         config: '<',
         container: '<',
         isShowParentName: '<',
-        onClick: '<'
+        onClick:'<',
+        selectedNode: '='
     }
 });
 

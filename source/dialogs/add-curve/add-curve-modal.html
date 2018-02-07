@@ -29,8 +29,14 @@
                         <div class="form-group">
                             <label class="col-sm-6">Family:</label>
                             <div class="col-sm-6">
-                                <select class="form-control wi-form-control" ng-model="wiModal.selectedFamily"
-                                 ng-options="family as family.name for family in wiModal.families" ng-change='wiModal.onFamilyChanged()'></select>
+                                <ui-select ng-model="wiModal.selectedFamily"
+                                    ng-change='wiModal.onFamilyChanged()'>
+                                    <ui-select-match placeholder='Select a family'>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices
+                                    repeat='family in wiModal.families | filter:{name:$select.search} track by $index'>
+                                        <div class="padding-left-20px">{{family.name}}</div>
+                                    </ui-select-choices>
+                                </ui-select>
                             </div>
                         </div>
                         <div class="form-group">
@@ -42,7 +48,13 @@
                         <div class="form-group">
                             <label class="control-label col-sm-6">Unit:</label>
                             <div class="col-sm-6">
-                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.unit" ng-disabled="true">
+                                <ui-select search-enabled='false' ng-model='wiModal.unit'>
+                                    <ui-select-match placeholder='Select a unit'>{{$select.selected.unit}}</ui-select-match>
+                                    <ui-select-choices
+                                    repeat='spec in wiModal.selectedFamily.family_spec track by $index'>
+                                        <div class="padding-left-20px">{{spec.unit}}</div>
+                                    </ui-select-choices>
+                                </ui-select>
                             </div>
                         </div>
                         <div class="form-group">
@@ -55,7 +67,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" ng-click="wiModal.onRunButtonClicked();" ng-disabled="!wiModal.curveName || wiModal.applyingInProgress" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onRunButtonClicked();" ng-disabled="!wiModal.datasetName || !wiModal.curveName || wiModal.applyingInProgress" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>

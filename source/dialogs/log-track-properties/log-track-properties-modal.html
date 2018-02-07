@@ -184,7 +184,7 @@
                         <div ng-show="wiModal.tabFlags[1] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="width-95-percent float-left">
-                                    <table class="text-on-table table table-bordered curveTable">
+                                    <table class="text-on-table table table-bordered curveTable ui-select-small">
                                         <thead>
                                             <tr>
                                                 <th>Curve</th>
@@ -293,6 +293,13 @@
                                     <button class="btn btn-default" ng-click="wiModal.addRowCurve();">
                                         <span class="plus-16x16"></span>
                                     </button>
+                                    <br><br>
+                                    <button class="btn btn-default" ng-click="wiModal.arrowUpCurve();">
+                                        <span class="arrow-up-16x16"></span>
+                                    </button>
+                                    <button class="btn btn-default" ng-click="wiModal.arrowDownCurve();">
+                                        <span class="arrow-down-16x16"></span>
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -301,7 +308,7 @@
                         <div ng-show="wiModal.tabFlags[2] == 'true'" class="container-fluid padding-top-2em padding-bottom-2em">
                             <form action="" class="form-horizontal">
                                 <div class="col-sm-11 padding-0">
-                                    <table style="border-collapse: collapse;" class="text-on-table table table-bordered shadingTable col-sm-12">
+                                    <table style="border-collapse: collapse;" class="text-on-table table table-bordered shadingTable col-sm-12 ui-select-small">
                                         <thead>
                                             <tr>
                                                 <td class="text-center"><strong>Limit 1</strong></td>

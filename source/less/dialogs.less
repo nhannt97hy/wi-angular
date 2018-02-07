@@ -520,9 +520,9 @@ input[type="checkbox"] {
 	border: 1px solid #ccc;
 }
 .scrollTable {
-	thead, tbody {
+	/* thead, tbody {
 		display: block;
-	}
+	} */
 	tbody {
 		max-height: 9em;
 		overflow-y: overlay;
@@ -631,8 +631,27 @@ input[type=checkbox].input-check {
 }
 
 .modalScroll {
-	max-height: 40em;
+	max-height: 30em;
     overflow-y: overlay;
 }
 //end import from inventory inentory dialog 
 .ui-select-toggle > .caret { pointer-events: none }
+
+.ui-select-small {
+	.ui-select-match .ui-select-toggle {
+		height: 20px;
+	}
+	.ui-select-search {
+		height: 20px;
+	}
+	.dropdown-menu {
+		min-width: 125px;
+		font-size: 11px;
+	}
+	.dropdown-menu::-webkit-scrollbar {
+		width: 5px;
+	}
+}
+.background-header-table {
+	background: #EBEDEF;
+}

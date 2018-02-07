@@ -1,17 +1,43 @@
 const componentName = 'wiInventory';
 const moduleName = 'wi-inventory';
 
-function Controller($scope, wiComponentService, wiApiService, ModalService) {
+function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService, ModalService, $timeout) {
     modalService = ModalService;
     let self = this;
     window.inv =this;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+    let oUtils = require('./oinv-utils');
+    oUtils.setGlobalObj({
+        wiComponentService, wiOnlineInvService, $timeout
+    });
+
     let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiInventory', self);
     };
+    this.getProjectList = function(wiItemDropdownCtrl) {
+        wiApiService.getProjectList(null, function(projectList) {
+            console.log(projectList);
+            wiItemDropdownCtrl.items = projectList.map(function(prj) {
+                return {
+                    data: {
+                        label: prj.name
+                    },
+                    properties: prj
+                };
+            });
+        });
+    }
+    this.projectChanged = function(projectProps) {
+        let refreshPromise = utils.refreshProjectState(projectProps.idProject);
+        refreshPromise && refreshPromise.then(projectLoaded => {
+            projectModel = modelFrom(projectLoaded);
+            self.projectConfig = [projectModel];
+        });
+    }
 
     function importModelExistedDialog(ModalService, callback) {
         function ModalController($scope, close, wiComponentService) {
@@ -56,45 +82,73 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
 
     let projectModel;
     function refreshProject() {
-        utils.refreshProjectState().then(projectLoaded => {
+        let refreshPromise = utils.refreshProjectState();
+        refreshPromise && refreshPromise.then(projectLoaded => {
             projectModel = modelFrom(projectLoaded);
             self.projectConfig = [projectModel];
         });
     }
     let inventoryModel;
     function refreshInventory() {
-        wiApiService.getInventory(inventory => {
+        self.inventoryConfig = [oUtils.initInventory()];
+        /*
+        wiOnlineInvService.getInventory(inventory => {
             inventoryModel = modelFrom(inventory);
             self.inventoryConfig = [inventoryModel];
             inventoryModel.type = 'inventory';
             inventoryModel.data.label = 'Inventory';
-        })
+        });
+        */
     }
     refreshProject();
     refreshInventory();
 
     this.onConfigClick = function () {
-        console.log(this.projectSelectedNode, this.inventorySelectedNode);
-        if (!this.projectSelectedNode || !this.inventorySelectedNode) return;
-        this.importValid = false;
-        switch (this.inventorySelectedNode.type) {
+        console.log(self.projectSelectedNode, self.inventorySelectedNode);
+        if (!self.projectSelectedNode || !self.inventorySelectedNode) return;
+        self.importValid = false;
+        switch (self.inventorySelectedNode.type) {
             case 'well':
-                if (this.projectSelectedNode.type == 'project' || this.projectSelectedNode.type == 'well') self.importValid = true;
+                if (self.projectSelectedNode.type == 'project' || self.projectSelectedNode.type == 'well') self.importValid = true;
                 break;
             case 'dataset':
-                if (this.projectSelectedNode.type == 'well' || this.projectSelectedNode.type == 'dataset') self.importValid = true;
+                if (self.projectSelectedNode.type == 'well' || self.projectSelectedNode.type == 'dataset') self.importValid = true;
                 break;
             case 'curve':
-                if (this.projectSelectedNode.type == 'dataset' || this.projectSelectedNode.type == 'curve') self.importValid = true;
+                if (self.projectSelectedNode.type == 'dataset' || self.projectSelectedNode.type == 'curve') self.importValid = true;
                 break;
             default:
-                this.importValid = false;
+                self.importValid = false;
                 break;
         }
-        $scope.$apply();
+        $timeout(function(){
+            $scope.$apply();
+        })
     }
+
+    function transformModelProperties(modelProps) {
+        if(modelProps.well_headers && modelProps.well_headers.length) {
+            modelProps.well_headers.forEach(function(wellheader) {
+                switch (wellheader.header) {
+                    case 'STRT': 
+                        modelProps.topDepth = wellheader.value;
+                        break;
+                    case 'STOP': 
+                        modelProps.bottomDepth = wellheader.value;
+                        break;
+                    case 'STEP':
+                        modelProps.step = wellheader.value;
+                        break;
+                    default:
+
+                }
+            })
+        }
+        return modelProps;
+    }
+
     function importModel(model, desParentModel) {
-        let itemProps = angular.copy(model.properties);
+        let itemProps = angular.copy(transformModelProperties(model.properties));
         let importedModel;
         if (model.type == 'well') {
             importedModel = utils.createWellModel(itemProps);
@@ -119,6 +173,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         if (!self.importValid) return;
         let desParentModel = self.projectSelectedNode;
         let model = self.inventorySelectedNode;
+        console.log("THANG Debug: ", desParentModel, model);
         if (self.projectSelectedNode.type == model.type) {
             desParentModel = utils.getParentByModel(self.projectSelectedNode.type, self.projectSelectedNode.id, null, projectModel);
         } else {
@@ -136,6 +191,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
                 self.importItems.push(importModel(model, desParentModel));
             }
         }
+    }
+    
+    this.revertButtonClicked = function () {
+        let revertModel = self.projectSelectedNode;
     }
 
     function getImportPayload(model) {
@@ -176,15 +235,22 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
                 let wellPayload = {
                     idProject: item.parent.idProject,
                     name: item.properties.name,
-                    topDepth: item.properties.start,
-                    bottomDepth: item.properties.stop,
+                    topDepth: item.properties.topDepth,
+                    bottomDepth: item.properties.bottomDepth,
                     step: item.properties.step,
                 }
                 wiApiService.createWell(wellPayload, function (newWell, err) {
                     if (err) {
                         reject(err);
+                        return;
                     }
+                    oUtils.updateParentNode(item, newWell);
+                    /*
                     item.properties = newWell;
+                    item.children.forEach(function(dataset) {
+                        dataset.parent = item.properties;
+                    })
+                    */
                     wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
                         if (err) {
                             reject(err);
@@ -213,6 +279,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         })
     }
     this.onLoadButtonClicked = function () {
+        console.log("THANG Debug: ", self.importItems);
         async.eachSeries(self.importItems, function (item, next) {
             importProcess(item).then(res => {
                 next();
@@ -233,6 +300,96 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         self.projectSelectedNode = null;
         self.importValid = false;
     };
+
+    this.upTrigger = function(cb) {
+        console.log("upTrigger");
+        let wells = self.inventoryConfig[0].children;
+        if (wells.length) {
+            wiOnlineInvService.listWells({
+                start: wells[0].properties.idWell, 
+                limit: 10, 
+                forward: false
+            }, function(listOfWells) {
+                $timeout(function() {
+                    console.log(listOfWells);
+                    for (let well of listOfWells) {
+                        let wellModel = wellToTreeConfig(well);
+                        wellModel.data.toggle = self.labelToggle;
+                        wells.unshift(wellModel);
+                        wells.pop();
+                    }
+                    if (cb) cb(listOfWells.length);
+                });
+            });
+        }
+        else if (cb) cb(0);
+    }
+    this.downTrigger = function(cb) {
+        console.log("downTrigger");
+        let wells = self.inventoryConfig[0].children;
+        if (wells.length) {
+            wiOnlineInvService.listWells({
+                start: wells[wells.length - 1].properties.idWell, 
+                limit: 10, 
+                forward: true
+            }, function(listOfWells) {
+                $timeout(function() {
+                    console.log(listOfWells);
+                    for (let well of listOfWells) {
+                        let wellModel = wellToTreeConfig(well);
+                        wellModel.data.toggle = self.labelToggle;
+                        wells.push(wellModel);
+                        wells.shift();
+                    }
+                    if (cb) cb(listOfWells.length);
+                });
+            });
+        }
+        else if (cb) cb(0);
+    }
+
+    this.selectHandler = function (currentNode, noLoadData) {
+        function bareSelectHandler() {
+            //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
+            //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
+            if (currentNode.data) {
+                currentNode.data.selected = true;
+                let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                if (!Array.isArray(selectedNodes)) selectedNodes = [];
+                if (!selectedNodes.includes(currentNode)) {
+                    selectedNodes.push(currentNode);
+                }
+                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+                // self.getWiiItems().getWiiProperties().emptyList();
+                self.onConfigClick();
+            }
+        }
+
+        if (currentNode.type == 'well' && !noLoadData) {
+            oUtils.updateDatasets(currentNode.id, self.inventoryConfig[0]).then(function(datasetsModel) {
+                async.each(datasetsModel, function(dModel, done) {
+                    oUtils.updateCurves(dModel.id, self.inventoryConfig[0]).then(function() {
+                        done();
+                    });
+                }, function(error) {
+                    bareSelectHandler();
+                });
+            });
+        }
+        else {
+            bareSelectHandler();
+        }
+    }
+    
+    this.unselectAllNodes = function () {
+        self.inventoryConfig.forEach(function (item) {
+            utils.visit(item, function (node) {
+                if (node.data) node.data.selected = false;
+            });
+        });
+        wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+    }
+
 }
 
 let app = angular.module(moduleName, []);

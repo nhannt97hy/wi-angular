@@ -8,7 +8,23 @@ function curveBulkUpdateDialog (ModalService, logTracks) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+        this.zoomInDialog = function() {
+            self.modalSize = {
+                "width": "1200px",
+            };
+            self.maxHeightModal = {
+                "max-height": "50em",
+            };
+        };
 
+        this.zoomOutDialog = function() {
+            self.modalSize = {};
+            self.maxHeightModal = {};
+        };
+
+        this.unCheck = function(track) {
+
+        }
         this.tracks = [];
         logTracks.forEach(function(lt) {
             let lineArr = [];
@@ -36,7 +52,7 @@ function curveBulkUpdateDialog (ModalService, logTracks) {
                 lineArr.push(line);
             });
             self.tracks.push({
-                use : true,
+                use : false,
                 name : lt.name,
                 id : lt.id,
                 lines : lineArr
@@ -105,6 +121,7 @@ function curveBulkUpdateDialog (ModalService, logTracks) {
                     currentCurve.setProperties(line);
 
                     currentTrack.plotCurve(currentCurve);
+                    currentTrack.doPlot();
                     if (cb) cb();
                 })
             }, function(err) {

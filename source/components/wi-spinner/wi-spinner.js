@@ -27,8 +27,10 @@ function Controller(wiComponentService, $timeout, $scope) {
     this.hide = hide;
     function hide() {
         if (--count > 0) return;
-        self.shown = false;
-        if (_spinner) _spinner.stop();
+        $timeout(() => {
+            self.shown = false;
+            if (_spinner) _spinner.stop();
+        })
     }
 }
 

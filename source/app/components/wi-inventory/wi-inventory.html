@@ -14,29 +14,40 @@
         position:relative;
     }
 </style>
-<div class="inventory-toolbar-wrapper">
-	<wi-toolbar>
-		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
-		<wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert All" handler="wiInventory.onRevertAllButtonClicked" ng-if="!!wiInventory.importItems.length"></wi-button>
-		<wi-button icon="reload-16x16" layout="icon-left" type="small" label='Refresh' tooltip="Refresh" handler="wiInventory.onRevertAllButtonClicked" ng-if="!wiInventory.importItems.length"></wi-button>
-	</wi-toolbar>
-</div>
 <div class="inventory-main" style="display:flex;flex-direction:row;">
     <div class="inventory-side">
         <wi-inventory-treeview name="projectTreeview" config="wiInventory.projectConfig" container="wiInventory" selected-node="wiInventory.projectSelectedNode"></wi-inventory-treeview>
     </div>
     <div class="inventory-center">
-        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
+        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:40%;left:50%;transform:translate(-50%, -50%);"
             title="import" ng-click='wiInventory.importButtonClicked()'
             ng-class="{'disabled': !wiInventory.importValid}">
             <span class="arrow-left-16x16"></span>
         </button>
+        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:60%;left:50%;transform:translate(-50%, -50%);"
+            title="revert" ng-click='wiInventory.revertButtonClicked()'
+            ng-class="{'disabled': false || !wiInventory.importValid}">
+            <span class="arrow-right-16x16"></span>
+        </button>
     </div>
-    <div class="inventory-side">
-        <wi-inventory-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-inventory-treeview>
+    <div style="display:flex;padding:0;" class="inventory-side">
+        <wi-scroll style='flex:1;display:flex;flex-direction:column;' up-trigger="wiInventory.upTrigger" down-trigger="wiInventory.downTrigger">
+            <wi-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-treeview>
+        </wi-scroll>
     </div>
 </div>
-
+<div class="inventory-toolbar-wrapper">
+    <wi-toolbar>
+        <wi-item-dropdown class='height34px' style="width:15em;" icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
+        </wi-item-dropdown>
+    </wi-toolbar>
+    <wi-toolbar>
+		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
+        <wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Sync' tooltip="Sync" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
+        <wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert All" handler="wiInventory.onRevertAllButtonClicked" ng-if="!!wiInventory.importItems.length"></wi-button>
+		<wi-button icon="reload-16x16" layout="icon-left" type="small" label='Refresh' tooltip="Refresh" handler="wiInventory.onRevertAllButtonClicked" ng-if="!wiInventory.importItems.length"></wi-button>
+	</wi-toolbar>
+</div>
 <!--
 <div class="inventory-main container-fluid">
     <div id="left-inventory" class="col-xs-5">

@@ -165,13 +165,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.xHistogram = graph.createHistogram(self.histogramModelX, well.step,
                     well.topDepth,
                     well.bottomDepth, elem);
-    
+
             let zoneCtrl = self.getZoneCtrl();
             if (!zoneCtrl) return;
             let activeZones = zoneCtrl.getActiveZones();
             self.xHistogram.setZoneSet(activeZones);
             self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
-    
+
             self.xHistogram.doPlot();
         },time)
     }
@@ -185,18 +185,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             var containerId = "#" + self.name + 'HistogramY';
             var elem = $(containerId);
             var innerElem = $(containerId + ' .transform-group');
-            let sensor = new ResizeSensor(elem[0], function() {
+            function handler() {
                 innerElem.css('width', elem[0].clientHeight + 'px');
                 innerElem.css('height', elem[0].clientWidth + 'px');
-            });
-    
-            function handler () {
-                if (!sensor || !sensor.detach) return;
-                sensor.detach();
-                sensor = new ResizeSensor(elem[0], function() {
-                    innerElem.css('width', elem[0].clientHeight + 'px');
-                    innerElem.css('height', elem[0].clientWidth + 'px');
-                });
+                self.xHistogram.doPlot();
+                self.yHistogram.doPlot();
             }
             self.resizeHandlerHis = function (event) {
                 let model = event.model;
@@ -216,13 +209,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.yHistogram = graph.createHistogram(self.histogramModelY, well.step,
                     well.topDepth,
                     well.bottomDepth, innerElem[0]);
-    
+
             let zoneCtrl = self.getZoneCtrl();
             if (!zoneCtrl) return;
             let activeZones = zoneCtrl.getActiveZones();
             self.yHistogram.setZoneSet(activeZones);
             self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
-    
+
             self.yHistogram.doPlot();
         },time)
     }
@@ -231,7 +224,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let pointSet = self.crossplotModel.properties.pointsets[0];
             if(pointSet.idCurveX && pointSet.idCurveY){
                 self.crossplotModel.properties.showHistogram = !self.crossplotModel.properties.showHistogram;
-                wiApiService.editCrossplot(self.crossplotModel.properties);                
+                saveCrossplot();
                 if (self.viCrossplot) $timeout(() => self.viCrossplot.doPlot(), 100);
                 $timeout(function(){
                     if(pointSet.idCurveZ){
@@ -256,7 +249,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getModel = function(){
         return self.crossplotModel;
     }
-    
+
     this.getZoneCtrl = function () {
         if (self.wiCrossplotCtrl) {
             return self.wiCrossplotCtrl.getWiZoneCtrl();
@@ -344,7 +337,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (menuItem) {
             menuItem.checked = self.crossplotModel.properties.referenceDisplay;
         }
-        wiApiService.editCrossplot(self.crossplotModel.properties);
+        saveCrossplot();
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
 
@@ -458,7 +451,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
                         //if (callback) callback(crossplotProps);
 
-                        self.crossplotModel.properties = crossplotProps;                        
+                        self.crossplotModel.properties = crossplotProps;
                         self.linkModels();
                         if (crossplotProps.pointSet.idZoneSet) {
                             crossplotProps.pointSet.zones = self.zoneArr.map(function(zone) {
@@ -569,7 +562,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                         self.crossplotModel.properties.referenceShowDepthGrid);
                                         //true);
                             });
-                        }, self.setContextMenu);
+                            self.switchReferenceWindow(self.crossplotModel.properties.referenceDisplay);
+                        });
                     }
                 }, {
                     name: "ShowOverlay",
@@ -770,6 +764,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.hisContextMenu);
     }
+
+    this.removeVisualizeCrossplot = function() {
+        if (self.viCrossplot && self.viCrossplot.destroy) {
+            self.viCrossplot.destroy();
+            self.viCrossplot = null;
+
+            let crossplotProps = angular.copy(self.crossplotModel.properties);
+            if (crossplotProps.pointsets && crossplotProps.pointsets.length) {
+                crossplotProps.pointSet = crossplotProps.pointsets[0];
+                crossplotProps.pointSet.idCurveX = null;
+                crossplotProps.pointSet.idCurveY = null;
+            }
+            self.createVisualizeCrossplot(null, null, crossplotProps);
+        }
+    }
+
     this.createVisualizeCrossplot = function (curveX, curveY, config) {
         if (self.viCrossplot && self.viCrossplot.pointSet) return;
         if (!config) {

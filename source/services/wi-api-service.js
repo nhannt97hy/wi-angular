@@ -20,7 +20,8 @@ let app = angular.module(moduleName, []);
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
+//const INVENTORY_SERVICE = 'http://inv.sflow.me';
+const INVENTORY_SERVICE = 'http://13.229.66.151';
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
@@ -57,6 +58,7 @@ const CREATE_WELL = '/project/well/new';
 const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
 const INFO_WELL = '/project/well/info';
+const DUPLICATE_WELL = '/project/well/duplicate';
 
 const CREATE_DATASET = '/project/well/dataset/new';
 const EDIT_DATASET = '/project/well/dataset/edit';
@@ -1447,6 +1449,10 @@ Service.prototype.duplicateCurve = function (idCurve, callback) {
 
 Service.prototype.duplicateZoneset = function (idZoneSet, callback) {
     this.post(DUPLICATE_ZONE_SET, {idZoneSet: idZoneSet}, callback);
+}
+
+Service.prototype.duplicateWell = function (idWell, callback) {
+    this.post(DUPLICATE_WELL, {idWell: idWell}, callback);
 }
 
 Service.prototype.savePlotAs = function (payload, callback) {

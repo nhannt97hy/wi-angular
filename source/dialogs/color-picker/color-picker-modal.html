@@ -50,31 +50,31 @@
                 <div class="col-xs-3">
                   <div id="RGB-red" class="input-group">
                     <label for="red" class="input-group-addon">Red</label>
-                    <input type="number" min="0" max="255" id="red" class="form-control" ng-model='wiModal.currentColor.r' ng-change="wiModal.checkColorValue(wiModal.currentColor.r, 1)">
+                    <input type="number" id="red" class="form-control" ng-model='wiModal.currentColor.r' ng-change="wiModal.checkColorValue(wiModal.currentColor.r, 'red')">
                   </div>
                 </div>
                 <div class="col-xs-3">
                   <div id="RGB-green" class="input-group">
                     <label for="green" class="input-group-addon">Green</label>
-                    <input type="number" min="0" max="255" id="green" class="form-control" ng-model='wiModal.currentColor.g' ng-change="wiModal.checkColorValue(wiModal.currentColor.g, 1)">
+                    <input type="number" id="green" class="form-control" ng-model='wiModal.currentColor.g' ng-change="wiModal.checkColorValue(wiModal.currentColor.g, 'green')">
                   </div>
                 </div>
                 <div class="col-xs-3">
                   <div id="RGB-blue" class="input-group">
                     <label for="blue" class="input-group-addon">Blue</label>
-                    <input type="number" min="0" max="255" id="blue" class="form-control" ng-model='wiModal.currentColor.b' ng-change="wiModal.checkColorValue(wiModal.currentColor.b, 1)">
+                    <input type="number" id="blue" class="form-control" ng-model='wiModal.currentColor.b' ng-change="wiModal.checkColorValue(wiModal.currentColor.b, 'blue')">
                   </div>
                 </div>
                 <div class="col-xs-3">
                   <div id="RGB-alpha" class="input-group">
                     <label for="alpha" class="input-group-addon">Alpha</label>
-                    <input type="number" min="0" max="1" step="0.01" id="alpha" class="form-control" ng-model='wiModal.currentColor.a' ng-change="wiModal.checkColorValue(wiModal.currentColor.a, 2)">
+                    <input type="number" step="0.01" id="alpha" class="form-control" ng-model='wiModal.currentColor.a' ng-change="wiModal.checkColorValue(wiModal.currentColor.a, 'alpha')">
                   </div>
                 </div>
               </div>
               <button type="button" class="btn btn-default" style="display: none;" ng-click='wiModal.updateColor();'>Click</button>
+              <!-- <p style="color: goldenrod" ng-if="wiModal.errorMessage"><span class="glyphicon glyphicon-warning-sign"></span> {{wiModal.errorMessage}}</p> -->
             </form>
-            <!-- <p class="dialog-error" ng-if="wiModal.errorMessage">{{wiModal.errorMessage}}</p> -->
           </div>
           <!-- End of RGB format -->
         </div>
