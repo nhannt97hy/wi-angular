@@ -348,8 +348,7 @@
                                         <div class="form-group">
                                             <label class="control-label col-sm-2">Crossplot Title</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control wi-form-control"
-                                                        >
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.title">
                                             </div>
                                         </div>
                                     </div>
@@ -357,107 +356,28 @@
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4">X Axis Label</label>
+                                            <label class="control-label col-sm-4">X Axes Label</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control wi-form-control"
-                                                        >
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.labelX">
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4">Y Axis Label</label>
+                                            <label class="control-label col-sm-4">Y Axes Label</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control wi-form-control"
-                                                        >
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.labelY">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-4">Z Axis Label</label>
+                                            <label class="control-label col-sm-4">Z Axes Label</label>
                                             <div class="col-sm-8">
-                                                <input type="text" class="form-control wi-form-control"
-                                                        >
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-4">Z1 Axis Label</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" class="form-control wi-form-control"
-                                                        >
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.labelZ">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <hr>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="form-group">
-                                            <div class="checkbox padding-left-5-percent">
-                                                <label><input type="checkbox" value="">Put regression line equation on plot</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <h5>Hard Copy</h5>
-                                        <div class="col-sm-6">
-                                            <label class="control-label col-sm-4">Width (inch)</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control wi-form-control">
-                                            </div>
-                                            <label class="control-label col-sm-4">Height (inch)</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control wi-form-control">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6 padding-left-20px">
-                                            <div class="checkbox padding-1em">
-                                                <label><input type="checkbox" value="">Plot Zone, depth and parameter info</label>
-                                            </div>
-                                            <div class="checkbox padding-1em">
-                                                <label><input type="checkbox" value="">Plot Achive Zone Title</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <h5>Frequency</h5>
-                                        <div class="col-sm-2">
-                                            <div class="form-group">
-                                                <div class="checkbox padding-left-15-percent">
-                                                    <label><input type="checkbox" value="">Display</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-group">
-                                                <label class="control-label col-sm-3">Position</label>
-                                                <div class="col-sm-9">
-                                                    <select class="form-control wi-form-control"
-                                                            ng-model="wiModal.props.general.title"></select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label class="control-label col-sm-3">
-                                                    Color
-                                                </label>
-                                                <div class="col-sm-9">
-                                                    <div class="float-left">
-                                                        <!-- <button ng-click="wiModal.colorCrossplot();"
-                                                                ng-style="{'background-color':wiModal.props.general.color}"
-                                                                class="form-control wi-form-control width-80px thick-border">
-                                                        </button> -->
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </form>
                         </div>
                     </wi-tab>
