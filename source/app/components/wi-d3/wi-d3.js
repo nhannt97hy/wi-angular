@@ -75,25 +75,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.toggleReferenceLine = function() {
         _referenceLine = !_referenceLine;
     }
-
+    let originalWidths = [];
     this.toggleFitWindow = function() {
         _fitWindow = !_fitWindow;
         let plotAreaElem = $('#logplot' + self.logPlotCtrl.id + 'D3AreaPlotArea');
         let plotAreaWidth = plotAreaElem.width();
         let sumOfOriWidth = 0;
-        let originalWidths = [];
+        let widths = [];
         // let fitWindowWidths = [];
         _tracks.forEach(function(t) {
-            originalWidths.push(t.width);
+            widths.push(t.width);
             sumOfOriWidth += t.width;
         });
         let ratioWidth = plotAreaWidth/sumOfOriWidth;
-        console.log("fitWindow WiD3", ratioWidth, sumOfOriWidth, plotAreaWidth);
         _tracks.forEach(function(t, index) {
             if(_fitWindow) {
-                t.width = originalWidths[index] * ratioWidth;
+                t.width = widths[index] * ratioWidth;
+                originalWidths.push(widths[index]);
             }
-            else t.width = originalWidths[index] /ratioWidth;
+            else {
+                t.width = originalWidths[index];
+            }
             t.doPlot();
         })
     }
@@ -1635,14 +1637,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
                 wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isDepthTrack()) {
                 wiApiService.editDepthTrack({ idDepthAxis: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isZoneTrack()) {
                 wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isImageTrack()) {
                 wiApiService.editImageTrack({ idImageTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isObjectTrack()) {
                 wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
+                _fitWindow = false;
             }
         });
     }
