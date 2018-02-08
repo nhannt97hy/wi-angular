@@ -58,8 +58,8 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if (self.props.general.width < 0 ) self.props.general.width = 0;
-            wiApiService.editTrack(self.props.general, function(res) {
-                console.log("res", res);
+            wiApiService.editTrack(self.props.general, function (res) {
+                if (!res) return;
                 let newProps = angular.copy(self.props);
                 newProps.general.width = utils.inchToPixel(self.props.general.width);
                 currentTrack.setProperties(newProps.general);
@@ -90,7 +90,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         });
         this.curveList = currentTrack.getCurves();
         let curves_bk = [];
-        this.curveList.forEach(function(c) {
+        this.curveList.forEach(function (c) {
             self.curves.push(c.getProperties());
 
             //get id & idCurve to compare in updateCurvesTab function
@@ -126,7 +126,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         });
         this.onSelectCurve = function () {
             let curve = self.curves.find(c => c._index == self.__idx);
-            idCurveNew = curve.lineCurve.id;
+            let idCurveNew = curve.lineCurve.id;
             let curveUnchanged = false;
             if (curve.idLine != null) curveUnchanged = true;
             wiApiService.infoCurve(idCurveNew, function (curveInfo) {
@@ -504,9 +504,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         function getLine (idLine) {
             let line = null;
             if (idLine != null && !isNaN(idLine)) {
-                line = self.curveList.filter(function(c) {
-                    return (c.id == idLine);
-                })[0];
+                line = self.curveList.find(c => c.id == idLine);
             };
             return line;
         }
@@ -621,6 +619,9 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                     item.idControlCurve = (item.leftLine.id > 0) ? 
                                             item.leftLine.idCurve : item.rightLine.idCurve;
                 }
+                const idLeftLine = item.leftLine.id
+                delete item.leftLine;
+                delete item.rightLine;
                 let request = angular.copy(item);
 
                 if(item.idLeftLine == -3) {
@@ -635,8 +636,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 if(item.idLeftLine > 0) {
                     item.type = 'pair';
                 }
-                delete request.leftLine;
-                delete request.rightLine;
                 delete request.changed;
 
                 let options = angular.copy(item);
@@ -647,7 +646,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 }
                 else {
                     request.leftFixedValue = null;
-                    request.idLeftLine = parseInt(item.leftLine.id);
+                    request.idLeftLine = parseInt(idLeftLine);
                 }
                 request.palette = request.palName;
 
@@ -704,19 +703,13 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             // }
             async.series([
                         function(callback) {
-                            updateGeneralTab(function (err) {
-                                callback();
-                            });
+                            updateGeneralTab(callback);
                         },
                         function(callback) {
-                            updateCurvesTab(function(err) {
-                                callback(err);
-                            });
+                            updateCurvesTab(callback);
                         },
                         function(callback) {
-                            updateShadingsTab(function(err) {
-                                callback(err);
-                            });
+                            updateShadingsTab(callback);
                         }], function(err, results) {
                             console.log(err, results);
                             if (!self.applyInProgress) callback(true);
