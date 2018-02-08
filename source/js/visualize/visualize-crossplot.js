@@ -271,6 +271,15 @@ Crossplot.prototype.PROPERTIES = {
             },
         },
         default: []
+    },
+    title: {
+        type: 'Object',
+        properties: {
+            title: { type: 'String' },
+            labelX: { type: 'String' },
+            labelY: { type: 'String' },
+            labelZ: { type: 'String' }
+        }
     }
 };
 
@@ -368,11 +377,15 @@ Crossplot.prototype.getTransformZ = function() {
 }
 
 Crossplot.prototype.getLabelX = function() {
-    return this.pointSet.labelX || (this.pointSet.curveX || {}).name;
+    return this.title.labelX || (this.pointSet.curveX || {}).name;
 }
 
 Crossplot.prototype.getLabelY = function() {
-    return this.pointSet.labelY || (this.pointSet.curveY || {}).name;
+    return this.title.labelY || (this.pointSet.curveY || {}).name;
+}
+
+Crossplot.prototype.getLabelZ = function() {
+    return this.title.labelZ || (this.pointSet.curveZ || {}).name;
 }
 
 Crossplot.prototype.getPlotRect = function() {
@@ -416,7 +429,7 @@ Crossplot.prototype.init = function(domElem) {
 
     this.axisContainer
         .selectAll('text.vi-crossplot-axis-label')
-        .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label'])
+        .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label', 'vi-crossplot-axis-z-label'])
         .enter()
             .append('text')
             .attr('class', function(d) { return 'vi-crossplot-axis-label ' + d; })
@@ -587,7 +600,11 @@ Crossplot.prototype.updateAxisTicks = function() {
         .call(axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
 
-    if (!this.pointSet.curveZ) return;
+    if (!this.shouldPlotZAxis()) {
+        this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
+            .style('display', 'none');
+        return;
+    }
 
     let wdZ = this.getWindowZ();
     let stepZ, transformZ, tickValues;
@@ -621,7 +638,7 @@ Crossplot.prototype.updateAxisTicks = function() {
     this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
         .call(axisZ)
         .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)')
-        .style('display', this.shouldPlotZAxis() ? 'block' : 'none');
+        .style('display', 'block');
 }
 
 Crossplot.prototype.updateAxisGrids = function() {
@@ -756,6 +773,24 @@ Crossplot.prototype.updateAxisLabels = function() {
             + ','
             + ((vpY[1]-vpY[0])/2 + vpY[0] - bbY.height/2)
             + ')rotate(-90)'
+        );
+
+    let labelZElem = this.axisContainer.select('text.vi-crossplot-axis-z-label')
+    if (!this.shouldPlotZAxis()) {
+        labelZElem.style('display', 'none');
+        return;
+    }
+
+    labelZElem.text(this.getLabelZ())
+        .style('display', 'block');
+    let bbZ = labelZElem.node().getBBox();
+    labelZElem
+        .attr('transform',
+            'translate('
+            + (vpX[1] - bbX.width)
+            + ','
+            + (bbX.height)
+            + ')'
         );
 }
 

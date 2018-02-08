@@ -78,8 +78,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let originalWidths = [];
     this.toggleFitWindow = function() {
         _fitWindow = !_fitWindow;
-        let plotAreaElem = $('#logplot' + self.logPlotCtrl.id + 'D3AreaPlotArea');
-        let plotAreaWidth = plotAreaElem.width();
+        let logplotElem = $('wi-logplot#' + self.logPlotCtrl.id + '>.logplot-header');
+        let slidingBarElem = $('wi-logplot#' + self.logPlotCtrl.id + '>.logplot-main-content>.slidingbar')
+        let plotAreaWidth = logplotElem.width() - slidingBarElem.width() - (slidingBarElem.outerWidth()-slidingBarElem.width())/2;
+        console.log("width", _tracks);
         let sumOfOriWidth = 0;
         let widths = [];
         // let fitWindowWidths = [];
@@ -94,7 +96,47 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 originalWidths.push(widths[index]);
             }
             else {
-                t.width = originalWidths[index];
+                // t.width = originalWidths[index];
+                if (t.isLogTrack()) {
+                    wiApiService.infoTrack(t.id, function (logTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(logTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isDepthTrack()) {
+                    wiApiService.infoDepthTrack(t.id, function (depthTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(depthTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isZoneTrack()) {
+                    wiApiService.getZoneTrack(t.id, function (zoneTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(zoneTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isImageTrack()) {
+                    wiApiService.getImageTrack(t.id, function (zoneTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(zoneTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isObjectTrack()) {
+                    wiApiService.getObjectTrack(t.id, function (objectTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(objectTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
             }
             t.doPlot();
         })
@@ -3145,6 +3187,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
                 if (props) {
                     console.log('logTrackPropertiesData', props);
+                    _fitWindow = false;
                 }
             }, {
                 tabs: ['true', 'true', 'true']
@@ -3153,6 +3196,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils.depthTrackPropertiesDialog(ModalService, _currentTrack, wiApiService, function (props) {
                 if (props) {
                     console.log('depthTrackPropertiesData', props);
+                    _fitWindow = false;
                 }
             });
         } else if (_currentTrack.isZoneTrack()) {
@@ -3174,6 +3218,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
                         _currentTrack.doPlot(true);
                     });
+                    _fitWindow = false;
                 }
             });
         } else if (_currentTrack.isImageTrack()) {
@@ -3194,6 +3239,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             _currentTrack.doPlot(true);
                         });
                     });
+                    _fitWindow = false;
                 }
             });
         } else if (_currentTrack.isObjectTrack()) {
@@ -3206,6 +3252,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         _currentTrack.setProperties(props);
                         _currentTrack.doPlot(true);
                     })
+                    _fitWindow = false;
                 }
             })
         }
