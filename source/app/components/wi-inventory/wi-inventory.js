@@ -299,7 +299,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         })
     }
     this.onLoadButtonClicked = function () {
-        async.eachSeries(self.importItems, function (item, next) {
+        async.eachLimit(self.importItems, 4,function (item, next) {
             importProcess(item).then(res => {
                 next();
             }).catch(err => {
