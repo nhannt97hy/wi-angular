@@ -5,7 +5,7 @@ function Controller($scope, $timeout, $http) {
     let self = this;
     this.$onInit = function() {
         $timeout(function() {
-            $('.scroll-container').scroll(function() {
+            $('#' + self.idScroll).scroll(function() {
                 var _self = this;
                 let scrollTop = $(this).scrollTop();
                 if (scrollTop + $(this).innerHeight() >= $(this)[0].scrollHeight) {
@@ -37,6 +37,7 @@ angular.module(moduleName, []).component(wiScrollName, {
     controllerAs: "wiScroll",
     transclude: true,
     bindings: {
+        idScroll: "<",
         upTrigger: "<",
         downTrigger: "<"
     }

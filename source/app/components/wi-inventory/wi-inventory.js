@@ -335,7 +335,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 $timeout(function() {
                     console.log(listOfWells);
                     for (let well of listOfWells) {
-                        let wellModel = wellToTreeConfig(well);
+                        let wellModel = oUtils.wellToTreeConfig(well);
                         wellModel.data.toggle = self.labelToggle;
                         wells.unshift(wellModel);
                         wells.pop();
@@ -358,7 +358,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 $timeout(function() {
                     console.log(listOfWells);
                     for (let well of listOfWells) {
-                        let wellModel = wellToTreeConfig(well);
+                        let wellModel = oUtils.wellToTreeConfig(well);
                         wellModel.data.toggle = self.labelToggle;
                         wells.push(wellModel);
                         wells.shift();
@@ -371,11 +371,74 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     }
     this.upTriggerPrj = function(cb) {
         console.log('up-trigger prj');
-        cb(0);
+        let wells = self.projectConfig;
+        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
+            wiApiService.listWells({
+                idProject: __idProject,
+                start: wells[0].properties.idWell, 
+                limit: 10, 
+                forward: false
+            }, function(listOfWells) {
+                $timeout(function() {
+                    console.log(listOfWells);
+                    for (let well of listOfWells) {
+                        let wellModel = utils.createWellModel(well)
+                        wells.unshift(wellModel);
+                        wellModel.data.toggle = self.labelToggle;
+                        // not necessary because well contain properties only (no eagger loading at serve side)
+                        if (well.datasets && well.datasets.length) {
+                            well.datasets.forEach(dataset => {
+                                let datasetModel = utils.createDatasetModel(dataset);
+                                wellModel.children.push(datasetModel);
+                                dataset.curves.forEach(curve => {
+                                    datasetModel.children.push(utils.createCurveModel(curve));
+                                })
+                            });
+                        }
+                        /*                        
+                        wellModel.data.toggle = self.labelToggle;
+                        wells.unshift(wellModel);
+                        wells.pop();
+                        */
+                    }
+                    if (cb) cb(listOfWells.length);
+                });
+            });
+        }
+        else if (cb) cb(0);
     }
     this.downTriggerPrj = function(cb) {
         console.log('down-trigger prj');
-        cb(0);
+        let wells = self.projectConfig;
+        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
+            wiApiService.listWells({
+                idProject: __idProject,
+                start: wells[wells.length - 1].properties.idWell, 
+                limit: 10, 
+                forward: true
+            }, function(listOfWells) {
+                $timeout(function() {
+                    console.log(listOfWells);
+                    for (let well of listOfWells) {
+                        let wellModel = utils.createWellModel(well);
+                        wells.push(wellModel);
+                        wells.shift();
+                        // not necessary because well contain properties only (no eagger loading at serve side)
+                        if (well.datasets && well.datasets.length) {
+                            well.datasets.forEach(dataset => {
+                                let datasetModel = utils.createDatasetModel(dataset);
+                                wellModel.children.push(datasetModel);
+                                dataset.curves.forEach(curve => {
+                                    datasetModel.children.push(utils.createCurveModel(curve));
+                                })
+                            });
+                        }
+                    }
+                    if (cb) cb(listOfWells.length);
+                });
+            });
+        }
+        else if (cb) cb(0);
     }
 
     this.selectHandler = selectHandler;

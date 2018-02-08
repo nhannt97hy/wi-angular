@@ -234,7 +234,6 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
 
     this.upTrigger = function(cb) {
-        console.log("upTrigger");
         let wells = self.treeConfig[0].children;
         if (wells.length) {
             wiOnlineInvService.listWells({
@@ -245,7 +244,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
                 $timeout(function() {
                     console.log(listOfWells);
                     for (let well of listOfWells) {
-                        let wellModel = wellToTreeConfig(well);
+                        let wellModel = oUtils.wellToTreeConfig(well);
                         wellModel.data.toggle = self.labelToggle;
                         wells.unshift(wellModel);
                         wells.pop();
@@ -269,7 +268,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
                 $timeout(function() {
                     console.log(listOfWells);
                     for (let well of listOfWells) {
-                        let wellModel = wellToTreeConfig(well);
+                        let wellModel = oUtils.wellToTreeConfig(well);
                         wellModel.data.toggle = self.labelToggle;
                         wells.push(wellModel);
                         wells.shift();

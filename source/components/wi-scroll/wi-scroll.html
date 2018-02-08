@@ -16,7 +16,7 @@
     }
 </style>
 <div style="position:relative;flex:1;display:flex;">
-    <div style='padding-left:0.5em;flex:1;'  ng-transclude class="scroll-container">
+    <div id='{{wiScroll.idScroll}}' style='padding-left:0.5em;flex:1;'  ng-transclude class="scroll-container">
     </div>
     <div ng-show="wiScroll.busy" class="scroll-busy">
         Loading ...

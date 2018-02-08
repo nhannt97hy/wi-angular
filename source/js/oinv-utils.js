@@ -34,7 +34,7 @@ exports.updateWells = updateWells;
 exports.updateWellsDebounce = updateWellsDebounce;
 exports.getAllChildrenCurves = getAllChildrenCurves;
 exports.updateParentNode = updateParentNode;
-
+exports.wellToTreeConfig = wellToTreeConfig;
 
 function updateWells(start, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;
