@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, allTracks) {
+module.exports = function (ModalService, allTracks, idLogplot) {
     function ModalController(wiComponentService, wiApiService, close) {
         let self = this;
         window.tBulk = this;
@@ -10,7 +10,8 @@ module.exports = function (ModalService, allTracks) {
 
         this.tracks = [];
         this.sumWidth = 0;
-        this.widthOfLogplot = utils.pixelToInch($(".logplot-main-content").width()).toFixed(4);
+        let logplotElem = $('wi-logplot#' + idLogplot + '>.logplot-main-content');
+        this.widthOfLogplot = utils.pixelToInch(logplotElem.width()).toFixed(4);
 
         allTracks.forEach(function(t) {
             self.tracks.push(getTrackProps(t));

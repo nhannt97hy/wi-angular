@@ -7,8 +7,12 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         wiModal = self;
 
         window.logTrack = this;
-        this.groupFn = function(item){
+        this.groupFnTabCurve = function(item){
             return item.properties.dataset;
+        }
+
+        this.groupFnTabShading = function(item){
+            return item.datasetName;
         }
 
         this.applyInProgress = false;

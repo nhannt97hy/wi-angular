@@ -226,7 +226,7 @@
                                 <ui-select ng-model="wiModal.variableShadingOptions.controlCurve"
                                             ng-change="wiModal.selectedControlCurve(wiModal.variableShadingOptions.controlCurve)">
                                     <ui-select-match placeholder='Select a curve'>{{wiModal.variableShadingOptions.controlCurve.properties.name}}</ui-select-match>
-                                    <ui-select-choices group-by="wiModal.groupFn"
+                                    <ui-select-choices group-by="wiModal.groupFnCtrl"
                                                 repeat='c as c in wiModal.curves | filter: $select.search'>
                                                 <div class="padding-left-20px">{{c.properties.name}}</div>
                                     </ui-select-choices>

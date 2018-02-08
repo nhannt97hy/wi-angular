@@ -14,6 +14,9 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
         this.groupFn = function(item){
+            return item.datasetName;
+        }
+        this.groupFnCtrl = function(item){
             return item.properties.dataset;
         }
 

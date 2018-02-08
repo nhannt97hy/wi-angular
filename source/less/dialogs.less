@@ -187,7 +187,7 @@ input[required] {
 // 	width: 4.5em;
 // }
 .selected {
-	background-color: #C8C9D0;
+	background-color: #C8C9D0 !important;
 }
 .table {
 	font-size: 12px;
@@ -657,4 +657,19 @@ input[type=checkbox].input-check {
 }
 .background-header-table {
 	background: #EBEDEF;
+}
+.striped-table {
+	thead {
+		tr th {
+			padding: 8px 2px;
+		}
+		tr {
+			background-color: #EBEDEF;
+		}
+	}
+	tbody {
+		tr:nth-child(even) {
+			background-color: #f2f2f2;
+		}
+	}
 }

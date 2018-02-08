@@ -22,6 +22,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _previousTrack = null;
     let _tooltip = true;
     let _referenceLine = true;
+    let _fitWindow = false;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
 
@@ -62,6 +63,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (on === undefined) return _referenceLine;
         _referenceLine = on;
     }
+    this.fitWindow = function(on) {
+        if (on === undefined) return _fitWindow;
+        _fitWindow = on;
+    }
 
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
@@ -69,6 +74,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.toggleReferenceLine = function() {
         _referenceLine = !_referenceLine;
+    }
+
+    this.toggleFitWindow = function() {
+        _fitWindow = !_fitWindow;
+        let plotAreaElem = $('#logplot' + self.logPlotCtrl.id + 'D3AreaPlotArea');
+        let plotAreaWidth = plotAreaElem.width();
+        let sumOfOriWidth = 0;
+        let originalWidths = [];
+        // let fitWindowWidths = [];
+        _tracks.forEach(function(t) {
+            originalWidths.push(t.width);
+            sumOfOriWidth += t.width;
+        });
+        let ratioWidth = plotAreaWidth/sumOfOriWidth;
+        console.log("fitWindow WiD3", ratioWidth, sumOfOriWidth, plotAreaWidth);
+        _tracks.forEach(function(t, index) {
+            if(_fitWindow) {
+                t.width = originalWidths[index] * ratioWidth;
+            }
+            else t.width = originalWidths[index] /ratioWidth;
+            t.doPlot();
+        })
     }
 
     this.getDepthRange = function () {
@@ -919,8 +946,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
-        });
-        this.logPlotCtrl.updateScale(this.scale);
+        })
     }
 
     this.setDepthRange = function (depthRange, notPlot) {

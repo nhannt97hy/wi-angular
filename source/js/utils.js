@@ -127,6 +127,7 @@ function lineToTreeConfig(line) {
         id: line.idLine,
         idCurve: line.idCurve,
         idDataset: curveModel.properties.idDataset,
+        dataset: findDatasetById(curveModel.properties.idDataset).name,
         name: lineModel.name,
         unit: line.unit,
         minX: line.minValue,

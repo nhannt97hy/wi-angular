@@ -21,9 +21,11 @@ module.exports = function (ModalService, logTracks) {
             self.modalSize = {};
             self.maxHeightModal = {};
         };
-
-        this.unCheck = function(track) {
-
+        this.checkAll = false;
+        this.checkAllFunc = function() {
+            self.tracks.forEach(function(t) {
+                t.use = self.checkAll;
+            })
         }
         this.tracks = [];
         logTracks.forEach(function(lt) {

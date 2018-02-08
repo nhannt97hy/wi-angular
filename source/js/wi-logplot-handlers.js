@@ -487,8 +487,8 @@ exports.TrackBulkUpdateButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
     let allTracks = wiLogplot.getwiD3Ctrl().getTracks();
-    console.log("allTracks", allTracks);
-    DialogUtils.trackBulkUpdateDialog(this.ModalService, allTracks, function () {
+    console.log("allTracks", wiLogplot);
+    DialogUtils.trackBulkUpdateDialog(this.ModalService, allTracks, wiLogplot.id, function () {
 
     });
 };
@@ -552,6 +552,8 @@ exports.SaveAsLogplotNameButtonClicked = function () {
 
 exports.FitWindowButtonClicked = function() {
     console.log('FitWindowButton is clicked');
+    this.wiLogplot.getwiD3Ctrl().toggleFitWindow()
+
 }
 
 exports.ReferenceLineButtonClicked = function() {
