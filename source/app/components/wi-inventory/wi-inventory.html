@@ -1,30 +1,43 @@
 <style>
     .inventory-side {
         display:flex;
+        flex-direction: column;
         padding:0;
         flex-basis: calc(32% - 30px);
         border: 1px solid #ccc;
         border-radius: 5px;
         overflow: hidden;
         margin: 10px;
-        padding: 10px;
+        //padding: 10px;
         box-shadow: inset 1px 1px 1px #e1e1e1;
         background-color: #ffffff;
+    }
+    .inventory-side .panel-heading {
+        padding-top:0;
+        padding-bottom:0;
     }
     .inventory-center {
         flex: 1;
         position:relative;
     }
+    .height24px span.btn.btn-default {
+        line-height: 20px;
+        height: 24px;
+    }
 </style>
 <div class="inventory-main" style="display:flex;flex-direction:row;">
-    <div class="inventory-side">
+    <div class="panel panel-default inventory-side">
+        <div style='display:flex;' class='panel-heading'>
+            <h5 style='margin-right:10px;'>Project</h5>
+            <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
+            </wi-item-dropdown>
+        </div>
         <wi-base-treeview name="projectTreeview" 
             config="wiInventory.projectConfig" 
             container="wiInventory" 
             on-click-function="wiInventory.prjClickFunction"
             on-select-function="wiInventory.selectProjectNode">
         </wi-base-treeview>
-        <!--<wi-inventory-treeview name="projectTreeview" config="wiInventory.projectConfig" container="wiInventory" selected-node="wiInventory.projectSelectedNode"></wi-inventory-treeview>-->
     </div>
     <div class="inventory-center">
         <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
@@ -32,12 +45,15 @@
             <span class="arrow-left-16x16"></span>
         </button>
     </div>
-    <div class='inventory-side'>
-        <wi-base-treeview name="pendingPrjTreeview" 
+    <div class='panel panel-default inventory-side'>
+        <div class='panel-heading'>
+            <h5>Import Queue</h5>
+        </div>
+        <wi-base-treeview name="PendingQueueTreeview" 
             config="wiInventory.importItems" 
             container="wiInventory" 
-            on-click-function="wiInventory.pendingPrjClickFunction"
-            on-select-function="wiInventory.selectPendingPrjNode">
+            on-click-function="wiInventory.pendingQueueClickFunction"
+            on-select-function="wiInventory.selectPendingQueueNode">
         </wi-base-treeview>
     </div>
     <div class="inventory-center">
@@ -50,7 +66,14 @@
             <span class="arrow-right-16x16"></span>
         </button>
     </div>
-    <div class="inventory-side">
+    <div class="panel panel-default inventory-side">
+        <div style='display:flex;' class='panel-heading'>
+            <h5 style='flex:1;'>Inventory</h5>
+            <button style='margin:5px 0;padding:0 10px;' title="Toggle Well name/File name"
+                ng-click="wiInventory.switchLabelTooltip(wiInventory.inventoryConfig[0].children)">
+                <i class="fa fa-exchange"></i>
+            </button>
+        </div>
         <wi-scroll style='flex:1;display:flex;flex-direction:column;' up-trigger="wiInventory.upTrigger" down-trigger="wiInventory.downTrigger">
             <wi-base-treeview name="inventoryTreeview" 
                 config="wiInventory.inventoryConfig" 
@@ -58,36 +81,6 @@
                 on-click-function="wiInventory.invClickFunction"
                 on-select-function="wiInventory.selectInventoryNode">
             </wi-base-treeview>
-            <!--<wi-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-treeview>-->
         </wi-scroll>
     </div>
 </div>
-<div class="inventory-toolbar-wrapper">
-    <wi-toolbar>
-        <wi-item-dropdown class='height34px' style="width:15em;" icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
-        </wi-item-dropdown>
-    </wi-toolbar>
-    <wi-toolbar>
-		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
-        <wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Sync' tooltip="Sync" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
-        <wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert All" handler="wiInventory.onRevertAllButtonClicked" ng-if="!!wiInventory.importItems.length"></wi-button>
-		<wi-button icon="reload-16x16" layout="icon-left" type="small" label='Refresh' tooltip="Refresh" handler="wiInventory.onRevertAllButtonClicked" ng-if="!wiInventory.importItems.length"></wi-button>
-	</wi-toolbar>
-</div>
-<!--
-<div class="inventory-main container-fluid">
-    <div id="left-inventory" class="col-xs-5">
-        <wi-inventory-treeview name="projectTreeview" config="wiInventory.projectConfig" container="wiInventory" selected-node="wiInventory.projectSelectedNode"></wi-inventory-treeview>
-    </div>
-    <div id="center-inventory" class="col-xs-2">
-        <div class="row">
-            <button class="btn btn-default" title="import" ng-click='wiInventory.importButtonClicked()' ng-class="{'disabled': !wiInventory.importValid}">
-                <span class="arrow-left-32x32"></span>
-            </button>
-        </div>
-    </div>
-    <div id="right-inventory" class="col-xs-5">
-        <wi-inventory-treeview name="inventoryTreeview" config="wiInventory.inventoryConfig" container="wiInventory" selected-node="wiInventory.inventorySelectedNode"></wi-inventory-treeview>
-    </div>
-</div>
--->

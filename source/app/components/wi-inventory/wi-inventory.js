@@ -4,7 +4,6 @@ const moduleName = 'wi-inventory';
 function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService, ModalService, $timeout) {
     modalService = ModalService;
     let self = this;
-
     window.__INV = self;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -165,12 +164,9 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         }
         return destModel;
     }
-
-    this.importItems = [];
-    this.importButtonClicked = function () {
-        let model = self.inventorySelectedNode; // assume it is a well
+    function queueWell(model) {
         if (!model) {
-            toastr.error('select well please');
+            toastr.warning(model.data.label + ' is not a well (SKIPPED)');
             return;
         }
         let importedModel = cloneModel(model);
@@ -178,13 +174,30 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             return item.name == importedModel.name;
         });
         if (existingWell) {
-            toastr.info('Well already added for importing');
+            toastr.warning(model.data.label + ' is already queued (SKIPPED)');
         }
         else self.importItems.push(importedModel);
     }
+    this.importItems = [];
+    this.importButtonClicked = function () {
+        let models = self.inventoryConfig[0].children.__SELECTED_NODES;
+        if (models && models.length) {
+            models.forEach(function(wellModel) {
+                queueWell(wellModel);
+            });
+        }
+        /*
+        let model = self.inventorySelectedNode; // assume it is a well
+        queueWell(model);
+        */
+    }
     
     this.revertButtonClicked = function () {
-        let revertModel = self.projectSelectedNode;
+        while (self.importItems.__SELECTED_NODES.length) {
+            let item = self.importItems.__SELECTED_NODES.pop();
+            let idx = self.importItems.indexOf(item);
+            self.importItems.splice(idx, 1);
+        }
     }
 
     function getImportPayload(model) {
@@ -345,19 +358,22 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
             if (currentNode.data) {
                 $timeout(function() { currentNode.data.selected = true; });
-                let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-                if (!Array.isArray(selectedNodes)) selectedNodes = [];
+                //let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                let selectedNodes = rootNode.__SELECTED_NODES;
+                if (!Array.isArray(selectedNodes)) 
+                    selectedNodes = [];
                 if (!selectedNodes.includes(currentNode)) {
                     selectedNodes.push(currentNode);
                 }
-                wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+                //wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+                rootNode.__SELECTED_NODES = selectedNodes;
                 // self.getWiiItems().getWiiProperties().emptyList();
                 self.onConfigClick();
             }
         }
 
         if (currentNode.type == 'well' && !noLoadData) {
-            if (rootNode === self.inventoryConfig) {
+            if (rootNode === self.inventoryConfig[0].children) {
                 oUtils.updateDatasets(currentNode.id, self.inventoryConfig[0]).then(function(datasetsModel) {
                     async.each(datasetsModel, function(dModel, done) {
                         oUtils.updateCurves(dModel.id, self.inventoryConfig[0]).then(function() {
@@ -384,7 +400,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 if (node.data) node.data.selected = false;
             });
         });
-        wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+        //wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+        rootNode.__SELECTED_NODES = [];
     }
     this.selectInventoryNode = function(node) {
         //self.inventorySelectedNode = node;
@@ -394,20 +411,27 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     this.selectProjectNode = function(node) {
         self.projectSelectedNode = node;
     }
+    this.selectPendingQueueNode = function(node) {
+        let parentWell = utils.getParentByModel(node.type, node.id, 'well', self.importItems);
+        self.pendingQueueSelectedNode = parentWell;
+    }
     this.invClickFunction = function($index, $event, node) {
-        clickFunction($index, $event, node, self.inventoryConfig);
+        clickFunction($index, $event, node, self.inventoryConfig[0].children, true);
     }
     this.prjClickFunction = function($index, $event, node) {
-        clickFunction($index, $event, node, self.projectConfig);
+        clickFunction($index, $event, node, self.projectConfig[0].children);
     }
-    function clickFunction($index, $event, node, rootNode) {
+    this.pendingQueueClickFunction = function($index, $event, node) {
+        clickFunction($index, $event, node, self.importItems);
+    }
+    function clickFunction($index, $event, node, rootNode, multiNodeFetch = false) {
         node.$index = $index;
         if (!node) {
             unselectAllNodes(rootNode);
             return;
         }
-        //wiComponentService.emit('update-properties', node);
-        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        //let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        let selectedNodes = rootNode.__SELECTED_NODES;
         if (!Array.isArray(selectedNodes)) selectedNodes = [];
         if (!$event.shiftKey) {
             if (selectedNodes.length) {
@@ -429,19 +453,31 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                         let toIndex = selectedNodes[0].$index;
                         unselectAllNodes(rootNode);
                         for (let i = fromIndex; i <= toIndex; i++) {
-                            selectHandler(rootNode[0].children[i], true, rootNode);
+                            if (Array.isArray(rootNode))
+                                selectHandler(rootNode[i], !multiNodeFetch, rootNode);
+                            else 
+                                selectHandler(rootNode.children[i], !multiNodeFetch, rootNode);
                         }
                     } else {
                         let fromIndex = selectedNodes[0].$index;
                         let toIndex = node.$index;
                         unselectAllNodes(rootNode);
                         for (let i = fromIndex; i <= toIndex; i++) {
-                            selectHandler(rootNode[0].children[i], true, rootNode);
+                            if (Array.isArray(rootNode))
+                                selectHandler(rootNode[i], !multiNodeFetch, rootNode);
+                            else 
+                                selectHandler(rootNode.children[i], !multiNodeFetch, rootNode);
                         }
                     }
                 }
             }
         }
+    }
+    this.switchLabelTooltip = function(wellNodes) {
+        self.labelToggle = !self.labelToggle;
+        wellNodes.forEach(function(node) {
+            node.data.toggle = self.labelToggle;
+        });
     }
 }
 
