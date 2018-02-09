@@ -24,6 +24,10 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
         let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
         let props = angular.copy(viCrossplot.getProperties());
         let ternary = this.ternary = props.ternary;
+        let well = wiD3CrossplotCtrl.getWell();
+        $scope.datasets = well.children.filter(function(node) {
+            return node.type == 'dataset';
+        });
 
         function prepareVertices(vertices) {
             self.vertices = vertices.map(function(vertex, index) {
@@ -51,7 +55,10 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
             $scope.selectedRow = 0;
         }
         let calculateOptions = $scope.calculateOptions = ternary.calculate;
-        $scope.result = ternary.result || {};
+        $scope.result = ternary.result || {
+            outputCurve: false,
+            selectedDataset: $scope.datasets[0]
+        };
 
         this.polygonList = new Array();
         props.polygons.forEach(function(polygonItem, index) {
@@ -230,6 +237,61 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
             });
         }
 
+        this.onSaveCurveButtonClicked = function() {
+            if (!$scope.result.selectedDataset || $scope.result.selectedDataset.id == null) {
+                toastr.error('No dataset selected');
+                return;
+            }
+
+            let curves = $scope.result.curves;
+            if (!curves || !curves.length) {
+                toastr.error('No curves to save');
+                return;
+            }
+            let curveNames = ($scope.result.curveNames || []).filter(function(n) {
+                return n; // n != null, n != ''
+            });
+            if (curveNames.length < 3) {
+                toastr.error('Curve name can not be blank');
+                return;
+            }
+            let topDepth = parseFloat(well.properties.topDepth);
+            let step = parseFloat(well.properties.step);
+
+            let payloads = []
+            curves.forEach(function(curve, i) {
+                dict = {}
+                curve.forEach(function(point) {
+                    dict[Math.round((point.y - topDepth)/step)] = point.x;
+                });
+                indices = Object.keys(dict).map(k => parseInt(k));
+                maxIndex = Math.max.apply(null, indices);
+
+                values = []
+                for (let i = 0; i <= maxIndex; i ++) {
+                    values.push(dict[i] === undefined ? null : dict[i]);
+                }
+                payloads.push({
+                    data: values,
+                    idDataset: $scope.result.selectedDataset.id,
+                    curveName: curveNames[i]
+                });
+            });
+            $scope.updating = true;
+            async.each(payloads, function(p, callback) {
+                wiApiService.processingDataCurve(p, function(res, err) {
+                    callback(err, res);
+                });
+            }, function(err) {
+                if (err) toastr.error(err);
+                else {
+                    utils.refreshProjectState();
+                }
+                $scope.updating = false;
+            })
+
+        }
+
         this.onCalculateButtonClicked = function () {
             let tmpTernary = {
                 idTernary: savedTernary.idTernary,
@@ -244,8 +306,10 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
                 result.materials = result.materials.map(function(m) {
                     return +parseFloat(m).toFixed(4);
                 });
-                $scope.result = result;
-
+                $scope.result = Object.assign($scope.result, result);
+                if (!$scope.result.curveNames) {
+                    $scope.result.curveNames = ['Material_1', 'Material_2', 'Material_3'];
+                }
             }
         }
 
