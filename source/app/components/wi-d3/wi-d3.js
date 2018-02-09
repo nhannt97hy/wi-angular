@@ -2538,7 +2538,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             this.shadingList = _currentTrack.getShadings();
 
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+                let leftLineBk = options.leftLine;
+                options.leftLine = null;
+                let rightLineBk = options.rightLine;
+                options.rightLine = null;
+
                 let request = angular.copy(options);
+
+                request.leftLine = leftLineBk;
+                request.rightLine = rightLineBk;
+                options.leftLine = leftLineBk;
+                options.rightLine = rightLineBk;
+                
                 if(options.idLeftLine == -3) {
                     options.type = 'custom';
                 };
