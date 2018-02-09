@@ -454,6 +454,7 @@ exports.ImportTrackButtonClicked = function () {
     let fileInput = document.createElement('input');
     fileInput.style.display = 'none';
     fileInput.type = 'file';
+    fileInput.accept = '.track';
     // fileInput.setAttribute('ngf-select', '');
     document.body.appendChild(fileInput);
     fileInput.click();
