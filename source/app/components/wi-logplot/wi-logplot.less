@@ -10,22 +10,29 @@ wi-logplot {
             border: none;
             padding: 4px 0 0 0;
         }
-        .scale {
-            display: inline-block;
-            margin: 0 1em;
-            line-height: 28px;
-            padding-top: 4px;
-        }
     }
 
     .logplot-header {
+        display: flex;
         margin: 0px 4px;
         background-color: rgb(136, 204, 136);
         text-align: center;
         line-height: 2em;
-        .well-name {
+        height: 2em;
+        .well-name-container {
+            flex-basis: 50%;
+            display: flex;
+            justify-content: flex-end;
             font-size: 14px;
             font-weight: bold;
+        }
+        .scale-container {
+            display: flex;
+            flex-grow: 1;
+            flex-shrink: 0;
+            flex-wrap: nowrap;
+            justify-content: flex-end;
+            margin: 0 1em;
         }
     }
 
