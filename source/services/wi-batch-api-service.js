@@ -1,7 +1,8 @@
 const wiServiceName = 'wiBatchApiService';
 const moduleName = 'wi-batch-api-service';
 
-const wiBatchURL = "http://192.168.0.91:33333";
+//const wiBatchURL = "http://192.168.0.91:33333";
+const wiBatchURL = "http://batch.sflow.me";
 
 const LIST_WF = wiBatchURL + "/workflow/list";
 const DELETE_DATADIR = wiBatchURL + "/workflow/delete-data";

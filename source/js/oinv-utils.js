@@ -8,16 +8,23 @@ let updateInventory = _.debounce(function () {
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     let wiComponentService = __GLOBAL.wiComponentService;
     let inventory = wiComponentService.getComponent('INVENTORY');
-    wiOnlineInvService.listWells({start:0,limit: 50, forward:true}, function (listWells) {
-        let preWellsModel = angular.copy(inventory.children) || [];
-        inventory.children = [];
-        if (!listWells.length) {
+    wiOnlineInvService.listWells({start:0,limit: 50, forward:true}, function (listOfWells) {
+        let container;
+        if (Array.isArray(inventory)) {
+            container = inventory;
+        }
+        else {
+            container = inventory.children;
+        }
+        let preWellsModel = angular.copy(container) || [];
+        if (!listOfWells.length) {
             return;
         }
-        listWells.forEach(function (well) {
+        container.length = 0;
+        listOfWells.forEach(function (well) {
             let preWellModel = preWellsModel.find(w => w.properties.idWell == well.idWell);
             let wellModel = wellToTreeConfig(well, preWellModel);
-            inventory.children.push(wellModel);
+            container.push(wellModel);
         });
     });
 }, 1000, { leading: true });
@@ -28,6 +35,7 @@ let updateWellsDebounce = _.debounce(function(start) {
 
 exports.updateCurves = updateCurves;
 exports.initInventory = initInventory;
+exports.getWellsFromInventory = getWellsFromInventory;
 exports.updateInventory = updateInventory;
 exports.updateDatasets = updateDatasets;
 exports.updateWells = updateWells;
@@ -61,6 +69,15 @@ function updateWells(start, rootNode) {
     })
 }
 
+function getWellsFromInventory() {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    inventoryModel = [];
+    wiComponentService.putComponent('INVENTORY', inventoryModel);
+    setTimeout(function () {
+        updateInventory();
+    });
+    return inventoryModel;
+}
 function initInventory() {
     let wiComponentService = __GLOBAL.wiComponentService;
     // let idUser = wiComponentService.getComponent(wiComponentService.USER).idUser;
@@ -87,7 +104,15 @@ function updateDatasets(idWell, rootNode) {
     if (rootNode) inventory = rootNode;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     return new Promise(function (resolve, reject) {
-        let wellModel = utils.getModel('well', idWell, inventory);
+        let _rootNode = inventory;
+        if (Array.isArray(inventory)) {
+            _rootNode = {
+                type: 'inventory',
+                id: -10,
+                children: inventory
+            }
+        }
+        let wellModel = utils.getModel('well', idWell, _rootNode);
         if (!wellModel) return;
         if (!wellModel.timestamp) wellModel.timestamp = 0;
         if ((Date.now() - wellModel.timestamp) < (180 * 1000) ) {
@@ -105,7 +130,7 @@ function updateDatasets(idWell, rootNode) {
                 let preDatasetModel = preDatasetsModel.find(d => {
                     d.properties.idDataset == dataset.idDataset
                 });
-                let datasetModel = datasetToTreeConfig(dataset, preDatasetModel, inventory);
+                let datasetModel = datasetToTreeConfig(dataset, preDatasetModel, _rootNode);
                 wellModel.children.push(datasetModel);
                 wellModel.timestamp = Date.now();
             });
@@ -119,7 +144,15 @@ function updateCurves(idDataset, rootNode) {
     if (rootNode) inventory = rootNode;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     return new Promise(function (resolve, reject) {
-        let datasetModel = utils.getModel('dataset', idDataset, inventory);
+        let _rootNode = inventory;
+        if (Array.isArray(inventory)) {
+            _rootNode = {
+                type: 'inventory',
+                id: -10,
+                children: inventory
+            };
+        }
+        let datasetModel = utils.getModel('dataset', idDataset, _rootNode);
         if (!datasetModel) return;
         if (!datasetModel.timestamp) datasetModel.timestamp = 0;
         if (Date.now() - datasetModel.timestamp < (180 * 1000)) {
@@ -135,7 +168,7 @@ function updateCurves(idDataset, rootNode) {
             }
             listCurves.forEach(function (curve) {
                 let preCurveModel = preCurvesModel.find(w => w.properties.idCurve == curve.idCurve);
-                let curveModel = curveToTreeConfig(curve, preCurveModel, inventory);
+                let curveModel = curveToTreeConfig(curve, preCurveModel, _rootNode);
                 datasetModel.children.push(curveModel);
                 datasetModel.timestamp = Date.now();
             });

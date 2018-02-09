@@ -31,13 +31,27 @@
             <h5 style='margin-right:10px;'>Project</h5>
             <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
             </wi-item-dropdown>
+            <button style='margin:5px 0 5px 5px;padding:0 10px;'
+                class='btn btn-default'
+                title="Reload project"
+                ng-click="wiInventory.refreshProject()">
+                <i class="fa fa-refresh"></i>
+            </button>
+        </div>
+        <div style='background-color:white;border:none;padding-top: 2px;padding-bottom: 2px;' 
+            class="panel-heading">
+            <form style='width:100%;display:flex;' ng-submit='wiInventory.prjSearch()'>
+                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiInventory.prjFilter' size='10'>
+            </form>
         </div>
         <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiInventory.upTriggerPrj', down-trigger='wiInventory.downTriggerPrj'>
             <wi-base-treeview name="projectTreeview" 
                 config="wiInventory.projectConfig" 
                 container="wiInventory" 
                 on-click-function="wiInventory.prjClickFunction"
-                on-select-function="wiInventory.selectProjectNode">
+                on-select-function="wiInventory.selectProjectNode"
+                filter="{{wiInventory.prjFilter}}">
             </wi-base-treeview>
         </wi-scroll>
     </div>
@@ -48,15 +62,26 @@
         </button>
     </div>
     <div class='panel panel-default inventory-side'>
-        <div class='panel-heading'>
-            <h5>Import Queue</h5>
+        <div class='panel-heading' style='display:flex;'>
+            <h5 style='flex:1;'>Import Queue</h5>
+            <button style="margin:5px 0;padding:0 10px;"
+                class='btn btn-default' title='purge' 
+                ng-click="wiInventory.importItems.length = 0;">
+                <span class='ti-brush-alt'></span>
+            </button>
+        </div>
+        <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' 
+            class="panel-heading">
+            <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+            <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiInventory.queueFilter' size='10'>
         </div>
         <wi-base-treeview name="PendingQueueTreeview" 
-            style="overflow-x:hidden;overflow-y:auto;"
+            style="flex:1;overflow-x:hidden;overflow-y:auto;"
             config="wiInventory.importItems" 
             container="wiInventory" 
             on-click-function="wiInventory.pendingQueueClickFunction"
-            on-select-function="wiInventory.selectPendingQueueNode">
+            on-select-function="wiInventory.selectPendingQueueNode"
+            filter="{{wiInventory.queueFilter}}">
         </wi-base-treeview>
     </div>
     <div class="inventory-center">
@@ -72,10 +97,22 @@
     <div class="panel panel-default inventory-side">
         <div style='display:flex;' class='panel-heading'>
             <h5 style='flex:1;'>Inventory</h5>
-            <button style='margin:5px 0;padding:0 10px;' title="Toggle Well name/File name"
-                ng-click="wiInventory.switchLabelTooltip(wiInventory.inventoryConfig[0].children)">
+            <button style='margin:5px 0px;padding:0 10px;'
+                class='btn btn-default'
+                title="Refresh inventory"
+                ng-click="wiInventory.refreshInventory()">
+                <i class="fa fa-refresh"></i>
+            </button>
+            <button style='margin:5px 0px 5px 5px;padding:0 10px;' title="Toggle Well name/File name"
+                class='btn btn-default'
+                ng-click="wiInventory.switchLabelTooltip(wiInventory.inventoryConfig)">
                 <i class="fa fa-exchange"></i>
             </button>
+        </div>
+        <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' 
+            class="panel-heading">
+            <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+            <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiInventory.invFilter' size='10'>
         </div>
         <wi-scroll style='flex:1;display:flex;flex-direction:column;' 
             id-scroll="'inventoryTreeScroll'"
@@ -84,7 +121,8 @@
                 config="wiInventory.inventoryConfig" 
                 container="wiInventory" 
                 on-click-function="wiInventory.invClickFunction"
-                on-select-function="wiInventory.selectInventoryNode">
+                on-select-function="wiInventory.selectInventoryNode"
+                filter="{{wiInventory.invFilter}}">
             </wi-base-treeview>
         </wi-scroll>
     </div>
