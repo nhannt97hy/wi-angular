@@ -39,9 +39,49 @@ app.component(componentName, {
 
 exports.name = moduleName;
 
+function getDataCurve(wiApiService, self){
+    wiApiService.getProjectInfo(1, function(projectInfo){
+        wiApiService.getProject(projectInfo, function(project){
+            self.project = project;
+            self.wells = self.project.wells;
+            self.well = self.wells[0];
+            self.datasets = self.well.datasets;
+            self.dataset = self.datasets[0];
+            self.curves = self.dataset.curves;
+            self.curve = self.curves[0];
+            getData(self, wiApiService);
+        })
+    }); 
+}
+function getData(self, wiApiService){
+    self.data = [];
+    self.target = [];
+    wiApiService.dataCurve(self.curve.idCurve, function(data){
+        data.forEach((o, i)=> {
+            self.data[i] = [];
+            self.data[i].push(parseFloat(o.x));
+            self.data[i].push(parseFloat(o.y));
+            self.target.push(parseFloat(o.y));
+        });
+    })
+}
 /* Create */
 function createModelCtrl($http, wiApiService, wiComponentService){
     let self = this;
+    getDataCurve(wiApiService, self);
+    this.changeWell = function(){
+        self.datasets = self.well.datasets;
+        self.dataset = self.datasets[0];
+        self.curves = self.dataset.curves;
+        self.curve = self.curves[0];
+    }
+    this.changeDataset = function(){
+        self.curves = self.dataset.curves;
+        self.curve = self.curves[0];
+    }
+    this.changeCurve = function(){
+        getData(self, wiApiService);
+    }
     this.name = "Model";
     this.description = "Description"
     this.types = [{
@@ -74,7 +114,10 @@ function createModelCtrl($http, wiApiService, wiComponentService){
     this.remove_layer = function(x){
         self.units.splice(x, 1);
     }
+    self.data = [];
+    self.target = [];
     this.create_model = function(){
+        // getData(self, wiApiService);
         if(self.name && self.type && self.data && self.target && self.description){
             wiComponentService.getComponent('SPINNER').show();
             payload = {
@@ -128,6 +171,20 @@ app.component(componentCreateModel, {
 /* Retrain */
 function retrainModelCtrl($http, wiApiService, wiComponentService){
     let self = this;
+    getDataCurve(wiApiService, self);
+    this.changeWell = function(){
+        self.datasets = self.well.datasets;
+        self.dataset = self.datasets[0];
+        self.curves = self.dataset.curves;
+        self.curve = self.curves[0];
+    }
+    this.changeDataset = function(){
+        self.curves = self.dataset.curves;
+        self.curve = self.curves[0];
+    }
+    this.changeCurve = function(){
+        getData(self, wiApiService);
+    }
     wiComponentService.getComponent('SPINNER').show();   
     $http({
         method: 'GET',
@@ -154,7 +211,7 @@ function retrainModelCtrl($http, wiApiService, wiComponentService){
                         self.rnd = false;
                     }
                 }
-                
+                // getData(self, wiApiService);
                 self.retrain = function(){
                     if(self.data && self.target){
                         wiComponentService.getComponent('SPINNER').show();
@@ -255,21 +312,8 @@ app.component(componentListModel, {
 /* predict */
 function predictCtrl($http,  wiApiService, wiComponentService){
     let self = this;
-    this.project;
-    wiApiService.getProjectInfo(1, function(projectInfo){
-        wiApiService.getProject(projectInfo, function(project){
-            self.project = project;
-            self.wells = self.project.wells;
-            self.well = self.wells[0];
-            self.datasets = self.well.datasets;
-            self.dataset = self.datasets[0];
-            self.curves = self.dataset.curves;
-            self.curve = self.curves[0];
-        })
-    });  
-    wiApiService.dataCurve(2, function(data){
-        console.log('dataCurve: ', data);
-    })
+    getDataCurve(wiApiService, self);
+
     this.changeWell = function(){
         self.datasets = self.well.datasets;
         self.dataset = self.datasets[0];
@@ -280,8 +324,8 @@ function predictCtrl($http,  wiApiService, wiComponentService){
         self.curves = self.dataset.curves;
         self.curve = self.curves[0];
     }
-    this.changeCurve = function(){
-        console.log('change curve: ', self.curve);
+    this.changeCurve = function() {
+        getData(self, wiApiService);
     }
     wiComponentService.getComponent('SPINNER').show();
     $http({
@@ -295,14 +339,14 @@ function predictCtrl($http,  wiApiService, wiComponentService){
             }else{
                 self.models = res;
                 self.model = self.models[0];
-                
+                // getData(self, wiApiService);
                 self.predict = function(){
-                    if(self.curve){
+                    if(self.data){
                         wiComponentService.getComponent('SPINNER').show();
                         payload = {
                             model_id: self.model.id,
                             model_type: self.model.type,
-                            data: self.curve
+                            data: self.data
                         }
                         $http({
                             method: 'POST',
