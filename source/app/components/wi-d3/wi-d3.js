@@ -75,12 +75,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.toggleReferenceLine = function() {
         _referenceLine = !_referenceLine;
     }
+
     let originalWidths = [];
     this.toggleFitWindow = function() {
         _fitWindow = !_fitWindow;
         let logplotElem = $('wi-logplot#' + self.logPlotCtrl.id + '>.logplot-header');
         let slidingBarElem = $('wi-logplot#' + self.logPlotCtrl.id + '>.logplot-main-content>.slidingbar')
-        let plotAreaWidth = logplotElem.width() - slidingBarElem.width() - (slidingBarElem.outerWidth()-slidingBarElem.width())/2;
+        let plotAreaWidth = logplotElem.width() - slidingBarElem.width()/2 - slidingBarElem.outerWidth()/2;
         console.log("width", _tracks);
         let sumOfOriWidth = 0;
         let widths = [];

@@ -230,23 +230,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         this.addRowCurve();
         this.setClickedRowCurve(0);
 
-        /*this.setClickedRowCurve = function (index) {
-            if (index < 0) return;
-            $scope.selectedRowCurve = index;
-            self.__idx = self.getCurves()[index]._index;
-            console.log(self.curves);
-        };
-*/
-        /*this.arrowUpCurve = function (){
-            let i = self.curves.find(c => c._index == self.__idx)._index;
-            // utils.swapValue(self.curves[i].orderNum, self.curves[i-1].orderNum);
-            let temp = self.curves[i].orderNum;
-            self.curves[i].orderNum = self.curves[i-1].orderNum;
-            self.curves[i-1].orderNum = temp;
-            self.setClickedRowCurve($scope.selectedRowCurve - 1);
-            self.getCurves();
-        }*/
-
         this.arrowUpCurve = function () {
             let _curves = self.getCurves();
             let i = $scope.selectedRowCurve;
@@ -421,17 +404,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             });
                         });
                     });
-                    // self.shadings.forEach(function(s) {
-                    //     s.idLeftLine = s.leftLine.id;
-                    //     if (s.type == 'left') {
-                    //         s.leftFixedValue = s.rightLine.minX;
-                    //         s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                    //     }
-                    //     if (s.type == 'right') {
-                    //         s.leftFixedValue = s.rightLine.maxX;
-                    //         s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                    //     }
-                    // });
 
                     currentTrack.doPlot(true);
                     if (updateCurvesTabCb) updateCurvesTabCb(err);
@@ -570,16 +542,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             else
                 shading.changed = changed.deleted;
             if (self.getShadings().length <= $scope.selectedRowShading) self.setClickedRowShading(self.getShadings().length-1);
-            // if (!self.getShadings().length) {
-            //     self.addRowShading();
-            //     self.setClickedRowShading(0);
-            // }
-
-            // if (!self.shadings[index]) return;
-            // if(self.shadings[index].changed == changed.created)
-            //     self.shadings.splice(index, 1);
-            // else
-            //     self.shadings[index].changed = changed.deleted;
         };
 
         // blank shading
@@ -589,7 +551,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
 
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options){
                 if(options) self.shadings[self.__idx] = options;
-                // if(self.shadings[self.__idx].changed == changed.unchanged) self.shadings[self.__idx].changed = changed.updated;
             }, self.shadings[self.__idx], currentTrack, wiLogplotCtrl);
             $event.stopPropagation();
         };
@@ -697,10 +658,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             if( self.applyInProgress) return;
             self.applyInProgress = true;
 
-            // if (!validateAll()) {
-            //     DialogUtils.errorMessageDialog(ModalService, "Shading setting is not valid");
-            //     return;
-            // }
             async.series([
                         function(callback) {
                             updateGeneralTab(callback);
@@ -717,7 +674,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             self.applyInProgress = false;
         }
         this.onApplyButtonClicked = function () {
-            doApply(function(){});
+            doApply();
         };
         this.onOkButtonClicked = function () {
             doApply(function(result) {

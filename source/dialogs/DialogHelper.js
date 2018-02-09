@@ -11,8 +11,9 @@ function initModal(modal) {
             handle: '.modal-header'
         });
     }, 700);
-    $(modal.element).keyup(function (e) {
+    $(modal.element).keypress(function (e) {
         if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.ESCAPE) {
+            e.preventDefault();
             let okButton, cancelButton;
             let buttonElems = $(modal.element).find('.modal-footer > button');
             for (let i = 0; i < buttonElems.length; i++) {

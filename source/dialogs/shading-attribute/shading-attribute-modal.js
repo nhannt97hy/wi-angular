@@ -216,7 +216,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             }
 
         };
-        // this.selectedControlCurve(self.shadingOptions.idControlCurve);
 
         this.fillStartColor = function () {
             DialogUtils.colorPickerDialog(ModalService, self.variableShadingOptions.fill.varShading.gradient.startColor, function (colorStr) {
@@ -313,7 +312,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         });
 
         // Call Backend API
-
 
         function initVariableShadingOptions() {
             self.variableShadingOptions = {
@@ -437,7 +435,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         }
 
         this.customFillsList = null;
-        // this.customFillsCurrent = this.variableShadingOptions.fill.varShading.customFills
 
         wiApiService.getCustomFills(function(customFillsList){
             self.customFillsList = customFillsList;
@@ -496,7 +493,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             if (checkErr) message = 'CustomFills: Low value or High value is invalid!';
             return message;
         }
-        // validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
         function isValid() {
             self.errorReason = null;
             if(!self.shadingOptions.idRightLine) {
@@ -522,7 +518,8 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             self.variableShadingOptions.negativeFill.varShading.varShadingType = self.varShadingType;
 
             let message = null;
-            if (self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') 
+            if (self.shadingOptions.shadingStyle == 'varShading' 
+                && self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') 
             {
                 message = validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
             }
