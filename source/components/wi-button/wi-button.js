@@ -34,10 +34,10 @@ function ButtonController(wiComponentService) {
 
     this.$onInit = function () {
         if (self.container === 'ribbon' || self.container === 'explorer') {
-            this.default.initialState.disabled = self.isDisabled() + '';
+            this.default.initialState.disabled = self.isDisabled();
 
             wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
-                self.disabled = "false";
+                self.disabled = false;
             });
 
             wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -51,9 +51,9 @@ function ButtonController(wiComponentService) {
     };
 
     this.isDisabled = function () {
-        if (self.disabled === 'true') {
+        if (self.disabled === true) {
             return true;
-        } else if (self.disabled === 'false') {
+        } else if (self.disabled === false) {
             return false;
         } else {
             return self.default.disabled;
@@ -80,7 +80,7 @@ app.component(wiButtonName, {
         checked: '<',
         handler: '<',
         handlerArgs: '<',
-        disabled: '@',
+        disabled: '<',
         separator: '@',
         container: '@'
     }
