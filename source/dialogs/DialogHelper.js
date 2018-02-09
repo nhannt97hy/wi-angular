@@ -17,7 +17,7 @@ function initModal(modal) {
             let okButton, cancelButton;
             let buttonElems = $(modal.element).find('.modal-footer > button');
             for (let i = 0; i < buttonElems.length; i++) {
-                if (buttonElems[i].innerText.toLowerCase().trim() == 'ok') {
+                if (buttonElems[i].innerText.toLowerCase().trim() == 'ok' || buttonElems[i].innerText.toLowerCase().trim() == 'login') {
                     okButton = buttonElems[i];
                 }
                 if (buttonElems[i].innerText.toLowerCase().trim() == 'cancel' || buttonElems[i].innerText.toLowerCase().trim() == 'close') {

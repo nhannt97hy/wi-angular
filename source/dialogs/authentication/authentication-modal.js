@@ -30,6 +30,7 @@ module.exports = function (ModalService, wiComponentService,callback) {
                 dialogUtils.confirmDialog(ModalService, "Registration", "Register successfully. Please wait for account activation.", function () {});
             });
         }
+        this.remember = true;
         this.onLoginButtonClicked = function () {
             self.error = null;
             if (!self.username || !self.password) return;

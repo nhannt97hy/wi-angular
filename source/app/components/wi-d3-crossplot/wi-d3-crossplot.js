@@ -7,7 +7,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.crossplotModel = null;
-    let zoneCtrl = null, refWindCtrl;
     this.viCrossplot = {};
     let _well = null;
 
@@ -119,7 +118,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function updateHistogramProps(crossplotModel,xy){
         let histogramProps = xy == 'xCurve' ? self.histogramModelX.properties : self.histogramModelY.properties;
         if (crossplotModel.properties.pointsets && crossplotModel.properties.pointsets.length) {
-            pointSet = crossplotModel.properties.pointsets[0];
+            let pointSet = crossplotModel.properties.pointsets[0];
             histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
             histogramProps.leftScale = (xy == 'xCurve')?pointSet.scaleLeft:pointSet.scaleBottom;
             histogramProps.rightScale = (xy == 'xCurve')?pointSet.scaleRight:pointSet.scaleTop;
@@ -682,8 +681,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.showHisContextMenu = function(event, xy){
         if (event.button != 2) return;
-        _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
-        visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
+        let _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
+        let visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
         self.hisContextMenu = [{
             name: "ShowAsLine",
             label: "Show As Line",
