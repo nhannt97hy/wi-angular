@@ -67,6 +67,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     let _referenceLine = true;
+    let _fitWindow = false;
     let _depthRange = [0, 100000];
     var commonCtxMenu = null;
     let _tracks = [];
@@ -140,11 +141,81 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (on === undefined) return _referenceLine;
         _referenceLine = on;
     }
+    this.fitWindow = function(on) {
+        if (on === undefined) return _fitWindow;
+        _fitWindow = on;
+    }
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
     this.toggleReferenceLine = function() {
         _referenceLine = !_referenceLine;
+    }
+    let originalWidths = [];
+    this.toggleFitWindow = function() {
+        _fitWindow = !_fitWindow;
+        let logplotElem = $('wi-logplot#' + self.wiLogplotCtrl.id + '>.logplot-header');
+        let slidingBarElem = $('wi-logplot#' + self.wiLogplotCtrl.id + '>.logplot-main-content>.slidingbar')
+        let plotAreaWidth = logplotElem.width() - slidingBarElem.width()/2 - slidingBarElem.outerWidth()/2;
+        console.log("width", _tracks);
+        let sumOfOriWidth = 0;
+        let widths = [];
+        // let fitWindowWidths = [];
+        _tracks.forEach(function(t) {
+            widths.push(t.width);
+            sumOfOriWidth += t.width;
+        });
+        let ratioWidth = plotAreaWidth/sumOfOriWidth;
+        _tracks.forEach(function(t, index) {
+            if(_fitWindow) {
+                t.width = widths[index] * ratioWidth;
+                originalWidths.push(widths[index]);
+            }
+            else {
+                // t.width = originalWidths[index];
+                if (t.isLogTrack()) {
+                    wiApiService.infoTrack(t.id, function (logTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(logTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isDepthTrack()) {
+                    wiApiService.infoDepthTrack(t.id, function (depthTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(depthTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isZoneTrack()) {
+                    wiApiService.getZoneTrack(t.id, function (zoneTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(zoneTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isImageTrack()) {
+                    wiApiService.getImageTrack(t.id, function (zoneTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(zoneTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isObjectTrack()) {
+                    wiApiService.getObjectTrack(t.id, function (objectTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(objectTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+            }
+            t.doPlot();
+        })
     }
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);
@@ -187,6 +258,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let wellProps = self.getWellProps();
         return parseFloat(wellProps.topDepth) || 0;
     }
+
     this.getDepthRange = function () {
         return _depthRange.map(function (d) {
             return Math.round(d * 10000) / 10000;
@@ -474,7 +546,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
-        })
+        });
+        this.wiLogplotCtrl.updateScale(this.scale);
     }
     this.setCurrentTrack = function (track) {
         if (_currentTrack == track) return;
@@ -1117,29 +1190,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
-                wiApiService.editTrack({idTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
-                })
+                wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isDepthTrack()) {
-                wiApiService.editDepthTrack({
-                    idDepthAxis: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
+                wiApiService.editDepthTrack({ idDepthAxis: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isZoneTrack()) {
-                wiApiService.editZoneTrack({idZoneTrack: track.id, width: Utils.pixelToInch(track.width)}, function () {
-                })
+                wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isImageTrack()) {
-                wiApiService.editImageTrack({
-                    idImageTrack: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
+                wiApiService.editImageTrack({ idImageTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isObjectTrack()) {
-                wiApiService.editObjectTrack({
-                    idObjectTrack: track.id,
-                    width: Utils.pixelToInch(track.width)
-                }, function () {
-                })
+                wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
+                _fitWindow = false;
             }
         });
     }

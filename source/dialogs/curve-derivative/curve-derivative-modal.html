@@ -23,7 +23,7 @@
                                     <div class="col-sm-4">
                                         <ui-select ng-model="wiModal.SelectedCurve" class="normal-text">
                                             <ui-select-match placeholder='Select a curve'>{{wiModal.SelectedCurve.properties.name}}</ui-select-match>
-                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
+                                            <ui-select-choices group-by="wiModal.groupFn" repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                                 <div class="padding-left-20px">{{curve.properties.name}}</div>
                                             </ui-select-choices>
                                         </ui-select>

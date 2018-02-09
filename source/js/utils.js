@@ -127,6 +127,7 @@ function lineToTreeConfig(line) {
         id: line.idLine,
         idCurve: line.idCurve,
         idDataset: curveModel.properties.idDataset,
+        dataset: findDatasetById(curveModel.properties.idDataset).name,
         name: lineModel.name,
         unit: line.unit,
         minX: line.minValue,
@@ -144,7 +145,6 @@ function lineToTreeConfig(line) {
         symbol: null,
         orderNum: line.orderNum
     };
-    let temp = line.displayMode.toLowerCase().trim();
     lineModel.data.line = {
         dash: eval(line.lineStyle),
         color: line.lineColor,
@@ -163,11 +163,6 @@ function lineToTreeConfig(line) {
 
 function shadingToTreeConfig(shading, paletteList) {
     let shadingModel = new Object();
-
-    function getValPal(palName) {
-        console.log("getPal", paletteList.palName);
-        return paletteList.palName;
-    };
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
     shadingModel.idRightLine = shading.idRightLine;
@@ -557,7 +552,7 @@ function createCurveModel (curve) {
         unit: curve.unit || "NA",
         alias: curve.name
     });
-    curveModel.datasetName = curve.dataset;
+    // curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
@@ -590,7 +585,7 @@ function curveToTreeConfig(curve, isDeleted) {
             unit: curve.unit || "NA",
             alias: curve.name
         };
-        curveModel.datasetName = curve.dataset;
+        // curveModel.datasetName = curve.dataset;
         curveModel.data = {
             childExpanded: false,
             icon: 'curve-16x16',
@@ -1083,7 +1078,6 @@ exports.projectToTreeConfig = function (project) {
     return projectModel;
 }
 
-
 function dustbinToTreeConfig(dustbin) {
     var dustbinModel = new Object();
     dustbinModel.type = 'dustbin';
@@ -1096,8 +1090,6 @@ function dustbinToTreeConfig(dustbin) {
         selected: false
     };
     dustbinModel.children = new Array();
-
-    let wiComponentService = __GLOBAL.wiComponentService;
     if (dustbin) {
         updateDustbinConfig(dustbin);
     }
@@ -1107,7 +1099,6 @@ function dustbinToTreeConfig(dustbin) {
 exports.dustbinToTreeConfig = dustbinToTreeConfig;
 
 function updateDustbinConfig(dustbin) {
-    let wiComponentService = __GLOBAL.wiComponentService;
     let dustbinModel = dustbinToTreeConfig();
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
@@ -1360,16 +1351,16 @@ function openLogplotTab(wiComponentService, logplotModel, callback) {
 };
 exports.openLogplotTab = openLogplotTab;
 
-function getCurrentWell(type) {
-    let currentWell = utils.getSelectedPath().find(node => node.type == 'well');
+function getCurrentWell() {
+    let currentWell = getSelectedPath().find(node => node.type == 'well');
     if(!currentWell){
-        utils.error("Please select well first!");
+        toastr.error("Please select well first!");
         return;
     }
     return currentWell;
 }
 exports.getCurrentWell = getCurrentWell;
-function getStaticNode(type, options) {
+function getStaticNode(type) {
     if (!type) return;
     let wiComponentService = __GLOBAL.wiComponentService;
     let currentWell = getSelectedPath().find(node => node.type == 'well');
@@ -1460,7 +1451,7 @@ function findZoneSetById(idZoneSet) {
     return zoneSet;
 }
 
-exports.findDatasetById = findDatasetById;
+exports.findZoneSetById = findZoneSetById;
 
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -1726,8 +1717,6 @@ exports.createDataset = function (name) {
 }
 
 exports.exportCurve = function () {
-    let wiComponentService = __GLOBAL.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
     let wiApiService = __GLOBAL.wiApiService;
@@ -1802,15 +1791,12 @@ exports.pasteCurve = function () {
     if (selectedNode.type != 'curve' && selectedNode.type != 'dataset') return;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let wiApiService = __GLOBAL.wiApiService;
-    let currentDatasetName = "";
     let currentDataset;
     if (selectedNode.type == 'curve') {
         // selectedNode is Curve
         currentDataset = findDatasetById(selectedNode.properties.idDataset);
-        currentDatasetName = currentDataset.properties.name;
     } else {
         // selectedNode is Dataset
-        currentDatasetName = selectedNode.properties.name;
         currentDataset = selectedNode;
     }
     // if copying
@@ -2937,111 +2923,16 @@ function updateWiCurveListingOnModelDeleted(model){
 }
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
-function calVSHfromGR(well, grCurve, matrix, shale, type, callback){
+
+function getDepthCurve(well){
     let length = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
-    let result = new Array(length);
-    let curvesData = {};
-
-    function getDepth(){
-        let depth = new Array(length);
-        for(i = 0; i < length; i++){
-            depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
-        }
-        return depth;
+    let depth = new Array(length);
+    for(i = 0; i < length; i++){
+        depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
     }
-
-    function getData(idCurve, callback){
-        if(idCurve){
-            __GLOBAL.wiApiService.dataCurve(idCurve, function(data){
-                callback(data.map(d => parseFloat(d.x)));
-            })
-        }else{
-            let data = getDepth();
-            callback(data);
-        }
-    }
-    
-    async.series([function(cb){
-        // get data from input
-        getData(grCurve.id, function(data){
-            curvesData['grCurve'] = data;
-            if(matrix.type == 'curve'){
-                getData(matrix.value.id, function(data){
-                    curvesData['matrix'] = data;
-                    if(shale.type == 'curve'){
-                        getData(shale.value.id, function(data){
-                            curvesData['shale'] = data;
-                            cb();
-                        })
-                    }else{
-                        curvesData['shale'] = new Array(length).fill(shale.value);
-                        cb();
-                    }
-                })
-            }else{
-                curvesData['matrix'] = new Array(length).fill(matrix.value);
-                if(shale.type == 'curve'){
-                    getData(shale.value.id, function(data){
-                        curvesData['shale'] = data;
-                        cb();
-                    })
-                }else{
-                    curvesData['shale'] = new Array(length).fill(shale.value);
-                    cb();
-                }
-            }
-        })
-    },
-    function(cb){
-        // cal GR index
-        for(let i = 0; i < length; i++){
-            result[i] = (curvesData['grCurve'][i] - curvesData['matrix'][i])/(curvesData['shale'][i] - curvesData['matrix'][i]);
-        }
-        cb();
-    },
-    function(cb){
-        // cal VSH by type
-        switch(type){
-            case 'Linear':
-            cb();
-            break;
-
-            case 'Clavier':
-            result = result.map(d => {return 1.7 - Math.sqrt(3.38 - Math.pow(d + 0.7, 2))});
-            cb();
-            break;
-
-            case 'Tertiary':
-            result = result.map(d => {return 0.083 * (Math.pow(2, 3.7 * d) - 1)});
-            cb();
-            break;
-
-            case 'Larionov':
-            result = result.map(d => {return 0.33 * (Math.pow(2, 3.7 * d) - 1)});
-            cb();
-            break;
-
-            case 'Stieber1':
-            result = result.map(d => {return d / (2 - d)});
-            cb();
-            break;
-
-            case 'Stieber3':
-            result = result.map(d => {return d / (3 - 2 * d)});
-            cb();
-            break;
-
-            case 'Stieber2':
-            result = result.map(d => {return d / (4 - 3 * d)});
-            cb();
-            break;
-        }
-    }], function(err){
-        console.log(result);
-        callback(result);
-    })
+    return depth;
 }
-exports.calVSHfromGR = calVSHfromGR;
+exports.getDepthCurve = getDepthCurve;
 
 function emitEvent (eventName, eventData) {
     let event = new CustomEvent(eventName, {detail: eventData});

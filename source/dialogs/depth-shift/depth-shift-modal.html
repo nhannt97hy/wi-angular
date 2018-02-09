@@ -35,7 +35,7 @@
                                     <div class="col-sm-4">
                                         <ui-select ng-model="wiModal.RefCurve" class="normal-text">
                                             <ui-select-match placeholder='Select a curve'>{{$select.selected.name}}</ui-select-match>
-                                            <ui-select-choices group-by="'datasetName'" repeat='curve in wiModal.curves | filter:{name:$select.search} track by curve.id'>
+                                            <ui-select-choices group-by="wiModal.groupFn" repeat='curve in wiModal.curves | filter:{name:$select.search} track by curve.id'>
                                                 <div class="padding-left-20px">{{curve.name}}</div>
                                             </ui-select-choices>
                                         </ui-select>
@@ -141,13 +141,13 @@
                                                 </tr>
                                             </thead>
                                             <tbody style="overflow-y: scroll;display:block;height:10em; overflow-x:hidden">
-                                                <tr ng-repeat="curve in wiModal.curves | filter:{name: filterCurve, datasetName:filterDataset}| filter: wiModal.CurveF track by $index"
+                                                <tr ng-repeat="curve in wiModal.curves | filter:{name: filterCurve, properties:{dataset:filterDataset}}| filter: wiModal.CurveF track by $index"
                                                     ng-class="{'selected': curve.flag}" ng-click="wiModal.select(curve)">
                                                     <td style="width: 20%">
                                                         <i class='glyphicon glyphicon-ok' ng-class="{'color-black': curve.flag, 'color-lightgray': !curve.flag}"></i>
                                                     </td>
                                                     <td style="width: 40%">{{curve.name}}</td>
-                                                    <td style="width: 40%">{{curve.datasetName}}</td>
+                                                    <td style="width: 40%">{{curve.properties.dataset}}</td>
                                                     <td></td>
                                                 </tr>
                                             </tbody>

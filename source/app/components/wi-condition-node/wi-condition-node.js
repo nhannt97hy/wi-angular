@@ -9,14 +9,18 @@ function Controller(wiComponentService, $timeout) {
                 name: 'Depth',
                 type: 'curve',
                 id: 0,
-                datasetName: '',
                 properties: {
                     name: 'Depth',
-                    idCurve: 0
+                    idCurve: 0,
+                    dataset: ''
                 }
             }]
             self.curveOptionsWithDepth = depth.concat(self.curveOptions);
         },500);
+    }
+
+    this.groupFn = function(item){
+        return item.properties.dataset;
     }
 
     this.comparisons = ['<', '>', '=', '<=', '>='];

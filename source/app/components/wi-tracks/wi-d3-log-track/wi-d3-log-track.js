@@ -458,7 +458,18 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let shadingOptions = currentShading.getProperties();
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+            let leftLineBk = options.leftLine;
+            options.leftLine = null;
+            let rightLineBk = options.rightLine;
+            options.rightLine = null;
+
             let request = angular.copy(options);
+
+            request.leftLine = leftLineBk;
+            request.rightLine = rightLineBk;
+            options.leftLine = leftLineBk;
+            options.rightLine = rightLineBk;
+
             if(options.idLeftLine == -3) {
                 options.type = 'custom';
             };
@@ -480,9 +491,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 options.idLeftLine = null;
             }
             else {
-                    request.leftFixedValue = null;
-                    request.idLeftLine = parseInt(options.idLeftLine);
-                }
+                request.leftFixedValue = null;
+                request.idLeftLine = parseInt(options.idLeftLine);
+            }
             wiApiService.editShading(request, function (shading) {
                 Utils.getPalettes(function(paletteList){
                     wiApiService.dataCurve(options.idControlCurve, function (curveData) {
@@ -501,7 +512,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         $timeout(function() {
                             _currentTrack.plotAllDrawings();
                         });
-
                     });
                 });
             });

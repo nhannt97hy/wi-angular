@@ -1065,7 +1065,13 @@ Service.prototype.editTrack = function (trackObj, callback, option) {
     let dataRequest = trackObj;
     this.post(EDIT_TRACK, dataRequest, callback, option);
 }
-
+Service.prototype.infoDepthTrack = function (idDepthAxis, callback) {
+    let self = this;
+    let dataRequest = {
+        idDepthAxis: idDepthAxis
+    };
+    this.post(GET_DEPTH_AXIS, dataRequest, callback);
+}
 Service.prototype.createDepthTrack = function (depthTrack, callback) {
     var self = this;
     this.post(CREATE_DEPTH_AXIS, depthTrack, callback);

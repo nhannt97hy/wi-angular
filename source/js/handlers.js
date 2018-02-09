@@ -214,7 +214,7 @@ exports.OpenTemplateButtonClicked = function () {
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     let currentWell = utils.getCurrentWell();
-    DialogUtils.OpenTemplateDialog(this.ModalService, currentWell, function (plot) {
+    DialogUtils.openTemplateDialog(this.ModalService, currentWell, function (plot) {
         utils.openLogplotTab(self.wiComponentService, utils.getModel('logplot', plot.idPlot));
     });
 };
@@ -278,7 +278,12 @@ exports.BlankLogplotButtonClicked = function () {
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    DialogUtils.newBlankLogplotDialog(ModalService, function (logplotName) {
+    let promptConfig = {
+        title: 'Create New Log Plot',
+        inputName: 'Log Plot Name',
+        input: 'BlankLogPlot'
+    }
+    DialogUtils.promptDialog(ModalService, promptConfig,function (logplotName) {
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function(logplot) {
                 console.log("Created new log plot", logplot);

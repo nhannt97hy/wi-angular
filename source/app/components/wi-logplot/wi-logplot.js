@@ -47,6 +47,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         //     // wiD3Controller.plotAll();
         // }
     };
+    this.updateScale = function (scale) {
+        this.currentView = scale.currentView;
+        this.displayView = scale.displayView;
+    }
 
     this.getLogplotModel = function () {
         return utils.findLogplotModelById(self.id);

@@ -10,7 +10,7 @@ function Controller(wiComponentService) {
     };
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    this.onChange = function (item, callback) {
+    this.onChange = function (item) {
         utils.editProperty(item, _.debounce(function () {
             wiComponentService.emit('update-properties', utils.getSelectedNode());
         }, 200));
