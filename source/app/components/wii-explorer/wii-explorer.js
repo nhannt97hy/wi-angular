@@ -18,7 +18,9 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         self.treeConfig = [oUtils.initInventory()];
     }
 
-    this.unselectAllNodes = function () {
+    this.unselectAllNodes = unselectAllNodes;
+
+    function unselectAllNodes() {
         self.treeConfig.forEach(function (item) {
             utils.visit(item, function (node) {
                 if (node.data) node.data.selected = false;
@@ -27,8 +29,52 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
     }
 
+    this.clickFunction = function($index, $event, node) {
+        node.$index = $index;
+        if (!node) {
+            unselectAllNodes();
+            return;
+        }
+        wiComponentService.emit('update-properties', node);
+        let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        if (!Array.isArray(selectedNodes)) selectedNodes = [];
+        if (!$event.shiftKey) {
+            if (selectedNodes.length) {
+                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes();
+                }
+            }
+            selectHandler(node);
+        } else {
+            // shift key
+            if (selectedNodes.length) {
+                if (selectedNodes.includes(node)) return;
+                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes();
+                    selectHandler(node);
+                } else {
+                    if (node.$index < selectedNodes[0].$index) {
+                        let fromIndex = node.$index;
+                        let toIndex = selectedNodes[0].$index;
+                        unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            selectHandler(this.config[i], true);
+                        }
+                    } else {
+                        let fromIndex = selectedNodes[0].$index;
+                        let toIndex = node.$index;
+                        unselectAllNodes();
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            selectHandler(this.config[i], true);
+                        }
+                    }
+                }
+            }
+        }
+    }
     // Select tree node handler
-    this.selectHandler = function (currentNode, noLoadData) {
+    this.selectHandler = selectHandler;
+    function selectHandler(currentNode, noLoadData) {
         function bareSelectHandler() {
             wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
             wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
@@ -97,41 +143,56 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         })
     }
 
-    this.getDefaultTreeviewCtxMenu = function ($index, treeViewCtrl) {
+    function expandAll(treeNode) {
+        if(!treeNode.data) return;
+        treeNode.data.childExpanded = true;
+        
+        treeNode.children && treeNode.children.length && treeNode.children.forEach(function(childNode) {
+            expandAll(childNode);
+        });
+    }
+    function collapseAll(treeNode) {
+        if(!treeNode.data) return;
+        treeNode.data.childExpanded = false;
+        treeNode.children && treeNode.children.length && treeNode.children.forEach(function(childNode) {
+            collapseAll(childNode);
+        });
+    }
+    function getDefaultTreeviewCtxMenu(treeNode) {
         return [
             {
                 name: "Expand",
                 label: "Expand",
                 icon: "expand-16x16",
                 handler: function () {
-                    treeViewCtrl.expand($index);
+                    treeNode.data.childExpanded = true;
                 }
             }, {
                 name: "Collapse",
                 label: "Collapse",
                 icon: "collapse-16x16",
                 handler: function () {
-                    treeViewCtrl.collapse($index);
+                    treeNode.data.childExpanded = false;
                 }
             }, {
                 name: "ExpandAll",
                 label: "Expand All",
                 icon: "expand-all-16x16",
                 handler: function () {
-                    treeViewCtrl.expandAll(self.treeConfig);
+                    expandAll(treeNode);
                 }
             }, {
                 name: "CollapseAll",
                 label: "Collapse All",
                 icon: "collapse-all-16x16",
                 handler: function () {
-                    treeViewCtrl.collapseAll(self.treeConfig);
+                    collapseAll(treeNode);
                 }
             }
         ]
     }
 
-    this.getItemTreeviewCtxMenu = function (nodeType, treeViewCtrl) {
+    function getItemTreeviewCtxMenu(nodeType, treeViewCtrl) {
         let selectedNode = utils.getSelectedNode(self.treeConfig[0]);
         switch (nodeType) {
             case 'file':
@@ -265,6 +326,15 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
     this.ImportWellTopButtonClicked = function () {
         console.log('ImportWellTopButtonClicked');
+    }
+    this.showContextMenu = function($event, $index, node) {
+        console.log('node', node);
+        let defaultContextMenu = [], itemContextMenu = [];
+        defaultContextMenu = getDefaultTreeviewCtxMenu(node);
+        let nodeType = node.type;
+        itemContextMenu = getItemTreeviewCtxMenu(nodeType, self);
+        let contextMenu = itemContextMenu.concat(defaultContextMenu);
+        wiComponentService.getComponent('ContextMenu').open($event.clientX, $event.clientY, contextMenu);
     }
 }
 

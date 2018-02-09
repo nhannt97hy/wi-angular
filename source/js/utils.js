@@ -1160,16 +1160,14 @@ function getSelectedPath(foundCB, rootNode) {
     if (!rootNode) return;
     let selectedPath = new Array();
     visit(rootNode, function (node, options) {
-        if (node.data) {
-            if (foundCB) {
-                if (foundCB(node)) {
-                    selectedPath = options.path.slice();
-                    return true;
-                }
-            } else if (node.data.selected == true) {
+        if (foundCB) {
+            if (foundCB(node)) {
                 selectedPath = options.path.slice();
                 return true;
             }
+        } else if (node.data.selected == true) {
+            selectedPath = options.path.slice();
+            return true;
         }
         return false;
     }, {

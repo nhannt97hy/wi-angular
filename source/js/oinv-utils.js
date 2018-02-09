@@ -37,12 +37,12 @@ exports.updateParentNode = updateParentNode;
 
 
 function updateWells(start, rootNode) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     let inventory = wiComponentService.getComponent('INVENTORY');
     if (rootNode) inventory = rootNode;
     let s = start;
     if (isNaN(s)) s = 0;
-    let wiComponentService = __GLOBAL.wiComponentService;
-    let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
     return new Promise(function (resolve, reject) {
         wiOnlineInvService.listWells({start:s,limit: 50, forward:true}, function (listWells) {
             let preWellsModel = angular.copy(inventory.children) || [];

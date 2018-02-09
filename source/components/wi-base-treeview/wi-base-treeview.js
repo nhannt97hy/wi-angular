@@ -5,7 +5,7 @@ function WiBaseTreeController(wiComponentService, $scope) {
     let self = this;
 
     this.$onInit = function () {
-        wiComponentService.putComponent(self.name, self);
+        if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
         $scope.$watch(() => this.filter,(value) => {
             if(value != undefined){
                 if(this.config && this.config.length){
@@ -105,8 +105,9 @@ function WiBaseTreeController(wiComponentService, $scope) {
         }
     }
 
-    this.onClick = function ($index, $event) {
-        this.onClickFunction && this.onClickFunction($index, $event);
+    this.onClick = function ($index, $event, node) {
+        self.onSelectFunction && self.onSelectFunction(node);
+        self.onClickFunction && self.onClickFunction($index, $event, node);
     }
 
     this.onDoubleClick = function ($index) {
@@ -137,7 +138,8 @@ app.component(componentName, {
         onDoubleClickFunction: '<',
         showContextMenuFunction: '<',
         isShowParentName: '<',
-        filter: '@'
+        filter: '@',
+        onSelectFunction: '<'
     }
 });
 exports.controller = WiBaseTreeController;
