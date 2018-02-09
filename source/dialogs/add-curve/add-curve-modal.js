@@ -64,7 +64,7 @@ module.exports = function (ModalService, Selwell) {
 
         this.onWellChanged();
         this.onFamilyChanged = function () {
-            self.unit = self.selectedFamily.family_spec.length ? self.selectedFamily.family_spec[0] : null;
+            self.unit = self.selectedFamily.family_spec.length ? self.selectedFamily.family_spec[0].unit : null;
         }
         this.onFamilyChanged();
         this.onRunButtonClicked = function () {
