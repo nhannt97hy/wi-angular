@@ -581,9 +581,17 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                                             item.leftLine.idCurve : item.rightLine.idCurve;
                 }
                 const idLeftLine = item.leftLine.id
-                delete item.leftLine;
-                delete item.rightLine;
+                let leftLineBk = item.leftLine;
+                item.leftLine = null;
+                let rightLineBk = item.rightLine;
+                item.rightLine = null;
+
                 let request = angular.copy(item);
+
+                request.leftLine = leftLineBk;
+                request.rightLine = rightLineBk;
+                item.leftLine = leftLineBk;
+                item.rightLine = rightLineBk;
 
                 if(item.idLeftLine == -3) {
                     item.type = 'custom';
@@ -598,12 +606,11 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                     item.type = 'pair';
                 }
                 delete request.changed;
+                delete request.leftLine;
+                delete request.rightLine;
 
-                let options = angular.copy(item);
                 if (item.idLeftLine < 0) {
                     request.idLeftLine = null;
-                    options.leftLine = null;
-                    options.idLeftLine = null;
                 }
                 else {
                     request.leftFixedValue = null;
@@ -674,7 +681,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             self.applyInProgress = false;
         }
         this.onApplyButtonClicked = function () {
-            doApply();
+            doApply(function() {});
         };
         this.onOkButtonClicked = function () {
             doApply(function(result) {
