@@ -310,7 +310,8 @@
                                                 <td width="15%">
                                                     <ui-select ng-model="shading.rightLine"
                                                                 ng-change="wiModal.onChangeShading($index); wiModal.onSelectRightLine();
-                                                                wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
+                                                                wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)"
+                                                                ng-click="wiModal.getCurveList();">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.rightLine.name}}</ui-select-match>
                                                         <ui-select-choices group-by="wiModal.groupFnTabShading"
                                                                     repeat='c as c in wiModal.curveList | filter: $select.search'>
@@ -321,7 +322,8 @@
                                                 <td width="15%">
                                                     <ui-select ng-model="shading.leftLine"
                                                                 ng-change="wiModal.onChangeShading($index); wiModal.onSelectLeftLine();
-                                                                wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)">
+                                                                wiModal.setShadingName(shading.rightLine, shading.leftLine, shading._index)"
+                                                                ng-click="wiModal.getCurveList();">
                                                         <ui-select-match placeholder='Select a curve'>{{shading.leftLine.name}}</ui-select-match>
                                                         <ui-select-choices group-by="wiModal.groupFnTabShading"
                                                                     repeat='c as c in wiModal.leftLimit | filter: $select.search'>

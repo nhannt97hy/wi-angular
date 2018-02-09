@@ -351,6 +351,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                                 res.shadings.forEach(function(s) {
                                     let shading = utils.getVisualizeShading(currentTrack, s.idShading);
                                     currentTrack.removeDrawing(shading);
+                                    self.shadings.find(shading => shading.idShading == s.idShading).changed = changed.deleted;
                                 });
                             }
                             callback();
@@ -367,8 +368,8 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         });
                     }
                     self.curves = self.curves.filter(c => { return c.changed != changed.deleted });
-                    self.curveList = currentTrack.getCurves();
-                    self.leftLimit = customLimit.concat(self.curveList);
+                    /*self.curveList = currentTrack.getCurves();
+                    self.leftLimit = customLimit.concat(self.curveList);*/
 
                     console.log("curveUpdated", self.curveUpdated, curves_bk);
 
@@ -574,6 +575,10 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             }
             if (self.shadings[self.__idx].leftLine.id > 0) self.shadings[self.__idx].leftFixedValue = null;
         };
+        this.getCurveList = function () {
+            self.curveList = currentTrack.getCurves();
+            self.leftLimit = customLimit.concat(self.curveList);
+        }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 if (!item.idControlCurve) {
