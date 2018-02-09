@@ -138,7 +138,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                             });
                         },
                         value: itemProperties.idFamily,
-                        valueLabel: listFamily.find(f => f.idFamily === itemProperties.idFamily).name,
+                        valueLabel: curveFamily.name,
                         editable: true
                     }, {
                         key: 'name',
