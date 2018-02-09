@@ -3,7 +3,7 @@
         <div class="modal-content">
 
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled="updating">&times;</button>
                 <h4><span class=""></span>&nbsp;Ternary diagram</h4>
             </div>
 
@@ -128,7 +128,7 @@
                                         Area
                                     </label>
                                 </div>
-                                <div class="col-sm-2" ng-repeat="i in [1]" 
+                                <div class="col-sm-2" ng-repeat="i in [1]"
                                     style="padding-right: 0; margin-left: 23px; padding-left:19px;">
                                     <multiselect class="selectPolygons" multiple="true"
                                         ng-model="calculateOptions.area.polygons"
@@ -137,7 +137,7 @@
                                         disabled="calculateOptions.type != 'Area'">
                                     </multiselect>
                                 </div>
-                                <div class="form-group col-sm-2" 
+                                <div class="form-group col-sm-2"
                                     style="margin-left: 50px; padding-left: 5px;">
                                     <select ng-model="calculateOptions.area.exclude"
                                             class="form-control wi-form-control"
@@ -165,6 +165,31 @@
                                     </span>
                                 </span>
                             </div>
+                            <div class="row">
+                                <span class="col-sm-3">
+                                    <label>
+                                        <input type="checkbox" ng-model="result.outputCurve" />
+                                        Output Curve
+                                    </label>
+                                </span>
+                                <div class="col-sm-3" class="form-control wi-form-control">
+                                    <ui-select ng-model="result.selectedDataset" ng-disabled="!result.outputCurve">
+                                        <ui-select-match >{{result.selectedDataset.name}}</ui-select-match>
+                                        <ui-select-choices repeat='dataset as dataset in datasets'>
+                                            <div class="padding-left-20px">{{dataset.properties.name}}</div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <span class="col-sm-3" ng-repeat="curveName in result.curveNames">
+                                    <label>
+                                        Curve {{$index + 1}}
+                                        <input type="text" ng-model="result.curveNames[$index]"
+                                            class="form-control wi-form-control valign-middle display-inline-block" ng-disabled="!result.outputCurve"/>
+                                    </label>
+                                </span>
+                            </div>
                         </form>
                     </div>
                     <div class="col-sm-1">
@@ -179,16 +204,19 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button ng-click="wiModal.onSaveCurveButtonClicked()" class="btn btn-default" ng-disabled="!result.outputCurve">
+                    Save Curve
+                </button>
                 <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3">
                     Calculate
                 </button>
-                <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
+                <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default" ng-disabled="updating">
                     <span class="ok-16x16"></span>&nbsp;Apply
                 </button>
-                <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
+                <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default" ng-disabled="updating">
                     <span class="ok-16x16"></span>&nbsp;Ok
                 </button>
-                <button class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">
+                <button class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()" ng-disabled="updating">
                     <span class="cancel-16x16"></span>&nbsp;Cancel
                 </button>
             </div>

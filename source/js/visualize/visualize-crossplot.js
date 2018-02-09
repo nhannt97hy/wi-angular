@@ -193,8 +193,8 @@ const TERNARY_SCHEMA = {
                 point: {
                     type: 'Object',
                     properties: {
-                        x: { type: 'Float' },
-                        y: { type: 'Float' }
+                        x: { type: 'Float', default: null },
+                        y: { type: 'Float', default: null }
                     }
                 },
                 area: {
@@ -1425,6 +1425,8 @@ Crossplot.prototype.plotTernary = function() {
     vertices = this.ternary.vertices.filter(function(v) {
         return v.used && v.x != null && v.y != null && !isNaN(v.x) && !isNaN(v.y);
     });
+    this.plotTernaryPoint();
+
     if (vertices.length != 3) return;
 
     let line = d3.line()
@@ -1459,7 +1461,6 @@ Crossplot.prototype.plotTernary = function() {
         });
     }
 
-    this.plotTernaryPoint();
 }
 
 Crossplot.prototype.plotTernaryPoint = function() {
@@ -1467,7 +1468,7 @@ Crossplot.prototype.plotTernaryPoint = function() {
     ternaryContainer.selectAll('.vi-crossplot-ternary-point').remove();
     if (!this.ternary.calculate) return;
     let point = this.ternary.calculate.point;
-    if (!point || point.x == null || point.y == null) return;
+    if (!point || point.x == null || point.y == null || isNaN(point.x) || isNaN(point.y)) return;
     let self = this;
     let helper = new SvgHelper(ternaryContainer, {
         fillStyle: self.TERNARY_POINT_COLOR,
