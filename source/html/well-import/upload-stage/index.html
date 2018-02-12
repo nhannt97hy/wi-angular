@@ -1,0 +1,28 @@
+<wi-tabset name='MYTAB' toggle='false'>
+    <wi-tab heading='WellLog zip archive'>
+        <div style='background-color:white;padding-bottom:5px;'>
+            <div class='wi-chunked-upload-container'>
+                <!--<wi-chunked-upload style="display:flex;flex-direction:column;height:100%;" upload-url="'http://192.168.0.91:33333/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
+                </wi-chunked-upload>-->
+                <wi-chunked-upload class='well-log-zip-upload' style="display:flex;flex-direction:column;height:100%;" upload-url="'http://batch.sflow.me/chunked-upload'" id-input="'my-welllog-zip'" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
+                </wi-chunked-upload>
+            </div>
+        </div>
+    </wi-tab>
+    <wi-tab heading='WellHeader file'>
+        <div style='background-color:white;padding-bottom:5px;'>
+            <div class='wi-chunked-upload-container'>
+                <wi-chunked-upload class='well-header-upload' style="display:flex;flex-direction:column;height:100%;" id-input="'my-well-header'" on-done='handlers.wellHeaderUploadDone' on-error='handlers.wellHeaderUploadError' upload-function="handlers.wellHeaderUpload">
+                </wi-chunked-upload>
+            </div>
+        </div>
+    </wi-tab>
+    <wi-tab heading='WellTop file'>
+        <div style='background-color:white;padding-bottom:5px;'>
+            <div class='wi-chunked-upload-container'>
+                <wi-chunked-upload class='well-top-upload' style="display:flex;flex-direction:column;height:100%;" id-input="'my-well-top'" on-done='handlers.wellTopUploadDone' on-error='handlers.wellTopUploadError' upload-function="handlers.wellTopUpload">
+                </wi-chunked-upload>
+            </div>
+        </div>
+    </wi-tab>
+</wi-tabset>

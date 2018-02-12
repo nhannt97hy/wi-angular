@@ -37,6 +37,33 @@ exports.lasZipArchiveUploadError = function(error) {
     toastr.error('Error: ' + error.reason + " (error:" + error.code + ")");
     $('wi-stage wi-chunked-upload form')[0].reset();
 }
+
+exports.wellHeaderUpload = function(file, callback) {
+    let wiBatchApiService = this.wiBatchApiService;
+    wiBatchApiService.uploadWellHeader(file, callback);
+}
+exports.wellHeaderUploadDone = function() {
+    toastr.info('upload successfully completed');
+    angular.element($('wi-stages ul')[0]).scope().ctrl.skip();
+}
+exports.wellHeaderUploadError = function(error) {
+    toastr.error('Error: ' + error.reason + " (error:" + error.code + ")");
+    $('wi-stage wi-chunked-upload form')[1].reset();
+}
+exports.wellTopUpload = function(file, callback) {
+    let wiBatchApiService = this.wiBatchApiService;
+    wiBatchApiService.uploadWellTop(file, callback);
+}
+exports.wellTopUploadDone = function() {
+    toastr.info('upload successfully completed');
+    angular.element($('wi-stages ul')[0]).scope().ctrl.skip();
+}
+exports.wellTopUploadError = function(error) {
+    toastr.error('Error: ' + error.reason + " (error:" + error.code + ")");
+    $('wi-stage wi-chunked-upload form')[2].reset();
+}
+
+
 exports.ImportBlockButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);

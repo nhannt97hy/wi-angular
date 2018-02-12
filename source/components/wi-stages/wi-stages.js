@@ -3,8 +3,9 @@ const name = 'wiStages';
 
 const stageComponentName = 'wiStage';
 
-function MasterController($scope, $timeout, wiChunkedUploadService) {
+function MasterController($scope, $timeout, wiChunkedUploadService, wiBatchApiService) {
     let self = this;
+    self.wiBatchApiService = wiBatchApiService;
     $scope.ctrl = self;
     this.stages = [];
     this.isExpand = true;

@@ -13,7 +13,8 @@ let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
 
-let DialogUtils = require('./DialogUtils');
+//let DialogUtils = require('./DialogUtils');
+let DialogUtils = require('./SimpleDialogUtils');
 
 let wiInitialization = require('./wi-initialization.js');
 let wiButton = require('./wi-button.js');
@@ -207,7 +208,7 @@ let app = angular.module('wiapp',
         'angularjs-dropdown-multiselect'
     ]);
 
-function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService) {
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -219,6 +220,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiApiService,
         wiChunkedUploadService,
         wiOnlineInvService,
+        wiBatchApiService,
         $timeout
     };
     // Logplot Handlers
@@ -302,7 +304,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.preventDuplicates = true;
 
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService) {
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService) {
     let functionBindingProp = {
         $scope,
         wiComponentService,
@@ -310,11 +312,12 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         wiApiService,
         $timeout
     };
+    $scope.wiBatchApiService = wiBatchApiService;
     window.utils = utils;
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService);
+    appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
             onInit();
@@ -345,7 +348,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         */
     }
 });
-app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope) {
+app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope, ModalService) {
     window.ZIPARCHIVEMAN = $scope;
     $scope.deleteZipArchive = function(zipArchiveName) {
         wiBatchApiService.deleteDataDir(zipArchiveName, function(err, res) {
@@ -356,27 +359,59 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
             updateWorkflowList();
         });
     }
+    $scope.deleteWellHeaderCSV = function(idUserFileUploaded) {
+        wiBatchApiService.deleteWellHeaderCSV(idUserFileUploaded, function(err, res) {
+            if (err) return toastr.error('Error' + (err.message || err));
+            updateWellHeaderCSVList();
+        });
+    }
+    $scope.deleteWellTopCSV = function(idUserFileUploaded) {
+        wiBatchApiService.deleteWellTopCSV(idUserFileUploaded, function(err, res) {
+            if (err) return toastr.error('Error' + (err.message || err));
+            updateWellTopCSVList();
+        });
+    }
+    updateWorkflowList();
     $scope.wiBatchUrl = wiBatchApiService.getWiBatchUrl();
     $scope.username = window.localStorage.getItem('username');
     $scope.nextStage = function(zArchive) {
         $rootScope.zipArchive = zArchive;
         angular.element($('wi-stages ul')[0]).scope().ctrl.skip();
     }
-    updateWorkflowList();
+    $scope.updateWorkflowList = updateWorkflowList;
+    $scope.updateWellHeaderCSVList = updateWellHeaderCSVList;
+    $scope.updateWellTopCSVList = updateWellTopCSVList;
+    $scope.runImport = runImport;
     function updateWorkflowList() {
         wiBatchApiService.listWorkflows(function(err, workflows) {
             if (err) {
                 toastr.error('Error' + (err.message || err));
                 return;
             }
-            /*
-            $scope.zipArchives = workflows.map(function(wf) {
-                return wf;
-            });
-            */
             $scope.zipArchives = workflows;
             $rootScope.zipArchives = angular.copy($scope.zipArchives);
         });
+    }
+    function updateWellHeaderCSVList() {
+        wiBatchApiService.listWellHeaderCSVs(function(err, wellHeaderCSVs) {
+            if (err) {
+                toastr.error('Error' + (err.message || err));
+                return;
+            }
+            $scope.wellHeaderCSVs = wellHeaderCSVs;
+        });
+    }
+    function updateWellTopCSVList() {
+        wiBatchApiService.listWellTopCSVs(function(err, wellTopCSVs) {
+            if (err) {
+                toastr.error('Error' + (err.message || err));
+                return;
+            }
+            $scope.wellTopCSVs = wellTopCSVs;
+        });
+    }
+    function runImport(zipArchive) {
+        DialogUtils.runImportDialog(ModalService, $scope.zipArchives, zipArchive);
     }
 });
 const monthNames = [ 
@@ -388,7 +423,6 @@ app.controller('runImport', function($scope, $rootScope, $timeout) {
     var socket = initSocket();
     $scope.selected = {};
     $scope.selected.zipArchive = $rootScope.zipArchive;
-    window.SCOPE = $scope;
     $scope.isDisabled = !!$rootScope.zipArchive;
     delete $rootScope.zipArchive;
 
@@ -423,7 +457,7 @@ app.controller('runImport', function($scope, $rootScope, $timeout) {
         });
     }
     function initSocket() {
-        var socket = io('http://192.168.0.91:33333');
+        var socket = io(wiBatchApiService.wiBatchUrl);
         socket.on('run-workflow-done', function(msg) {
             console.log(msg);
             $timeout(function() {
@@ -501,13 +535,13 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
 
 app.filter('datetimeFormat', function() {
     return function(timestamp) {
-        var date = new Date(timestamp);
+        var date = new Date(parseInt(timestamp));
         return date.getFullYear() + "-" + monthNames[date.getMonth()] + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
     }
 });
 app.filter('timeFormat', function() {
     return function(timestamp) {
-        var date = new Date(timestamp);
+        var date = new Date(parseInt(timestamp));
         var h = date.getHours();
         var m = date.getMinutes();
         var s = date.getSeconds();

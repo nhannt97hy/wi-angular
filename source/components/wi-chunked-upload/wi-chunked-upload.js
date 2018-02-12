@@ -9,26 +9,39 @@ angular.module(moduleName, [])
             idInput: "<",
             uploadUrl: "<",
             onDone: "<",
-            onError: "<"
+            onError: "<",
+            uploadFunction: "<"
         }
     });
 
-function Controller($scope, $http, $timeout, wiChunkedUploadService) {
+function Controller($scope, $http, $timeout, wiChunkedUploadService, wiBatchApiService) {
     let self = this;
     self.uploadService = wiChunkedUploadService;
 
     $scope.fileNameChanged = fileNameChanged;
 
-    function fileNameChanged() {
-        console.log('File name changed');
+    this.$onInit = function() {
+        console.log(self.uploadFunction);
+        $scope.uploadFunction = self.uploadFunction;
+    }
+    function fileNameChanged(obj) {
+        console.log('File name changed', obj);
         var fileInput = $("#" + self.idInput)[0];
         $timeout(function() {
             if (fileInput && fileInput.files && fileInput.files.length) {
                 let file = $("#" + self.idInput)[0].files[0];
-                wiChunkedUploadService.startUpload(file, self.uploadUrl, function(err) {
-                    if (err) self.onError(err);
-                    else self.onDone();
-                });
+                if ($scope.uploadFunction) {
+                    $scope.uploadFunction(file, function(err) {
+                        if (err) self.onError(err);
+                        else self.onDone();
+                    });
+                }
+                else {
+                    wiChunkedUploadService.startUpload(file, self.uploadUrl, function(err) {
+                        if (err) self.onError(err);
+                        else self.onDone();
+                    });
+                }
             }
         });
     }
@@ -39,5 +52,6 @@ function Controller($scope, $http, $timeout, wiChunkedUploadService) {
     this.cancelUpload = function() {
         wiChunkedUploadService.cancelUpload();
     }
+    
 }
 exports.name = moduleName;

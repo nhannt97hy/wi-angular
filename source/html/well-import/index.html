@@ -14,13 +14,9 @@
     }
     .wi-chunked-upload-container {
         width: 70%;
-        height: 70%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        /*background: linear-gradient(gray, white);
-        box-shadow: 5px 5px 10px #888;*/
+        height: calc(100% - 76px);
+        margin:auto;
+        background-color:white;
     }
     .color-running, .color-processed {
         color: green;
@@ -76,82 +72,36 @@
         95% { content: " |"; }
         100% { content: " /"; }
     }
+    .well-log-zip-upload .file-container {
+        border-color: rgba(128, 0, 0, 0.5);
+    }
+    .well-header-upload .file-container {
+        border-color: rgba(0, 128, 0, 0.5);
+    }
+    .well-top-upload .file-container {
+        border-color: rgba(0, 0, 128, 0.5);
+    }
 </style>
 <wi-stages style='padding:70px 10px 10px;display:flex;flex-direction:row;position:absolute;top:0;left:0;right:0;bottom:0;'>
-    <wi-stage label="Upload Well LAS Archive (zip format)" icon="fa fa-cloud-upload">
+    <wi-stage label="Upload batch assets" icon="fa fa-cloud-upload">
         <div style='flex:1;display:flex;flex-direction:column'>
-            <div style='flex:1;position-relative;'>
-                <div class='wi-chunked-upload-container'>
-                    <!--<wi-chunked-upload style="display:flex;flex-direction:column;height:100%;" upload-url="'http://192.168.0.91:33333/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
-                    </wi-chunked-upload>-->
-                    <wi-chunked-upload style="display:flex;flex-direction:column;height:100%;" upload-url="'http://batch.sflow.me/chunked-upload'" id-input="my-file" on-done='handlers.lasZipArchiveUploadDone' on-error='handlers.lasZipArchiveUploadError'>
-                    </wi-chunked-upload>
-                </div>
-            </div>
+            <!--<div style='flex:1;position-relative;'>-->
+                @@include('./upload-stage/index.html')
+            <!--</div>-->
         </div>
     </wi-stage>
-    <wi-stage label="Manage Well LAS Archives" icon="fa fa-archive">
+    <wi-stage label="Manage batch assets" icon="fa fa-archive">
         <div style='flex:1;display:flex;flex-direction:column'>
             <div style='flex:1;overflow:auto;' ng-controller='zipArchiveManager as zam'>
-                <!--<h4 style="text-align: center;padding-top:1em;">Zip Archives</h4>-->
-                <ul style="width:70%;margin:auto;padding-left:0">
-                    <li style='display:flex;padding:1em 1em 0.2em;border-bottom: 1px solid black;font-weight:700;'>
-                        <div style='flex-basis:100px;'>Status</div>
-                        <div style='flex:1'>Archive name</div>
-                        <div style='flex:1'>Upload time</div>
-                        <div style='flex-basis:120px;text-align:right;'>Actions</div>
-                    </li>
-                    <li style='display:flex;padding:1em 1em 0.5em;border-bottom: 1px solid #888;font-style:italic;font-weight:200;' ng-repeat='zipArchive in zipArchives'>
-                        <div style='flex-basis:100px;'>
-                            <i class='fa fa-circle' 
-                            ng-class="{'color-running': zipArchive.status == 'running','color-processed':zipArchive.status == 'processed', 'color-error':zipArchive.status == 'error', 'color-new':zipArchive.status == 'new'}"></i>
-                            &nbsp;&nbsp;&nbsp;&nbsp;{{zipArchive.status}}
-                        </div>
-                        <div style='flex:1'>{{zipArchive.workflowName}}</div>
-                        <div style='flex:1;'>{{zipArchive.workflowConfig.ts | datetimeFormat}}</div>
-                        <div style='flex-basis:120px;text-align:right;'>
-                            <a style="font-size: 12px;padding: 4px 9px;vertical-align: text-bottom;" 
-                                href='{{wiBatchUrl}}/log/{{username}}/{{zipArchive.workflowName}}/error.txt' 
-                                class='btn btn-default' ng-show="zipArchive.status == 'processed'" target='_blank'>
-                                <i class="fa fa-file-o"></i>
-                            </a>
-                            <button ng-click='nextStage(zipArchive)'><span class='run-16x16'></span></button>
-                            <button ng-disabled="zipArchive.status=='running'"  ng-click='deleteZipArchive(zipArchive.workflowName)'><span class='close-16x16-edit'></span></button>
-                        </div>
-                    </li>
-                </ul>
+                @@include('./manage-stage/index.html')
             </div>
         </div>
     </wi-stage>
-    <wi-stage label="Import a Well LAS archive into Online Inventory" icon="fa fa-file-code-o">
+    <!--<wi-stage label="Import a Well LAS archive into Online Inventory" icon="fa fa-file-code-o">
         <div style='flex:1;display:flex;flex-direction:column' ng-controller="runImport">
-            <form class="form-horizontal">
-                <div class='col-sm-offset-1 col-sm-10 {{animateClass}}' style="padding-top:1em;padding-bottom:0.5em;color:red;font-style:italic;">{{message}}</div>
-                <div class="form-group">
-                    <div class="col-sm-offset-1 col-sm-8">
-                        <ui-select class='height34px' ng-model="selected.zipArchive" 
-                            ng-change="onSelectZipArchive()" ng-disabled='isDisabled'>
-                            <ui-select-match placeholder='Select a zip archive'>{{selected.zipArchive.workflowName}}</ui-select-match>
-                            <ui-select-choices repeat='zip in zipArchives'>
-                                <div>{{zip.workflowName}}</div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
-                    <div class="col-sm-2">
-                        <button ng-click='startImport();'><span style='vertical-align:middle;' class='run-32x32'></span>Run import</button>
-                    </div>
-                </div>
-            </form>
-            <div style='flex: 1;overflow:auto;' class="col-sm-offset-1 col-sm-10 console"> 
-                <ul style="padding-left:0px;list-style:none;">
-                    <li style='display:flex' ng-repeat='line in msgQueue'>
-                        <div style='color:#888;flex-basis:7em;'>[{{line.ts | timeFormat}}]</div>
-                        <div style='user-select: text;flex:1'>{{line.content}}</div>
-                    </li>
-                </ul>
-            </div>
+            @@include('./running-stage/index.html')
         </div>
-    </wi-stage>
+    </wi-stage>-->
     <wi-stage label="Finish" icon="fa fa-flag-checkered">
         <div style='flex:1;display:flex;flex-direction:column'>
             <div style='flex:1'>

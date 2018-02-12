@@ -1,0 +1,41 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Run import</h4>
+            </div>
+            <div style='display:flex;flex-direction:column;' class="modal-body small-text">
+                <form class="form-horizontal">
+                    <div class='col-sm-offset-1 col-sm-10 {{wiModal.animateClass}}' style="padding-top:1em;padding-bottom:0.5em;color:red;font-style:italic;">{{wiModal.message}}</div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-1 col-sm-8">
+                            <ui-select class='height34px' ng-model="wiModal.zipArchive" ng-disabled='true'>
+                                <ui-select-match placeholder='Select a zip archive'>{{wiModal.zipArchive.workflowName}}</ui-select-match>
+                                <ui-select-choices repeat='zip in wiModal.zipArchives'>
+                                    <div>{{zip.workflowName}}</div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-sm-2">
+                            <button ng-hide='wiModal.zipArchive.status == "running"' ng-click='wiModal.startImport();'><span style='vertical-align:middle;' class='run-32x32'></span>Run import</button>
+                            <button ng-show='wiModal.zipArchive.status == "running"' ng-click='wiModal.startImport();'><span style='vertical-align:middle;' class='fa fa-link'></span>Connect</button>
+                        </div>
+                    </div>
+                </form>
+                <div style='flex: 1;overflow:auto;flex-basis:32em;' class="col-sm-offset-1 col-sm-10 console"> 
+                    <ul style="padding-left:0px;list-style:none;">
+                        <li style='display:flex' ng-repeat='line in wiModal.msgQueue'>
+                            <div style='color:#888;flex-basis:7em;'>[{{line.ts | timeFormat}}]</div>
+                            <div style='user-select: text;flex:1'>{{line.content}}</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

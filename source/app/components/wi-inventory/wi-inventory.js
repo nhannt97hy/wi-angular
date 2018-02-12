@@ -267,7 +267,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
 
     function importProcess(item) {
         return new Promise((resolve, reject) => {
-            if (!self.projectConfig || !self.projectConfig.length) {
+            if (!Array.isArray(self.projectConfig) || isNaN(__idProject) || __idProject <= 0) {
                 return reject(new Error('No project for import'));
             }
             if (item.type == 'well') {
