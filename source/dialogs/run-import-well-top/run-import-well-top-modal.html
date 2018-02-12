@@ -1,0 +1,25 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Well top import</h4>
+            </div>
+            <div style='display:flex;flex-direction:column;' class="modal-body">
+                <form class='form-horizontal'>
+                    <div class='form-group'>
+                        <label class='col-sm-4'>Import to Project:</label>
+                        <input class='col-sm-5' ng-model='wiModal.projectName' required>
+                        <div class='col-sm-3'><button class='btn btn-default' ng-click='wiModal.startImportWT();'><span class='ti-import'></span>&nbsp;Import</button></div>
+                    </div>
+                </form>
+                <ul style='max-height:60%;overflow-y:auto;'>
+                    <li ng-repeat='well in wiModal.successWells'>{{well.well}} -- {{well.result}}</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Close</button>
+            </div>
+        </div>
+    </div>
+</div>

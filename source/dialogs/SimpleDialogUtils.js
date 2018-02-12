@@ -7,6 +7,14 @@ let runImportDialog = require('./run-import-modal.js');
 runImportDialog.setInitFunc(initModal);
 exports.runImportDialog = runImportDialog.dialogFunc;
 
+let runImportWHDialog = require('./run-import-well-header-modal.js');
+runImportWHDialog.setInitFunc(initModal);
+exports.runImportWellHeaderDialog = runImportWHDialog.dialogFunc;
+
+let runImportWTDialog = require('./run-import-well-top-modal.js');
+runImportWTDialog.setInitFunc(initModal);
+exports.runImportWellTopDialog = runImportWTDialog.dialogFunc;
+
 function initModal(modal) {
     modal.element.modal();
     $(modal.element).prop('tabindex', 1);

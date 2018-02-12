@@ -7,6 +7,8 @@ const wiBatchURL = "http://batch.sflow.me";
 const LIST_WF = wiBatchURL + "/workflow/list";
 const LIST_WH = wiBatchURL + "/well-header/list-file";
 const LIST_WT = wiBatchURL + "/well-top/list-file";
+const RUN_WH = wiBatchURL + "/well-header/run";
+const RUN_WT = wiBatchURL + "/well-top/run";
 const DELETE_DATADIR = wiBatchURL + "/workflow/delete-data";
 const DELETE_WELL_HEADER_CSV = wiBatchURL + "/well-header/delete";
 const DELETE_WELL_TOP_CSV = wiBatchURL + "/well-top/delete";
@@ -130,6 +132,13 @@ WiBatchApi.prototype.deleteWellHeaderCSV = function(idUserFileUploaded, callback
 WiBatchApi.prototype.deleteWellTopCSV = function(idUserFileUploaded, callback) {
     this.doPost(DELETE_WELL_TOP_CSV, {idUserFileUploaded}, callback);
 }
+WiBatchApi.prototype.runImportWellHeaderCSV = function(idUserFileUploaded, callback) {
+    this.doPost(RUN_WH, {idUserFileUploaded}, callback);
+}
+WiBatchApi.prototype.runImportWellTopCSV = function(projectName, idUserFileUploaded, callback) {
+    this.doPost(RUN_WT, {idUserFileUploaded, projectName}, callback);
+}
+
 WiBatchApi.prototype.getWiBatchUrl = function() { return wiBatchURL; }
 exports.name = moduleName;
 exports.wiBatchUrl = wiBatchURL;

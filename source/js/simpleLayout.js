@@ -382,6 +382,8 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
     $scope.updateWellHeaderCSVList = updateWellHeaderCSVList;
     $scope.updateWellTopCSVList = updateWellTopCSVList;
     $scope.runImport = runImport;
+    $scope.importWellHeaderCSV = importWellHeaderCSV;
+    $scope.importWellTopCSV = importWellTopCSV;
     function updateWorkflowList() {
         wiBatchApiService.listWorkflows(function(err, workflows) {
             if (err) {
@@ -412,6 +414,12 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
     }
     function runImport(zipArchive) {
         DialogUtils.runImportDialog(ModalService, $scope.zipArchives, zipArchive);
+    }
+    function importWellHeaderCSV(whCSV) {
+        DialogUtils.runImportWellHeaderDialog(ModalService, whCSV);
+    }
+    function importWellTopCSV(wtCSV) {
+        DialogUtils.runImportWellTopDialog(ModalService, wtCSV);
     }
 });
 const monthNames = [ 
