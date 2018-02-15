@@ -129,3 +129,4 @@ exports.badholeCoalSaltDialog = require('./badhole-coal-salt-modal');
 
 exports.depthShiftDialog = require('./depth-shift-modal');
 exports.curveFamilyDialog = require('./curve-family-modal');
+exports.saturationArchieDialog = require('./saturation-archie-modal');
