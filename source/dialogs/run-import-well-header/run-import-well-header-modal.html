@@ -2,17 +2,21 @@
     <div class='modal-dialog'>
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <button type="button" class="close" ng-click="wiModal.onOkButtonClicked()" aria-hidden="true">&times;</button>
                 <h4>Well header import</h4>
             </div>
-            <div style='display:flex;flex-direction:column;' class="modal-body">
-                <ul style='height:70%;overflow-y:auto;'>
-                    <li ng-repeat='well in wiModal.successWells'>{{well}}</li>
-                </ul>
+            <div style='' class="modal-body small-text">
+                <h5>Updated wells</h5>
+                <wi-base-treeview style="height:70vh;overflow-y:auto;"
+                    config='wiModal.successWells'>
+                </wi-base-treeview>
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Close</button>
             </div>
+        </div>
+        <div wi-element-ready="wiModal.onInitDialog();" style='position:absolute;top:0;bottom:0;left:0;right:0;' 
+            ng-show='wiModal.loading' id='spinner-holder'>
         </div>
     </div>
 </div>

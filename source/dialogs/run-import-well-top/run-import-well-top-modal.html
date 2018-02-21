@@ -10,16 +10,28 @@
                     <div class='form-group'>
                         <label class='col-sm-4'>Import to Project:</label>
                         <input class='col-sm-5' ng-model='wiModal.projectName' required>
-                        <div class='col-sm-3'><button class='btn btn-default' ng-click='wiModal.startImportWT();'><span class='ti-import'></span>&nbsp;Import</button></div>
+                        <div class='col-sm-3'>
+                            <button style='width:100%;text-align:center;' class='btn-default' ng-click='wiModal.startImportWT();'><span class='ti-import'></span>&nbsp;Import</button>
+                        </div>
                     </div>
                 </form>
-                <ul style='max-height:60%;overflow-y:auto;'>
-                    <li ng-repeat='well in wiModal.successWells'>{{well.well}} -- {{well.result}}</li>
-                </ul>
+                <wi-scroll ng-show='wiModal.successWells.length' style="height:60vh;overflow-y:auto;" 
+                    up-trigger="wiModal.upTrigger" down-trigger='wiModal.downTrigger'>
+                    <wi-base-treeview  
+                        container='wiModal' show-index='true'
+                        config='wiModal.successWells' on-click-function='wiModal.onNodeClick'>
+                    </wi-base-treeview>
+                </wi-scroll>
+                <div ng-show='wiModal.successWells.length' style='text-align:center;margin-top:5px'>
+                    <a style='width:100%' class='btn-default btn' href="index.html?idProject={{wiModal.idProject}}">View in I2G WI</button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Close</button>
             </div>
+        </div>
+        <div style='position:absolute;top:0;bottom:0;left:0;right:0;' wi-element-ready="wiModal.initModal();"
+            ng-show='wiModal.loading' id='spinner-holder'>
         </div>
     </div>
 </div>

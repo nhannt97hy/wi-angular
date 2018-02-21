@@ -334,6 +334,12 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         self.projectSelectedNode = null;
         self.importValid = false;
     };
+    let resetColor = _.debounce(function(wells) {
+        wells.forEach(function(w) {
+            delete w.data.bgColor;
+        });
+        $scope.$apply();
+    }, 1000);
 
     this.upTrigger = function(cb) {
         console.log("upTrigger");
@@ -344,20 +350,24 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 limit: 10, 
                 forward: false
             }, function(listOfWells) {
-                $timeout(function() {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
+                async.eachSeries(listOfWells, function(well, done) {
+                    $timeout(function() {
                         let wellModel = oUtils.wellToTreeConfig(well);
                         wellModel.data.toggle = self.labelToggle;
+                        wellModel.data.bgColor = '#CCF';
                         wells.unshift(wellModel);
                         wells.pop();
-                    }
+                        done();
+                    }, 10);
+                }, function() {
                     if (cb) cb(listOfWells.length);
+                    resetColor(wells);
                 });
             });
         }
         else if (cb) cb(0);
     }
+    
     this.downTrigger = function(cb) {
         console.log("downTrigger");
         let wells = self.inventoryConfig;
@@ -367,15 +377,19 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 limit: 10, 
                 forward: true
             }, function(listOfWells) {
-                $timeout(function() {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
+                console.log(listOfWells);
+                async.eachSeries(listOfWells, function(well, done) {
+                    $timeout(function() {
                         let wellModel = oUtils.wellToTreeConfig(well);
+                        wellModel.data.bgColor = '#CCF';
                         wellModel.data.toggle = self.labelToggle;
                         wells.push(wellModel);
                         wells.shift();
-                    }
+                        done();
+                    }, 10);
+                }, function() {
                     if (cb) cb(listOfWells.length);
+                    resetColor(wells);
                 });
             });
         }
@@ -392,6 +406,20 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
                 forward: false
             }, function(listOfWells) {
+                async.eachSeries(listOfWells, function(well, done) {
+                    $timeout(function() {
+                        let wellModel = utils.createWellModel(well);
+                        wellModel.data.toggle = self.labelToggle;
+                        wellModel.data.bgColor = '#CCF';
+                        wells.unshift(wellModel);
+                        wells.pop();
+                        done();
+                    }, 10);
+                }, function() {
+                    if (cb) cb(listOfWells.length);
+                    resetColor(wells);
+                });
+                /*
                 $timeout(function() {
                     console.log(listOfWells);
                     for (let well of listOfWells) {
@@ -408,14 +436,10 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                                 })
                             });
                         }
-                        /*                        
-                        wellModel.data.toggle = self.labelToggle;
-                        wells.unshift(wellModel);
-                        wells.pop();
-                        */
                     }
                     if (cb) cb(listOfWells.length);
                 });
+                */
             });
         }
         else if (cb) cb(0);
@@ -431,6 +455,20 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
                 forward: true
             }, function(listOfWells) {
+                async.eachSeries(listOfWells, function(well, done) {
+                    $timeout(function() {
+                        let wellModel = utils.createWellModel(well);
+                        wellModel.data.bgColor = '#CCF';
+                        wellModel.data.toggle = self.labelToggle;
+                        wells.push(wellModel);
+                        wells.shift();
+                        done();
+                    }, 10);
+                }, function() {
+                    if (cb) cb(listOfWells.length);
+                    resetColor(wells);
+                });
+                /*
                 $timeout(function() {
                     console.log(listOfWells);
                     for (let well of listOfWells) {
@@ -450,6 +488,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                     }
                     if (cb) cb(listOfWells.length);
                 });
+                */
             });
         }
         else if (cb) cb(0);

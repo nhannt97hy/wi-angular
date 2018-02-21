@@ -384,6 +384,7 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
     $scope.runImport = runImport;
     $scope.importWellHeaderCSV = importWellHeaderCSV;
     $scope.importWellTopCSV = importWellTopCSV;
+    $scope.showRecentWHSuccessWells = showRecentWHSuccessWells;
     function updateWorkflowList() {
         wiBatchApiService.listWorkflows(function(err, workflows) {
             if (err) {
@@ -416,10 +417,22 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
         DialogUtils.runImportDialog(ModalService, $scope.zipArchives, zipArchive);
     }
     function importWellHeaderCSV(whCSV) {
-        DialogUtils.runImportWellHeaderDialog(ModalService, whCSV);
+        DialogUtils.runImportWellHeaderDialog(ModalService, function(callback) {
+            wiBatchApiService.runImportWellHeaderCSV(whCSV.idUserFileUploaded, function(err) {
+                if (!err) {
+                    wiBatchApiService.listWHSuccessWells(callback);
+                }
+                else callback(new Error('Unknown error'));
+            });
+        });
     }
     function importWellTopCSV(wtCSV) {
         DialogUtils.runImportWellTopDialog(ModalService, wtCSV);
+    }
+    function showRecentWHSuccessWells() {
+        DialogUtils.runImportWellHeaderDialog(ModalService, function(callback) {
+            wiBatchApiService.listWHSuccessWells(callback);
+        });
     }
 });
 const monthNames = [ 

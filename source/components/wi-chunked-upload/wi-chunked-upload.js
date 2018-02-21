@@ -21,7 +21,6 @@ function Controller($scope, $http, $timeout, wiChunkedUploadService, wiBatchApiS
     $scope.fileNameChanged = fileNameChanged;
 
     this.$onInit = function() {
-        console.log(self.uploadFunction);
         $scope.uploadFunction = self.uploadFunction;
     }
     function fileNameChanged(obj) {

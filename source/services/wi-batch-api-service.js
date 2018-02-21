@@ -9,6 +9,8 @@ const LIST_WH = wiBatchURL + "/well-header/list-file";
 const LIST_WT = wiBatchURL + "/well-top/list-file";
 const RUN_WH = wiBatchURL + "/well-header/run";
 const RUN_WT = wiBatchURL + "/well-top/run";
+const BATCH_CREATE_WELLS = wiBatchURL + "/well/create-well";
+const LIST_WH_SUCCESS_WELLS = wiBatchURL + "/well-header/list-success";
 const DELETE_DATADIR = wiBatchURL + "/workflow/delete-data";
 const DELETE_WELL_HEADER_CSV = wiBatchURL + "/well-header/delete";
 const DELETE_WELL_TOP_CSV = wiBatchURL + "/well-top/delete";
@@ -137,6 +139,12 @@ WiBatchApi.prototype.runImportWellHeaderCSV = function(idUserFileUploaded, callb
 }
 WiBatchApi.prototype.runImportWellTopCSV = function(projectName, idUserFileUploaded, callback) {
     this.doPost(RUN_WT, {idUserFileUploaded, projectName}, callback);
+}
+WiBatchApi.prototype.listWHSuccessWells = function(callback) {
+    this.doPost(LIST_WH_SUCCESS_WELLS, undefined, callback);
+}
+WiBatchApi.prototype.batchCreateWells = function(projectName, callback) {
+    this.doPost(BATCH_CREATE_WELLS, {projectName}, callback);
 }
 
 WiBatchApi.prototype.getWiBatchUrl = function() { return wiBatchURL; }

@@ -265,16 +265,14 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
                 limit: 10, 
                 forward: true
             }, function(listOfWells) {
-                $timeout(function() {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
-                        let wellModel = oUtils.wellToTreeConfig(well);
-                        wellModel.data.toggle = self.labelToggle;
-                        wells.push(wellModel);
-                        wells.shift();
-                    }
-                    if (cb) cb(listOfWells.length);
-                });
+                console.log(listOfWells);
+                for (let well of listOfWells) {
+                    let wellModel = oUtils.wellToTreeConfig(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    wells.push(wellModel);
+                    wells.shift();
+                }
+                if (cb) cb(listOfWells.length);
             });
         }
         else if (cb) cb(0);

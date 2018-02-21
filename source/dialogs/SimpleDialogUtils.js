@@ -1,7 +1,9 @@
 exports.initModal = initModal;
-exports.authenticationDialog = authenticationDialog;
+exports.errorMessageDialog = errorMessageDialog;
+exports.warningMessageDialog = warningMessageDialog;
 exports.promptDialog = promptDialog;
 exports.confirmDialog = confirmDialog;
+exports.authenticationDialog = authenticationDialog;
 
 let runImportDialog = require('./run-import-modal.js');
 runImportDialog.setInitFunc(initModal);
@@ -47,6 +49,51 @@ function initModal(modal) {
         }
     });
 }
+
+function errorMessageDialog(ModalService, errorMessage, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.error = errorMessage;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+
+    ModalService.showModal({
+        templateUrl: 'error-message/error-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (data) {
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+            if (callback) callback();
+        })
+    });
+};
+
+function warningMessageDialog (ModalService, warningMessage, callback) {
+    function ModalController($scope, close) {
+        let self = this;
+        this.warning = warningMessage;
+        this.onCloseButtonClicked = function () {
+            close(null);
+        };
+    }
+    ModalService.showModal({
+        templateUrl: 'warning-message/warning-message-modal.html',
+        controller: ModalController,
+        controllerAs: 'wiModal'
+    }).then(function (modal) {
+        initModal(modal);
+        modal.close.then(function (data) {
+            if (callback) callback();
+            $('.modal-backdrop').last().remove();
+            $('body').removeClass('modal-open');
+        })
+    });
+};
 function authenticationDialog(ModalService, wiComponentService,callback) {
     function ModalController($scope, close, wiApiService) {
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);

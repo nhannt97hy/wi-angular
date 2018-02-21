@@ -12,7 +12,8 @@ function runImportDialog(ModalService, zipArchives, zipArchive, callback) {
         this.message = "Select a zip archive to import into Inventory";
         this.zipArchives = zipArchives;
         this.zipArchive = zipArchive;
-        var socket = initSocket();
+        var socket;
+        initSocket();
         this.onOkButtonClicked = function () {
             close(null);
         };
@@ -40,7 +41,7 @@ function runImportDialog(ModalService, zipArchives, zipArchive, callback) {
             });
         }
         function initSocket() {
-            var socket = io(wiBatchApiService.getWiBatchUrl());
+            socket = io(wiBatchApiService.getWiBatchUrl());
             socket.on('run-workflow-done', function(msg) {
                 console.log(msg);
                 $timeout(function() {
@@ -56,7 +57,6 @@ function runImportDialog(ModalService, zipArchives, zipArchive, callback) {
                 });
             });
             if (self.zipArchive && self.zipArchive.status == 'running') startImport();
-            return socket;
         }
     }
 

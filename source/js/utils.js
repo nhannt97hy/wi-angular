@@ -935,7 +935,7 @@ function createWellModel(well) {
     Object.assign(wellModel, {
         idProject: well.idProject,
         idWell: well.idWell,
-        name: well.name,
+        name: well.name || well.wellName,
         topDepth: parseFloat(well.topDepth),
         bottomDepth: parseFloat(well.bottomDepth),
         step: parseFloat(well.step),
@@ -944,7 +944,7 @@ function createWellModel(well) {
     wellModel.data = {
         childExpanded: false,
         icon: "well-16x16",
-        label: well.name
+        label: well.name || well.wellName
     };
     if (well.idGroup) wellModel.parent = 'group' + well.idGroup;
     else wellModel.parent = 'project' + well.idProject;

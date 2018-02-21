@@ -30,28 +30,27 @@
     <wi-tab class='well-log' heading='WellLog (zip)' on-show="updateWorkflowList">
         <ul style="padding:1em 0;">
             <li style='display:flex;padding:1em 1em 0.2em;border-bottom: 1px solid black;font-weight:700;'>
-                <div style='flex-basis:100px;'>Status</div>
                 <div style='flex:1'>Archive name</div>
+                <div style='flex-basis:100px;'>Status</div>
                 <div style='flex:1'>Upload time</div>
                 <div style='flex-basis:120px;text-align:right;'>Actions</div>
             </li>
             <li style='display:flex;padding:1em 1em 0.5em;border-bottom: 1px solid #888;font-style:italic;font-weight:200;' ng-repeat='zipArchive in zipArchives'>
+                <div style='flex:1'><i class="fa fa-file-archive-o"></i>&nbsp;&nbsp;&nbsp;{{zipArchive.workflowName}}</div>
                 <div style='flex-basis:100px;'>
                     <i class='fa fa-circle' 
                     ng-class="{'color-running': zipArchive.status == 'running','color-processed':zipArchive.status == 'processed', 'color-error':zipArchive.status == 'error', 'color-new':zipArchive.status == 'new'}"></i>
                     &nbsp;&nbsp;&nbsp;&nbsp;{{zipArchive.status}}
                 </div>
-                <div style='flex:1'>{{zipArchive.workflowName}}</div>
                 <div style='flex:1;'>{{zipArchive.workflowConfig.ts | datetimeFormat}}</div>
                 <div style='flex-basis:120px;text-align:right;'>
-                    <a style="font-size: 12px;padding: 4px 9px;vertical-align: text-bottom;" 
+                    <a style="font-size: 12px;padding: 4px 9px;vertical-align: text-bottom;" title="View log"
                         href='{{wiBatchUrl}}/log/{{username}}/{{zipArchive.workflowName}}/error.txt' 
                         class='btn btn-default' ng-show="zipArchive.status == 'processed'" target='_blank'>
-                        <i class="fa fa-file-o"></i>
+                        <i class="fa fa-file"></i>
                     </a>
-                    <!--<button ng-click='nextStage(zipArchive)'><span class='run-16x16'></span></button>-->
-                    <button ng-click='runImport(zipArchive)'><span class='run-16x16'></span></button>
-                    <button ng-disabled="zipArchive.status=='running'"  ng-click='deleteZipArchive(zipArchive.workflowName)'><span class='close-16x16-edit'></span></button>
+                    <button ng-click='runImport(zipArchive)' title="run import"><span class='run-16x16'></span></button>
+                    <button ng-disabled="zipArchive.status=='running'"  ng-click='deleteZipArchive(zipArchive.workflowName)' title='Delete'><span class='close-16x16-edit'></span></button>
                 </div>
             </li>
         </ul>
@@ -66,13 +65,10 @@
             <li style='display:flex;padding:1em 1em 0.5em;border-bottom: 1px solid #888;font-style:italic;font-weight:200;' ng-repeat='whCSV in wellHeaderCSVs'>
                 <div style='flex:1'>{{whCSV.fileName}}</div>
                 <div style='flex:1;'>{{whCSV.uploadedTime | datetimeFormat}}</div>
-                <div style='flex-basis:120px;text-align:right;'>
-                    <a style="font-size: 12px;padding: 4px 9px;vertical-align: text-bottom;" 
-                        href='' class='btn btn-default' target='_blank'>
-                        <i class="fa fa-file-o"></i>
-                    </a>
-                    <button ng-click='importWellHeaderCSV(whCSV)'><span class='run-16x16'></span></button>
-                    <button ng-click='deleteWellHeaderCSV(whCSV.idUserFileUploaded)'><span class='close-16x16-edit'></span></button>
+                <div style='flex-basis:150px;text-align:right;'>
+                    <button style="font-size: 14px; padding: 3px 9px 2px; vertical-align:top;" ng-click='showRecentWHSuccessWells()' title='Show recent result'><span class='fa fa-file-o'></span></button>
+                    <button ng-click='importWellHeaderCSV(whCSV)' title='Run import'><span class='run-16x16'></span></button>
+                    <button ng-click='deleteWellHeaderCSV(whCSV.idUserFileUploaded)' title='Delete'><span class='close-16x16-edit'></span></button>
                 </div>
             </li>
         </ul>
@@ -88,12 +84,9 @@
                 <div style='flex:1'>{{wtCSV.fileName}}</div>
                 <div style='flex:1;'>{{wtCSV.uploadedTime | datetimeFormat}}</div>
                 <div style='flex-basis:120px;text-align:right;'>
-                    <a style="font-size: 12px;padding: 4px 9px;vertical-align: text-bottom;" 
-                        href='' class='btn btn-default' target='_blank'>
-                        <i class="fa fa-file-o"></i>
-                    </a>
-                    <button ng-click='importWellTopCSV(wtCSV)'><span class='run-16x16'></span></button>
-                    <button ng-click='deleteWellTopCSV(wtCSV.idUserFileUploaded)'><span class='close-16x16-edit'></span></button>
+                    <!--<button style="font-size: 14px; padding: 3px 9px 2px; vertical-align: top;" ng-click='showRecentWHSuccessWells()'><span class='fa fa-file-o'></span></button>-->
+                    <button ng-click='importWellTopCSV(wtCSV)' title='Run import'><span class='run-16x16'></span></button>
+                    <button ng-click='deleteWellTopCSV(wtCSV.idUserFileUploaded)' title='Delete'><span class='close-16x16-edit'></span></button>
                 </div>
             </li>
         </ul>
