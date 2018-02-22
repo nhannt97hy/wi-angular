@@ -139,7 +139,8 @@ app.component(componentName, {
         showContextMenuFunction: '<',
         isShowParentName: '<',
         filter: '@',
-        onSelectFunction: '<'
+        onSelectFunction: '<',
+        showId: '<'
     }
 });
 exports.controller = WiBaseTreeController;

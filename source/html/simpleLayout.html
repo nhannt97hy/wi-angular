@@ -2,7 +2,7 @@
 
 <head>
     <title>I2G Lightweight</title>
-    <link rel="shortcut icon" href="img/icon/Well_Insight.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="img/Well_Insight.ico" type="image/x-icon">
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href="vendor/css/jquery-ui.css" rel="stylesheet">
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
@@ -106,15 +106,14 @@
             <wi-tabset toggle='true' on-toggle='onRibbonToggle'>
                 <wi-tab heading="Main" closable='false'>
                     <wi-toolbar name="MiscToolbar" label="Miscelaneous" container="ribbon">
-                        <!--<wi-button name="InventoryInspection" icon="browse-project-32x32" label="Inventory inspection" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.ImportBlockButtonClicked">-->
-                        <wi-button name="InventoryInspection" icon="browse-project-32x32" label="Invt. Inspector" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.InventoryInspectionButtonClicked">
+                        <wi-button name="InventoryInspection" icon="browse-project-32x32" label="Invt. Inspector" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.InventoryInspectionButtonClicked">
                         </wi-button>
-                        <wi-button name="InventoryConnect" icon="browse-project-32x32" label="Invt. Connect" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.InventoryConnectButtonClicked">
+                        <wi-button name="InventoryConnect" icon="browse-project-32x32" label="Invt. Connect" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.InventoryConnectButtonClicked">
                         </wi-button>
-                        <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.WipmButtonClicked">
+                        <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WipmButtonClicked">
                         </wi-button>
-                        <wi-button name="WellImport" icon="well-load-32x32" label="Mega Import" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.WellImportClicked"></wi-button>
-                        <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="{{handlers.isDisabled()}}" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
+                        <wi-button name="WellImport" icon="well-load-32x32" label="Mega Import" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WellImportClicked"></wi-button>
+                        <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
             </wi-tabset>

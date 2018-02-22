@@ -21,7 +21,7 @@
                 ng-dblclick="wiBaseTreeview.onDoubleClick($index);">
                 <div class="display-inline-block margin-right-0_5em">
                     <span class="{{item.data.icon}}"></span>
-                    <div ng-show="wiBaseTreeview.config[$index].id" class='wi-parent-id'>{{wiBaseTreeview.config[$index].id}}</div>
+                    <div ng-show="wiBaseTreeview.showId && wiBaseTreeview.config[$index].id" class='wi-parent-id'>{{wiBaseTreeview.config[$index].id}}</div>
                 </div>
                 <span ng-if="wiBaseTreeview.isShowParentName && item.parentData">{{item.parentData.label}} /</span>
                 <span ng-if="wiBaseTreeview.isShowParentName && item.parentDataArr" ng-repeat="parentData in item.parentDataArr">{{parentData.label}} /&nbsp;</span>
@@ -48,7 +48,8 @@
             on-double-click-function='wiBaseTreeview.onDoubleClickFunction',
             show-context-menu-function='wiBaseTreeview.showContextMenuFunction'
             is-show-parent-name="item.data.isCollection"
-            on-select-function="wiBaseTreeview.onSelectFunction">
+            on-select-function="wiBaseTreeview.onSelectFunction"
+            show-id='wiBaseTreeview.showId'>
         </wi-base-treeview>
     </div>
 </div>

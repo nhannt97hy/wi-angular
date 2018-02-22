@@ -1,7 +1,7 @@
 const componentName = 'wiiProperties';
 const moduleName = 'wii-properties';
 
-function Controller(wiComponentService, wiApiService, $timeout) {
+function Controller(wiComponentService, wiOnlineInvService, $timeout) {
     let self = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
@@ -17,6 +17,53 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             });
         });
     };
+    this.onChange = function(item) {
+        let selectedNode = wiComponentService.getComponent('properties-node');
+        let properties = selectedNode.properties;
+        let newProperties = angular.copy(properties);
+        newProperties[item.key] = item.value;
+        return new Promise((resolve, reject) => {
+            if (JSON.stringify(newProperties) === JSON.stringify(properties)) return reject();
+            let payload = {};
+            payload[item.key] = item.value;
+            switch (selectedNode.type) {
+                case 'well':
+                    let wellHeader = properties.well_headers.find(h => h.header == item.key);
+                    if (wellHeader && wellHeader.value == item.value) return reject("Eeee");
+                    payload = {
+                        idWell: properties.idWell,
+                        header: item.key,
+                        value: item.value
+                    }
+                    wiOnlineInvService.editWellHeader(payload, async function (newWell, err) {
+                        if (err) reject();
+                        //await updateWells();
+                        wellHeader.value = item.value;
+                        resolve("Aaaa");
+                    });
+                    break;
+                case 'dataset':
+                    payload.idDataset = properties.idDataset;
+                    wiOnlineInvService.editDataset(payload, async function (newDataset, err) {
+                        if (err) reject();
+                        //await updateDatasets();
+                        resolve();
+                    });
+                    break;
+                case 'curve':
+                    payload.idCurve = properties.idCurve
+                    wiApiService.editCurve(payload, async function (newCurve, err) {
+                        if (err) reject();
+                        //await updateCurves(newCurve.idDataset);
+                        properties[item.key] = item.value;
+                        resolve();
+                    });
+                    break;
+                default:
+                    reject();
+            }
+        });
+    }
     const type = {
         checkbox: 'checkbox',
         select: 'select'

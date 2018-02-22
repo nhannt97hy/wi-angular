@@ -1,7 +1,4 @@
-let initModal;
-exports.setInitFunc = function(initFunction) {
-    initModal = initFunction;
-}
+let helper = require('./DialogHelper');
 exports.dialogFunc = runImportWellHeaderDialog;
 
 function runImportWellHeaderDialog(ModalService, initFunc, callback) {
@@ -57,10 +54,9 @@ function runImportWellHeaderDialog(ModalService, initFunc, callback) {
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {
-        initModal(modal);
+        helper.initModal(modal);
         modal.close.then(function (data) {
-            $('.modal-backdrop').last().remove();
-            $('body').removeClass('modal-open');
+            helper.removeBackdrop();
             if (callback) {
                 callback(data);
             }

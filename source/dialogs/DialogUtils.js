@@ -1,9 +1,19 @@
-
+// GENERIC MODALS
 exports.authenticationDialog = require('./authentication-modal');
+exports.promptDialog = require('./prompt-modal');
+exports.confirmDialog = require('./confirm-modal');
+exports.errorMessageDialog = require('./error-message-modal');
+exports.warningMessageDialog = require('./warning-message-modal');
+// MINIAPPS MODALS
+exports.runImportDialog = require('./run-import-modal');
+exports.runImportWHDialog = require('./run-import-well-header-modal');
+exports.runImportWTDialog = require('./run-import-well-top-modal');
+
+// WELL INSIGHT MODALS
+exports.aboutDialog = require('./about-modal');
+
 exports.newProjectDialog = require('./new-project-modal');
 exports.openProjectDialog = require('./open-project-modal');
-exports.confirmDialog = require('./confirm-modal');
-exports.promptDialog = require('./prompt-modal');
 exports.unitSettingDialog = require('./unit-setting-modal');
 // add new well
 exports.addNewDialog = require('./add-new-modal');
@@ -46,12 +56,6 @@ exports.imageZonePropertiesDialog = require('./image-properties-modal');
 
 exports.showImageDialog = require('./image-view-modal');
 
-exports.errorMessageDialog = require('./error-message-modal');
-
-exports.warningMessageDialog = require('./warning-message-modal');
-
-
-exports.aboutDialog = require('./about-modal');
 exports.rangeSpecificDialog = require('./range-specific-modal');
 
 exports.colorPickerDialog = require('./color-picker-modal');

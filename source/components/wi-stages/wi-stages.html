@@ -63,12 +63,12 @@
         <wi-button class='wi-inline-button' 
             ng-show="wiStages.currentStageIndex > 0" 
             icon='arrow-left-32x32' 
-            disabled="{{!wiStages.navigatable()}}"
+            disabled="!wiStages.navigatable()"
             label='Back' handler="wiStages.back"></wi-button>
         <wi-button class='wi-inline-button' 
             ng-show="wiStages.currentStageIndex < wiStages.stages.length - 1" 
             icon='arrow-right-32x32' 
-            disabled="{{!wiStages.navigatable()}}"
+            disabled="!wiStages.navigatable()"
             label='Skip' handler="wiStages.skip"></wi-button>
     </div>
 </div>
