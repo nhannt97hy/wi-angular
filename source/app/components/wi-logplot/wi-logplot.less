@@ -12,13 +12,28 @@ wi-logplot {
         }
     }
 
-    .logplot-well-name {
+    .logplot-header {
+        display: flex;
         margin: 0px 4px;
-        padding: 2px;
         background-color: rgb(136, 204, 136);
         text-align: center;
-        font-size: 14px;
-        font-weight: bold;
+        line-height: 2em;
+        height: 2em;
+        .well-name-container {
+            flex-basis: 50%;
+            display: flex;
+            justify-content: flex-end;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .scale-container {
+            display: flex;
+            flex-grow: 1;
+            flex-shrink: 0;
+            flex-wrap: nowrap;
+            justify-content: flex-end;
+            margin: 0 1em;
+        }
     }
 
     .logplot-main-content {

@@ -7,7 +7,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.crossplotModel = null;
-    let zoneCtrl = null, refWindCtrl;
     this.viCrossplot = {};
     let _well = null;
 
@@ -90,7 +89,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (crossplotProps.pointsets && crossplotProps.pointsets.length)
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
-            self.switchReferenceZone(crossplotProps.pointSet.idZoneSet != null);
+            self.switchReferenceZone(crossplotProps.pointSet.depthType == 'zonalDepth');
             let refWindCtrl = self.getWiRefWindCtrl();
             if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
@@ -119,7 +118,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function updateHistogramProps(crossplotModel,xy){
         let histogramProps = xy == 'xCurve' ? self.histogramModelX.properties : self.histogramModelY.properties;
         if (crossplotModel.properties.pointsets && crossplotModel.properties.pointsets.length) {
-            pointSet = crossplotModel.properties.pointsets[0];
+            let pointSet = crossplotModel.properties.pointsets[0];
             histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
             histogramProps.leftScale = (xy == 'xCurve')?pointSet.scaleLeft:pointSet.scaleBottom;
             histogramProps.rightScale = (xy == 'xCurve')?pointSet.scaleRight:pointSet.scaleTop;
@@ -263,6 +262,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return null;
     }
+
+    this.switchDepthType = function() {
+        if (self.crossplotModel.properties.pointsets[0].depthType == 'intervalDepth') {
+            self.crossplotModel.properties.pointsets[0].depthType = 'zonalDepth';
+        }
+        else {
+            self.crossplotModel.properties.pointsets[0].depthType = 'intervalDepth';
+        }
+        self.viCrossplot.pointSet.depthType = self.crossplotModel.properties.pointsets[0].depthType;
+        self.switchReferenceZone();
+    }
+
     function setWiZoneArr(zoneArray) {
         self.zoneArr = zoneArray;
     }
@@ -458,13 +469,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 return zone.properties;
                             });;
                         }
-                        let idZoneSet = (crossplotProps.pointSet || {}).idZoneSet;
+                        let depthType = (crossplotProps.pointSet || {}).depthType;
 
                         delete self.viCrossplot.pointSet;
+
                         self.viCrossplot.setProperties(crossplotProps);
                         // self.viCrossplot.doPlot();
                         try {
-                            self.switchReferenceZone(idZoneSet != null);
+                            self.switchReferenceZone(depthType == 'zonalDepth');
                         }
                         catch(e) {
                             // Canh - Dont know why error :'(
@@ -682,8 +694,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.showHisContextMenu = function(event, xy){
         if (event.button != 2) return;
-        _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
-        visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
+        let _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
+        let visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
         self.hisContextMenu = [{
             name: "ShowAsLine",
             label: "Show As Line",

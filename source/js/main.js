@@ -2,6 +2,20 @@ String.prototype.capitalize = function() {
     if (this.length < 1) return this;
     return this.replace(this[0], this[0].toUpperCase());
 }
+/**
+ * Returns a number whose value is limited to the given range.
+ *
+ * Example: limit the output of this computation to between 0 and 255
+ * (x * 255).clamp(0, 255)
+ *
+ * @param {Number} min The lower boundary of the output range
+ * @param {Number} max The upper boundary of the output range
+ * @returns A number in the range [min, max]
+ * @type Number
+ */
+Number.prototype.clamp = function(min, max) {
+    return Math.min(Math.max(this, min), max);
+  };
 
 Object.defineProperty(Array.prototype, "binarySearch", {
     enumerable: false,
@@ -13,6 +27,7 @@ console.log('hic hic');
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
+let petrophysics = require('./petrophysics');
 
 let DialogUtils = require('./DialogUtils');
 
@@ -171,7 +186,8 @@ let app = angular.module('wiapp',
         'ui.bootstrap',
         'ngSanitize',
         'ui.select',
-        'angularjs-dropdown-multiselect'
+        'angularjs-dropdown-multiselect',
+        'mgo-angular-wizard'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
@@ -316,6 +332,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    wiComponentService.putComponent(wiComponentService.PETROPHYSICS, petrophysics);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);

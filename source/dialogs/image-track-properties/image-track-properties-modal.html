@@ -6,7 +6,7 @@
                 <h4 class="modal-title">Image Track Properties - {{wiModal.title}}</h4>
             </div>
             <div class="modal-body">
-                <form name="myForm" action="" class="form-horizontal dialog-style" novalidate>
+                <div class="form-horizontal dialog-style" novalidate>
                     <h5 class="normal-text">General</h5>
                     <div class="form-group">
                         <div class="col-sm-5">
@@ -107,7 +107,8 @@
                             </div>
                         </div>
                     </div>
-                <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>                    
+                </div>
+                <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
             <div class="modal-footer">
                 <button ng-if="wiModal.isCreated" type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;Apply</button>

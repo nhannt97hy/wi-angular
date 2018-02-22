@@ -298,7 +298,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     let dataF = data.map(d => parseFloat(d.x));
                     self.curvesData[self.currentIndex].push({
                         name: SelCurve.name,
-                        datasetName: SelCurve.datasetName,
+                        datasetName: SelCurve.properties.dataset,
                         idDataset: SelCurve.properties.idDataset,
                         id: SelCurve.id,
                         data: dataF,

@@ -22,6 +22,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let _previousTrack = null;
     let _tooltip = true;
     let _referenceLine = true;
+    let _fitWindow = false;
     //let WiLogplotModel = null;
     let _depthRange = [0, 100000];
 
@@ -62,6 +63,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (on === undefined) return _referenceLine;
         _referenceLine = on;
     }
+    this.fitWindow = function(on) {
+        if (on === undefined) return _fitWindow;
+        _fitWindow = on;
+    }
 
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
@@ -69,6 +74,73 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.toggleReferenceLine = function() {
         _referenceLine = !_referenceLine;
+    }
+
+    let originalWidths = [];
+    this.toggleFitWindow = function() {
+        _fitWindow = !_fitWindow;
+        let logplotElem = $('wi-logplot#' + self.logPlotCtrl.id + '>.logplot-header');
+        let slidingBarElem = $('wi-logplot#' + self.logPlotCtrl.id + '>.logplot-main-content>.slidingbar')
+        let plotAreaWidth = logplotElem.width() - slidingBarElem.width()/2 - slidingBarElem.outerWidth()/2;
+        console.log("width", _tracks);
+        let sumOfOriWidth = 0;
+        let widths = [];
+        // let fitWindowWidths = [];
+        _tracks.forEach(function(t) {
+            widths.push(t.width);
+            sumOfOriWidth += t.width;
+        });
+        let ratioWidth = plotAreaWidth/sumOfOriWidth;
+        _tracks.forEach(function(t, index) {
+            if(_fitWindow) {
+                t.width = widths[index] * ratioWidth;
+                originalWidths.push(widths[index]);
+            }
+            else {
+                // t.width = originalWidths[index];
+                if (t.isLogTrack()) {
+                    wiApiService.infoTrack(t.id, function (logTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(logTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isDepthTrack()) {
+                    wiApiService.infoDepthTrack(t.id, function (depthTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(depthTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isZoneTrack()) {
+                    wiApiService.getZoneTrack(t.id, function (zoneTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(zoneTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isImageTrack()) {
+                    wiApiService.getImageTrack(t.id, function (zoneTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(zoneTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+                if (t.isObjectTrack()) {
+                    wiApiService.getObjectTrack(t.id, function (objectTrack) {
+                        $timeout(function() {
+                            t.width = Utils.inchToPixel(objectTrack.width);
+                            t.doPlot();
+                        })
+                    });
+                }
+            }
+            t.doPlot();
+        })
     }
 
     this.getDepthRange = function () {
@@ -919,7 +991,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         };
         _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
-        })
+        });
+        this.logPlotCtrl.updateScale(this.scale);
     }
 
     this.setDepthRange = function (depthRange, notPlot) {
@@ -1608,14 +1681,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
                 wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isDepthTrack()) {
                 wiApiService.editDepthTrack({ idDepthAxis: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isZoneTrack()) {
                 wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isImageTrack()) {
                 wiApiService.editImageTrack({ idImageTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+                _fitWindow = false;
             } else if (track.isObjectTrack()) {
                 wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
+                _fitWindow = false;
             }
         });
     }
@@ -1876,9 +1954,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
         this.shadingList = _currentTrack.getShadings();
 
-        console.log("Shading Properties", currentShading);
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+            let leftLineBk = options.leftLine;
+            options.leftLine = null;
+            let rightLineBk = options.rightLine;
+            options.rightLine = null;
+
             let request = angular.copy(options);
+
+            request.leftLine = leftLineBk;
+            request.rightLine = rightLineBk;
+            options.leftLine = leftLineBk;
+            options.rightLine = rightLineBk;
+
             if(options.idLeftLine == -3) {
                 options.type = 'custom';
             };
@@ -1900,10 +1988,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 options.idLeftLine = null;
             }
             else {
-                    request.leftFixedValue = null;
-                    request.idLeftLine = parseInt(options.idLeftLine);
-                }
-            console.log("update shadingAttributeDialog", options, request);
+                request.leftFixedValue = null;
+                request.idLeftLine = parseInt(options.idLeftLine);
+            }
             wiApiService.editShading(request, function (shading) {
                 Utils.getPalettes(function(paletteList){
                     wiApiService.dataCurve(options.idControlCurve, function (curveData) {
@@ -2451,7 +2538,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             this.shadingList = _currentTrack.getShadings();
 
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+                let leftLineBk = options.leftLine;
+                options.leftLine = null;
+                let rightLineBk = options.rightLine;
+                options.rightLine = null;
+
                 let request = angular.copy(options);
+
+                request.leftLine = leftLineBk;
+                request.rightLine = rightLineBk;
+                options.leftLine = leftLineBk;
+                options.rightLine = rightLineBk;
+                
                 if(options.idLeftLine == -3) {
                     options.type = 'custom';
                 };
@@ -3111,6 +3209,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
                 if (props) {
                     console.log('logTrackPropertiesData', props);
+                    _fitWindow = false;
                 }
             }, {
                 tabs: ['true', 'true', 'true']
@@ -3119,6 +3218,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             DialogUtils.depthTrackPropertiesDialog(ModalService, _currentTrack, wiApiService, function (props) {
                 if (props) {
                     console.log('depthTrackPropertiesData', props);
+                    _fitWindow = false;
                 }
             });
         } else if (_currentTrack.isZoneTrack()) {
@@ -3140,6 +3240,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         }
                         _currentTrack.doPlot(true);
                     });
+                    _fitWindow = false;
                 }
             });
         } else if (_currentTrack.isImageTrack()) {
@@ -3160,6 +3261,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             _currentTrack.doPlot(true);
                         });
                     });
+                    _fitWindow = false;
                 }
             });
         } else if (_currentTrack.isObjectTrack()) {
@@ -3172,6 +3274,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         _currentTrack.setProperties(props);
                         _currentTrack.doPlot(true);
                     })
+                    _fitWindow = false;
                 }
             })
         }

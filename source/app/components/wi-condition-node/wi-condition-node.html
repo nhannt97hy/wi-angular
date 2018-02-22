@@ -6,7 +6,7 @@
         <div class='col-xs-5'class='form-control'>
             <ui-select ng-model='wiConditionNode.item.left.value' ng-change="wiConditionNode.update()">
                 <ui-select-match placeholder='Select a curve'>{{$select.selected.properties.name}}</ui-select-match>
-                <ui-select-choices group-by="'datasetName'"
+                <ui-select-choices group-by="wiConditionNode.groupFn"
                 repeat='curve.id as curve in wiConditionNode.curveOptionsWithDepth | filter:{name:$select.search} track by curve.id'>
                 <div class="padding-left-20px">{{curve.properties.name}}</div>
             </ui-select-choices>

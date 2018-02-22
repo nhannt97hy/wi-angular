@@ -97,3 +97,10 @@ exports.ConfigTernaryDiagramButtonClicked = function() {
     DialogUtils.ternaryDialog(this.ModalService, wiD3Crossplot, function () {});
 }
 
+exports.ZoneButtonClicked = function() {
+    this.wiCrossplot.getWiD3CrossplotCtrl().switchDepthType();
+}
+
+exports.CurveButtonClicked = function() {
+    this.wiCrossplot.getWiD3CrossplotCtrl().switchDepthType();
+}

@@ -1,17 +1,14 @@
 const componentName = 'wiProperties';
 const moduleName = 'wi-properties';
 
-function Controller(wiComponentService, wiApiService, $timeout) {
+function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalService) {
     let self = this;
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
 
-        wiComponentService.on('update-properties', function doUpdateListConfig(currentItem) {
-            toListConfig(currentItem).then(function (listConfig) {
-                $timeout(function () {
-                    self.listConfig = listConfig;
-                })
-            });
+        wiComponentService.on('update-properties', async function doUpdateListConfig(currentItem) {
+            self.listConfig = await toListConfig(currentItem);
+            $scope.$apply();
         });
         wiComponentService.on('project-unloaded-event', function cleanList() {
             self.listConfig = null;
@@ -19,7 +16,8 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     };
     const type = {
         checkbox: 'checkbox',
-        select: 'select'
+        select: 'select',
+        action: 'action'
     }
 
     async function toListConfig(currentItem) {
@@ -27,6 +25,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         let config = {};
         let itemProperties = currentItem.properties;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         switch (currentItem.type) {
             case 'well':
                 config = {
@@ -127,14 +126,19 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }, {
                         key: 'idFamily',
                         label: 'Family',
-                        type: type.select,
-                        options: listFamily.map(function (family) {
-                            return {
-                                value: family.idFamily,
-                                label: family.name
-                            }
-                        }),
+                        type: type.action,
+                        handle: () => {
+                            dialogUtils.curveFamilyDialog(ModalService, currentItem, listFamily, function (newFamily) {
+                                if (!newFamily) return;
+                                utils.editProperty({ key: 'idFamily', value: newFamily.idFamily }, async function () {
+                                    itemProperties.idFamily = newFamily.idFamily;
+                                    self.listConfig = await toListConfig(currentItem);
+                                    $scope.$apply();
+                                })
+                            });
+                        },
                         value: itemProperties.idFamily,
+                        valueLabel: curveFamily.name,
                         editable: true
                     }, {
                         key: 'name',
@@ -1104,18 +1108,6 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         listConfig.push(config); */
         return listConfig;
     }
-
-    // function doUpdateListConfig(currentItem) {
-    //     self.listConfig = toListConfig(currentItem);
-    // }
-
-    function cleanList() {
-        self.listConfig = null;
-    }
-
-    // this.updateListConfig = function(newConfig) {
-    //     doUpdateListConfig(newConfig);
-    // }
 }
 
 let app = angular.module(moduleName, []);

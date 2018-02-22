@@ -17,6 +17,10 @@ function Controller() {
         }
     }
 
+    this.groupFn = function(item){
+        return item.properties.dataset;
+    }
+
     this.onValueChange = function(){
         self.model.value = self.SelectedValue;
     }
@@ -25,7 +29,7 @@ function Controller() {
         if(!self.SelectedCurve){
             self.SelectedCurve = self.curvesList[0];
         }
-        self.model.value = self.SelectedCurve.properties.idCurve;            
+        self.model.value = self.SelectedCurve.properties.idCurve;
     }
     this.onSelectCurveChange = function(){
         if(self.SelectedCurve){

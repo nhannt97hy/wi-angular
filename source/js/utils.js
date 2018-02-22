@@ -127,6 +127,7 @@ function lineToTreeConfig(line) {
         id: line.idLine,
         idCurve: line.idCurve,
         idDataset: curveModel.properties.idDataset,
+        dataset: findDatasetById(curveModel.properties.idDataset).name,
         name: lineModel.name,
         unit: line.unit,
         minX: line.minValue,
@@ -556,7 +557,7 @@ function createCurveModel (curve) {
         unit: curve.unit || "NA",
         alias: curve.name
     });
-    curveModel.datasetName = curve.dataset;
+    // curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
@@ -591,7 +592,7 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
             unit: curve.unit || "NA",
             alias: curve.name
         };
-        curveModel.datasetName = curve.dataset;
+        // curveModel.datasetName = curve.dataset;
         curveModel.data = {
             childExpanded: false,
             icon: 'curve-16x16',
@@ -2946,111 +2947,16 @@ function getSelectedNode(rootNode) {
 exports.getSelectedNode = getSelectedNode;
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
-function calVSHfromGR(well, grCurve, matrix, shale, type, callback){
+
+function getDepthCurve(well){
     let length = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
-    let result = new Array(length);
-    let curvesData = {};
-
-    function getDepth(){
-        let depth = new Array(length);
-        for(i = 0; i < length; i++){
-            depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
-        }
-        return depth;
+    let depth = new Array(length);
+    for(i = 0; i < length; i++){
+        depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
     }
-
-    function getData(idCurve, callback){
-        if(idCurve){
-            __GLOBAL.wiApiService.dataCurve(idCurve, function(data){
-                callback(data.map(d => parseFloat(d.x)));
-            })
-        }else{
-            let data = getDepth();
-            callback(data);
-        }
-    }
-    
-    async.series([function(cb){
-        // get data from input
-        getData(grCurve.id, function(data){
-            curvesData['grCurve'] = data;
-            if(matrix.type == 'curve'){
-                getData(matrix.value.id, function(data){
-                    curvesData['matrix'] = data;
-                    if(shale.type == 'curve'){
-                        getData(shale.value.id, function(data){
-                            curvesData['shale'] = data;
-                            cb();
-                        })
-                    }else{
-                        curvesData['shale'] = new Array(length).fill(shale.value);
-                        cb();
-                    }
-                })
-            }else{
-                curvesData['matrix'] = new Array(length).fill(matrix.value);
-                if(shale.type == 'curve'){
-                    getData(shale.value.id, function(data){
-                        curvesData['shale'] = data;
-                        cb();
-                    })
-                }else{
-                    curvesData['shale'] = new Array(length).fill(shale.value);
-                    cb();
-                }
-            }
-        })
-    },
-    function(cb){
-        // cal GR index
-        for(let i = 0; i < length; i++){
-            result[i] = (curvesData['grCurve'][i] - curvesData['matrix'][i])/(curvesData['shale'][i] - curvesData['matrix'][i]);
-        }
-        cb();
-    },
-    function(cb){
-        // cal VSH by type
-        switch(type){
-            case 'Linear':
-            cb();
-            break;
-
-            case 'Clavier':
-            result = result.map(d => {return 1.7 - Math.sqrt(3.38 - Math.pow(d + 0.7, 2))});
-            cb();
-            break;
-
-            case 'Tertiary':
-            result = result.map(d => {return 0.083 * (Math.pow(2, 3.7 * d) - 1)});
-            cb();
-            break;
-
-            case 'Larionov':
-            result = result.map(d => {return 0.33 * (Math.pow(2, 3.7 * d) - 1)});
-            cb();
-            break;
-
-            case 'Stieber1':
-            result = result.map(d => {return d / (2 - d)});
-            cb();
-            break;
-
-            case 'Stieber3':
-            result = result.map(d => {return d / (3 - 2 * d)});
-            cb();
-            break;
-
-            case 'Stieber2':
-            result = result.map(d => {return d / (4 - 3 * d)});
-            cb();
-            break;
-        }
-    }], function(err){
-        console.log(result);
-        callback(result);
-    })
+    return depth;
 }
-exports.calVSHfromGR = calVSHfromGR;
+exports.getDepthCurve = getDepthCurve;
 
 function swapValue (a, b) {
     let t = a;

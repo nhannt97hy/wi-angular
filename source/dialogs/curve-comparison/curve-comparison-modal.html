@@ -132,7 +132,7 @@
                                         <ui-select-match placeholder='Select a curve'>
                                             {{compa.curve1.properties.name}}
                                         </ui-select-match>
-                                        <ui-select-choices group-by="'datasetName'" position="down"
+                                        <ui-select-choices group-by="wiModal.groupFn" position="down"
                                                             repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                             <div class="normal-text">{{curve.properties.name}}</div>
                                         </ui-select-choices>
@@ -144,7 +144,7 @@
                                         <ui-select-match placeholder='Select a curve'>
                                             {{compa.curve2.properties.name}}
                                         </ui-select-match>
-                                        <ui-select-choices group-by="'datasetName'" position="down"
+                                        <ui-select-choices group-by="wiModal.groupFn" position="down"
                                                             repeat='curve in wiModal.curves | filter:{properties: {name:$select.search}} track by curve.id'>
                                             <div class="normal-text">{{curve.properties.name}}</div>
                                         </ui-select-choices>

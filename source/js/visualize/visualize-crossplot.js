@@ -131,11 +131,7 @@ const POINTSET_SCHEMA = {
             item: ZONE_SCHEMA,
             default: []
         },
-        zAxes: {
-            type: 'Enum',
-            values: ['Zone', 'Curve'],
-            default: 'Curve'
-        }
+        depthType: { type: 'String' }
     }
 };
 
@@ -193,8 +189,8 @@ const TERNARY_SCHEMA = {
                 point: {
                     type: 'Object',
                     properties: {
-                        x: { type: 'Float' },
-                        y: { type: 'Float' }
+                        x: { type: 'Float', default: null },
+                        y: { type: 'Float', default: null }
                     }
                 },
                 area: {
@@ -271,6 +267,15 @@ Crossplot.prototype.PROPERTIES = {
             },
         },
         default: []
+    },
+    title: {
+        type: 'Object',
+        properties: {
+            title: { type: 'String' },
+            labelX: { type: 'String' },
+            labelY: { type: 'String' },
+            labelZ: { type: 'String' }
+        }
     }
 };
 
@@ -286,9 +291,9 @@ Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
 
     //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
-    if (props.pointSet && props.pointSet.idZoneSet != null) {
-        this.pointSet.zAxes = 'Zone';
-    }
+    // if (props.pointSet && props.pointSet.idZoneSet != null) {
+    //     this.pointSet.depthType = 'zonalDepth';
+    // }
     return this;
 }
 
@@ -325,7 +330,7 @@ Crossplot.prototype.getTransformY = function() {
 }
 
 Crossplot.prototype.getTransformZ = function() {
-    if (this.pointSet.zAxes == 'Curve') {
+    if (this.pointSet.depthType == 'intervalDepth') {
         let wdZ = this.getWindowZ();
         let reverse = wdZ[0] > wdZ[1];
         if (this.shouldUseAxisColors()) {
@@ -348,7 +353,7 @@ Crossplot.prototype.getTransformZ = function() {
                 .range(reverse ? Utils.clone(this.colors).reverse() : this.colors);
         }
     }
-    else if (this.pointSet.zAxes == 'Zone') {
+    else if (this.pointSet.depthType == 'zonalDepth') {
         let domain = [];
         let range = ['transparent']
         let zones = this.pointSet.zones.sort(function(a, b) {
@@ -368,11 +373,15 @@ Crossplot.prototype.getTransformZ = function() {
 }
 
 Crossplot.prototype.getLabelX = function() {
-    return this.pointSet.labelX || (this.pointSet.curveX || {}).name;
+    return this.title.labelX || (this.pointSet.curveX || {}).name;
 }
 
 Crossplot.prototype.getLabelY = function() {
-    return this.pointSet.labelY || (this.pointSet.curveY || {}).name;
+    return this.title.labelY || (this.pointSet.curveY || {}).name;
+}
+
+Crossplot.prototype.getLabelZ = function() {
+    return this.title.labelZ || (this.pointSet.curveZ || {}).name;
 }
 
 Crossplot.prototype.getPlotRect = function() {
@@ -385,7 +394,7 @@ Crossplot.prototype.setMode = function(mode) {
 }
 
 Crossplot.prototype.showZonalOrInterval = function() {
-    return this.pointSet.idZoneSet == null ? 'Interval' : 'Zonal';
+    return this.pointSet.depthType;
 }
 
 Crossplot.prototype.init = function(domElem) {
@@ -416,7 +425,7 @@ Crossplot.prototype.init = function(domElem) {
 
     this.axisContainer
         .selectAll('text.vi-crossplot-axis-label')
-        .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label'])
+        .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label', 'vi-crossplot-axis-z-label'])
         .enter()
             .append('text')
             .attr('class', function(d) { return 'vi-crossplot-axis-label ' + d; })
@@ -587,7 +596,11 @@ Crossplot.prototype.updateAxisTicks = function() {
         .call(axisY)
         .style('transform', 'translateX(' + vpX[0] + 'px)');
 
-    if (!this.pointSet.curveZ) return;
+    if (!this.shouldPlotZAxis()) {
+        this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
+            .style('display', 'none');
+        return;
+    }
 
     let wdZ = this.getWindowZ();
     let stepZ, transformZ, tickValues;
@@ -621,7 +634,7 @@ Crossplot.prototype.updateAxisTicks = function() {
     this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
         .call(axisZ)
         .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)')
-        .style('display', this.shouldPlotZAxis() ? 'block' : 'none');
+        .style('display', 'block');
 }
 
 Crossplot.prototype.updateAxisGrids = function() {
@@ -756,6 +769,24 @@ Crossplot.prototype.updateAxisLabels = function() {
             + ','
             + ((vpY[1]-vpY[0])/2 + vpY[0] - bbY.height/2)
             + ')rotate(-90)'
+        );
+
+    let labelZElem = this.axisContainer.select('text.vi-crossplot-axis-z-label')
+    if (!this.shouldPlotZAxis()) {
+        labelZElem.style('display', 'none');
+        return;
+    }
+
+    labelZElem.text(this.getLabelZ())
+        .style('display', 'block');
+    let bbZ = labelZElem.node().getBBox();
+    labelZElem
+        .attr('transform',
+            'translate('
+            + (vpX[1] - bbX.width)
+            + ','
+            + (bbX.height)
+            + ')'
         );
 }
 
@@ -1234,7 +1265,7 @@ Crossplot.prototype.plotPolygons = function() {
 }
 
 Crossplot.prototype.shouldPlotZAxis = function() {
-    return this.pointSet.curveZ && this.pointSet.zAxes == 'Curve';
+    return this.pointSet.curveZ && this.pointSet.depthType == 'intervalDepth';
 }
 
 Crossplot.prototype.shouldUseAxisColors = function() {
@@ -1243,8 +1274,8 @@ Crossplot.prototype.shouldUseAxisColors = function() {
 
 Crossplot.prototype.plotSymbols = function() {
     let self = this;
-    let zAxes = self.pointSet.zAxes;
-    let shouldPlotZ = (zAxes == 'Curve' && self.pointSet.curveZ) || (zAxes == 'Zone' && self.pointSet.zones.length > 0);
+    let depthType = self.pointSet.depthType;
+    let shouldPlotZ = (depthType == 'intervalDepth' && self.pointSet.curveZ) || (depthType == 'zonalDepth' && self.pointSet.zones.length > 0);
 
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
@@ -1313,7 +1344,7 @@ Crossplot.prototype.prepareData = function() {
     let self = this;
     let zonalOrInterval = this.showZonalOrInterval();
     let zones = [];
-    if (zonalOrInterval == 'Zonal') {
+    if (zonalOrInterval == 'zonalDepth') {
         if (self.pointSet.activeZone instanceof Array) {
             zones = self.pointSet.zones.filter(function(zone) {
                 return self.pointSet.activeZone.indexOf(zone.idZone) > -1;
@@ -1329,10 +1360,10 @@ Crossplot.prototype.prepareData = function() {
         }
     }
     Utils.parseData(this.pointSet.curveY.data).forEach(function(d) {
-        if (zonalOrInterval == 'Zonal') {
+        if (zonalOrInterval == 'zonalDepth') {
             if (!self.isInZones(d, zones)) return;
         }
-        else if (zonalOrInterval == 'Interval') {
+        else if (zonalOrInterval == 'intervalDepth') {
             if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) {
                 return;
             }
@@ -1351,7 +1382,7 @@ Crossplot.prototype.prepareData = function() {
             self.data.push({
                 x: mapX[d.y],
                 y: d.x,
-                z: self.pointSet.zAxes == 'Curve' ? mapZ[d.y] : d.y,
+                z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
                 depth: d.y
             });
         }
@@ -1390,6 +1421,8 @@ Crossplot.prototype.plotTernary = function() {
     vertices = this.ternary.vertices.filter(function(v) {
         return v.used && v.x != null && v.y != null && !isNaN(v.x) && !isNaN(v.y);
     });
+    this.plotTernaryPoint();
+
     if (vertices.length != 3) return;
 
     let line = d3.line()
@@ -1424,7 +1457,6 @@ Crossplot.prototype.plotTernary = function() {
         });
     }
 
-    this.plotTernaryPoint();
 }
 
 Crossplot.prototype.plotTernaryPoint = function() {
@@ -1432,7 +1464,7 @@ Crossplot.prototype.plotTernaryPoint = function() {
     ternaryContainer.selectAll('.vi-crossplot-ternary-point').remove();
     if (!this.ternary.calculate) return;
     let point = this.ternary.calculate.point;
-    if (!point || point.x == null || point.y == null) return;
+    if (!point || point.x == null || point.y == null || isNaN(point.x) || isNaN(point.y)) return;
     let self = this;
     let helper = new SvgHelper(ternaryContainer, {
         fillStyle: self.TERNARY_POINT_COLOR,

@@ -21,7 +21,12 @@
                     <table class="text-on-table table table-bordered curveTable scrollTable">
                         <thead class="background-header-table">
                             <tr>
-                                <th rowspan="2" width="5%">Use</th>
+                                <th rowspan="2" width="5%">
+                                    Use All
+                                    <input type="checkbox" 
+                                            ng-model="wiModal.checkAll"
+                                            ng-click="wiModal.checkAllFunc()">
+                                </th>
                                 <th rowspan="2" width="10%">Track</th>
                                 <th colspan="4" width="40%">Header</th>
                                 <th colspan="2" width="20%">Scale</th>

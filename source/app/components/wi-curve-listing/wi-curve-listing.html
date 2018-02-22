@@ -35,7 +35,7 @@
 						<td style="flex:2">{{curve.name}}
 							<span class="fa fa-undo undo" ng-if="curve.modified" ng-click="wiCurveListing.reverseModified(curve.id)" title='Discard Changes'></span>
 						</td>
-						<td style="flex:2">{{curve.datasetName}}</td>
+						<td style="flex:2">{{curve.properties.dataset}}</td>
 						<td style="flex:1;text-align:center">
 							<input type="checkbox" ng-model="curve.selected" ng-change="wiCurveListing.onCurveSelectClick(curve)">
 						</td>

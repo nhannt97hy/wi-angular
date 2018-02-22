@@ -1,0 +1,198 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-1000">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><span class="water-saturation-16x16"></span>&nbsp;Saturation Archie</h4>
+            </div>
+
+            <div class="modal-body dialog-style">
+                <style>
+                    .list-group {
+                        height: 21rem;
+                        overflow: overlay;
+                    }
+                    .list-group-item.active {
+                        background-color: #f0f0f0;
+                    }
+                    .input {
+                        display:inline-flex;
+                        width:100%;
+                        margin-bottom: 1rem;
+                    }
+                    .input button{
+                        margin-right: 1rem;
+                        flex-basis: 160px;
+                    }
+                    .wizard-control{
+                        height: 34px;
+                    }
+                    .next{
+                        float: right;
+                    }
+                    .previous{
+                        float: left;
+                    }
+                    </style>
+                <div>
+                    <wizard on-finish="finishedWizard()" on-cancel="cancelledWizard()">
+                        <wz-step wz-title="Starting">
+                            <div>
+                                <div style='display:flex;'>
+                                    <div style='flex:1;margin-right:1rem;'>
+                                        <select ng-model='wiModal.groupBy' ng-init="wiModal.groupBy='well'"
+                                        class='form-control' style="margin-bottom: 1rem;"
+                                        ng-change='wiModal.onFilterChange()'>
+                                            <option value="well">Well</option>
+                                            <option value="dataset">Well.Dataset</option>
+                                        </select>
+                                        <ul ng-if="wiModal.groupBy=='well'" class='list-group'>
+                                            <li ng-repeat="well in wiModal.wells"
+                                            ng-click='wiModal.onFilterChange(well)'
+                                            class='list-group-item'
+                                            ng-class="{active: well.id==wiModal.selWell.id}">
+                                                <span class='well-16x16'></span>&nbsp;
+                                                {{well.name}}</li>
+                                        </ul>
+                                        <ul ng-if="wiModal.groupBy=='dataset'" class='list-group'>
+                                            <li ng-repeat='dataset in wiModal.datasets'
+                                            ng-click="wiModal.onFilterChange(dataset)"
+                                            class='list-group-item'
+                                            ng-class="{active: dataset.id==wiModal.selDataset.id}">
+                                                <span class='curve-data-16x16'></span>
+                                                {{dataset.parentData.label}}.{{dataset.name}}</li>
+                                        </ul>
+                                    </div>
+                                    <div style='flex:1;'>
+                                        <select ng-model='wiModal.filterBy' ng-init='wiModal.filterBy="group"'
+                                        ng-change='wiModal.onFilterChange()' class='form-control'
+                                        style="margin-bottom: 1rem;">
+                                            <option value="group">Family Group</option>
+                                            <option value="family">Family</option>
+                                            <option value="curve">Curve</option>
+                                        </select>
+                                        <ul class='list-group'>
+                                            <li ng-repeat="template in wiModal.templates"
+                                            ng-click='wiModal.selTemplate = template'
+                                            class='list-group-item'
+                                            ng-class='{active: template==wiModal.selTemplate}'>{{template}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class='input'>
+                                    <button class="btn btn-default" type="button"
+                                    ng-click="wiModal.onSelectTemplate('FR')">
+                                        Formation Resistivity
+                                    </button>
+                                    <input type="text" class='form-control'
+                                    style="flex:1;"
+                                    ng-model='wiModal.template.FR.name' disabled>
+                                </div>
+                                <div class='input'>
+                                    <button class="btn btn-default" type="button"
+                                    ng-click="wiModal.onSelectTemplate('PR')">
+                                        Porosity
+                                    </button>
+                                    <input type="text" class='form-control'
+                                    style="flex:1;"
+                                    ng-model='wiModal.template.PR.name' disabled>
+                                </div>
+                            </div>
+                            <div class='wizard-control'>
+                                <button type="button" class="btn btn-default next" wz-next ng-disabled='!wiModal.template'>Next&nbsp;
+                                    <span class='fa fa-chevron-right'></span>
+                                </button>
+                            </div>
+                        </wz-step>
+                        <wz-step wz-title="Continuing">
+                            <div>
+                                <div style='display:flex;'>
+                                    <div style='flex:1;margin-right:2rem;'>
+                                        <select ng-model='wiModal.groupBy' ng-init="wiModal.groupBy='well'"
+                                        class='form-control' style="margin-bottom: 1rem;">
+                                            <option value="well">Well</option>
+                                            <option value="dataset">Well.Dataset</option>
+                                        </select>
+                                        <ul ng-if="wiModal.groupBy=='well'" class='list-group'>
+                                            <li ng-repeat="well in wiModal.wells"
+                                            ng-click='wiModal.onFilterChange(well)'
+                                            class='list-group-item'
+                                            ng-class="{active: well.id==wiModal.selWell.id}">
+                                                <span class='well-16x16'></span>&nbsp;
+                                                {{well.name}}</li>
+                                        </ul>
+                                        <ul ng-if="wiModal.groupBy=='dataset'" class='list-group'>
+                                            <li ng-repeat='dataset in wiModal.datasets'
+                                            ng-click="wiModal.onFilterChange(dataset)"
+                                            class='list-group-item'
+                                            ng-class="{active: dataset.id==wiModal.selDataset.id}">
+                                                <span class='curve-data-16x16'></span>
+                                                {{dataset.parentData.label}}.{{dataset.name}}</li>
+                                        </ul>
+                                    </div>
+                                    <div style='flex:1;'>
+                                        <div>Curve</div>
+                                        <ul class='list-group'>
+                                            <li ng-repeat="curve in wiModal.matchCurves"
+                                            ng-click='wiModal.onClickCurve(curve)'
+                                            class='list-group-item'
+                                            ng-class='{active: wiModal.selCurve.id == curve.id}'
+                                            ng-dblclick="wiModal.onDbClickCurve(curve)">{{curve.name}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div style="display:inline-flex; width:100%;">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Well</th>
+                                                <th>Dataset</th>
+                                                <th>Formation Resistivity</th>
+                                                <th>Porosity</th>
+                                                <th>Tortuosity Factor (a)</th>
+                                                <th>Cementation Exponent (m)</th>
+                                                <th>Saturation Exponent (n)</th>
+                                                <th>Water Resistivity (Rw)</th>
+                                                <th>Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="curve in wiModal.selectedCurves">
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class='wizard-control'>
+                                <button type="button" class="btn btn-default previous" wz-previous>
+                                    <span class='fa fa-chevron-left'></span>
+                                    &nbsp;Previous
+                                </button>
+                                <button type="button" class="btn btn-default next" wz-next>Next&nbsp;
+                                    <span class='fa fa-chevron-right'></span>
+                                </button>
+                            </div>
+                        </wz-step>
+                        <wz-step wz-title="More steps">
+                            <p>Even more steps!!</p>
+                            <input type="submit" wz-next value="Finish now" />
+                        </wz-step>
+                    </wizard>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onApplyButtonClicked();" class="btn btn-default" ng-disabled="wiModal.applyingInProgress || !wiModal.finished">
+                    <span class="apply-16x16"></span>&nbsp;Apply
+                </button>
+                <button type="button" ng-click="wiModal.onOKButtonClicked();" class="btn btn-default" ng-disabled="wiModal.applyingInProgress || !wiModal.finished">
+                    <span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
+                    <span class="close-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body">
                 <div class="image">
-                    <img ng-src="{{wiModal.currentImageUrl}}" alt="{{wiModal.currentImageName}}">
+                    <img src="{{wiModal.currentImageUrl}}" alt="{{wiModal.currentImageName}}">
                 </div>
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
@@ -16,12 +16,11 @@
     <style>
         .image {
             text-align: center;
-            overflow-x: auto;
-            overflow-y: auto;
+            overflow: auto;
         }
         .image img {
-            max-width: 1920px;
-            max-height: 500px;
+            max-width: auto;
+            max-height: auto;
         }
     </style>
 </div>
