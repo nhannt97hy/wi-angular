@@ -2,6 +2,7 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, Selwell) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout){
         let self = this;
+        window.addC = this;
         this.applyingInProgress = false;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -39,6 +40,8 @@ module.exports = function (ModalService, Selwell) {
         this.curves = [];
         this.families = utils.getListFamily();
         this.selectedFamily = this.families[0];
+        let mainFamilies = this.families.map(f => f.familyGroup);
+        this.mainFamilies = Array.from(new Set(mainFamilies));
         this.onWellChanged = function(){
             self.datasets.length = 0;
             self.curves.length = 0;
@@ -63,10 +66,17 @@ module.exports = function (ModalService, Selwell) {
         }
 
         this.onWellChanged();
+        this.onMainFamilyChange = function(){
+            this.selectedFamily = this.families.find(f => f.familyGroup== self.mainFamily);
+            this.onFamilyChanged();            
+        }
         this.onFamilyChanged = function () {
             self.unit = self.selectedFamily.family_spec.length ? self.selectedFamily.family_spec[0].unit : null;
         }
         this.onFamilyChanged();
+        this.mainFamilyFilter = function(family){
+            return family.familyGroup == self.mainFamily;
+        }
         this.onRunButtonClicked = function () {
             if (self.applyingInProgress) return;
             self.applyingInProgress = true;
