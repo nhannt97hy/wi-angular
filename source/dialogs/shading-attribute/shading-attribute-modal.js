@@ -457,7 +457,13 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 });
             }
         };
-
+        this.setVarShadingType = function() {
+            if(self.varShadingType == 'customFills') {
+                self.displayType = false;
+                self.shadingOptions.isNegPosFill = false;
+                self.variableShadingOptions.fill.display = true;
+            }
+        }
         this.setCustomFillsIfNull = function() {
             self.displayType = false;
             self.shadingOptions.isNegPosFill = false;
@@ -478,6 +484,8 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             }
         }
         function validateCustomFills (content) {
+            let XValue = [self.variableShadingOptions.fill.varShading.startX, self.variableShadingOptions.fill.varShading.endX];
+
             let lowArr = [];
             let highArr =[];
             let message = null;
@@ -488,7 +496,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             content.forEach(function(c) {
                 lowArr.push(c.lowVal);
                 highArr.push(c.highVal);
-                if (utils.isEmpty(c.lowVal) || utils.isEmpty(c.highVal)) checkErr = true;
+                if (utils.isEmpty(c.lowVal) 
+                    || utils.isEmpty(c.highVal) 
+                    || !_.inRange(c.lowVal, XValue[0], XValue[1]) 
+                    || !_.inRange(c.highVal, XValue[0], XValue[1])) checkErr = true;
             });
             if (checkErr) message = 'CustomFills: Low value or High value is invalid!';
             return message;
