@@ -457,7 +457,13 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 });
             }
         };
-
+        this.setVarShadingType = function() {
+            if(self.varShadingType == 'customFills') {
+                self.displayType = false;
+                self.shadingOptions.isNegPosFill = false;
+                self.variableShadingOptions.fill.display = true;
+            }
+        }
         this.setCustomFillsIfNull = function() {
             self.displayType = false;
             self.shadingOptions.isNegPosFill = false;

@@ -411,8 +411,7 @@
                             <label class="control-label col-sm-12">
                                 <input type="radio" value="customFills" 
                                         ng-model="wiModal.varShadingType"
-                                        ng-change="wiModal.setVarShadingType()"
-                                        ng-change="wiModal.setCustomFillsIfNull()">
+                                        ng-change="wiModal.setVarShadingType(); wiModal.setCustomFillsIfNull()">
                                 Custom Fills
                             </label>
                         </div>

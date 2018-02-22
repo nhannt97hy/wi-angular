@@ -320,6 +320,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                                     self.curveList = currentTrack.getCurves();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;
+                                    curves_bk.push({ id : line.idLine, idCurve : line.idCurve });
                                 } else {
                                     console.error(err);
                                 }
@@ -368,41 +369,36 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         });
                     }
                     self.curves = self.curves.filter(c => { return c.changed != changed.deleted });
-                    /*self.curveList = currentTrack.getCurves();
-                    self.leftLimit = customLimit.concat(self.curveList);*/
-
-                    console.log("curveUpdated", self.curveUpdated, curves_bk);
 
                     // idCurve changed
                     let curvesTemp = [];
                     self.curveUpdated.forEach(function (c) {
-                        curves_bk.forEach(function(cBk) {
-                            self.shadings.forEach(function (s) {
+                        self.shadings.forEach(function (s) {
+                            curves_bk.forEach(function(cBk) {
                                 // delete shading when select other curve
                                 if (cBk.id == c.id && cBk.idCurve != c.idCurve) {
                                     if (s.rightLine.id == c.id || s.leftLine.id == c.id)
                                         s.changed = (s.changed == changed.created) ? s.changed : changed.deleted;
                                 }
-
-                                if (s.rightLine.id == c.id) {
-                                    s.rightLine = c;
-                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                                }
-                                if (s.leftLine.id == c.id) {
-                                    s.leftLine = c;
-                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                                }
-
-                                s.idLeftLine = s.leftLine.id;
-                                if (s.type == 'left') {
-                                    s.leftFixedValue = s.rightLine.minX;
-                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                                }
-                                if (s.type == 'right') {
-                                    s.leftFixedValue = s.rightLine.maxX;
-                                    s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
-                                }
                             });
+                            if (s.rightLine.id == c.id) {
+                                s.rightLine = c;
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                            }
+                            if (s.leftLine.id == c.id) {
+                                s.leftLine = c;
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                            }
+
+                            s.idLeftLine = s.leftLine.id;
+                            if (s.type == 'left') {
+                                s.leftFixedValue = s.rightLine.minX;
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                            }
+                            if (s.type == 'right') {
+                                s.leftFixedValue = s.rightLine.maxX;
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                            }
                         });
                     });
 
@@ -581,78 +577,82 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         }
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
-                if (!item.idControlCurve) {
-                    item.idControlCurve = (item.leftLine.id > 0) ? 
-                                            item.leftLine.idCurve : item.rightLine.idCurve;
-                }
-                const idLeftLine = item.leftLine.id
-                let leftLineBk = item.leftLine;
-                item.leftLine = null;
-                let rightLineBk = item.rightLine;
-                item.rightLine = null;
+                if (item.rightLine && item.leftLine) {
 
-                let request = angular.copy(item);
-
-                request.leftLine = leftLineBk;
-                request.rightLine = rightLineBk;
-                item.leftLine = leftLineBk;
-                item.rightLine = rightLineBk;
-
-                if(item.idLeftLine == -3) {
-                    item.type = 'custom';
-                };
-                if(item.idLeftLine == -2) {
-                    item.type = 'right';
-                };
-                if(item.idLeftLine == -1) {
-                    item.type = 'left';
-                };
-                if(item.idLeftLine > 0) {
-                    item.type = 'pair';
-                }
-                delete request.changed;
-                delete request.leftLine;
-                delete request.rightLine;
-
-                if (item.idLeftLine < 0) {
-                    request.idLeftLine = null;
-                }
-                else {
-                    request.leftFixedValue = null;
-                    request.idLeftLine = parseInt(idLeftLine);
-                }
-                request.palette = request.palName;
-
-                switch(item.changed) {
-                    case changed.unchanged:
-                        callback();
-                        break;
-                    case changed.created: {
-                        wiApiService.createShading(request, function (shading) {
-                            self.shadings[idx].idShading = shading.idShading;
-                            callback();
-                        });
-                        item.changed = changed.unchanged;
-                        break;
+                    if (!item.idControlCurve) {
+                        item.idControlCurve = (item.leftLine.id > 0) ? 
+                                                item.leftLine.idCurve : item.rightLine.idCurve;
                     }
+                    const idLeftLine = item.leftLine.id
+                    let leftLineBk = item.leftLine;
+                    item.leftLine = null;
+                    let rightLineBk = item.rightLine;
+                    item.rightLine = null;
 
-                    case changed.updated: {
-                        console.log("updated", request, item);
-                        wiApiService.editShading(request, function (shading) {
-                            callback();
-                        });
-                        item.changed = changed.unchanged;
-                        break;
+                    let request = angular.copy(item);
+
+                    request.leftLine = leftLineBk;
+                    request.rightLine = rightLineBk;
+                    item.leftLine = leftLineBk;
+                    item.rightLine = rightLineBk;
+
+                    if(item.idLeftLine == -3) {
+                        item.type = 'custom';
+                    };
+                    if(item.idLeftLine == -2) {
+                        item.type = 'right';
+                    };
+                    if(item.idLeftLine == -1) {
+                        item.type = 'left';
+                    };
+                    if(item.idLeftLine > 0) {
+                        item.type = 'pair';
                     }
-                    case changed.deleted:
-                        wiApiService.removeShading(item.idShading, function (shading) {
-                            callback();
-                        });
-                        break;
-                    default:
-                        // break;
-                        callback('unknown change code:', item.change);
+                    delete request.changed;
+                    delete request.leftLine;
+                    delete request.rightLine;
+
+                    if (item.idLeftLine < 0) {
+                        request.idLeftLine = null;
                     }
+                    else {
+                        request.leftFixedValue = null;
+                        request.idLeftLine = parseInt(idLeftLine);
+                    }
+                    request.palette = request.palName;
+
+                    switch(item.changed) {
+                        case changed.unchanged:
+                            callback();
+                            break;
+                        case changed.created: {
+                            wiApiService.createShading(request, function (shading) {
+                                self.shadings[idx].idShading = shading.idShading;
+                                callback();
+                            });
+                            item.changed = changed.unchanged;
+                            break;
+                        }
+
+                        case changed.updated: {
+                            console.log("updated", request, item);
+                            wiApiService.editShading(request, function (shading) {
+                                callback();
+                            });
+                            item.changed = changed.unchanged;
+                            break;
+                        }
+                        case changed.deleted:
+                            wiApiService.removeShading(item.idShading, function (shading) {
+                                callback();
+                            });
+                            break;
+                        default:
+                            // break;
+                            callback('unknown change code:', item.change);
+                        }
+                    }
+                    else callback();
                 }, function(err) {
                     if (err) {
                         setTimeout(() => {
