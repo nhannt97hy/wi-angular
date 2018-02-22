@@ -23,7 +23,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         this.zoneSets = new Array();
         this.datasetsInWell = new Array();
         this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
-        this.depthType = 'intervalDepth';
+        // this.depthType = 'intervalDepth';
         this.lineMode = false;
         this.overlayLines = [];
 
@@ -54,7 +54,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
                 pointSet.pointSymbol = utils.upperCaseFirstLetter(pointSet.pointSymbol);
 
                 // self.pointSet = self.crossplotModel.properties.pointSet;
-                self.depthType = (pointSet && pointSet.idZoneSet != null) ? "zonalDepth" : "intervalDepth";
+                self.depthType = pointSet.depthType || 'intervalDepth';
                 self.lineMode = pointSet.lineMode ? pointSet.lineMode : true;
                 pointSet.activeZone = pointSet.activeZone ? pointSet.activeZone : 'All';
                 self.selectedZone = pointSet.activeZone ? pointSet.activeZone : 'All'; // To be removed
@@ -213,11 +213,13 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         }
 
         this.onDepthTypeChanged = function(){
+            self.crossplotModelProps.pointsets[0].depthType = self.depthType;
+            console.log('gg', self.depthType, self.crossplotModelProps.pointsets[0])
             switch (self.depthType) {
                 case "intervalDepth":
                 self.crossplotModelProps.pointsets[0].intervalDepthTop = self.crossplotModelProps.pointsets[0].intervalDepthTop ? self.crossplotModelProps.pointsets[0].intervalDepthTop: getTopFromWell();
                 self.crossplotModelProps.pointsets[0].intervalDepthBottom = self.crossplotModelProps.pointsets[0].intervalDepthBottom ? self.crossplotModelProps.pointsets[0].intervalDepthBottom : getBottomFromWell();
-                self.crossplotModelProps.pointsets[0].idZoneSet = null;
+                // self.crossplotModelProps.pointsets[0].idZoneSet = null;
                 break;
                 case "zonalDepth":
                 if(self.selectedZoneSet){

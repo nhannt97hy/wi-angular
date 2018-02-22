@@ -89,7 +89,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (crossplotProps.pointsets && crossplotProps.pointsets.length)
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
-            self.switchReferenceZone(crossplotProps.pointSet.idZoneSet != null);
+            self.switchReferenceZone(crossplotProps.pointSet.depthType == 'zonalDepth');
             let refWindCtrl = self.getWiRefWindCtrl();
             if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
@@ -262,6 +262,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return null;
     }
+
+    this.switchDepthType = function() {
+        if (self.crossplotModel.properties.pointsets[0].depthType == 'intervalDepth') {
+            self.crossplotModel.properties.pointsets[0].depthType = 'zonalDepth';
+        }
+        else {
+            self.crossplotModel.properties.pointsets[0].depthType = 'intervalDepth';
+        }
+        self.viCrossplot.pointSet.depthType = self.crossplotModel.properties.pointsets[0].depthType;
+        self.switchReferenceZone();
+    }
+
     function setWiZoneArr(zoneArray) {
         self.zoneArr = zoneArray;
     }
@@ -457,13 +469,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 return zone.properties;
                             });;
                         }
-                        let idZoneSet = (crossplotProps.pointSet || {}).idZoneSet;
+                        let depthType = (crossplotProps.pointSet || {}).depthType;
 
                         delete self.viCrossplot.pointSet;
+
                         self.viCrossplot.setProperties(crossplotProps);
                         // self.viCrossplot.doPlot();
                         try {
-                            self.switchReferenceZone(idZoneSet != null);
+                            self.switchReferenceZone(depthType == 'zonalDepth');
                         }
                         catch(e) {
                             // Canh - Dont know why error :'(

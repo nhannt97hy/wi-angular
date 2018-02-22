@@ -185,7 +185,8 @@ let app = angular.module('wiapp',
         'ui.bootstrap',
         'ngSanitize',
         'ui.select',
-        'angularjs-dropdown-multiselect'
+        'angularjs-dropdown-multiselect',
+        'mgo-angular-wizard'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {

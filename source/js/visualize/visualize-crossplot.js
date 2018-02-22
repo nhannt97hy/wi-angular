@@ -131,11 +131,7 @@ const POINTSET_SCHEMA = {
             item: ZONE_SCHEMA,
             default: []
         },
-        zAxes: {
-            type: 'Enum',
-            values: ['Zone', 'Curve'],
-            default: 'Curve'
-        }
+        depthType: { type: 'String' }
     }
 };
 
@@ -295,9 +291,9 @@ Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
 
     //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
-    if (props.pointSet && props.pointSet.idZoneSet != null) {
-        this.pointSet.zAxes = 'Zone';
-    }
+    // if (props.pointSet && props.pointSet.idZoneSet != null) {
+    //     this.pointSet.depthType = 'zonalDepth';
+    // }
     return this;
 }
 
@@ -334,7 +330,7 @@ Crossplot.prototype.getTransformY = function() {
 }
 
 Crossplot.prototype.getTransformZ = function() {
-    if (this.pointSet.zAxes == 'Curve') {
+    if (this.pointSet.depthType == 'intervalDepth') {
         let wdZ = this.getWindowZ();
         let reverse = wdZ[0] > wdZ[1];
         if (this.shouldUseAxisColors()) {
@@ -357,7 +353,7 @@ Crossplot.prototype.getTransformZ = function() {
                 .range(reverse ? Utils.clone(this.colors).reverse() : this.colors);
         }
     }
-    else if (this.pointSet.zAxes == 'Zone') {
+    else if (this.pointSet.depthType == 'zonalDepth') {
         let domain = [];
         let range = ['transparent']
         let zones = this.pointSet.zones.sort(function(a, b) {
@@ -398,7 +394,7 @@ Crossplot.prototype.setMode = function(mode) {
 }
 
 Crossplot.prototype.showZonalOrInterval = function() {
-    return this.pointSet.idZoneSet == null ? 'Interval' : 'Zonal';
+    return this.pointSet.depthType;
 }
 
 Crossplot.prototype.init = function(domElem) {
@@ -1269,7 +1265,7 @@ Crossplot.prototype.plotPolygons = function() {
 }
 
 Crossplot.prototype.shouldPlotZAxis = function() {
-    return this.pointSet.curveZ && this.pointSet.zAxes == 'Curve';
+    return this.pointSet.curveZ && this.pointSet.depthType == 'intervalDepth';
 }
 
 Crossplot.prototype.shouldUseAxisColors = function() {
@@ -1278,8 +1274,8 @@ Crossplot.prototype.shouldUseAxisColors = function() {
 
 Crossplot.prototype.plotSymbols = function() {
     let self = this;
-    let zAxes = self.pointSet.zAxes;
-    let shouldPlotZ = (zAxes == 'Curve' && self.pointSet.curveZ) || (zAxes == 'Zone' && self.pointSet.zones.length > 0);
+    let depthType = self.pointSet.depthType;
+    let shouldPlotZ = (depthType == 'intervalDepth' && self.pointSet.curveZ) || (depthType == 'zonalDepth' && self.pointSet.zones.length > 0);
 
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
@@ -1348,7 +1344,7 @@ Crossplot.prototype.prepareData = function() {
     let self = this;
     let zonalOrInterval = this.showZonalOrInterval();
     let zones = [];
-    if (zonalOrInterval == 'Zonal') {
+    if (zonalOrInterval == 'zonalDepth') {
         if (self.pointSet.activeZone instanceof Array) {
             zones = self.pointSet.zones.filter(function(zone) {
                 return self.pointSet.activeZone.indexOf(zone.idZone) > -1;
@@ -1364,10 +1360,10 @@ Crossplot.prototype.prepareData = function() {
         }
     }
     Utils.parseData(this.pointSet.curveY.data).forEach(function(d) {
-        if (zonalOrInterval == 'Zonal') {
+        if (zonalOrInterval == 'zonalDepth') {
             if (!self.isInZones(d, zones)) return;
         }
-        else if (zonalOrInterval == 'Interval') {
+        else if (zonalOrInterval == 'intervalDepth') {
             if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) {
                 return;
             }
@@ -1386,7 +1382,7 @@ Crossplot.prototype.prepareData = function() {
             self.data.push({
                 x: mapX[d.y],
                 y: d.x,
-                z: self.pointSet.zAxes == 'Curve' ? mapZ[d.y] : d.y,
+                z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
                 depth: d.y
             });
         }
