@@ -290,8 +290,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                     track.plotZone(zone2);
                     track.removeZone(zone);
                     track.rearrangeHeaders();
-                    // _plotZoneSet(track);
-                    Utils.emitEvent('zone-updated', track);
                     Utils.refreshProjectState();
                 })
             })

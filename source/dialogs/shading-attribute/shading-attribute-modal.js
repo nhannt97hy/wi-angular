@@ -457,7 +457,13 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 });
             }
         };
-
+        this.setVarShadingType = function() {
+            if(self.varShadingType == 'customFills') {
+                self.displayType = false;
+                self.shadingOptions.isNegPosFill = false;
+                self.variableShadingOptions.fill.display = true;
+            }
+        }
         this.setCustomFillsIfNull = function() {
             self.displayType = false;
             self.shadingOptions.isNegPosFill = false;
@@ -478,19 +484,41 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             }
         }
         function validateCustomFills (content) {
+            let XValue = [self.variableShadingOptions.fill.varShading.startX, self.variableShadingOptions.fill.varShading.endX];
+            XValue.sort(function(a, b) {
+                return a - b;
+            });
+
             let lowArr = [];
             let highArr =[];
             let message = null;
-            let checkErr = false;
+            let checkErr = null;
             if (!content.length) {
                 message = 'Please add custom fills!';
             }
-            content.forEach(function(c) {
+            content.forEach(function(c, index) {
                 lowArr.push(c.lowVal);
                 highArr.push(c.highVal);
-                if (utils.isEmpty(c.lowVal) || utils.isEmpty(c.highVal)) checkErr = true;
+
+                if (utils.isEmpty(c.lowVal) 
+                    || utils.isEmpty(c.highVal) 
+                    || !_.inRange(c.lowVal, XValue[0], XValue[1]) 
+                    || !_.inRange(c.highVal, XValue[0], XValue[1])) checkErr = "invalid";
+                if(!checkErr) {
+                    let contentClone = angular.copy(content);
+                    contentClone.splice(index, 1);
+                    contentClone.forEach(function(ct) {
+                        let ctValue = [ct.lowVal, ct.highVal];
+                        ctValue.sort(function(a, b) {
+                            return a - b;
+                        });
+                        if ((c.lowVal > ctValue[0] && c.lowVal < ctValue[1]) 
+                            || (c.highVal > ctValue[0] && c.highVal < ctValue[1])) checkErr = "overlap";
+                    });
+                }
             });
-            if (checkErr) message = 'CustomFills: Low value or High value is invalid!';
+            if (checkErr == "invalid") message = 'CustomFills: Low value or High value is invalid!';
+            if (checkErr == "overlap") message = 'CustomFills: Values overlap!';
             return message;
         }
         function isValid() {

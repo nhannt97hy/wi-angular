@@ -1127,6 +1127,8 @@ exports.MicroAndMacroPorosityButtonClicked = function () {
 
 exports.WaterSaturationButtonClicked = function () {
     console.log('WaterSaturationButton is clicked');
+    let DialogsUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    DialogsUtils.saturationArchieDialog(this.ModalService);
 };
 
 exports.PermeabilityButtonClicked = function () {

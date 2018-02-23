@@ -62,12 +62,12 @@ module.exports = function (ModalService) {
             payloadParams.file = self.lasFile;
 
             let spinner = wiComponentService.getComponent('SPINNER');
-            spinner.show();
             if(self.selectedDataset){
                 DialogUtils.confirmDialog(ModalService, "WARNING!", "Importing data to dataset existed! Do you want to continue?", function(yes){
                     if(!yes){
                         self.isDisabled = false;
                     } else {
+                        spinner.show();
                         wiApiService.postWithFile('/file', payloadParams)
                         .then(function (well) {
                             console.log('well response', well);
@@ -99,6 +99,7 @@ module.exports = function (ModalService) {
                         if(!yes){
                             self.isDisabled = false;
                         } else {
+                            spinner.show();
                             wiApiService.postWithFile('/file', payloadParams)
                             .then(function (well) {
                                 console.log('well response', well);
@@ -125,6 +126,7 @@ module.exports = function (ModalService) {
                         }
                     });
                 } else {
+                    spinner.show();
                     wiApiService.postWithFile('/file', payloadParams)
                     .then(function (well) {
                         console.log('well response', well);

@@ -459,7 +459,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     bottomJustification: imageTrackProperties.bottomJustification,
                     background: imageTrackProperties.background,
                     width: imageTrackProperties.width,
-                    orderNum: trackOrder
+                    orderNum: trackOrder,
+                    zoomFactor: imageTrackProperties.zoomFactor
                 }
                 wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
                     self.pushImageTrack(returnImageTrack);
@@ -478,6 +479,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 title: "Object Track " + (objectTracks.length + 1),
                 topJustification: "center",
                 width: Utils.inchToPixel(2.5),
+                zoomFactor: 1.0
             }
             DialogUtils.objectTrackPropertiesDialog(ModalService, self.wiLogplotCtrl, defaultObjectTrackProp, function (objectTrackProp) {
                 let dataRequest = {
@@ -486,7 +488,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     showTitle: objectTrackProp.showTitle,
                     topJustification: objectTrackProp.topJustification,
                     width: objectTrackProp.width,
-                    orderNum: trackOrder
+                    orderNum: trackOrder,
+                    zoomFactor: objectTrackProp.zoomFactor
                 };
                 wiApiService.createObjectTrack(dataRequest, function (returnObjectTrack) {
                     self.pushObjectTrack(returnObjectTrack);

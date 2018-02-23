@@ -21,7 +21,8 @@ module.exports = function (ModalService, logTracks) {
             self.modalSize = {};
             self.maxHeightModal = {};
         };
-        this.checkAll = false;
+        this.checkAll = true;
+        // this.checkAllFunc;
         this.checkAllFunc = function() {
             self.tracks.forEach(function(t) {
                 t.use = self.checkAll;
@@ -54,7 +55,7 @@ module.exports = function (ModalService, logTracks) {
                 lineArr.push(line);
             });
             self.tracks.push({
-                use : false,
+                use : true,
                 name : lt.name,
                 id : lt.id,
                 lines : lineArr

@@ -6,7 +6,16 @@
                 <h4 class="modal-title"><span class="curve-new-32x32"></span>&nbsp;Add New Curve</h4>
             </div>
             <div class="modal-body">
-                <div class="">
+                <style>
+                    .ui-select-choices {
+                        position: fixed;
+                        top: auto;
+                        left: auto;
+                        width: auto !important;
+                        min-width: calc( 50% - 50px);
+                    }
+                </style>
+                <div class="container-fluid">
                     <h5 class="modal-infomation-title">&nbsp;Curve Infomation</h5>
                     <form class="form-horizontal" action="" name="modalAddCurve">
                         <div class="form-group">
@@ -27,13 +36,26 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-6">Main Family:</label>
+                            <div class="col-sm-6">
+                                <ui-select ng-model="wiModal.mainFamily" ng-init="wiModal.mainFamily = wiModal.mainFamilies[0]"
+                                ng-change='wiModal.onMainFamilyChange()'>
+                                    <ui-select-match placeholder='Select a main family'>{{$select.selected}}</ui-select-match>
+                                    <ui-select-choices
+                                    repeat='item in wiModal.mainFamilies | filter:$select.search'>
+                                        <div class="padding-left-20px">{{item}}</div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-6">Family:</label>
                             <div class="col-sm-6">
                                 <ui-select ng-model="wiModal.selectedFamily"
                                     ng-change='wiModal.onFamilyChanged()'>
                                     <ui-select-match placeholder='Select a family'>{{$select.selected.name}}</ui-select-match>
                                     <ui-select-choices
-                                    repeat='family in wiModal.families | filter:{name:$select.search} track by $index'>
+                                    repeat='family in wiModal.families | filter:{name:$select.search} | filter: wiModal.mainFamilyFilter track by $index'>
                                         <div class="padding-left-20px">{{family.name}}</div>
                                     </ui-select-choices>
                                 </ui-select>

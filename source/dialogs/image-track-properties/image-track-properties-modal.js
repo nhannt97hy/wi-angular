@@ -26,6 +26,7 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
         this.topJustification = props.topJustification.toLowerCase();
         this.background = props.background;
         this.width = props.width;
+        this.zoomFactor = props.zoomFactor || 1;
 
         this._DEL = _DEL;
         this.imagesOfCurrentTrack = [];
@@ -168,6 +169,7 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
             props.background = self.background;
             props.width = self.width;
             props.image_of_tracks = self.imagesOfCurrentTrack;
+            props.zoomFactor = self.zoomFactor;
             // parameterSet: self.parameterSet
         }
 
