@@ -410,6 +410,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 bottomJustification: "center",
                 background: '#ffffff',
                 width: Utils.inchToPixel(1),
+                zoomFactor: 1.0
             }
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
                 let dataRequest = {
@@ -472,7 +473,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 topJustification: "center",
                 color: '#ffffff',
                 width: Utils.inchToPixel(1),
-                parameterSet: null
+                parameterSet: null,
+                zoomFactor: 1.0
             }
             DialogUtils.zoneTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultZoneTrackProp, function (zoneTrackProperties) {
                 let dataRequest = {
@@ -484,7 +486,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     color: zoneTrackProperties.color,
                     width: zoneTrackProperties.width,
                     idZoneSet: zoneTrackProperties.idZoneSet,
-                    orderNum: trackOrder
+                    orderNum: trackOrder,
+                    zoomFactor: zoneTrackProperties.zoomFactor
                 }
                 wiApiService.createZoneTrack(dataRequest, function (returnZoneTrack) {
                     let zoneTrack = dataRequest;
@@ -1681,6 +1684,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('dblclick', function () {
             openTrackPropertiesDialog();
         });
+        track.on('mousemove', function() {
+            _drawTooltip(track);
+        })
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
                 wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
