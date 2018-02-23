@@ -9,20 +9,37 @@ function Controller($scope, $timeout, $http) {
                 var _self = this;
                 let scrollTop = $(this).scrollTop();
                 if (scrollTop + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-                    //self.busy = true;
-                    self.downTrigger(function(num) {
-                        //self.busy = false;
-                        if (num > 0) {
-                            $(_self).scrollTop(scrollTop - 3);
+                    self.downTrigger(function(newItems, existingList) {
+                        if (newItems.length > 0) {
+                            async.eachSeries(newItems, function(item, done) {
+                                $timeout(function() {
+                                    item.data.bgColor= '#CCF';
+                                    existingList.push(item);
+                                    existingList.shift();
+                                    done();
+                                }, 100);
+                            }, function() {
+                                $(_self).scrollTop(scrollTop - 3);
+                                $timeout(() => existingList.forEach(item => delete item.data.bgColor), 1000);;
+                            });
                         }
                     });
                 }
                 if ($(this).scrollTop() == 0) {
-                    //self.busy = true;
-                    self.upTrigger(function(num) {
-                        //self.busy = false;
-                        if (num > 0) {
-                            $(_self).scrollTop(30);
+                    self.upTrigger(function(newItems, existingList) {
+                        if (newItems.length > 0) {
+                            async.eachSeries(newItems, function(item, done) {
+                                $timeout(function() {
+                                    item.data.bgColor= '#CCF';
+                                    existingList.unshift(item);
+                                    existingList.pop();
+                                    done();
+                                }, 100);
+                            }, function() {
+                                $(_self).scrollTop(3);
+                                //existingList.forEach(item => delete item.data.bgColor);
+                                $timeout(() => existingList.forEach(item => delete item.data.bgColor), 1000);;
+                            });
                         }
                     });
                 }

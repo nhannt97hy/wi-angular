@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-exports.dialogFunc = runImportDialog;
+module.exports = runImportDialog;
 
 function runImportDialog(ModalService, zipArchives, zipArchive, callback) {
     function ModalController($scope, close, wiBatchApiService, $timeout) {

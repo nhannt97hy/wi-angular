@@ -22,8 +22,9 @@ let updateInventory = _.debounce(function () {
         }
         container.length = 0;
         listOfWells.forEach(function (well) {
-            let preWellModel = preWellsModel.find(w => w.properties.idWell == well.idWell);
-            let wellModel = wellToTreeConfig(well, preWellModel);
+            //let preWellModel = preWellsModel.find(w => w.properties.idWell == well.idWell);
+            //let wellModel = wellToTreeConfig(well, preWellModel);
+            let wellModel = wellToTreeConfig(well);
             container.push(wellModel);
         });
     });
@@ -69,7 +70,7 @@ function updateWells(start, rootNode) {
     })
 }
 
-function getWellsFromInventory() {
+function getWellsFromInventory($scope, $timeout) {
     let wiComponentService = __GLOBAL.wiComponentService;
     inventoryModel = [];
     wiComponentService.putComponent('INVENTORY', inventoryModel);

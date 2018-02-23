@@ -51,7 +51,8 @@
                 container="wiInventory" 
                 on-click-function="wiInventory.prjClickFunction"
                 on-select-function="wiInventory.selectProjectNode"
-                filter="{{wiInventory.prjFilter}}">
+                filter="{{wiInventory.prjFilter}}"
+                show-id="true">
             </wi-base-treeview>
         </wi-scroll>
     </div>
@@ -81,7 +82,8 @@
             container="wiInventory" 
             on-click-function="wiInventory.pendingQueueClickFunction"
             on-select-function="wiInventory.selectPendingQueueNode"
-            filter="{{wiInventory.queueFilter}}">
+            filter="{{wiInventory.queueFilter}}"
+            show-id="true">
         </wi-base-treeview>
     </div>
     <div class="inventory-center">
@@ -122,7 +124,8 @@
                 container="wiInventory" 
                 on-click-function="wiInventory.invClickFunction"
                 on-select-function="wiInventory.selectInventoryNode"
-                filter="{{wiInventory.invFilter}}">
+                filter="{{wiInventory.invFilter}}"
+                show-id="true">
             </wi-base-treeview>
         </wi-scroll>
     </div>

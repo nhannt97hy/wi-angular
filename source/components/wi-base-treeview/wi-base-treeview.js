@@ -6,18 +6,28 @@ function WiBaseTreeController(wiComponentService, $scope) {
 
     this.$onInit = function () {
         if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
+        /*
         $scope.$watch(() => this.filter,(value) => {
             if(value != undefined){
                 if(this.config && this.config.length){
                     this.config.forEach((c, i) => {
-                        let parent = new Array()
-                            filterF(c, value, parent);
-                            }
-                        )
-                    }
+                        let parent = new Array();
+                        filterF(c, value, parent);
+                    })
                 }
             }
-        )
+        });
+        */
+        $scope.$watch(function() { return this.filter},function(value) {
+            if(value != undefined){
+                if(this.config && this.config.length){
+                    this.config.forEach((c) => {
+                        let parent = new Array();
+                        filterF(c, value, parent);
+                    })
+                }
+            }
+        });
     };
 
     function filterF(input, strCp, parent, lastChild){
@@ -26,7 +36,7 @@ function WiBaseTreeController(wiComponentService, $scope) {
         if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
             if(parent && parent.length){
                 parent.forEach(p => {
-                    p.data.childExpanded = true;
+                    // p.data.childExpanded = true; // TUNG
                     p.data.hide = false;
                 })
             }

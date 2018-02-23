@@ -15,7 +15,8 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     this.$onInit = function () {
         utils = wiComponentService.getComponent(wiComponentService.UTILS);
         wiComponentService.putComponent(self.name, self);
-        self.treeConfig = [oUtils.initInventory()];
+        //self.treeConfig = [oUtils.initInventory()];
+        self.treeConfig = oUtils.getWellsFromInventory($scope, $timeout);
     }
 
     this.unselectAllNodes = unselectAllNodes;
@@ -111,6 +112,8 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
 
     this.refreshInventory = function () {
         oUtils.updateInventory();
+        self.getWiiItems().emptyItems();
+        self.getWiiItems().getWiiProperties().emptyList();
     }
 
     this.getDisplayField = function() {
@@ -119,7 +122,10 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
 
     this.switchLabelTooltip = function() {
         self.labelToggle = !self.labelToggle;
-        self.treeConfig[0].children.forEach(function(node) {
+        /*self.treeConfig[0].children.forEach(function(node) {
+            node.data.toggle = self.labelToggle;
+        });*/
+        self.treeConfig.forEach(function(node) {
             node.data.toggle = self.labelToggle;
         });
     }
@@ -137,8 +143,9 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         if (!wellModel) return;
         if (wellModel.type != 'well') return;
         wiOnlineInvService.deleteWell(wellModel.properties.idWell, function () {
-            //utils.updateWells(wellModel.properties.idFile);
-            oUtils.updateWellsDebounce();
+            //oUtils.updateWellsDebounce();
+            let idx = self.treeConfig.indexOf(wellModel);
+            self.treeConfig.splice(idx, 1);
             self.getWiiItems().emptyItems();
         })
     }
@@ -193,7 +200,11 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
 
     function getItemTreeviewCtxMenu(nodeType, treeViewCtrl) {
-        let selectedNode = utils.getSelectedNode(self.treeConfig[0]);
+        //let selectedNode = utils.getSelectedNode(self.treeConfig[0]);
+        let selectedNode = utils.getSelectedNode({
+            data: {},
+            children: self.treeConfig
+        });
         switch (nodeType) {
             case 'file':
                 return [
@@ -214,7 +225,6 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
                         icon: 'delete-16x16',
                         handler: function () {
                             let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-                            console.log(selectedNodes);
                             if (selectedNodes && selectedNodes.length) {
                                 for (let sn of selectedNodes) {
                                     if (sn.type == "well") {
@@ -234,48 +244,44 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
 
     this.upTrigger = function(cb) {
-        let wells = self.treeConfig[0].children;
+        //let wells = self.treeConfig[0].children;
+        let wells = self.treeConfig;
         if (wells.length) {
             wiOnlineInvService.listWells({
                 start: wells[0].properties.idWell, 
                 limit: 10, 
                 forward: false
             }, function(listOfWells) {
-                $timeout(function() {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
-                        let wellModel = oUtils.wellToTreeConfig(well);
-                        wellModel.data.toggle = self.labelToggle;
-                        wells.unshift(wellModel);
-                        wells.pop();
-                    }
-                    if (cb) cb(listOfWells.length);
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = oUtils.wellToTreeConfig(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    return wellModel;
                 });
+                if (cb) cb(lowm, wells);
             });
         }
-        else if (cb) cb(0);
+        else if (cb) cb([]);
     }
 
     this.downTrigger = function(cb) {
         console.log("downTrigger");
-        let wells = self.treeConfig[0].children;
+        //let wells = self.treeConfig[0].children;
+        let wells = self.treeConfig;
         if (wells.length) {
             wiOnlineInvService.listWells({
                 start: wells[wells.length - 1].properties.idWell, 
                 limit: 10, 
                 forward: true
             }, function(listOfWells) {
-                console.log(listOfWells);
-                for (let well of listOfWells) {
+                let lowm = listOfWells.map(function(well) {
                     let wellModel = oUtils.wellToTreeConfig(well);
                     wellModel.data.toggle = self.labelToggle;
-                    wells.push(wellModel);
-                    wells.shift();
-                }
-                if (cb) cb(listOfWells.length);
+                    return wellModel;
+                });
+                if (cb) cb(lowm, wells);
             });
         }
-        else if (cb) cb(0);
+        else if (cb) cb([]);
     }
 
     function selectFile(callback, isMulti = true) {
@@ -306,6 +312,8 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
                         DialogUtils.errorMessageDialog(ModalService, "Some errors while upload file!");
                     } else {
                         oUtils.updateInventory();
+                        self.getWiiItems().emptyItems();
+                        self.getWiiItems().getWiiProperties().emptyList();
                     }
                 })
             }

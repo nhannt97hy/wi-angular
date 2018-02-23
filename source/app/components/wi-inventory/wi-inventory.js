@@ -126,7 +126,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
     this.refreshInventory = refreshInventory;
     function refreshInventory() {
         //self.inventoryConfig = [oUtils.initInventory()];
-        self.inventoryConfig = oUtils.getWellsFromInventory();
+        self.inventoryConfig = oUtils.getWellsFromInventory($scope, $timeout);
 
         /*
         wiOnlineInvService.getInventory(inventory => {
@@ -201,6 +201,40 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         }
         return destModel;
     }
+    function datasetToTreeConfig(dataset, currentModel) {
+        let datasetModel = {};
+        datasetModel.type = 'dataset';
+        datasetModel.id = dataset.idDataset;
+        datasetModel.data = currentModel ? currentModel.data : {
+            childExpanded: false,
+            icon: 'curve-data-16x16',
+            label: dataset.name,
+            selected: false,
+            isLeaf: true
+        };
+        datasetModel.properties = dataset;
+        datasetModel.children = currentModel ? currentModel.children : [];
+        return datasetModel;
+    }
+    function updateDatasets(currentWellModel, callback) {
+        wiOnlineInvService.listDatasets(currentWellModel.properties.idWell, function (listDatasets) {
+            let preDatasetsModel = angular.copy(currentWellModel.children) || [];
+            currentWellModel.children = [];
+            if (!listDatasets.length) {
+                callback(currentWellModel.children);
+                return;
+            }
+            listDatasets.forEach(function (dataset) {
+                let preDatasetModel = preDatasetsModel.find(d => {
+                    d.properties.idDataset == dataset.idDataset
+                });
+                let datasetModel = datasetToTreeConfig(dataset);
+                currentWellModel.children.push(datasetModel);
+            });
+            callback(currentWellModel.children);
+        });
+        
+    }
     function queueWell(model) {
         if (!model) {
             toastr.warning(model.data.label + ' is not a well (SKIPPED)');
@@ -214,7 +248,18 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             toastr.warning(model.data.label + ' is already queued (SKIPPED)');
             return;
         }
-        self.importItems.push(importedModel);
+
+                oUtils.updateDatasets(currentNode.id, self.inventoryConfig).then(function(datasetsModel) {
+                    async.each(datasetsModel, function(dModel, done) {
+                        oUtils.updateCurves(dModel.id, self.inventoryConfig).then(function() {
+                            done();
+                        });
+                    }, function(error) {
+                        bareSelectHandler();
+                        callback && callback();
+                    });
+                });
+
     }
     this.importButtonClicked = function () {
         let models = self.inventoryConfig.__SELECTED_NODES;
@@ -350,19 +395,13 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 limit: 10, 
                 forward: false
             }, function(listOfWells) {
-                async.eachSeries(listOfWells, function(well, done) {
-                    $timeout(function() {
-                        let wellModel = oUtils.wellToTreeConfig(well);
-                        wellModel.data.toggle = self.labelToggle;
-                        wellModel.data.bgColor = '#CCF';
-                        wells.unshift(wellModel);
-                        wells.pop();
-                        done();
-                    }, 10);
-                }, function() {
-                    if (cb) cb(listOfWells.length);
-                    resetColor(wells);
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = oUtils.wellToTreeConfig(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
                 });
+                if (cb) cb(lowm, wells);
             });
         }
         else if (cb) cb(0);
@@ -377,20 +416,13 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 limit: 10, 
                 forward: true
             }, function(listOfWells) {
-                console.log(listOfWells);
-                async.eachSeries(listOfWells, function(well, done) {
-                    $timeout(function() {
-                        let wellModel = oUtils.wellToTreeConfig(well);
-                        wellModel.data.bgColor = '#CCF';
-                        wellModel.data.toggle = self.labelToggle;
-                        wells.push(wellModel);
-                        wells.shift();
-                        done();
-                    }, 10);
-                }, function() {
-                    if (cb) cb(listOfWells.length);
-                    resetColor(wells);
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = oUtils.wellToTreeConfig(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
                 });
+                if (cb) cb(lowm, wells);
             });
         }
         else if (cb) cb(0);
@@ -406,40 +438,13 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
                 forward: false
             }, function(listOfWells) {
-                async.eachSeries(listOfWells, function(well, done) {
-                    $timeout(function() {
-                        let wellModel = utils.createWellModel(well);
-                        wellModel.data.toggle = self.labelToggle;
-                        wellModel.data.bgColor = '#CCF';
-                        wells.unshift(wellModel);
-                        wells.pop();
-                        done();
-                    }, 10);
-                }, function() {
-                    if (cb) cb(listOfWells.length);
-                    resetColor(wells);
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = utils.createWellModel(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
                 });
-                /*
-                $timeout(function() {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
-                        let wellModel = utils.createWellModel(well)
-                        wells.unshift(wellModel);
-                        wellModel.data.toggle = self.labelToggle;
-                        // not necessary because well contain properties only (no eagger loading at serve side)
-                        if (well.datasets && well.datasets.length) {
-                            well.datasets.forEach(dataset => {
-                                let datasetModel = utils.createDatasetModel(dataset);
-                                wellModel.children.push(datasetModel);
-                                dataset.curves.forEach(curve => {
-                                    datasetModel.children.push(utils.createCurveModel(curve));
-                                })
-                            });
-                        }
-                    }
-                    if (cb) cb(listOfWells.length);
-                });
-                */
+                if (cb) cb(lowm, wells);
             });
         }
         else if (cb) cb(0);
@@ -455,40 +460,13 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
                 forward: true
             }, function(listOfWells) {
-                async.eachSeries(listOfWells, function(well, done) {
-                    $timeout(function() {
-                        let wellModel = utils.createWellModel(well);
-                        wellModel.data.bgColor = '#CCF';
-                        wellModel.data.toggle = self.labelToggle;
-                        wells.push(wellModel);
-                        wells.shift();
-                        done();
-                    }, 10);
-                }, function() {
-                    if (cb) cb(listOfWells.length);
-                    resetColor(wells);
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = utils.createWellModel(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
                 });
-                /*
-                $timeout(function() {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
-                        let wellModel = utils.createWellModel(well);
-                        wells.push(wellModel);
-                        wells.shift();
-                        // not necessary because well contain properties only (no eagger loading at serve side)
-                        if (well.datasets && well.datasets.length) {
-                            well.datasets.forEach(dataset => {
-                                let datasetModel = utils.createDatasetModel(dataset);
-                                wellModel.children.push(datasetModel);
-                                dataset.curves.forEach(curve => {
-                                    datasetModel.children.push(utils.createCurveModel(curve));
-                                })
-                            });
-                        }
-                    }
-                    if (cb) cb(listOfWells.length);
-                });
-                */
+                if (cb) cb(lowm, wells);
             });
         }
         else if (cb) cb(0);
@@ -589,7 +567,8 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         self.pendingQueueSelectedNode = parentWell;
     }
     this.invClickFunction = function($index, $event, node) {
-        clickFunction($index, $event, node, self.inventoryConfig, true);
+        //clickFunction($index, $event, node, self.inventoryConfig, true);
+        clickFunction($index, $event, node, self.inventoryConfig);
     }
     this.prjClickFunction = function($index, $event, node) {
         clickFunction($index, $event, node, self.projectConfig, true);

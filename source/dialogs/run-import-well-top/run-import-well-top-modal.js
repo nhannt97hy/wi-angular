@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-exports.dialogFunc = runImportWellTopDialog;
+module.exports = runImportWellTopDialog;
 
 function runImportWellTopDialog(ModalService, wtCSV, callback) {
     function ModalController($scope, close, wiApiService, wiBatchApiService, $timeout) {
