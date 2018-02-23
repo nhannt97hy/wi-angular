@@ -32,7 +32,8 @@ ObjectTrack.prototype.getProperties = function () {
         topJustification: this.justification || "center",
         title: this.name,
         width: this.width,
-        idObjectTrack: this.id
+        idObjectTrack: this.id,
+        zoomFactor: this.zoomFactor
     }
 };
 
@@ -42,6 +43,7 @@ ObjectTrack.prototype.setProperties = function (props) {
     Utils.setIfNotNull(this, 'showTitle', props.showTitle);
     Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
     Utils.setIfNotNull(this, 'width', props.width);
+    Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
 };
 
 ObjectTrack.prototype.init = function (baseElement) {

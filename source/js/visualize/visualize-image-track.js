@@ -33,7 +33,8 @@ ImageTrack.prototype.getProperties = function() {
         topJustification: Utils.capitalize(this.justification),
         bottomJustification: 'Center',
         background: Utils.convertColorToRGB(this.bgColor),
-        width: this.width
+        width: this.width,
+        zoomFactor: this.zoomFactor
     }
 }
 
@@ -45,6 +46,7 @@ ImageTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'justification', Utils.lowercase(props.topJustification));
     Utils.setIfNotNull(this, 'bgColor', Utils.convertColorToRGB(props.background));
     Utils.setIfNotNull(this, 'width', props.width);
+    Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
 }
 
 ImageTrack.prototype.setMode = function(newMode) {
@@ -208,7 +210,7 @@ ImageTrack.prototype.addImageZoneHeader = function(imgzone, isNew) {
 
     if (isNew) {
         let rect = header.node().getBoundingClientRect();
-        
+
         header.append('svg')
             .attr('class', 'vi-drawing-header-fill vi-image-zone-header-fill')
             .attr('width', rect.width)

@@ -15,7 +15,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let self = this;
     this.scopeObj = $scope;
     this.compileFunc = $compile;
-    
+
     let graph = wiComponentService.getComponent('GRAPH');
     let _tracks = [];
     let _currentTrack = null;
@@ -253,7 +253,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.updateLogTrack = function (viTrack) {
         if (!viTrack.isLogTrack()) return;
-        
+
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         function _addShadingToTrack (shading) {
@@ -409,7 +409,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 topJustification: "center",
                 bottomJustification: "center",
                 background: '#ffffff',
-                width: Utils.inchToPixel(1)
+                width: Utils.inchToPixel(1),
             }
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
                 let dataRequest = {
@@ -420,7 +420,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     bottomJustification: imageTrackProperties.bottomJustification,
                     background: imageTrackProperties.background,
                     width: imageTrackProperties.width,
-                    orderNum: trackOrder
+                    orderNum: trackOrder,
+                    zoomFactor: imageTrackProperties.zoomFactor
                 }
                 wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
                     let viTrack = self.pushImageTrack(returnImageTrack);
@@ -541,6 +542,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 title: "Object Track " + (objectTracks.length + 1),
                 topJustification: "center",
                 width: Utils.inchToPixel(2.5),
+                zoomFactor: 1.0
             }
             DialogUtils.objectTrackPropertiesDialog(ModalService, self.logPlotCtrl, defaultObjectTrackProp, function (objectTrackProp) {
                 let dataRequest = {
@@ -549,7 +551,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     showTitle: objectTrackProp.showTitle,
                     topJustification: objectTrackProp.topJustification,
                     width: objectTrackProp.width,
-                    orderNum: trackOrder
+                    orderNum: trackOrder,
+                    zoomFactor: objectTrackProp.zoomFactor
                 };
                 wiApiService.createObjectTrack(dataRequest, function (returnObjectTrack) {
                     console.log("returned object track: ", returnObjectTrack);
@@ -1215,7 +1218,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 x = plotMouse[0];
                 y = plotMouse[1];
                 plotDim = tr.plotContainer.node().getBoundingClientRect();
-                
+
                 if (Number.isNaN(x) || Number.isNaN(y)) continue;
                 if (x > 0 && x < plotDim.width && y > 0 && y < plotDim.height) {
                     track = tr;
@@ -2474,7 +2477,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         ]);
     }
     this.createShadingForSelectedCurve = function () {
-        
+
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
         if (!curve1) return;
@@ -2549,7 +2552,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 request.rightLine = rightLineBk;
                 options.leftLine = leftLineBk;
                 options.rightLine = rightLineBk;
-                
+
                 if(options.idLeftLine == -3) {
                     options.type = 'custom';
                 };
@@ -2599,7 +2602,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
         })
     }
-    
+
     this.createCrossplot = function () {
         let curve1 = _currentTrack.getCurrentCurve();
         let curve2 = _currentTrack.getTmpCurve();
@@ -3045,7 +3048,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         let newCrossplotModel = null;
                         let newOoT;
                         async.series([ function(callback) {
-                            utils.createCrossplot(_getWellProps().idWell, 
+                            utils.createCrossplot(_getWellProps().idWell,
                                 "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
                                 function(err, crossplotModel) {
                                     if (err) {
@@ -3114,7 +3117,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                             let object = self.addObjectToTrack(_currentTrack, newOoT);
                             _currentTrack.setCurrentDrawing(object);
-                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot, 
+                            object.createCrossplot(newCrossplotModel.properties.idCrossPlot,
                                 newCrossplotModel.properties.name, $scope, $compile, self.containerName);
                             callback();
                         }]);
@@ -3379,7 +3382,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
         if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
         $scope.safeApply();
-    }   
+    }
     this.onReady = function(args) {
         function handler () {
             self.plotAll();
@@ -3496,7 +3499,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
                 function (plot, err) {
-                console.log("getLogplot", plot); 
+                console.log("getLogplot", plot);
                     if (err) return;
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
@@ -3669,13 +3672,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                     let histogramModel = Utils.findHistogramModelById(objectProps.idHistogram);
                                                     if (histogramModel && histogramModel.properties) {
                                                         anObject.createHistogram(
-                                                            histogramModel.properties.idHistogram, 
-                                                            histogramModel.properties.name, 
+                                                            histogramModel.properties.idHistogram,
+                                                            histogramModel.properties.name,
                                                             wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
-                                                       // TODO 
+                                                       // TODO
                                                     }
                                                 }
                                                 else {
@@ -3687,13 +3690,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                                     let crossplotModel = Utils.getModel('crossplot', objectProps.idCrossplot);
                                                     if (crossplotModel && crossplotModel.properties) {
                                                         anObject.createCrossplot(
-                                                            crossplotModel.properties.idCrossPlot, 
-                                                            crossplotModel.properties.name, 
+                                                            crossplotModel.properties.idCrossPlot,
+                                                            crossplotModel.properties.name,
                                                             wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
                                                         );
                                                     }
                                                     else {
-                                                       // TODO 
+                                                       // TODO
                                                     }
                                                 }
                                                 else {
