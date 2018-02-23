@@ -1,6 +1,12 @@
 let helper = require('./DialogHelper');
 module.exports = function (ModalService, currentColor, callback) {
     if (!currentColor) currentColor = "#fff";
+    if(!this.isOpen) {
+        this.isOpen = true;
+    } else {
+        return;
+    }
+    let dialog = this;
 
     function colorToString(color) {
         let retArray = [color.r, color.g, color.b, color.a];
@@ -205,6 +211,7 @@ module.exports = function (ModalService, currentColor, callback) {
         });
         $('#cp').colorpicker('setValue', currentColor);
         modal.close.then(function (colorStr) {
+            if(dialog && dialog.isOpen) dialog.isOpen = false;
             helper.removeBackdrop();
             if (callback) if (colorStr) callback(colorStr);
         });
