@@ -54,12 +54,12 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             });
         };
         this.onRangeValue = function () {
-            if (self.props.general.majorTicks) {
+            if (self.props.general.majorTicks != null && !isNaN(self.props.general.majorTicks)) {
                 self.props.general.majorTicks = parseInt(self.props.general.majorTicks);
                 if (self.props.general.majorTicks < 1 ) self.props.general.majorTicks = 1;
                 if (self.props.general.majorTicks > 50) self.props.general.majorTicks = 50;
             }
-            if (self.props.general.minorTicks) {
+            if (self.props.general.minorTicks != null && !isNaN(self.props.general.minorTicks)) {
                 self.props.general.minorTicks = parseInt(self.props.general.minorTicks);
                 if (self.props.general.minorTicks < 1 ) self.props.general.minorTicks = 1;
                 if (self.props.general.minorTicks > 50) self.props.general.minorTicks = 50;
@@ -497,8 +497,18 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
 
         };
         this.onChangeShading = function (index) {
-            if (self.shadings.find(s => s._index == self.__idx).changed == changed.unchanged) 
+            if (self.shadings.find(s => s._index == self.__idx).changed == changed.unchanged) {
                 self.shadings.find(s => s._index == self.__idx).changed = changed.updated;
+                self.typeFixedValue();
+            }
+        }
+        this.syncShadingType = function () {
+            self.shadings.find(s => s._index == self.__idx).fill.shadingType 
+                = self.shadings.find(s => s._index == self.__idx).shadingStyle;
+            self.shadings.find(s => s._index == self.__idx).positiveFill.shadingType 
+                = self.shadings.find(s => s._index == self.__idx).shadingStyle;
+            self.shadings.find(s => s._index == self.__idx).negativeFill.shadingType 
+                = self.shadings.find(s => s._index == self.__idx).shadingStyle;
         }
         this.addRowShading = function () {
             self.shadings.push({

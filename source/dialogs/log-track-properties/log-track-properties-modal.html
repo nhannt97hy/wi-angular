@@ -352,7 +352,7 @@
                                                 <td width="15%">
                                                     <select ng-model="shading.shadingStyle"
                                                             class="form-control wi-form-control"
-                                                            ng-change="wiModal.onChangeShading($index)">
+                                                            ng-change="wiModal.onChangeShading($index); wiModal.syncShadingType()">
                                                         <option value="pattern">Fill Pattern</option>
                                                         <option value="varShading">Variable Shading</option>
                                                     </select>
