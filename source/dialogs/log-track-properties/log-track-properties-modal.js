@@ -53,6 +53,18 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 self.props.general.color = colorStr;
             });
         };
+        this.onRangeValue = function () {
+            if (self.props.general.majorTicks) {
+                self.props.general.majorTicks = parseInt(self.props.general.majorTicks);
+                if (self.props.general.majorTicks < 1 ) self.props.general.majorTicks = 1;
+                if (self.props.general.majorTicks > 50) self.props.general.majorTicks = 50;
+            }
+            if (self.props.general.minorTicks) {
+                self.props.general.minorTicks = parseInt(self.props.general.minorTicks);
+                if (self.props.general.minorTicks < 1 ) self.props.general.minorTicks = 1;
+                if (self.props.general.minorTicks > 50) self.props.general.minorTicks = 50;
+            }
+        }
         function updateGeneralTab(callback) {
             let temp = true;
             // utils.changeTrack(self.props.general, wiApiService);

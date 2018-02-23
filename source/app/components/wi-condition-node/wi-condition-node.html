@@ -1,7 +1,7 @@
-<div class='condition-item' 
+<div class='condition-item'
     ng-class="{'condition-item-selected': wiConditionNode.item.selected}"
     ng-click="wiConditionNode.doSelect($event)">
-    
+
     <div ng-if="!wiConditionNode.isNull() && !wiConditionNode.item.children" class="container-fluid">
         <div class='col-xs-5'class='form-control'>
             <ui-select ng-model='wiConditionNode.item.left.value' ng-change="wiConditionNode.update()">
@@ -12,17 +12,20 @@
             </ui-select-choices>
             </ui-select>
         </div>
-        <div class='col-xs-2'>
-            <select class='form-control wi-form-control' ng-model="wiConditionNode.item.comparison" 
-                ng-options="com for com in wiConditionNode.comparisons"
-                ng-change="wiConditionNode.update()"></select>
+        <div class='col-xs-2'class='form-control'>
+            <ui-select ng-model='wiConditionNode.item.comparison'
+            ng-change="wiConditionNode.update()"
+            search-enabled='false'>
+                <ui-select-match>{{$select.selected}}</ui-select-match>
+                <ui-select-choices repeat='com in wiConditionNode.comparisons'>{{com}}</ui-select-choices>
+            </ui-select>
         </div>
         <div class='col-xs-5'>
             <wi-multi-input ng-model='wiConditionNode.item.right' model='wiConditionNode.item.right' curves-list='wiConditionNode.curveOptions'
             ng-change='wiConditionNode.update()' value-only='wiConditionNode.item.left.value'></wi-multi-input>
         </div>
     </div>
-    <div ng-if="!wiConditionNode.isNull() && wiConditionNode.item.children" class='condition-node' 
+    <div ng-if="!wiConditionNode.isNull() && wiConditionNode.item.children" class='condition-node'
         >
         <div class="condition-operands">
             <div ng-repeat="childNode in wiConditionNode.item.children">
