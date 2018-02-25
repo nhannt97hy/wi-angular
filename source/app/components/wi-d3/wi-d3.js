@@ -754,7 +754,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
             _currentTrack.setMode('AddMarker');
         }
-    }
+    } 
 
     this.addAnnotation = function () {
         if (!_currentTrack.isLogTrack()) return;

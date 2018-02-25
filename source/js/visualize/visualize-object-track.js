@@ -242,6 +242,7 @@ ObjectTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
         .attr('x2', function(d) { return d.x2; })
         .attr('y1', function(d) { return d.y1; })
         .attr('y2', function(d) { return d.y2; });
+    lines.raise();
 }
 
 ObjectTrack.prototype.removeTooltipLines = function() {
