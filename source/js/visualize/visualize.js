@@ -241,3 +241,12 @@ exports.createHistogram = function(config, depthStep, startDepth, endDepth, domE
     histogram.init(domElem);
     return histogram;
 }
+
+exports.plotSelection = function (wiD3Ctrl, selectionId, data) {
+    let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
+    logTracks.forEach(t => {
+        let selection = t.getSelection(selectionId);
+        selection.setProperties({maskData: data});
+        t.plotDrawing(selection);
+    })
+}

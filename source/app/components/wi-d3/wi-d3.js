@@ -508,6 +508,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.pushLogTrack = function (logTrackProps) {
         self.pushTrackComponent(logTrackProps);
+        $timeout(function() {
+            let track = getComponentCtrlByProperties(logTrackProps).viTrack;
+            if (self.containerName) {
+                self.selectionMasks.map(m => m.id = m.idCombinedBoxTool);
+                track.initSelectionArea(self.selectionMasks);
+            }
+        });
     }
     this.pushZoneTrack = function (zoneTrackProps) {
         self.pushTrackComponent(zoneTrackProps);
@@ -1484,6 +1491,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
+        selectionMasks: '<',
         containerName: '@'
     }
 });
