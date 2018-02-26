@@ -1201,7 +1201,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _setCurrentTrack(track);
             openTrackPropertiesDialog();
         });
-        track.on('mousemove', function() {
+        track.plotContainer.on('mousemove', function() {
             _drawTooltip(track);
         });
         track.onVerticalResizerDrag(function () {
