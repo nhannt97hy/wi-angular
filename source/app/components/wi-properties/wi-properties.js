@@ -138,7 +138,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                             });
                         },
                         value: itemProperties.idFamily,
-                        valueLabel: curveFamily.name,
+                        valueLabel: curveFamily.name || 'Select a family',
                         editable: true
                     }, {
                         key: 'name',

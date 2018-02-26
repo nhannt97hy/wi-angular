@@ -328,7 +328,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
-                                    wiD3Ctrl.addCurveToTrack(currentTrack, data, lineModel.data);
+                                    wiD3Ctrl.getComponentCtrlByViTrack(currentTrack).addCurveToTrack(currentTrack, data, lineModel.data);
                                     self.curveList = currentTrack.getCurves();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;
@@ -395,21 +395,21 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             });
                             if (s.rightLine.id == c.id) {
                                 s.rightLine = c;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                             if (s.leftLine.id == c.id) {
                                 s.leftLine = c;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
 
                             s.idLeftLine = s.leftLine.id;
                             if (s.type == 'left') {
                                 s.leftFixedValue = s.rightLine.minX;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                             if (s.type == 'right') {
                                 s.leftFixedValue = s.rightLine.maxX;
-                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed; 
+                                s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                         });
                     });
@@ -503,11 +503,11 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             }
         }
         this.syncShadingType = function () {
-            self.shadings.find(s => s._index == self.__idx).fill.shadingType 
+            self.shadings.find(s => s._index == self.__idx).fill.shadingType
                 = self.shadings.find(s => s._index == self.__idx).shadingStyle;
-            self.shadings.find(s => s._index == self.__idx).positiveFill.shadingType 
+            self.shadings.find(s => s._index == self.__idx).positiveFill.shadingType
                 = self.shadings.find(s => s._index == self.__idx).shadingStyle;
-            self.shadings.find(s => s._index == self.__idx).negativeFill.shadingType 
+            self.shadings.find(s => s._index == self.__idx).negativeFill.shadingType
                 = self.shadings.find(s => s._index == self.__idx).shadingStyle;
         }
         this.addRowShading = function () {
@@ -640,7 +640,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 if (item.rightLine && item.leftLine) {
                     if (!item.idControlCurve) {
-                        item.idControlCurve = (item.leftLine.id > 0) ? 
+                        item.idControlCurve = (item.leftLine.id > 0) ?
                                                 item.leftLine.idCurve : item.rightLine.idCurve;
                                                 let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
                         item.fill.varShading.startX = _lineProps.minScale;
@@ -726,7 +726,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
-                    wiD3Ctrl.updateLogTrack(currentTrack);
+                    wiD3Ctrl.updateTrack(currentTrack);
 
                     self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
                     self.shadingList = currentTrack.getShadings();

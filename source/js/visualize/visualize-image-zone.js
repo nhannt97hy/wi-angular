@@ -154,7 +154,7 @@ ImageZone.prototype.drawImage = function(config, isNewDraw) {
             .style('object-fit', (config.smartDisplay ? 'contain' : 'fill'))
             .style('width', '100%')
             .style('height', '100%');
-    } 
+    }
 }
 
 ImageZone.prototype.updateHeader = function() {
@@ -214,6 +214,7 @@ ImageZone.prototype.lineDragCallback = function(line) {
 
     this.topDepth = transformY.invert(minY);
     this.bottomDepth = transformY.invert(maxY);
+    this.doPlot();
 }
 
 ImageZone.prototype.onLineDragEnd = function(cb) {

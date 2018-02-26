@@ -1234,20 +1234,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 if (wiD3Ctrl && !track) {
                     let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
                     if (errorCode > 0) {
-                        wiD3Ctrl.addLogTrack(null, function (newViTrack) {
-                            idCurves.forEach(idCurve => {
-                                apiService.createLine({
-                                    idTrack: newViTrack.id,
-                                    idCurve: idCurve,
-                                    orderNum: newViTrack.getCurveOrderKey()
-                                }, function (line) {
-                                    let lineModel = lineToTreeConfig(line);
-                                    getCurveData(apiService, idCurve, function (err, data) {
-                                        if (!err) wiD3Ctrl.addCurveToTrack(newViTrack, data, lineModel.data);
-                                    });
-                                });
-                            })
-                        })
+                        wiD3Ctrl.addLogTrack(null, idCurves[0]);
                     }
                     else if (errorCode === 0) {
                         toastr.error("Cannot drop curve from another well");
@@ -1265,7 +1252,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                             }, function (line) {
                                 let lineModel = lineToTreeConfig(line);
                                 getCurveData(apiService, idCurve, function (err, data) {
-                                    if (!err) wiD3Ctrl.addCurveToTrack(track, data, lineModel.data);
+                                    if (!err) wiD3Ctrl.getComponentCtrlByViTrack(track).addCurveToTrack(track, data, lineModel.data);
                                 });
                             });
                         }
@@ -2947,6 +2934,18 @@ function getDepthCurve(well){
 }
 exports.getDepthCurve = getDepthCurve;
 
+function emitEvent (eventName, eventData) {
+    let event = new CustomEvent(eventName, {detail: eventData});
+    document.dispatchEvent(event);
+}
+exports.emitEvent = emitEvent;
+
+function listenEvent (eventName, callback) {
+    document.addEventListener(eventName, function (e) {
+        callback(e.detail);
+    })
+}
+exports.listenEvent = listenEvent;
 function swapValue (a, b) {
     let t = a;
     a = b;

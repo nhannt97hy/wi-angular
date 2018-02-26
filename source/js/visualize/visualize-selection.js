@@ -10,12 +10,26 @@ Utils.extend(Drawing, Selection);
 function Selection(config) {
     // this.maskData = config.maskData || [];
     this.maskData = config.data || {};
+    this.selectionData = [];
+    this.selectionBins = [];
+    this.currentMask = null;
     this.id = config.id;
+    this.name = config.name;
     this.color = config.color;
 }
 
 Selection.prototype.setProperties = function (props) {
-    Utils.setIfNotNull(this, 'maskData', props.maskData);
+    Utils.setIfNotNull(this, 'maskData', Object.assign({}, this.maskData, props.maskData));
+    Utils.setIfNotNull(this, 'currentMask', props.maskData);
+}
+
+Selection.prototype.updateSelectionData = function () {
+    this.selectionData.push(this.currentMask);
+    return this.selectionData;
+}
+
+Selection.prototype.setSelectionBins = function (selectionBins) {
+    this.selectionBins = selectionBins;
 }
 
 Selection.prototype.getProperties = function () {
@@ -32,19 +46,32 @@ Selection.prototype.setMode = function (newMode) {
         .style('cursor', newMode == null ? 'default' : 'copy');
 }
 
-Selection.prototype.init = function (plotContainer, track) {
+Selection.prototype.initCanvas = function (plotContainer, place) {
     Drawing.prototype.init.call(this, plotContainer);
 
-    this.track = track;
     this.canvas = plotContainer.append('canvas')
         .attr('class', 'vi-track-drawing vi-track-selection')
+        .attr('id', (place + this.id + this.name).replace(/\s+/g, ''))
         .lower();
 
     this.adjustSize();
 
     this.selectionDrawingArea = this.canvas.node().getContext('2d');
-    // this.selectionDrawingArea.fillStyle = 'yellow';
-    // this.selectionDrawingArea.fillRect(minX, minY, rect.width, maxY - minY);
+    return this;
+}
+
+Selection.prototype.initSvg = function (plotContainer, place) {
+    Drawing.prototype.init.call(this, plotContainer);
+
+    this.svg = plotContainer.append('svg')
+        .attr('class', 'vi-selection-histogram-svg')
+        .attr('id', (place + this.id + this.name).replace(/\s+/g, ''))
+        .attr('width', $(plotContainer.node()).width())
+        .attr('height', $(plotContainer.node()).height())
+        .style('position', 'absolute')
+        .lower();
+
+    this.adjustSize();
     return this;
 }
 
@@ -66,10 +93,5 @@ Selection.prototype.doPlot = function () {
             start = null;
             end = null;
         }
-        // this.selectionDrawingArea.moveTo(0, transformY(y));
-        // this.selectionDrawingArea.lineTo(this.rect.width, transformY(y));
-        // this.selectionDrawingArea.lineWidth = 1;
-        // this.selectionDrawingArea.strokeStyle = this.color;
-        // this.selectionDrawingArea.stroke();
     }
 }

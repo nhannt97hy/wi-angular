@@ -1,6 +1,6 @@
-exports.SelectorButtonClicked = function (name) {
+exports.SelectorButtonClicked = function (selector) {
 	let wiComboviewCtrl = this.wiComboview;
-	wiComboviewCtrl.useSelector(name);
+	wiComboviewCtrl.useSelector(selector);
 }
 
 
