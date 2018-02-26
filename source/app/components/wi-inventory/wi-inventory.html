@@ -16,7 +16,7 @@
 </style>
 <div class="inventory-toolbar-wrapper">
 	<wi-toolbar>
-		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="{{(!wiInventory.importItems.length).toString()}}"></wi-button>
+		<wi-button icon="file-import-16x16" layout="icon-left" type="small" label='Import' tooltip="Import" handler="wiInventory.onLoadButtonClicked" disabled="!wiInventory.importItems.length"></wi-button>
 		<wi-button icon="cancel-16x16" layout="icon-left" type="small" label='Revert All' tooltip="Revert All" handler="wiInventory.onRevertAllButtonClicked" ng-if="!!wiInventory.importItems.length"></wi-button>
 		<wi-button icon="reload-16x16" layout="icon-left" type="small" label='Refresh' tooltip="Refresh" handler="wiInventory.onRevertAllButtonClicked" ng-if="!wiInventory.importItems.length"></wi-button>
 	</wi-toolbar>
