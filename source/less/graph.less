@@ -71,18 +71,11 @@
 .vi-object-track-container {
 
     .vi-track-plot-container {
+        border-right: 1px solid black;
 
         .object-container {
             border-top: 1px solid blue;
             border-bottom: 1px solid blue;
-        }
-
-        .vi-object-horizontal-line {
-            cursor: row-resize;
-        }
-        .vi-object-horizontal-line:hover {
-            stroke-width: 5px;
-            stroke: #999;
         }
         .ui-resizable-handle:hover {
             background-color: #999;
@@ -159,7 +152,7 @@
     }
 }
 
-.vi-log-track-container, .vi-depth-track-container {
+.vi-log-track-container, .vi-depth-track-container, .vi-image-track-container, .vi-object-track-container, .vi-zone-track-container{
     .tooltip-line {
         stroke: black;
         stroke-dasharray: 2, 1;

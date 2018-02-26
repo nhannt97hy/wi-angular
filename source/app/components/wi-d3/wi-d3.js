@@ -406,7 +406,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 topJustification: "center",
                 color: '#ffffff',
                 width: Utils.inchToPixel(1),
-                parameterSet: null
+                parameterSet: null,
+                zoomFactor: 1.0
             }
             DialogUtils.zoneTrackPropertiesDialog(ModalService, self.wiLogplotCtrl, defaultZoneTrackProp, function (zoneTrackProperties) {
                 let dataRequest = {
@@ -418,7 +419,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     color: zoneTrackProperties.color,
                     width: zoneTrackProperties.width,
                     idZoneSet: zoneTrackProperties.idZoneSet,
-                    orderNum: trackOrder
+                    orderNum: trackOrder,
+                    zoomFactor: zoneTrackProperties.zoomFactor
                 }
                 wiApiService.createZoneTrack(dataRequest, function (returnZoneTrack) {
                     let zoneTrack = dataRequest;
@@ -448,7 +450,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 topJustification: "center",
                 bottomJustification: "center",
                 background: '#ffffff',
-                width: Utils.inchToPixel(1)
+                width: Utils.inchToPixel(1),
+                zoomFactor: 1.0
             }
             DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiLogplotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
                 let dataRequest = {
@@ -1186,10 +1189,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.on('mousedown', function () {
             _setCurrentTrack(track);
             // if (d3.event.button == 2) _trackOnRightClick(track);
-        })
+        });
         track.on('dblclick', function () {
             _setCurrentTrack(track);
             openTrackPropertiesDialog();
+        });
+        track.on('mousemove', function() {
+            _drawTooltip(track);
         });
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
