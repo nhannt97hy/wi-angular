@@ -494,6 +494,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 request.leftFixedValue = null;
                 request.idLeftLine = parseInt(options.idLeftLine);
             }
+            options.rightCurve = options.rightLine;
+            options.leftCurve = options.leftLine;
+            delete options.rightLine;
+            delete options.leftLine;
+
             wiApiService.editShading(request, function (shading) {
                 Utils.getPalettes(function(paletteList){
                     wiApiService.dataCurve(options.idControlCurve, function (curveData) {
