@@ -1991,6 +1991,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 request.leftFixedValue = null;
                 request.idLeftLine = parseInt(options.idLeftLine);
             }
+            options.rightCurve = options.rightLine;
+            options.leftCurve = options.leftLine;
+            delete options.leftLine;
+            delete options.rightLine;
+
             wiApiService.editShading(request, function (shading) {
                 Utils.getPalettes(function(paletteList){
                     wiApiService.dataCurve(options.idControlCurve, function (curveData) {
@@ -2571,9 +2576,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     options.idLeftLine = null;
                 }
                 else {
-                        request.leftFixedValue = null;
-                        request.idLeftLine = parseInt(options.idLeftLine);
-                    }
+                    request.leftFixedValue = null;
+                    request.idLeftLine = parseInt(options.idLeftLine);
+                }
+                options.rightCurve = options.rightLine;
+                options.leftCurve = options.leftLine;
+                delete options.leftLine;
+                delete options.rightLine;
+                
                 wiApiService.editShading(request, function (shading) {
                     Utils.getPalettes(function(paletteList){
                         wiApiService.dataCurve(options.idControlCurve, function (curveData) {

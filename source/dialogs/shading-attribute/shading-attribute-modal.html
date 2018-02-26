@@ -104,11 +104,14 @@
                                             </wi-canvas-rect>
                                         </ui-select-match>
                                         <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
-                                                            width="350" height="20"
-                                                            foreground="{{wiModal.fillPatternOptions.fill.pattern.foreground}}"
-                                                            background='{{wiModal.fillPatternOptions.fill.pattern.background}}'>
-                                            </wi-canvas-rect>
+                                            <div>
+                                                <span class="col-sm-3 small-text">{{selectedPattern | uppercase}}</span>
+                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                width="250" height="20"
+                                                                foreground="{{wiModal.fillPatternOptions.fill.pattern.foreground}}"
+                                                                background='{{wiModal.fillPatternOptions.fill.pattern.background}}'>
+                                                </wi-canvas-rect>
+                                            </div>
                                         </ui-select-choices>
                                     </ui-select>
                                 </div>
@@ -157,11 +160,14 @@
                                             </wi-canvas-rect>
                                         </ui-select-match>
                                         <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
-                                                            width="350" height="20"
+                                            <div>
+                                                <span class="col-sm-3 small-text">{{selectedPattern | uppercase}}</span>
+                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                            width="250" height="20"
                                                             foreground="{{wiModal.fillPatternOptions.positiveFill.pattern.foreground}}"
                                                             background='{{wiModal.fillPatternOptions.positiveFill.pattern.background}}'>
-                                            </wi-canvas-rect>
+                                                </wi-canvas-rect>
+                                            </div>
                                         </ui-select-choices>
                                     </ui-select>
                                 </div>
@@ -198,11 +204,14 @@
                                             </wi-canvas-rect>
                                         </ui-select-match>
                                         <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
-                                                            width="350" height="20"
+                                            <div>
+                                                <span class="col-sm-3 small-text">{{selectedPattern | uppercase}}</span>
+                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                            width="250" height="20"
                                                             foreground="{{wiModal.fillPatternOptions.negativeFill.pattern.foreground}}"
                                                             background='{{wiModal.fillPatternOptions.negativeFill.pattern.background}}'>
-                                            </wi-canvas-rect>
+                                                </wi-canvas-rect>
+                                            </div>
                                         </ui-select-choices>
                                     </ui-select>
                                 </div>
@@ -461,11 +470,15 @@
                                                             </wi-canvas-rect>
                                                         </ui-select-match>
                                                         <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns" position="down">
-                                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
-                                                                            width="120" height="20"
+                                                            <div>
+                                                                <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
+                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                            width="50" height="20"
                                                                             foreground="{{fill.foreground}}"
-                                                                            background="{{fill.background}}">
-                                                            </wi-canvas-rect>
+                                                                            background="{{fill.background}}"
+                                                                            style="float: right;">
+                                                                </wi-canvas-rect>
+                                                            </div>
                                                         </ui-select-choices>
                                                     </ui-select>
                                                 </td>

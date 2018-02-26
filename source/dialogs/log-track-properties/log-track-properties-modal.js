@@ -528,6 +528,19 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         foreground: "black",
                         background: "blue"
                     },
+                    varShading : {
+                        varShadingType: 'gradient',
+                        gradient : {
+                            startColor : 'blue',
+                            endColor : 'transparent'
+                        },
+                        palette : null,
+                        palName : 'BarsMap',
+                        customFills : {
+                            name: null,
+                            content: []
+                        }
+                    },
                     shadingType: 'pattern'
                 },
                 positiveFill: {
@@ -537,6 +550,19 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         foreground: "black",
                         background: "blue"
                     },
+                    varShading : {
+                        varShadingType: 'gradient',
+                        gradient : {
+                            startColor : 'blue',
+                            endColor : 'transparent'
+                        },
+                        palette : null,
+                        palName : 'BarsMap',
+                        customFills : {
+                            name: null,
+                            content: []
+                        }
+                    },
                     shadingType: 'pattern'
                 },
                 negativeFill: {
@@ -545,6 +571,19 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         name: "none",
                         foreground: "black",
                         background: "blue"
+                    },
+                    varShading : {
+                        varShadingType: 'gradient',
+                        gradient : {
+                            startColor : 'blue',
+                            endColor : 'transparent'
+                        },
+                        palette : null,
+                        palName : 'BarsMap',
+                        customFills : {
+                            name: null,
+                            content: []
+                        }
                     },
                     shadingType: 'pattern'
                 },
@@ -600,10 +639,16 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         function updateShadingsTab(updateShadingsTabCb) {
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 if (item.rightLine && item.leftLine) {
-
                     if (!item.idControlCurve) {
                         item.idControlCurve = (item.leftLine.id > 0) ? 
                                                 item.leftLine.idCurve : item.rightLine.idCurve;
+                                                let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
+                        item.fill.varShading.startX = _lineProps.minScale;
+                        item.fill.varShading.endX = _lineProps.maxScale;
+                        item.positiveFill.varShading.startX = _lineProps.minScale;
+                        item.positiveFill.varShading.endX = _lineProps.maxScale;
+                        item.negativeFill.varShading.startX = _lineProps.minScale;
+                        item.negativeFill.varShading.endX = _lineProps.maxScale;
                     }
                     const idLeftLine = item.leftLine.id
                     let leftLineBk = item.leftLine;
