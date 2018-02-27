@@ -58,7 +58,15 @@ let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
+
+let wiD3DepthTrack = require('./wi-d3-depth-track');
+let wiD3ZoneTrack = require('./wi-d3-zone-track');
+let wiD3ImageTrack = require('./wi-d3-image-track');
+let wiD3ObjectTrack = require('./wi-d3-object-track');
+let wiD3LogTrack = require('./wi-d3-log-track');
+
 let wiD3 = require('./wi-d3');
+// let wiD3 = require('./wi-d3-new');
 let wiHistogram = require('./wi-histogram');
 let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot');
@@ -134,6 +142,13 @@ let app = angular.module('wiapp',
         wiResizableX.name,
         wiD3Crossplot.name,
         wiD3Histogram.name,
+
+        wiD3DepthTrack.name,
+        wiD3ZoneTrack.name,
+        wiD3ImageTrack.name,
+        wiD3ObjectTrack.name,
+        wiD3LogTrack.name,
+
         wiD3.name,
         wiHistogram.name,
         wiCrossplot.name,

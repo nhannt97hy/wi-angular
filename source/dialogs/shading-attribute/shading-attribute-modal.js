@@ -130,6 +130,11 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
 
         this.onSelectRightLine = function () {
             self.shadingOptions.idRightLine = self.shadingOptions.rightLine.id;
+            if (self.shadingOptions.type == 'left')
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
+            if (self.shadingOptions.type == 'right')
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
+            if (self.shadingOptions.leftLine) self.onSelectLeftLine();
         };
         this.onSelectLeftLine = function () {
             self.shadingOptions.idLeftLine = self.shadingOptions.leftLine.id;
@@ -141,7 +146,9 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
                 self.shadingOptions.type = 'right';
             }
-        }
+            if (self.shadingOptions.leftLine.id > 0) self.shadingOptions.leftFixedValue = null;
+        };
+
         function getLine (idLine) {
             let line = null;
             if (idLine != null && !isNaN(idLine)) {
@@ -429,6 +436,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 lowVal: null,
                 highVal: null,
                 pattern: "none",
+                foreground: "black",
                 background: "blue",
                 description: ""
             });
@@ -501,9 +509,9 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 highArr.push(c.highVal);
 
                 if (utils.isEmpty(c.lowVal) 
-                    || utils.isEmpty(c.highVal) 
-                    || !_.inRange(c.lowVal, XValue[0], XValue[1]) 
-                    || !_.inRange(c.highVal, XValue[0], XValue[1])) checkErr = "invalid";
+                    || utils.isEmpty(c.highVal)) checkErr = "invalid";
+                if(!checkErr && (c.lowVal < XValue[0] || c.highVal < XValue[0] 
+                                || c.lowVal > XValue[1] || c.highVal > XValue[1])) checkErr = "outRange";
                 if(!checkErr) {
                     let contentClone = angular.copy(content);
                     contentClone.splice(index, 1);
@@ -518,6 +526,9 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 }
             });
             if (checkErr == "invalid") message = 'CustomFills: Low value or High value is invalid!';
+            if (checkErr == "outRange") message = 'CustomFills: Please enter a value not above ' 
+                                                    + self.variableShadingOptions.fill.varShading.startX + '-' 
+                                                    + self.variableShadingOptions.fill.varShading.endX+ '!';
             if (checkErr == "overlap") message = 'CustomFills: Values overlap!';
             return message;
         }
@@ -573,6 +584,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                     positiveFill : temp.positiveFill,
                     negativeFill : temp.negativeFill
                 };
+                console.log("_options", self._options);
                 _callback();
             } else {
                 DialogUtils.warningMessageDialog(ModalService, message);

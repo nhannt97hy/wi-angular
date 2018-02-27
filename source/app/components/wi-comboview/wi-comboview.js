@@ -6,11 +6,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 	let comboviewHandlers = wiComponentService.getComponent('COMBOVIEW_HANDLERS');
 	let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-	
+
 	this.$onInit = function () {
 		self.wiD3AreaName = self.name + 'D3Area';
 		self.comboviewModel = self.getModel();
-		
+
 		if (self.name) wiComponentService.putComponent(self.name, self);
 
 		$scope.handlers = {};
@@ -68,7 +68,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	this.useSelector = function (selector) {
 		console.log(selector);
 		let wiD3Comboview = self.getwiD3Ctrl();
-		wiD3Comboview.drawOnLogTrack();
+		wiD3Comboview.drawSelectionOnLogplot(selector);
 	}
 
 	this.useEraser = function (eraser) {

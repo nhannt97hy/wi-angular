@@ -168,7 +168,7 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
 
     $scope.addLeftShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addLeftShadingToTrack(track, track.getCurrentCurve(), {
+        wiD3Ctrl.getComponentCtrlByViTrack(track).addLeftShadingToTrack(track, track.getCurrentCurve(), {
             fill: {
                 varShading: {
                     startX: 1,
@@ -222,19 +222,19 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
 
     $scope.addRightShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addRightShadingToTrack(track, track.getCurrentCurve(), {});
+        wiD3Ctrl.getComponentCtrlByViTrack(track).addRightShadingToTrack(track, track.getCurrentCurve(), {});
     }
 
     $scope.addCustomShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
-        wiD3Ctrl.addCustomShadingToTrack(track, track.getCurrentCurve(), 0.5, {});
+        wiD3Ctrl.getComponentCtrlByViTrack(track).addCustomShadingToTrack(track, track.getCurrentCurve(), 0.5, {});
     }
 
     $scope.addPairShadingButtonClick = function() {
         let track = wiD3Ctrl.getCurrentTrack();
         let curves = track.getCurves();
         if (curves.length < 2) return;
-        wiD3Ctrl.addPairShadingToTrack(track, curves[0], curves[1], {
+        wiD3Ctrl.getComponentCtrlByViTrack(track).addPairShadingToTrack(track, curves[0], curves[1], {
             fill: {
                 varShading: {
                     startX: 1,
@@ -274,7 +274,7 @@ app.controller('WiDummy', function ($scope, $timeout, wiComponentService) {
     }
 
     $scope.removeShadingButtonClick = function() {
-        wiD3Ctrl.removeCurrentShading();
+        wiD3Ctrl.getComponentCtrlByViTrack(track).removeCurrentShading();
     }
 
     function genSamples(extentX, extentY) {

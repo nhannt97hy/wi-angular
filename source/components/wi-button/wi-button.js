@@ -23,8 +23,8 @@ function ButtonController(wiComponentService) {
                 self.handler(self.index);
             } else {
                 if (self.handlerArgs) {
-                    Array.isArray(self.handlerArgs) && self.handler(...self.handlerArgs);
-                    self.handler(self.handlerArgs);
+                    if (Array.isArray(self.handlerArgs)) self.handler(...self.handlerArgs);
+                    else self.handler(self.handlerArgs);
                 } else {
                     self.handler();
                 }

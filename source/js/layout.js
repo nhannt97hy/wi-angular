@@ -22,8 +22,7 @@ let layoutConfig = {
                     isClosable: false,
                     width: 15,
                     content: []
-                }
-                ,{
+                }, {
                     type: 'stack',
                     id: 'right',
                     isClosable: false,

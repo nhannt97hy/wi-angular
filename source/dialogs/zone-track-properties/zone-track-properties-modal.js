@@ -23,6 +23,7 @@ module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, cal
         this.width = props.width;
         this.parameterSet = props.parameterSet;
         this.zoneSets = [];
+        this.zoomFactor = props.zoomFactor;
 
         function refreshZoneSets() {
             wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
@@ -60,7 +61,8 @@ module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, cal
                 color: self.color,
                 width: self.width,
                 parameterSet: self.parameterSet,
-                idZoneSet: self.idZoneSet
+                idZoneSet: self.idZoneSet,
+                zoomFactor: self.zoomFactor
             }
             if (self.error) return;
             close(props, 100);

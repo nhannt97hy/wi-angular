@@ -56,6 +56,12 @@
                                     <input type="number" min="0" step="0.001" class="form-control wi-form-control" id="width" ng-model="wiModal.width">
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-5 padding-left-3em" for="width">Zoom Factor</label>
+                                <div class="col-sm-7">
+                                    <input type="number" min="0" step="any" class="form-control wi-form-control" id="zoomFactor" ng-model="wiModal.zoomFactor">
+                                </div>
+                            </div>
                         </div>
                         <div id="parameters">
                             <h5 class="normal-text">Parameters</h5>
@@ -80,7 +86,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>                    
+                        <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
                     </div>
             </div>
             <div class="modal-footer">

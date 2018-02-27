@@ -8,7 +8,7 @@
                     label="{{tool.name}}" 
                     layout="icon-left" class="height-auto"
                     handler="handlers.SelectorButtonClicked"
-                    handler-args="[tool.name]">
+                    handler-args="tool">
                 </wi-button>
 
                 <wi-button label="Edit Tool" layout="icon-left" class="height-auto" handler="handlers.EditToolComboboxButtonClicked">
@@ -36,7 +36,7 @@
             <wi-button name="PropertiesButton" label="Properties" type="small" tooltip="Properties" handler="handlers.CombinedPlotPropertiesButtonClicked">
             </wi-button>
     </wi-toolbar>
-    
+
 </div>
 <div class="comboview-main-content">
     <wi-d3-comboview name='{{wiComboview.wiD3AreaName}}' wi-comboview-ctrl='wiComboview'></wi-d3-comboview>

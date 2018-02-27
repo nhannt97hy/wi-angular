@@ -17,6 +17,7 @@ module.exports = function (ModalService, wiLogplotCtrl, objectTrackProperties, c
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
         this.width = props.width;
+        this.zoomFactor = props.zoomFactor;
 
         this.onOkButtonClicked = function () {
             self.error = null;
@@ -25,6 +26,7 @@ module.exports = function (ModalService, wiLogplotCtrl, objectTrackProperties, c
                 title: self.title,
                 topJustification: self.topJustification,
                 width: self.width,
+                zoomFactor: self.zoomFactor
             }
             if (self.error) return;
             close(props, 100);
