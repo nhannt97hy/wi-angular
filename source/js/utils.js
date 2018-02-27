@@ -2447,7 +2447,7 @@ function inchToPixel(inch) {
 exports.inchToPixel = inchToPixel;
 
 function pixelToInch(px) {
-    let inch = Math.round(px / getDpi() * 1000) / 1000;
+    let inch = Math.round(px / getDpi() * 10000) / 10000;
     return inch
 }
 
