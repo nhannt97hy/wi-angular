@@ -29,8 +29,9 @@
     <div class="panel panel-default inventory-side">
         <div style='display:flex;' class='panel-heading'>
             <h5 style='margin-right:10px;'>Project</h5>
-            <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
+            <wi-item-dropdown ng-show='!wiInventory.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiInventory.getProjectList' on-item-changed="wiInventory.projectChanged">
             </wi-item-dropdown>
+            <input style='flex:1;margin:5px 0; height:24px;font-size:14px;' ng-show='wiInventory.isFrozen' ng-model='wiInventory.projectName' ng-disabled='true'>
             <button style='margin:5px 0 5px 5px;padding:0 10px;'
                 class='btn btn-default'
                 title="Reload project"
