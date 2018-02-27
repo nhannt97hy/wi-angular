@@ -2,7 +2,7 @@ const tabsetComponentName = 'wiTabset';
 const tabComponentName = 'wiTab';
 const moduleName = 'wi-tabs';
 
-function TabsetController() {
+function TabsetController($timeout) {
     let self = this;
 
     this.tabs = [];
@@ -24,6 +24,7 @@ function TabsetController() {
         deactiveAllTabs(self.tabs);
 
         self.tabs[index].active = true;
+        self.tabs[index].onShow && self.tabs[index].onShow();
     };
 
     this.closeTab = function (index) {
@@ -43,7 +44,11 @@ function TabsetController() {
 
     this.addTab = function (tab) {
         self.tabs.push(tab);
-        self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
+        $timeout(function() {
+            self.tabs[0].active = true;
+         //   self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
+        });
+        //self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
     };
 
     function deactiveAllTabs(tabs) {
@@ -87,7 +92,8 @@ app.component(tabComponentName, {
         heading: '@',
         closable: '@',
         active: '<',
-        enabled: '<'
+        enabled: '<',
+        onShow: '<'
     }
 });
 

@@ -10,7 +10,18 @@ function Controller(wiComponentService) {
     };
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    this.onChange = function (item) {
+    this.onChange = function(item) {
+        if (self.onChangeFunc) {
+            self.onChangeFunc(item).then(function() {
+
+            }).catch(function() {
+            });
+        }
+        else {
+            onChangeDefault(item);
+        }
+    }
+    function onChangeDefault(item) {
         utils.editProperty(item, _.debounce(function () {
             wiComponentService.emit('update-properties', utils.getSelectedNode());
         }, 200));
@@ -25,7 +36,8 @@ app.component(componentName, {
     bindings: {
         name : '@',
         heading: '@',
-        items: '<'
+        items: '<',
+        onChangeFunc: '<'
     }
 });
 

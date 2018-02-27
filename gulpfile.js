@@ -189,8 +189,10 @@ gulp.task('clean', function () {
 
 gulp.task('include', function () {
     return gulp.src([
-        './source/html/index.html', 
-        './source/html/plot.html'
+        './source/html/index.html',
+        './source/html/plot.html',
+        './source/html/simpleLayout.html',
+        './source/html/miniapp1.html'
     ]).pipe(fileInclude({
         prefix: '@@',
         basepath: '@file',
@@ -430,5 +432,17 @@ gulp.task('serve', [], function () {
 gulp.task('build-lightweight', mainTasks, function() {
     gulp.src([
         'build/js/main-lightweight.js'
+    ]).pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
+});
+
+gulp.task('build-miniapp1', mainTasks, function() {
+    gulp.src([
+        'build/js/miniapp1.js'
+    ]).pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
+});
+
+gulp.task('build-simpleLayout', mainTasks, function() {
+    gulp.src([
+        'build/js/simpleLayout.js'
     ]).pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
 });

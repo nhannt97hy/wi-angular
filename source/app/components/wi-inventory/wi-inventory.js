@@ -1,16 +1,69 @@
 const componentName = 'wiInventory';
 const moduleName = 'wi-inventory';
 
-function Controller($scope, wiComponentService, wiApiService, ModalService) {
+function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService, ModalService, $timeout) {
     modalService = ModalService;
     let self = this;
+    let __idProject;
+    window.__INV = self;
+
+    self.projectConfig = new Array();
+    self.inventoryConfig = new Array();
+    self.importItems = new Array();
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+    let oUtils = require('./oinv-utils');
+    oUtils.setGlobalObj({
+        wiComponentService, wiOnlineInvService, $timeout
+    });
+
     let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiInventory', self);
+        self.isFrozen = !!self.idProject;
+        if (self.isFrozen) {
+            __idProject = self.idProject;
+            wiApiService.getProjectInfo(__idProject, function(projectProps) {
+                self.projectName = projectProps.name;
+                refreshProject();
+            });
+        }
     };
+    this.getProjectList = function(wiItemDropdownCtrl) {
+        wiApiService.getProjectList(null, function(projectList) {
+            console.log(projectList);
+            wiItemDropdownCtrl.items = projectList.map(function(prj) {
+                return {
+                    data: {
+                        label: prj.name
+                    },
+                    properties: prj
+                };
+            });
+        });
+    }
+    function projectChanged(projectProps) {
+        __idProject = projectProps.idProject;
+        if (__idProject > 0) {
+            wiApiService.listWells({ 
+                idProject: __idProject,
+                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
+            }, function(wells) {
+                self.projectConfig.length = 0;
+                modelFrom(self.projectConfig, wells);
+            });
+        }
+        /*
+        let refreshPromise = utils.refreshProjectState(projectProps.idProject);
+        refreshPromise && refreshPromise.then(projectLoaded => {
+            projectModel = modelFrom(projectLoaded);
+            self.projectConfig = [projectModel];
+        });
+        */
+    }
+    this.projectChanged = projectChanged;
 
     function importModelExistedDialog(ModalService, callback) {
         function ModalController($scope, close, wiComponentService) {
@@ -37,6 +90,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         });
     }
 
+    /*
     function modelFrom(root) {
         let rootModel = utils.createProjectModel(root);
         root.wells.forEach(well => {
@@ -52,88 +106,184 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         })
         return rootModel;
     }
+    */
+    function modelFrom(rootConfig, wells) {
+        wells.forEach(well => {
+            let wellModel = utils.createWellModel(well)
+            rootConfig.push(wellModel);
+            if (well.datasets && well.datasets.length) {
+                well.datasets.forEach(dataset => {
+                    let datasetModel = utils.createDatasetModel(dataset);
+                    wellModel.children.push(datasetModel);
+                    dataset.curves.forEach(curve => {
+                        datasetModel.children.push(utils.createCurveModel(curve));
+                    })
+                });
+            }
+        })
+    }
 
     let projectModel;
+    this.refreshProject = refreshProject;
     function refreshProject() {
-        utils.refreshProjectState().then(projectLoaded => {
-            projectModel = modelFrom(projectLoaded);
-            self.projectConfig = [projectModel];
-        });
+        if (!isNaN(__idProject) && __idProject > 0) {
+            projectChanged({idProject:__idProject});
+        }
     }
     let inventoryModel;
+    this.refreshInventory = refreshInventory;
     function refreshInventory() {
-        wiApiService.getInventory(inventory => {
+        //self.inventoryConfig = [oUtils.initInventory()];
+        self.inventoryConfig = oUtils.getWellsFromInventory($scope, $timeout);
+
+        /*
+        wiOnlineInvService.getInventory(inventory => {
             inventoryModel = modelFrom(inventory);
             self.inventoryConfig = [inventoryModel];
             inventoryModel.type = 'inventory';
             inventoryModel.data.label = 'Inventory';
-        })
+        });
+        */
     }
     refreshProject();
     refreshInventory();
 
     this.onConfigClick = function () {
-        console.log(this.projectSelectedNode, this.inventorySelectedNode);
-        if (!this.projectSelectedNode || !this.inventorySelectedNode) return;
-        this.importValid = false;
-        switch (this.inventorySelectedNode.type) {
+        console.log(self.projectSelectedNode, self.inventorySelectedNode);
+        if (!self.projectSelectedNode || !self.inventorySelectedNode) return;
+        self.importValid = false;
+        switch (self.inventorySelectedNode.type) {
             case 'well':
-                if (this.projectSelectedNode.type == 'project' || this.projectSelectedNode.type == 'well') self.importValid = true;
+                if (self.projectSelectedNode.type == 'project' || self.projectSelectedNode.type == 'well') self.importValid = true;
                 break;
             case 'dataset':
-                if (this.projectSelectedNode.type == 'well' || this.projectSelectedNode.type == 'dataset') self.importValid = true;
+                if (self.projectSelectedNode.type == 'well' || self.projectSelectedNode.type == 'dataset') self.importValid = true;
                 break;
             case 'curve':
-                if (this.projectSelectedNode.type == 'dataset' || this.projectSelectedNode.type == 'curve') self.importValid = true;
+                if (self.projectSelectedNode.type == 'dataset' || self.projectSelectedNode.type == 'curve') self.importValid = true;
                 break;
             default:
-                this.importValid = false;
+                self.importValid = false;
                 break;
         }
-        $scope.$apply();
-    }
-    function importModel(model, desParentModel) {
-        let itemProps = angular.copy(model.properties);
-        let importedModel;
-        if (model.type == 'well') {
-            importedModel = utils.createWellModel(itemProps);
-        } else if (model.type == 'dataset') {
-            importedModel = utils.createDatasetModel(itemProps);
-        } else if (model.type == 'curve') {
-            importedModel = utils.createCurveModel(itemProps)
-        }
-        importedModel.parent = angular.copy(desParentModel.properties);
-        importedModel.isImported = true;
-        desParentModel.children.push(importedModel);
-        if (Array.isArray(model.children) && model.children.length) {
-            model.children.forEach(childModel => {
-                importModel(childModel, importedModel);
-            })
-        }
-        return importedModel;
+        $timeout(function() {
+            $scope.$apply();
+        })
     }
 
-    this.importItems = [];
-    this.importButtonClicked = function () {
-        if (!self.importValid) return;
-        let desParentModel = self.projectSelectedNode;
-        let model = self.inventorySelectedNode;
-        if (self.projectSelectedNode.type == model.type) {
-            desParentModel = utils.getParentByModel(self.projectSelectedNode.type, self.projectSelectedNode.id, null, projectModel);
-        } else {
-            desParentModel.data.childExpanded = true;
+    function transformModelProperties(modelProps) {
+        if(modelProps.well_headers && modelProps.well_headers.length) {
+            modelProps.well_headers.forEach(function(wellheader) {
+                switch (wellheader.header) {
+                    case 'STRT': 
+                        modelProps.topDepth = wellheader.value;
+                        break;
+                    case 'STOP': 
+                        modelProps.bottomDepth = wellheader.value;
+                        break;
+                    case 'STEP':
+                        modelProps.step = wellheader.value;
+                        break;
+                    default:
+
+                }
+            })
         }
-        let sameNameExisted = desParentModel.children.find(c => c.name == model.name);
-        if (sameNameExisted) {
-            importModelExistedDialog(ModalService, function () {
-                console.log('conflict', model);
+        return modelProps;
+    }
+
+    function cloneModel(srcModel) {
+        let itemProps = transformModelProperties(srcModel.properties);
+        let destModel;
+        if (srcModel.type == 'well') {
+            destModel = utils.createWellModel(itemProps);
+        } else if (srcModel.type == 'dataset') {
+            destModel = utils.createDatasetModel(itemProps);
+        } else if (srcModel.type == 'curve') {
+            destModel = utils.createCurveModel(itemProps)
+        }
+        if (Array.isArray(srcModel.children) && srcModel.children.length) {
+            srcModel.children.forEach(function(childModel) {
+                destModel.children.push(cloneModel(childModel));
             });
-        } else {
-            if (desParentModel.isImported) {
-                importModel(model, desParentModel);
-            } else {
-                self.importItems.push(importModel(model, desParentModel));
+        }
+        return destModel;
+    }
+    function datasetToTreeConfig(dataset, currentModel) {
+        let datasetModel = {};
+        datasetModel.type = 'dataset';
+        datasetModel.id = dataset.idDataset;
+        datasetModel.data = currentModel ? currentModel.data : {
+            childExpanded: false,
+            icon: 'curve-data-16x16',
+            label: dataset.name,
+            selected: false,
+            isLeaf: true
+        };
+        datasetModel.properties = dataset;
+        datasetModel.children = currentModel ? currentModel.children : [];
+        return datasetModel;
+    }
+    function updateDatasets(currentWellModel, callback) {
+        wiOnlineInvService.listDatasets(currentWellModel.properties.idWell, function (listDatasets) {
+            let preDatasetsModel = angular.copy(currentWellModel.children) || [];
+            currentWellModel.children = [];
+            if (!listDatasets.length) {
+                callback(currentWellModel.children);
+                return;
             }
+            listDatasets.forEach(function (dataset) {
+                let preDatasetModel = preDatasetsModel.find(d => {
+                    d.properties.idDataset == dataset.idDataset
+                });
+                let datasetModel = datasetToTreeConfig(dataset);
+                currentWellModel.children.push(datasetModel);
+            });
+            callback(currentWellModel.children);
+        });
+        
+    }
+    function queueWell(model) {
+        if (!model) {
+            toastr.warning(model.data.label + ' is not a well (SKIPPED)');
+            return;
+        }
+        let importedModel = cloneModel(model);
+        let existingWell = self.importItems.find(function(item) {
+            return item.name == importedModel.name;
+        });
+        if (existingWell) {
+            toastr.warning(model.data.label + ' is already queued (SKIPPED)');
+            return;
+        }
+
+        oUtils.updateDatasets(model.id, self.inventoryConfig).then(function(datasetsModel) {
+            async.each(datasetsModel, function(dModel, done) {
+                oUtils.updateCurves(dModel.id, self.inventoryConfig).then(function() {
+                    done();
+                });
+            }, function(error) {
+                $timeout(function() {
+                    self.importItems.push(angular.copy(model));
+                });
+            });
+        });
+
+    }
+    this.importButtonClicked = function () {
+        let models = self.inventoryConfig.__SELECTED_NODES;
+        if (models && models.length) {
+            models.forEach(function(wellModel) {
+                queueWell(wellModel);
+            });
+        }
+    }
+    
+    this.revertButtonClicked = function () {
+        while (self.importItems.__SELECTED_NODES.length) {
+            let item = self.importItems.__SELECTED_NODES.pop();
+            let idx = self.importItems.indexOf(item);
+            self.importItems.splice(idx, 1);
         }
     }
 
@@ -171,19 +321,22 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
 
     function importProcess(item) {
         return new Promise((resolve, reject) => {
+            if (!Array.isArray(self.projectConfig) || isNaN(__idProject) || __idProject <= 0) {
+                return reject(new Error('No project for import'));
+            }
             if (item.type == 'well') {
                 let wellPayload = {
-                    idProject: item.parent.idProject,
+                    idProject: __idProject,
                     name: item.properties.name,
-                    topDepth: item.properties.start,
-                    bottomDepth: item.properties.stop,
+                    topDepth: item.properties.topDepth,
+                    bottomDepth: item.properties.bottomDepth,
                     step: item.properties.step,
                 }
                 wiApiService.createWell(wellPayload, function (newWell, err) {
                     if (err) {
-                        reject(err);
+                        newWell = err.content;
                     }
-                    item.properties = newWell;
+                    oUtils.updateParentNode(item, newWell);
                     wiApiService.post('/inventory/import/dataset', getImportPayload(item), function (res, err) {
                         if (err) {
                             reject(err);
@@ -212,14 +365,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         })
     }
     this.onLoadButtonClicked = function () {
-        async.eachSeries(self.importItems, function (item, next) {
+        async.eachLimit(self.importItems, 4,function (item, next) {
             importProcess(item).then(res => {
                 next();
             }).catch(err => {
                 next(err);
             })
         }, (err) => {
-            if (err) return console.error(err);
+            if (err) {
+                toastr.error('Error:' + err.message);
+                return console.error(err);
+            }
             // self.importItems.length = 0;
             self.onRevertAllButtonClicked();
         })
@@ -232,13 +388,290 @@ function Controller($scope, wiComponentService, wiApiService, ModalService) {
         self.projectSelectedNode = null;
         self.importValid = false;
     };
+    let resetColor = _.debounce(function(wells) {
+        wells.forEach(function(w) {
+            delete w.data.bgColor;
+        });
+        $scope.$apply();
+    }, 1000);
+
+    this.upTrigger = function(cb) {
+        console.log("upTrigger");
+        let wells = self.inventoryConfig;
+        if (wells.length) {
+            wiOnlineInvService.listWells({
+                start: wells[0].properties.idWell, 
+                limit: 10, 
+                forward: false
+            }, function(listOfWells) {
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = oUtils.wellToTreeConfig(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
+                });
+                if (cb) cb(lowm, wells);
+            });
+        }
+        else if (cb) cb(0);
+    }
+    
+    this.downTrigger = function(cb) {
+        console.log("downTrigger");
+        let wells = self.inventoryConfig;
+        if (wells.length) {
+            wiOnlineInvService.listWells({
+                start: wells[wells.length - 1].properties.idWell, 
+                limit: 10, 
+                forward: true
+            }, function(listOfWells) {
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = oUtils.wellToTreeConfig(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
+                });
+                if (cb) cb(lowm, wells);
+            });
+        }
+        else if (cb) cb(0);
+    }
+    this.upTriggerPrj = function(cb) {
+        console.log('up-trigger prj');
+        let wells = self.projectConfig;
+        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
+            wiApiService.listWells({
+                idProject: __idProject,
+                start: wells[0].properties.idWell, 
+                limit: 10,
+                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
+                forward: false
+            }, function(listOfWells) {
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = utils.createWellModel(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
+                });
+                if (cb) cb(lowm, wells);
+            });
+        }
+        else if (cb) cb(0);
+    }
+    this.downTriggerPrj = function(cb) {
+        console.log('down-trigger prj');
+        let wells = self.projectConfig;
+        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
+            wiApiService.listWells({
+                idProject: __idProject,
+                start: wells[wells.length - 1].properties.idWell, 
+                limit: 10, 
+                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
+                forward: true
+            }, function(listOfWells) {
+                let lowm = listOfWells.map(function(well) {
+                    let wellModel = utils.createWellModel(well);
+                    wellModel.data.toggle = self.labelToggle;
+                    //wellModel.data.bgColor = '#CCF';
+                    return wellModel;
+                });
+                if (cb) cb(lowm, wells);
+            });
+        }
+        else if (cb) cb(0);
+    }
+
+    this.selectHandler = selectHandler;
+    function selectHandler(currentNode, noLoadData, rootNode, callback) {
+        function bareSelectHandler() {
+            //wiComponentService.emit(wiComponentService.UPDATE_ITEMS_EVENT, currentNode);
+            //wiComponentService.emit(wiComponentService.UPDATE_PROPERTIES_EVENT, currentNode);
+            if (currentNode.data) {
+                $timeout(function() { currentNode.data.selected = true; });
+                //let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                let selectedNodes = rootNode.__SELECTED_NODES;
+                if (!Array.isArray(selectedNodes)) 
+                    selectedNodes = [];
+                if (!selectedNodes.includes(currentNode)) {
+                    selectedNodes.push(currentNode);
+                }
+                //wiComponentService.putComponent(wiComponentService.SELECTED_NODES, selectedNodes);
+                rootNode.__SELECTED_NODES = selectedNodes;
+                // self.getWiiItems().getWiiProperties().emptyList();
+                self.onConfigClick();
+            }
+        }
+
+        if (currentNode.type == 'well' && !noLoadData) {
+            if (rootNode === self.inventoryConfig) {
+                oUtils.updateDatasets(currentNode.id, self.inventoryConfig).then(function(datasetsModel) {
+                    async.each(datasetsModel, function(dModel, done) {
+                        oUtils.updateCurves(dModel.id, self.inventoryConfig).then(function() {
+                            done();
+                        });
+                    }, function(error) {
+                        bareSelectHandler();
+                        callback && callback();
+                    });
+                });
+            }
+            else if (rootNode === self.projectConfig) {
+                if (Date.now() - (currentNode.ts||0) > 20*1000) {
+                    wiApiService.getWell(currentNode.id, function(wellProps) {
+                        currentNode.ts = Date.now();
+                        if (wellProps.datasets && wellProps.datasets.length) {
+                            currentNode.children.length = 0;
+                            wellProps.datasets.forEach(dataset => {
+                                let datasetModel = utils.createDatasetModel(dataset);
+                                currentNode.children.push(datasetModel);
+                                dataset.curves && dataset.curves.length && dataset.curves.forEach(curve => {
+                                    datasetModel.children.push(utils.createCurveModel(curve));
+                                });
+                            });
+                        }
+                        bareSelectHandler();
+                        callback && callback();
+                    });
+                }
+                else {
+                    bareSelectHandler();
+                    callback && callback();
+                }
+            }
+            else {
+                bareSelectHandler();
+                callback && callback();
+            }
+        }
+        else {
+            bareSelectHandler();
+            callback && callback();
+        }
+    }
+    
+    this.unselectAllNodes = unselectAllNodes;
+    function unselectAllNodes(rootNode) {
+        rootNode.forEach(function (item) {
+            utils.visit(item, function (node) {
+                if (node.data) node.data.selected = false;
+            });
+        });
+        //wiComponentService.putComponent(wiComponentService.SELECTED_NODES, []);
+        rootNode.__SELECTED_NODES = [];
+    }
+    this.selectInventoryNode = function(node) {
+        //self.inventorySelectedNode = node;
+        let parentWell = utils.getParentByModel(node.type, node.id, 'well', {
+            type:'inventory', 
+            id: -10, 
+            children:self.inventoryConfig
+        });
+        self.inventorySelectedNode = parentWell;
+    }
+    this.selectProjectNode = function(node) {
+        self.projectSelectedNode = node;
+    }
+    this.selectPendingQueueNode = function(node) {
+        let parentWell = utils.getParentByModel(node.type, node.id, 'well', self.importItems);
+        self.pendingQueueSelectedNode = parentWell;
+    }
+    this.invClickFunction = function($index, $event, node) {
+        //clickFunction($index, $event, node, self.inventoryConfig, true);
+        clickFunction($index, $event, node, self.inventoryConfig);
+    }
+    this.prjClickFunction = function($index, $event, node) {
+        clickFunction($index, $event, node, self.projectConfig, true);
+    }
+    this.pendingQueueClickFunction = function($index, $event, node) {
+        clickFunction($index, $event, node, self.importItems);
+    }
+    function clickFunction($index, $event, node, rootNode, multiNodeFetch = false) {
+        node.$index = $index;
+        if (!node) {
+            unselectAllNodes(rootNode);
+            return;
+        }
+        //let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+        let selectedNodes = rootNode.__SELECTED_NODES;
+        if (!Array.isArray(selectedNodes)) selectedNodes = [];
+        if (!$event.shiftKey) {
+            if (selectedNodes.length) {
+                if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes(rootNode);
+                }
+            }
+            selectHandler(node, false, rootNode);
+        } else {
+            // shift key
+            if (selectedNodes.length) {
+                if (selectedNodes.includes(node)) return;
+                if (node.type != selectedNodes[selectedNodes.length-1].type || node.parent != selectedNodes[0].parent) {
+                    unselectAllNodes(rootNode);
+                    selectHandler(node, false, rootNode);
+                } else {
+                    if (node.$index < selectedNodes[0].$index) {
+                        let fromIndex = node.$index;
+                        let toIndex = selectedNodes[0].$index;
+                        unselectAllNodes(rootNode);
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            if (Array.isArray(rootNode))
+                                selectHandler(rootNode[i], !multiNodeFetch, rootNode);
+                            else 
+                                selectHandler(rootNode.children[i], !multiNodeFetch, rootNode);
+                        }
+                    } else {
+                        let fromIndex = selectedNodes[0].$index;
+                        let toIndex = node.$index;
+                        unselectAllNodes(rootNode);
+                        for (let i = fromIndex; i <= toIndex; i++) {
+                            if (Array.isArray(rootNode))
+                                selectHandler(rootNode[i], !multiNodeFetch, rootNode);
+                            else 
+                                selectHandler(rootNode.children[i], !multiNodeFetch, rootNode);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    this.switchLabelTooltip = function(wellNodes) {
+        self.labelToggle = !self.labelToggle;
+        wellNodes.forEach(function(node) {
+            node.data.toggle = self.labelToggle;
+        });
+    }
+    this.prjSearch = function() {
+        console.log('search project');
+        let min = 0;
+        if (self.projectConfig.length)
+            min = self.projectConfig.reduce(function(min, well){
+                if (well.id < min) {
+                    return well.id;
+                }
+                return min;
+            }, Number.MAX_SAFE_INTEGER);
+
+        if (__idProject > 0) {
+            wiApiService.listWells({ 
+                idProject: __idProject,
+                start: min,
+                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
+            }, function(wells) {
+                self.projectConfig.length = 0;
+                modelFrom(self.projectConfig, wells);
+            });
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-inventory.html',
     controller: Controller,
-    controllerAs: componentName
+    controllerAs: componentName,
+    bindings: {
+        idProject: "<"
+    }
 });
 
 exports.name = moduleName;

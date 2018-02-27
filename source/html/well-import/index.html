@@ -1,0 +1,112 @@
+<style>
+    .wi-inline-button {
+        float: none;
+        display: inline-block;
+    }
+    .content-heading {
+        text-align: left;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0em;
+        margin-left: auto;
+        margin-right: auto;
+        width: 97%;
+        font-style: italic;
+    }
+    .wi-chunked-upload-container {
+        width: 70%;
+        height: calc(100% - 76px);
+        margin:auto;
+        background-color:white;
+    }
+    .color-running, .color-processed {
+        color: green;
+    }
+    .color-running {
+        animation: blinker 1s cubic-bezier(.5, 0, 1, 1) infinite alternate; 
+    }
+    @keyframes blinker {  
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    .color-new {
+        color: blue;
+    }
+    .color-error {
+        color: red;
+    }
+    .console {
+        border: 1px solid black;
+        background-color: #444;
+        box-shadow: inset 1px 1px 2px black;
+        font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+        padding: 0.5em 1em;
+        color: white;
+    }
+    .console::-webkit-scrollbar {
+        width:5px;
+    }
+    .animate::after {
+        animation: changeLetter 4s linear infinite;
+        content: " /";
+    }
+    @keyframes changeLetter {
+        0% { content: " /"; }
+        5% { content: " -"; }
+        10% { content: " \\"; }
+        15% { content: " |"; }
+        20% { content: " /"; }
+        25% { content: " -"; }
+        30% { content: " \\"; }
+        35% { content: " |"; }
+        40% { content: " /"; }
+        45% { content: " -"; }
+        50% { content: " \\"; }
+        55% { content: " |"; }
+        60% { content: " /"; }
+        65% { content: " -"; }
+        70% { content: " \\"; }
+        75% { content: " |"; }
+        80% { content: " /"; }
+        85% { content: " -"; }
+        90% { content: " \\"; }
+        95% { content: " |"; }
+        100% { content: " /"; }
+    }
+    .well-log-zip-upload .file-container {
+        border-color: rgba(128, 0, 0, 0.5);
+    }
+    .well-header-upload .file-container {
+        border-color: rgba(0, 128, 0, 0.5);
+    }
+    .well-top-upload .file-container {
+        border-color: rgba(0, 0, 128, 0.5);
+    }
+</style>
+<wi-stages style='padding:70px 10px 10px;display:flex;flex-direction:row;position:absolute;top:0;left:0;right:0;bottom:0;'>
+    <wi-stage label="Upload batch assets" icon="fa fa-cloud-upload">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <!--<div style='flex:1;position-relative;'>-->
+                @@include('./upload-stage/index.html')
+            <!--</div>-->
+        </div>
+    </wi-stage>
+    <wi-stage label="Manage batch assets" icon="fa fa-archive">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1;overflow:auto;' ng-controller='zipArchiveManager as zam'>
+                @@include('./manage-stage/index.html')
+            </div>
+        </div>
+    </wi-stage>
+    <!--<wi-stage label="Import a Well LAS archive into Online Inventory" icon="fa fa-file-code-o">
+        <div style='flex:1;display:flex;flex-direction:column' ng-controller="runImport">
+            @@include('./running-stage/index.html')
+        </div>
+    </wi-stage>-->
+    <wi-stage label="Finish" icon="fa fa-flag-checkered">
+        <div style='flex:1;display:flex;flex-direction:column'>
+            <div style='flex:1'>
+                <h1 style="text-align:center;color: #ccc;font-size:6em;">FINISH</h1>
+            </div>
+        </div>
+    </wi-stage>
+</wi-stages>

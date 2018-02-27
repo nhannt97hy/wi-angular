@@ -105,6 +105,7 @@ app.factory(wiServiceName, function () {
         DUSTBIN_REFRESH_EVENT: 'dustbin-refresh-event',
         PALETTES: 'PALETTES',
         LOGPLOT_LOADED_EVENT: 'logplot-loaded-event',
+        UPDATE_ITEMS_EVENT: 'UPDATE_ITEMS_EVENT'
     };
 });
 

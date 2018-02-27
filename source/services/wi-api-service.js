@@ -20,7 +20,8 @@ let app = angular.module(moduleName, []);
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
+//const INVENTORY_SERVICE = 'http://inv.sflow.me';
+const INVENTORY_SERVICE = 'http://13.229.66.151';
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
@@ -53,6 +54,7 @@ const CREATE_PROJECT = '/project/new';
 const GET_PROJECT_LIST = '/project/list';
 const GET_PROJECT_INFO = '/project/info';
 
+const LIST_WELL = '/project/well/list';
 const CREATE_WELL = '/project/well/new';
 const EDIT_WELL = '/project/well/edit';
 const DELETE_WELL = '/project/well/delete';
@@ -841,7 +843,9 @@ Service.prototype.getProjectInfo = function (idProject, callback) {
 Service.prototype.getProjectList = function (infoProject, callback) {
     this.post(GET_PROJECT_LIST, infoProject, callback);
 }
-
+Service.prototype.listWells = function(wellQuery, callback) {
+    this.post(LIST_WELL, wellQuery, callback);
+}
 Service.prototype.createWell = function (infoWell, callback) {
     console.log('infoWell', infoWell);
     this.post(CREATE_WELL, infoWell, callback);

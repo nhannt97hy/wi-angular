@@ -3,34 +3,50 @@ const moduleName = 'wi-base-treeview';
 
 function WiBaseTreeController(wiComponentService, $scope) {
     let self = this;
-
+    function filterByDefault (item) {
+        return item.data.label + "    " + item.data.tooltip;
+    }
     this.$onInit = function () {
-        wiComponentService.putComponent(self.name, self);
+        if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
+        if (!self.filterBy) self.filterBy = filterByDefault;
         $scope.$watch(() => this.filter,(value) => {
             if(value != undefined){
                 if(this.config && this.config.length){
                     this.config.forEach((c, i) => {
-                        let parent = new Array()
-                            filterF(c, value, parent);
-                            }
-                        )
+                        let parent = new Array();
+                        filterF(c, value, parent);
+                    })
+                }
+            }
+        });
+        /*
+        $scope.$watch(function() {
+            return self.filter;
+        },function(value) {
+            if(value != undefined){
+                if(self.config && self.config.length){
+                    for (let c of self.config) {
+                        let parent = new Array();
+                        filterF(c, value, parent);
                     }
                 }
             }
-        )
+        });
+        */
     };
 
     function filterF(input, strCp, parent, lastChild){
         parent.unshift(input);
         input.data.hide = true;
-        if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
+        //if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
+        if(input && self.filterBy(input).toLowerCase().includes(strCp.toLowerCase())){
             if(parent && parent.length){
                 parent.forEach(p => {
-                    p.data.childExpanded = true;
+                    //p.data.childExpanded = true;
                     p.data.hide = false;
                 })
             }
-        }else{
+        } else {
             if(!input.children || !input.children.length){
                 parent.shift();
                 if(lastChild){
@@ -40,9 +56,8 @@ function WiBaseTreeController(wiComponentService, $scope) {
         }
         if(input.children && input.children.length){
             input.children.forEach((child, i) => {
-                filterF(child, strCp, parent, i == input.children.length - 1)
-                }
-            )
+                filterF(child, strCp, parent, i == input.children.length - 1);
+            });
         }
     }
 
@@ -105,8 +120,9 @@ function WiBaseTreeController(wiComponentService, $scope) {
         }
     }
 
-    this.onClick = function ($index, $event) {
-        this.onClickFunction && this.onClickFunction($index, $event);
+    this.onClick = function ($index, $event, node) {
+        self.onSelectFunction && self.onSelectFunction(node);
+        self.onClickFunction && self.onClickFunction($index, $event, node);
     }
 
     this.onDoubleClick = function ($index) {
@@ -137,7 +153,10 @@ app.component(componentName, {
         onDoubleClickFunction: '<',
         showContextMenuFunction: '<',
         isShowParentName: '<',
-        filter: '@'
+        filter: '@',
+        filterBy: '<',
+        onSelectFunction: '<',
+        showId: '<'
     }
 });
 exports.controller = WiBaseTreeController;

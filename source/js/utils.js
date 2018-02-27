@@ -73,7 +73,7 @@ exports.doLogin = function doLogin (cb) {
             window.localStorage.setItem('rememberAuth', true);
         }
         window.localStorage.setItem('username', userInfo.username);
-        window.localStorage.setItem('token', userInfo.token);
+    window.localStorage.setItem('token', userInfo.token);
         window.localStorage.setItem('refreshToken', userInfo.refreshToken);
         __GLOBAL.wiApiService.setAuthenticationInfo(userInfo);
         wiComponentService.getComponent('user').userUpdate();
@@ -294,10 +294,14 @@ exports.createZoneSet = function createZoneSet (idWell, callback) {
 
 function logplotToTreeConfig(plot, options = {}) {
     let plotModel = new Object();
+    let wellModel = options.wellModel;
+    if (!wellModel)
+        wellModel = getModel('well', plot.idWell);
+
     setTimeout(() => {
-        let wellModel = getModel('well', plot.idWell);
         plotModel.parentData = wellModel.data;
     });
+
     if (options.isDeleted) {
         plotModel.name = 'logplot-deleted-child';
         plotModel.type = 'logplot-deleted-child';
@@ -334,7 +338,8 @@ function logplotToTreeConfig(plot, options = {}) {
         openLogplotTab(wiComponentService, plotModel);
     }
     plotModel.parent = 'well' + plot.idWell;
-    wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS).push(plotModel);
+    let projectLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS)
+    if (projectLogplots) projectLogplots.push(plotModel);
     return plotModel;
 }
 
@@ -566,8 +571,10 @@ function createCurveModel (curve) {
 }
 exports.createCurveModel = createCurveModel;
 
-function curveToTreeConfig(curve, isDeleted) {
+function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) {
     let curveModel = createCurveModel(curve);
+    let dModel = datasetModel || getModel('dataset', curve.idDataset);
+    let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
         let datasetModel = getModel('dataset', curve.idDataset);
         let wellModel = getModel('well', datasetModel.properties.idWell);
@@ -625,11 +632,12 @@ function createDatasetModel (dataset) {
 }
 exports.createDatasetModel = createDatasetModel;
 
-function datasetToTreeConfig(dataset, isDeleted) {
+function datasetToTreeConfig(dataset, isDeleted, wellModel, treeRoot) {
     let datasetModel = createDatasetModel(dataset);
+    let wM = wellModel;
+    if (!wM) wM = getModel('well', dataset.idWell, treeRoot);
     setTimeout(() => {
-        let wellModel = getModel('well', dataset.idWell);
-        datasetModel.parentData = wellModel.data;
+        datasetModel.parentData = wM.data;
     });
     if (isDeleted) {
         datasetModel.name = "dataset-deleted-child";
@@ -655,7 +663,7 @@ function datasetToTreeConfig(dataset, isDeleted) {
         if (!dataset.curves) return datasetModel;
         dataset.curves.forEach(function (curve) {
             curve.dataset = dataset.name;
-            datasetModel.children.push(curveToTreeConfig(curve));
+            datasetModel.children.push(curveToTreeConfig(curve, false, wM, datasetModel));
         });
         return datasetModel;
     }
@@ -928,7 +936,7 @@ function createWellModel(well) {
     Object.assign(wellModel, {
         idProject: well.idProject,
         idWell: well.idWell,
-        name: well.name,
+        name: well.name || well.wellName,
         topDepth: parseFloat(well.topDepth),
         bottomDepth: parseFloat(well.bottomDepth),
         step: parseFloat(well.step),
@@ -937,7 +945,7 @@ function createWellModel(well) {
     wellModel.data = {
         childExpanded: false,
         icon: "well-16x16",
-        label: well.name
+        label: well.name || well.wellName
     };
     if (well.idGroup) wellModel.parent = 'group' + well.idGroup;
     else wellModel.parent = 'project' + well.idProject;
@@ -972,7 +980,7 @@ function wellToTreeConfig(well, isDeleted) {
         let wellModel = createWellModel(well);
         if (well.datasets) {
             well.datasets.forEach(function (dataset) {
-                wellModel.children.push(datasetToTreeConfig(dataset));
+                wellModel.children.push(datasetToTreeConfig(dataset, false, wellModel));
             });
         }
         let zoneSetsNode = createZoneSetsNode(well);
@@ -1133,12 +1141,6 @@ function visit(node, callback, options) {
 
 exports.visit = visit;
 
-exports.getSelectedNode = getSelectedNode;
-
-function getSelectedNode() {
-    return getSelectedPath().pop();
-}
-
 exports.getSelectedProjectNode = getSelectedProjectNode;
 
 function getSelectedProjectNode() {
@@ -1159,16 +1161,14 @@ function getSelectedPath(foundCB, rootNode) {
     if (!rootNode) return;
     let selectedPath = new Array();
     visit(rootNode, function (node, options) {
-        if (node.data) {
-            if (foundCB) {
-                if (foundCB(node)) {
-                    selectedPath = options.path.slice();
-                    return true;
-                }
-            } else if (node.data.selected == true) {
+        if (foundCB) {
+            if (foundCB(node)) {
                 selectedPath = options.path.slice();
                 return true;
             }
+        } else if (node.data.selected == true) {
+            selectedPath = options.path.slice();
+            return true;
         }
         return false;
     }, {
@@ -1338,10 +1338,10 @@ function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet,
     });
 };
 exports.createCrossplotToObjectOfTrack = createCrossplotToObjectOfTrack;
-function openLogplotTab(wiComponentService, logplotModel, callback) {
+function openLogplotTab(wiComponentService, logplotModel, callback, isClosable = true) {
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     // let graph = wiComponentService.getComponent('GRAPH');
-    layoutManager.putTabRightWithModel(logplotModel);
+    layoutManager.putTabRightWithModel(logplotModel, isClosable);
     if (logplotModel.data.opened) return;
     logplotModel.data.opened = true;
     if (callback) wiComponentService.on(wiComponentService.LOGPLOT_LOADED_EVENT, function handler () {
@@ -1455,7 +1455,11 @@ exports.findZoneSetById = findZoneSetById;
 
 function findWellById(idWell) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+    if (!wiExplorer) {
+        return wiComponentService.getComponent('WELL_MODEL');
+    }
+    let rootNodes = wiExplorer.treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let well = null;
     visit(rootNodes[0], function (node) {
@@ -1604,20 +1608,22 @@ function sortProjectData(projectData) {
     });
 }
 
-let refreshProjectState = function () {
+let refreshProjectState = function (idProject) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let dom = document.getElementById('treeContent');
 
-    if (!project) return;
+    if (!project && !idProject) return;
 
     return new Promise(function (resolve, reject) {
         let payload = {
-            idProject: project.idProject
+            idProject: idProject || project.idProject
         };
         let wiApiService = __GLOBAL.wiApiService;
-        let ScrollTmp = dom.scrollTop;
-        window.localStorage.setItem('scrollTmp', ScrollTmp);
+        if (dom) {
+            let ScrollTmp = dom.scrollTop;
+            window.localStorage.setItem('scrollTmp', ScrollTmp);
+        }
         wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
             sortProjectData(projectRefresh);
 
@@ -2921,6 +2927,11 @@ function updateWiCurveListingOnModelDeleted(model){
             return;
     }
 }
+function getSelectedNode(rootNode) {
+    return getSelectedPath(null, rootNode).pop();
+}
+
+exports.getSelectedNode = getSelectedNode;
 
 exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
 

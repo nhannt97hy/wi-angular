@@ -1,0 +1,10 @@
+<ui-select style='width:100%;' ng-model="wiItemDropdown.selectedItem" ng-change="wiItemDropdown.onChange();">
+    <ui-select-match placeholder="[ Select project ]">
+        {{wiItemDropdown.selectedItem.data.label}}
+    </ui-select-match>
+
+    <ui-select-choices repeat="item in wiItemDropdown.items|filter:{data:{label:$select.search}}">
+        <div><span class='{{wiItemDropdown.icon}}'></span>&nbsp;&nbsp;{{item.data.label}}</div>
+    </ui-select-choices>
+
+</ui-select>

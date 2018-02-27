@@ -1,0 +1,22 @@
+<style>
+    .file-container {
+        border:7px dashed #ccc;
+    }
+</style>
+
+<div style='text-align:center;opacity:{{wiChunkedUpload.uploadService.progress?1:0}}'>
+    <h5 class="animate">Uploading (<a style='cursor:pointer;font-weight:500;color:red;' ng-click='wiChunkedUpload.cancelUpload();' href=''>Click to cancel</a>)...</h5>
+    <h6 style='font-style:italic;font-weight:200;color:red;'>(Please wait and do not refresh browser)</h6>
+</div>
+<wi-progress-bar percent="wiChunkedUpload.uploadService.progress.toFixed(0)||0"></wi-progress-bar>
+<div class='file-container' style="cursor:pointer;position:relative;width:100%;flex:1;"
+    ng-click='wiChunkedUpload.selectFile($event);'>
+    <div ng-class="{'text-color-red':!wiChunkedUpload.uploadService.uploadUrl,'text-color-steelblue':!!wiChunkedUpload.uploadService.uploadUrl}" style="cursor:pointer;width: 100%;position:absolute;top:50%;transform:translateY('-50%');text-align:center;word-wrap:break-word;font-size:16px;">
+        <i style='font-size:200%;' ng-hide='!wiChunkedUpload.uploadService.uploadUrl' class="fa fa-file-archive-o">&nbsp;</i>{{wiChunkedUpload.uploadService.file.name || "[CLICK TO UPLOAD]"}}
+    </div>
+</div>
+<form ng-submit="wiChunkedUpload.submit();">
+    <input style='display:none;' 
+        id="{{wiChunkedUpload.idInput}}" 
+        type='file' name='file' onchange='angular.element(this).scope().fileNameChanged(this)'>
+</form>

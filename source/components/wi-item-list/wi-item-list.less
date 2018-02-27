@@ -1,0 +1,33 @@
+wi-item-list {
+    & > input {
+        margin: 4px;
+        width: ~"calc(100% - 8px)";
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+    li {
+        display: flex;
+    }
+    i.ti-check {
+        color: transparent;
+    }
+    i.ti-check.checked {
+        color: inherit;
+    }
+    li.selected {
+        background-color: #ccc;
+        color: blue;
+    }
+    div {
+        flex-basis: 20px;
+        padding:5px;
+    }
+    div.border-right {
+        border-right: 1px dotted #888;
+    }
+    li {
+        border-bottom: 1px dotted #888;
+    }
+}

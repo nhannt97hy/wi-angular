@@ -1,0 +1,25 @@
+<div  class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Curves</h4>
+    </div>
+    <div class="panel-body">
+        <table ng-if="wiiItems.items.length">
+            <tr>
+                <th>Curve</th>
+                <th>Unit</th>
+            </tr>
+            <tr ng-repeat="item in wiiItems.items"
+                ng-click="wiiItems.onItemClick($index, $event);"
+                ng-class="{active: item.data.selected}"
+                wi-right-click="wiiItems.onItemClick($index, $event); wiiItems.showContextMenu($index, $event)">
+                <td style='width:67%;' class="curve-name">
+                    <i class="curve-16x16"></i>
+                    <input type="text" ng-model="item.properties.name" ng-change="item.changed = true" ng-blur="wiiItems.onChange(item)" wi-enter="wiiItems.onChange(item)">
+                </td>
+                <td style='width:33%;'>
+                    <input type="text" ng-model="item.properties.unit" ng-change="item.changed = true" ng-blur="wiiItems.onChange(item)" wi-enter="wiiItems.onChange(item)">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

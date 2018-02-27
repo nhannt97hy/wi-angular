@@ -1,0 +1,26 @@
+<input class="control-input" 
+    ng-model='wiItemList.filter' ng-change="wiItemList.filterChange();"
+    placeholder="[Enter filter]">
+<wi-scroll up-trigger="wiItemList.upTrigger" down-trigger="wiItemList.downTrigger">
+    <ul>
+        <li ng-repeat="item in wiItemList.items track by $index" 
+        ng-class="{'selected':item.data.selected}" ng-show="wiItemList.isShown(item);">
+            <div ng-click='item.data.isExpanded = !item.data.isExpanded'>
+                <i class='fa' ng-class="{'fa-caret-down': item.data.isExpanded,'fa-caret-right': !item.data.isExpanded}"></i>
+            </div>
+            <div class='border-right text-center' ng-show='wiItemList.showIndex'
+            ng-click='wiItemList.selectItem($index, wiItemList.baseIndex + $index, $event)'>
+                {{wiItemList.baseIndex + $index + 1}}
+            </div>
+            <div ng-click='wiItemList.selectItem($index, wiItemList.baseIndex + $index, $event)'>
+                <i class="{{wiItemList.data.icon || wiItemList.icon}}"></i>
+            </div>
+            <div ng-click='wiItemList.selectItem($index, wiItemList.baseIndex + $index, $event)' 
+            style='flex:1;'>{{item.data.label}}</div>
+            <div ng-click='wiItemList.selectItem($index, wiItemList.baseIndex + $index, $event)'
+            class='text-center' style='cursor: pointer;' ng-show='wiItemList.showCheck'>
+                <i class='ti-check' ng-class="{'checked': item.data.checked}"></i>
+            </div>
+        </li>
+    </ul>
+</wi-scroll>

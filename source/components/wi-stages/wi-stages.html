@@ -1,0 +1,74 @@
+<style>
+    .stages-holder {
+        list-style: none;
+        -webkit-padding-start: 0;
+        padding: 5px 0.5em;
+    }
+    .wi-stage-holder {
+        margin: 1px;
+        opacity: 0.3;
+    }
+    .wi-stage {
+        border: 1px solid #888;
+        padding: 0.5em 1em;
+        background-color: #ccc;
+        display: inline-block;
+        width: calc(100% - 45px);
+    }
+    .wi-stage-holder.stage-active {
+        opacity: 1;
+        color: navy;
+    }
+    .wi-stage-heading {
+        font-size: 16px;
+        line-height: 1.5;
+        width: 30px;
+        margin-right: 5px;
+        //border: 2px solid #eee;
+        border-radius: 50%;
+        //color: #eee;
+        color: darkgreen;
+        //background: linear-gradient(green, white);
+        display: inline-block;
+        text-align: center;
+        padding: 5px;
+    }
+    wi-stages wi-stage {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+<div class='scroll-container' style="flex-basis:400px;overflow:auto;">
+    <h5 style='text-align:center;margin-bottom:0;color:#888;'>START</h5>
+    <ul class='stages-holder'>
+        <li ng-repeat="wiStage in wiStages.stages" class='wi-stage-holder' ng-class="{'stage-active': wiStage.active}">
+            <div>
+                <div style="text-align:center;font-size:24px;color:#ccc;margin:3px;"><i class="fa fa-angle-double-down"></i></div>
+                <div style="opacity:{{wiStage.active?1:0}}" class="wi-stage-heading"><i class="fa fa-arrow-right"></i></div>
+                <div class='wi-stage'>
+                    <h5>{{wiStage.stageIndex + 1}}. &nbsp;&nbsp;<i style='font-size:180%;vertical-align:middle;' class="{{wiStage.icon}}"></i>&nbsp;&nbsp;{{wiStage.label}}</h5>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+<div style='display:flex;flex-direction:column;flex:1'>
+    <div style='display:flex;flex-direction:column;flex:1;position:relative;' ng-transclude></div>
+    <div style='text-align:right;padding-top: 5px;'>
+        <wi-button class='wi-inline-button' 
+            ng-show="wiStages.currentStageIndex > 0" 
+            icon='arrow-left-32x32' 
+            disabled="!wiStages.navigatable()"
+            label='Back' handler="wiStages.back"></wi-button>
+        <wi-button class='wi-inline-button' 
+            ng-show="wiStages.currentStageIndex < wiStages.stages.length - 1" 
+            icon='arrow-right-32x32' 
+            disabled="!wiStages.navigatable()"
+            label='Skip' handler="wiStages.skip"></wi-button>
+    </div>
+</div>
