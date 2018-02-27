@@ -642,7 +642,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                     if (!item.idControlCurve) {
                         item.idControlCurve = (item.leftLine.id > 0) ?
                                                 item.leftLine.idCurve : item.rightLine.idCurve;
-                                                let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
+                        let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
                         item.fill.varShading.startX = _lineProps.minScale;
                         item.fill.varShading.endX = _lineProps.maxScale;
                         item.positiveFill.varShading.startX = _lineProps.minScale;
@@ -765,6 +765,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
+            wiD3Ctrl.updateTrack(currentTrack);
         };
     }
 
