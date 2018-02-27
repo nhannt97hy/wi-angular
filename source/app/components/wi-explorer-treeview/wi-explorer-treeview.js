@@ -15,6 +15,9 @@ function WiExpTreeController($controller, wiComponentService, wiApiService, $tim
         let typeItemDragable = 'curve';
         let element = $('.wi-parent-node' + `[type='${typeItemDragable}']`);
         utils.setupCurveDraggable(element, wiComponentService, wiApiService);
+
+        let dragEle = $('.wi-parent-node[type=dataset],[type=well]');
+        utils.setupItemDraggable(dragEle, wiComponentService);
     };
 
     this.onClick = function ($index, $event) {

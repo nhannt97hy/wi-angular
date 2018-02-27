@@ -61,13 +61,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
         let projectItem = stack.getItemsById("explorer-block");
         let propertiesItem = stack.getItemsById("property-block");
         if(projectItem.length || propertiesItem.length){
-            // console.log('do nothing');            
+            // console.log('do nothing');
         }else{
             // console.log('add more control');
             let control = $($("#stack-header-control").html()),
             previousBtn = control.find("#previousBtn"),
             nextBtn = control.find("#nextBtn");
-    
+
             let previous = function(){
                 let current = stack.getActiveContentItem().config.id;
                 let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
@@ -76,7 +76,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                     stack.setActiveContentItem(stack.contentItems[preIdx]);
                 }
             }
-    
+
             let next = function(){
                 let current = stack.getActiveContentItem().config.id;
                 let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
@@ -86,7 +86,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 }
             }
 
-            previousBtn.click(previous);    
+            previousBtn.click(previous);
             nextBtn.click(next);
 
             // Add the colorDropdown to the header
@@ -167,18 +167,18 @@ module.exports.putLeft = function (templateId, title) {
     });
 }
 
+// module.exports.putRight = function (templateId, title) {
+//     layoutManager.root.getItemsById('right')[0].addChild({
+//         type: 'component',
+//         id: templateId,
+//         componentName: 'wi-block',
+//         componentState: {
+//             templateId: templateId
+//         },
+//         title: title
+//     });
+// }
 /*
-module.exports.putRight = function (templateId, title) {
-    layoutManager.root.getItemsById('right')[0].addChild({
-        type: 'component',
-        id: templateId,
-        componentName: 'wi-block',
-        componentState: {
-            templateId: templateId
-        },
-        title: title
-    });
-}
 module.exports.putComponentRight = function (text, title) {
     layoutManager.root.getItemsById('layout')[0].addChild(
         {
@@ -204,6 +204,7 @@ module.exports.putTabRight = function (config) {
         title: 'Title'
     }
     Object.assign(childConfig, config);
+    childConfig.title = `<span class="${config.tabIcon}"></span> <span>${config.title}</span>`
     layoutManager.root.getItemsById('right')[0].addChild(childConfig);
 }
 

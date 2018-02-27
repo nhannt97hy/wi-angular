@@ -81,10 +81,9 @@ app.factory(wiServiceName, function () {
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         HISTORYSTATE: 'HISTORY_STATE',
-        PETROPHYSICS: 'PETROPHYSICS',
+        WI_WORKFLOW: 'WiWorkFlow',
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
-        // MOMENT: 'moment',
         PROJECT_LOADED: 'project-loaded',
         ITEM_ACTIVE_PAYLOAD: 'item-active-payload',
         LIST_FAMILY: 'list-family',
