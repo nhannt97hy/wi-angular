@@ -1204,6 +1204,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.plotContainer.on('mousemove', function() {
             _drawTooltip(track);
         });
+        track.plotContainer.on('mouseleave', function () {
+            _removeTooltip(track);
+        })
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
                 wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
