@@ -80,6 +80,7 @@ let wiCustomInput = require('./wi-custom-input');
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
 let wiScroll = require('./wi-scroll');
+let wiItemDropdown = require('./wi-item-dropdown');
 
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
@@ -168,6 +169,7 @@ let app = angular.module('wiapp',
         wiComboview.name,
         wiD3Comboview.name,
         wiScroll.name,
+        wiItemDropdown.name,
 
         wiElementReady.name,
         wiRightClick.name,
