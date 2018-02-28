@@ -329,7 +329,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
                                     wiD3Ctrl.getComponentCtrlByViTrack(currentTrack).addCurveToTrack(currentTrack, data, lineModel.data);
-                                    self.curveList = currentTrack.getCurves();
+                                    self.getCurveList();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;
                                     curves_bk.push({ id : line.idLine, idCurve : line.idCurve });
