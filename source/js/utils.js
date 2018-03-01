@@ -73,7 +73,7 @@ exports.doLogin = function doLogin (cb) {
             window.localStorage.setItem('rememberAuth', true);
         }
         window.localStorage.setItem('username', userInfo.username);
-    window.localStorage.setItem('token', userInfo.token);
+    window.localStorage.setItem('token', userInfo.g);
         window.localStorage.setItem('refreshToken', userInfo.refreshToken);
         __GLOBAL.wiApiService.setAuthenticationInfo(userInfo);
         wiComponentService.getComponent('user').userUpdate();

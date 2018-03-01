@@ -68,6 +68,9 @@ function getData(self, wiApiService){
 /* Create */
 function createModelCtrl($http, wiApiService, wiComponentService){
     let self = this;
+    wiApiService.listFamily(function(list){
+        console.log('list family:', list);
+    })
     getDataCurve(wiApiService, self);
     this.changeWell = function(){
         self.datasets = self.well.datasets;
