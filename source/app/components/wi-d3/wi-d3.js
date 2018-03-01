@@ -1162,6 +1162,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             controller.openPropertiesDialog();
         }
     }
+    this.openTrackPropertiesDialog = openTrackPropertiesDialog;
     function getOrderKey(track) {
         if (_tracks.length <= 0) {
             return 'm';

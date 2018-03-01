@@ -1349,43 +1349,6 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     });
 };
 
-exports.setupItemDraggable = function(element, wiComponentService){
-    let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
-    let selectedObjs;
-
-    element.draggable({
-        helper: function (event) {
-            selectedObjs = $('.wi-parent-node[type=dataset],[type=well]').filter('.item-active').clone();
-            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-            if (!selectedNodes || selectedNodes.find(n => n.type != 'dataset' ||n.type != 'well')) return $(event.currentTarget).clone();
-            return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
-        },
-        start: function (event, ui) {
-            dragMan.dragging = true;
-        },
-        stop: function (event, ui) {
-            dragMan.dragging = false;
-            let wiStep = dragMan.wiStep;
-            dragMan.wiStep = null;
-            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-            if(selectedNodes && selectedNodes.length && wiStep){
-                selectedNodes.forEach(n => {
-                    wiStep.addMoreInput(n);
-                })
-            }
-        },
-        appendTo: 'body',
-        revert: false,
-        scroll: false,
-        containment: 'document',
-        cursor: 'move',
-        cursorAt: {
-            top: 0,
-            left: 0
-        }
-    });
-};
-
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
     let currentWell = getCurrentWell();
     let dataRequest = {
