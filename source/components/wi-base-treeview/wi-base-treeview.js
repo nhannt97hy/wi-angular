@@ -3,10 +3,12 @@ const moduleName = 'wi-base-treeview';
 
 function WiBaseTreeController(wiComponentService, $scope) {
     let self = this;
-
+    function filterByDefault (item) {
+        return item.data.label + "    " + item.data.tooltip;
+    }
     this.$onInit = function () {
         if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
-        /*
+        if (!self.filterBy) self.filterBy = filterByDefault;
         $scope.$watch(() => this.filter,(value) => {
             if(value != undefined){
                 if(this.config && this.config.length){
@@ -17,30 +19,34 @@ function WiBaseTreeController(wiComponentService, $scope) {
                 }
             }
         });
-        */
-        $scope.$watch(function() { return this.filter},function(value) {
+        /*
+        $scope.$watch(function() {
+            return self.filter;
+        },function(value) {
             if(value != undefined){
-                if(this.config && this.config.length){
-                    this.config.forEach((c) => {
+                if(self.config && self.config.length){
+                    for (let c of self.config) {
                         let parent = new Array();
                         filterF(c, value, parent);
-                    })
+                    }
                 }
             }
         });
+        */
     };
 
     function filterF(input, strCp, parent, lastChild){
         parent.unshift(input);
         input.data.hide = true;
-        if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
+        //if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
+        if(input && self.filterBy(input).toLowerCase().includes(strCp.toLowerCase())){
             if(parent && parent.length){
                 parent.forEach(p => {
-                    // p.data.childExpanded = true; // TUNG
+                    //p.data.childExpanded = true;
                     p.data.hide = false;
                 })
             }
-        }else{
+        } else {
             if(!input.children || !input.children.length){
                 parent.shift();
                 if(lastChild){
@@ -50,9 +56,8 @@ function WiBaseTreeController(wiComponentService, $scope) {
         }
         if(input.children && input.children.length){
             input.children.forEach((child, i) => {
-                filterF(child, strCp, parent, i == input.children.length - 1)
-                }
-            )
+                filterF(child, strCp, parent, i == input.children.length - 1);
+            });
         }
     }
 
@@ -149,6 +154,7 @@ app.component(componentName, {
         showContextMenuFunction: '<',
         isShowParentName: '<',
         filter: '@',
+        filterBy: '<',
         onSelectFunction: '<',
         showId: '<'
     }

@@ -410,6 +410,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.visHistogram = graph.createHistogram(histogramModel, well.step, 
                 well.topDepth, 
                 well.bottomDepth, elem);
+        if (self.containerName) {
+            self.selectionMasks.map(m => m.id = m.idCombinedBoxTool);
+            self.visHistogram.initSelectionArea(self.selectionMasks);
+        }
         //self.visHistogram.zoneSetModel = self.zoneSetModel;
         //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
 
@@ -481,6 +485,7 @@ app.component(componentName, {
         name: '@',
         wiHistogramCtrl: '<',
         idHistogram: '<',
+        selectionMasks: '<',
         containerName: '@'
     }
 });

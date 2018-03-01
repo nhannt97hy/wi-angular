@@ -22,6 +22,14 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiInventory', self);
+        self.isFrozen = !!self.idProject;
+        if (self.isFrozen) {
+            __idProject = self.idProject;
+            wiApiService.getProjectInfo(__idProject, function(projectProps) {
+                self.projectName = projectProps.name;
+                refreshProject();
+            });
+        }
     };
     this.getProjectList = function(wiItemDropdownCtrl) {
         wiApiService.getProjectList(null, function(projectList) {
@@ -249,16 +257,17 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
             return;
         }
 
-                oUtils.updateDatasets(currentNode.id, self.inventoryConfig).then(function(datasetsModel) {
-                    async.each(datasetsModel, function(dModel, done) {
-                        oUtils.updateCurves(dModel.id, self.inventoryConfig).then(function() {
-                            done();
-                        });
-                    }, function(error) {
-                        bareSelectHandler();
-                        callback && callback();
-                    });
+        oUtils.updateDatasets(model.id, self.inventoryConfig).then(function(datasetsModel) {
+            async.each(datasetsModel, function(dModel, done) {
+                oUtils.updateCurves(dModel.id, self.inventoryConfig).then(function() {
+                    done();
                 });
+            }, function(error) {
+                $timeout(function() {
+                    self.importItems.push(angular.copy(model));
+                });
+            });
+        });
 
     }
     this.importButtonClicked = function () {
@@ -659,7 +668,10 @@ let app = angular.module(moduleName, []);
 app.component(componentName, {
     templateUrl: 'wi-inventory.html',
     controller: Controller,
-    controllerAs: componentName
+    controllerAs: componentName,
+    bindings: {
+        idProject: "<"
+    }
 });
 
 exports.name = moduleName;

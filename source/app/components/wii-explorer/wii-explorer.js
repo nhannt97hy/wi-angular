@@ -245,6 +245,10 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
 
     this.upTrigger = function(cb) {
         //let wells = self.treeConfig[0].children;
+        if (self.filter && self.filter.length) {
+            if (cb) cb([]);
+            return;
+        }
         let wells = self.treeConfig;
         if (wells.length) {
             wiOnlineInvService.listWells({
@@ -264,7 +268,10 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
     }
 
     this.downTrigger = function(cb) {
-        console.log("downTrigger");
+        if (self.filter && self.filter.length) {
+            if (cb) cb([]);
+            return;
+        }
         //let wells = self.treeConfig[0].children;
         let wells = self.treeConfig;
         if (wells.length) {

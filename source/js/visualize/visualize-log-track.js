@@ -5,6 +5,7 @@ let ViImage = require('./visualize-image');
 let Marker = require('./visualize-marker');
 let Annotation = require('./visualize-annotation');
 let Utils = require('./visualize-utils');
+let Selection = require('./visualize-selection');
 
 module.exports = LogTrack;
 
@@ -117,8 +118,8 @@ LogTrack.prototype.setProperties = function(props) {
 
 LogTrack.prototype.setMode = function(newMode) {
     this.mode = newMode;
-    this.plotContainer.selectAll('.vi-track-drawing')
-        .style('cursor', newMode == null ? 'crosshair' : 'copy');
+    this.plotContainer
+        .style('cursor', newMode == null ? 'default' : 'copy');
 }
 
 LogTrack.prototype.updateScaleInfo = function(scaleOpt) {
@@ -250,6 +251,10 @@ LogTrack.prototype.getExtentY = function() {
     let minY = Utils.roundDown(d3.min(ys), 100 * this.yStep);
     let maxY = Utils.roundUp(d3.max(ys), 100 * this.yStep);
     return [minY, maxY];
+}
+
+LogTrack.prototype.getSelection = function(id) {
+    return this.drawings.find(d => d.isSelection() && d.id == id);
 }
 
 /**
@@ -1061,7 +1066,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     if (d3.event.button != 0) {
         d3.event.currentDrawing = this.currentDrawing;
         return;
-    } 
+    }
 
     if (this.currentDrawing && this.currentDrawing.nearPoint(x, y)) {
         d3.event.currentDrawing = this.currentDrawing;
@@ -1202,11 +1207,11 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
     }
     $(this.plotContainer.node()).draggable({
         axis: 'x',
-        containment: self.root.node(),
+        containment: self.root.node().parentNode.parentNode,
         helper: function () {
             if (self.getCurrentCurve()) {
                 let currentCurve = self.getCurrentCurve();
-                return $('<img></img>').prop({src: currentCurve.canvas.node().toDataURL()});
+                return $('<img></img>').prop({src: currentCurve.canvas.node().toDataURL(), style: 'z-index: 99'});
             }
             return $('<span></span>');
         },
@@ -1238,4 +1243,19 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
             document.dispatchEvent(onCurveDrop);
         }
     });
+}
+
+LogTrack.prototype.addSelection = function(config) {
+    let selection = new Selection(config);
+
+    selection.initCanvas(this.plotContainer, 'logplot');
+    this.drawings.push(selection);
+
+    return selection;
+}
+
+LogTrack.prototype.initSelectionArea = function(masks) {
+    masks.forEach((m) => {
+        this.addSelection(m);
+    })
 }

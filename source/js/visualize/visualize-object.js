@@ -108,7 +108,7 @@ ObjectOfTrack.prototype.init = function(plotContainer, wiComponentService, wiApi
     this.objectContainer = this.foreignObject.append('xhtml:div')
                                 .attr('class', 'object-container')
                                 .style('position', 'relative');
-    
+
     this.tooltip = this.objectContainer.append('div')
                             .attr('class', 'vi-object-tooltip');
 
@@ -138,7 +138,7 @@ ObjectOfTrack.prototype.init = function(plotContainer, wiComponentService, wiApi
             updateObject(ui);
             self.save();
         });
-    
+
     this.updateHeader();
 
     function updateObject(ui) {
@@ -208,7 +208,7 @@ ObjectOfTrack.prototype.updateDepth = function(event, ui){
 
 ObjectOfTrack.prototype.doPlot = function(highlight, forcePlot) {
     if (this.startDepth == null || this.endDepth == null) return;
-    
+
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
 
@@ -277,7 +277,7 @@ function buildHistogramProps(config, wellProps) {
         color: config.color || "Blue",
         discriminator: config.discriminator || null,
         curveId: config.curve.idCurve,
-        yStep: config.curve.yStep || parseFloat(wellProps.step),
+        yStep: config.curve.yStep || parseFloat(wellProps.step),f
     };
     return histogramProps;
 }
@@ -298,7 +298,7 @@ ObjectOfTrack.prototype.createHistogram = function(idHistogram, histogramName, s
             .style('display', 'flex')
             .node();
 
-    let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="' 
+    let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="'
                + (getWiD3HistogramName(idHistogram)) + '" id-histogram="'
                + idHistogram + '"></wi-d3-histogram>';
     $(domEle).html(compileFunc(html)(scopeObj));
@@ -322,7 +322,7 @@ ObjectOfTrack.prototype.createCrossplot = function(idCrossplot, crossplotName, s
             .style('display', 'flex')
             .node();
 
-    let html = '<wi-d3-crossplot style="flex: 1; display: flex;flex-direction:column;" name="' 
+    let html = '<wi-d3-crossplot style="flex: 1; display: flex;flex-direction:column;" name="'
                + (getWiD3CrossplotName(idCrossplot)) + '" id-crossplot="'
                + idCrossplot + '"></wi-d3-crossplot>';
     $(domEle).html(compileFunc(html)(scopeObj));
@@ -342,7 +342,7 @@ ObjectOfTrack.prototype.getViCrossplot = function() {
 
 ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellProp, scopeObj, compileFunc) {
     if(config.dragToCreate) {
-        config.intervalDepthTop = parseFloat(this.startDepth.toFixed(4));  
+        config.intervalDepthTop = parseFloat(this.startDepth.toFixed(4));
         config.intervalDepthBottom = parseFloat(this.endDepth.toFixed(4));
         config.dragToCreate = false;
     } else {
@@ -367,7 +367,7 @@ ObjectOfTrack.prototype.createHistogramToForeignObject = function(config, wellPr
             .style('display', 'flex')
             .node();
 
-    let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="' 
+    let html = '<wi-d3-histogram style="flex: 1; display: flex;flex-direction:column;" name="'
                + getWiD3HistogramName(config.idHistogram) + '" id-histogram="'
                + config.idHistogram + '"></wi-d3-histogram>';
     $(domEle).html(compileFunc(html)(scopeObj));
@@ -385,7 +385,7 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
         return;
     }
     if(crossplotConfig.dragToCreate) {
-        crossplotConfig.config.pointSet.intervalDepthTop = parseFloat(this.startDepth.toFixed(4));  
+        crossplotConfig.config.pointSet.intervalDepthTop = parseFloat(this.startDepth.toFixed(4));
         crossplotConfig.config.pointSet.intervalDepthBottom = parseFloat(this.endDepth.toFixed(4));
         crossplotConfig.dragToCreate = false;
     } else {
@@ -415,7 +415,7 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
             .style('display', 'flex')
             .attr('class', 'vi-object-crossplot')
             .node();
-    
+
     d3.select(domEle)
         .append("div")
             .style('flex', 1)
@@ -423,7 +423,7 @@ ObjectOfTrack.prototype.createCrossplotToForeignObject = function(crossplotConfi
             .attr('class', 'vi-crossplot-container');
 
     this.viCrossplot = graph.createCrossplot(crossplotConfig.curve1, crossplotConfig.curve2, crossplotConfig.config, domEle);
-    
+
     console.log("cross plot of this object: ", this.viCrossplot);
     this.currentDraw = "Crossplot";
     this.setProperties({

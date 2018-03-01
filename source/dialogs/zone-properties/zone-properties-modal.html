@@ -28,16 +28,25 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Fill pattern</label>
                                 <div class="col-sm-8">
-                                    <ui-select theme="bootstrap" ng-model="wiModal.fill.pattern.name">
+                                    <ui-select theme="bootstrap" ng-model="wiModal.fill.pattern.name"
+                                                search-enabled="false">
                                         <ui-select-match>
-                                            <wi-canvas-rect name="_selectedPatternCanvas" pattern="{{wiModal.fill.pattern.name}}" width="300" height="20" foreground="{{wiModal.fill.pattern.foreground}}"
-                                                background='{{wiModal.fill.pattern.background}}'>
+                                            <wi-canvas-rect name="_selectedPatternCanvas" pattern="{{wiModal.fill.pattern.name}}" 
+                                                            width="320" height="20" 
+                                                            foreground="{{wiModal.fill.pattern.foreground}}"
+                                                            background='{{wiModal.fill.pattern.background}}'>
                                             </wi-canvas-rect>
                                         </ui-select-match>
                                         <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" width="300" height="20" foreground="{{wiModal.fill.pattern.foreground}}"
-                                                background='{{wiModal.fill.pattern.background}}'>
-                                            </wi-canvas-rect>
+                                            <div>
+                                                <span class="col-sm-3 small-text">{{selectedPattern | uppercase}}</span>
+                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
+                                                                width="220" height="20" 
+                                                                foreground="{{wiModal.fill.pattern.foreground}}"
+                                                                background='{{wiModal.fill.pattern.background}}'
+                                                                style="float: right;">
+                                                </wi-canvas-rect>
+                                            </div>
                                         </ui-select-choices>
                                     </ui-select>
                                 </div>

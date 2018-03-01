@@ -112,8 +112,10 @@
                         </wi-button>
                         <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WipmButtonClicked">
                         </wi-button>
-                        <wi-button name="WellImport" icon="well-load-32x32" label="Mega Import" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WellImportClicked"></wi-button>
+
+                        <wi-button name="BatchTools" icon="well-load-32x32" label="Batch Tools" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.BatchToolsClicked"></wi-button>
                         <wi-button name="TestChooseData" icon="edit-curve-32x32" label="Test Choose Data" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.TestChooseData"></wi-button>
+
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -146,6 +148,7 @@
     <template id='inventory-connect'>
         <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
             <h3 class="content-heading">Inventory Connect</h3>
+            <!--<wi-inventory style='flex:1;' id-project='1'></wi-inventory>-->
             <wi-inventory style='flex:1;'></wi-inventory>
         </div>
     </template>

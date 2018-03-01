@@ -69,6 +69,10 @@ Drawing.prototype.isImageZone = function () {
     return this.constructor.name == 'ImageZone';
 }
 
+Drawing.prototype.isSelection = function () {
+    return this.constructor.name == 'Selection';
+}
+
 /**
  * Check if the drawing near a point
  * @param {Number} x - x coordinate of the point

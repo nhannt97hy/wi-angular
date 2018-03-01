@@ -12,7 +12,7 @@ exports.ExitButtonClicked = function () {
         }
     })
 };
-exports.WellImportClicked = function() {
+exports.BatchToolsClicked = function() {
     console.log('Well Import clicked');
     let wiComponentService = this.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);

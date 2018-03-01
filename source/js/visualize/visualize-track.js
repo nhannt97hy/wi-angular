@@ -130,6 +130,10 @@ Track.prototype.updateOrderNum = function() {
         .attr('data-order-num', function(d) {return d;})
         .style('width', '5px')
         .style('cursor', 'col-resize');
+
+    // component node
+    d3.select(this.root.node().parentNode).datum(this.orderNum)
+        .attr('data-order-num', function (d) {return d; });
 }
 /**
  * Create DOM element containing header
@@ -155,7 +159,7 @@ Track.prototype.createHeaderContainer = function() {
         .style('background-color', this.HEADER_NAME_COLOR)
         .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
-        // .style('z-index', 1)
+        .style('z-index', 1)
         .style('margin', '0 1px')
         .style('white-space', 'nowrap')
         .text(this.name)
@@ -192,7 +196,10 @@ Track.prototype.createHeaderContainer = function() {
  * Create DOM element containing body
  */
 Track.prototype.createBodyContainer = function() {
-    let existedPlot = this.root
+    // let existedPlot = this.rootNode
+    //     .select('.vi-track-body-container');
+
+    let existedPlot = d3.select(this.root.node().parentNode.parentNode)
         .select('.vi-track-body-container');
 
     this.bodyContainer = this.trackContainer.append('div')
@@ -327,8 +334,9 @@ Track.prototype.onTrackDrag = function(callbackDrop) {
         callbackDrop(event.desTrack);
     }
     $(this.trackContainer.node()).draggable({
+    // $(this.root.node().parentNode).draggable({
         axis: 'x',
-        containment: 'parent',
+        containment: $(this.root.node().parentNode.parentNode),
         helper: function () {
             return $(self.headerNameBlock.node()).clone()
                 .css({'z-index': 99, 'width': self.width, 'background-color': 'rgb(69, 129, 69)', 'box-shadow': '1px 1px 2px 2px rgba(0,0,0,0.2)', 'color': '#fff'});
@@ -345,6 +353,7 @@ Track.prototype.onTrackDrag = function(callbackDrop) {
         }
     });
     $(this.trackContainer.node()).droppable({
+    // $(this.root.node().parentNode).droppable({
         accept: '.vi-track-container',
         tolerance: 'pointer',
         scope: 'tracks',

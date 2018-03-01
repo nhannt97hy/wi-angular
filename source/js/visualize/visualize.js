@@ -134,7 +134,10 @@ exports.buildCurve = function(config, data, well) {
  */
 exports.rearrangeTracks = function(wiD3Ctrl) {
     let wiD3Name = wiD3Ctrl.name;
-    d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
+
+    // d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
+
+    d3.select('[name=' + wiD3Name + ']').selectAll('.wi-d3-track-component').sort();
 }
 
 /**
@@ -237,4 +240,13 @@ exports.createHistogram = function(config, depthStep, startDepth, endDepth, domE
     console.log('---', config, domElem);
     histogram.init(domElem);
     return histogram;
+}
+
+exports.plotSelection = function (wiD3Ctrl, selectionId, data) {
+    let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
+    logTracks.forEach(t => {
+        let selection = t.getSelection(selectionId);
+        selection.setProperties({maskData: data});
+        t.plotDrawing(selection);
+    })
 }
