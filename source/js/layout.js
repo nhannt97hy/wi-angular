@@ -214,11 +214,11 @@ module.exports.putTabRightWithModel = function (model, isClosable = true) {
     let itemType, itemId, tabIcon, name, htmlTemplate;
     console.log(model);
     switch (model.type) {
-        case 'logplot':
+        case 'logplot': case 'multiLogplot':
             itemId = 'logplot' + model.id;
             tabIcon = 'logplot-blank-16x16';
-            name = 'logplot' + model.properties.idPlot;
-            htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
+            name = model.type + model.properties.idPlot;
+            htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '" type="' + model.type + '"></wi-logplot>'
             break;
         case 'crossplot':
             itemId = 'crossplot' + model.id;
@@ -258,7 +258,7 @@ module.exports.putTabRightWithModel = function (model, isClosable = true) {
             html: htmlTemplate,
             model: model
         },
-        title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name} - (${well.properties.name})</span>`
+        title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name}${well ? ' - ( ' + well.properties.name + ')':''}</span>`
     });
     let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
     historyState.putPlotToHistory(model.type, model.id);

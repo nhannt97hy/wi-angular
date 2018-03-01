@@ -543,6 +543,32 @@ function comboviewToTreeConfig(comboview, isDeleted) {
 }
 exports.comboviewToTreeConfig = comboviewToTreeConfig;
 
+function multiLogplotToTreeConfig(multiLogplot, isDeleted) {
+    let multiLogplotModel = new Object();
+    multiLogplotModel.name = 'multiLogplot';
+    multiLogplotModel.type = 'multiLogplot';
+    multiLogplotModel.id = multiLogplot.idPlot;
+    multiLogplotModel.properties = {
+        idProject: multiLogplot.idProject,
+        idPlot: multiLogplot.idPlot,
+        name: multiLogplot.name
+    };
+    multiLogplotModel.data = {
+        childExpanded: false,
+        icon: 'logplot-blank-16x16',
+        label: multiLogplot.name
+    };
+    let wiComponentService = __GLOBAL.wiComponentService;
+    multiLogplotModel.handler = function () {
+        openMultiLogplotTab(wiComponentService, multiLogplotModel);
+    }
+
+    multiLogplotModel.parent = 'project' + multiLogplot.idProject;
+    let projectMultiLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_MULTILOGPLOTS)
+    if (projectMultiLogplots) projectMultiLogplots.push(plotModel);
+    return multiLogplotModel;
+}
+
 function createCurveModel (curve) {
     let curveModel = new Object();
     curveModel.name = curve.name;
@@ -927,6 +953,39 @@ function createComboviewsNode(parent) {
     return comboviewsModel;
 }
 
+function createMultiLogplotNode(parent, options = {}) {
+    let multiLogplotsModel = new Object();
+    multiLogplotsModel.data = {
+        childExpanded: false,
+        icon: 'logplot-blank-16x16',
+        label: "MultiLogplots"
+    }
+
+    if (options.isDeleted) {
+        multiLogplotsModel.name = 'multiLogplot-deleted';
+        multiLogplotsModel.type = 'multiLogplot-deleted';
+        multiLogplotsModel.data.isCollection = true;
+    } else if (options.isCollection) {
+        multiLogplotsModel.type = 'multiLogplots';
+        multiLogplotsModel.data.isCollection = true;
+    } else {
+        multiLogplotsModel.name = 'multiLogplot';
+        multiLogplotsModel.type = 'multiLogplot';
+    }
+
+    multiLogplotsModel.children = new Array();
+    if (!parent) return multiLogplotsModel;
+    if (!parent.multiLogplots) return multiLogplotsModel;
+    multiLogplotsModel.properties = {
+        totalItems: parent.multiLogplots.length,
+        idProject: parent.idProject
+    }
+    parent.multiLogplots.forEach(function (multiLogplot) {
+        multiLogplotsModel.children.push(multiLogplotToTreeConfig(multiLogplot));
+    });
+    return multiLogplotsModel;
+}
+
 function createWellModel(well) {
     let wellModel = new Object();
     wellModel.name = "well";
@@ -1079,10 +1138,17 @@ exports.projectToTreeConfig = function (project) {
             projectModel.children.push(wellToTreeConfig(well));
         }
     });
+    // project multiLogplots
+    wiComponentService.putComponent(wiComponentService.PROJECT_MULTILOGPLOTS, project.multiLogplots);
+    let projectMultiLogplotsNode = createMultiLogplotNode(null, { isCollection: true });
+    project.multiLogplots.forEach(function (multiLogplot) {
+        projectMultiLogplotsNode.children.push(multiLogplotToTreeConfig(multiLogplot));
+    })
 
     projectModel.children.push(projectLogplotsNode);
     projectModel.children.push(projectCrossplotsNode);
     projectModel.children.push(projectHistogramsNode);
+    projectModel.children.push(projectMultiLogplotsNode);
     return projectModel;
 }
 
@@ -2427,6 +2493,14 @@ function openComboviewTab(comboviewModel) {
 }
 
 exports.openComboviewTab = openComboviewTab;
+
+function openMultiLogplotTab(wiComponentService, multiLogplotModel) {
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRightWithModel(multiLogplotModel);
+    multiLogplotModel.data.opened = true;
+    console.log("openning multiLogplot tab with model: ", multiLogplotModel);
+}
+exports.openMultiLogplotTab = openMultiLogplotTab;
 
 function getDpi() {
     let inch = document.createElement('inch');

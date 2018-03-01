@@ -1758,3 +1758,14 @@ Service.prototype.getInventory = function (callback) {
 Service.prototype.getInventoryUrl = function () {
     return INVENTORY_SERVICE;
 };
+Service.prototype.getMultiLogplot = function (idMultiLogplot, callback) {
+    // HARD CODE BEFORE ADDING API FROM SERVER
+    let plots = this.wiComponentService.getComponent(this.wiComponentService.PROJECT_LOGPLOTS);
+    let fakeData = {
+        idMultiLogplot: idMultiLogplot,
+        logplots: plots
+    }
+    setTimeout(function () {
+        callback(fakeData);
+    }, 500);
+}
