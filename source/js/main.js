@@ -27,9 +27,9 @@ console.log('hic hic');
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
-let petrophysics = require('./petrophysics');
 
 let DialogUtils = require('./DialogUtils');
+// let WorkFlowUtils = require('./WorkFlowUtils');
 
 let wiButton = require('./wi-button.js');
 let wiDropdown = require('./wi-dropdown.js');
@@ -55,6 +55,8 @@ let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
 let wiInventory = require('./wi-inventory');
+let wiWorkflow = require('./wi-workflow');
+let wiStep = require('./wi-step');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -77,6 +79,8 @@ let wiCustomInput = require('./wi-custom-input');
 
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
+let wiScroll = require('./wi-scroll');
+let wiItemDropdown = require('./wi-item-dropdown');
 
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
@@ -104,16 +108,16 @@ let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
 
 // models
-let wiDepth = require('./wi-depth.model');
-let wiCurve = require('./wi-curve.model');
-let wiDataset = require('./wi-dataset.model');
-let wiProperty = require('./wi-property.model');
-let wiListview = require('./wi-listview.model');
-let wiTreeConfig = require('./wi-tree-config.model');
-let wiTreeItem = require('./wi-tree-item.model');
-let wiWell = require('./wi-well.model');
-let wiLogplotsModel = require('./wi-logplots.model');
-let wiLogplotModel = require('./wi-logplot.model');
+// let wiDepth = require('./wi-depth.model');
+// let wiCurve = require('./wi-curve.model');
+// let wiDataset = require('./wi-dataset.model');
+// let wiProperty = require('./wi-property.model');
+// let wiListview = require('./wi-listview.model');
+// let wiTreeConfig = require('./wi-tree-config.model');
+// let wiTreeItem = require('./wi-tree-item.model');
+// let wiWell = require('./wi-well.model');
+// let wiLogplotsModel = require('./wi-logplots.model');
+// let wiLogplotModel = require('./wi-logplot.model');
 let wiZone = require('./wi-zone');
 let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
@@ -159,9 +163,13 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiWorkflow.name,
+        wiStep.name,
 
         wiComboview.name,
         wiD3Comboview.name,
+        wiScroll.name,
+        wiItemDropdown.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -169,16 +177,16 @@ let app = angular.module('wiapp',
         wiDecimalPlaces.name,
 
         // models
-        wiDepth.name,
-        wiCurve.name,
-        wiDataset.name,
-        wiProperty.name,
-        wiListview.name,
-        wiTreeConfig.name,
-        wiTreeItem.name,
-        wiWell.name,
-        wiLogplotsModel.name,
-        wiLogplotModel.name,
+        // wiDepth.name,
+        // wiCurve.name,
+        // wiDataset.name,
+        // wiProperty.name,
+        // wiListview.name,
+        // wiTreeConfig.name,
+        // wiTreeItem.name,
+        // wiWell.name,
+        // wiLogplotsModel.name,
+        // wiLogplotModel.name,
 
         wiApiService.name,
         wiComponentService.name,
@@ -197,6 +205,7 @@ let app = angular.module('wiapp',
         'angularResizable',
 
         // 3rd lib
+
         'ngFileUpload',
         'ui.bootstrap',
         'ngSanitize',
@@ -222,7 +231,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // Crossplot Handlers
     wiComponentService.putComponent(wiComponentService.CROSSPLOT_HANDLERS, crossplotHanders);
     // dependency 3rd component
-    // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
 
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
@@ -239,7 +247,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
     // config explorer block - treeview
-    // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     $scope.myTreeviewConfig = {};
     // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
@@ -347,7 +354,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    wiComponentService.putComponent(wiComponentService.PETROPHYSICS, petrophysics);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);

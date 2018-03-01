@@ -1162,6 +1162,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             controller.openPropertiesDialog();
         }
     }
+    this.openTrackPropertiesDialog = openTrackPropertiesDialog;
     function getOrderKey(track) {
         if (_tracks.length <= 0) {
             return 'm';
@@ -1204,6 +1205,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         track.plotContainer.on('mousemove', function() {
             _drawTooltip(track);
         });
+        track.plotContainer.on('mouseleave', function () {
+            _removeTooltip(track);
+        })
         track.onVerticalResizerDrag(function () {
             if (track.isLogTrack()) {
                 wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })

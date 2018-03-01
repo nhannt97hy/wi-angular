@@ -786,7 +786,7 @@ function createLogplotsNode(parent, options = {}) {
         });
     } else {
         parent.plots.forEach(function (plot) {
-            plotsModel.children.push(logplotToTreeConfig(plot));
+            plotsModel.children.push(logplotToTreeConfig(plot, options));
         });
     }
     return plotsModel;
@@ -984,7 +984,7 @@ function wellToTreeConfig(well, isDeleted) {
             });
         }
         let zoneSetsNode = createZoneSetsNode(well);
-        let logplotNode = createLogplotsNode(well);
+        let logplotNode = createLogplotsNode(well, {wellModel});
         let crossplotNode = createCrossplotsNode(well);
         let histogramNode = createHistogramsNode(well);
         let comboviewNode = createComboviewsNode(well);
@@ -2410,7 +2410,7 @@ function inchToPixel(inch) {
 exports.inchToPixel = inchToPixel;
 
 function pixelToInch(px) {
-    let inch = Math.round(px / getDpi() * 1000) / 1000;
+    let inch = Math.round(px / getDpi() * 10000) / 10000;
     return inch
 }
 

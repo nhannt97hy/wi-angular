@@ -4,9 +4,9 @@ let wiToolbar = require('./wi-toolbar');
 let wiButton = require('./wi-button');
 
 // models
-let wiTreeConfig = require('./wi-tree-config.model');
+// let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
-let wiWell = require('./wi-well.model');
+// let wiWell = require('./wi-well.model');
 
 let wiComponentService = require('./wi-component-service');
 
@@ -17,9 +17,9 @@ let app = angular.module('helloapp',
         wiExplorer.name,
         wiTreeview.name,
 
-        wiTreeConfig.name,
+        // wiTreeConfig.name,
         wiTreeItem.name,
-        wiWell.name,
+        // wiWell.name,
 
         wiComponentService.name]);
 

@@ -80,6 +80,20 @@ exports.ProjectButtonClicked = function () {
 
 exports.WorkflowsButtonClicked = function () {
     console.log('WorkflowsButton is clicked');
+    // let wiComponentService = this.wiComponentService;
+    // let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    // layoutManager.putRight('workflow-block', "Workflow", "workflow-16x16");
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'Workflow',
+        title: 'Workflow',
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: `<wi-workflow></wi-workflow>`,
+            name: 'Workflow'
+        }
+    })
 };
 
 exports.PropertyGridButtonClicked = function () {

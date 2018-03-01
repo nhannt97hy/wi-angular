@@ -329,7 +329,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
                                     wiD3Ctrl.getComponentCtrlByViTrack(currentTrack).addCurveToTrack(currentTrack, data, lineModel.data);
-                                    self.curveList = currentTrack.getCurves();
+                                    self.getCurveList();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;
                                     curves_bk.push({ id : line.idLine, idCurve : line.idCurve });
@@ -642,7 +642,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                     if (!item.idControlCurve) {
                         item.idControlCurve = (item.leftLine.id > 0) ?
                                                 item.leftLine.idCurve : item.rightLine.idCurve;
-                                                let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
+                        let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
                         item.fill.varShading.startX = _lineProps.minScale;
                         item.fill.varShading.endX = _lineProps.maxScale;
                         item.positiveFill.varShading.startX = _lineProps.minScale;
@@ -765,6 +765,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
+            wiD3Ctrl.updateTrack(currentTrack);
         };
     }
 

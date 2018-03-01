@@ -94,16 +94,16 @@ let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
 
 // models
-let wiDepth = require('./wi-depth.model');
-let wiCurve = require('./wi-curve.model');
-let wiDataset = require('./wi-dataset.model');
-let wiProperty = require('./wi-property.model');
-let wiListview = require('./wi-listview.model');
-let wiTreeConfig = require('./wi-tree-config.model');
-let wiTreeItem = require('./wi-tree-item.model');
-let wiWell = require('./wi-well.model');
-let wiLogplotsModel = require('./wi-logplots.model');
-let wiLogplotModel = require('./wi-logplot.model');
+// let wiDepth = require('./wi-depth.model');
+// let wiCurve = require('./wi-curve.model');
+// let wiDataset = require('./wi-dataset.model');
+// let wiProperty = require('./wi-property.model');
+// let wiListview = require('./wi-listview.model');
+// let wiTreeConfig = require('./wi-tree-config.model');
+// let wiTreeItem = require('./wi-tree-item.model');
+// let wiWell = require('./wi-well.model');
+// let wiLogplotsModel = require('./wi-logplots.model');
+// let wiLogplotModel = require('./wi-logplot.model');
 let wiZone = require('./wi-zone');
 let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
@@ -163,16 +163,16 @@ let app = angular.module('wiapp',
         wiScroll.name,
 
         // models
-        wiDepth.name,
-        wiCurve.name,
-        wiDataset.name,
-        wiProperty.name,
-        wiListview.name,
-        wiTreeConfig.name,
-        wiTreeItem.name,
-        wiWell.name,
-        wiLogplotsModel.name,
-        wiLogplotModel.name,
+        // wiDepth.name,
+        // wiCurve.name,
+        // wiDataset.name,
+        // wiProperty.name,
+        // wiListview.name,
+        // wiTreeConfig.name,
+        // wiTreeItem.name,
+        // wiWell.name,
+        // wiLogplotsModel.name,
+        // wiLogplotModel.name,
 
         wiApiService.name,
         wiComponentService.name,

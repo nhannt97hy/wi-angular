@@ -1,4 +1,4 @@
-<div class="wi-treeview-container" style="background-color:{{wiBaseTreeview.config[$index].data.bgColor||none}}"
+<div class="wi-treeview-container" style="background-color:{{wiBaseTreeview.config[$index].data.bgColor||'white'}}"
      ng-class='{"rootview": wiBaseTreeview.name}'
      ng-repeat="item in wiBaseTreeview.config track by $index"
      ng-if='!item.data.deleted'>

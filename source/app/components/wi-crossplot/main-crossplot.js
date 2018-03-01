@@ -15,9 +15,9 @@ let wiRightClick = require('./wi-right-click');
 
 let wiComponentService = require('./wi-component-service');
 let wiApiService = require('./wi-api-service');
-let wiTreeConfig = require('./wi-tree-config.model');
+// let wiTreeConfig = require('./wi-tree-config.model');
 let wiTreeItem = require('./wi-tree-item.model');
-let wiWell = require('./wi-well.model');
+// let wiWell = require('./wi-well.model');
 let wiProperty = require('./wi-property.model');
 let wiListview = require('./wi-listview.model');
 let wiDataset = require('./wi-dataset.model');
@@ -51,9 +51,9 @@ let app = angular.module('helloapp', [
     wiApiService.name,
     wiExplorer.name,
     wiProperties.name,
-    wiWell.name,
+    // wiWell.name,
     wiTreeItem.name,
-    wiTreeConfig.name,
+    // wiTreeConfig.name,
     wiProperty.name,
     wiListview.name,
     wiDataset.name,
