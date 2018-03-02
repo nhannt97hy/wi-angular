@@ -64,7 +64,7 @@ let wiItemDropdown = require('./wi-item-dropdown');
 let wiScroll = require('./wi-scroll');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
-let wiStep = require('./wi-step');
+// let wiStep = require('./wi-step');
 
 let wiiExplorer = require('./wii-explorer');
 let wiiItems = require('./wii-items');
@@ -161,7 +161,7 @@ let app = angular.module('wiapp',
         wiScroll.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
-        wiStep.name,
+        // wiStep.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -213,7 +213,8 @@ let app = angular.module('wiapp',
         'ui.bootstrap',
         'ngSanitize',
         'ui.select',
-        'angularjs-dropdown-multiselect'
+        'angularjs-dropdown-multiselect',
+        'mgo-angular-wizard'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService) {
@@ -320,6 +321,31 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         wiApiService,
         $timeout
     };
+    $scope.myWorkflowConfig = {
+        name: "Missing curve reconstruction",
+        steps: [
+            {
+                name: "Train",
+                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: [],
+                processFunction: function() {console.log(1);}
+            },
+            {
+                name: "Verify",
+                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: [],
+                processFunction: function() {console.log(2);}
+            },
+            {
+                name: "Predict",
+                inputs: [
+                    { name: "Curve 1 " },{ name: "Curve 2 " } 
+                ],
+                parameters: [],
+                processFunction: function() {console.log(3);}
+            }
+        ]
+    }
     $scope.wiBatchApiService = wiBatchApiService;
     window.utils = utils;
     utils.setGlobalObj(functionBindingProp);

@@ -73,12 +73,36 @@ function Controller(wiComponentService) {
                 ]
             }
         ]
+        
+    };
+    this.workflowConfig = {    
+        name: "Missing curve reconstruction",
+        steps: [
+            {
+                name: "Train",
+                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: []
+            },
+            {
+                name: "Verify",
+                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: []
+            },
+            {
+                name: "Predict",
+                inputs: [
+                    { name: "Curve 1 " },{ name: "Curve 2 " } 
+                ],
+                parameters: []
+            }
+        ]
     };
 
     this.$onInit = function() {
         wiComponentService.putComponent(wiComponentService.WI_WORKFLOW, self);
     };
     this.getCurrentProjectId = function() {
+        if (self.idProject) return self.idProject;
         let openProject = wiComponentService.getComponent(
             wiComponentService.PROJECT_LOADED
         );
@@ -92,7 +116,10 @@ app.component(name, {
     templateUrl: "wi-workflow.html",
     controller: Controller,
     controllerAs: name,
-    transclude: true
+    transclude: true,
+    bindings: {
+        idProject: "<"
+    }
 });
 
 exports.name = moduleName;

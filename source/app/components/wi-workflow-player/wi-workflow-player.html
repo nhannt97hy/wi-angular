@@ -141,19 +141,19 @@
                     <div style='padding:10px;display:flex;flex-direction:row;flex:1;'>
                         <div style='flex:1;display:flex;flex-direction:column;padding: 5px 0 0 5px;' class='bordered'>
                             <div>
-                                <label class="btn btn-default" ng-click="wiWorkflowPlayer.onSelectionTypeChanged()" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_GROUP_SELECTION}'
+                                <label class="btn btn-default" ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.FAMILY_GROUP_SELECTION)" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_GROUP_SELECTION}'
                                     title="Main Family">
-                                    <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_GROUP_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType">
+                                    <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_GROUP_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
                                     <span class='zone-table-16x16'></span>
                                 </label>
-                                <label class="btn btn-default  " ng-click="wiWorkflowPlayer.onSelectionTypeChanged()" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_SELECTION}'
+                                <label class="btn btn-default  " ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.FAMILY_SELECTION)" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_SELECTION}'
                                     title="Family">
-                                    <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType">
+                                    <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
                                     <span class='user-define-16x16'></span>
                                 </label>
-                                <label class="btn btn-default  " ng-click="wiWorkflowPlayer.onSelectionTypeChanged()" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.CURVE_SELECTION}'
+                                <label class="btn btn-default  " ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.CURVE_SELECTION)" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.CURVE_SELECTION}'
                                     title="Curve">
-                                    <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.CURVE_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType">
+                                    <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.CURVE_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
                                     <span class='curve-16x16'></span>
                                 </label>
                             </div>
@@ -255,7 +255,7 @@
 
                                         <span ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
                                             style='float:right;line-height:1.5em;cursor:pointer'></span>
-                                        <span style='float:right;line-height:1.5em;cursor:pointer' ng-click="" class='run-16x16' title="test run"></span>
+                                        <span style='float:right;line-height:1.5em;cursor:pointer' ng-click="wf.processFunction()" class='run-16x16' title="test run"></span>
                                     </div>
                                     <div ng-show="wf.expanded" class='panel-body' style="border-top: 1px solid #eee;overflow:auto;">
                                         <table style='width:auto;max-width:none;' class="table table-bordered">
