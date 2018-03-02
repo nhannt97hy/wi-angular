@@ -11,42 +11,52 @@ function Controller(wiComponentService) {
                 inputs: [{ name: "Gamma Ray" }],
                 parameters: [
                     { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
+                    { name: "GR clay", type: "number", value: 100 },
                     {
                         name: "Method",
                         type: "select",
-                        value: { name: "Linear", value: "Linear" },
+                        value: 1,
                         choices: [
-                            { name: "Linear", value: "Linear" },
-                            { name: "Clavier", value: "Clavier" },
+                            { name: "Linear", value: 1 },
+                            { name: "Clavier", value: 2 },
                             {
                                 name: "Larionov Tertiary rocks",
-                                value: "Tertiary"
+                                value: 3
+                            },
+                            {
+                                name: "Larionov older rocks",
+                                value: 4
+                            },
+                            {
+                                name: "Stieber variation I",
+                                value: 5
+                            },
+                            {
+                                name: "Stieber - Miocene and Pliocene",
+                                value: 6
+                            },
+                            {
+                                name: "Stieber variation II",
+                                value: 7
                             }
                         ]
                     }
-                ]
+                ],
+                function: "calVSHfromGR"
             },
             {
                 name: "Porosity",
                 inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }],
                 parameters: [
-                    { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
+                    { name: "matrix", type: "number", value: 2.65 },
+                    { name: "shale", type: "number", value: 2.4 },
                     {
-                        name: "Method",
-                        type: "select",
-                        value: { name: "Linear", value: "Linear" },
-                        choices: [
-                            { name: "Linear", value: "Linear" },
-                            { name: "Clavier", value: "Clavier" },
-                            {
-                                name: "Larionov Tertiary rocks",
-                                value: "Tertiary"
-                            }
-                        ]
+                        name: "fluid",
+                        type: "number",
+                        value: 1
                     }
-                ]
+                ],
+                function: "calEffectivePorosityFromDensity"
             },
             {
                 name: "Saturation",
@@ -55,30 +65,20 @@ function Controller(wiComponentService) {
                     { name: "Porosity" }
                 ],
                 parameters: [
-                    { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
-                    {
-                        name: "Method",
-                        type: "select",
-                        value: { name: "Linear", value: "Linear" },
-                        choices: [
-                            { name: "Linear", value: "Linear" },
-                            { name: "Clavier", value: "Clavier" },
-                            {
-                                name: "Larionov Tertiary rocks",
-                                value: "Tertiary"
-                            }
-                        ]
-                    }
-                ]
+                    { name: "a", type: "number", value: 1 },
+                    { name: "m", type: "number", value: 2 },
+                    { name: "n", type: "number", value: 2 },
+                    { name: "Rw", type: "number", value: 0.03 },
+                ],
+                function: "calSaturationArchie"
             }
         ]
     };
 
-    this.$onInit = function() {
+    this.$onInit = function () {
         wiComponentService.putComponent(wiComponentService.WI_WORKFLOW, self);
     };
-    this.getCurrentProjectId = function() {
+    this.getCurrentProjectId = function () {
         let openProject = wiComponentService.getComponent(
             wiComponentService.PROJECT_LOADED
         );

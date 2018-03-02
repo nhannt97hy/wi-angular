@@ -1,5 +1,6 @@
 const name = "wiWorkflowPlayer";
 const moduleName = "wi-workflow-player";
+let petrophysics = require('./petrophysics');
 
 function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     let self = this;
@@ -20,7 +21,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     self.FAMILY_SELECTION = FAMILY_SELECTION;
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
 
-    this.$onInit = function() {
+    this.$onInit = function () {
         wiComponentService.putComponent(self.name, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
@@ -31,8 +32,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         self.projectConfig = new Array();
     };
 
-    this.onClick = function($index, $event, node) {
-        self.selectionList.forEach(function(item) {
+    this.onClick = function ($index, $event, node) {
+        self.selectionList.forEach(function (item) {
             item.data.selected = false;
         });
         node.data.selected = true;
@@ -40,7 +41,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     function getFamilyList() {
         if (!self.filterText) {
             if (!__familyList) {
-                __familyList = utils.getListFamily().map(function(family) {
+                __familyList = utils.getListFamily().map(function (family) {
                     return {
                         id: family.idFamily,
                         data: {
@@ -56,7 +57,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             return __familyList;
         } else {
             if (!__familyList) {
-                __familyList = utils.getListFamily().map(function(family) {
+                __familyList = utils.getListFamily().map(function (family) {
                     return {
                         id: family.idFamily,
                         data: {
@@ -197,7 +198,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 ).treeConfig[0];
                 utils.visit(
                     root,
-                    function(node, _hash) {
+                    function (node, _hash) {
                         if (node.type == "curve") {
                             _hash[node.data.label] = 1;
                         }
@@ -205,7 +206,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     },
                     hash
                 );
-                self.selectionList = Object.keys(hash).map(function(key) {
+                self.selectionList = Object.keys(hash).map(function (key) {
                     return {
                         id: -1,
                         data: {
@@ -223,8 +224,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
     }
 
-    this.onSelectTemplate = function(parentIdx, itemIdx) {
-        let __SELECTED_NODE = self.selectionList.find(function(d) {
+    this.onSelectTemplate = function (parentIdx, itemIdx) {
+        let __SELECTED_NODE = self.selectionList.find(function (d) {
             return d.data.selected;
         });
         if (__SELECTED_NODE) {
@@ -239,13 +240,13 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
     };
 
-    this.onDeleteInput = function(idx) {
+    this.onDeleteInput = function (idx) {
         for (let wf of self.workflowConfig.steps) {
             wf.inputData.splice(idx, 1);
         }
         // self.inputArray.splice(idx, 1);
     };
-    this.upTrigger = function(cb) {
+    this.upTrigger = function (cb) {
         let familyList = getFamilyList();
         if (self.selectionType == FAMILY_SELECTION) {
             if (__selectionTop > 0) {
@@ -268,7 +269,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             } else cb([]);
         } else cb([]);
     };
-    this.downTrigger = function(cb) {
+    this.downTrigger = function (cb) {
         let familyList = getFamilyList();
         if (self.selectionType == FAMILY_SELECTION) {
             let __selectionBottom = __selectionTop + __selectionLength;
@@ -293,11 +294,11 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             } else cb([]);
         } else cb([]);
     };
-    this.onFilterEnterKey = function(filterText) {
+    this.onFilterEnterKey = function (filterText) {
         self.filterText = filterText;
         if (self.selectionType == FAMILY_SELECTION) {
             __selectionTop = 0;
-            $timeout(function() {
+            $timeout(function () {
                 self.selectionList = getFamilyList().slice(
                     0,
                     __selectionLength
@@ -324,11 +325,17 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }
         });
     }
-    this.getProjectList = function(wiItemDropdownCtrl) {
+    function refreshProject() {
+        if (!isNaN(self.idProject) && self.idProject > 0) {
+            self.projectChanged({ idProject: self.idProject });
+        }
+    }
+    this.refreshProject = refreshProject;
+    this.getProjectList = function (wiItemDropdownCtrl) {
         if (!self.idProject) {
-            wiApiService.getProjectList(null, function(projectList) {
+            wiApiService.getProjectList(null, function (projectList) {
                 console.log(projectList);
-                wiItemDropdownCtrl.items = projectList.map(function(prj) {
+                wiItemDropdownCtrl.items = projectList.map(function (prj) {
                     return {
                         data: {
                             label: prj.name
@@ -338,14 +345,14 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 });
             });
         } else {
-            wiApiService.getProjectInfo(self.idProject, function(projectProps) {
+            wiApiService.getProjectInfo(self.idProject, function (projectProps) {
                 self.projectName = projectProps.name;
                 self.projectChanged({ idProject: projectProps.idProject });
             });
         }
     };
 
-    this.projectChanged = function(projectProps) {
+    this.projectChanged = function (projectProps) {
         let __idProject = projectProps.idProject;
         if (__idProject > 0) {
             wiApiService.listWells(
@@ -356,7 +363,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             ? self.prjFilter
                             : undefined
                 },
-                function(wells) {
+                function (wells) {
                     self.projectConfig.length = 0;
                     modelFrom(self.projectConfig, wells);
                 }
@@ -364,7 +371,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
     };
     function draggableSetting() {
-        $timeout(function() {
+        $timeout(function () {
             $(
                 'wi-base-treeview#__projectWellTree .wi-parent-node[type="dataset"]'
             ).draggable({
@@ -378,7 +385,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         switch (matchCriterion.type) {
             case FAMILY_GROUP_SELECTION:
                 let familyList = utils.getListFamily();
-                return curves.filter(function(cModel) {
+                return curves.filter(function (cModel) {
                     let group = familyList.find(
                         f => f.idFamily == cModel.properties.idFamily
                     );
@@ -387,26 +394,25 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                         : false;
                 });
             case FAMILY_SELECTION:
-                return curves.filter(function(cModel) {
+                return curves.filter(function (cModel) {
                     return matchCriterion.value == cModel.properties.idFamily;
                 });
             case CURVE_SELECTION:
-                return curves.filter(function(cModel) {
+                return curves.filter(function (cModel) {
                     return matchCriterion.value == cModel.properties.name;
                 });
         }
         return [];
     }
-    this.droppableSetting = function() {
+    this.droppableSetting = function () {
         $("wi-workflow-player .wi-droppable").droppable({
-            drop: function(event, ui) {
-                console.log(parseInt($(ui.draggable[0]).attr("data")));
+            drop: function (event, ui) {
                 let idDataset = parseInt($(ui.draggable[0]).attr("data"));
                 let options = new Object();
                 for (let node of self.projectConfig) {
                     utils.visit(
                         node,
-                        function(_node, _options) {
+                        function (_node, _options) {
                             if (
                                 _node.type == "dataset" &&
                                 _node.id == idDataset
@@ -419,14 +425,13 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     );
                     if (options.found) break;
                 }
-                console.log(options.result);
                 // populate data into self.inputArray
                 if (!options.result) {
                     toastr.error("Dataset doesn't not exist");
                     return;
                 }
                 let datasetModel = options.result;
-                let datasetName = datasetModel.properties.name;
+                // let datasetName = datasetModel.properties.name;
                 let idWell = datasetModel.properties.idWell;
                 let wellModel = self.projectConfig.find(
                     well => well.id == idWell
@@ -436,7 +441,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 for (let wf of self.workflowConfig.steps) {
                     if (!wf.inputData || !Array.isArray(wf.inputData))
                         wf.inputData = new Array();
-                    let inputItems = wf.inputs.map(function(ipt) {
+                    let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
+                    if (existDataset) return;
+                    let inputItems = wf.inputs.map(function (ipt) {
                         let tempItem = {
                             name: ipt.name,
                             choices: matchCurves(datasetModel.children, ipt)
@@ -469,7 +476,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     function selectHandler(currentNode, noLoadData, rootNode, callback) {
         function bareSelectHandler() {
             if (currentNode.data) {
-                $timeout(function() {
+                $timeout(function () {
                     currentNode.data.selected = true;
                 });
                 let selectedNodes = rootNode.__SELECTED_NODES;
@@ -482,7 +489,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
         if (currentNode.type == "well" && !noLoadData) {
             if (Date.now() - (currentNode.ts || 0) > 20 * 1000) {
-                wiApiService.getWell(currentNode.id, function(wellProps) {
+                wiApiService.getWell(currentNode.id, function (wellProps) {
                     currentNode.ts = Date.now();
                     if (wellProps.datasets && wellProps.datasets.length) {
                         currentNode.children.length = 0;
@@ -513,15 +520,15 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
     }
     function unselectAllNodes(rootNode) {
-        rootNode.forEach(function(item) {
-            utils.visit(item, function(node) {
+        rootNode.forEach(function (item) {
+            utils.visit(item, function (node) {
                 if (node.data) node.data.selected = false;
             });
         });
         rootNode.__SELECTED_NODES = [];
     }
 
-    this.prjClickFunction = function($index, $event, node) {
+    this.prjClickFunction = function ($index, $event, node) {
         clickFunction($index, $event, node, self.projectConfig, true);
     };
 
@@ -548,12 +555,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 unselectAllNodes(rootNode);
             }
         }
-        selectHandler(node, false, rootNode, function() {
+        selectHandler(node, false, rootNode, function () {
             draggableSetting();
         });
     }
 
-    this.validate = function() {
+    this.validate = function () {
         for (let step of self.workflowConfig.steps) {
             if (!step.disabled) {
                 for (let input of step.inputs) {
@@ -563,6 +570,58 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
         return true;
     };
+
+    function saveCurve(curveList, curveInfo, callback) {
+        let payload = {
+            data: curveInfo.data,
+            unit: curveInfo.unit,
+            idDataset: curveInfo.idDataset
+        }
+        let curve = curveList.find(c => c.name == curveInfo.name);
+        if (curve) {
+            payload.idDesCurve = curve.idCurve;
+        } else {
+            payload.curveName = curveInfo.name
+        }
+        wiApiService.processingDataCurve(payload, function (ret) {
+            callback();
+        })
+    }
+
+    this.runWorkflow = function (wf) {
+        let run = petrophysics[wf.function];
+        if (wf.inputData && wf.inputData.length && run) {
+            if (!wf.outputData || !Array.isArray(wf.outputData)) wf.outputData = new Array();
+            async.eachOfSeries(wf.inputData, (data, idx, callback) => {
+                let curvesData = [];
+                async.eachOfSeries(data.inputs, (curve, index, cb) => {
+                    let idCurve = curve.value.id;
+                    wiApiService.dataCurve(idCurve, function (data) {
+                        curvesData.push(data.map(d => parseFloat(d.x)));
+                        cb();
+                    })
+                }, (err) => {
+                    if (err) console.log(err);
+                    run(curvesData, wf.parameters, function (ret) {
+                        wf.outputData[idx] = ret;
+                        async.each(ret, (d, cb2) => {
+                            let dataset = data.dataset;
+                            d.idDataset = dataset.idDataset;
+                            saveCurve(dataset.curves, d, cb2);
+                        }, (err) => {
+                            console.log("save curves done");
+                            refreshProject();
+                            callback();
+                        })
+                    })
+                })
+            }, (err) => {
+                if (err) console.log(err);
+                console.log("done!", wf.outputData);
+            }
+            )
+        }
+    }
 }
 
 let app = angular.module(moduleName, []);
