@@ -63,6 +63,7 @@ let wiItemList = require('./wi-item-list');
 let wiItemDropdown = require('./wi-item-dropdown');
 let wiScroll = require('./wi-scroll');
 let wiWorkflow = require('./wi-workflow');
+let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiStep = require('./wi-step');
 
 let wiiExplorer = require('./wii-explorer');
@@ -159,6 +160,7 @@ let app = angular.module('wiapp',
         wiItemDropdown.name,
         wiScroll.name,
         wiWorkflow.name,
+        wiWorkflowPlayer.name,
         wiStep.name,
 
         wiElementReady.name,
