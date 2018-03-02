@@ -61,6 +61,7 @@
     <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/simpleLayout.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/wi-export.css">
     <!-- Insert this line above script imports  -->
     <script>
         if (typeof module === 'object') {
@@ -118,6 +119,7 @@
                         <wi-button name="BatchTools" icon="well-load-32x32" label="Batch Tools" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.BatchToolsClicked"></wi-button>
                         <wi-button name="TestChooseData" icon="edit-curve-32x32" label="Test Choose Data" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.TestChooseData"></wi-button>
 
+                        <wi-button name="ExportTool" icon="export-well-top-32x32" label="Export Tool" container="ribbon" disable="handlers.isDisabled()" class="height65" handler="handlers.ExportToolButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -162,6 +164,13 @@
     </template>
     <div id="testElement"></div>
 
+    <template id="export-tool">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Export Tool</h3>
+            <wi-export></wi-export>
+        </div>
+    </template>
+    
     <script src="js/simpleLayout.js.bundle.js"></script>
     <!--<script src="http://192.168.0.91:33333/socket.io/socket.io.js"></script>-->
     <script src="http://batch.sflow.me/socket.io/socket.io.js"></script>

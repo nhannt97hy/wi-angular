@@ -121,6 +121,8 @@ let wiConditionNode = require('./wi-condition-node');
 let wipm = require('./wi-predict-model');
 let wiTest = require('./wi-test');
 
+let wiExport = require('./wi-export');
+
 let app = angular.module('wiapp',
     [
         wiInitialization.name,
@@ -205,6 +207,7 @@ let app = angular.module('wiapp',
         ngInfiniteScroll,
         wipm.name,
         wiTest.name,
+        wiExport.name,
         'angularModalService',
         'angularResizable',
 
