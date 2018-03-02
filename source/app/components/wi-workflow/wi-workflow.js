@@ -3,21 +3,77 @@ const moduleName = "wi-workflow";
 
 function Controller(wiComponentService) {
     let self = this;
-    this.inputConfig = [{ name: "Gamma Ray" }];
-    this.parameterConfig = [
-        { name: "GR clean", type: "number", value: 10 },
-        { name: "GR clay", type: "number", value: 120 },
-        {
-            name: "Method",
-            type: "select",
-            value: { name: "Linear", value: "Linear" },
-            choices: [
-                { name: "Linear", value: "Linear" },
-                { name: "Clavier", value: "Clavier" },
-                { name: "Larionov Tertiary rocks", value: "Tertiary" }
-            ]
-        }
-    ];
+    this.workflowConfig = {
+        name: "Clastic",
+        steps: [
+            {
+                name: "Shale Volume",
+                inputs: [{ name: "Gamma Ray" }],
+                parameters: [
+                    { name: "GR clean", type: "number", value: 10 },
+                    { name: "GR clay", type: "number", value: 120 },
+                    {
+                        name: "Method",
+                        type: "select",
+                        value: { name: "Linear", value: "Linear" },
+                        choices: [
+                            { name: "Linear", value: "Linear" },
+                            { name: "Clavier", value: "Clavier" },
+                            {
+                                name: "Larionov Tertiary rocks",
+                                value: "Tertiary"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: "Porosity",
+                inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }],
+                parameters: [
+                    { name: "GR clean", type: "number", value: 10 },
+                    { name: "GR clay", type: "number", value: 120 },
+                    {
+                        name: "Method",
+                        type: "select",
+                        value: { name: "Linear", value: "Linear" },
+                        choices: [
+                            { name: "Linear", value: "Linear" },
+                            { name: "Clavier", value: "Clavier" },
+                            {
+                                name: "Larionov Tertiary rocks",
+                                value: "Tertiary"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: "Saturation",
+                inputs: [
+                    { name: "Formation Resistivity" },
+                    { name: "Porosity" }
+                ],
+                parameters: [
+                    { name: "GR clean", type: "number", value: 10 },
+                    { name: "GR clay", type: "number", value: 120 },
+                    {
+                        name: "Method",
+                        type: "select",
+                        value: { name: "Linear", value: "Linear" },
+                        choices: [
+                            { name: "Linear", value: "Linear" },
+                            { name: "Clavier", value: "Clavier" },
+                            {
+                                name: "Larionov Tertiary rocks",
+                                value: "Tertiary"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
 
     this.$onInit = function() {
         wiComponentService.putComponent(wiComponentService.WI_WORKFLOW, self);
