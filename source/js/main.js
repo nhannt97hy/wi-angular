@@ -56,7 +56,7 @@ let wiReferenceWindow = require('./wi-reference-window');
 
 let wiInventory = require('./wi-inventory');
 let wiWorkflow = require('./wi-workflow');
-let wiStep = require('./wi-step');
+let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -164,7 +164,7 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiWorkflow.name,
-        wiStep.name,
+        wiWorkflowPlayer.name,
 
         wiComboview.name,
         wiD3Comboview.name,
