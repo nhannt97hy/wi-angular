@@ -67,7 +67,7 @@ exports.InventoryButtonClicked = function() {
         tabIcon: 'project-normal-16x16',
         componentState: {
             html: `
-                <div style="flex:1;display:flex;flex-direction:row;background-color:#f0f0f0;">
+                <div style="flex:1;display:flex;flex-direction:row;">
                     <wii-explorer name='wiiExplorer' style="margin-left:1em;flex: 4"></wii-explorer>
                     <wii-items name="wiiItems" style="flex: 3;overflow:hidden;"></wii-items>
                     <wii-properties name="wiiProperties" style="flex: 3;overflow:auto;"></wii-properties>
@@ -237,7 +237,7 @@ exports.ImportFromInventoryButtonClicked = function () {
         tabIcon: 'project-normal-16x16',
         componentState: {
             html: `
-                <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+                <div style='height:100%;display:flex;flex-direction:column;'>
                     <wi-inventory style='flex:1;' id-project=${loadedProject.idProject}></wi-inventory>
                 </div>
             `,
