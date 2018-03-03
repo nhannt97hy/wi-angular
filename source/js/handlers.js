@@ -57,9 +57,25 @@ exports.SaveProjectAsButtonClicked = function () {
 };
 
 exports.InventoryButtonClicked = function() {
+    let self = this;
     let wiComponentService = this.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.inventoryDialog(this.ModalService);
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'inventory-inspection',
+        title: 'Inventory Inspection',
+        tabIcon: 'project-normal-16x16',
+        componentState: {
+            html: `
+                <div style="flex:1;display:flex;flex-direction:row;background-color:#f0f0f0;">
+                    <wii-explorer name='wiiExplorer' style="margin-left:1em;flex: 4"></wii-explorer>
+                    <wii-items name="wiiItems" style="flex: 3;overflow:hidden;"></wii-items>
+                    <wii-properties name="wiiProperties" style="flex: 3;overflow:auto;"></wii-properties>
+                </div>
+            `,
+            name: 'wiInventory'
+        }
+    })
 }
 
 exports.ImportButtonClicked = function() {
@@ -211,15 +227,20 @@ exports.ImportFromInventoryButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     // let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     // DialogUtils.importFromInventoryDialog(this.ModalService)
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
-        id: 'inventory',
-        title: 'Inventory',
-        tabIcon: 'project_normal_32x32',
+        id: 'inventory-connect',
+        title: 'Inventory Connect',
+        tabIcon: 'project-normal-16x16',
         componentState: {
-            html: `<wi-inventory></wi-inventory`,
+            html: `
+                <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+                    <wi-inventory style='flex:1;' id-project=${loadedProject.idProject}></wi-inventory>
+                </div>
+            `,
             name: 'wiInventory'
         }
     })
