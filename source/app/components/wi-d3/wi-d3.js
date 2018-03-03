@@ -511,8 +511,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $timeout(function() {
             let track = getComponentCtrlByProperties(logTrackProps).viTrack;
             if (self.containerName) {
-                self.selectionMasks.map(m => m.id = m.idCombinedBoxTool);
-                track.initSelectionArea(self.selectionMasks);
+                track.initSelectionArea(self.viSelections);
+                track.pushSelectionAreas();
             }
         });
     }
@@ -1495,7 +1495,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
-        selectionMasks: '<',
+        viSelections: '<',
         containerName: '@'
     }
 });

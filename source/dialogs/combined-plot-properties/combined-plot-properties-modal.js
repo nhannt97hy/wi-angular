@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, combinedplotInfo, callback) {
+module.exports = function (ModalService, callback) {
     function ModalController(wiComponentService, wiApiService, close) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let self = this;
@@ -8,9 +8,6 @@ module.exports = function (ModalService, combinedplotInfo, callback) {
         let wells = project.wells;
 
         let props = {
-            // logplot: combinedplotInfo.plots[0].idPlot || null,
-            // histogram: combinedplotInfo.histograms[0].idHistogram || null,
-            // crossplot: combinedplotInfo.crossplots[0].idCrossPlot || null
             logplot: null,
             histogram: null,
             crossplot: null

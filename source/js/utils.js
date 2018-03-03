@@ -2370,10 +2370,6 @@ exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
         __GLOBAL.wiApiService.createCombinedBox(dataRequest, function (combinedBox) {
             if (combinedBox.name) {
                 resolve(combinedBox);
-                let comboviewModel = comboviewToTreeConfig(combinedBox);
-                refreshProjectState().then(function () {
-                    openComboviewTab(comboviewModel);
-                });
             } else {
                 reject(combinedBox);
             }
@@ -2384,9 +2380,27 @@ exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
 function openComboviewTab(comboviewModel) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    layoutManager.putTabRightWithModel(comboviewModel);
-    if (comboviewModel.data.opened) return;
-    comboviewModel.data.opened = true;
+    __GLOBAL.wiApiService.getCombinedBox(comboviewModel.properties.idCombinedBox, function (data) {
+        let toolBox = data.combined_box_tools;
+        let selections = data.selection_tools;
+        for (let i = 0; i < selections.length; i++) {
+            let tool = toolBox.find(tool => tool.idCombinedBoxTool == selections[i].idCombinedBoxTool);
+            selections[i].color = tool.color;
+            selections[i].name = tool.name;
+        }
+        let plots = data.plots;
+        let histograms = data.histograms;
+        let crossplots = data.crossplots;
+        // self.init();
+        comboviewModel.properties.toolBox = toolBox;
+        comboviewModel.properties.selections = selections;
+        comboviewModel.properties.plots = plots;
+        comboviewModel.properties.histograms = histograms;
+        comboviewModel.properties.crossplots = crossplots;
+        layoutManager.putTabRightWithModel(comboviewModel);
+        if (comboviewModel.data.opened) return;
+        comboviewModel.data.opened = true;
+    });
 }
 
 exports.openComboviewTab = openComboviewTab;

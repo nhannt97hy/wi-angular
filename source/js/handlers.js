@@ -5,9 +5,9 @@ exports.NewProjectButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.newProjectDialog(ModalService, function (data) {
         self.wiApiService.createProject(data, function (response) {
-            if(!response.name){
+            if (!response.name) {
                 DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!");
-            }else{
+            } else {
                 wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
                 let utils = self.wiComponentService.getComponent('UTILS');
                 self.wiApiService.getProject({ idProject: response.idProject }, function (response) {
@@ -78,7 +78,7 @@ exports.InventoryButtonClicked = function() {
     })
 }
 
-exports.ImportButtonClicked = function() {
+exports.ImportButtonClicked = function () {
     exports.ImportFromInventoryButtonClicked.call(this);
 }
 
@@ -320,22 +320,22 @@ exports.BlankLogplotButtonClicked = function () {
         inputName: 'Log Plot Name',
         input: 'BlankLogPlot'
     }
-    DialogUtils.promptDialog(ModalService, promptConfig,function (logplotName) {
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
-            .then(function(logplot) {
+            .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
-                    wiD3Ctrl.addDepthTrack(function() {
+                    wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Track 1');
                     });
                 });
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 exports.BlankLogplotButtonClicked.call(self);
             });
     });
@@ -364,10 +364,10 @@ exports.TrippleComboButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    if(logplot.familiesWithoutCurve.length > 0){
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
+                    if (logplot.familiesWithoutCurve.length > 0) {
                         let message = "Not Found Curves in families : ";
-                        logplot.familiesWithoutCurve.forEach(function(r){
+                        logplot.familiesWithoutCurve.forEach(function (r) {
                             message += r + "<br>";
                         });
                         // setTimeout(function(){
@@ -405,10 +405,10 @@ exports.DensityNeutronButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    if(logplot.familiesWithoutCurve.length > 0){
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
+                    if (logplot.familiesWithoutCurve.length > 0) {
                         let message = "Not Found Curves in families : ";
-                        logplot.familiesWithoutCurve.forEach(function(r){
+                        logplot.familiesWithoutCurve.forEach(function (r) {
                             message += r + "<br>";
                         });
                         // setTimeout(function(){
@@ -446,10 +446,10 @@ exports.ResistivitySonicButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    if(logplot.familiesWithoutCurve.length > 0){
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
+                    if (logplot.familiesWithoutCurve.length > 0) {
                         let message = "Not Found Curves in families : ";
-                        logplot.familiesWithoutCurve.forEach(function(r){
+                        logplot.familiesWithoutCurve.forEach(function (r) {
                             message += r + "<br>";
                         });
                         // setTimeout(function(){
@@ -487,12 +487,12 @@ exports.TriTracksBlankButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Track 1', function() {
-                            wiD3Ctrl.addLogTrack('Track 2', function() {
+                        wiD3Ctrl.addLogTrack('Track 1', function () {
+                            wiD3Ctrl.addLogTrack('Track 2', function () {
                                 wiD3Ctrl.addLogTrack('Track 3');
                             });
                         });
@@ -528,13 +528,13 @@ exports.InputCurveButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Grammaray', function() {
-                            wiD3Ctrl.addLogTrack('Density', function() {
-                                wiD3Ctrl.addLogTrack('Neutron', function() {
+                        wiD3Ctrl.addLogTrack('Grammaray', function () {
+                            wiD3Ctrl.addLogTrack('Density', function () {
+                                wiD3Ctrl.addLogTrack('Neutron', function () {
                                     wiD3Ctrl.addLogTrack('Sonic');
                                 });
                             });
@@ -571,16 +571,16 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Lithology', function() {
-                            wiD3Ctrl.addLogTrack('Gramma Ray', function() {
-                                wiD3Ctrl.addLogTrack('Density', function() {
-                                    wiD3Ctrl.addLogTrack('Neutron', function() {
-                                        wiD3Ctrl.addLogTrack('Sonic', function() {
-                                            wiD3Ctrl.addLogTrack('Resistivity', function() {
+                        wiD3Ctrl.addLogTrack('Lithology', function () {
+                            wiD3Ctrl.addLogTrack('Gramma Ray', function () {
+                                wiD3Ctrl.addLogTrack('Density', function () {
+                                    wiD3Ctrl.addLogTrack('Neutron', function () {
+                                        wiD3Ctrl.addLogTrack('Sonic', function () {
+                                            wiD3Ctrl.addLogTrack('Resistivity', function () {
                                                 wiD3Ctrl.addLogTrack('PHI_TOTAL');
                                             });
                                         });
@@ -620,14 +620,14 @@ exports.Syn_CurveButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Lithology', function() {
-                            wiD3Ctrl.addLogTrack('Gramma Ray', function() {
-                                wiD3Ctrl.addLogTrack('Density', function() {
-                                    wiD3Ctrl.addLogTrack('Neutron', function() {
+                        wiD3Ctrl.addLogTrack('Lithology', function () {
+                            wiD3Ctrl.addLogTrack('Gramma Ray', function () {
+                                wiD3Ctrl.addLogTrack('Density', function () {
+                                    wiD3Ctrl.addLogTrack('Neutron', function () {
                                         wiD3Ctrl.addLogTrack('Sonic');
                                     });
                                 });
@@ -665,17 +665,17 @@ exports.ResultButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Lithology', function() {
-                            wiD3Ctrl.addLogTrack('GR-DT-RHOB-NPHI', function() {
-                                wiD3Ctrl.addLogTrack('Resistivity', function() {
+                        wiD3Ctrl.addLogTrack('Lithology', function () {
+                            wiD3Ctrl.addLogTrack('GR-DT-RHOB-NPHI', function () {
+                                wiD3Ctrl.addLogTrack('Resistivity', function () {
                                     wiD3Ctrl.addDepthTrack(function () {
-                                        wiD3Ctrl.addLogTrack('Total Porosity', function() {
-                                            wiD3Ctrl.addLogTrack('Fracture Porosity', function() {
-                                                wiD3Ctrl.addLogTrack('Water Saturation', function() {
+                                        wiD3Ctrl.addLogTrack('Total Porosity', function () {
+                                            wiD3Ctrl.addLogTrack('Fracture Porosity', function () {
+                                                wiD3Ctrl.addLogTrack('Water Saturation', function () {
                                                     wiD3Ctrl.addLogTrack('Permeability');
                                                 })
                                             });
@@ -709,7 +709,7 @@ exports.BlankCrossPlotButtonClicked = function () {
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function(err, crossplotModel) {
+        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
             if (err) {
                 exports.BlankCrossPlotButtonClicked.call(self);
             }
@@ -733,7 +733,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         console.log("CROSS NAME : ", crossplotName);
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function(err, crossplotModel){
+        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
             if (err) {
                 newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
             }
@@ -836,7 +836,7 @@ exports.BlankHistogramButtonClicked = function () {
     });
 }
 
-function newTemplateHistogram(name, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback){
+function newTemplateHistogram(name, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback) {
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -882,7 +882,7 @@ exports.NeutronButtonClicked = function () {
 
 exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
-    newTemplateHistogram("RHOB Histogram" ,"Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("RHOB Histogram", "Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
@@ -1235,6 +1235,44 @@ exports.BlankComboviewButtonClicked = function () {
     DialogUtils.promptDialog(ModalService, promptConfig, function (combinedPlotName) {
         utils.createComboview(selectedNode.properties.idWell, combinedPlotName, null)
             .then(function (combinedPlot) {
+                let defaultToolBox = [
+                    {
+                        name: 'Default Tool 1',
+                        color: 'red',
+                        idCombinedBox: combinedPlot.idCombinedBox
+                    },
+                    {
+                        name: 'Default Tool 2',
+                        color: 'green',
+                        idCombinedBox: combinedPlot.idCombinedBox
+                    },
+                    {
+                        name: 'Default Tool 3',
+                        color: 'blue',
+                        idCombinedBox: combinedPlot.idCombinedBox
+                    }
+                ];
+                async.eachSeries(defaultToolBox, function (tool, nextTool) {
+                    wiApiService.createCombinedBoxTool(tool, function(data) {
+                        if (data) {
+                            let reqSelection = {
+                                idCombinedBox: data.idCombinedBox,
+                                idCombinedBoxTool: data.idCombinedBoxTool,
+                                data: []
+                            }
+                            wiApiService.createSelectionTool(reqSelection, function(returnedSelection) {
+                                nextTool();
+                            });
+                        } else {
+                            nextTool();
+                        }
+					});
+                }, function () {
+                    let comboviewModel = utils.comboviewToTreeConfig(combinedPlot);
+                    utils.refreshProjectState().then(function () {
+                        utils.openComboviewTab(comboviewModel);
+                    });
+                });
             })
             .catch(function (err) {
                 utils.error(combinedPlotName + " existed!", function () {

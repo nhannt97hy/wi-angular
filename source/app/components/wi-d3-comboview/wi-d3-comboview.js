@@ -6,6 +6,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 	let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 	let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+	let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 
 	this.layoutManager;
 	this.layoutConfig = {
@@ -27,7 +28,8 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 		self.layoutManager = new GoldenLayout(self.layoutConfig, document.getElementById(domId));
 		self.layoutManager.registerComponent('blank', function (container, state) {
 			let newScope = $scope.$new(true);
-			newScope.selectionMasks = self.wiComboviewCtrl.toolBox;
+			// newScope.viSelections = self.wiComboviewCtrl.selections;
+			newScope.viSelections = self.viSelections;
 			container.getElement().html($compile(state.html)(newScope));
 			let modelRef = state.model;
 			container.on('destroy', function () {
@@ -49,10 +51,16 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	}
 
 	this.onReady = function () {
+		// let selections = self.wiComboviewCtrl.selections;
+		// selections.forEach(function(selectionConfig) {
+		// 	let viSelection = graph.createSelection(selectionConfig);
+		// 	self.viSelections.push(viSelection);
+		// });
 		self.createLayout(self.comboviewAreaId);
 		$(document).on('resize', function () {
 			self.layoutManager.updateSize();
 		});
+		configCombinedPlotProperties(self.plotModels);
 	}
 
 	this.getModel = function () {
@@ -62,12 +70,18 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	this.$onInit = function () {
 		self.comboviewAreaId = self.name + 'ComboviewArea';
 		self.suffix = self.wiComboviewCtrl.name;
+		self.viSelections = [];
+		let selections = self.wiComboviewModel.properties.selections;
+		selections.forEach(function(selectionConfig) {
+			let viSelection = graph.createSelection(selectionConfig);
+			self.viSelections.push(viSelection);
+		});
 		self.plotModels = {
-			logplot: null,
-			histogram: null,
-			crossplot: null
+			logplot: self.wiComboviewModel.properties.plots[0],
+			histogram: self.wiComboviewModel.properties.histograms[0],
+			crossplot: self.wiComboviewModel.properties.crossplots[0]
 		};
-		self.comboviewModel = self.getModel();
+		// self.comboviewModel = self.getModel();
 		if (self.name) {
 			wiComponentService.putComponent(self.name, self);
 			wiComponentService.emit(self.name);
@@ -113,28 +127,27 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 		});
 	}
 
-	this.configCombinedPlotProperties = function () {
-		// wiApiService.getCombinedBox(self.wiComboviewCtrl.id, function(returnedCombinedBox) {
-		// $timeout(function() {
-		let returnedCombinedBox = '';
-		DialogUtils.combinedPlotPropertiesDialog(ModalService, returnedCombinedBox, function (props) {
-			// let dataRequest = {
-			// 	idWell: returnedCombinedBox.idWell,
-			// 	idCombinedBox: returnedCombinedBox.idCombinedBox,
-			// 	idLogPlots: props.logplot.idPlot,
-			// 	idHistograms: props.histogram.idHistogram,
-			// 	idCrossPlots: props.crossplot.idCrossPlot
-			// }
-			// wiApiService.editCombinedBox(dataRequest, function() {
-			// $timeout(function() {
-			if (props.logplot) self.addLogplot(props.logplot);
-			if (props.histogram) self.addHistogram(props.histogram);
-			if (props.crossplot) self.addCrossplot(props.crossplot);
-			// });
-			// });
-		});
-		// });
-		// });
+	this.configCombinedPlotProperties = configCombinedPlotProperties;
+
+	function configCombinedPlotProperties(combinedPlotProps = {}) {
+		const {logplot, histogram, crossplot} = combinedPlotProps;
+		if (logplot || histogram || crossplot) {
+			if (logplot) self.addLogplot(logplot);
+			if (histogram) self.addHistogram(histogram);
+			if (crossplot) self.addCrossplot(crossplot);
+			let dataRequest = {
+				idWell: self.wiComboviewModel.properties.idWell,
+				name: self.wiComboviewModel.properties.name,
+				idCombinedBox: self.wiComboviewCtrl.id,
+				idLogPlots: logplot.idPlot,
+				idCrossPlots: crossplot.idCrossPlot,
+				idHistograms: histogram.idHistogram
+			};
+			wiApiService.editCombinedBox(dataRequest);
+		}
+		else {
+			DialogUtils.combinedPlotPropertiesDialog(ModalService, configCombinedPlotProperties);
+		}
 	}
 
 	this.addLogplot = function (logplotProps) {
@@ -163,20 +176,17 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 	this.drawSelectionOnLogplot = function (selector) {
 		if (!self.plotModels) return;
+		let selection = self.viSelections.find(s => s.idCombinedBoxTool == selector.idCombinedBoxTool);
 		let createdLogplotId = self.plotModels.logplot.properties.idPlot;
 		let wiD3Ctrl = wiComponentService.getComponent('logplot' + createdLogplotId + self.suffix).getwiD3Ctrl();
-		let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 		let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
 		logTracks.forEach(function (track) {
 			track.setMode('UseSelector');
 			let transformY = track.getTransformY();
-			let startDepth, endDepth, maskData = {};
-			// let selection = track.getSelection(selector.id);
-			// let rect = track.plotContainer.node().getBoundingClientRect();
+			let startDepth, stopDepth, maskData = {};
 			track.plotContainer.call(d3.drag()
 				.on('drag', function () {
 					if (track.mode != 'UseSelector') return;
-					// console.log('drawing selection in log track');
 					let y = d3.mouse(track.plotContainer.node())[1];
 					let depth = Math.round(transformY.invert(y));
 					if (!startDepth) startDepth = depth;
@@ -190,25 +200,37 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 							maskData[y] = true;
 						}
 					}
-					graph.plotSelection(wiD3Ctrl, selector.id, maskData);
+					graph.plotSelection(wiD3Ctrl, selection.idSelectionTool, maskData);
 				})
 				.on('end', function () {
 					if (track.mode != 'UseSelector') return;
 					wiComponentService.dropComponent('selector');
 					logTracks.forEach(function (tr) {
 						tr.setMode(null);
-						tr.plotContainer.on('.drag', null)
+						tr.plotContainer.on('.drag', null);
 					});
-					maskData = track.getSelection(selector.id).maskData;
-					let selectionData = track.getSelection(selector.id).updateSelectionData();
+					selection.setData(maskData);
+					selection.data = calculateData(selection.data);
 
+					let reqSelection = {
+						idCombinedBox: selection.idCombinedBox,
+						idCombinedBoxTool: selection.idCombinedBoxTool,
+						idSelectionTool: selection.idSelectionTool,
+						data: selection.data
+					};
+
+					wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
+						if (!returnedSelection) return;
+						let selectionProps = returnedSelection;
+						selectionProps.name = selection.name;
+						selectionProps.color = selection.color;
 					if (self.plotModels.histogram) {
 						let createdHistogramId = self.plotModels.histogram.properties.idHistogram;
 						let createdHistogramComponent = 'histogram' + createdHistogramId + 'comboview' + self.wiComboviewCtrl.id;
 						let createdHistogram = wiComponentService.getComponent(createdHistogramComponent);
 						let createdHistogramD3Area = wiComponentService.getComponent(createdHistogramComponent + 'D3Area');
 						let visHistogram = createdHistogramD3Area.visHistogram;
-						visHistogram.setSelectionData(selectionData, selector);
+							visHistogram.setSelection(selectionProps);
 						visHistogram._doPlot();
 					}
 					if (self.plotModels.crossplot) {
@@ -217,12 +239,33 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 						let createdCrossplot = wiComponentService.getComponent(createdCrossplotComponent);
 						let createdCrossplotD3Area = wiComponentService.getComponent(createdCrossplotComponent + 'D3Area');
 						let viCrossplot = createdCrossplotD3Area.viCrossplot;
-						viCrossplot.setSelectionData(selectionData, selector);
+							viCrossplot.setSelection(selectionProps);
 						viCrossplot._doPlot();
 					}
+					});
 				})
 			);
 		});
+	}
+
+	function calculateData(data) {
+		const mask = new Set();
+		data.forEach(d => {
+			const startDepth = Math.min(+d.startDepth, +d.stopDepth);
+			const stopDepth = Math.max(+d.startDepth, +d.stopDepth);
+			for (let i = startDepth; i <= stopDepth; i++) mask.add(i);
+		})
+		const newData = [];
+		const depths = Array.from(mask.values()).sort((a, b) => a - b);
+		if (!depths.length) return data;
+		let c = depths[0];
+		for (let i = 0; i < depths.length; i++) {
+			if (depths[i + 1] !== depths[i] + 1 || i === length - 1) {
+				newData.push({ startDepth: c, stopDepth: depths[i] });
+				c = depths[i + 1];
+			}
+		}
+		return newData;
 	}
 
 	this.showContextMenu = function (event) {
@@ -260,7 +303,8 @@ app.component(componentName, {
 	transclude: true,
 	bindings: {
 		name: '@',
-		wiComboviewCtrl: '<'
+		wiComboviewCtrl: '<',
+		wiComboviewModel: '<'
 	}
 });
 

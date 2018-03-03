@@ -212,6 +212,11 @@ const GET_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/info';
 const DELETE_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/delete';
 const LIST_COMBINED_BOX_TOOL = '/project/well/combined-box/tool/list';
 
+const CREATE_SELECTION_TOOL = '/project/well/combined-box/selection-tool/new';
+const EDIT_SELECTION_TOOL = '/project/well/combined-box/selection-tool/edit';
+const GET_SELECTION_TOOL = '/project/well/combined-box/selection-tool/info';
+const DELETE_SELECTION_TOOL = '/project/well/combined-box/selection-tool/delete';
+
 const DUSTBIN = '/dustbin';
 const RESTORE_OBJECT = '/dustbin/restore';
 const DELETE_OBJECT = '/dustbin/delete';
@@ -1604,6 +1609,23 @@ Service.prototype.removeCombinedBoxTool = function (idCombinedBoxTool, callback)
 Service.prototype.listCombinedBoxTool = function (idCombinedBox, callback) {
     let self = this;
     this.post(LIST_COMBINED_BOX_TOOL, {idCombinedBox: idCombinedBox}, callback);
+}
+
+Service.prototype.createSelectionTool = function (data, callback) {
+    let self = this;
+    this.post(CREATE_SELECTION_TOOL, data, callback);
+}
+Service.prototype.editSelectionTool = function (data, callback) {
+    let self = this;
+    this.post(EDIT_SELECTION_TOOL, data, callback);
+}
+Service.prototype.getSelectionTool = function (idSelectionTool, callback) {
+    let self = this;
+    this.post(GET_SELECTION_TOOL, {idSelectionTool: idSelectionTool}, callback);
+}
+Service.prototype.removeSelectionTool = function (idSelectionTool, callback) {
+    let self = this;
+    this.delete(DELETE_SELECTION_TOOL, {idSelectionTool: idSelectionTool}, callback);
 }
 
 
