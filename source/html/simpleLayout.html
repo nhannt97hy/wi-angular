@@ -8,6 +8,7 @@
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="vendor/css/toastr.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/css/angular-wizard.min.css">
     <!-- color picker -->
     <link rel="stylesheet" type="text/css" href="vendor/css/bootstrap-colorpicker.min.css">
     <link rel="stylesheet" type="text/css" href="css/color-picker.css">
@@ -60,6 +61,7 @@
     <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/simpleLayout.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/wi-export.css">
     <!-- Insert this line above script imports  -->
     <script>
         if (typeof module === 'object') {
@@ -94,6 +96,7 @@
     <!--select line style && line width-->
     <script src="vendor/js/angular-sanitize.min.js"></script>
     <script src="vendor/js/toastr.min.js"></script>
+    <script type="text/javascript" src="vendor/js/angular-wizard.min.js"></script>
 
     <!-- <script src="vendor/js/angular-toastr.tpls.js"></script>
     <link rel="stylesheet" href="vendor/css/angular-toastr.css" /> -->
@@ -112,7 +115,11 @@
                         </wi-button>
                         <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WipmButtonClicked">
                         </wi-button>
+
                         <wi-button name="BatchTools" icon="well-load-32x32" label="Batch Tools" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.BatchToolsClicked"></wi-button>
+                        <wi-button name="TestChooseData" icon="edit-curve-32x32" label="Test Choose Data" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.TestChooseData"></wi-button>
+
+                        <wi-button name="ExportTool" icon="export-well-top-32x32" label="Export Tool" container="ribbon" disable="handlers.isDisabled()" class="height65" handler="handlers.ExportToolButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -147,6 +154,20 @@
             <h3 class="content-heading">Inventory Connect</h3>
             <wi-inventory style='flex:1;' id-project='1'></wi-inventory>
             <!-- <wi-inventory style='flex:1;'></wi-inventory> -->
+        </div>
+    </template>
+
+    <template id='test'>
+        <!-- <wi-test></wi-test> -->
+        <!-- <wi-workflow id-project='1'></wi-workflow> -->
+        <wi-workflow-player id-project='1' workflow-config='myWorkflowConfig'></wi-workflow-player>
+    </template>
+    <div id="testElement"></div>
+
+    <template id="export-tool">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Export Tool</h3>
+            <wi-export></wi-export>
         </div>
     </template>
     

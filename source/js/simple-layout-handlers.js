@@ -97,6 +97,23 @@ exports.WipmButtonClicked = function () {
     });
 };
 
+exports.ExportToolButtonClicked = function () {
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    // console.log(layoutManager.getRoot());
+    let root = layoutManager.getRoot();
+    root.removeChild(root.contentItems[0]);
+    root.addChild({
+        type: 'component',
+        id: 'export-tool',
+        componentName: 'wi-block',
+        componentState: {
+            templateId: 'export-tool'
+        }
+    });
+};
+
+
 exports.testGetData = function() {
     let wiApiService = this.wiApiService;
     console.log('Test get Data', wiApiService);
@@ -158,3 +175,19 @@ exports.onInventoryInit = function(wiListCtrl) {
         });
     });
 }
+
+exports.TestChooseData = function () {
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    // console.log(layoutManager.getRoot());
+    let root = layoutManager.getRoot();
+    root.removeChild(root.contentItems[0]);
+    root.addChild({
+        type: 'component',
+        id: 'test',
+        componentName: 'wi-block',
+        componentState: {
+            templateId: 'test'
+        }
+    });
+};

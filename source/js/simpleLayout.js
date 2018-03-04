@@ -62,6 +62,9 @@ let wiStages = require('./wi-stages');
 let wiItemList = require('./wi-item-list');
 let wiItemDropdown = require('./wi-item-dropdown');
 let wiScroll = require('./wi-scroll');
+let wiWorkflow = require('./wi-workflow');
+let wiWorkflowPlayer = require('./wi-workflow-player');
+// let wiStep = require('./wi-step');
 
 let wiiExplorer = require('./wii-explorer');
 let wiiItems = require('./wii-items');
@@ -116,6 +119,9 @@ let wiOnlineInvService = require('./wi-online-inv-service');
 let wiConditionNode = require('./wi-condition-node');
 
 let wipm = require('./wi-predict-model');
+let wiTest = require('./wi-test');
+
+let wiExport = require('./wi-export');
 
 let app = angular.module('wiapp',
     [
@@ -154,12 +160,15 @@ let app = angular.module('wiapp',
         wiStages.name,
         wiItemList.name,
         wiItemDropdown.name,
+        wiScroll.name,
+        wiWorkflow.name,
+        wiWorkflowPlayer.name,
+        // wiStep.name,
 
         wiElementReady.name,
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
-        wiScroll.name,
 
         // models
         // wiDepth.name,
@@ -197,6 +206,8 @@ let app = angular.module('wiapp',
 
         ngInfiniteScroll,
         wipm.name,
+        wiTest.name,
+        wiExport.name,
         'angularModalService',
         'angularResizable',
 
@@ -205,7 +216,8 @@ let app = angular.module('wiapp',
         'ui.bootstrap',
         'ngSanitize',
         'ui.select',
-        'angularjs-dropdown-multiselect'
+        'angularjs-dropdown-multiselect',
+        'mgo-angular-wizard'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService) {
@@ -312,6 +324,31 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         wiApiService,
         $timeout
     };
+    $scope.myWorkflowConfig = {
+        name: "Missing curve reconstruction",
+        steps: [
+            {
+                name: "Train",
+                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: [],
+                processFunction: function() {console.log(1);}
+            },
+            {
+                name: "Verify",
+                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: [],
+                processFunction: function() {console.log(2);}
+            },
+            {
+                name: "Predict",
+                inputs: [
+                    { name: "Curve 1 " },{ name: "Curve 2 " } 
+                ],
+                parameters: [],
+                processFunction: function() {console.log(3);}
+            }
+        ]
+    }
     $scope.wiBatchApiService = wiBatchApiService;
     window.utils = utils;
     utils.setGlobalObj(functionBindingProp);

@@ -67,7 +67,7 @@ exports.InventoryButtonClicked = function() {
         tabIcon: 'project-normal-16x16',
         componentState: {
             html: `
-                <div style="flex:1;display:flex;flex-direction:row;">
+                <div style="height:100%;display:flex;flex-direction:row;">
                     <wii-explorer name='wiiExplorer' style="margin-left:1em;flex: 4"></wii-explorer>
                     <wii-items name="wiiItems" style="flex: 3;overflow:hidden;"></wii-items>
                     <wii-properties name="wiiProperties" style="flex: 3;overflow:auto;"></wii-properties>
@@ -106,7 +106,7 @@ exports.WorkflowsButtonClicked = function () {
         title: 'Workflow',
         tabIcon: 'workflow-16x16',
         componentState: {
-            html: `<wi-workflow></wi-workflow>`,
+            html: `<wi-workflow style="height:100%;"></wi-workflow>`,
             name: 'Workflow'
         }
     })

@@ -11,7 +11,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     let __selectionTop = 0;
     let __selectionLength = 50;
     let __selectionDelta = 10;
-    let __familyList = undefined;
     self.filterText = "";
     self.filterText1 = "";
     const CURVE_SELECTION = "1";
@@ -25,6 +24,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         wiComponentService.putComponent(self.name, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
+        
         onSelectionTypeChanged();
 
         // SELECT INPUT TAB
@@ -38,44 +38,96 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         });
         node.data.selected = true;
     };
-    function getFamilyList() {
+    let __familyList;
+    function getFamilyList(callback) {
         if (!self.filterText) {
             if (!__familyList) {
-                __familyList = utils.getListFamily().map(function (family) {
-                    return {
-                        id: family.idFamily,
-                        data: {
-                            label: family.name,
-                            icon: "user-define-16x16",
-                            selected: false
-                        },
-                        children: [],
-                        properties: family
-                    };
-                });
+                let temp = utils.getListFamily();
+                if (temp) {
+                    __familyList = temp.map(function(family) {
+                        return {
+                            id: family.idFamily,
+                            data: {
+                                label: family.name,
+                                icon: "user-define-16x16",
+                                selected: false
+                            },
+                            children: [],
+                            properties: family
+                        };
+                    });
+                    callback(__familyList);
+                }
+                else {
+                    wiApiService.listFamily(function(lstFamily) {
+                        __familyList = lstFamily.map(function(family) {
+                            return {
+                                id: family.idFamily,
+                                data: {
+                                    label: family.name,
+                                    icon: "user-define-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: family
+                            };
+                        });
+                        callback(__familyList);
+                    });
+                }
             }
-            return __familyList;
+            else callback(__familyList);
         } else {
             if (!__familyList) {
-                __familyList = utils.getListFamily().map(function (family) {
-                    return {
-                        id: family.idFamily,
-                        data: {
-                            label: family.name,
-                            icon: "user-define-16x16",
-                            selected: false
-                        },
-                        children: [],
-                        properties: family
-                    };
-                });
+                let temp = utils.getListFamily();
+                if (temp) {
+                    __familyList = temp.map(function(family) {
+                        return {
+                            id: family.idFamily,
+                            data: {
+                                label: family.name,
+                                icon: "user-define-16x16",
+                                selected: false
+                            },
+                            children: [],
+                            properties: family
+                        };
+                    });
+                    callback(__familyList.filter(item =>
+                        item.data.label
+                            .toLowerCase()
+                            .includes(self.filterText.toLowerCase())
+                    ));
+                }
+                else {
+                    wiApiService.listFamily(function(lstFamily) {
+                        __familyList = lstFamily.map(function(family) {
+                            return {
+                                id: family.idFamily,
+                                data: {
+                                    label: family.name,
+                                    icon: "user-define-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: family
+                            };
+                        });
+                        callback(__familyList.filter(item =>
+                            item.data.label
+                                .toLowerCase()
+                                .includes(self.filterText.toLowerCase())
+                        ));
+                    });
+                }
             }
-            let list = __familyList;
-            return list.filter(item =>
-                item.data.label
-                    .toLowerCase()
-                    .includes(self.filterText.toLowerCase())
-            );
+            else {
+                callback(__familyList.filter(item =>
+                    item.data.label
+                        .toLowerCase()
+                        .includes(self.filterText.toLowerCase())
+                ));
+            }
         }
     }
     /*this.inputArray = [
@@ -163,69 +215,160 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     //	inputConfig = [{ name: "Gamma Ray", value: "Gama Ray Family", type: "2" }];
     ////	inputConfig = [{ name: "Gamma Ray", value: "DTCO3", type: "1" }];
     this.onSelectionTypeChanged = onSelectionTypeChanged;
-    function onSelectionTypeChanged() {
+    function onSelectionTypeChanged(selType) {
         self.filterText1 = "";
         self.filterText = "";
+        self.selectionType = selType || self.selectionType;
         switch (self.selectionType) {
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
                 let groups = new Set();
-                temp.forEach(t => {
-                    groups.add(t.familyGroup);
-                });
-                self.selectionList = Array.from(groups).map(g => {
-                    return {
-                        id: -1,
-                        data: {
-                            label: g,
-                            icon: "zone-table-16x16",
-                            selected: false
-                        },
-                        children: [],
-                        properties: {}
-                    };
-                });
+                if(temp){
+                    temp.forEach(t => {
+                        groups.add(t.familyGroup);
+                    });
+                    $timeout(function(){
+                        self.selectionList = Array.from(groups).map(g => {
+                            return {
+                                id: -1,
+                                data: {
+                                    label: g,
+                                    icon: "zone-table-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: {}
+                            };
+                        });
+                    });
+                }else{
+                    wiApiService.listFamily(function(temp){
+                        temp.forEach(t => {
+                            groups.add(t.familyGroup);
+                        });
+                        $timeout(function() {
+                            self.selectionList = Array.from(groups).map(g => {
+                                return {
+                                    id: -1,
+                                    data: {
+                                        label: g,
+                                        icon: "zone-table-16x16",
+                                        selected: false
+                                    },
+                                    children: [],
+                                    properties: {}
+                                };
+                            });
+                        });
+                    })
+                }
+                
                 break;
             case FAMILY_SELECTION:
-                let tempArray = getFamilyList();
-                self.selectionList = tempArray.slice(0, __selectionLength);
-                __selectionTop = 0;
+                getFamilyList(function(familyList) {
+                    $timeout(function() {
+                        self.selectionList = familyList.slice(0, __selectionLength);
+                    });
+                    __selectionTop = 0;
+                });
                 break;
             case CURVE_SELECTION:
                 let hash = new Object();
-                let root = wiComponentService.getComponent(
-                    wiComponentService.WI_EXPLORER
-                ).treeConfig[0];
-                utils.visit(
-                    root,
-                    function (node, _hash) {
-                        if (node.type == "curve") {
-                            _hash[node.data.label] = 1;
-                        }
-                        return false;
-                    },
-                    hash
-                );
-                self.selectionList = Object.keys(hash).map(function (key) {
-                    return {
-                        id: -1,
-                        data: {
-                            label: key,
-                            icon: "curve-16x16",
-                            selected: false
+                let wiExplr = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+                let root = null;
+                if (wiExplr) root = wiExplr.treeConfig[0];
+                if (root) {
+                    utils.visit(
+                        root,
+                        function(node, _hash) {
+                            if (node.type == "curve") {
+                                _hash[node.data.label] = 1;
+                            }
+                            return false;
                         },
-                        children: [],
-                        properties: {}
-                    };
-                });
+                        hash
+                    );
+                    $timeout(() => self.selectionList = Object.keys(hash).map(function(key) {
+                        return {
+                            id: -1,
+                            data: {
+                                label: key,
+                                icon: "curve-16x16",
+                                selected: false
+                            },
+                            children: [],
+                            properties: {}
+                        };
+                    }));
+                }
+                else {
+                    buildCurveListFromServer(function(curve) {
+                        hash[curve.name] = 1;
+                    }, function() {
+                        $timeout(() => self.selectionList = Object.keys(hash).map(function(key) {
+                            return {
+                                id: -1,
+                                data: {
+                                    label: key,
+                                    icon: "curve-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: {}
+                            };
+                        }));
+                    });
+                }
                 break;
             default:
                 break;
         }
     }
-
-    this.onSelectTemplate = function (parentIdx, itemIdx) {
-        let __SELECTED_NODE = self.selectionList.find(function (d) {
+    function buildCurveListFromServer(cb, done) {
+        // wiApiService.listWells({
+        //     idProject:self.idProject,
+        //     limit: 100000
+        // }, function(wells) {
+        //     for (let well of wells) {
+        //         wiApiService.getWell(well.idWell, function(wellProps) {
+        //             for (let dataset of wellProps.datasets) {
+        //                 for (let curve of dataset.curves) {
+        //                     cb(curve);
+        //                 }
+        //             }
+        //         })
+        //     }
+        // });
+        if (!self.idProject) {
+            toastr.error("No project exists");
+            return;
+        }
+        wiApiService.listWells({
+            idProject:self.idProject,
+            limit: 100000
+        }, function(wells) {
+            if (!Array.isArray(wells)) {
+                toastr.error('Error in listing wells');
+                console.error(wells);
+                return;
+            } 
+            async.each(wells, function(well, __end) {
+                wiApiService.getWell(well.idWell, function(wellProps) {
+                    for (let dataset of wellProps.datasets) {
+                        for (let curve of dataset.curves) {
+                            cb(curve);
+                        }
+                    }
+                    __end();
+                })
+            }, function(err) {
+                done();
+            });
+                
+        });
+    }
+    this.onSelectTemplate = function(parentIdx, itemIdx) {
+        let __SELECTED_NODE = self.selectionList.find(function(d) {
             return d.data.selected;
         });
         if (__SELECTED_NODE) {
@@ -246,63 +389,67 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
         // self.inputArray.splice(idx, 1);
     };
-    this.upTrigger = function (cb) {
-        let familyList = getFamilyList();
+    this.upTrigger = function(cb) {
         if (self.selectionType == FAMILY_SELECTION) {
             if (__selectionTop > 0) {
                 if (__selectionTop > __selectionDelta) {
-                    let newItems = familyList
-                        .slice(
-                            __selectionTop - __selectionDelta,
-                            __selectionTop
-                        )
-                        .reverse();
-                    __selectionTop = __selectionTop - __selectionDelta;
-                    cb(newItems, self.selectionList);
+                    getFamilyList(function(familyList) {
+                        let newItems = familyList
+                            .slice(
+                                __selectionTop - __selectionDelta,
+                                __selectionTop
+                            )
+                            .reverse();
+                        __selectionTop = __selectionTop - __selectionDelta;
+                        cb(newItems, self.selectionList);
+
+                    });
                 } else {
-                    let newItems = familyList
-                        .slice(0, __selectionTop)
-                        .reverse();
-                    __selectionTop = 0;
-                    cb(newItems, self.selectionList);
+                    getFamilyList(function(familyList) {
+                        let newItems = familyList
+                            .slice(0, __selectionTop)
+                            .reverse();
+                        __selectionTop = 0;
+                        cb(newItems, self.selectionList);
+                    });
                 }
             } else cb([]);
         } else cb([]);
     };
-    this.downTrigger = function (cb) {
-        let familyList = getFamilyList();
+    this.downTrigger = function(cb) {
         if (self.selectionType == FAMILY_SELECTION) {
-            let __selectionBottom = __selectionTop + __selectionLength;
-            if (__selectionBottom < familyList.length) {
-                if (familyList.length - __selectionBottom > __selectionDelta) {
-                    let newItems = familyList.slice(
-                        __selectionBottom + 1,
-                        __selectionDelta + __selectionBottom + 1
-                    );
-                    __selectionTop = __selectionTop + __selectionDelta;
-                    cb(newItems, self.selectionList);
-                } else {
-                    let newItems = familyList.slice(
-                        __selectionBottom + 1,
-                        familyList.length
-                    );
-                    __selectionTop =
-                        __selectionTop +
-                        (familyList.length - __selectionBottom);
-                    cb(newItems, self.selectionList);
-                }
-            } else cb([]);
+            getFamilyList(function(familyList) {
+                let __selectionBottom = __selectionTop + __selectionLength;
+                if (__selectionBottom < familyList.length) {
+                    if (familyList.length - __selectionBottom > __selectionDelta) {
+                        let newItems = familyList.slice(
+                            __selectionBottom + 1,
+                            __selectionDelta + __selectionBottom + 1
+                        );
+                        __selectionTop = __selectionTop + __selectionDelta;
+                        cb(newItems, self.selectionList);
+                    } else {
+                        let newItems = familyList.slice(
+                            __selectionBottom + 1,
+                            familyList.length
+                        );
+                        __selectionTop =
+                            __selectionTop +
+                            (familyList.length - __selectionBottom);
+                        cb(newItems, self.selectionList);
+                    }
+                } else cb([]);
+            });
         } else cb([]);
     };
     this.onFilterEnterKey = function (filterText) {
         self.filterText = filterText;
         if (self.selectionType == FAMILY_SELECTION) {
             __selectionTop = 0;
-            $timeout(function () {
-                self.selectionList = getFamilyList().slice(
-                    0,
-                    __selectionLength
-                );
+            $timeout(function() {
+                getFamilyList(function(familyList) {
+                    self.selectionList = familyList.slice(0,__selectionLength);
+                });
             });
         }
     };
@@ -385,13 +532,15 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         switch (matchCriterion.type) {
             case FAMILY_GROUP_SELECTION:
                 let familyList = utils.getListFamily();
-                return curves.filter(function (cModel) {
-                    let group = familyList.find(
-                        f => f.idFamily == cModel.properties.idFamily
-                    );
-                    return group
-                        ? matchCriterion.value == group.familyGroup
-                        : false;
+                return curves.filter(function(cModel) {
+                    if(familyList){
+                        let group = familyList.find(
+                            f => f.idFamily == cModel.properties.idFamily
+                        );
+                        return group
+                            ? matchCriterion.value == group.familyGroup
+                            : false;
+                    }
                 });
             case FAMILY_SELECTION:
                 return curves.filter(function (cModel) {
@@ -407,6 +556,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     this.droppableSetting = function () {
         $("wi-workflow-player .wi-droppable").droppable({
             drop: function (event, ui) {
+                let w = $(this.parentElement).width();
+                $(this.parentElement).css('width', w);
                 let idDataset = parseInt($(ui.draggable[0]).attr("data"));
                 let options = new Object();
                 for (let node of self.projectConfig) {

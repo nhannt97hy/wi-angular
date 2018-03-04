@@ -2,6 +2,8 @@ const name = "wiStep";
 const moduleName = "wi-step";
 
 function Controller(wiComponentService, wiApiService, $timeout, $scope) {
+    let list ;
+    
     let self = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
@@ -24,8 +26,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         wiComponentService.putComponent(self.name, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
-        onSelectionTypeChanged();
-
+        wiApiService.listFamily(function(listF){
+            console.log(listF);
+            list = listF;
+            onSelectionTypeChanged();
+        })
+        
         // SELECT INPUT TAB
         self.isFrozen = !!self.idProject;
         self.projectConfig = new Array();
@@ -40,7 +46,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     function getFamilyList() {
         if (!self.filterText) {
             if (!__familyList) {
-                __familyList = utils.getListFamily().map(function(family) {
+                let temp = utils.getListFamily();
+                if(!temp)
+                    temp = list;
+                __familyList = temp.map(function(family) {
                     return {
                         id: family.idFamily,
                         data: {
@@ -56,7 +65,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             return __familyList;
         } else {
             if (!__familyList) {
-                __familyList = utils.getListFamily().map(function(family) {
+                let temp = utils.getListFamily();
+                if(!temp)
+                    temp = list;
+                __familyList = temp.map(function(family) {
                     return {
                         id: family.idFamily,
                         data: {
@@ -139,12 +151,16 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     //	inputConfig = [{ name: "Gamma Ray", value: "Gama Ray Family", type: "2" }];
     ////	inputConfig = [{ name: "Gamma Ray", value: "DTCO3", type: "1" }];
     this.onSelectionTypeChanged = onSelectionTypeChanged;
+    
     function onSelectionTypeChanged() {
         self.filterText1 = "";
         self.filterText = "";
         switch (self.selectionType) {
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
+                // console.log('temp: ', temp);
+                if(!temp)
+                    temp = list;
                 let groups = new Set();
                 temp.forEach(t => {
                     groups.add(t.familyGroup);
@@ -182,6 +198,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     },
                     hash
                 );
+                console.log('hash: ', hash);
                 self.selectionList = Object.keys(hash).map(function(key) {
                     return {
                         id: -1,
