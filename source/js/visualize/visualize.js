@@ -12,6 +12,7 @@ let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
 let Histogram = require('./visualize-histogram');
+let Selection = require('./visualize-selection');
 
 exports.CanvasHelper = CanvasHelper;
 
@@ -242,11 +243,30 @@ exports.createHistogram = function(config, depthStep, startDepth, endDepth, domE
     return histogram;
 }
 
-exports.plotSelection = function (wiD3Ctrl, selectionId, data) {
+exports.plotSelection = function (wiD3Ctrl, selectionId, newDatum) {
     let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
     logTracks.forEach(t => {
         let selection = t.getSelection(selectionId);
-        selection.setProperties({maskData: data});
-        t.plotDrawing(selection);
+        // const data = selection.data;
+        // let newStartPos, newStopPos;
+        // const datum = data.find(d => {
+        //     if (newDatum.startDepth < d.startDepth && newDatum.startDepth < d.stopDepth) newStartPos = -1;
+        //     if (newDatum.startDepth >= d.startDepth && newDatum.startDepth <= d.stopDepth) newStartPos = 0;
+        //     if (newDatum.startDepth > d.startDepth && newDatum.startDepth > d.stopDepth) newStartPos = 1;
+        //     if (newDatum.stopDepth < d.startDepth && newDatum.stopDepth < d.stopDepth) newStartPos = -1;
+        //     if (newDatum.stopDepth >= d.startDepth && newDatum.stopDepth <= d.stopDepth) newStartPos = 0;
+        //     if (newDatum.stopDepth > d.startDepth && newDatum.stopDepth > d.stopDepth) newStartPos = 1;
+
+        //     d.startDepth === newDatum.startDepth
+        // });
+        // if (datum) data.splice(data.indexOf(datum), 1, newDatum);
+        selection.setProperties({maskData: newDatum});
+        selection._doPlot();
+        // t.plotDrawing(selection);
     })
+}
+
+exports.createSelection = function (config) {
+    let selection = new Selection(config);
+    return selection;
 }
