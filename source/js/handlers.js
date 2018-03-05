@@ -56,7 +56,7 @@ exports.SaveProjectAsButtonClicked = function () {
     console.log('SaveProjectAsButton is clicked');
 };
 
-exports.InventoryButtonClicked = function() {
+exports.InventoryButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -491,8 +491,8 @@ exports.TriTracksBlankButtonClicked = function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Track 1', function () {
-                            wiD3Ctrl.addLogTrack('Track 2', function () {
+                        wiD3Ctrl.addLogTrack('Track 1', undefined, function () {
+                            wiD3Ctrl.addLogTrack('Track 2', undefined, function () {
                                 wiD3Ctrl.addLogTrack('Track 3');
                             });
                         });
@@ -1253,20 +1253,20 @@ exports.BlankComboviewButtonClicked = function () {
                     }
                 ];
                 async.eachSeries(defaultToolBox, function (tool, nextTool) {
-                    wiApiService.createCombinedBoxTool(tool, function(data) {
+                    wiApiService.createCombinedBoxTool(tool, function (data) {
                         if (data) {
                             let reqSelection = {
                                 idCombinedBox: data.idCombinedBox,
                                 idCombinedBoxTool: data.idCombinedBoxTool,
                                 data: []
                             }
-                            wiApiService.createSelectionTool(reqSelection, function(returnedSelection) {
+                            wiApiService.createSelectionTool(reqSelection, function (returnedSelection) {
                                 nextTool();
                             });
                         } else {
                             nextTool();
                         }
-					});
+                    });
                 }, function () {
                     let comboviewModel = utils.comboviewToTreeConfig(combinedPlot);
                     utils.refreshProjectState().then(function () {
