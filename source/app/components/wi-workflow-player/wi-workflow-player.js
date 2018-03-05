@@ -360,7 +360,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }, function(err) {
                 done();
             });
-                
         });
     }
     this.onSelectTemplate = function(parentIdx, itemIdx) {

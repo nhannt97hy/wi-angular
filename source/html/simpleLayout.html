@@ -158,9 +158,10 @@
     </template>
 
     <template id='test'>
-        <!-- <wi-test></wi-test> -->
-        <!-- <wi-workflow id-project='1'></wi-workflow> -->
-        <wi-workflow-player id-project='1' workflow-config='myWorkflowConfig'></wi-workflow-player>
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wipm">
+            <h3 class="content-heading">WIPM</h3>
+            <wi-workflow-player name="wiWorkflowPlayer" id-project='1' workflow-config='myWorkflowConfig'></wi-workflow-player>
+        </div>
     </template>
     <div id="testElement"></div>
 

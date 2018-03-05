@@ -324,31 +324,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         wiApiService,
         $timeout
     };
-    $scope.myWorkflowConfig = {
-        name: "Missing curve reconstruction",
-        steps: [
-            {
-                name: "Train",
-                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
-                parameters: [],
-                processFunction: function() {console.log(1);}
-            },
-            {
-                name: "Verify",
-                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
-                parameters: [],
-                processFunction: function() {console.log(2);}
-            },
-            {
-                name: "Predict",
-                inputs: [
-                    { name: "Curve 1 " },{ name: "Curve 2 " } 
-                ],
-                parameters: [],
-                processFunction: function() {console.log(3);}
-            }
-        ]
-    }
     $scope.wiBatchApiService = wiBatchApiService;
     window.utils = utils;
     utils.setGlobalObj(functionBindingProp);
@@ -383,6 +358,98 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
             title: 'Title'
         });
         */
+    }
+});
+app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentService, $http){
+    let listCurves = [];
+    const HOST = '54.169.13.92';
+    const PORT = 3002;
+    function getDataCurves(i, callback){
+        let wiWorkflowPlayer = wiComponentService.getComponent('wiWorkflowPlayer');
+        let curves = wiWorkflowPlayer.workflowConfig.steps[i].inputData[0].inputs;
+        async.each(curves, function(curve, __end){
+            wiApiService.dataCurve(curve.value.id, function(data){
+                let a_curve = [];
+                data.forEach(function(point){
+                    a_curve.push(point.x);
+                });
+                listCurves.push(a_curve);
+                __end();
+            });
+        }, function(err){
+            console.log(listCurves);
+            callback(listCurves);
+        });
+    }
+    $scope.myWorkflowConfig = {
+        name: "Missing curve reconstruction",
+        steps: [
+            {
+                name: "Train",
+                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: [],
+                processFunction: train
+            },
+            {
+                name: "Verify",
+                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                parameters: [],
+                processFunction: verify
+            },
+            {
+                name: "Predict",
+                inputs: [
+                    { name: "Curve 1 " },{ name: "Curve 2 " } 
+                ],
+                parameters: [],
+                processFunction: predict
+            }
+        ]
+    }
+    function train(){
+        getDataCurves(0, function(curves){
+            DialogUtils.trainModelDialog(ModalService, function(payload){
+                // console.log(curves);
+                // payload.data.push(curves[0], curves[1]);
+                // payload.target.push(curves[2]);
+                payload.data = [
+                    [1,0,0,1,0,0,1],
+                    [1,0,0,1,0,0,1],
+                    [1,0,0,1,0,0,1],
+                    [1,0,0,1,0,0,1],
+                    [1,0,0,1,0,0,1],
+                    [1,0,0,1,0,0,1],
+                    [1,0,0,1,0,0,1]
+                ];
+                payload.target = [1,2,1,4,5,2,1];
+                wiComponentService.getComponent('SPINNER').show();       
+                $http({
+                    method: 'POST',
+                    url: 'http://'+HOST+':'+PORT + '/store/api/model/new',
+                    data: payload
+                }).then(function(response){
+                        console.log('create model:', response.data);
+                        wiComponentService.getComponent('SPINNER').hide();
+                        var res = response.data;
+                        if(res.statusCode == 200){
+                            toastr.success('Create model success!', '');
+                        }else{
+                            toastr.error(res.body.message, '');
+                        }
+                        return;
+                }, function(error){
+                    wiComponentService.getComponent('SPINNER').hide();
+                    toastr.error('Call store api create model error!', '');
+                    return;
+                })
+            });
+        })
+    }
+    function verify(){
+
+    }
+    function predict(){
+
     }
 });
 app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope, ModalService) {
