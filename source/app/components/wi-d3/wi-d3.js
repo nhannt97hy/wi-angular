@@ -332,7 +332,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: 0.65
             }, function (depthTrack) {
                 self.pushDepthTrack(depthTrack);
-                if (callback) callback();
+                $timeout(callback);
             });
         }
         else {
@@ -343,7 +343,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var trackOrder = getOrderKey();
         if (trackOrder) {
             const logTracks = self.getTracks().filter(track => track.type == 'log-track');
-            let logTrackProps;
+            let createdLogTrack;
             let logTrack;
             async.series([
                 function (callback) {
