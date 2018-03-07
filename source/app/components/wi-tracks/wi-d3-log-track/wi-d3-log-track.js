@@ -488,25 +488,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             delete options.leftCurve;
 
             wiApiService.editShading(request, function (shading) {
-                Utils.getPalettes(function(paletteList){
-                    wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                        options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
-                        if(!options.isNegPosFill) {
-                            if(options.fill.varShading && options.fill.varShading.palName)
-                                options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
-                        }
-                        else {
-                            if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
-                                options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                            if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
-                                options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                        }
-                        currentShading.setProperties(options);
-                        $timeout(function() {
-                            _currentTrack.plotAllDrawings();
-                        });
-                    });
-                });
+                self.wiD3Ctrl.updateTrack(_currentTrack);
             });
         }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
     };

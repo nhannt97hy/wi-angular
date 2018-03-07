@@ -436,6 +436,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             if (s.type == 'right') s.leftCurve = {"id": -2, "name": "right"}
             if (s.type == 'custom') s.leftCurve = {"id": -3, "name": "custom"}
             if (s.type == 'pair') s.leftCurve = getLine(s.idLeftLine);
+            s.idLeftLine = s.leftCurve.id;
             s.shadingStyle = utils.getShadingStyle(s.isNegPosFill ? s.positiveFill : s.fill);
         });
         this.typeFixedValue = function () {
@@ -444,7 +445,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 self.shadings[self.__idx].idLeftLine = -1;
                 self.shadings[self.__idx].type = 'left';
             }
-            if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightCurve.maxX) {
+            else if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightCurve.maxX) {
                 self.shadings[self.__idx].leftCurve = {"id": -2, "name": "right"};
                 self.shadings[self.__idx].idLeftLine = -2;
                 self.shadings[self.__idx].type = 'right';
@@ -453,7 +454,6 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 self.shadings[self.__idx].leftCurve = {"id": -3, "name": "custom"};
                 self.shadings[self.__idx].idLeftLine = -3;
                 self.shadings[self.__idx].type = 'custom';
-
             }
         }
         this.getShadings = function () {
