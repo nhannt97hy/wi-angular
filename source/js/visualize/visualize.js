@@ -12,6 +12,8 @@ let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
 let Histogram = require('./visualize-histogram');
+let neuralNetworkPlayground = require('./neural-network/visualize-neural-network-playground');
+
 
 exports.CanvasHelper = CanvasHelper;
 
@@ -249,4 +251,10 @@ exports.plotSelection = function (wiD3Ctrl, selectionId, data) {
         selection.setProperties({maskData: data});
         t.plotDrawing(selection);
     })
+}
+
+exports.createNNPlayground = function (config, domElem) {
+    let neuralNetWork = new neuralNetworkPlayground(config);
+    neuralNetWork.init(domElem);
+    return neuralNetWork;
 }

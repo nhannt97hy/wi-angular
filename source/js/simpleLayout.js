@@ -15,6 +15,7 @@ let utils = require('./utils');
 
 //let DialogUtils = require('./DialogUtils');
 let DialogUtils = require('./SimpleDialogUtils');
+// let graph = require('./SimpleVisualize');
 
 let wiInitialization = require('./wi-initialization.js');
 let wiButton = require('./wi-button.js');
@@ -40,6 +41,7 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiNeuralNetwork = require('./wi-neural-network');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -154,6 +156,7 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiNeuralNetwork.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -329,6 +332,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    wiComponentService.putComponent(wiComponentService.GRAPH, graph);
     appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
@@ -631,9 +635,9 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
         });
     }
 });
-const monthNames = [ 
-    "Jan", "Feb", "Mar", "Apr", 
-    "May", "Jun", "Jul", "Aug", 
+const monthNames = [
+    "Jan", "Feb", "Mar", "Apr",
+    "May", "Jun", "Jul", "Aug",
     "Sep", "Oct", "Nov", "Dec"
 ];
 app.controller('runImport', function($scope, $rootScope, $timeout) {
@@ -647,7 +651,7 @@ app.controller('runImport', function($scope, $rootScope, $timeout) {
     $scope.animateClass = "";
     $scope.msgQueue = [];
 
-    if (!$scope.selected.zipArchive) 
+    if (!$scope.selected.zipArchive)
         $scope.selected.zipArchive = $rootScope.zipArchives && $rootScope.zipArchives.length ? $rootScope.zipArchives[0] : null;
 
     $scope.zipArchives = $rootScope.zipArchives;
@@ -704,8 +708,8 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
             else {
                 let wells = wiItemListCtrl.items;
                 wiOnlineInvService.listWells({
-                    start: wells[0].properties.idWell, 
-                    limit: 10, 
+                    start: wells[0].properties.idWell,
+                    limit: 10,
                     forward: false
                 }, function(listOfWells) {
                     $timeout(function() {
@@ -730,8 +734,8 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
             else {
                 let wells = wiItemListCtrl.items;
                 wiOnlineInvService.listWells({
-                    start: wells[wells.length - 1].properties.idWell, 
-                    limit: 10, 
+                    start: wells[wells.length - 1].properties.idWell,
+                    limit: 10,
                     forward: true
                 }, function(listOfWells) {
                     $timeout(function() {
@@ -749,6 +753,52 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
         });
     }
 });
+
+app.controller('NeuralController', function($scope, ModalService) {
+    console.log('controller: ', this, $scope);
+    let self = this;
+    // fake datas
+    self.nNodes = 16;
+    self.nLayers = 6;
+    self.inputCurves = [{name: 'DTCO3'}, {name: 'ECGR'}, {name: 'DTCO3'}, {name: 'DTCO3'}, {name: 'DTCO3'},
+                        {name: 'ECGR'}, {name: 'DTCO3'}, {name: 'DTCO3'}];;
+    self.outputCurves = [{name: 'C2'}, {name: 'ECGR'}, {name: 'DTCO3'}];
+    console.log('controller: ', this, $scope);
+    this.addLayerButtonClicked = function () {
+        this.nLayers ++;
+    }
+    this.removeLayerButtonClicked = function () {
+        this.nLayers = (--this.nLayers) < 0 ? 0:this.nLayers;
+    }
+    this.addNodeButtonClicked = function () {
+        this.nNodes ++;
+    }
+    this.removeNodeButtonClicked = function () {
+        this.nNodes = (--this.nNodes) < 0 ? 0:this.nNodes;
+    }
+    this.neuralNetWorkProperties = function () {
+        let config = self.getConfigs();
+        DialogUtils.neuralNetWorkPropertiesDialog(ModalService, config, function (nnConfig) {
+            self.setConfigs(nnConfig);
+        });
+    }
+    this.getConfigs = function () {
+        return {
+            inputCurves: self.inputCurves,
+            nLayers: self.nLayers,
+            nNodes: self.nNodes,
+            outputCurves: self.outputCurves
+        }
+    }
+
+    this.setConfigs = function (newConfig) {
+        // change reference of 2 array to invoke $onChanges methods
+        self.inputCurves = angular.copy(newConfig.inputCurves);
+        self.outputCurves = angular.copy(newConfig.outputCurves);
+        self.nLayers = newConfig.nLayers;
+        self.nNodes = newConfig.nNodes;
+    }
+})
 
 app.filter('datetimeFormat', function() {
     return function(timestamp) {
