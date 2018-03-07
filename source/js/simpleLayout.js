@@ -367,22 +367,40 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
     function getDataCurves(i, callback){
         listCurves = [];
         let wiWorkflowPlayer = wiComponentService.getComponent('wiWorkflowPlayer');
-        // console.log('wiWorkflowPlayer: ', wiWorkflowPlayer);
+        console.log('wiWorkflowPlayer: ', wiWorkflowPlayer);
         let inputData = wiWorkflowPlayer.workflowConfig.steps[i].inputData;
         if(inputData){
-            let curves = inputData[0].inputs;
-            async.each(curves, function(curve, __end){
-                wiApiService.dataCurve(curve.value.id, function(data){
-                    let a_curve = [];
-                    data.forEach(function(point){
-                        a_curve.push(point.x);
+            let listInputData = [];
+            inputData.forEach(function(data, i){
+                let checkFullCurve = true;
+                for(let j =0 ; j<data.inputs.length; j++){
+                    if(!data.inputs[j].value){
+                        checkFullCurve = false;
+                        break;
+                    }
+                }
+                if(checkFullCurve)
+                    listInputData.push(data.inputs);
+            });
+            for(let i =0; i< inputData[0].inputs.length; i++){
+                listCurves[i] = [];
+            }
+            listInputData.forEach(function(input_data, i){
+                let j=-1;
+                async.each(input_data, function(curve,__end){
+                    wiApiService.dataCurve(curve.value.id, function(data){
+                        j++;
+                        data.forEach(function(point){
+                            listCurves[j].push(point.x);
+                        });
+                        __end();
                     });
-                    listCurves.push(a_curve);
-                    __end();
+                }, function(err){
+                    if(i==listInputData.length-1){
+                        console.log(listCurves);
+                        callback(listCurves);
+                    }
                 });
-            }, function(err){
-                // console.log(listCurves);
-                callback(listCurves);
             });
         }else {
             toastr.error('Choose a dataset', '');
@@ -446,6 +464,7 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
                     filterCurves[j].push(curves[j][i]);
                 }
         }
+        console.log('result of filterNull: ', filterCurves);
         return filterCurves;
     }
     function train(){
@@ -487,7 +506,6 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
     function predict(){
         getDataCurves(1, function(list_curves){
             let curves = filterNull(list_curves);
-            console.log(curves);
             DialogUtils.predictModelDialog(ModalService, function(payload){
                 payload.data = curves;
                 wiComponentService.getComponent('SPINNER').show();  
