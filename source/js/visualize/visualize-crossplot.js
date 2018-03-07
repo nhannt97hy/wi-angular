@@ -1506,7 +1506,7 @@ Crossplot.prototype.prepareSelectionData = function(depthData) {
     let self = this;
     let selectionData = [];
     depthData.forEach(function(data) {
-        let selectionDepths = [];
+        let selectionPoints = [];
         Utils.parseData(self.pointSet.curveY.data).forEach(function(d) {
             if (!self.isInSelections(d, data)) return;
             if (self.discriminatorData.length) {
@@ -1516,7 +1516,7 @@ Crossplot.prototype.prepareSelectionData = function(depthData) {
             }
 
             if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
-                selectionDepths.push({
+                selectionPoints.push({
                     x: mapX[d.y],
                     y: d.x,
                     z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
@@ -1524,7 +1524,7 @@ Crossplot.prototype.prepareSelectionData = function(depthData) {
                 });
             }
         });
-        selectionData.push(selectionDepths);
+        selectionData.push(selectionPoints);
     });
     return selectionData;
 }
@@ -1990,4 +1990,8 @@ Crossplot.prototype.initSelectionArea = function(viSelections) {
         viSelection.initCanvas(self.bodyContainer, 'crossplot');
         self.selectionCanvasContainer.push(viSelection);
     });
+}
+
+Crossplot.prototype.getSelection = function(id) {
+    return this.selectionCanvasContainer.find(d => d.isSelection() && d.idSelectionTool == id);
 }

@@ -51,11 +51,6 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	}
 
 	this.onReady = function () {
-		// let selections = self.wiComboviewCtrl.selections;
-		// selections.forEach(function(selectionConfig) {
-		// 	let viSelection = graph.createSelection(selectionConfig);
-		// 	self.viSelections.push(viSelection);
-		// });
 		self.createLayout(self.comboviewAreaId);
 		$(document).on('resize', function () {
 			self.layoutManager.updateSize();
@@ -132,17 +127,23 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	function configCombinedPlotProperties(combinedPlotProps = {}) {
 		const {logplot, histogram, crossplot} = combinedPlotProps;
 		if (logplot || histogram || crossplot) {
-			if (logplot) self.addLogplot(logplot);
-			if (histogram) self.addHistogram(histogram);
-			if (crossplot) self.addCrossplot(crossplot);
 			let dataRequest = {
 				idWell: self.wiComboviewModel.properties.idWell,
 				name: self.wiComboviewModel.properties.name,
-				idCombinedBox: self.wiComboviewCtrl.id,
-				idLogPlots: logplot.idPlot,
-				idCrossPlots: crossplot.idCrossPlot,
-				idHistograms: histogram.idHistogram
+				idCombinedBox: self.wiComboviewCtrl.id
 			};
+			if (logplot) {
+				self.addLogplot(logplot);
+				dataRequest.idLogPlots = logplot.idPlot;
+			}
+			if (histogram) {
+				self.addHistogram(histogram);
+				dataRequest.idHistograms = histogram.idHistogram;
+			}
+			if (crossplot) {
+				self.addCrossplot(crossplot);
+				dataRequest.idCrossPlots = crossplot.idCrossPlot;
+			}
 			wiApiService.editCombinedBox(dataRequest);
 		}
 		else {
@@ -175,13 +176,14 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 	}
 
 	this.drawSelectionOnLogplot = function (selector) {
-		if (!self.plotModels) return;
+		if (!self.plotModels.logplot || !selector) return;
 		let selection = self.viSelections.find(s => s.idCombinedBoxTool == selector.idCombinedBoxTool);
 		let createdLogplotId = self.plotModels.logplot.properties.idPlot;
 		let wiD3Ctrl = wiComponentService.getComponent('logplot' + createdLogplotId + self.suffix).getwiD3Ctrl();
 		let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
 		logTracks.forEach(function (track) {
 			track.setMode('UseSelector');
+			selection.canvasLogtrack.raise();
 			let transformY = track.getTransformY();
 			let startDepth, stopDepth, maskData = {};
 			track.plotContainer.call(d3.drag()
@@ -204,7 +206,6 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 				})
 				.on('end', function () {
 					if (track.mode != 'UseSelector') return;
-					wiComponentService.dropComponent('selector');
 					logTracks.forEach(function (tr) {
 						tr.setMode(null);
 						tr.plotContainer.on('.drag', null);
@@ -224,28 +225,116 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 						let selectionProps = returnedSelection;
 						selectionProps.name = selection.name;
 						selectionProps.color = selection.color;
-					if (self.plotModels.histogram) {
-						let createdHistogramId = self.plotModels.histogram.properties.idHistogram;
-						let createdHistogramComponent = 'histogram' + createdHistogramId + 'comboview' + self.wiComboviewCtrl.id;
-						let createdHistogram = wiComponentService.getComponent(createdHistogramComponent);
-						let createdHistogramD3Area = wiComponentService.getComponent(createdHistogramComponent + 'D3Area');
-						let visHistogram = createdHistogramD3Area.visHistogram;
+						if (self.plotModels.histogram) {
+							let createdHistogramId = self.plotModels.histogram.properties.idHistogram;
+							let createdHistogramComponent = 'histogram' + createdHistogramId + 'comboview' + self.wiComboviewCtrl.id;
+							let createdHistogram = wiComponentService.getComponent(createdHistogramComponent);
+							let createdHistogramD3Area = wiComponentService.getComponent(createdHistogramComponent + 'D3Area');
+							let visHistogram = createdHistogramD3Area.visHistogram;
 							visHistogram.setSelection(selectionProps);
-						visHistogram._doPlot();
-					}
-					if (self.plotModels.crossplot) {
-						let createdCrossplotId = self.plotModels.crossplot.properties.idCrossPlot;
-						let createdCrossplotComponent = 'crossplot' + createdCrossplotId + 'comboview' + self.wiComboviewCtrl.id;
-						let createdCrossplot = wiComponentService.getComponent(createdCrossplotComponent);
-						let createdCrossplotD3Area = wiComponentService.getComponent(createdCrossplotComponent + 'D3Area');
-						let viCrossplot = createdCrossplotD3Area.viCrossplot;
+							visHistogram._doPlot();
+						}
+						if (self.plotModels.crossplot) {
+							let createdCrossplotId = self.plotModels.crossplot.properties.idCrossPlot;
+							let createdCrossplotComponent = 'crossplot' + createdCrossplotId + 'comboview' + self.wiComboviewCtrl.id;
+							let createdCrossplot = wiComponentService.getComponent(createdCrossplotComponent);
+							let createdCrossplotD3Area = wiComponentService.getComponent(createdCrossplotComponent + 'D3Area');
+							let viCrossplot = createdCrossplotD3Area.viCrossplot;
 							viCrossplot.setSelection(selectionProps);
-						viCrossplot._doPlot();
-					}
+							viCrossplot._doPlot();
+						}
 					});
 				})
 			);
 		});
+	}
+
+	this.drawSelectionOnCrossplot = function (selector) {
+		if (!self.plotModels.crossplot || !selector) return;
+		let selection = self.viSelections.find(s => s.idCombinedBoxTool == selector.idCombinedBoxTool);
+		let createdCrossplotId = self.plotModels.crossplot.properties.idCrossPlot;
+		let createdCrossplotComponent = 'crossplot' + createdCrossplotId + 'comboview' + self.wiComboviewCtrl.id;
+		let createdCrossplot = wiComponentService.getComponent(createdCrossplotComponent);
+		let createdCrossplotD3Area = wiComponentService.getComponent(createdCrossplotComponent + 'D3Area');
+		let viCrossplot = createdCrossplotD3Area.viCrossplot;
+		let viSelection = viCrossplot.getSelection(selection.idSelectionTool);
+		let ctx = viSelection.canvas.node().getContext('2d');
+		let transformX = viCrossplot.getTransformX();
+		let transformY = viCrossplot.getTransformY();
+		let drawnPoints = [];
+		let rootData = viCrossplot.data;
+		viSelection.setMode('UseSelector', 'crossplot');
+		ctx.fillStyle = viSelection.color;
+		viSelection.canvas.call(d3.drag()
+			.on('drag', function() {
+				if (viSelection.mode != 'UseSelector') return;
+				let pointer = d3.mouse(viSelection.canvas.node());
+				let pointerX = pointer[0];
+				let pointerY = pointer[1];
+
+				if (nearPoint(pointerX, pointerY, viCrossplot.ctx)) {
+					ctx.beginPath();
+					ctx.arc(pointerX, pointerY, 1.5, 0, Math.PI*2, true);
+					ctx.fill();
+					let x = Math.round(transformX.invert(pointerX) * 10000) / 10000;
+					let y = Math.round(transformY.invert(pointerY) * 10000) / 10000;
+					drawnPoints.push({x, y});
+				}
+			})
+			.on('end', function() {
+				if (viSelection.mode != 'UseSelector') return;
+				viSelection.setMode(null, 'crossplot');
+				viSelection.canvas.on('.drag', null);
+				if (drawnPoints.length) {
+					let drawnPointDepths = [];
+					let epsilon = 0.3;
+					rootData.filter(d => {
+						let objPoint = drawnPoints.find(p => Math.abs(p.x - d.x) <= epsilon && Math.abs(p.y - d.y) <= epsilon);
+						return objPoint;
+					}).forEach(d => {
+						let datum = {
+							startDepth: d.depth - 1,
+							stopDepth: d.depth + 1
+						};
+						selection.data.push(datum);
+					});
+					selection.data = calculateData(selection.data);
+
+					let reqSelection = {
+						idCombinedBox: selection.idCombinedBox,
+						idCombinedBoxTool: selection.idCombinedBoxTool,
+						idSelectionTool: selection.idSelectionTool,
+						data: selection.data
+					};
+
+					wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
+						if (!returnedSelection) return;
+						let selectionProps = returnedSelection;
+						selectionProps.name = selection.name;
+						selectionProps.color = selection.color;
+						if (self.plotModels.logplot) {
+							let createdLogplotId = self.plotModels.logplot.properties.idPlot;
+							let wiD3Ctrl = wiComponentService.getComponent('logplot' + createdLogplotId + self.suffix).getwiD3Ctrl();
+							let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
+							logTracks.forEach(function (tr) {
+								tr.setMode(null);
+								tr.plotContainer.on('.drag', null);
+							});
+							viSelection.doPlot();
+						}
+						if (self.plotModels.histogram) {
+							let createdHistogramId = self.plotModels.histogram.properties.idHistogram;
+							let createdHistogramComponent = 'histogram' + createdHistogramId + 'comboview' + self.wiComboviewCtrl.id;
+							let createdHistogram = wiComponentService.getComponent(createdHistogramComponent);
+							let createdHistogramD3Area = wiComponentService.getComponent(createdHistogramComponent + 'D3Area');
+							let visHistogram = createdHistogramD3Area.visHistogram;
+							visHistogram.setSelection(selectionProps);
+							visHistogram._doPlot();
+						}
+					});
+				}
+			})
+		);
 	}
 
 	function calculateData(data) {
@@ -266,6 +355,22 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 			}
 		}
 		return newData;
+	}
+
+	function nearPoint(x, y, ctx) {
+		const e = 0.5;
+		let imgData = ctx.getImageData(x-e, y-e, e*2, e*2);
+		let r, g, b, a;
+		for (let i = 0; i < imgData.width * imgData.height; i ++) {
+			r = imgData.data[i * 4];
+			g = imgData.data[i * 4 + 1];
+			b = imgData.data[i * 4 + 2];
+			a = imgData.data[i * 4 + 3];
+
+			if (r > 0 || g > 0 || b > 0 || a > 0)
+				return true;
+		}
+		return false;
 	}
 
 	this.showContextMenu = function (event) {

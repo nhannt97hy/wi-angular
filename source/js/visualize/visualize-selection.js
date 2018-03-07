@@ -46,18 +46,30 @@ Selection.prototype.setSelectionBins = function (selectionBins) {
     this.selectionBins = selectionBins;
 }
 
+Selection.prototype.setMode = function(mode, place) {
+    switch (place) {
+        case 'logplot':
+            this.canvasLogtrack.raise();
+            this.canvasLogtrack.style('cursor', mode == null ? 'default' : 'copy');
+            break;
+        case 'histogram':
+            this.svg.raise();
+            this.svg.style('cursor', mode == null ? 'default' : 'copy');
+            break;
+        case 'crossplot':
+            this.canvas.raise();
+            this.canvas.style('cursor', mode == null ? 'default' : 'copy');
+            break;
+    }
+    this.mode = mode;
+}
+
 Selection.prototype.getProperties = function () {
     let self = this;
 
     return {
         maskData: this.maskData
     };
-}
-
-Selection.prototype.setMode = function (newMode) {
-    this.mode = newMode;
-    this.plotContainer
-        .style('cursor', newMode == null ? 'default' : 'copy');
 }
 
 Selection.prototype.initCanvasLogtrack = function (plotContainer, place) {
@@ -134,8 +146,8 @@ Selection.prototype.doPlot = function () {
         let start = transformY(+d.startDepth);
         let stop = transformY(+d.stopDepth);
         this.rect = Utils.getBoundingClientDimension(this.root.node());
+        this.canvasLogtrack.raise();
         this.selectionDrawingArea.fillStyle = this.color;
         this.selectionDrawingArea.fillRect(0, start, this.rect.width, stop - start);
-        this.canvasLogtrack.raise();
     })
 }

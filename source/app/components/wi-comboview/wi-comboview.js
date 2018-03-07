@@ -33,7 +33,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	}
 
 	this.editTool = function () {
-		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.toolBox, self.id, function(data) {
+		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.model.properties.toolBox, self.id, function(data) {
 			if (!data) return;
 			self.toolBox = data;
 		});
@@ -43,6 +43,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 		console.log(selector);
 		let wiD3Comboview = self.getwiD3Ctrl();
 		wiD3Comboview.drawSelectionOnLogplot(selector);
+		wiD3Comboview.drawSelectionOnCrossplot(selector);
 	}
 
 	this.useEraser = function (eraser) {
