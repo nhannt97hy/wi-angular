@@ -93,24 +93,65 @@ exports.ProjectButtonClicked = function () {
         wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
     }
 };
-
-exports.WorkflowsButtonClicked = function () {
-    console.log('WorkflowsButton is clicked');
-    // let wiComponentService = this.wiComponentService;
-    // let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    // layoutManager.putRight('workflow-block', "Workflow", "workflow-16x16");
+exports.NewWorkflowButtonClicked = function () {
+    console.log('NewWorkflowButton is clicked');
+    let self = this;
     let wiComponentService = this.wiComponentService;
-    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    layoutManager.putTabRight({
-        id: 'Workflow',
-        title: 'Workflow',
-        tabIcon: 'workflow-16x16',
-        componentState: {
-            html: `<wi-workflow style="height:100%;"></wi-workflow>`,
-            name: 'Workflow'
-        }
-    })
-};
+    let ModalService = this.ModalService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let utils = self.wiComponentService.getComponent('UTILS');
+    DialogUtils.newWorkflowDialog(ModalService, function (data) {
+        self.wiApiService.createWorkflow(data, function (response, err) {
+            if (err) {
+                toastr.error(err);
+            } else {
+                let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                layoutManager.putTabRight({
+                    id: 'workflow' + response.idWorkflow,
+                    title: response.name,
+                    tabIcon: 'workflow-16x16',
+                    componentState: {
+                        html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
+                        name: 'Workflow'
+                    }
+                })
+            }
+        });
+    });
+}
+
+exports.OpenWorkflowButtonClicked = function () {
+    console.log('OpenWorkflowButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.openWorkflowDialog(this.ModalService, function (response) {
+        let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        layoutManager.putTabRight({
+            id: 'workflow' + response.idWorkflow,
+            title: response.name,
+            tabIcon: 'workflow-16x16',
+            componentState: {
+                html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
+                name: 'Workflow'
+            }
+        })
+    });
+}
+// exports.WorkflowsButtonClicked = function () {
+//     console.log('WorkflowsButton is clicked');
+//     let wiComponentService = this.wiComponentService;
+//     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+//     layoutManager.putTabRight({
+//         id: 'Workflow',
+//         title: 'Workflow',
+//         tabIcon: 'workflow-16x16',
+//         componentState: {
+//             html: `<wi-workflow id="1"></wi-workflow>`,
+//             name: 'Workflow'
+//         }
+//     })
+// };
 
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');

@@ -121,6 +121,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                             modelsWithTab.forEach(function (model) {
                                 if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
                             });
+                            utils.updateWiCurveListingOnModelDeleted(selectedNode);
                         }
                         break;
                     case 'dataset':
