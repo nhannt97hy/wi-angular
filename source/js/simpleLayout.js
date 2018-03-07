@@ -365,63 +365,99 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
     const HOST = '54.169.13.92';
     const PORT = 3002;
     function getDataCurves(i, callback){
+        listCurves = [];
         let wiWorkflowPlayer = wiComponentService.getComponent('wiWorkflowPlayer');
-        let curves = wiWorkflowPlayer.workflowConfig.steps[i].inputData[0].inputs;
-        async.each(curves, function(curve, __end){
-            wiApiService.dataCurve(curve.value.id, function(data){
-                let a_curve = [];
-                data.forEach(function(point){
-                    a_curve.push(point.x);
+        // console.log('wiWorkflowPlayer: ', wiWorkflowPlayer);
+        let inputData = wiWorkflowPlayer.workflowConfig.steps[i].inputData;
+        if(inputData){
+            let curves = inputData[0].inputs;
+            async.each(curves, function(curve, __end){
+                wiApiService.dataCurve(curve.value.id, function(data){
+                    let a_curve = [];
+                    data.forEach(function(point){
+                        a_curve.push(point.x);
+                    });
+                    listCurves.push(a_curve);
+                    __end();
                 });
-                listCurves.push(a_curve);
-                __end();
+            }, function(err){
+                // console.log(listCurves);
+                callback(listCurves);
             });
-        }, function(err){
-            console.log(listCurves);
-            callback(listCurves);
-        });
+        }else {
+            toastr.error('Choose a dataset', '');
+        }
     }
     $scope.myWorkflowConfig = {
         name: "Missing curve reconstruction",
         steps: [
             {
                 name: "Train",
-                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
+                inputs: [
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Target " }],
                 parameters: [],
                 processFunction: train
             },
-            {
-                name: "Verify",
-                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
-                parameters: [],
-                processFunction: verify
-            },
+            // {
+            //     name: "Verify",
+            //     inputs: [
+            //         { name: "Curve Data" },
+            //         { name: "Curve Data" },
+            //         { name: "Curve Data" },
+            //         { name: "Curve Data" },
+            //         { name: "Curve Data" },
+            //         { name: "Curve Verify" }
+            //     ],
+            //     parameters: [],
+            //     processFunction: verify
+            // },
             {
                 name: "Predict",
                 inputs: [
-                    { name: "Curve 1 " },{ name: "Curve 2 " } 
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Data " },
+                    { name: "Curve Data " } 
                 ],
                 parameters: [],
                 processFunction: predict
             }
         ]
     }
+    function filterNull(curves){
+        let l = curves.length;
+        let filterCurves = [];
+        for(let j = 0; j<l; j++){
+            filterCurves[j] = [];
+        }
+        for(let i = 0; i<curves[0].length; i++){
+            let checkNull = true;
+            for(let j=0; j<l; j++)
+                if(curves[j][i] === "null")
+                    checkNull = false;
+            if(checkNull)
+                for(let j = 0; j<l; j++){
+                    filterCurves[j].push(curves[j][i]);
+                }
+        }
+        return filterCurves;
+    }
     function train(){
-        getDataCurves(0, function(curves){
+        getDataCurves(0, function(list_curves){
+            let curves = filterNull(list_curves);
             DialogUtils.trainModelDialog(ModalService, function(payload){
-                // console.log(curves);
-                // payload.data.push(curves[0], curves[1]);
-                // payload.target.push(curves[2]);
-                payload.data = [
-                    [1,0,0,1,0,0,1],
-                    [1,0,0,1,0,0,1],
-                    [1,0,0,1,0,0,1],
-                    [1,0,0,1,0,0,1],
-                    [1,0,0,1,0,0,1],
-                    [1,0,0,1,0,0,1],
-                    [1,0,0,1,0,0,1]
-                ];
-                payload.target = [1,2,1,4,5,2,1];
+                payload.data.push(curves[0], curves[1], curves[2], curves[3], curves[4]);
+                curves[5].forEach(function(x){
+                    payload.target.push(x);
+                })
+                console.log(payload.data);
+                console.log(payload.target);
                 wiComponentService.getComponent('SPINNER').show();       
                 $http({
                     method: 'POST',
@@ -449,7 +485,45 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
 
     }
     function predict(){
-
+        getDataCurves(1, function(list_curves){
+            let curves = filterNull(list_curves);
+            console.log(curves);
+            DialogUtils.predictModelDialog(ModalService, function(payload){
+                payload.data = curves;
+                wiComponentService.getComponent('SPINNER').show();  
+                $http({
+                    method: 'POST',
+                    url: 'http://'+HOST+':'+PORT + '/store/api/predict',
+                    data: payload
+                }).then(function(response){
+                    wiComponentService.getComponent('SPINNER').hide();
+                    var res = response.data;
+                    console.log(list_curves);
+                    for(let i = 0; i<list_curves[0].length; i++)
+                    {
+                        if(list_curves[0][i]==="null" || list_curves[1][i]==="null" || list_curves[2][i]==="null"
+                        || list_curves[3][i]==="null" || list_curves[4][i]==="null")
+                        {
+                            res.body.target.splice(i,0,"null");
+                            // console.log(list_curves[0][i]);                            
+                        }
+                    }
+                    // console.log('predict:', res);
+                    console.log('result of predict: ', res.body.target);
+                    if(res.statusCode == 200){
+                        toastr.success('Predict observation success!', '');
+                    }else{
+                        console.log('fail');
+                        toastr.error(res.body.message, '');
+                    }
+                    return;
+                }, function(error){
+                    wiComponentService.getComponent('SPINNER').hide();
+                    toastr.error("Call store api predict error", '');
+                    return;
+                });
+            });
+        });
     }
 });
 app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope, ModalService) {

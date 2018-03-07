@@ -59,7 +59,6 @@ function trainModelDialog(ModalService, callback) {
         }
         this.onOkButtonClicked = function () {
             if(self.name && self.type && self.description){
-                
                 payload = {
                     name: self.name,
                     type: self.type,

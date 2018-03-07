@@ -15,8 +15,8 @@ const componentListModel = 'listModel';
 
 let token = window.localStorage.getItem('token');
 let username;
-if(token)
-    username = JSON.parse(atob(token.split('.')[1])).username;
+// if(token)
+//     username = JSON.parse(atob(token.split('.')[1])).username;
 
 function WipmController(wiComponentService, wiApiService){
     let self = this;
