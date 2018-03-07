@@ -573,8 +573,8 @@ exports.createCurveModel = createCurveModel;
 
 function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) {
     let curveModel = createCurveModel(curve);
-    let dModel = datasetModel || getModel('dataset', curve.idDataset);
-    let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
+    // let dModel = datasetModel || getModel('dataset', curve.idDataset);
+    // let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
         let datasetModel = getModel('dataset', curve.idDataset);
         let wellModel = getModel('well', datasetModel.properties.idWell);
