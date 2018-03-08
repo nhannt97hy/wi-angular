@@ -576,9 +576,9 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
     let dModel = datasetModel || getModel('dataset', curve.idDataset);
     let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
-        let datasetModel = getModel('dataset', curve.idDataset);
-        let wellModel = getModel('well', datasetModel.properties.idWell);
-        curveModel.parentDataArr = [wellModel.data, datasetModel.data];
+        //let datasetModel = getModel('dataset', curve.idDataset);
+        //let wellModel = getModel('well', datasetModel.properties.idWell);
+        curveModel.parentDataArr = [wModel.data, dModel.data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
@@ -1453,17 +1453,18 @@ function findZoneSetById(idZoneSet) {
 
 exports.findZoneSetById = findZoneSetById;
 
-function findWellById(idWell) {
+function getRootFromWiExplorer() {
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-    if (!wiExplorer) {
-        return wiComponentService.getComponent('WELL_MODEL');
-    }
-    let rootNodes = wiExplorer.treeConfig;
-    if (!rootNodes || !rootNodes.length) return;
+    if (!wiExplorer || !wiExplorer.treeConfig) return null;
+    return wiExplorer.treeConfig[0];
+}
+function findWellById(idWell, rootNode) {
+    let root = rootNode;
+    if (!root) root = getRootFromWiExplorer();
+    if (!root) return {};
     let well = null;
-    visit(rootNodes[0], function (node) {
-
+    visit(root, function (node) {
         if (node.type == 'well' && node.id == idWell) {
             well = node;
         }
