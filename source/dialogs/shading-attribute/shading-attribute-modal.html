@@ -72,8 +72,7 @@
                             <label class="control-label col-sm-4">
                                 <input type="radio" value="pattern" 
                                        ng-model="wiModal.shadingOptions.shadingStyle"
-                                       ng-change="wiModal.switchShadingType()"
-                                       >
+                                       ng-change="wiModal.switchShadingType()">
                                     Fill Pattern
                             </label>
                             <label class="control-label col-sm-4">
@@ -120,12 +119,13 @@
                                 </div>
                                 <div class="col-sm-3 text-center">
                                     <button ng-click="wiModal.foreground()"
-                                    ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}"
+                                            ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}"
                                             class="form-control wi-form-control width-80px thick-border"
                                             ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
                                 </div>
                                 <div class="col-sm-3 text-center">
-                                    <button ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.background}" ng-click="wiModal.background()"
+                                    <button ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.background}"
+                                            ng-click="wiModal.background()"
                                             class="form-control wi-form-control width-80px thick-border"
                                             ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
                                 </div>
