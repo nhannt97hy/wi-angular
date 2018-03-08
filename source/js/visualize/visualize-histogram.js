@@ -555,7 +555,7 @@ Histogram.prototype._doPlot = function() {
                     .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue')
                     .on('mousemove', function(d, i) { 
                         if (self.histogramModel.properties.showTooltip)
-                        showTooltip(self.intervalBins[i]);
+                        showTooltip(self.zoneBins[j][i]);
                     })
                     .on('mouseout', hideTooltip);
             }
@@ -564,6 +564,7 @@ Histogram.prototype._doPlot = function() {
 
     function drawSelectionHistogram() {
         self.selectionSvgContainer.forEach(function(selectionSvg) {
+            selectionSvg.svg.raise();
             let selectionBars = selectionSvg.svg.selectAll('.selection-bars').data(self.fullBins).enter()
             .append('g').attr('class', 'selection-bars')
             .attr('transform', function (d) {
@@ -588,14 +589,14 @@ Histogram.prototype._doPlot = function() {
                             fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                             selectionBinHeight = fullBinHeight;
                             for (let k = 0; k <= arrIdx; k++) {
-                                selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][49 - i].length * 100 / len));
+                                selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][self.fullBins.length - 1 - i].length * 100 / len));
                             }
                             return selectionBinHeight;
                         }
                         fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length));
                         selectionBinHeight = fullBinHeight;
                         for (let k = 0; k <= arrIdx; k++) {
-                            selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][49 - i].length));
+                            selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][self.fullBins.length - 1 - i].length));
                         }
                         return selectionBinHeight;
                     })
@@ -603,18 +604,18 @@ Histogram.prototype._doPlot = function() {
                         if (self.histogramModel.properties.plotType != 'Frequency') {
                             let len = self.getLength();
                             return transformY(wdY[0])
-                                - transformY(selectionBins[arrIdx][49 - i].length * 100 / len);
-                            }
-                        return transformY(wdY[0]) - transformY(selectionBins[arrIdx][49 - i].length);
+                            - transformY(selectionBins[arrIdx][self.fullBins.length - 1 - i].length * 100 / len);
+                        }
+                        return transformY(wdY[0]) - transformY(selectionBins[arrIdx][self.fullBins.length - 1 - i].length);
                     })
                     .attr('fill', selectionSvg.color);
             }
-            selectionSvg.svg.raise();
+            selectionBars.selectAll('rect[height="0"]').remove();
         });
     }
     
     function drawCurveHistogram() {
-        //var line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+        //var line = d3.liney().curve(d3.curveCatmullRom.alpha(0.5));
         var line = d3.line().curve(d3.curveBasis);
         var path = self.svgContainer.append('path')
             .attr('class', 'curves');

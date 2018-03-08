@@ -1,7 +1,8 @@
 <div>
     <style>
         wi-workflow-player>div {
-            height: calc(100% - 10px);
+            /* height: calc(100% - 10px); */
+            flex: 1;
             display: flex;
             background-color: #f7f7f7;
         }
@@ -35,19 +36,23 @@
             line-height: 20px;
             height: 24px;
         }
+
         wi-workflow-player .ui-select-bootstrap>ul.ui-select-choices li,
         wi-workflow-player .ui-select-bootstrap>ul.ui-select-no-choice li {
-            display:block;
+            display: block;
             width: 100%;
         }
-        wi-workflow-player .ui-select-bootstrap > .ui-select-choices, 
-        wi-workflow-player .ui-select-bootstrap > .ui-select-no-choice {
+
+        wi-workflow-player .ui-select-bootstrap>.ui-select-choices,
+        wi-workflow-player .ui-select-bootstrap>.ui-select-no-choice {
             width: auto;
         }
+
         wi-workflow-player .ui-select-match-text {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         #testElement .wi-parent-id,
         #testElement .icon-expanded {
             display: none;
@@ -86,7 +91,8 @@
             height: 60px;
         }
 
-        wi-workflow-player .steps-indicator li a:before, .steps-indicator:before {
+        wi-workflow-player .steps-indicator li a:before,
+        .steps-indicator:before {
             background-color: #aaa;
         }
 
@@ -94,6 +100,7 @@
             position: absolute;
             top: 16px;
         }
+
         @keyframes blink-animation {
             from {
                 opacity: 0;
@@ -102,11 +109,13 @@
                 opacity: 1;
             }
         }
+
         wi-workflow-player .steps-indicator li.current a:before {
             background-color: blue;
             animation: blink-animation 2s steps(5, start) infinite;
             -webkit-animation: blink-animation 1s steps(5, start) infinite;
         }
+
         /* end wizard styles */
 
         wi-workflow-player .wi-droppable {
@@ -130,19 +139,23 @@
             left: 0;
             transform: translateY(-50%);
         }
+
         wi-workflow-player ul.table-row {
-            list-style:none;
+            list-style: none;
             padding-left: 0;
             white-space: nowrap;
             display: table-row;
         }
+
         wi-workflow-player ul.table-head {
             font-weight: 700;
             background-color: #ddd;
         }
+
         wi-workflow-player ul.table-row.table-head li {
             border-left-color: white;
         }
+
         wi-workflow-player ul.table-row>li {
             padding: 0 0.5em;
             display: inline-block;
@@ -155,11 +168,11 @@
             line-height: 28px;
             width: 120px;
         }
-        
+
         wi-workflow-player .control-button {
-            float:left;
-            cursor:pointer;
-            line-height:1.5em;
+            float: left;
+            cursor: pointer;
+            line-height: 1.5em;
         }
 
         wi-workflow-player .block-button {
@@ -170,63 +183,160 @@
             border: 1px solid #888;
         }
     </style>
-    <div class="form-group">
-        <wizard indicators-position="top">
-            <wz-step wz-title="Configure Inputs">
-                <div style='display:flex; flex-direction:column;flex:1;'>
-                    <div style='padding:10px;display:flex;flex-direction:row;flex:1;'>
-                        <div style='flex:1;display:flex;flex-direction:column;margin-bottom:0;' class='bordered panel panel-default'>
-                            <div class='panel-heading' style='padding:5px;'>
-                                <h5 style="margin-right:10px;display:inline;line-height:2;">Data type</h5>
-                                <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.FAMILY_GROUP_SELECTION)" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_GROUP_SELECTION}' title="Main Family">
-                                    <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_GROUP_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
-                                    <span class='zone-table-16x16'></span>
-                                </label>
-                                <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.FAMILY_SELECTION)" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_SELECTION}' title="Family">
-                                    <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
-                                    <span class='user-define-16x16'></span>
-                                </label>
-                                <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.CURVE_SELECTION)" ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.CURVE_SELECTION}' title="Curve">
-                                    <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.CURVE_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
-                                    <span class='curve-16x16'></span>
-                                </label>
-                            </div>
-                            <div style='position:relative;'>
-                                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
-                                <input wi-enter="wiWorkflowPlayer.onFilterEnterKey(wiWorkflowPlayer.filterText1);" style='text-indent:1.5em;' class='form-control'
-                                    type='text' ng-model='wiWorkflowPlayer.filterText1'>
-                            </div>
-                            <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiWorkflowPlayer.upTrigger"
-                                down-trigger="wiWorkflowPlayer.downTrigger">
-                                <wi-base-treeview id='tplTree' config='wiWorkflowPlayer.selectionList' on-click-function="wiWorkflowPlayer.onClick" filter="{{wiWorkflowPlayer.selectionType == wiWorkflowPlayer.FAMILY_SELECTION?wiWorkflowPlayer.filterText:wiWorkflowPlayer.filterText1}}">
-                                </wi-base-treeview>
-                            </wi-scroll>
+    <!-- <div class="form-group"> -->
+    <wizard indicators-position="top" on-finish="wiWorkflowPlayer.finishWizard()">
+        <wz-step wz-title="Configure Inputs">
+            <div style='display:flex; flex-direction:column;flex:1;'>
+                <div style='padding:10px;display:flex;flex-direction:row;flex:1;'>
+                    <div style='flex:1;display:flex;flex-direction:column;margin-bottom:0;' class='bordered panel panel-default'>
+                        <div class='panel-heading' style='padding:5px;'>
+                            <h5 style="margin-right:10px;display:inline;line-height:2;">Data type</h5>
+                            <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.FAMILY_GROUP_SELECTION)"
+                                ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_GROUP_SELECTION}'
+                                title="Main Family">
+                                <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_GROUP_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
+                                <span class='zone-table-16x16'></span>
+                            </label>
+                            <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.FAMILY_SELECTION)"
+                                ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.FAMILY_SELECTION}' title="Family">
+                                <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.FAMILY_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
+                                <span class='user-define-16x16'></span>
+                            </label>
+                            <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowPlayer.onSelectionTypeChanged(wiWorkflowPlayer.CURVE_SELECTION)"
+                                ng-class='{active: wiWorkflowPlayer.selectionType==wiWorkflowPlayer.CURVE_SELECTION}' title="Curve">
+                                <!-- <input type="radio" name="filterBy" class="display-none" value='{{wiWorkflowPlayer.CURVE_SELECTION}}' ng-model="wiWorkflowPlayer.selectionType"> -->
+                                <span class='curve-16x16'></span>
+                            </label>
                         </div>
-                        <div style="margin-left:5px;flex:2;padding:0 5px;overflow-y:auto;">
-                            <div ng-repeat="wf in wiWorkflowPlayer.workflowConfig.steps"
-                                style='width:100%;'
-                                class='bordered panel panel-default' 
-                                ng-init='wf.expanded = true;parentIdx = $index;'>
-                                <div style='background-color:#eee;' class='panel-heading'>
-                                    <span class="control-button" ng-class="{'fa fa-chevron-up': wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded' style=';margin-right:5px'>
+                        <div style='position:relative;'>
+                            <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                            <input wi-enter="wiWorkflowPlayer.onFilterEnterKey(wiWorkflowPlayer.filterText1);" style='text-indent:1.5em;' class='form-control'
+                                type='text' ng-model='wiWorkflowPlayer.filterText1'>
+                        </div>
+                        <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiWorkflowPlayer.upTrigger"
+                            down-trigger="wiWorkflowPlayer.downTrigger">
+                            <wi-base-treeview id='tplTree' config='wiWorkflowPlayer.selectionList' on-click-function="wiWorkflowPlayer.onClick" filter="{{wiWorkflowPlayer.selectionType == wiWorkflowPlayer.FAMILY_SELECTION?wiWorkflowPlayer.filterText:wiWorkflowPlayer.filterText1}}">
+                            </wi-base-treeview>
+                        </wi-scroll>
+                    </div>
+                    <div style="margin-left:5px;flex:2;padding:0 5px;overflow-y:auto;">
+                        <div ng-repeat="wf in wiWorkflowPlayer.workflowConfig.steps" style='width:100%;' class='bordered panel panel-default' ng-init='wf.expanded = true;parentIdx = $index;'>
+                            <div style='background-color:#eee;' class='panel-heading'>
+                                <span class="control-button" ng-class="{'fa fa-chevron-up': wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
+                                    style='margin-right:5px;'>
+                                </span>
+                                <span ng-click="wf.disabled = !wf.disabled" class='ti-check control-button block-button' ng-class='{"disabled-color": wf.disabled}'
+                                    style='margin-right:10px;color:black;padding-left:3px;padding-right:3px;'>
+                                </span>
+                                <span style='font-weight:700;'>{{wf.name}}</span>
+                            </div>
+                            <div style='border-top: 1px solid #eee;' class='panel-body' ng-show='wf.expanded'>
+                                <ul style='padding-left:0;'>
+                                    <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wf.inputs">
+                                        <div style='flex-basis:20em;text-align:right;margin-right:5px;'>
+                                            <button style='width:100%;vertical-align:baseline;' class="btn btn-default" type="button" ng-click="wiWorkflowPlayer.onSelectTemplate(parentIdx, $index)"
+                                                ng-disabled='wf.disabled'>{{item.name}}
+                                                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        <div style="flex:1;position:relative;">
+                                            <span ng-class="{'zone-table-16x16': item.type==wiWorkflowPlayer.FAMILY_GROUP_SELECTION, 'user-define-16x16': item.type==wiWorkflowPlayer.FAMILY_SELECTION, 'curve-16x16': item.type==wiWorkflowPlayer.CURVE_SELECTION}"
+                                                style='position:absolute;top:50%;transform:translateY(-50%);left:0.5em;'></span>
+                                            <input type="text" style='padding-left:2em;' class='form-control' ng-model='item.label' disabled>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button ng-disabled="!wiWorkflowPlayer.validate();" wz-next class='btn btn-default wizard-control' style='right:10px;'>
+                    <span>Next</span>
+                    <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
+                </button>
+            </div>
+        </wz-step>
+        <wz-step wz-title='Select Inputs'>
+            <div style='display:flex; flex-direction:column;flex:1;'>
+                <div style="display:flex;flex:1;flex-direction:row;padding:10px;">
+                    <div class="bordered panel panel-default inventory-side">
+                        <div style='display:flex;' class='panel-heading'>
+                            <h5 style='margin-right:10px;'>Project</h5>
+                            <wi-item-dropdown ng-show='!wiWorkflowPlayer.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'"
+                                on-wi-dropdown-init='wiWorkflowPlayer.getProjectList' on-item-changed="wiWorkflowPlayer.projectChanged">
+                            </wi-item-dropdown>
+                            <input style='flex:1;margin:5px 0; height:24px;font-size:14px;' class='form-control' ng-show='wiWorkflowPlayer.isFrozen'
+                                ng-model='wiWorkflowPlayer.projectName' ng-disabled='true'>
+                            <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiWorkflowPlayer.refreshProject()">
+                                <i class="fa fa-refresh"></i>
+                            </button>
+                        </div>
+                        <div style='position:relative;'>
+                            <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                            <input type='text' style='text-indent:1.5em;' ng-model='wiWorkflowPlayer.prjFilter' size='10' class="form-control">
+                        </div>
+                        <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiWorkflowPlayer.upTriggerPrj'
+                            down-trigger='wiWorkflowPlayer.downTriggerPrj'>
+                            <wi-base-treeview id='__projectWellTree' name="projectTreeview" config="wiWorkflowPlayer.projectConfig" container="wiWorkflowPlayer"
+                                on-click-function="wiWorkflowPlayer.prjClickFunction" filter="{{wiWorkflowPlayer.prjFilter}}"
+                                show-id="true">
+                            </wi-base-treeview>
+                        </wi-scroll>
+                    </div>
+                    <div style="flex:2;display:flex;flex-direction:column; margin-left:5px;padding:0 5px;overflow:hidden;">
+                        <div class='wi-droppable' wi-element-ready="wiWorkflowPlayer.droppableSetting();" ng-style="{height:wiWorkflowPlayer.wiDroppableHeight}">
+                            <div style='position:absolute; top:0;left:0; z-index:1;'>
+                                <span style="padding: 0.5em; border-radius:6px; background-color:#ccc;box-shadow: 1px 1px 2px #888;display:inline-block; margin:3px;"
+                                    ng-repeat="inputData in wiWorkflowPlayer.workflowConfig.steps[0].inputData track by $index">{{inputData.well.name}}/{{inputData.dataset.name}}
+                                    <span style='cursor:pointer;padding: 5px;color:steelblue;' class='ti-close' ng-click="wiWorkflowPlayer.onDeleteInput($index)"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div style="flex:1;padding:10px 0;overflow:auto;">
+                            <div ng-repeat='wf in wiWorkflowPlayer.workflowConfig.steps' ng-hide='wf.disabled' class='bordered panel panel-default' style='display:table;min-width:100%;'>
+                                <div class='panel-heading' style='background-color:#eee;'>
+                                    <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
+                                        style='margin-right:5px;'>
                                     </span>
-                                    <span ng-click="wf.disabled = !wf.disabled" class='ti-check control-button block-button' ng-class='{"disabled-color": wf.disabled}' style='margin-right:10px;color:black;padding-left:3px;padding-right:3px;'>
-                                    </span>
+                                    <!--<span class='control-button ti-check' ng-class='{"disabled-color": wf.disabled}' style='margin-right:5px;color:black;'>
+                                        </span>-->
+                                    <span style='margin-right:10px;padding-right:2px;' ng-click="wiWorkflowPlayer.runWorkflow(wf)" class='fa fa-play control-button block-button'
+                                        title="test run"></span>
                                     <span style='font-weight:700;'>{{wf.name}}</span>
                                 </div>
-                                <div style='border-top: 1px solid #eee;' class='panel-body' ng-show='wf.expanded'>
-                                    <ul style='padding-left:0;'>
-                                        <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wf.inputs">
-                                            <div style='flex-basis:20em;text-align:right;margin-right:5px;'>
-                                                <button style='width:100%;vertical-align:baseline;' class="btn btn-default" type="button" ng-click="wiWorkflowPlayer.onSelectTemplate(parentIdx, $index)"
-                                                    ng-disabled='wf.disabled'>{{item.name}}
-                                                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                                                </button>
-                                            </div>
-                                            <div style="flex:1;position:relative;">
-                                                <span ng-class="{'zone-table-16x16': item.type==wiWorkflowPlayer.FAMILY_GROUP_SELECTION, 'user-define-16x16': item.type==wiWorkflowPlayer.FAMILY_SELECTION, 'curve-16x16': item.type==wiWorkflowPlayer.CURVE_SELECTION}"
-                                                    style='position:absolute;top:50%;transform:translateY(-50%);left:0.5em;'></span>
-                                                <input type="text" style='padding-left:2em;' class='form-control' ng-model='item.label' disabled>
+                                <div ng-show="wf.expanded" class='panel-body' style="border-top: 1px solid #eee;overflow:visible;">
+                                    <ul ng-if='wf.inputData.length' class='table-row table-head'>
+                                        <li style="width:20px;">#</li>
+                                        <li>Well</li>
+                                        <li>Dataset</li>
+                                        <li ng-repeat='inputItem in wf.inputs'>{{inputItem.name}}</li>
+                                        <li ng-repeat="paramItem in wf.parameters">{{paramItem.name}}</li>
+                                    </ul>
+                                    <ul class='table-row' ng-repeat="item in wf.inputData track by $index">
+                                        <li style="width:20px">{{$index + 1}}</li>
+                                        <li title='{{item.well.name}}'>{{item.well.name}}</li>
+                                        <li title='{{item.dataset.name}}'>{{item.dataset.name}}</li>
+                                        <li style='height:auto;overflow:visible;padding:0;' ng-repeat="input in item.inputs">
+                                            <ui-select ng-model="input.value">
+                                                <ui-select-match>
+                                                    {{$select.selected.name}}
+                                                </ui-select-match>
+                                                <ui-select-choices repeat="curve in input.choices">
+                                                    {{curve.name}}
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </li>
+                                        <li style='height:auto;overflow:visible;padding:0;' ng-repeat="param in item.parameters">
+                                            <ui-select ng-if="param.type == 'select'" ng-model="param.value">
+                                                <ui-select-match>
+                                                    {{$select.selected.name}}
+                                                </ui-select-match>
+                                                <ui-select-choices repeat="p.value as p in param.choices">
+                                                    {{p.name}}
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <div>
+                                                <input style='width:100%;' ng-if="param.type != 'select'" type="{{param.type}}" ng-model="param.value" class='form-control wi-form-control'>
                                             </div>
                                         </li>
                                     </ul>
@@ -234,107 +344,17 @@
                             </div>
                         </div>
                     </div>
-                    <button ng-disabled="!wiWorkflowPlayer.validate();" wz-next class='btn btn-default wizard-control' style='right:10px;'>
-                        <span>Next</span>
-                        <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
-                    </button>
                 </div>
-            </wz-step>
-            <wz-step wz-title='Select Inputs'>
-                <div style='display:flex; flex-direction:column;flex:1;'>
-                    <div style="display:flex;flex:1;flex-direction:row;padding:10px;">
-                        <div class="bordered panel panel-default inventory-side">
-                            <div style='display:flex;' class='panel-heading'>
-                                <h5 style='margin-right:10px;'>Project</h5>
-                                <wi-item-dropdown ng-show='!wiWorkflowPlayer.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'"
-                                    on-wi-dropdown-init='wiWorkflowPlayer.getProjectList' on-item-changed="wiWorkflowPlayer.projectChanged">
-                                </wi-item-dropdown>
-                                <input style='flex:1;margin:5px 0; height:24px;font-size:14px;' class='form-control' ng-show='wiWorkflowPlayer.isFrozen'
-                                    ng-model='wiWorkflowPlayer.projectName' ng-disabled='true'>
-                                <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiWorkflowPlayer.refreshProject()">
-                                    <i class="fa fa-refresh"></i>
-                                </button>
-                            </div>
-                            <div style='position:relative;'>
-                                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
-                                <input type='text' style='text-indent:1.5em;' ng-model='wiWorkflowPlayer.prjFilter' size='10' class="form-control">
-                            </div>
-                            <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiWorkflowPlayer.upTriggerPrj'
-                                down-trigger='wiWorkflowPlayer.downTriggerPrj'>
-                                <wi-base-treeview id='__projectWellTree' name="projectTreeview" config="wiWorkflowPlayer.projectConfig" container="wiWorkflowPlayer"
-                                    on-click-function="wiWorkflowPlayer.prjClickFunction" filter="{{wiWorkflowPlayer.prjFilter}}"
-                                    show-id="true">
-                                </wi-base-treeview>
-                            </wi-scroll>
-                        </div>
-                        <div style="flex:2;display:flex;flex-direction:column; margin-left:5px;padding:0 5px;overflow:hidden;">
-                            <div class='wi-droppable' wi-element-ready="wiWorkflowPlayer.droppableSetting();" ng-style="{height:wiWorkflowPlayer.wiDroppableHeight}">
-                                <div style='position:absolute; top:0;left:0; z-index:1;'>
-                                    <span style="padding: 0.5em; border-radius:6px; background-color:#ccc;box-shadow: 1px 1px 2px #888;display:inline-block; margin:3px;"
-                                        ng-repeat="inputData in wiWorkflowPlayer.workflowConfig.steps[0].inputData track by $index">{{inputData.well.name}}/{{inputData.dataset.name}}
-                                        <span style='cursor:pointer;padding: 5px;color:steelblue;' class='ti-close' ng-click="wiWorkflowPlayer.onDeleteInput($index)"></span>
-                                    </span>
-                                </div>
-                            </div>
-                            <div style="flex:1;padding:10px 0;overflow:auto;">
-                                <div ng-repeat='wf in wiWorkflowPlayer.workflowConfig.steps' ng-hide='wf.disabled' class='bordered panel panel-default' style='display:table;min-width:100%;'>
-                                    <div class='panel-heading' style='background-color:#eee;'>
-                                        <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded' style='margin-right:5px;'>
-                                        </span>
-                                        <!--<span class='control-button ti-check' ng-class='{"disabled-color": wf.disabled}' style='margin-right:5px;color:black;'>
-                                        </span>-->
-                                        <span style='margin-right:10px;padding-right:2px;' ng-click="wiWorkflowPlayer.runWorkflow(wf)" class='fa fa-play control-button block-button' title="test run"></span>
-                                        <span style='font-weight:700;'>{{wf.name}}</span>
-                                    </div>
-                                    <div ng-show="wf.expanded" class='panel-body' style="border-top: 1px solid #eee;overflow:visible;">
-                                        <ul ng-if='wf.inputData.length' class='table-row table-head'>
-                                            <li style="width:20px;">#</li>
-                                            <li>Well</li>
-                                            <li>Dataset</li>
-                                            <li ng-repeat='inputItem in wf.inputs'>{{inputItem.name}}</li>
-                                            <li ng-repeat="paramItem in wf.parameters">{{paramItem.name}}</li>
-                                        </ul>
-                                        <ul class='table-row' ng-repeat="item in wf.inputData track by $index">
-                                            <li style="width:20px">{{$index + 1}}</li>
-                                            <li title='{{item.well.name}}'>{{item.well.name}}</li>
-                                            <li title='{{item.dataset.name}}'>{{item.dataset.name}}</li>
-                                            <li style='height:auto;overflow:visible;padding:0;' ng-repeat="input in item.inputs">
-                                                <ui-select ng-model="input.value">
-                                                    <ui-select-match>
-                                                        {{$select.selected.name}}
-                                                    </ui-select-match>
-                                                    <ui-select-choices repeat="curve in input.choices">
-                                                        {{curve.name}}
-                                                    </ui-select-choices>
-                                                </ui-select>
-                                            </li>
-                                            <li style='height:auto;overflow:visible;padding:0;' ng-repeat="param in item.parameters">
-                                                <ui-select ng-if="param.type == 'select'" ng-model="param.value">
-                                                    <ui-select-match>
-                                                        {{$select.selected.name}}
-                                                    </ui-select-match>
-                                                    <ui-select-choices repeat="p.value as p in param.choices">
-                                                        {{p.name}}
-                                                    </ui-select-choices>
-                                                </ui-select>
-                                                <div><input style='width:100%;' ng-if="param.type != 'select'" type="{{param.type}}" ng-model="param.value" class='form-control wi-form-control'></div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button wz-previous class=' btn btn-default wizard-control' style='left:10px;'>
-                        <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
-                        <span>Back</span>
-                    </button>
-                    <button wz-next class='btn btn-default wizard-control' style='right:10px;'>
-                        <span>Finish</span>
-                        <i class='ok-16x16' style='vertical-align:text-bottom;'></i>
-                    </button>
-                </div>
-            </wz-step>
-        </wizard>
-    </div>
+                <button wz-previous class=' btn btn-default wizard-control' style='left:10px;'>
+                    <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
+                    <span>Back</span>
+                </button>
+                <button wz-next class='btn btn-default wizard-control' style='right:10px;'>
+                    <span>Finish</span>
+                    <i class='ok-16x16' style='vertical-align:text-bottom;'></i>
+                </button>
+            </div>
+        </wz-step>
+    </wizard>
+    <!-- </div> -->
 </div>

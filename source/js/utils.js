@@ -573,8 +573,8 @@ exports.createCurveModel = createCurveModel;
 
 function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) {
     let curveModel = createCurveModel(curve);
-    let dModel = datasetModel || getModel('dataset', curve.idDataset);
-    let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
+    // let dModel = datasetModel || getModel('dataset', curve.idDataset);
+    // let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
         let datasetModel = getModel('dataset', curve.idDataset);
         let wellModel = getModel('well', datasetModel.properties.idWell);
@@ -2923,22 +2923,31 @@ exports.getVisualizeShading = getVisualizeShading;
 
 function updateWiCurveListingOnModelDeleted(model){
     let wiComponentService = __GLOBAL.wiComponentService;
+    let wiCurveListing = wiComponentService.getComponent('WCL');
     switch (model.type) {
         case 'curve':
             let idCurve = model.properties.idCurve;
             let wellModel = findWellByCurve(idCurve);
-            let wiCurveListing = wiComponentService.getComponent('WCL');
             if(wiCurveListing){
                 let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
                 let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
-                if(indexCurve){
+                if(indexCurve != -1){
                     wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+                }
+            }
+            break;
+        case 'well':
+            if(wiCurveListing){
+                let indexWell = wiCurveListing.wells.findIndex(w => w.id == model.id);
+                if(indexWell != -1){
+                    wiCurveListing.curvesData.splice(indexWell, 1);
+                    wiCurveListing.depthArr.splice(indexWell, 1);
                 }
             }
             break;
         default:
             console.log('not implemented')
-            return;
+            break;
     }
 }
 function getSelectedNode(rootNode) {

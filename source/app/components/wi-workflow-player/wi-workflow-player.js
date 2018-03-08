@@ -19,18 +19,43 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     self.CURVE_SELECTION = CURVE_SELECTION;
     self.FAMILY_SELECTION = FAMILY_SELECTION;
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
+    let __inputChanged = {
+        status: false,
+        index: []
+    };
+    let __inputDataLen = 0;
 
     this.$onInit = function () {
-        wiComponentService.putComponent(self.name, self);
+        if (self.name) wiComponentService.putComponent(self.name, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
-        
+
         onSelectionTypeChanged();
 
         // SELECT INPUT TAB
         self.isFrozen = !!self.idProject;
         self.projectConfig = new Array();
     };
+
+    $scope.$on('wizard:stepChanged', function (event, args) {
+        if (args.index == 0) {
+            __inputChanged.status = false;
+            __inputChanged.index.length = 0;
+        } else {
+            if (__inputChanged.status && __inputDataLen) {
+                console.log("inputs in step " + __inputChanged.index + " has changed! Must be refresh!");
+                __inputChanged.index.forEach(item => {
+                    let step = self.workflowConfig.steps[item];
+                    step.inputData.forEach(child => {
+                        child.inputs.forEach((ipt, idx) => {
+                            ipt.choices = matchCurves(child.dataset.curves, step.inputs[idx]);
+                            ipt.value = ipt.choices.length ? ipt.choices[0] : null;
+                        })
+                    })
+                })
+            }
+        }
+    })
 
     this.onClick = function ($index, $event, node) {
         self.selectionList.forEach(function (item) {
@@ -44,7 +69,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             if (!__familyList) {
                 let temp = utils.getListFamily();
                 if (temp) {
-                    __familyList = temp.map(function(family) {
+                    __familyList = temp.map(function (family) {
                         return {
                             id: family.idFamily,
                             data: {
@@ -59,8 +84,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     callback(__familyList);
                 }
                 else {
-                    wiApiService.listFamily(function(lstFamily) {
-                        __familyList = lstFamily.map(function(family) {
+                    wiApiService.listFamily(function (lstFamily) {
+                        __familyList = lstFamily.map(function (family) {
                             return {
                                 id: family.idFamily,
                                 data: {
@@ -81,7 +106,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             if (!__familyList) {
                 let temp = utils.getListFamily();
                 if (temp) {
-                    __familyList = temp.map(function(family) {
+                    __familyList = temp.map(function (family) {
                         return {
                             id: family.idFamily,
                             data: {
@@ -100,8 +125,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     ));
                 }
                 else {
-                    wiApiService.listFamily(function(lstFamily) {
-                        __familyList = lstFamily.map(function(family) {
+                    wiApiService.listFamily(function (lstFamily) {
+                        __familyList = lstFamily.map(function (family) {
                             return {
                                 id: family.idFamily,
                                 data: {
@@ -212,8 +237,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             ]
         };
     */
-    //	inputConfig = [{ name: "Gamma Ray", value: "Gama Ray Family", type: "2" }];
-    ////	inputConfig = [{ name: "Gamma Ray", value: "DTCO3", type: "1" }];
     this.onSelectionTypeChanged = onSelectionTypeChanged;
     function onSelectionTypeChanged(selType) {
         self.filterText1 = "";
@@ -223,11 +246,11 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
                 let groups = new Set();
-                if(temp){
+                if (temp) {
                     temp.forEach(t => {
                         groups.add(t.familyGroup);
                     });
-                    $timeout(function(){
+                    $timeout(function () {
                         self.selectionList = Array.from(groups).map(g => {
                             return {
                                 id: -1,
@@ -241,12 +264,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             };
                         });
                     });
-                }else{
-                    wiApiService.listFamily(function(temp){
+                } else {
+                    wiApiService.listFamily(function (temp) {
                         temp.forEach(t => {
                             groups.add(t.familyGroup);
                         });
-                        $timeout(function() {
+                        $timeout(function () {
                             self.selectionList = Array.from(groups).map(g => {
                                 return {
                                     id: -1,
@@ -262,11 +285,11 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                         });
                     })
                 }
-                
+
                 break;
             case FAMILY_SELECTION:
-                getFamilyList(function(familyList) {
-                    $timeout(function() {
+                getFamilyList(function (familyList) {
+                    $timeout(function () {
                         self.selectionList = familyList.slice(0, __selectionLength);
                     });
                     __selectionTop = 0;
@@ -280,7 +303,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 if (root) {
                     utils.visit(
                         root,
-                        function(node, _hash) {
+                        function (node, _hash) {
                             if (node.type == "curve") {
                                 _hash[node.data.label] = 1;
                             }
@@ -288,7 +311,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                         },
                         hash
                     );
-                    $timeout(() => self.selectionList = Object.keys(hash).map(function(key) {
+                    $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
                         return {
                             id: -1,
                             data: {
@@ -302,10 +325,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     }));
                 }
                 else {
-                    buildCurveListFromServer(function(curve) {
+                    buildCurveListFromServer(function (curve) {
                         hash[curve.name] = 1;
-                    }, function() {
-                        $timeout(() => self.selectionList = Object.keys(hash).map(function(key) {
+                    }, function () {
+                        $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
                             return {
                                 id: -1,
                                 data: {
@@ -344,16 +367,16 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             return;
         }
         wiApiService.listWells({
-            idProject:self.idProject,
+            idProject: self.idProject,
             limit: 100000
-        }, function(wells) {
+        }, function (wells) {
             if (!Array.isArray(wells)) {
                 toastr.error('Error in listing wells');
                 console.error(wells);
                 return;
-            } 
-            async.each(wells, function(well, __end) {
-                wiApiService.getWell(well.idWell, function(wellProps) {
+            }
+            async.each(wells, function (well, __end) {
+                wiApiService.getWell(well.idWell, function (wellProps) {
                     for (let dataset of wellProps.datasets) {
                         for (let curve of dataset.curves) {
                             cb(curve);
@@ -361,14 +384,14 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     }
                     __end();
                 })
-            }, function(err) {
+            }, function (err) {
                 done();
             });
-                
+
         });
     }
-    this.onSelectTemplate = function(parentIdx, itemIdx) {
-        let __SELECTED_NODE = self.selectionList.find(function(d) {
+    this.onSelectTemplate = function (parentIdx, itemIdx) {
+        let __SELECTED_NODE = self.selectionList.find(function (d) {
             return d.data.selected;
         });
         if (__SELECTED_NODE) {
@@ -378,6 +401,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             item.value =
                 __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
             item.type = self.selectionType;
+            __inputChanged.status = true;
+            let tmp = new Set(__inputChanged.index);
+            tmp.add(parentIdx);
+            __inputChanged.index = Array.from(tmp);
         } else {
             toastr.error("please select data type!");
         }
@@ -387,13 +414,13 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         for (let wf of self.workflowConfig.steps) {
             wf.inputData.splice(idx, 1);
         }
-        // self.inputArray.splice(idx, 1);
+        __inputDataLen--;
     };
-    this.upTrigger = function(cb) {
+    this.upTrigger = function (cb) {
         if (self.selectionType == FAMILY_SELECTION) {
             if (__selectionTop > 0) {
                 if (__selectionTop > __selectionDelta) {
-                    getFamilyList(function(familyList) {
+                    getFamilyList(function (familyList) {
                         let newItems = familyList
                             .slice(
                                 __selectionTop - __selectionDelta,
@@ -405,7 +432,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
 
                     });
                 } else {
-                    getFamilyList(function(familyList) {
+                    getFamilyList(function (familyList) {
                         let newItems = familyList
                             .slice(0, __selectionTop)
                             .reverse();
@@ -416,9 +443,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             } else cb([]);
         } else cb([]);
     };
-    this.downTrigger = function(cb) {
+    this.downTrigger = function (cb) {
         if (self.selectionType == FAMILY_SELECTION) {
-            getFamilyList(function(familyList) {
+            getFamilyList(function (familyList) {
                 let __selectionBottom = __selectionTop + __selectionLength;
                 if (__selectionBottom < familyList.length) {
                     if (familyList.length - __selectionBottom > __selectionDelta) {
@@ -446,9 +473,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         self.filterText = filterText;
         if (self.selectionType == FAMILY_SELECTION) {
             __selectionTop = 0;
-            $timeout(function() {
-                getFamilyList(function(familyList) {
-                    self.selectionList = familyList.slice(0,__selectionLength);
+            $timeout(function () {
+                getFamilyList(function (familyList) {
+                    self.selectionList = familyList.slice(0, __selectionLength);
                 });
             });
         }
@@ -532,10 +559,13 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         switch (matchCriterion.type) {
             case FAMILY_GROUP_SELECTION:
                 let familyList = utils.getListFamily();
-                return curves.filter(function(cModel) {
-                    if(familyList){
+                return curves.filter(function (cModel) {
+                    if (familyList) {
                         let group = familyList.find(
-                            f => f.idFamily == cModel.properties.idFamily
+                            f => {
+                                if (cModel.properties) return f.idFamily == cModel.properties.idFamily;
+                                return f.idFamily == cModel.idFamily;
+                            }
                         );
                         return group
                             ? matchCriterion.value == group.familyGroup
@@ -544,11 +574,13 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 });
             case FAMILY_SELECTION:
                 return curves.filter(function (cModel) {
-                    return matchCriterion.value == cModel.properties.idFamily;
+                    if (cModel.properties) return matchCriterion.value == cModel.properties.idFamily;
+                    return matchCriterion.value == cModel.idFamily;
                 });
             case CURVE_SELECTION:
                 return curves.filter(function (cModel) {
-                    return matchCriterion.value == cModel.properties.name;
+                    if (cModel.properties) return matchCriterion.value == cModel.properties.name;
+                    return matchCriterion.value == cModel.name;
                 });
         }
         return [];
@@ -612,6 +644,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     };
                     $timeout(() => {
                         wf.inputData.push(input);
+                        __inputDataLen = wf.inputData.length;
                     });
                 }
                 $timeout(
@@ -746,7 +779,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             async.eachOfSeries(wf.inputData, (data, idx, callback) => {
                 let curvesData = [];
                 async.eachOfSeries(data.inputs, (curve, index, cb) => {
-                    let idCurve = curve.value.id;
+                    let idCurve = curve.value.id || curve.value.idCurve;
                     wiApiService.dataCurve(idCurve, function (data) {
                         curvesData.push(data.map(d => parseFloat(d.x)));
                         cb();
@@ -772,6 +805,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }
             )
         }
+    }
+
+    this.finishWizard = function () {
+        console.log("Finish him!");
     }
 }
 

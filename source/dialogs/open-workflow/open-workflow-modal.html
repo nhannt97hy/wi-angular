@@ -1,0 +1,36 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title">
+                    <span class="workflow-16x16"></span>&nbsp;Open Workflow</h4>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-infomation-title">
+                    <span class="workflow-16x16"></span>&nbsp;Workflow Information
+                </h5>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Workflow name:</label>
+                        <div class="col-sm-9">
+                            <select ng-model="wiModal.selectedWorkflow" class="form-control"
+                            ng-options="wf.name for wf in wiModal.workflows track by wf.idWorkflow">
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"
+                ng-disabled="!wiModal.selectedWorkflow">
+                    <span class="ok-16x16"></span>&nbsp;OK
+                </button>
+                <button type="button" class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

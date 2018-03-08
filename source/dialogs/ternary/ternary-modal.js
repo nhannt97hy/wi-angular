@@ -260,14 +260,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
 
             let payloads = []
             curves.forEach(function(curve, i) {
-                dict = {}
+                let dict = {}
                 curve.forEach(function(point) {
                     dict[Math.round((point.y - topDepth)/step)] = point.x;
                 });
-                indices = Object.keys(dict).map(k => parseInt(k));
-                maxIndex = Math.max.apply(null, indices);
+                let indices = Object.keys(dict).map(k => parseInt(k));
+                let maxIndex = Math.max.apply(null, indices);
 
-                values = []
+                let values = []
                 for (let i = 0; i <= maxIndex; i ++) {
                     values.push(dict[i] === undefined ? null : dict[i]);
                 }
