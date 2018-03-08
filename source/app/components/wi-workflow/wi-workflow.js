@@ -1,7 +1,7 @@
 const name = "wiWorkflow";
 const moduleName = "wi-workflow";
 
-function Controller(wiComponentService) {
+function Controller(wiComponentService, wiApiService) {
     let self = this;
     this.workflowConfig = {
         name: "Clastic",
@@ -56,7 +56,7 @@ function Controller(wiComponentService) {
                         value: 1
                     }
                 ],
-                function: "calEffectivePorosityFromDensity"
+                function: "calPorosityFromDensity"
             },
             {
                 name: "Saturation",
@@ -73,7 +73,7 @@ function Controller(wiComponentService) {
                 function: "calSaturationArchie"
             }
         ]
-        
+
     };
     /*
     this.workflowConfig = {    
@@ -99,17 +99,36 @@ function Controller(wiComponentService) {
         ]
     };
     */
+    function getWorkflowConfig() {
+        wiApiService.getWorkflow(self.id, function (wfData) {
+            self.workflowConfig = wfData;
+        })
+    }
 
     this.$onInit = function () {
-        wiComponentService.putComponent(wiComponentService.WI_WORKFLOW, self);
+        self.name = 'workflow' + self.id + "Area";
+        self.WorkflowPlayerName = "workflowplayer" + self.id + "Area";
+        wiComponentService.putComponent(self.name, self);
+        self.showOutput = true;
     };
-    this.getCurrentProjectId = function() {
+    this.getCurrentProjectId = function () {
         if (self.idProject) return self.idProject;
         let openProject = wiComponentService.getComponent(
             wiComponentService.PROJECT_LOADED
         );
         return (openProject || {}).idProject;
     };
+
+    this.SaveWorkflowButtonClicked = function () {
+        console.log("Save workflow");
+    }
+
+    this.EditWorkflowButtonClicked = function () {
+        console.log("Edit workflow");
+    }
+    this.toggleOutput = function () {
+        self.showOutput = !self.showOutput;
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -120,7 +139,8 @@ app.component(name, {
     controllerAs: name,
     transclude: true,
     bindings: {
-        idProject: "<"
+        idProject: "<",
+        id: "<"
     }
 });
 

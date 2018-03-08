@@ -58,11 +58,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         this.fillPatternOptions = {};
         this.variableShadingOptions = {};
 
-        let condition1 = (this.shadingOptions.shadingStyle == "fillPattern" && !this.shadingOptions.isNegPosFill);
-        let condition2 = (this.shadingOptions.shadingStyle == "fillPattern" && this.shadingOptions.isNegPosFill);
-        let condition3 = (this.shadingOptions.shadingStyle == "variableShading" && !this.shadingOptions.isNegPosFill);
-        let condition4 = (this.shadingOptions.shadingStyle == "variableShading" && this.shadingOptions.isNegPosFill);
-
         this.fillPatternOptions = {
             fill : {
                 display : !this.shadingOptions.isNegPosFill,
@@ -94,7 +89,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                                                     this.shadingOptions.leftCurve.idCurve : this.shadingOptions.rightCurve.idCurve;
         }
         let controlCurve = utils.getCurveFromId(this.shadingOptions.idControlCurve);
-        console.log("controlCurve", this.shadingOptions.idControlCurve, controlCurve);
         
         this.namePals = new Array();
         utils.getPalettes(function(pals){
@@ -147,7 +141,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 self.shadingOptions.type = 'right';
             }
             if (self.shadingOptions.leftCurve.id > 0) self.shadingOptions.leftFixedValue = null;
-        };
+        };  
 
         function getLine (idLine) {
             let line = null;
@@ -166,6 +160,13 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             }
             if (self.shadingOptions.shadingStyle == 'varShading') {
                 self.displayType = self.checkboxVal;
+                if (self.displayType == true 
+                    && self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') {
+                    self.varShadingType = 'gradient';
+                    self.variableShadingOptions.fill.varShading.varShadingType = 'gradient';
+                    self.variableShadingOptions.positiveFill.varShading.varShadingType = 'gradient';
+                    self.variableShadingOptions.negativeFill.varShading.varShadingType = 'gradient';
+                }
                 self.correctFillingStyleVarShading();
             }
         }
@@ -495,7 +496,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                         lowVal: null,
                         highVal: null,
                         pattern: "none",
-                        // foreground: "transparent",
+                        foreground: "black",
                         background: "blue",
                         description: ""
                     }]
