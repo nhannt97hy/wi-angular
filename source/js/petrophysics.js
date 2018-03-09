@@ -1,22 +1,22 @@
 'use strict';
 // petrophysics
 
-function calVSHfromGR(inputs, parameters, callback) {
+function calVCLfromGR(inputs, parameters, callback) {
     let grCurve = inputs[0];
-    let matrix = parameters[0].value || 10;
-    let shale = parameters[1].value || 120;
+    let clean = parameters[0].value || 10;
+    let clay = parameters[1].value || 120;
     let type = parameters[2].value || 1;
     let result = new Array();
     async.series([
         function (cb) {
             // cal GR index
             for (let i = 0; i < grCurve.length; i++) {
-                result[i] = (grCurve[i] - matrix) / (shale - matrix);
+                result[i] = (grCurve[i] - clean) / (clay - clean);
             }
             cb();
         },
         function (cb) {
-            // cal VSH by type
+            // cal VCL by type
             switch (type) {
                 case 1: // Linear
                     cb();
@@ -56,83 +56,62 @@ function calVSHfromGR(inputs, parameters, callback) {
             }
         }], function (err) {
             result = result.map(d => parseFloat(d.clamp(0, 1).toFixed(4)));
-            let output = {
-                name: "VSH_GR",
-                data: result,
-                unit: "v/v"
-            }
-            callback([output]);
+            callback([result]);
         })
 }
-exports.calVSHfromGR = calVSHfromGR;
+exports.calVCLfromGR = calVCLfromGR;
 
 function calPorosityFromDensity(inputs, parameters, callback) {
     let total = new Array();
     let effective = new Array()
     let density = inputs[0];
-    let vsh = inputs[1];
-    let matrix = parameters[0].value || 2.65;
-    let shale = parameters[1].value || 2.4;
-    let fluid = parameters[2].value || 1;
+    let vclay = inputs[1];
+    let clean = parameters[0].value || 2.65;
+    let fluid = parameters[1].value || 1;
+    let clay = parameters[2].value || 2.3;
 
-    let sh = (matrix - shale) / (matrix - fluid);
+    let sh = (clean - clay) / (clean - fluid);
     for (let i = 0; i < density.length; i++) {
-        total[i] = (matrix - density[i]) / (matrix - fluid);
-        if (vsh) {
-            let tmp = total[i] - (sh * vsh[i]);
+        total[i] = (clean - density[i]) / (clean - fluid);
+        if (vclay) {
+            let tmp = total[i] - (sh * vclay[i]);
             effective[i] = parseFloat(tmp.clamp(0, 1).toFixed(4));
         };
     }
     total = total.map(d => parseFloat(d.clamp(0, 1).toFixed(4)));
-    let output = [{
-        name: "PHIT_D",
-        data: total,
-        unit: "v/v"
-    }];
-    if (vsh) output.push({
-        name: "PHIE_D",
-        data: effective,
-        unit: "v/v"
-    })
-    callback(output);
+    callback([total, effective]);
 }
 exports.calPorosityFromDensity = calPorosityFromDensity;
 
 function calSaturationArchie(inputs, parameters, callback) {
-    let SW = new Array(), SH = new Array(), SW_UNCL = new Array(), BVW = new Array();
+    let result = new Array(4).fill().map(r => new Array());
     let Rt = inputs[0], porosity = inputs[1];
     let a = parameters[0].value || 1;
     let m = parameters[1].value || 2;
     let n = parameters[2].value || 2;
     let Rw = parameters[3].value || 0.03;
     for (let i = 0; i < Rt.length; i++) {
-        SW_UNCL[i] = Math.pow((a * Rw) / (Rt[i] * Math.pow(porosity[i], m)), (1 / n));
-        SW[i] = parseFloat(SW_UNCL[i].clamp(0, 1).toFixed(4));
-        SH[i] = 1 - SW[i];
-        BVW[i] = SW[i] * porosity[i];
+        let tmp = Math.pow((a * Rw) / (Rt[i] * Math.pow(porosity[i], m)), (1 / n));
+        result[2][i] = tmp; // SW_AR_UNCL
+        let tmp2 = parseFloat(tmp.clamp(0, 1).toFixed(4));
+        result[0][i] = tmp2; // SW_AR
+        result[1][i] = 1 - tmp2; //SH_AR
+        result[3][i] = tmp2 * porosity[i]; //BVW_AR
     }
-    callback([
-        {
-            name: "SW_AR",
-            data: SW,
-            unit: "v/v"
-        },
-        {
-            name: "SH_AR",
-            data: SH,
-            unit: "v/v"
-        },
-        {
-            name: "SW_AR_UNCL",
-            data: SW_UNCL,
-            unit: "v/v"
-        },
-        {
-            name: "BVW_AR",
-            data: BVW,
-            unit: "v/v"
-        },
-    ]
-    )
+    callback(result);
 }
 exports.calSaturationArchie = calSaturationArchie;
+
+function calCutoffSummation(inputs, parameters, callback){
+    let clay = inputs[0], phi = inputs[1], sw = inputs[2];
+    let clay_cut = parameters[2], phi_cut = parameters[3], sw_cut = parameters[4];
+    let res = new Array(), pay = new Array();
+
+    for(let i = 0; i < clay.length; i++){
+        res[i] = (clay[i] <= clay_cut && phi[i] >= phi_cut) ? 1 : 0;
+        pay[i] = (clay[i] <= clay_cut && phi[i] >= phi_cut && sw[i] <= sw_cut) ? 1 : 0;
+    }
+    callback([res, pay]);
+}
+
+exports.calCutoffSummation = calCutoffSummation;

@@ -1040,10 +1040,11 @@ Service.prototype.removeLogplot = function (idLogplot, callback) {
     this.delete(DELETE_PLOT, { idPlot: idLogplot }, callback);
 }
 
-Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
+Service.prototype.createLogTrack = function (idPlot, orderNum, callback, opts) {
     var self = this;
     let dataRequest = {
         idPlot: idPlot,
+        title: (opts || {}).title,
         orderNum: orderNum
     };
     this.post(CREATE_LOG_TRACK, dataRequest, callback);
