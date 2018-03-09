@@ -1,5 +1,5 @@
 <ui-select style='width:100%;' ng-model="wiItemDropdown.selectedItem" ng-change="wiItemDropdown.onChange();">
-    <ui-select-match placeholder="[ Select project ]">
+    <ui-select-match placeholder="[ {{wiItemDropdown.placeHolder}} ]">
         {{wiItemDropdown.selectedItem.data.label}}
     </ui-select-match>
 

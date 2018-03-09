@@ -745,6 +745,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     }
 
     this.validate = function () {
+        if (!self.workflowConfig || !self.workflowConfig.steps) 
+            return false;
+
         for (let step of self.workflowConfig.steps) {
             if (!step.disabled) {
                 for (let input of step.inputs) {

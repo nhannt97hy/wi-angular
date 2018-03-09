@@ -114,7 +114,7 @@ exports.NewWorkflowButtonClicked = function () {
                         html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
                         name: 'Workflow'
                     }
-                })
+                });
             }
         });
     });

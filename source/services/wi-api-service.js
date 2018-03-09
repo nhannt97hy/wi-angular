@@ -246,6 +246,10 @@ const GET_WORKFLOW = '/workflow/info';
 const EDIT_WORKFLOW = '/workflow/edit';
 const DELETE_WORKFLOW = '/workflow/delete';
 const GET_WORKFLOW_LIST = "/workflow/list";
+
+const CREATE_WORKFLOW_SPEC = '/workflow-spec/new';
+const GET_WORKFLOW_SPEC_LIST = '/workflow-spec/list';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -1803,4 +1807,10 @@ Service.prototype.removeWorkflow = function (idWorkflow, callback) {
 
 Service.prototype.getWorkflowList = function(callback){
     this.post(GET_WORKFLOW_LIST, null, callback);
+}
+Service.prototype.createWorkflowSpec = function(name, spec, callback) {
+    this.post(CREATE_WORKFLOW_SPEC, {name:name, content:spec}, callback);
+}
+Service.prototype.getWorkflowSpecList = function(callback) {
+    this.post(GET_WORKFLOW_SPEC_LIST, null, callback);
 }

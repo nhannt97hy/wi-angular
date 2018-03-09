@@ -9,13 +9,28 @@ module.exports = function (ModalService, callback) {
 
             let data = {
                 name: $scope.name,
-                content: {}
+                content: self.wfSpec
             };
             close(data);
         };
 
         this.onCancelButtonClicked = function () {
             close(null);
+        }
+        this.getWorkflowSpecs = function(wiItemDropdownCtrl) {
+            wiApiService.getWorkflowSpecList(function(wfSpecs) {
+                wiItemDropdownCtrl.items = wfSpecs.map(function(wfSpec) {
+                    return {
+                        data: {
+                            label: wfSpec.name
+                        },
+                        properties: wfSpec
+                    }
+                });
+            });
+        }
+        this.workflowSpecChanged = function(wfSpecProps) {
+            self.wfSpec = wfSpecProps.content;
         }
     }
 
