@@ -33,7 +33,9 @@ app.component(name, {
         items: "<",
         onWiDropdownInit: "<",
         onItemChanged: "<",
-        placeHolder: "@"
+        placeHolder: "@",
+        ctrlBtnIcon: "@",
+        onCtrlBtnClick: "<"
     }
 });
 

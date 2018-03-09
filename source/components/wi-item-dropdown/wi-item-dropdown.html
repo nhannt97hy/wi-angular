@@ -4,7 +4,9 @@
     </ui-select-match>
 
     <ui-select-choices repeat="item in wiItemDropdown.items|filter:{data:{label:$select.search}}">
-        <div><span class='{{wiItemDropdown.icon}}'></span>&nbsp;&nbsp;{{item.data.label}}</div>
+        <div><span class='{{wiItemDropdown.icon}}'></span>&nbsp;&nbsp;{{item.data.label}}
+            <span style='float:right;display:block;' ng-if="wiItemDropdown.onCtrlBtnClick" class='{{wiItemDropdown.ctrlBtnIcon}}' ng-click="wiItemDropdown.onCtrlBtnClick(item, $event, wiItemDropdown);"></span>
+        </div>
     </ui-select-choices>
 
 </ui-select>

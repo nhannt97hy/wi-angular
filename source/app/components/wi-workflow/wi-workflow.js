@@ -110,10 +110,10 @@ function Controller(wiComponentService, wiApiService) {
         self.WorkflowPlayerName = "workflowplayer" + self.id + "Area";
         wiComponentService.putComponent(self.name, self);
         self.showOutput = true;
-        wiApiService.getWorkflow(self.id, function(workflow) {
+        /*wiApiService.getWorkflow(self.id, function(workflow) {
             console.log(workflow.content);
             self.workflowConfig = workflow.content;
-        });
+        });*/
     };
     this.getCurrentProjectId = function () {
         if (self.idProject) return self.idProject;

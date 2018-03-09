@@ -9,6 +9,7 @@ module.exports = function (ModalService, callback) {
 
             let data = {
                 name: $scope.name,
+                idWorkflowSpec: self.idWorkflowSpec,
                 content: self.wfSpec
             };
             close(data);
@@ -30,6 +31,7 @@ module.exports = function (ModalService, callback) {
             });
         }
         this.workflowSpecChanged = function(wfSpecProps) {
+            self.idWorkflowSpec = wfSpecProps.idWorkflowSpec;
             self.wfSpec = wfSpecProps.content;
         }
     }

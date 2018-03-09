@@ -1802,7 +1802,7 @@ Service.prototype.getWorkflow = function (idWorkflow, callback) {
 }
 
 Service.prototype.removeWorkflow = function (idWorkflow, callback) {
-    this.post(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
+    this.delete(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
 }
 
 Service.prototype.getWorkflowList = function(callback){

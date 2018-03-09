@@ -27,6 +27,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
 
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
+        if (self.idWorkflow) {
+            wiApiService.getWorkflow(self.idWorkflow, function(workflow) {
+                console.log(workflow.content);
+                self.workflowConfig = workflow.content;
+            });
+        }
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
 
@@ -36,6 +42,17 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         self.isFrozen = !!self.idProject;
         self.projectConfig = new Array();
     };
+
+    function saveWorkflow() {
+        if (!self.idWorkflow) return;
+        wiApiService.editWorkflow({
+            idWorkflow: self.idWorkflow,
+            content:self.workflowConfig
+        }, function(workflow) {
+            console.log('save workflow', workflow);
+        });
+    }
+    this.saveWorkflow = _.debounce(saveWorkflow, 3000);
 
     $scope.$on('wizard:stepChanged', function (event, args) {
         if (args.index == 0) {
@@ -52,7 +69,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             ipt.value = ipt.choices.length ? ipt.choices[0] : null;
                         })
                     })
-                })
+                });
+                self.saveWorkflow();
             }
         }
     })
@@ -155,88 +173,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }
         }
     }
-    /*this.inputArray = [
-        {
-            well: { name: "W4", idWell: 2 },
-            dataset: { name: "W4", idDataset: 2 },
-            inputs: [
-                {
-                    name: "Gamma Ray",
-                    value: { idCurve: 1, name: "ECGR" },
-                    choices: [
-                        { idCurve: 1, name: "ECGR" },
-                        { idCurve: 2, name: "ECGR-NEW" }
-                    ]
-                }
-            ],
-            parameters: [
-                { name: "Gamma ray clean", type: "number", value: 10 },
-                { name: "Gamma ray clay", type: "number", value: 120 },
-                {
-                    name: "Method",
-                    type: "select",
-                    value: { name: "Linear", value: "Linear" },
-                    choices: [
-                        { name: "Linear", value: "Linear" },
-                        { name: "Clavier", value: "Clavier" },
-                        { name: "Larionov Tertiary rocks", value: "Tertiary" }
-                    ]
-                }
-            ]
-        },
-        {
-            well: "02_97_DD_1X",
-            dataset: "02_97_DD_1X",
-            inputs: [
-                {
-                    name: "Gamma Ray",
-                    value: { idCurve: 1, name: "ECGR" },
-                    choices: [
-                        { idCurve: 1, name: "ECGR" },
-                        { idCurve: 2, name: "ECGR-NEW" }
-                    ]
-                }
-            ],
-            parameters: [
-                { name: "Gamma ray clean", type: "number", value: 10 },
-                { name: "Gamma ray clay", type: "number", value: 120 },
-                {
-                    name: "Method",
-                    type: "select",
-                    value: { name: "Linear", value: "Linear" },
-                    choices: [
-                        { name: "Linear", value: "Linear" },
-                        { name: "Clavier", value: "Clavier" },
-                        { name: "Larionov Tertiary rocks", value: "Tertiary" }
-                    ]
-                }
-            ]
-        }
-    ];*/
-    /*
-        worflowConfig = {
-            name: "Clastic",
-            steps: [
-                {
-                    name: "Shale Volume",
-                    inputs: [{ name: "Gamma Ray" }],
-                    data: [...],
-                    parameters: [],
-                },
-                {
-                    name: "Porosity",
-                    inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }]
-                },
-                {
-                    name: "Saturation",
-                    inputs: [
-                        { name: "Formation Resistivity" },
-                        { name: "Porosity" }
-                    ]
-                }
-            ]
-        };
-    */
     this.onSelectionTypeChanged = onSelectionTypeChanged;
     function onSelectionTypeChanged(selType) {
         self.filterText1 = "";
@@ -348,20 +284,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
     }
     function buildCurveListFromServer(cb, done) {
-        // wiApiService.listWells({
-        //     idProject:self.idProject,
-        //     limit: 100000
-        // }, function(wells) {
-        //     for (let well of wells) {
-        //         wiApiService.getWell(well.idWell, function(wellProps) {
-        //             for (let dataset of wellProps.datasets) {
-        //                 for (let curve of dataset.curves) {
-        //                     cb(curve);
-        //                 }
-        //             }
-        //         })
-        //     }
-        // });
         if (!self.idProject) {
             toastr.error("No project exists");
             return;
@@ -405,6 +327,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             let tmp = new Set(__inputChanged.index);
             tmp.add(parentIdx);
             __inputChanged.index = Array.from(tmp);
+            self.saveWorkflow();
         } else {
             toastr.error("please select data type!");
         }
@@ -645,6 +568,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     $timeout(() => {
                         wf.inputData.push(input);
                         __inputDataLen = wf.inputData.length;
+                        self.saveWorkflow();
                     });
                 }
                 $timeout(
@@ -825,6 +749,7 @@ app.component(name, {
     bindings: {
         name: "@",
         idProject: "<",
+        idWorkflow: "<",
         workflowConfig: "<"
     }
 });

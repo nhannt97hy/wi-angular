@@ -9,7 +9,8 @@
     </wi-toolbar>
 </div>
 <div class="workflow-main-content">
-    <wi-workflow-player name='{{wiWorkflow.WorkflowPlayerName}}' id-project='wiWorkflow.getCurrentProjectId()' workflow-config="wiWorkflow.workflowConfig"></wi-workflow-player>
+    <!--<wi-workflow-player name='{{wiWorkflow.WorkflowPlayerName}}' id-project='wiWorkflow.getCurrentProjectId()' workflow-config="wiWorkflow.workflowConfig"></wi-workflow-player>-->
+    <wi-workflow-player name='{{wiWorkflow.WorkflowPlayerName}}' id-project='wiWorkflow.getCurrentProjectId()' id-workflow="wiWorkflow.id"></wi-workflow-player>
     <div resizable r-directions="['top']" r-flex="true" class="output-pane" ng-show='wiWorkflow.showOutput'>
         <h5 class="output-header">
             <label>Ouputs</label>

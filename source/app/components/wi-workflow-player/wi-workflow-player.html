@@ -222,10 +222,10 @@
                     <div style="margin-left:5px;flex:2;padding:0 5px;overflow-y:auto;">
                         <div ng-repeat="wf in wiWorkflowPlayer.workflowConfig.steps" style='width:100%;' class='bordered panel panel-default' ng-init='wf.expanded = true;parentIdx = $index;'>
                             <div style='background-color:#eee;' class='panel-heading'>
-                                <span class="control-button" ng-class="{'fa fa-chevron-up': wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
+                                <span class="control-button" ng-class="{'fa fa-chevron-up': wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded;wiWorkflowPlayer.saveWorkflow();'
                                     style='margin-right:5px;'>
                                 </span>
-                                <span ng-click="wf.disabled = !wf.disabled" class='ti-check control-button block-button' ng-class='{"disabled-color": wf.disabled}'
+                                <span ng-click="wf.disabled = !wf.disabled;wiWorkflowPlayer.saveWorkflow();" class='ti-check control-button block-button' ng-class='{"disabled-color": wf.disabled}'
                                     style='margin-right:10px;color:black;padding-left:3px;padding-right:3px;'>
                                 </span>
                                 <span style='font-weight:700;'>{{wf.name}}</span>
