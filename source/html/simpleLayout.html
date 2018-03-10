@@ -160,7 +160,10 @@
     <template id='test'>
         <!-- <wi-test></wi-test> -->
         <!-- <wi-workflow id-project='1'></wi-workflow> -->
-        <wi-workflow-player id-project='1' workflow-config='myWorkflowConfig'></wi-workflow-player>
+        <div style="display: flex;flex-direction:column;height:100%">
+            <h3 class='content-heading'>Workflow</h3>
+            <wi-workflow-player style="flex:1;display:flex;" id-project='1' workflow-config='myWorkflowConfig'></wi-workflow-player>
+        </div>
     </template>
     <div id="testElement"></div>
 
