@@ -42,6 +42,7 @@ let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
 let wiNeuralNetwork = require('./wi-neural-network');
+let wiPlot = require('./wi-plot');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -157,6 +158,7 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -445,7 +447,7 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
                     { name: "Curve Data " },
                     { name: "Curve Data " },
                     { name: "Curve Data " },
-                    { name: "Curve Data " } 
+                    { name: "Curve Data " }
                 ],
                 parameters: [],
                 processFunction: predict
@@ -481,7 +483,7 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
                 })
                 console.log(payload.data);
                 console.log(payload.target);
-                wiComponentService.getComponent('SPINNER').show();       
+                wiComponentService.getComponent('SPINNER').show();
                 $http({
                     method: 'POST',
                     url: 'http://'+HOST+':'+PORT + '/store/api/model/new',
@@ -512,7 +514,7 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
             let curves = filterNull(list_curves);
             DialogUtils.predictModelDialog(ModalService, function(payload){
                 payload.data = curves;
-                wiComponentService.getComponent('SPINNER').show();  
+                wiComponentService.getComponent('SPINNER').show();
                 $http({
                     method: 'POST',
                     url: 'http://'+HOST+':'+PORT + '/store/api/predict',
@@ -527,7 +529,7 @@ app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentS
                         || list_curves[3][i]==="null" || list_curves[4][i]==="null")
                         {
                             res.body.target.splice(i,0,"null");
-                            // console.log(list_curves[0][i]);                            
+                            // console.log(list_curves[0][i]);
                         }
                     }
                     // console.log('predict:', res);
@@ -797,6 +799,88 @@ app.controller('NeuralController', function($scope, ModalService) {
         self.outputCurves = angular.copy(newConfig.outputCurves);
         self.nLayers = newConfig.nLayers;
         self.nNodes = newConfig.nNodes;
+    }
+});
+
+app.controller('wiPlotPlaygroundController', function($scope) {
+    let self = this;
+    function getRandomData(start, stop, size, isIncArr) {
+        let result = [];
+        let range = stop - start;
+        let step = range / size;
+        for( let i = 0; i < size; ++i) {
+            if(isIncArr) {
+                if(i == 0) {
+                    result.push(/*Math.random()*/step + start);
+                    continue;
+                }
+                result.push(/*Math.random()*/step + result[i-1]);
+            } else {
+                result.push(Math.random()*range + start);
+            }
+        }
+        return result;
+    }
+    let x = {
+        label: 'DTCO3',
+        data: getRandomData(0, 9, 200, true),
+        min: -1,
+        max: 10
+    };
+    let y = {
+        label: 'ECGR',
+        data: getRandomData(10, 90, 200),
+        min: 0,
+        max: 100
+    }
+    this.makeRandomData = function () {
+        this.plotConfig = angular.copy(this.plotConfig);
+        this.plotConfig.x.max = Math.round(Math.random()*10 + 10);
+        this.plotConfig.x.min = Math.round(Math.random()*10 + -10);
+        this.plotConfig.y.max = Math.round(Math.random()*20 + 90);
+        this.plotConfig.y.min = Math.round(Math.random()*20 + -10);
+        this.plotConfig.x.data = getRandomData(this.plotConfig.x.min, this.plotConfig.x.max, 200, true);
+        this.plotConfig.y.data = getRandomData(this.plotConfig.y.min, this.plotConfig.y.max, 200);
+    }
+
+    function genRandomColor() {
+        let r = Math.round(Math.random() * 150 + 50);
+        let g = Math.round(Math.random() * 150 + 50);
+        let b = Math.round(Math.random() * 150 + 50);
+        return 'rgb(' + [r,g,b].join(",") + ')'
+    }
+
+    this.makeLineColor = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.lineColor = genRandomColor();
+    }
+
+    this.makePointColor = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.pointColor = genRandomColor();
+    }
+
+    this.toggleLine = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.showLine = !self.plotOption.showLine;
+    }
+
+    this.togglePoint = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.showPoint = !self.plotOption.showPoint;
+    }
+
+    this.plotConfig = {
+        x: x,
+        y: y
+    };
+    this.plotOption = {
+        lineColor: 'blue',
+        lineStyle: 'solid',
+        pointColor: 'black',
+        pointStyle: 'circle',
+        showPoint: true,
+        showLine: true
     }
 })
 

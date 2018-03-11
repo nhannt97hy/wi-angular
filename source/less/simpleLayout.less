@@ -29,7 +29,6 @@ div.panel-default, div.panel-default>div.panel-heading {
 }
 
 // NeuralNetwork style sheet
-
 .neural-network-main {
     // full width and height container
     display: flex;
@@ -47,5 +46,31 @@ div.panel-default, div.panel-default>div.panel-heading {
     text[class*='-layer-label'] {
         font-size: 25;
         font-weight: bold;
+    }
+}
+
+// Wi Plot stylesheet
+.wi-plot-main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    & > div {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+    }
+    .wi-plot-plot-container {
+        flex: 1;
+        .axis path {
+            display: true;
+        }
+
+        .axis line {
+            stroke: #888;
+            stroke-opacity: 0.5;
+        }
+        .axis--x text, .axis--y text {
+            display: none;
+        }
     }
 }
