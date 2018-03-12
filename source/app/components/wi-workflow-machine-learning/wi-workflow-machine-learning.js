@@ -784,6 +784,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
             wf.inputs.splice(i, 1);
     }
     this.isCurveOutput = function(wf, i){
+        if(wf.name=='Predict')
+            return false;
         if(i==wf.inputs.length-1)
             return true;
         return false;
@@ -803,14 +805,14 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
             },
             {
                 name: "Verify",
-                inputs: [{ name: "Curve input" }, { name: "Curve output" }],
+                inputs: [{ name: "Curve input" }, { name: "Curve verify" }],
                 parameters: [],
                 outputs: [],
                 function: verify
             },
             {
                 name: "Predict",
-                inputs: [{ name: "Curve input" }, { name: "Curve output" }],
+                inputs: [{ name: "Curve input" }, { name: "Curve input" }],
                 parameters: [],
                 outputs: [],
                 function: predict

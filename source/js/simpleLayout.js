@@ -42,6 +42,7 @@ let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
 let wiNeuralNetwork = require('./wi-neural-network');
+let wiPlot = require('./wi-plot');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -154,6 +155,7 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -358,302 +360,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
             title: 'Title'
         });
         */
-    }
-});
-app.controller('wipm', function($scope, ModalService, wiApiService, wiComponentService, $http){
-    let listCurves = [];
-    const HOST = '54.169.13.92';
-    const PORT = 3002;
-    function getDataCurves(i, callback){
-        listCurves = [];
-        let wiWorkflowPlayer = wiComponentService.getComponent('wiWorkflowPlayer');
-        console.log('wiWorkflowPlayer: ', wiWorkflowPlayer);
-        let inputData = wiWorkflowPlayer.workflowConfig.steps[i].inputData;
-        if(inputData){
-            let listInputData = [];
-            inputData.forEach(function(data, i){
-                let checkFullCurve = true;
-                for(let j =0 ; j<data.inputs.length; j++){
-                    if(!data.inputs[j].value){
-                        checkFullCurve = false;
-                        break;
-                    }
-                }
-                if(checkFullCurve)
-                    listInputData.push(data.inputs);
-            });
-            for(let i =0; i< inputData[0].inputs.length; i++){
-                listCurves[i] = [];
-            }
-            listInputData.forEach(function(input_data, i){
-                let j=-1;
-                async.each(input_data, function(curve,__end){
-                    wiApiService.dataCurve(curve.value.id, function(data){
-                        j++;
-                        data.forEach(function(point){
-                            listCurves[j].push(point.x);
-                        });
-                        __end();
-                    });
-                }, function(err){
-                    if(i==listInputData.length-1){
-                        console.log(listCurves);
-                        callback(listCurves);
-                    }
-                });
-            });
-        }else {
-            toastr.error('Choose a dataset', '');
-        }
-    }
-    $scope.myWorkflowConfig = {
-        name: "Clastic",
-        steps: [
-            {
-                name: "Clay Volume",
-                inputs: [{ name: "Gamma Ray" }],
-                parameters: [
-                    { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
-                    {
-                        name: "Method",
-                        type: "select",
-                        value: 1,
-                        choices: [
-                            { name: "Linear", value: 1 },
-                            { name: "Clavier", value: 2 },
-                            {
-                                name: "Larionov Tertiary rocks",
-                                value: 3
-                            },
-                            {
-                                name: "Larionov older rocks",
-                                value: 4
-                            },
-                            {
-                                name: "Stieber variation I",
-                                value: 5
-                            },
-                            {
-                                name: "Stieber - Miocene and Pliocene",
-                                value: 6
-                            },
-                            {
-                                name: "Stieber variation II",
-                                value: 7
-                            }
-                        ]
-                    }
-                ],
-                outputs: [
-                    {
-                        name: "VCL_GR",
-                        family: "Clay Volume"
-                    }
-                ],
-                function: "calVCLfromGR"
-            },
-            {
-                name: "Porosity",
-                inputs: [{ name: "Bulk Density" }, { name: "Clay Volume" }],
-                parameters: [
-                    { name: "clean", type: "number", value: 2.65 },
-                    { name: "fluid", type: "number", value: 1 },
-                    { name: "clay", type: "number", value: 2.3 }
-                ],
-                outputs:[
-                    {
-                        name: "PHIT_D",
-                        family: "Total Porosity"
-                    },
-                    {
-                        name: "PHIE_D",
-                        family: "Effective Porosity"
-                    }
-                ],
-                function: "calPorosityFromDensity"
-            },
-            {
-                name: "Saturation",
-                inputs: [
-                    { name: "Formation Resistivity" },
-                    { name: "Porosity" }
-                ],
-                parameters: [
-                    { name: "a", type: "number", value: 1 },
-                    { name: "m", type: "number", value: 2 },
-                    { name: "n", type: "number", value: 2 },
-                    { name: "Rw", type: "number", value: 0.03 },
-                ],
-                outputs:[
-                    {
-                        name: "SW_AR",
-                        family: "Water Saturation"
-                    },
-                    {
-                        name: "SH_AR",
-                        family: "Hydrocarbon Saturation"
-                    },
-                    {
-                        name: "SW_AR_UNCL",
-                        family: "Water Saturation Unclipped"
-                    },
-                    {
-                        name: "BVW_AR",
-                        family: "Bulk Volume Water"
-                    }
-                ],
-                function: "calSaturationArchie"
-            },
-            {
-                name: "Summation",
-                inputs: [
-                    {
-                        name: "Clay Volume"
-                    },
-                    {
-                        name: "Porosity"
-                    },
-                    {
-                        name: "Water Saturation"
-                    }
-                ],
-                parameters: [
-                    {
-                        name: "Min Res Height",
-                        type: "number",
-                        value: 0
-                    },
-                    {
-                        name: "Min Pay Height",
-                        type: "number",
-                        value: 0
-                    },
-                    {
-                        name: "Vclay Cut",
-                        type: "number",
-                        value: 0.35
-                    },
-                    {
-                        name: "Phi Cut",
-                        type: "number",
-                        value: 0.15
-                    },
-                    {
-                        name: "Sw Cut",
-                        type: "number",
-                        value: 0.6
-                    }
-                ],
-                outputs: [
-                    {
-                        name: "NetRes",
-                        family: "Net Reservoir Flag"
-                    },
-                    {
-                        name: "NetPay",
-                        family: "Net Pay Flag"
-                    }
-                ],
-                function: "calCutoffSummation"
-            }
-        ]
-
-    };
-    function filterNull(curves){
-        let l = curves.length;
-        let filterCurves = [];
-        for(let j = 0; j<l; j++){
-            filterCurves[j] = [];
-        }
-        for(let i = 0; i<curves[0].length; i++){
-            let checkNull = true;
-            for(let j=0; j<l; j++)
-                if(curves[j][i] === "null")
-                    checkNull = false;
-            if(checkNull)
-                for(let j = 0; j<l; j++){
-                    filterCurves[j].push(curves[j][i]);
-                }
-        }
-        console.log('result of filterNull: ', filterCurves);
-        return filterCurves;
-    }
-    function train(){
-        getDataCurves(0, function(list_curves){
-            let curves = filterNull(list_curves);
-            DialogUtils.trainModelDialog(ModalService, function(payload){
-                payload.data.push(curves[0], curves[1], curves[2], curves[3], curves[4]);
-                curves[5].forEach(function(x){
-                    payload.target.push(x);
-                })
-                console.log(payload.data);
-                console.log(payload.target);
-                wiComponentService.getComponent('SPINNER').show();       
-                $http({
-                    method: 'POST',
-                    url: 'http://'+HOST+':'+PORT + '/store/api/model/new',
-                    data: payload
-                }).then(function(response){
-                        console.log('create model:', response.data);
-                        wiComponentService.getComponent('SPINNER').hide();
-                        var res = response.data;
-                        if(res.statusCode == 200){
-                            toastr.success('Create model success!', '');
-                        }else{
-                            toastr.error(res.body.message, '');
-                        }
-                        return;
-                }, function(error){
-                    wiComponentService.getComponent('SPINNER').hide();
-                    toastr.error('Call store api create model error!', '');
-                    return;
-                })
-            });
-        })
-    }
-    function verify(){
-
-    }
-    function predict(){
-        getDataCurves(1, function(list_curves){
-            let curves = filterNull(list_curves);
-            DialogUtils.predictModelDialog(ModalService, function(payload){
-                payload.data = curves;
-                wiComponentService.getComponent('SPINNER').show();  
-                $http({
-                    method: 'POST',
-                    url: 'http://'+HOST+':'+PORT + '/store/api/predict',
-                    data: payload
-                }).then(function(response){
-                    wiComponentService.getComponent('SPINNER').hide();
-                    var res = response.data;
-                    console.log(list_curves);
-                    for(let i = 0; i<list_curves[0].length; i++)
-                    {
-                        if(list_curves[0][i]==="null" || list_curves[1][i]==="null" || list_curves[2][i]==="null"
-                        || list_curves[3][i]==="null" || list_curves[4][i]==="null")
-                        {
-                            res.body.target.splice(i,0,"null");
-                            // console.log(list_curves[0][i]);                            
-                        }
-                    }
-                    // console.log('predict:', res);
-                    console.log('result of predict: ', res.body.target);
-                    if(res.statusCode == 200){
-                        toastr.success('Predict observation success!', '');
-                    }else{
-                        console.log('fail');
-                        toastr.error(res.body.message, '');
-                    }
-                    return;
-                }, function(error){
-                    wiComponentService.getComponent('SPINNER').hide();
-                    toastr.error("Call store api predict error", '');
-                    return;
-                });
-            });
-        });
     }
 });
 app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService, $rootScope, ModalService) {
@@ -905,6 +611,88 @@ app.controller('NeuralController', function($scope, ModalService) {
         self.outputCurves = angular.copy(newConfig.outputCurves);
         self.nLayers = newConfig.nLayers;
         self.nNodes = newConfig.nNodes;
+    }
+});
+
+app.controller('wiPlotPlaygroundController', function($scope) {
+    let self = this;
+    function getRandomData(start, stop, size, isIncArr) {
+        let result = [];
+        let range = stop - start;
+        let step = range / size;
+        for( let i = 0; i < size; ++i) {
+            if(isIncArr) {
+                if(i == 0) {
+                    result.push(/*Math.random()*/step + start);
+                    continue;
+                }
+                result.push(/*Math.random()*/step + result[i-1]);
+            } else {
+                result.push(Math.random()*range + start);
+            }
+        }
+        return result;
+    }
+    let x = {
+        label: 'DTCO3',
+        data: getRandomData(0, 9, 200, true),
+        min: -1,
+        max: 10
+    };
+    let y = {
+        label: 'ECGR',
+        data: getRandomData(10, 90, 200),
+        min: 0,
+        max: 100
+    }
+    this.makeRandomData = function () {
+        this.plotConfig = angular.copy(this.plotConfig);
+        this.plotConfig.x.max = Math.round(Math.random()*10 + 10);
+        this.plotConfig.x.min = Math.round(Math.random()*10 + -10);
+        this.plotConfig.y.max = Math.round(Math.random()*20 + 90);
+        this.plotConfig.y.min = Math.round(Math.random()*20 + -10);
+        this.plotConfig.x.data = getRandomData(this.plotConfig.x.min, this.plotConfig.x.max, 200, true);
+        this.plotConfig.y.data = getRandomData(this.plotConfig.y.min, this.plotConfig.y.max, 200);
+    }
+
+    function genRandomColor() {
+        let r = Math.round(Math.random() * 150 + 50);
+        let g = Math.round(Math.random() * 150 + 50);
+        let b = Math.round(Math.random() * 150 + 50);
+        return 'rgb(' + [r,g,b].join(",") + ')'
+    }
+
+    this.makeLineColor = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.lineColor = genRandomColor();
+    }
+
+    this.makePointColor = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.pointColor = genRandomColor();
+    }
+
+    this.toggleLine = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.showLine = !self.plotOption.showLine;
+    }
+
+    this.togglePoint = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.showPoint = !self.plotOption.showPoint;
+    }
+
+    this.plotConfig = {
+        x: x,
+        y: y
+    };
+    this.plotOption = {
+        lineColor: 'blue',
+        lineStyle: 'solid',
+        pointColor: 'black',
+        pointStyle: 'circle',
+        showPoint: true,
+        showLine: true
     }
 })
 

@@ -13,6 +13,7 @@ let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
 let Histogram = require('./visualize-histogram');
 let neuralNetworkPlayground = require('./neural-network/visualize-neural-network-playground');
+let visualizeWiPlot = require('./visualize-wi-plot');
 
 let Selection = require('./visualize-selection');
 
@@ -276,4 +277,10 @@ exports.createNNPlayground = function (config, domElem) {
 exports.createSelection = function (config) {
     let selection = new Selection(config);
     return selection;
+}
+
+exports.createVisualizeWiPlot = function (config, domElem) {
+    let viWiPlot = new visualizeWiPlot(config);
+    viWiPlot.init(domElem);
+    return viWiPlot;
 }
