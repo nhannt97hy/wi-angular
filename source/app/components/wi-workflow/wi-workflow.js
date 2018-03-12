@@ -8,11 +8,11 @@ function Controller(wiComponentService, wiApiService) {
         name: "Clastic",
         steps: [
             {
-                name: "Shale Volume",
+                name: "Clay Volume",
                 inputs: [{ name: "Gamma Ray" }],
                 parameters: [
                     { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 100 },
+                    { name: "GR clay", type: "number", value: 120 },
                     {
                         name: "Method",
                         type: "select",
@@ -43,18 +43,30 @@ function Controller(wiComponentService, wiApiService) {
                         ]
                     }
                 ],
-                function: "calVSHfromGR"
+                outputs: [
+                    {
+                        name: "VCL_GR",
+                        family: "Clay Volume"
+                    }
+                ],
+                function: "calVCLfromGR"
             },
             {
                 name: "Porosity",
-                inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }],
+                inputs: [{ name: "Bulk Density" }, { name: "Clay Volume" }],
                 parameters: [
-                    { name: "matrix", type: "number", value: 2.65 },
-                    { name: "shale", type: "number", value: 2.4 },
+                    { name: "clean", type: "number", value: 2.65 },
+                    { name: "fluid", type: "number", value: 1 },
+                    { name: "clay", type: "number", value: 2.3 }
+                ],
+                outputs:[
                     {
-                        name: "fluid",
-                        type: "number",
-                        value: 1
+                        name: "PHIT_D",
+                        family: "Total Porosity"
+                    },
+                    {
+                        name: "PHIE_D",
+                        family: "Effective Porosity"
                     }
                 ],
                 function: "calPorosityFromDensity"
@@ -71,17 +83,87 @@ function Controller(wiComponentService, wiApiService) {
                     { name: "n", type: "number", value: 2 },
                     { name: "Rw", type: "number", value: 0.03 },
                 ],
+                outputs:[
+                    {
+                        name: "SW_AR",
+                        family: "Water Saturation"
+                    },
+                    {
+                        name: "SH_AR",
+                        family: "Hydrocarbon Saturation"
+                    },
+                    {
+                        name: "SW_AR_UNCL",
+                        family: "Water Saturation Unclipped"
+                    },
+                    {
+                        name: "BVW_AR",
+                        family: "Bulk Volume Water"
+                    }
+                ],
                 function: "calSaturationArchie"
+            },
+            {
+                name: "Summation",
+                inputs: [
+                    {
+                        name: "Clay Volume"
+                    },
+                    {
+                        name: "Porosity"
+                    },
+                    {
+                        name: "Water Saturation"
+                    }
+                ],
+                parameters: [
+                    {
+                        name: "Min Res Height",
+                        type: "number",
+                        value: 0
+                    },
+                    {
+                        name: "Min Pay Height",
+                        type: "number",
+                        value: 0
+                    },
+                    {
+                        name: "Vclay Cut",
+                        type: "number",
+                        value: 0.35
+                    },
+                    {
+                        name: "Phi Cut",
+                        type: "number",
+                        value: 0.15
+                    },
+                    {
+                        name: "Sw Cut",
+                        type: "number",
+                        value: 0.6
+                    }
+                ],
+                outputs: [
+                    {
+                        name: "NetRes",
+                        family: "Net Reservoir Flag"
+                    },
+                    {
+                        name: "NetPay",
+                        family: "Net Pay Flag"
+                    }
+                ],
+                function: "calCutoffSummation"
             }
         ]
 
     };
-    */
-    /*wiApiService.createWorkflowSpec('Clastic', this.workflowConfig, function(res){
+    wiApiService.createWorkflowSpec('Clastic', this.workflowConfig, function(res){
         console.log(res);
-    });*/
+    });
+    */
     /*
-    this.workflowConfig = {    
+    this.workflowConfig = {
         name: "Missing curve reconstruction",
         steps: [
             {
@@ -97,7 +179,7 @@ function Controller(wiComponentService, wiApiService) {
             {
                 name: "Predict",
                 inputs: [
-                    { name: "Curve 1 " },{ name: "Curve 2 " } 
+                    { name: "Curve 1 " },{ name: "Curve 2 " }
                 ],
                 parameters: []
             }
