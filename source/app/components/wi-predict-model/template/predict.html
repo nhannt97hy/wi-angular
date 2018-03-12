@@ -18,7 +18,7 @@
                     {{predictCtrl.well.name}}
                 </ui-select-match>
                 <ui-select-choices  position="down"
-                                    repeat='well in predictCtrl.wells | filter:{name:$select.search} track by well.idWell' >
+                                    repeat='well in predictCtrl.wells' >
                     <div class="normal-text">{{well.name}}</div>
                 </ui-select-choices>
             </ui-select>
@@ -31,7 +31,7 @@
                     {{predictCtrl.dataset.name}}
                 </ui-select-match>
                 <ui-select-choices  position="down"
-                                    repeat='dataset in predictCtrl.datasets | filter:{name:$select.search} track by dataset.idDataset' >
+                                    repeat='dataset in predictCtrl.datasets' >
                     <div class="normal-text">{{dataset.name}}</div>
                 </ui-select-choices>
             </ui-select>

@@ -1,10 +1,10 @@
 let helper = require('./DialogHelper');
 module.exports = function (ModalService, wiApiService, callback, shadingOptions, currentTrack, wiLogplotCtrl){
-    let thisModal = null;
+    // let thisModal = null;
 
     function ModalController($scope, close, wiComponentService, $timeout) {
         let self = this;
-        thisModal = this;
+        // thisModal = this;
         window.__SA = this;
         this.disabled = false;
         this.error = null;
@@ -13,6 +13,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         let graph = wiComponentService.getComponent('GRAPH');
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
+        console.log("shadingOptions", shadingOptions);
         this.groupFn = function(item){
             return item.datasetName;
         }
@@ -23,29 +24,28 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         this.paletteList = null;
         this.paletteName = null;
         this.curveList = currentTrack.getCurves();
-
-        let leftLineBk = shadingOptions.leftLine;
-        shadingOptions.leftLine = null;
-        let rightLineBk = shadingOptions.rightLine;
-        shadingOptions.rightLine = null;
+        let leftCurveBk = shadingOptions.leftCurve;
+        shadingOptions.leftCurve = null;
+        let rightCurveBk = shadingOptions.rightCurve;
+        shadingOptions.rightCurve = null;
 
         this.shadingOptions = angular.copy(shadingOptions);
 
-        this.shadingOptions.leftLine = leftLineBk;
-        this.shadingOptions.rightLine = rightLineBk;
-        shadingOptions.leftLine = leftLineBk;
-        shadingOptions.rightLine = rightLineBk;
+        this.shadingOptions.leftCurve = leftCurveBk;
+        this.shadingOptions.rightCurve = rightCurveBk;
+        shadingOptions.leftCurve = leftCurveBk;
+        shadingOptions.rightCurve = rightCurveBk;
 
         let paletteNameArr = [];
         let paletteValArr = [];
 
         if (!shadingOptions.shadingStyle)
             this.shadingOptions.shadingStyle = utils.getShadingStyle(this.shadingOptions.isNegPosFill ? this.shadingOptions.positiveFill : this.shadingOptions.fill)
-        if (this.shadingOptions.type == 'left') this.shadingOptions.leftLine = {"id": -1, "name": "left"}
-        if (this.shadingOptions.type == 'right') this.shadingOptions.leftLine = {"id": -2, "name": "right"}
-        if (this.shadingOptions.type == 'custom') this.shadingOptions.leftLine = {"id": -3, "name": "custom"}
-        if (this.shadingOptions.type == 'pair') this.shadingOptions.leftLine = getLine(this.shadingOptions.idLeftLine);
-        this.shadingOptions.rightLine = getLine(this.shadingOptions.idRightLine);
+        if (this.shadingOptions.type == 'left') this.shadingOptions.leftCurve = {"id": -1, "name": "left"}
+        if (this.shadingOptions.type == 'right') this.shadingOptions.leftCurve = {"id": -2, "name": "right"}
+        if (this.shadingOptions.type == 'custom') this.shadingOptions.leftCurve = {"id": -3, "name": "custom"}
+        if (this.shadingOptions.type == 'pair') this.shadingOptions.leftCurve = getLine(this.shadingOptions.idLeftLine);
+        this.shadingOptions.rightCurve = getLine(this.shadingOptions.idRightLine);
 
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
@@ -57,11 +57,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
 
         this.fillPatternOptions = {};
         this.variableShadingOptions = {};
-
-        let condition1 = (this.shadingOptions.shadingStyle == "fillPattern" && !this.shadingOptions.isNegPosFill);
-        let condition2 = (this.shadingOptions.shadingStyle == "fillPattern" && this.shadingOptions.isNegPosFill);
-        let condition3 = (this.shadingOptions.shadingStyle == "variableShading" && !this.shadingOptions.isNegPosFill);
-        let condition4 = (this.shadingOptions.shadingStyle == "variableShading" && this.shadingOptions.isNegPosFill);
 
         this.fillPatternOptions = {
             fill : {
@@ -90,11 +85,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             }
         }
         if (!this.shadingOptions.idControlCurve) {
-            this.shadingOptions.idControlCurve = (this.shadingOptions.leftLine.id > 0) ? 
-                                                    this.shadingOptions.leftLine.idCurve : this.shadingOptions.rightLine.idCurve;
+            this.shadingOptions.idControlCurve = (this.shadingOptions.leftCurve.id > 0) ? 
+                                                    this.shadingOptions.leftCurve.idCurve : this.shadingOptions.rightCurve.idCurve;
         }
         let controlCurve = utils.getCurveFromId(this.shadingOptions.idControlCurve);
-        console.log("controlCurve", this.shadingOptions.idControlCurve, controlCurve);
         
         this.namePals = new Array();
         utils.getPalettes(function(pals){
@@ -111,43 +105,43 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         
         // function
         this.typeFixedValue = function () {
-            if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightLine.minX){
-                self.shadingOptions.leftLine = {"id": -1, "name": "left"};
+            if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightCurve.minX){
+                self.shadingOptions.leftCurve = {"id": -1, "name": "left"};
                 self.shadingOptions.idLeftLine = -1;
                 self.shadingOptions.type = 'left';
             }
-            else if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightLine.maxX) {
-                self.shadingOptions.leftLine = {"id": -2, "name": "right"};
+            else if(self.shadingOptions.leftFixedValue == self.shadingOptions.rightCurve.maxX) {
+                self.shadingOptions.leftCurve = {"id": -2, "name": "right"};
                 self.shadingOptions.idLeftLine = -2;
                 self.shadingOptions.type = 'right';
             }
             else {
-                self.shadingOptions.leftLine = {"id": -3, "name": "custom"};
+                self.shadingOptions.leftCurve = {"id": -3, "name": "custom"};
                 self.shadingOptions.idLeftLine = -3;
                 self.shadingOptions.type = 'custom';
             }
         }
 
         this.onSelectRightLine = function () {
-            self.shadingOptions.idRightLine = self.shadingOptions.rightLine.id;
+            self.shadingOptions.idRightLine = self.shadingOptions.rightCurve.id;
             if (self.shadingOptions.type == 'left')
-                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightCurve.minX;
             if (self.shadingOptions.type == 'right')
-                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
-            if (self.shadingOptions.leftLine) self.onSelectLeftLine();
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightCurve.maxX;
+            if (self.shadingOptions.leftCurve) self.onSelectLeftLine();
         };
         this.onSelectLeftLine = function () {
-            self.shadingOptions.idLeftLine = self.shadingOptions.leftLine.id;
-            if (self.shadingOptions.leftLine.id == -1) {
-                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.minX;
+            self.shadingOptions.idLeftLine = self.shadingOptions.leftCurve.id;
+            if (self.shadingOptions.leftCurve.id == -1) {
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightCurve.minX;
                 self.shadingOptions.type = 'left';
             }
-            if (self.shadingOptions.leftLine.id == -2) {
-                self.shadingOptions.leftFixedValue = self.shadingOptions.rightLine.maxX;
+            if (self.shadingOptions.leftCurve.id == -2) {
+                self.shadingOptions.leftFixedValue = self.shadingOptions.rightCurve.maxX;
                 self.shadingOptions.type = 'right';
             }
-            if (self.shadingOptions.leftLine.id > 0) self.shadingOptions.leftFixedValue = null;
-        };
+            if (self.shadingOptions.leftCurve.id > 0) self.shadingOptions.leftFixedValue = null;
+        };  
 
         function getLine (idLine) {
             let line = null;
@@ -157,6 +151,24 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 })[0];
             };
             return line;
+        }
+        this.switchShadingType = function () {
+            if (self.shadingOptions.shadingStyle == 'pattern') {
+                self.checkboxVal = self.displayType;
+                self.fillPatternOptions.fill.display = !self.checkboxVal;
+                self.correctFillingStyle();
+            }
+            if (self.shadingOptions.shadingStyle == 'varShading') {
+                self.displayType = self.checkboxVal;
+                if (self.displayType == true 
+                    && self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') {
+                    self.varShadingType = 'gradient';
+                    self.variableShadingOptions.fill.varShading.varShadingType = 'gradient';
+                    self.variableShadingOptions.positiveFill.varShading.varShadingType = 'gradient';
+                    self.variableShadingOptions.negativeFill.varShading.varShadingType = 'gradient';
+                }
+                self.correctFillingStyleVarShading();
+            }
         }
         this.foreground = function () {
             if(!self.fillPatternOptions.fill.pattern.foreground) self.fillPatternOptions.fill.pattern.name = 'basement';
@@ -484,7 +496,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                         lowVal: null,
                         highVal: null,
                         pattern: "none",
-                        // foreground: "transparent",
+                        foreground: "black",
                         background: "blue",
                         description: ""
                     }]
@@ -570,10 +582,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                     changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
                                 ? (shadingOptions.changed = 2) : shadingOptions.changed,
                     idControlCurve : self.variableShadingOptions.controlCurve.id,
-                    idLeftLine : self.shadingOptions.leftLine ? self.shadingOptions.leftLine.id : null,
-                    idRightLine : self.shadingOptions.rightLine.id,
-                    leftLine : self.shadingOptions.leftLine,
-                    rightLine : self.shadingOptions.rightLine,
+                    idLeftLine : self.shadingOptions.leftCurve ? self.shadingOptions.leftCurve.id : null,
+                    idRightLine : self.shadingOptions.rightCurve.id,
+                    leftCurve : self.shadingOptions.leftCurve,
+                    rightCurve : self.shadingOptions.rightCurve,
                     idShading : shadingOptions.idShading,
                     idTrack : shadingOptions.idTrack,
                     isNegPosFill : self.shadingOptions.isNegPosFill,

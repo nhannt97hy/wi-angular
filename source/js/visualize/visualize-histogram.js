@@ -26,7 +26,7 @@ function Histogram(histogramModel) {
     this.zoneData = new Array();
     this.zoneBins = new Array();
 
-    this.selector = null;
+    this.viSelection = null;
 }
 Histogram.prototype.trap = function (eventName, handlerCb) {
     let eventHandlers = this.handlers[eventName];
@@ -67,10 +67,8 @@ Histogram.prototype.setCurve = function(data) {
     }
     this.data = data;
 }
-Histogram.prototype.setSelectionData = function(selectionData, selector) {
-    this.selector = selector;
-    let selection = this.selectionSvgContainer.filter(selection => selection.id == this.selector.id)[0];
-    selection.selectionData = selectionData;
+Histogram.prototype.setSelection = function(viSelection) {
+    this.viSelection = viSelection;
 }
 
 Histogram.prototype.getTickValuesY = function() {
@@ -126,11 +124,7 @@ Histogram.prototype.filterF = function(d, zoneIdx) {
 
 Histogram.prototype.filterSelection = function(d, selectionDataSegment) {
     let self = this;
-    let selectedDepths = [];
     let tempDepth = 0;
-    for (let depthValue in selectionDataSegment) {
-        selectedDepths.push(parseInt(depthValue));
-    }
     if (!self.histogramModel) return false;
     if (self.histogramModel.properties.leftScale == self.histogramModel.properties.rightScale) return false;
 
@@ -138,9 +132,9 @@ Histogram.prototype.filterSelection = function(d, selectionDataSegment) {
     left = Math.min(self.histogramModel.properties.leftScale, self.histogramModel.properties.rightScale);
     right = Math.max(self.histogramModel.properties.leftScale, self.histogramModel.properties.rightScale);
 
-    if (self.selector && self.histogramModel) {
-        return (!isNaN(d.y) && (tempDepth >= selectedDepths[0]) &&
-            (tempDepth < selectedDepths[selectedDepths.length - 1]) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
+    if (self.histogramModel) {
+        return (!isNaN(d.y) && (tempDepth >= selectionDataSegment.startDepth) &&
+            (tempDepth < selectionDataSegment.stopDepth) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
     }
     let xFloat = parseFloat(d.x);
     return (
@@ -331,9 +325,9 @@ Histogram.prototype._doPlot = function() {
         if (step < 0) __reverseBins(this.intervalBins);
     }
 
-    if (this.selector) {
+    // if (this.viSelection) {
         this.selectionSvgContainer.forEach(function(selection) {
-            let selectionData = self.getSelectionData(selection.selectionData);
+            let selectionData = self.getSelectionData(selection.data);
             let selectionBins = [];
             selectionData.forEach(function(data) {
                 let bins = histogramGenerator(data);
@@ -346,7 +340,7 @@ Histogram.prototype._doPlot = function() {
                 })
             });
         });
-    }
+    // }
 
     // Calculate average and standardDeviation
     self.unsetJoinedZoneData(); // IMPORTANT ! Clear joinZoneData for calculate statistics
@@ -420,7 +414,7 @@ Histogram.prototype._doPlot = function() {
 //        .style('transform', 'translateX(' + (vpX[1] - 100) + 'px)');
     if(self.histogramModel.properties.plot === "Bar") {
         drawBarHistogram();
-        if (self.selector)
+        // if (self.viSelection)
             drawSelectionHistogram();
     } else if(self.histogramModel.properties.plot === "Curve"){
         drawCurveHistogram();
@@ -561,7 +555,7 @@ Histogram.prototype._doPlot = function() {
                     .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue')
                     .on('mousemove', function(d, i) { 
                         if (self.histogramModel.properties.showTooltip)
-                        showTooltip(self.intervalBins[i]);
+                        showTooltip(self.zoneBins[j][i]);
                     })
                     .on('mouseout', hideTooltip);
             }
@@ -570,6 +564,7 @@ Histogram.prototype._doPlot = function() {
 
     function drawSelectionHistogram() {
         self.selectionSvgContainer.forEach(function(selectionSvg) {
+            selectionSvg.svg.raise();
             let selectionBars = selectionSvg.svg.selectAll('.selection-bars').data(self.fullBins).enter()
             .append('g').attr('class', 'selection-bars')
             .attr('transform', function (d) {
@@ -594,14 +589,14 @@ Histogram.prototype._doPlot = function() {
                             fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                             selectionBinHeight = fullBinHeight;
                             for (let k = 0; k <= arrIdx; k++) {
-                                selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][49 - i].length * 100 / len));
+                                selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][self.fullBins.length - 1 - i].length * 100 / len));
                             }
                             return selectionBinHeight;
                         }
                         fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length));
                         selectionBinHeight = fullBinHeight;
                         for (let k = 0; k <= arrIdx; k++) {
-                            selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][49 - i].length));
+                            selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][self.fullBins.length - 1 - i].length));
                         }
                         return selectionBinHeight;
                     })
@@ -609,18 +604,18 @@ Histogram.prototype._doPlot = function() {
                         if (self.histogramModel.properties.plotType != 'Frequency') {
                             let len = self.getLength();
                             return transformY(wdY[0])
-                                - transformY(selectionBins[arrIdx][49 - i].length * 100 / len);
-                            }
-                        return transformY(wdY[0]) - transformY(selectionBins[arrIdx][49 - i].length);
+                            - transformY(selectionBins[arrIdx][self.fullBins.length - 1 - i].length * 100 / len);
+                        }
+                        return transformY(wdY[0]) - transformY(selectionBins[arrIdx][self.fullBins.length - 1 - i].length);
                     })
                     .attr('fill', selectionSvg.color);
             }
-            selectionSvg.svg.raise();
+            selectionBars.selectAll('rect[height="0"]').remove();
         });
     }
     
     function drawCurveHistogram() {
-        //var line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+        //var line = d3.liney().curve(d3.curveCatmullRom.alpha(0.5));
         var line = d3.line().curve(d3.curveBasis);
         var path = self.svgContainer.append('path')
             .attr('class', 'curves');
@@ -1141,16 +1136,10 @@ Histogram.prototype.getPercentile = function (p) {
     return calPercentile(this.joinZoneData(), p);
 }
 
-Histogram.prototype.addSelection = function (config) {
-    let selection = new Selection(config);
-
-    selection.initSvg(this.container, 'histogram');
-    this.selectionSvgContainer.push(selection);
-    return selection;
-}
-
-Histogram.prototype.initSelectionArea = function(masks) {
-    masks.forEach((m) => {
-        this.addSelection(m);
-    })
+Histogram.prototype.initSelectionArea = function(viSelections) {
+    let self = this;
+    viSelections.forEach((viSelection) => {
+        viSelection.initSvg(self.container, 'histogram');
+        self.selectionSvgContainer.push(viSelection);
+    });
 }

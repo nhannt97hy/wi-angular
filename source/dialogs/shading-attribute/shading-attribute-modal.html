@@ -36,9 +36,9 @@
                             </div>
                             <div class="row padding-bottom-1em">
                                 <div class="col-sm-4">
-                                    <ui-select ng-model="wiModal.shadingOptions.rightLine"
+                                    <ui-select ng-model="wiModal.shadingOptions.rightCurve"
                                                 ng-change="wiModal.onSelectRightLine();">
-                                        <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.rightLine.name}}</ui-select-match>
+                                        <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.rightCurve.name}}</ui-select-match>
                                         <ui-select-choices group-by="wiModal.groupFn"
                                                     repeat='c as c in wiModal.curveList | filter: $select.search'>
                                                     <div class="padding-left-20px">{{c.name}}</div>
@@ -46,9 +46,9 @@
                                     </ui-select>
                                 </div>
                                 <div class="col-sm-4">
-                                    <ui-select ng-model="wiModal.shadingOptions.leftLine"
+                                    <ui-select ng-model="wiModal.shadingOptions.leftCurve"
                                                 ng-change="wiModal.setLimit2(); wiModal.onSelectLeftLine();">
-                                        <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.leftLine.name}}</ui-select-match>
+                                        <ui-select-match placeholder='Select a curve'>{{wiModal.shadingOptions.leftCurve.name}}</ui-select-match>
                                         <ui-select-choices group-by="wiModal.groupFn"
                                                     repeat='c as c in wiModal.leftLimit | filter: $select.search'>
                                                     <div class="padding-left-20px">{{c.name}}</div>
@@ -61,7 +61,7 @@
                                             ng-change="wiModal.shadingOptions.idLeftLine = null;
                                             wiModal.setShadingName(wiModal.shadingOptions.idRightLine, wiModal.shadingOptions.idLeftLine); wiModal.typeFixedValue();"
                                             step="any"
-                                            ng-disabled="!wiModal.shadingOptions.rightLine">
+                                            ng-disabled="!wiModal.shadingOptions.rightCurve">
                                 </div>
                             </div>
                         </div>
@@ -71,12 +71,14 @@
                             </label>
                             <label class="control-label col-sm-4">
                                 <input type="radio" value="pattern" 
-                                       ng-model="wiModal.shadingOptions.shadingStyle">
+                                       ng-model="wiModal.shadingOptions.shadingStyle"
+                                       ng-change="wiModal.switchShadingType()">
                                     Fill Pattern
                             </label>
                             <label class="control-label col-sm-4">
                                 <input type="radio" value="varShading" 
-                                       ng-model="wiModal.shadingOptions.shadingStyle">
+                                       ng-model="wiModal.shadingOptions.shadingStyle"
+                                       ng-change="wiModal.switchShadingType()">
                                     Variable Shading
                             </label>
                         </div>
@@ -117,12 +119,13 @@
                                 </div>
                                 <div class="col-sm-3 text-center">
                                     <button ng-click="wiModal.foreground()"
-                                    ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}"
+                                            ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}"
                                             class="form-control wi-form-control width-80px thick-border"
                                             ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
                                 </div>
                                 <div class="col-sm-3 text-center">
-                                    <button ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.background}" ng-click="wiModal.background()"
+                                    <button ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.background}"
+                                            ng-click="wiModal.background()"
                                             class="form-control wi-form-control width-80px thick-border"
                                             ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
                                 </div>

@@ -53,6 +53,7 @@ exports.DuplicateButtonClicked = function () {
 };
 
 exports.PrintButtonClicked = function () {
+    return toastr.info("Not implemented!");
     let $timeout = this.$timeout;
     let wiLogplotCtrl = this.wiLogplot;
     let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();

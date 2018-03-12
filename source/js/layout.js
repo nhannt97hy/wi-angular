@@ -128,6 +128,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
+        newScope.model = componentState.model;
         container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
         if (componentState.model) tabComponents[container.parent.config.id] = container.parent;
@@ -236,7 +237,13 @@ module.exports.putTabRightWithModel = function (model, isClosable = true) {
             itemId = 'comboview' + model.id;
             tabIcon = 'link-view-16x16';
             name = 'comboview' + model.id;
-            htmlTemplate = '<wi-comboview name="' + name + '" id="' + model.properties.idCombinedBox + '"></wi-comboview>'
+            // htmlTemplate = '<wi-comboview name="' + name + '" id="' + model.properties.idCombinedBox + '"></wi-comboview>';
+            htmlTemplate = `
+                <wi-comboview
+                    name="${name}" id="${model.properties.idCombinedBox}"
+                    model="model">
+                </wi-comboview>
+            `;
             break;
         default:
             console.error('model type is not valid');

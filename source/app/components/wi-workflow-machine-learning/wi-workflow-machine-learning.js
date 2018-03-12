@@ -1,8 +1,14 @@
-const name = "wiWorkflowPlayer";
-const moduleName = "wi-workflow-player";
+const name = "wiWorkflowMachineLearning";
+const moduleName = "wi-workflow-machine-learning";
+const HOST = '54.169.13.92';
+const PORT = 3002;
+let token = window.localStorage.getItem('token');
+let username;
+if(token)
+    username = JSON.parse(atob(token.split('.')[1])).username;
 let petrophysics = require('./petrophysics');
 
-function Controller(wiComponentService, wiApiService, $timeout, $scope) {
+function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
     let self = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
@@ -28,7 +34,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
         // CONFIGURE INPUT TAB
-        self.selectionType = "3";
+        self.selectionType = "1";
 
         onSelectionTypeChanged();
 
@@ -160,94 +166,60 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }
         }
     }
-    /*this.inputArray = [
-        {
-            well: { name: "W4", idWell: 2 },
-            dataset: { name: "W4", idDataset: 2 },
-            inputs: [
-                {
-                    name: "Gamma Ray",
-                    value: { idCurve: 1, name: "ECGR" },
-                    choices: [
-                        { idCurve: 1, name: "ECGR" },
-                        { idCurve: 2, name: "ECGR-NEW" }
-                    ]
-                }
-            ],
-            parameters: [
-                { name: "Gamma ray clean", type: "number", value: 10 },
-                { name: "Gamma ray clay", type: "number", value: 120 },
-                {
-                    name: "Method",
-                    type: "select",
-                    value: { name: "Linear", value: "Linear" },
-                    choices: [
-                        { name: "Linear", value: "Linear" },
-                        { name: "Clavier", value: "Clavier" },
-                        { name: "Larionov Tertiary rocks", value: "Tertiary" }
-                    ]
-                }
-            ]
-        },
-        {
-            well: "02_97_DD_1X",
-            dataset: "02_97_DD_1X",
-            inputs: [
-                {
-                    name: "Gamma Ray",
-                    value: { idCurve: 1, name: "ECGR" },
-                    choices: [
-                        { idCurve: 1, name: "ECGR" },
-                        { idCurve: 2, name: "ECGR-NEW" }
-                    ]
-                }
-            ],
-            parameters: [
-                { name: "Gamma ray clean", type: "number", value: 10 },
-                { name: "Gamma ray clay", type: "number", value: 120 },
-                {
-                    name: "Method",
-                    type: "select",
-                    value: { name: "Linear", value: "Linear" },
-                    choices: [
-                        { name: "Linear", value: "Linear" },
-                        { name: "Clavier", value: "Clavier" },
-                        { name: "Larionov Tertiary rocks", value: "Tertiary" }
-                    ]
-                }
-            ]
-        }
-    ];*/
-    /*
-        worflowConfig = {
-            name: "Clastic",
-            steps: [
-                {
-                    name: "Shale Volume",
-                    inputs: [{ name: "Gamma Ray" }],
-                    data: [...],
-                    parameters: [],
-                },
-                {
-                    name: "Porosity",
-                    inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }]
-                },
-                {
-                    name: "Saturation",
-                    inputs: [
-                        { name: "Formation Resistivity" },
-                        { name: "Porosity" }
-                    ]
-                }
-            ]
-        };
-    */
     this.onSelectionTypeChanged = onSelectionTypeChanged;
     function onSelectionTypeChanged(selType) {
         self.filterText1 = "";
         self.filterText = "";
         self.selectionType = selType || self.selectionType;
         switch (self.selectionType) {
+            case CURVE_SELECTION:
+                let hash = new Object();
+                let wiExplr = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+                let root = null;
+                if (wiExplr) root = wiExplr.treeConfig[0];
+                if (root) {
+                    utils.visit(
+                        root,
+                        function (node, _hash) {
+                            if (node.type == "curve") {
+                                _hash[node.data.label] = 1;
+                            }
+                            return false;
+                        },
+                        hash
+                    );
+                    $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
+                        return {
+                            id: -1,
+                            data: {
+                                label: key,
+                                icon: "curve-16x16",
+                                selected: false
+                            },
+                            children: [],
+                            properties: {}
+                        };
+                    }));
+                }
+                else {
+                    buildCurveListFromServer(function (curve) {
+                        hash[curve.name] = 1;
+                    }, function () {
+                        $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
+                            return {
+                                id: -1,
+                                data: {
+                                    label: key,
+                                    icon: "curve-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: {}
+                            };
+                        }));
+                    });
+                }
+                break;
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
                 let groups = new Set();
@@ -300,73 +272,11 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     __selectionTop = 0;
                 });
                 break;
-            case CURVE_SELECTION:
-                let hash = new Object();
-                let wiExplr = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-                let root = null;
-                if (wiExplr) root = wiExplr.treeConfig[0];
-                if (root) {
-                    utils.visit(
-                        root,
-                        function (node, _hash) {
-                            if (node.type == "curve") {
-                                _hash[node.data.label] = 1;
-                            }
-                            return false;
-                        },
-                        hash
-                    );
-                    $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
-                        return {
-                            id: -1,
-                            data: {
-                                label: key,
-                                icon: "curve-16x16",
-                                selected: false
-                            },
-                            children: [],
-                            properties: {}
-                        };
-                    }));
-                }
-                else {
-                    buildCurveListFromServer(function (curve) {
-                        hash[curve.name] = 1;
-                    }, function () {
-                        $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
-                            return {
-                                id: -1,
-                                data: {
-                                    label: key,
-                                    icon: "curve-16x16",
-                                    selected: false
-                                },
-                                children: [],
-                                properties: {}
-                            };
-                        }));
-                    });
-                }
-                break;
             default:
                 break;
         }
     }
     function buildCurveListFromServer(cb, done) {
-        // wiApiService.listWells({
-        //     idProject:self.idProject,
-        //     limit: 100000
-        // }, function(wells) {
-        //     for (let well of wells) {
-        //         wiApiService.getWell(well.idWell, function(wellProps) {
-        //             for (let dataset of wellProps.datasets) {
-        //                 for (let curve of dataset.curves) {
-        //                     cb(curve);
-        //                 }
-        //             }
-        //         })
-        //     }
-        // });
         if (!self.idProject) {
             toastr.error("No project exists");
             return;
@@ -402,8 +312,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             let step = self.workflowConfig.steps[parentIdx];
             let item = step.inputs[itemIdx];
             item.label = __SELECTED_NODE.data.label;
-            item.value =
-                __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
+            item.value = __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
             item.type = self.selectionType;
             __inputChanged.status = true;
             let tmp = new Set(__inputChanged.index);
@@ -589,8 +498,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
         return [];
     }
-    this.droppableSetting = function () {
-        $("wi-workflow-player .wi-droppable").droppable({
+    this.droppableSetting = function (wf) {
+        let id = wf.name;
+        $("wi-workflow-machine-learning #" + id).droppable({
             drop: function (event, ui) {
                 let w = $(this.parentElement).width();
                 $(this.parentElement).css('width', w);
@@ -624,39 +534,30 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     well => well.id == idWell
                 );
                 let wellName = wellModel.properties.name;
-
-                for (let wf of self.workflowConfig.steps) {
-                    if (!wf.inputData || !Array.isArray(wf.inputData))
-                        wf.inputData = new Array();
-                    let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
-                    if (existDataset) return;
-                    let inputItems = wf.inputs.map(function (ipt) {
-                        let tempItem = {
-                            name: ipt.name,
-                            choices: matchCurves(datasetModel.children, ipt)
-                        };
-                        tempItem.value = tempItem.choices.length
-                            ? tempItem.choices[0]
-                            : null;
-                        return tempItem;
-                    });
-                    let input = {
-                        well: wellModel.properties,
-                        dataset: datasetModel.properties,
-                        inputs: inputItems,
-                        parameters: angular.copy(wf.parameters)
+                if (!wf.inputData || !Array.isArray(wf.inputData))
+                    wf.inputData = new Array();
+                let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
+                if (existDataset) return;
+                let inputItems = wf.inputs.map(function (ipt) {
+                    let tempItem = {
+                        name: ipt.name,
+                        choices: matchCurves(datasetModel.children, ipt)
                     };
-                    $timeout(() => {
-                        wf.inputData.push(input);
-                        __inputDataLen = wf.inputData.length;
-                    });
-                }
-                $timeout(
-                    () =>
-                        (self.wiDroppableHeight =
-                            $("wi-workflow-player .wi-droppable>div").height() +
-                            6)
-                );
+                    tempItem.value = tempItem.choices.length
+                        ? tempItem.choices[0]
+                        : null;
+                    return tempItem;
+                });
+                let input = {
+                    well: wellModel.properties,
+                    dataset: datasetModel.properties,
+                    inputs: inputItems,
+                    parameters: angular.copy(wf.parameters)
+                };
+                $timeout(() => {
+                    wf.inputData.push(input);
+                    __inputDataLen = wf.inputData.length;
+                });
             }
         });
     };
@@ -873,19 +774,344 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     this.finishWizard = function () {
         console.log("Finish him!");
     }
+    this.addCurveInput = function(wf){
+        wf.inputs.unshift({name: "Curve input"});
+    }
+    this.deleteCurveInput = function(wf, i){
+        if(wf.inputs.length==2)
+            toastr.error(wf.name+' needs at least one curve input!');
+        else
+            wf.inputs.splice(i, 1);
+    }
+    this.isCurveOutput = function(wf, i){
+        if(i==wf.inputs.length-1)
+            return true;
+        return false;
+    }
+    this.removeWell = function(wf, i){
+        wf.inputData.splice(i, 1);
+    }
+    this.workflowConfig = {
+        name: "MachineLearning",
+        steps: [
+            {
+                name: "Training",
+                inputs: [{ name: "Curve input" }, { name: "Curve output" }],
+                parameters: [],
+                outputs: [],
+                function: train
+            },
+            {
+                name: "Verify",
+                inputs: [{ name: "Curve input" }, { name: "Curve output" }],
+                parameters: [],
+                outputs: [],
+                function: verify
+            },
+            {
+                name: "Predict",
+                inputs: [{ name: "Curve input" }, { name: "Curve output" }],
+                parameters: [],
+                outputs: [],
+                function: predict
+            }
+        ]
+    };
+    let listCurves = [];
+    function getDataCurves(k, callback){
+        listCurves = [];
+        console.log(self.workflowConfig);
+        let inputData = self.workflowConfig.steps[k].inputData;
+        if(inputData){
+            let listInputData = [];
+            inputData.forEach(function(data){
+                let checkFullCurve = true;
+                for(let j =0 ; j<data.inputs.length; j++){
+                    if(!data.inputs[j].value){
+                        checkFullCurve = false;
+                        break;
+                    }
+                }
+                if(checkFullCurve)
+                listInputData.push(data.inputs);
+            });
+            for(let i =0; i< inputData[0].inputs.length; i++){
+                listCurves[i] = [];
+            }
+            listInputData.forEach(function(input_data, i){
+                let j=-1;
+                async.each(input_data, function(curve,__end){
+                    console.log(curve);
+                    wiApiService.dataCurve(curve.value.id, function(data){
+                        j++;
+                        data.forEach(function(point){
+                            listCurves[j].push(parseFloat(point.x));
+                        });
+                        __end();
+                    });
+                }, function(err){
+                    if(i==listInputData.length-1){
+                        if(k!=0)
+                            listCurves.splice(listCurves.length-1, 1);
+                        console.log(listCurves);
+                        callback(listCurves);
+                    }
+                });
+            });
+        }else {
+            toastr.error('Choose a dataset', '');
+        }
+    }
+    function filterNull(curves){
+        let l = curves.length;
+        let filterCurves = [];
+        for(let j = 0; j<l; j++){
+            filterCurves[j] = [];
+        }
+        for(let i = 0; i<curves[0].length; i++){
+            let checkNull = true;
+            for(let j=0; j<l; j++)
+                if(isNaN(curves[j][i]))
+                    checkNull = false;
+            if(checkNull)
+                for(let j = 0; j<l; j++){
+                    filterCurves[j].push(curves[j][i]);
+                }
+        }
+        // console.log('result of filterNull: ', filterCurves);
+        return filterCurves;
+    }
+    function train(){
+        getDataCurves(0, function(list_curves){
+            let curves = filterNull(list_curves);
+            self.layerArr = [];
+            for(let i = 0; i<self.nLayers; i++){
+                self.layerArr.push(self.nNodes);
+            }
+            let payload = {
+                name: self.nameModel,
+                type: self.type,
+                data: [],
+                target: [],
+                description: self.description,
+                user_created: username,
+                params: {
+                    data_scale: self.data_scale,
+                    target_scale: self.target_scale,
+                    max_iter: self.max_iter,
+                    alpha: self.alpha,
+                    max_features: self.max_features,
+                    kernel: self.kernel,
+                    gamma: self.gamma,
+                    C: self.C,
+                    n_estimators: self.n_estimators,
+                    layers: self.layerArr,
+                    activation: self.activation
+                }
+            };
+            for(let i=0; i<curves.length-1; i++)
+                payload.data.push(curves[i]);
+            curves[curves.length-1].forEach(function(x){
+                payload.target.push(x);
+            })
+            wiComponentService.getComponent('SPINNER').show();       
+            $http({
+                method: 'POST',
+                url: 'http://'+HOST+':'+PORT + '/store/api/model/new',
+                json: true,
+                data: payload
+            }).then(function(response){
+                    console.log(payload);
+                    console.log('create model result:', response.data);
+                    wiComponentService.getComponent('SPINNER').hide();
+                    var res = response.data;
+                    if(res.statusCode == 200){
+                        toastr.success('Create model success!', '');
+                    }else{
+                        toastr.error(res.body.message, '');
+                    }
+                    return;
+            }, function(error){
+                wiComponentService.getComponent('SPINNER').hide();
+                toastr.error('Call store api create model error!', '');
+                return;
+            });
+        });
+    };
+    function verify(){
+        getDataCurves(1, function(list_curves){
+            let curves = filterNull(list_curves);
+            let payload = {
+                model_id: self.modelVerify.id,
+                data: []
+            };
+            payload.data.push(curves[0], curves[1], curves[2], curves[3], curves[4]);
+            wiComponentService.getComponent('SPINNER').show();  
+            $http({
+                method: 'POST',
+                url: 'http://'+HOST+':'+PORT + '/store/api/predict',
+                data: payload
+            }).then(function(response){
+                wiComponentService.getComponent('SPINNER').hide();
+                var res = response.data;
+                console.log('predict result:', res);
+                if(res.statusCode == 200){
+                    toastr.success('Predict observation success!', '');
+                    let target = [];
+                    res.body.target.forEach(function(x){
+                        target.push(x);
+                    });
+                    for(let i = 0; i<list_curves[0].length; i++)
+                    {
+                        let checkNull = true;
+                        for(let j=0; j< list_curves.length; j++)
+                            if(isNaN(list_curves[j][i])){
+                                checkNull = false;
+                                break;
+                            }
+                        if(!checkNull)
+                            target.splice(i,0,NaN);
+                    }
+                    console.log('target of verify after fill null: ', target);
+                    console.log('verify curve: ', list_curves[5]);
+                }else{
+                    console.log('fail');
+                    toastr.error(res.body.message, '');
+                }
+                return;
+            }, function(error){
+                wiComponentService.getComponent('SPINNER').hide();
+                toastr.error("Call store api predict error", '');
+                return;
+            });
+        });
+    };
+    function predict(){
+        getDataCurves(2, function(list_curves){
+            let curves = filterNull(list_curves);
+            let payload = {
+                model_id: self.modelPredict.id,
+                data: curves
+            };
+            wiComponentService.getComponent('SPINNER').show();  
+            $http({
+                method: 'POST',
+                url: 'http://'+HOST+':'+PORT + '/store/api/predict',
+                data: payload
+            }).then(function(response){
+                wiComponentService.getComponent('SPINNER').hide();
+                var res = response.data;
+                console.log('predict result:', res);
+                if(res.statusCode == 200){
+                    toastr.success('Predict observation success!', '');
+                    let target = [];
+                    res.body.target.forEach(function(x){
+                        target.push(x);
+                    });
+                    for(let i = 0; i<list_curves[0].length; i++)
+                    {
+                        let checkNull = true;
+                        for(let j=0; j< list_curves.length; j++)
+                            if(isNaN(list_curves[j][i])){
+                                checkNull = false;
+                                break;
+                            }
+                        if(!checkNull)
+                            target.splice(i,0,NaN);
+                    }
+                    console.log('target of predict after fill null: ', target);
+                }else{
+                    console.log('fail');
+                    toastr.error(res.body.message, '');
+                }
+                return;
+            }, function(error){
+                wiComponentService.getComponent('SPINNER').hide();
+                toastr.error("Call store api predict error", '');
+                return;
+            });
+        });
+    };
+    this.getListModel = function(){
+        console.log(self.workflowConfig.steps);
+        if(!self.workflowConfig.steps[1].disabled || !self.workflowConfig.steps[2].disabled){
+            wiComponentService.getComponent('SPINNER').show();
+            $http({
+                method: 'GET',
+                url: 'http://'+HOST+':'+PORT + '/store/api/model/list/' + username
+            }).then(function(response){
+                    wiComponentService.getComponent('SPINNER').hide();
+                    console.log('delete: ', response);
+                    if(response.status == 200){
+                        self.listModel = response.data;
+                        self.modelVerify = self.modelPredict = self.listModel[0];
+                        console.log(self.listModel);
+                    }else{
+                        toastr.error(res.body + '\n Load page again!', '');
+                    }
+                    return;
+                }, function(error){
+                    toastr.error('Call store api get list model error', '');
+                    return;
+            });
+        }
+    };
+    this.listType = ['LinearRegression', 'HuberRegressor', 'Lasso', 'DecisionTreeRegressor', 'RandomForestRegressor', 'SupportVectorMachine', 'MultiPerceptron', 'ConjugateGradient'];
+    this.type = this.listType[0];
+    this.listKernel = ["rbf", "linear", "poly", "sigmoid"];
+    this.kernel = this.listKernel[0];
+    this.listActivation = ["Tanh", "Sigmoid"];
+    this.activation = this.listActivation[0];
+    this.nameModel = "Model";
+    this.max_iter = 100;
+    this.alpha = 0.0001;
+    this.C = 0.1;this.gamma = 0.1;
+    this.max_features = 1;
+    this.n_estimators = 10;
+    this.data_scale = [0,1];
+    this.target_scale = [0,1];
+    this.nLayers = this.nNodes = 1;
+    this.description = 'description';
+    this.inputCurves = [];this.outputCurves = [];
+    this.change = function(){
+        self.inputCurves = [];
+        self.outputCurves = [];
+        if(self.type=='ConjugateGradient' || self.type=='MultiPerceptron'){
+            let leng = self.workflowConfig.steps[0].inputs.length;
+            for(let i=0; i<leng-1; i++)
+            self.inputCurves.push({name: self.workflowConfig.steps[0].inputs[i].value});
+            self.outputCurves.push({name: self.workflowConfig.steps[0].inputs[leng-1].value});
+        }
+    }
+    this.addLayerButtonClicked = function () {
+        this.nLayers ++;
+    }
+    this.removeLayerButtonClicked = function () {
+        this.nLayers = (--this.nLayers) < 0 ? 0:this.nLayers;
+    }
+    this.addNodeButtonClicked = function () {
+        this.nNodes ++;
+    }
+    this.removeNodeButtonClicked = function () {
+        this.nNodes = (--this.nNodes) < 0 ? 0:this.nNodes;
+    }
+    this.refreshInputData = function(){
+        self.workflowConfig.steps.forEach(function(step){
+            step.inputData = [];
+        });
+    }
 }
 
 let app = angular.module(moduleName, []);
 
 app.component(name, {
-    templateUrl: "wi-workflow-player.html",
+    templateUrl: "wi-workflow-machine-learning.html",
     controller: Controller,
     controllerAs: name,
     transclude: true,
     bindings: {
         name: "@",
-        idProject: "<",
-        workflowConfig: "<"
+        idProject: "<"
     }
 });
 

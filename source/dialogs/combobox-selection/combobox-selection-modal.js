@@ -8,7 +8,6 @@ module.exports = function (ModalService, toolBox, idCombinedBox, callback) {
         const _NEW = 'created';
         const _EDIT = 'edited';
         const _DEL = 'deleted';
-        const _DEFAULT = 'default';
 
         let nameCounter = 0;
 
@@ -81,7 +80,6 @@ module.exports = function (ModalService, toolBox, idCombinedBox, callback) {
                 async.eachOfSeries(self.tools, function(tool, i, callback) {
                     switch (self.tools[i].flag) {
                         case _NEW:
-                        case _DEFAULT:
                             delete self.tools[i].flag;
                             self.tools[i].idCombinedBox = idCombinedBox;
                             wiApiService.createCombinedBoxTool(self.tools[i], function(data) {

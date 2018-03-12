@@ -883,8 +883,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 if (self.containerName) {
-                    self.selectionMasks.map(m => m.id = m.idCombinedBoxTool);
-                    self.viCrossplot.initSelectionArea(self.selectionMasks);
+                    self.viCrossplot.initSelectionArea(self.viSelections);
                 }
                 self.loading = false;
             });
@@ -1126,7 +1125,7 @@ app.component(componentName, {
         name: '@',
         wiCrossplotCtrl: '<',
         idCrossplot: '<',
-        selectionMasks: '<',
+        viSelections: '<',
         containerName: '@'
     }
 });

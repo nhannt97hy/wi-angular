@@ -332,18 +332,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: 0.65
             }, function (depthTrack) {
                 self.pushDepthTrack(depthTrack);
-                if (callback) callback();
+                $timeout(callback);
             });
         }
         else {
             Utils.error('can not create depth track');
         }
     }
-    this.addLogTrack = function (trackTitle, idCurve) {
+    this.addLogTrack = function (trackTitle, idCurve, onFinished) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
             const logTracks = self.getTracks().filter(track => track.type == 'log-track');
-            let logTrackProps;
+            let createdLogTrack;
             let logTrack;
             async.series([
                 function (callback) {
@@ -372,8 +372,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     callback();
                 }, function (callback) {
                     $timeout(function() {
-                        if(idCurve) {
-                            let LogtrackController = self.trackComponents.find(function(component) { return component.props == logTrack;}).controller;
+                        if (idCurve && !isNaN(idCurve)) {
+                            let LogtrackController = self.trackComponents.find(function (component) { return component.props == logTrack; }).controller;
                             let newViTrack = LogtrackController.viTrack;
                             wiApiService.createLine({
                                 idTrack: newViTrack.id,
@@ -387,10 +387,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 console.log('created Line', line);
                                 callback();
                             });
-                        }
+                        } else callback();
                     })
                 }
-            ]);
+            ], function (err, results) {
+                if (!err && typeof onFinished === 'function') onFinished();
+            });
         }
         else {
             error('Cannot add Log track');
@@ -511,8 +513,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $timeout(function() {
             let track = getComponentCtrlByProperties(logTrackProps).viTrack;
             if (self.containerName) {
-                self.selectionMasks.map(m => m.id = m.idCombinedBoxTool);
-                track.initSelectionArea(self.selectionMasks);
+                track.initSelectionArea(self.viSelections);
+                track.pushSelectionAreas();
             }
         });
     }
@@ -1495,7 +1497,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
-        selectionMasks: '<',
+        viSelections: '<',
         containerName: '@'
     }
 });

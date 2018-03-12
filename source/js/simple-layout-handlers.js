@@ -193,7 +193,7 @@ exports.onInventoryInit = function(wiListCtrl) {
     });
 }
 
-exports.TestChooseData = function () {
+exports.MachineLearningButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     // console.log(layoutManager.getRoot());
@@ -201,10 +201,10 @@ exports.TestChooseData = function () {
     root.removeChild(root.contentItems[0]);
     root.addChild({
         type: 'component',
-        id: 'test',
+        id: 'machine-learning',
         componentName: 'wi-block',
         componentState: {
-            templateId: 'test'
+            templateId: 'machine-learning'
         }
     });
 };

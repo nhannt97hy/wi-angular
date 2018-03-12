@@ -113,14 +113,12 @@
                         </wi-button>
                         <wi-button name="InventoryConnect" icon="browse-project-32x32" label="Invt. Connect" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.InventoryConnectButtonClicked">
                         </wi-button>
-                        <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WipmButtonClicked">
-                        </wi-button>
 
                         <wi-button name="BatchTools" icon="well-load-32x32" label="Batch Tools" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.BatchToolsClicked"></wi-button>
-                        <wi-button name="TestChooseData" icon="edit-curve-32x32" label="Test Choose Data" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.TestChooseData"></wi-button>
+                        <wi-button name="MachineLearning" icon="caculation-multilinerregression-32x32" label="Machine Learning" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.MachineLearningButtonClicked"></wi-button>
 
                         <wi-button name="ExportTool" icon="export-well-top-32x32" label="Export Tool" container="ribbon" disable="handlers.isDisabled()" class="height65" handler="handlers.ExportToolButtonClicked"></wi-button>
-                        <wi-button name="NeuralNetWorkPlayground" icon="browse-project-32x32" label="NN Playground" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.NeuralNetworkPlaygroundButtonClicked">
+                        <wi-button name="NeuralNetWorkPlayground" icon="browse-project-32x32" label="NN Playground" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.NeuralNetworkPlaygroundButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -160,11 +158,6 @@
         </div>
     </template>
 
-    <template id="wipm" >
-        <wi-predict-model name="wipm"></wi-predict-model>
-        <!-- @@include('./wipm/index.html') -->
-    </template>
-
     <template id="well-import">
         <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
             <h3 class="content-heading">Mega Import</h3>
@@ -187,10 +180,10 @@
         </div>
     </template>
 
-    <template id='test'>
-        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wipm">
-            <h3 class="content-heading">WIPM</h3>
-            <wi-workflow-player name="wiWorkflowPlayer" id-project='1' workflow-config='myWorkflowConfig'></wi-workflow-player>
+    <template id='machine-learning'>
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Machine Learning</h3>
+            <wi-workflow-machine-learning name="wiWorkflowPlayer" id-project='1'></wi-workflow-machine-learning>
         </div>
     </template>
     <div id="testElement"></div>
