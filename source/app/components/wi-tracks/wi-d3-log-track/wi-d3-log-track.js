@@ -430,6 +430,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
         }
         wiApiService.createShading(shadingObj, function (shading) {
+            console.log("///", shading);
             let shadingModel = Utils.shadingToTreeConfig(shading);
             if (!curve2) {
                 self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);

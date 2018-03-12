@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let LayoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     let logplotHandlers = {};
 
     /* private variables */
@@ -808,7 +809,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         self.slider.noUiSlider.on('update', function(values) {
-            console.log('value', values);
+            // console.log('value', values);
             let difference = self.contentWidth - self.sliderWidth + 20;
             let val = parseFloat(values[0]);
             let left = -1*difference * val / 100.;
@@ -1227,6 +1228,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
                 _fitWindow = false;
             }
+            LayoutManager.triggerResize();
         });
     }
     function _onPlotMouseWheelCallback(track) {
