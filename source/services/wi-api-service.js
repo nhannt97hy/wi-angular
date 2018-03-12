@@ -246,6 +246,10 @@ const GET_WORKFLOW = '/workflow/info';
 const EDIT_WORKFLOW = '/workflow/edit';
 const DELETE_WORKFLOW = '/workflow/delete';
 const GET_WORKFLOW_LIST = "/workflow/list";
+
+const CREATE_WORKFLOW_SPEC = '/workflow-spec/new';
+const GET_WORKFLOW_SPEC_LIST = '/workflow-spec/list';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -1040,10 +1044,11 @@ Service.prototype.removeLogplot = function (idLogplot, callback) {
     this.delete(DELETE_PLOT, { idPlot: idLogplot }, callback);
 }
 
-Service.prototype.createLogTrack = function (idPlot, orderNum, callback) {
+Service.prototype.createLogTrack = function (idPlot, orderNum, callback, opts) {
     var self = this;
     let dataRequest = {
         idPlot: idPlot,
+        title: (opts || {}).title,
         orderNum: orderNum
     };
     this.post(CREATE_LOG_TRACK, dataRequest, callback);
@@ -1798,9 +1803,15 @@ Service.prototype.getWorkflow = function (idWorkflow, callback) {
 }
 
 Service.prototype.removeWorkflow = function (idWorkflow, callback) {
-    this.post(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
+    this.delete(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
 }
 
 Service.prototype.getWorkflowList = function(callback){
     this.post(GET_WORKFLOW_LIST, null, callback);
+}
+Service.prototype.createWorkflowSpec = function(name, spec, callback) {
+    this.post(CREATE_WORKFLOW_SPEC, {name:name, content:spec}, callback);
+}
+Service.prototype.getWorkflowSpecList = function(callback) {
+    this.post(GET_WORKFLOW_SPEC_LIST, null, callback);
 }

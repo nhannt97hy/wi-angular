@@ -27,6 +27,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
 
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
+        if (self.idWorkflow) {
+            wiApiService.getWorkflow(self.idWorkflow, function(workflow) {
+                console.log(workflow.content);
+                self.workflowConfig = workflow.content;
+            });
+        }
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
 
@@ -37,25 +43,42 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         self.projectConfig = new Array();
     };
 
+    function saveWorkflow() {
+        if (!self.idWorkflow) return;
+        wiApiService.editWorkflow({
+            idWorkflow: self.idWorkflow,
+            content:self.workflowConfig
+        }, function(workflow) {
+            console.log('save workflow', workflow);
+        });
+    }
+    this.saveWorkflow = _.debounce(saveWorkflow, 3000);
+
     $scope.$on('wizard:stepChanged', function (event, args) {
-        if (args.index == 0) {
-            __inputChanged.status = false;
-            __inputChanged.index.length = 0;
-        } else {
-            if (__inputChanged.status && __inputDataLen) {
-                console.log("inputs in step " + __inputChanged.index + " has changed! Must be refresh!");
-                __inputChanged.index.forEach(item => {
-                    let step = self.workflowConfig.steps[item];
-                    step.inputData.forEach(child => {
-                        child.inputs.forEach((ipt, idx) => {
-                            ipt.choices = matchCurves(child.dataset.curves, step.inputs[idx]);
-                            ipt.value = ipt.choices.length ? ipt.choices[0] : null;
+        self.filterText = '';
+        switch (args.index) {
+            case 0:
+                __inputChanged.status = false;
+                __inputChanged.index.length = 0;
+                break;
+
+            case 2:
+                if (__inputChanged.status && __inputDataLen) {
+                    console.log("inputs in step " + __inputChanged.index + " has changed! Must be refresh!");
+                    __inputChanged.index.forEach(item => {
+                        let step = self.workflowConfig.steps[item];
+                        step.inputData.forEach(child => {
+                            child.inputs.forEach((ipt, idx) => {
+                                ipt.choices = matchCurves(child.dataset.curves, step.inputs[idx]);
+                                ipt.value = ipt.choices.length ? ipt.choices[0] : null;
+                            })
                         })
-                    })
-                })
-            }
+                    });
+                }
+                self.saveWorkflow();
+                break;
         }
-    })
+    });
 
     this.onClick = function ($index, $event, node) {
         self.selectionList.forEach(function (item) {
@@ -155,88 +178,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }
         }
     }
-    /*this.inputArray = [
-        {
-            well: { name: "W4", idWell: 2 },
-            dataset: { name: "W4", idDataset: 2 },
-            inputs: [
-                {
-                    name: "Gamma Ray",
-                    value: { idCurve: 1, name: "ECGR" },
-                    choices: [
-                        { idCurve: 1, name: "ECGR" },
-                        { idCurve: 2, name: "ECGR-NEW" }
-                    ]
-                }
-            ],
-            parameters: [
-                { name: "Gamma ray clean", type: "number", value: 10 },
-                { name: "Gamma ray clay", type: "number", value: 120 },
-                {
-                    name: "Method",
-                    type: "select",
-                    value: { name: "Linear", value: "Linear" },
-                    choices: [
-                        { name: "Linear", value: "Linear" },
-                        { name: "Clavier", value: "Clavier" },
-                        { name: "Larionov Tertiary rocks", value: "Tertiary" }
-                    ]
-                }
-            ]
-        },
-        {
-            well: "02_97_DD_1X",
-            dataset: "02_97_DD_1X",
-            inputs: [
-                {
-                    name: "Gamma Ray",
-                    value: { idCurve: 1, name: "ECGR" },
-                    choices: [
-                        { idCurve: 1, name: "ECGR" },
-                        { idCurve: 2, name: "ECGR-NEW" }
-                    ]
-                }
-            ],
-            parameters: [
-                { name: "Gamma ray clean", type: "number", value: 10 },
-                { name: "Gamma ray clay", type: "number", value: 120 },
-                {
-                    name: "Method",
-                    type: "select",
-                    value: { name: "Linear", value: "Linear" },
-                    choices: [
-                        { name: "Linear", value: "Linear" },
-                        { name: "Clavier", value: "Clavier" },
-                        { name: "Larionov Tertiary rocks", value: "Tertiary" }
-                    ]
-                }
-            ]
-        }
-    ];*/
-    /*
-        worflowConfig = {
-            name: "Clastic",
-            steps: [
-                {
-                    name: "Shale Volume",
-                    inputs: [{ name: "Gamma Ray" }],
-                    data: [...],
-                    parameters: [],
-                },
-                {
-                    name: "Porosity",
-                    inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }]
-                },
-                {
-                    name: "Saturation",
-                    inputs: [
-                        { name: "Formation Resistivity" },
-                        { name: "Porosity" }
-                    ]
-                }
-            ]
-        };
-    */
     this.onSelectionTypeChanged = onSelectionTypeChanged;
     function onSelectionTypeChanged(selType) {
         self.filterText1 = "";
@@ -348,20 +289,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
     }
     function buildCurveListFromServer(cb, done) {
-        // wiApiService.listWells({
-        //     idProject:self.idProject,
-        //     limit: 100000
-        // }, function(wells) {
-        //     for (let well of wells) {
-        //         wiApiService.getWell(well.idWell, function(wellProps) {
-        //             for (let dataset of wellProps.datasets) {
-        //                 for (let curve of dataset.curves) {
-        //                     cb(curve);
-        //                 }
-        //             }
-        //         })
-        //     }
-        // });
         if (!self.idProject) {
             toastr.error("No project exists");
             return;
@@ -405,6 +332,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             let tmp = new Set(__inputChanged.index);
             tmp.add(parentIdx);
             __inputChanged.index = Array.from(tmp);
+            self.saveWorkflow();
         } else {
             toastr.error("please select data type!");
         }
@@ -645,6 +573,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     $timeout(() => {
                         wf.inputData.push(input);
                         __inputDataLen = wf.inputData.length;
+                        self.saveWorkflow();
                     });
                 }
                 $timeout(
@@ -745,6 +674,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     }
 
     this.validate = function () {
+        if (!self.workflowConfig || !self.workflowConfig.steps) 
+            return false;
+
         for (let step of self.workflowConfig.steps) {
             if (!step.disabled) {
                 for (let input of step.inputs) {
@@ -756,19 +688,70 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     };
 
     function saveCurve(curveList, curveInfo, callback) {
+        getFamilyList(familyList => {
+            let payload = {
+                data: curveInfo.data,
+                idDataset: curveInfo.idDataset,
+                idFamily: familyList.find(f => f.data.label == curveInfo.family).id
+            }
+            let curve = curveList.find(c => c.name == curveInfo.name);
+            if (curve) {
+                payload.idDesCurve = curve.idCurve;
+                curveInfo.idCurve = curve.idCurve;
+            } else {
+                payload.curveName = curveInfo.name
+            }
+            wiApiService.processingDataCurve(payload, function (ret) {
+                if(!curve) curveInfo.idCurve = ret.idCurve;
+                callback();
+            })
+        });
+    }
+
+    function createLogplotFromResult(wfInput, wfOutput, callback) {
         let payload = {
-            data: curveInfo.data,
-            unit: curveInfo.unit,
-            idDataset: curveInfo.idDataset
-        }
-        let curve = curveList.find(c => c.name == curveInfo.name);
-        if (curve) {
-            payload.idDesCurve = curve.idCurve;
-        } else {
-            payload.curveName = curveInfo.name
-        }
-        wiApiService.processingDataCurve(payload, function (ret) {
-            callback();
+            idWell: wfOutput.idWell,
+            name: wfOutput.plotName
+        };
+
+        wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
+            wfOutput.idPlot = response.idPlot;
+            let currentOrderNum = 'a';
+            async.eachSeries(wfInput.inputs, (ipt, done1) => {
+                wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                    //create line
+                    wiApiService.createLine({
+                        idTrack: trackData.idTrack,
+                        idCurve: ipt.value.properties ? ipt.value.properties.idCurve : ipt.value.idCurve,
+                        orderNum: currentOrderNum
+                    }, function(line){
+                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                        done1();
+                    })
+                }, {
+                        title: ipt.name
+                    });
+            }, function (err) {
+                if (err) toastr.error(err);
+                async.eachSeries(wfOutput, (opt, done2) => {
+                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                        // create line
+                        wiApiService.createLine({
+                            idTrack: trackData.idTrack,
+                            idCurve: opt.idCurve,
+                            orderNum: currentOrderNum
+                        }, function(line){
+                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                            done2();
+                        })
+                    }, {
+                            title: opt.name
+                        })
+                }, function (err) {
+                    if (err) toastr.error(err);
+                    callback();
+                })
+            })
         })
     }
 
@@ -779,7 +762,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             async.eachOfSeries(wf.inputData, (data, idx, callback) => {
                 let curvesData = [];
                 async.eachOfSeries(data.inputs, (curve, index, cb) => {
-                    let idCurve = curve.value.id || curve.value.idCurve;
+                    let idCurve = curve.value.id;
                     wiApiService.dataCurve(idCurve, function (data) {
                         curvesData.push(data.map(d => parseFloat(d.x)));
                         cb();
@@ -787,20 +770,28 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 }, (err) => {
                     if (err) console.log(err);
                     run(curvesData, wf.parameters, function (ret) {
-                        wf.outputData[idx] = ret;
-                        async.each(ret, (d, cb2) => {
+                        wf.outputData[idx] = new Array();
+                        wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
+                        wf.outputData[idx].plotName = self.workflowConfig.name + wf.name + wf.inputData[idx].dataset.name;
+                        wf.outputs.forEach((o, i) => {
+                            wf.outputData[idx][i] = o;
+                            wf.outputData[idx][i].data = ret[i];
+                        })
+                        async.each(wf.outputData[idx], (d, cb2) => {
                             let dataset = data.dataset;
                             d.idDataset = dataset.idDataset;
                             saveCurve(dataset.curves, d, cb2);
                         }, (err) => {
                             console.log("save curves done");
-                            refreshProject();
-                            callback();
+                            createLogplotFromResult(wf.inputData[idx], wf.outputData[idx], callback);
+                            // callback();
                         })
                     })
                 })
             }, (err) => {
                 if (err) console.log(err);
+                refreshProject();
+                utils.refreshProjectState();
                 console.log("done!", wf.outputData);
             }
             )
@@ -822,6 +813,7 @@ app.component(name, {
     bindings: {
         name: "@",
         idProject: "<",
+        idWorkflow: "<",
         workflowConfig: "<"
     }
 });

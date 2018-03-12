@@ -80,6 +80,20 @@ exports.InventoryButtonClicked = function () {
 
 exports.ImportButtonClicked = function () {
     exports.ImportFromInventoryButtonClicked.call(this);
+    /*
+    let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        type:'component',
+        componentName: 'html-block',
+        id: "TestPane",
+        componentState: {
+            html: `
+                <wi-logplot name="logplot5" id="5">
+                </wi-logplot>
+            `
+        },
+        title: `<span class="logplot-blank-16x16"></span> <span>logplot5</span>`
+    });*/
 }
 
 exports.ProjectButtonClicked = function () {
@@ -114,7 +128,7 @@ exports.NewWorkflowButtonClicked = function () {
                         html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
                         name: 'Workflow'
                     }
-                })
+                });
             }
         });
     });

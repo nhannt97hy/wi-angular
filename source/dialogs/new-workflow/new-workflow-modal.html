@@ -22,9 +22,14 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3">Workflow Spec</label>
-                            <div class="col-sm-9">
+                            <wi-item-dropdown class='col-sm-9 height34px position-fixed adjust-width'
+                                on-wi-dropdown-init="wiModal.getWorkflowSpecs" 
+                                on-item-changed="wiModal.workflowSpecChanged"
+                                place-holder="Select workflow spec">
+                            </wi-item-dropdown>
+                            <!--<div class="col-sm-9">
                                 <input type="text" class="form-control" ng-model="spec">
-                            </div>
+                            </div>-->
                         </div>
                     </form>
                 </div>
