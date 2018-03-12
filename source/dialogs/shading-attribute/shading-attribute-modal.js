@@ -321,8 +321,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             utils.getPalettes(function(paletteList){
                 paletteNameArr = Object.keys(paletteList);
                 paletteValArr = JSON.stringify(Object.values(paletteList));
-                console.log("getPalettes");
-
                 callback();
 
             });
@@ -455,9 +453,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         }
 
         this.customFillsList = null;
-
+        let cfEmpty = [{name: '', content: []}];
         wiApiService.getCustomFills(function(customFillsList){
-            self.customFillsList = customFillsList;
+            self.customFillsList = cfEmpty.concat(customFillsList);
+
         });
         this.setCustomFills = function(){
             self.variableShadingOptions.fill.varShading.customFills = angular.copy(self.customFillsCurrent);
@@ -468,12 +467,14 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
             }
             else {
-                wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
-                    DialogUtils.confirmDialog(ModalService, "Save CustomFills", "CustomFills: " + customFills.name + " saved successfully!", function(){
-                        wiApiService.getCustomFills(function(customFillsList){
-                            self.customFillsList = customFillsList;
+                DialogUtils.confirmDialog(ModalService, "Save CustomFills", "Template "+ self.customFillsCurrent.name + " existed. Do you want to overwrite the existing object?", function(ret) {
+                    if(ret) {
+                        wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
+                            wiApiService.getCustomFills(function(customFillsList){
+                                self.customFillsList = cfEmpty.concat(customFillsList);
+                            });
                         });
-                    });
+                    }
                 });
             }
         };
@@ -575,8 +576,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 message = validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
             }
             if(!message) {
-                let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
-                console.log("gg",self.shadingOptions);
+                let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions);
                 self._options = {
                     _index : shadingOptions._index,
                     changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
