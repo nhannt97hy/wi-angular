@@ -318,9 +318,11 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
                         DialogUtils.errorMessageDialog(ModalService, "Some errors while upload file!");
                     } else {
-                        oUtils.updateInventory();
-                        self.getWiiItems().emptyItems();
-                        self.getWiiItems().getWiiProperties().emptyList();
+                        $timeout(function() {
+                            oUtils.updateInventory();
+                            self.getWiiItems().emptyItems();
+                            self.getWiiItems().getWiiProperties().emptyList();
+                        }, 500);
                     }
                 })
             }
