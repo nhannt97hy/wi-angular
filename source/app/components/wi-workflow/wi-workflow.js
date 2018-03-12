@@ -3,6 +3,8 @@ const moduleName = "wi-workflow";
 
 function Controller(wiComponentService, wiApiService) {
     let self = this;
+    let layout = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+
     /*
     this.workflowConfig = {
         name: "Clastic",
@@ -192,10 +194,6 @@ function Controller(wiComponentService, wiApiService) {
         self.WorkflowPlayerName = "workflowplayer" + self.id + "Area";
         wiComponentService.putComponent(self.name, self);
         self.showOutput = true;
-        /*wiApiService.getWorkflow(self.id, function(workflow) {
-            console.log(workflow.content);
-            self.workflowConfig = workflow.content;
-        });*/
     };
     this.getCurrentProjectId = function () {
         if (self.idProject) return self.idProject;
@@ -205,15 +203,24 @@ function Controller(wiComponentService, wiApiService) {
         return (openProject || {}).idProject;
     };
 
-    this.SaveWorkflowButtonClicked = function () {
-        console.log("Save workflow");
-    }
-
     this.EditWorkflowButtonClicked = function () {
         console.log("Edit workflow");
     }
     this.toggleOutput = function () {
         self.showOutput = !self.showOutput;
+    }
+
+    this.openPlot = function(plot){
+        let plotModel = {
+            id: plot.idPlot,
+            type: 'logplot',
+            properties: {
+                idPlot: plot.idPlot,
+                name: plot.plotName,
+                idWell: plot.idWell
+            }
+        }
+        layout.putTabRightWithModel(plotModel);
     }
 }
 
