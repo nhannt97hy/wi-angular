@@ -578,7 +578,7 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
     setTimeout(() => {
         //let datasetModel = getModel('dataset', curve.idDataset);
         //let wellModel = getModel('well', datasetModel.properties.idWell);
-        curveModel.parentDataArr = [wModel.data, dModel.data];
+        curveModel.parentDataArr = [(wellModel||{}).data, (datasetModel||{}).data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
