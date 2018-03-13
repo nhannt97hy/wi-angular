@@ -1242,7 +1242,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     return;
                 }
                 if (wiD3Ctrl && track) {
-                    idCurves.forEach(idCurve => {
+                    async.eachSeries(idCurves, (idCurve, next) => {
                         let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
                         if (errorCode > 0) {
                             apiService.createLine({
@@ -1253,6 +1253,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                                 let lineModel = lineToTreeConfig(line);
                                 getCurveData(apiService, idCurve, function (err, data) {
                                     if (!err) wiD3Ctrl.getComponentCtrlByViTrack(track).addCurveToTrack(track, data, lineModel.data);
+                                    next(err);
                                 });
                             });
                         }
