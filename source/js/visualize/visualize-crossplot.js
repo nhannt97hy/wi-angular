@@ -496,11 +496,15 @@ Crossplot.prototype.init = function(domElem) {
 
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-overlay-line');
+    
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-tooltip');
 
     this.doPlot();
 
     this.on('mousedown', function() { self.mouseDownCallback() });
     this.on('mousemove', function() { self.mouseMoveCallback() });
+    this.on('mouseleave', function() { self.tooltip(null, null, true);})
 }
 
 Crossplot.prototype.createContainer = function() {
@@ -1788,6 +1792,9 @@ Crossplot.prototype.mouseMoveCallback = function() {
             this.plotUserLine();
         }
     }
+    else {
+        this.tooltip(x, y);
+    }
 }
 
 Crossplot.prototype.onMouseDown = function(callback) {
@@ -1994,4 +2001,52 @@ Crossplot.prototype.initSelectionArea = function(viSelections) {
 
 Crossplot.prototype.getSelection = function(id) {
     return this.selectionCanvasContainer.find(d => d.isSelection() && d.idSelectionTool == id);
+}
+
+Crossplot.prototype.tooltip = function(x, y, notShow) {
+    let self = this;
+    let transformX = self.getTransformX();
+    let transformY = self.getTransformY();
+    let tooltipData = {x: x, y: y};
+    
+    let container = self.svgContainer.select('.vi-crossplot-tooltip')
+    .attr('transform', 'translate(' + (transformX(x) + 15) + ',' + (transformY(y) + 15) + ')');
+    if(notShow || !x || !y) {
+        container.selectAll('*').remove();
+        return;       
+    }
+    let text = container.selectAll('text')
+        .data([x, y]);
+    text.enter()
+        .append('text')
+        .style('font-size', 14)
+        .style('font-weight', 'bold')
+        .attr('x', 0)
+        .attr('y', (d, i) => { return 15 + 20*i;})
+        .text(function (d, i) { 
+            return (i == 0 ? self.getLabelX():self.getLabelY()) + ': ' + d.toFixed(2);
+        });
+    text.attr('y', (d, i) => { return 15 + 20*i;})
+        .text(function (d, i) { 
+        return (i == 0 ? self.getLabelX():self.getLabelY()) + ': ' + d.toFixed(2);
+    });
+    text.exit().remove();
+    let bbox = container.node().getBBox();
+    let rect = container.selectAll('rect')
+        .data([tooltipData]);
+    rect.enter()
+        .append('rect')
+            .attr('x', bbox.x - 5)
+            .attr('y', bbox.y - 5)
+            .attr('width', bbox.width + 10)
+            .attr('height', bbox.height + 10)
+            .attr('fill', 'lightgreen')
+            .attr('fill-opacity', 0.9)
+            .attr('rx', 10)
+            .attr('ry', 10)
+            .attr('stroke-width', 1)
+            .attr('stroke', '#444');
+    rect.exit().remove();
+
+    text.raise();
 }
