@@ -746,7 +746,58 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             orderNum: currentOrderNum
                         }, function(line){
                             currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                            done2();
+                            let bgColor = null;
+                            switch (opt.family) {
+                                case "Net Reservoir Flag": 
+                                    bgColor = "green";
+                                    break;
+                                case "Net Pay Flag":
+                                    bgColor = "red";
+                                    break;
+                            }
+                            if (!bgColor) {
+                                done2();
+                                return;
+                            }
+                            wiApiService.createShading({
+                                idTrack:trackData.idTrack,
+                                name:opt.name + "-left",
+
+                                negativeFill : {
+                                    display: false, 
+                                    sadingType: "pattern",
+                                    pattern: {
+                                        background : "blue",
+                                        foreground : "black",
+                                        name : "none"
+                                    }
+                                },
+                                positiveFill: {
+                                    display: false, 
+                                    sadingType: "pattern",
+                                    pattern: {
+                                        background : "blue",
+                                        foreground : "black",
+                                        name : "none"
+                                    }
+                                },
+                                fill:{
+                                    display:true,
+                                    shadingType:"pattern",
+                                    pattern:{
+                                        name: "none",
+                                        foreground:"black",
+                                        background:bgColor
+                                    }
+                                },
+                                isNegPosFill:false,
+                                idLeftLine:null,
+                                idRightLine:line.idLine,
+                                leftFixedValue:0,
+                                idControlCurve:opt.idCurve
+                            }, function(shadingProps) {
+                                done2();
+                            });
                         })
                     }, {
                             title: opt.name
