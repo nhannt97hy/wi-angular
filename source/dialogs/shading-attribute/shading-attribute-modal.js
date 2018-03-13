@@ -464,19 +464,28 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
             if(!self.customFillsCurrent.name) {
-                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
+                DialogUtils.errorMessageDialog(ModalService, 'Add name CustomFills to save!');
             }
             else {
-                DialogUtils.confirmDialog(ModalService, "Save CustomFills", "Template "+ self.customFillsCurrent.name + " existed. Do you want to overwrite the existing object?", function(ret) {
-                    if(ret) {
-                        wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
-                            wiApiService.getCustomFills(function(customFillsList){
-                                self.customFillsList = cfEmpty.concat(customFillsList);
-                            });
+                wiApiService.getCustomFills(function(customFillsList){
+                    let checkName = false;
+                    customFillsList.forEach(function(c) {
+                        if(self.customFillsCurrent.name == c.name) checkName = true;
+                    });
+                    if(checkName) {
+                        DialogUtils.confirmDialog(ModalService, 'Save CustomFills', 'Template "'+ self.customFillsCurrent.name + '" existed. Do you want to overwrite the existing object?', function(ret) {
+                            if(ret) saveCF();
                         });
-                    }
+                    } else saveCF();
                 });
-            }
+            };
+            function saveCF() {
+                wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
+                    wiApiService.getCustomFills(function(customFillsList){
+                        self.customFillsList = cfEmpty.concat(customFillsList);
+                    });
+                });
+            };
         };
         this.setVarShadingType = function() {
             if(self.varShadingType == 'customFills') {
