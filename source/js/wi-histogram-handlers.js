@@ -55,7 +55,7 @@ exports.ZoneButtonClicked = function() {
 exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    wiHistogramCtrl.histogramModel.properties.showGaussian = !wiHistogramCtrl.histogramModel.properties.showGaussian;
+    wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian;
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Gaussian');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
@@ -63,7 +63,7 @@ exports.GaussianButtonClicked = function() {
 exports.CumulativeButtonClicked = function() {
     console.log('CumulativeButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    wiHistogramCtrl.histogramModel.properties.showCumulative = !wiHistogramCtrl.histogramModel.properties.showCumulative;
+    wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative;
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Cumulative');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
@@ -72,13 +72,13 @@ exports.PlotBarsButtonClicked = PlotBarsButtonClicked;
 function PlotBarsButtonClicked() {
     console.log('PlotBarsButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    let currentPlot = wiHistogramCtrl.histogramModel.properties.plot;
+    let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
     switch(currentPlot) {
         case 'Bar': 
-            wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
             break;
         default:
-            wiHistogramCtrl.histogramModel.properties.plot = "Bar";
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
     } 
     // wiHistogramCtrl.histogramModel.properties.plot = "Bar";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
@@ -89,13 +89,13 @@ exports.PlotCurvesButtonClicked = function() {
     console.log('PlotCurvesButton is clicked');
     // PlotBarsButtonClicked.call(this);
     let wiHistogramCtrl = this.wiHistogram;
-    let currentPlot = wiHistogramCtrl.histogramModel.properties.plot;
+    let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
     switch(currentPlot) {
         case 'Bar': 
-            wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
             break;
         default:
-            wiHistogramCtrl.histogramModel.properties.plot = "Bar";
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
     } 
     //wiHistogramCtrl.histogramModel.properties.plot = "Curve";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
