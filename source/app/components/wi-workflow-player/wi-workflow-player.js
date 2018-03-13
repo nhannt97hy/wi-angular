@@ -737,7 +737,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 });
             }, function (err) {
                 if (err) toastr.error(err);
-                async.eachSeries(wfOutput, (opt, done2) => {
+                async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
                     wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                         // create line
                         wiApiService.createLine({
@@ -778,14 +778,16 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 }, function(err) {
                     if (err) console.log(err);
                     run(curvesData, wf.parameters, function (ret) {
-                        wf.outputData[idx] = new Array();
+                        
+                        wf.outputData[idx] = new Object();
                         wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
                         wf.outputData[idx].plotName = self.workflowConfig.name + wf.name + wf.inputData[idx].dataset.name;
+                        wf.outputData[idx].outputCurves = new Array();
                         wf.outputs.forEach((o, i) => {
-                            wf.outputData[idx][i] = o;
-                            wf.outputData[idx][i].data = ret[i];
+                            wf.outputData[idx].outputCurves[i] = o;
+                            wf.outputData[idx].outputCurves[i].data = ret[i];
                         })
-                        async.each(wf.outputData[idx], (d, cb2) => {
+                        async.each(wf.outputData[idx].outputCurves, (d, cb2) => {
                             let dataset = data.dataset;
                             d.idDataset = dataset.idDataset;
                             d.idWell = data.well.idWell;
@@ -802,11 +804,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }, function(err) {
                 if (err) console.log(err);
                 //refreshProject();
-                utils.refreshProjectState();
+                //utils.refreshProjectState();
                 console.log("done!", wf.outputData);
-                let wiWorkflow = wiComponentService.getComponent("workflow" + self.idWorkflow + "Area");
-                wiWorkflow.wfOutputData = wf.outputData;
+                //let wiWorkflow = wiComponentService.getComponent("workflow" + self.idWorkflow + "Area");
+                //wiWorkflow.wfOutputData = wf.outputData;
                 __running_wf = false;
+                saveWorkflow();
             });
         }
     }
@@ -815,7 +818,19 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         console.log("Finish him!");
     }
     this.rightWidth = function() {
-        return $('wi-workflow-player').width() *2 /3;
+        return $($('wi-workflow')[0].parentNode).width() *2 /3;
+    }
+    this.openPlot = function(plot){
+        let layout = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        layout.putTabRightWithModel({
+            id: plot.idPlot,
+            type: 'logplot',
+            properties: {
+                idPlot: plot.idPlot,
+                name: plot.plotName,
+                idWell: plot.idWell
+            }
+        });
     }
 }
 

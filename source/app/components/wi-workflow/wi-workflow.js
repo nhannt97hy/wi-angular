@@ -210,18 +210,6 @@ function Controller(wiComponentService, wiApiService) {
         self.showOutput = !self.showOutput;
     }
 
-    this.openPlot = function(plot){
-        let plotModel = {
-            id: plot.idPlot,
-            type: 'logplot',
-            properties: {
-                idPlot: plot.idPlot,
-                name: plot.plotName,
-                idWell: plot.idWell
-            }
-        }
-        layout.putTabRightWithModel(plotModel);
-    }
 }
 
 let app = angular.module(moduleName, []);
