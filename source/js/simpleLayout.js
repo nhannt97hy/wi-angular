@@ -577,12 +577,15 @@ app.controller('NeuralController', function($scope, ModalService) {
     self.inputCurves = [{name: 'DTCO3'}, {name: 'ECGR'}, {name: 'DTCO3'}, {name: 'DTCO3'}, {name: 'DTCO3'},
                         {name: 'ECGR'}, {name: 'DTCO3'}, {name: 'DTCO3'}];;
     self.outputCurves = [{name: 'C2'}, {name: 'ECGR'}, {name: 'DTCO3'}];
+    self.hiddenLayer = [5,7,1,8,9];
     console.log('controller: ', this, $scope);
-    this.addLayerButtonClicked = function () {
-        this.nLayers ++;
+    this.addHiddenLayerButtonClicked = function () {
+        self.hiddenLayer.push(2);
+        self.hiddenLayer = angular.copy(self.hiddenLayer);
     }
-    this.removeLayerButtonClicked = function () {
-        this.nLayers = (--this.nLayers) < 0 ? 0:this.nLayers;
+    this.removeHiddenLayerButtonClicked = function () {
+        self.hiddenLayer.pop();
+        self.hiddenLayer = angular.copy(self.hiddenLayer);
     }
     this.addNodeButtonClicked = function () {
         this.nNodes ++;
@@ -599,9 +602,10 @@ app.controller('NeuralController', function($scope, ModalService) {
     this.getConfigs = function () {
         return {
             inputCurves: self.inputCurves,
-            nLayers: self.nLayers,
-            nNodes: self.nNodes,
-            outputCurves: self.outputCurves
+            // nLayers: self.nLayers,
+            // nNodes: self.nNodes,
+            outputCurves: self.outputCurves,
+            hiddenLayer: self.hiddenLayer
         }
     }
 
@@ -609,8 +613,9 @@ app.controller('NeuralController', function($scope, ModalService) {
         // change reference of 2 array to invoke $onChanges methods
         self.inputCurves = angular.copy(newConfig.inputCurves);
         self.outputCurves = angular.copy(newConfig.outputCurves);
-        self.nLayers = newConfig.nLayers;
-        self.nNodes = newConfig.nNodes;
+        self.hiddenLayer = angular.copy(newConfig.hiddenLayer);
+        // self.nLayers = newConfig.nLayers;
+        // self.nNodes = newConfig.nNodes;
     }
 });
 

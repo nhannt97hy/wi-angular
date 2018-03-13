@@ -7,9 +7,10 @@ const LAYER_LABEL_CONTAINER_HEIGHT = NODE_SIZE + 20;
 
 function NeuralNetwork(config) {
     this.inputCurves = config.inputCurves;
-    this.nLayers = config.nLayers;
-    this.nNodes = config.nNodes;
+    // this.nLayers = config.nLayers;
+    // this.nNodes = config.nNodes;
     this.outputCurves = config.outputCurves;
+    this.hiddenLayer = config.hiddenLayer;
 }
 
 NeuralNetwork.prototype.init = function (domElem) {
@@ -31,9 +32,10 @@ NeuralNetwork.prototype.init = function (domElem) {
 
 NeuralNetwork.prototype.setProperties = function (newProps) {
     this.inputCurves = newProps.inputCurves || this.inputCurves;
-    this.nLayers = newProps.nLayers == undefined || newProps.nLayers == null ? this.nLayers:newProps.nLayers;
-    this.nNodes = newProps.nNodes == undefined || newProps.nNodes == null ? this.nNodes:newProps.nNodes;
+    // this.nLayers = newProps.nLayers == undefined || newProps.nLayers == null ? this.nLayers:newProps.nLayers;
+    // this.nNodes = newProps.nNodes == undefined || newProps.nNodes == null ? this.nNodes:newProps.nNodes;
     this.outputCurves = newProps.outputCurves || this.outputCurves;
+    this.hiddenLayer = newProps.hiddenLayer || this.hiddenLayer;
 }
 
 NeuralNetwork.prototype.getNodes = function () {
@@ -59,6 +61,7 @@ NeuralNetwork.prototype.getNodes = function () {
         };
     });
     // hidden layers
+    /*
     for(let i = 1; i <= self.nLayers; ++i) {
         for( let j = 1; j <= self.nNodes; ++j) {
             nodes.push({
@@ -69,7 +72,20 @@ NeuralNetwork.prototype.getNodes = function () {
             })
         }
     }
-
+    */
+    let hiddenNodes = [];
+    self.hiddenLayer.forEach(function(nNodes, idx) {
+        for(let i = 1; i <= nNodes; ++i) {
+            hiddenNodes.push({
+                label: 'hidden' + idx + '_' + i,
+                layer: idx + 2,
+                lidx: i,
+                color: getColor(idx + 2)
+            })
+        }
+    });
+    nodes = nodes.concat(hiddenNodes);
+    self.nLayers = self.hiddenLayer.length;
     // output layer
     nodes = nodes.concat(self.outputCurves.map(function (curve, idx) {
         return {
@@ -84,11 +100,12 @@ NeuralNetwork.prototype.getNodes = function () {
 
 NeuralNetwork.prototype.prepareLayers = function () {
     let self = this;
+    self.nLayers = self.hiddenLayer.length;
 
     // calculate space between nodes
     let svgSize = self.svgContainer.node().getBoundingClientRect();
     let maxNetworkHorizontalSize = self.nLayers + 2;
-    let maxNetworkVerticalNode = d3.max([self.inputCurves.length, self.nNodes]);
+    let maxNetworkVerticalNode = d3.max([self.inputCurves.length, d3.max(self.hiddenLayer), self.outputCurves.length]);
     let ydist = NODE_SIZE * 2 + NODE_SPACE_BETWEEN;
     let maxNetworkVerticalSize = ydist * maxNetworkVerticalNode;
 
@@ -167,19 +184,21 @@ NeuralNetwork.prototype.prepareLayers = function () {
         .attr('class', 'input-layer-path')
         .datum(inputLayerLabelDatum)
             .attr('d', layerLabelLine);
-    let hiddenLayerLabelDatum = [
-        {x: hiddenLabelStartX - NODE_SIZE * 1.75, y: lowestY - NODE_SIZE},
-        {x: hiddenLabelStartX - NODE_SIZE * 1.5, y: lowestY - NODE_SIZE - 5},
-        {x: ((hiddenLabelStartX + hiddenLabelStopX) / 2), y: lowestY - NODE_SIZE - 15},
-        {x: hiddenLabelStopX + NODE_SIZE * 1.5, y: lowestY - NODE_SIZE - 5},
-        {x: hiddenLabelStopX + NODE_SIZE * 1.75, y: lowestY - NODE_SIZE}
-    ];
-    labelContainer.append('path')
-        .attr('fill', 'none')
-        .attr('stroke', 'black')
-        .attr('class', 'hidden-layer-path')
-        .datum(hiddenLayerLabelDatum)
-            .attr('d', layerLabelLine);
+    if(self.hiddenLayer.length) {
+        let hiddenLayerLabelDatum = [
+            {x: hiddenLabelStartX - NODE_SIZE * 1.75, y: lowestY - NODE_SIZE},
+            {x: hiddenLabelStartX - NODE_SIZE * 1.5, y: lowestY - NODE_SIZE - 5},
+            {x: ((hiddenLabelStartX + hiddenLabelStopX) / 2), y: lowestY - NODE_SIZE - 15},
+            {x: hiddenLabelStopX + NODE_SIZE * 1.5, y: lowestY - NODE_SIZE - 5},
+            {x: hiddenLabelStopX + NODE_SIZE * 1.75, y: lowestY - NODE_SIZE}
+        ];
+        labelContainer.append('path')
+            .attr('fill', 'none')
+            .attr('stroke', 'black')
+            .attr('class', 'hidden-layer-path')
+            .datum(hiddenLayerLabelDatum)
+                .attr('d', layerLabelLine);
+    }
     let outputLayerLabelDatum = [
         {x: outputLabelX - NODE_SIZE * 1.75, y: lowestY - NODE_SIZE},
         {x: outputLabelX - NODE_SIZE * 1.5, y: lowestY - NODE_SIZE - 5},
@@ -207,6 +226,13 @@ NeuralNetwork.prototype.prepareLayers = function () {
             }
         }
     }).filter(function(d) { return typeof d !== "undefined"; });
+
+    // get hidden layer nodes
+    let hiddenLayerNodes = [];
+    for(let i = 0; i < self.hiddenLayer.length; ++i) {
+        let layerNodes = nodes.filter((node) => (node.layer == (i + 2)));
+        hiddenLayerNodes.push(layerNodes);
+    }
 
     //handle events
     function handleNodeMouseover(d, i) {
@@ -236,6 +262,16 @@ NeuralNetwork.prototype.prepareLayers = function () {
         } else {
             //handle for other layers
         }
+    }
+    function handleHiddenLayerMouseLeave(d, i) {
+        d3.select(this)
+            .attr('fill-opacity', 0)
+            .attr('stroke','none');
+    }
+    function handleHiddenLayerMouseOver(d, i) {
+        d3.select(this)
+            .attr('fill-opacity', 0.3)
+            .attr('stroke','black');
     }
     function draw() {
         // draw links
@@ -302,7 +338,29 @@ NeuralNetwork.prototype.prepareLayers = function () {
             .text(function(d) { return d.label; });
 
         node.exit().remove();
-    }
 
+        // draw hidden layer selector
+        let selector = container.selectAll(".layer-selector")
+            .data(hiddenLayerNodes)
+            .enter().append('rect')
+                .attr('x', function(d) { return d[0].x - NODE_SIZE* 3/2;})
+                .attr('y', function(d) { return d[0].y - NODE_SIZE* 3/2;})
+                .attr('width', 3 * NODE_SIZE)
+                .attr('height', function(d) { return d[d.length-1].y - d[0].y + NODE_SIZE * 3; })
+                .attr('fill', 'lightgreen')
+                .attr('fill-opacity', 0)
+                .attr('stroke', 'none')
+                .attr('stroke-width', 1)
+                .attr('rx', 10)
+                .attr('ry', 10)
+                .on('mouseover', handleHiddenLayerMouseOver)
+                .on('mouseleave', handleHiddenLayerMouseLeave);
+        // update
+        selector.attr('x', function(d) { return d[0].x - NODE_SIZE* 3/2;})
+            .attr('y', function(d) { return d[0].y - NODE_SIZE* 3/2;})
+            .attr('width', 3 * NODE_SIZE)
+            .attr('height', function(d) { return d[d.length-1].y - d[0].y + NODE_SIZE * 3; })
+        selector.exit().remove();
+    }
     draw();
 }

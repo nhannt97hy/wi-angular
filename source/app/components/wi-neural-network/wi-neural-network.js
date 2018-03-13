@@ -34,9 +34,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getConfigs = function () {
         return {
             inputCurves: self.inputCurves,
-            nLayers: self.nLayers,
-            nNodes: self.nNodes,
-            outputCurves: self.outputCurves
+            // nLayers: self.nLayers,
+            // nNodes: self.nNodes,
+            outputCurves: self.outputCurves,
+            hiddenLayer: self.hiddenLayer
         }
     }
     this.setConfigs = function (newConfig) {
@@ -52,11 +53,11 @@ app.component(componentName, {
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        idProject: '<',
         inputCurves: '<',
-        nLayers: '<',
-        nNodes: '<',
-        outputCurves: '<'
+        // nLayers: '<',
+        // nNodes: '<',
+        outputCurves: '<',
+        hiddenLayer: '<'
     }
 });
 

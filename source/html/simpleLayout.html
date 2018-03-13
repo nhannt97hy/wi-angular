@@ -151,26 +151,21 @@
             <h3 class="content-heading">Neural Network Playground</h3>
             <!--<wi-inventory style='flex:1;' id-project='1'></wi-inventory>-->
             <div class="row">
-                <div class="col-md-6 col-md-offset 2">
-                    <span class="lead">Number of Layers:
-                        <button type="button" class="btn btn-default" name="removeLayers" ng-click="network.removeLayerButtonClicked()">-</button>
-                        <span class="label label-success">{{ network.nLayers }}</span>
-                        <button type="button" class="btn btn-default" name="addLayers" ng-click="network.addLayerButtonClicked()">+</button>
+                <div class="col-md-6 col-md-offset-2">
+                    <span class="lead">
+                        <button type="button" class="btn btn-default" name="removeLayers" ng-click="network.removeHiddenLayerButtonClicked()">-</button>
+                        <span class="label label-success">{{ network.hiddenLayer.length }}</span>
+                        <button type="button" class="btn btn-default" name="addLayers" ng-click="network.addHiddenLayerButtonClicked()">+</button>
+                        Hidden Layers
                     </span>
 
                 </div>
-                <div class="col-md-4">
-                    <span class="lead">Number of Nodes:
-                        <button type="button" class="btn btn-default" name="removeLayers" ng-click="network.removeNodeButtonClicked()">-</button>
-                        <span class="label label-success">{{ network.nNodes }}</span>
-                        <button type="button" class="btn btn-default" name="addLayers" ng-click="network.addNodeButtonClicked()">+</button>
-                    </span>
-                </div>
-                <div class="col-md-2">
+               
+                <!-- <div class="col-md-2">
                     <button type="button" class="btn btn-primary" name="button" ng-click="network.neuralNetWorkProperties()">Configure network</button>
-                </div>
+                </div> -->
             </div>
-            <wi-neural-network style='flex:1;' input-curves="network.inputCurves" output-curves="network.outputCurves" n-layers="network.nLayers" n-nodes="network.nNodes"></wi-neural-network>
+            <wi-neural-network style='flex:1;' input-curves="network.inputCurves" output-curves="network.outputCurves" hidden-layer="network.hiddenLayer"></wi-neural-network>
         </div>
     </template>
 
