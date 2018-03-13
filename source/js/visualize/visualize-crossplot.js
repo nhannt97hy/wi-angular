@@ -331,10 +331,22 @@ Crossplot.prototype.getViewportY = function() {
 }
 
 Crossplot.prototype.getWindowX = function() {
+    if(this.pointSet.logX) {
+        let left = this.pointSet.scaleLeft > 0 ? this.pointSet.scaleLeft : 0.001;
+        let right = this.pointSet.scaleRight ? this.pointSet.scaleRight : 0.001;
+
+        return [left, right];
+    }
     return [this.pointSet.scaleLeft, this.pointSet.scaleRight];
 }
 
 Crossplot.prototype.getWindowY = function() {
+    if(this.pointSet.logY) {
+        let bottom = this.pointSet.scaleBottom > 0 ? this.pointSet.scaleBottom : 0.001;
+        let top = this.pointSet.scaleTop ? this.pointSet.scaleTop : 0.001;
+
+        return [bottom, top];
+    }
     return [this.pointSet.scaleBottom, this.pointSet.scaleTop];
 }
 
@@ -343,13 +355,15 @@ Crossplot.prototype.getWindowZ = function() {
 }
 
 Crossplot.prototype.getTransformX = function() {
-    return d3.scaleLinear()
+    let scaleFunc = this.pointSet.logX ? d3.scaleLog():d3.scaleLinear();
+    return scaleFunc
         .domain(this.getWindowX())
         .range(this.getViewportX());
 }
 
 Crossplot.prototype.getTransformY = function() {
-    return d3.scaleLinear()
+    let scaleFunc = this.pointSet.logY ? d3.scaleLog():d3.scaleLinear();
+    return scaleFunc
         .domain(this.getWindowY())
         .range(this.getViewportY());
 }
@@ -2008,45 +2022,52 @@ Crossplot.prototype.tooltip = function(x, y, notShow) {
     let transformX = self.getTransformX();
     let transformY = self.getTransformY();
     let tooltipData = {x: x, y: y};
-    
-    let container = self.svgContainer.select('.vi-crossplot-tooltip')
-    .attr('transform', 'translate(' + (transformX(x) + 15) + ',' + (transformY(y) + 15) + ')');
-    if(notShow || !x || !y) {
+
+    let xCoord = transformX(x) + 15;
+    let yCoord = transformY(y) + 15;
+    let container = self.svgContainer.select('.vi-crossplot-tooltip');
+    if(notShow || isNaN(xCoord) || isNaN(yCoord)  || !x || !y) {
         container.selectAll('*').remove();
         return;       
     }
+
     let text = container.selectAll('text')
         .data([x, y]);
     text.enter()
         .append('text')
         .style('font-size', 14)
         .style('font-weight', 'bold')
-        .attr('x', 0)
-        .attr('y', (d, i) => { return 15 + 20*i;})
+        .attr('x', xCoord)
+        .attr('y', (d, i) => { return yCoord + 15 + 20*i;})
         .text(function (d, i) { 
-            return (i == 0 ? self.getLabelX():self.getLabelY()) + ': ' + d.toFixed(2);
+            return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
         });
-    text.attr('y', (d, i) => { return 15 + 20*i;})
+    text.attr('x', xCoord)
+        .attr('y', (d, i) => { return yCoord + 15 + 20*i;})
         .text(function (d, i) { 
-        return (i == 0 ? self.getLabelX():self.getLabelY()) + ': ' + d.toFixed(2);
+        return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
     });
     text.exit().remove();
-    let bbox = container.node().getBBox();
+
+    let maxWidth = d3.max(container.selectAll('text').nodes().map(function(node) { return node.getBBox().width;}));
+    let maxHeight = container.select('text').node().getBBox().height * 2.5;
     let rect = container.selectAll('rect')
-        .data([tooltipData]);
+        .data([{x: xCoord,y: yCoord}]);
     rect.enter()
         .append('rect')
-            .attr('x', bbox.x - 5)
-            .attr('y', bbox.y - 5)
-            .attr('width', bbox.width + 10)
-            .attr('height', bbox.height + 10)
+            .attr('x', (d)=> d.x - 5)
+            .attr('y', (d)=> d.y - 5)
+            .attr('width', maxWidth + 10)
+            .attr('height', maxHeight + 10)
             .attr('fill', 'lightgreen')
             .attr('fill-opacity', 0.9)
-            .attr('rx', 10)
-            .attr('ry', 10)
-            .attr('stroke-width', 1)
-            .attr('stroke', '#444');
+            .attr('stroke', '#444')
+            .attr('rx', 7)
+            .attr('ry', 7); 
+    rect.attr('x', (d)=> d.x - 5)
+        .attr('y', (d)=> d.y - 5)
+        .attr('width', maxWidth + 10)
+        .attr('height', maxHeight + 10);
     rect.exit().remove();
-
     text.raise();
 }
