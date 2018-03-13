@@ -11,7 +11,7 @@ exports.NewProjectButtonClicked = function () {
                 wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
                 let utils = self.wiComponentService.getComponent('UTILS');
                 self.wiApiService.getProject({ idProject: response.idProject }, function (response) {
-                    utils.projectOpen(self.wiComponentService, response);
+                    utils.projectOpen(response);
                 });
             }
         });
@@ -25,7 +25,7 @@ exports.OpenProjectButtonClicked = function () {
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
         let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, projectData);
+        utils.projectOpen(projectData);
     });
 };
 
@@ -35,7 +35,7 @@ exports.CloseProjectButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
         if (yesOrNo) {
-            utils.projectClose(self.wiComponentService);
+            utils.projectClose();
         }
     })
 };
@@ -185,9 +185,11 @@ exports.ExitButtonClicked = function () {
     DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you sure to exit program?", function (isExit) {
         if (isExit) {
             window.localStorage.removeItem('token');
-            window.localStorage.removeItem('username');
+            // window.localStorage.removeItem('username');
             window.localStorage.removeItem('password');
             window.localStorage.removeItem('rememberAuth');
+            window.history.replaceState({}, 'home', '/');
+            document.title = 'Well Insight';
             location.reload();
         }
     })

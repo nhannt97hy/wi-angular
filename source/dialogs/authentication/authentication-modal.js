@@ -6,6 +6,7 @@ module.exports = function (ModalService, wiComponentService,callback) {
         this.disabled = false;
         this.error = null;
         this.captchaPNG = wiApiService.getCaptcha();
+        this.username = window.localStorage.getItem('username');
         this.checkPasswords = function () {
             if (!self.passwordReg || !self.passwordConfirm) {
                 self.error = 'Passwords must not be empty.'
