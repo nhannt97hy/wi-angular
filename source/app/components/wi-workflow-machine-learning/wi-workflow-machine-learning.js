@@ -775,13 +775,24 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
         console.log("Finish him!");
     }
     this.addCurveInput = function(wf){
-        wf.inputs.unshift({name: "Curve input"});
+        if(!self.workflowConfig.steps[0].disabled)
+        self.workflowConfig.steps.forEach(function(step){
+            step.inputs.unshift({name: "Curve input"});
+        });
+        else
+            wf.inputs.unshift({name: "Curve input"});
     }
     this.deleteCurveInput = function(wf, i){
         if(wf.inputs.length==2)
             toastr.error(wf.name+' needs at least one curve input!');
-        else
-            wf.inputs.splice(i, 1);
+        else{
+            if(!self.workflowConfig.steps[0].disabled)
+            self.workflowConfig.steps.forEach(function(step){
+                step.inputs.splice(i, 1);
+            });
+            else
+                wf.inputs.splice(i, 1);
+        }
     }
     this.isCurveOutput = function(wf, i){
         if(wf.name=='Predict')
@@ -812,7 +823,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
             },
             {
                 name: "Predict",
-                inputs: [{ name: "Curve input" }, { name: "Curve input" }],
+                inputs: [{ name: "Curve input" }],
                 parameters: [],
                 outputs: [],
                 function: predict
@@ -822,7 +833,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
     let listCurves = [];
     function getDataCurves(k, callback){
         listCurves = [];
-        console.log(self.workflowConfig);
+        // console.log(self.workflowConfig);
         let inputData = self.workflowConfig.steps[k].inputData;
         if(inputData){
             let listInputData = [];
@@ -843,7 +854,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
             listInputData.forEach(function(input_data, i){
                 let j=-1;
                 async.each(input_data, function(curve,__end){
-                    console.log(curve);
                     wiApiService.dataCurve(curve.value.id, function(data){
                         j++;
                         data.forEach(function(point){
@@ -915,7 +925,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
                 payload.data.push(curves[i]);
             curves[curves.length-1].forEach(function(x){
                 payload.target.push(x);
-            })
+            });
+            console.log("data-train:", payload.data);
+            console.log("target-train:", payload.target);
             wiComponentService.getComponent('SPINNER').show();       
             $http({
                 method: 'POST',
@@ -923,7 +935,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
                 json: true,
                 data: payload
             }).then(function(response){
-                    console.log(payload);
+                    // console.log(payload);
                     console.log('create model result:', response.data);
                     wiComponentService.getComponent('SPINNER').hide();
                     var res = response.data;
@@ -947,7 +959,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
                 model_id: self.modelVerify.id,
                 data: []
             };
-            payload.data.push(curves[0], curves[1], curves[2], curves[3], curves[4]);
+            curves.forEach(function(curve){
+                payload.data.push(curve);
+            });
+            console.log("data-verify:", payload.data);
             wiComponentService.getComponent('SPINNER').show();  
             $http({
                 method: 'POST',
@@ -966,7 +981,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
                     for(let i = 0; i<list_curves[0].length; i++)
                     {
                         let checkNull = true;
-                        for(let j=0; j< list_curves.length; j++)
+                        for(let j=0; j< list_curves.length-1; j++)
                             if(isNaN(list_curves[j][i])){
                                 checkNull = false;
                                 break;
@@ -974,10 +989,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
                         if(!checkNull)
                             target.splice(i,0,NaN);
                     }
-                    console.log('target of verify after fill null: ', target);
-                    console.log('verify curve: ', list_curves[5]);
+                    console.log('result of verify: ', target);
+                    console.log('verify curve: ', list_curves[list_curves.length-1]);
                 }else{
-                    console.log('fail');
                     toastr.error(res.body.message, '');
                 }
                 return;
@@ -1023,7 +1037,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
                     }
                     console.log('target of predict after fill null: ', target);
                 }else{
-                    console.log('fail');
                     toastr.error(res.body.message, '');
                 }
                 return;
@@ -1101,6 +1114,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, $http) {
         self.workflowConfig.steps.forEach(function(step){
             step.inputData = [];
         });
+    }
+    this.hideConfig = function(wf){
+        if(wf.name=="Training"){
+            return wf.disabled;
+        }else
+            return !self.workflowConfig.steps[0].disabled;
     }
 }
 
