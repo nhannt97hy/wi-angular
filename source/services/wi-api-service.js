@@ -77,6 +77,7 @@ const CUT_CURVE = '/project/well/dataset/curve/move';
 const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
 const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
+const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -1814,4 +1815,7 @@ Service.prototype.createWorkflowSpec = function(name, spec, callback) {
 }
 Service.prototype.getWorkflowSpecList = function(callback) {
     this.post(GET_WORKFLOW_SPEC_LIST, null, callback);
+}
+Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
+    this.post(IS_EXISTED_CURVE, {name: curveName, idDataset: idDataset}, callback);
 }

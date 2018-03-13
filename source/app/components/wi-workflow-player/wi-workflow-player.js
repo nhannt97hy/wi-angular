@@ -4,6 +4,7 @@ let petrophysics = require('./petrophysics');
 
 function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     let self = this;
+    let __running_wf = false;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
         wiComponentService.DIALOG_UTILS
@@ -44,7 +45,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     };
 
     function saveWorkflow() {
-        if (!self.idWorkflow) return;
+        if (!self.idWorkflow || __running_wf) return;
         wiApiService.editWorkflow({
             idWorkflow: self.idWorkflow,
             content:self.workflowConfig
@@ -674,7 +675,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     }
 
     this.validate = function () {
-        if (!self.workflowConfig || !self.workflowConfig.steps) 
+        if (!self.workflowConfig || !self.workflowConfig.steps)
             return false;
 
         for (let step of self.workflowConfig.steps) {
@@ -687,23 +688,25 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         return true;
     };
 
-    function saveCurve(curveList, curveInfo, callback) {
+    function saveCurve(curveInfo, callback) {
         getFamilyList(familyList => {
+            let family = familyList.find(f => f.data.label == curveInfo.family);
             let payload = {
                 data: curveInfo.data,
                 idDataset: curveInfo.idDataset,
-                idFamily: familyList.find(f => f.data.label == curveInfo.family).id
+                idFamily: (family || {}).id || null
             }
-            let curve = curveList.find(c => c.name == curveInfo.name);
-            if (curve) {
-                payload.idDesCurve = curve.idCurve;
-                curveInfo.idCurve = curve.idCurve;
-            } else {
-                payload.curveName = curveInfo.name
-            }
-            wiApiService.processingDataCurve(payload, function (ret) {
-                if(!curve) curveInfo.idCurve = ret.idCurve;
-                callback();
+            wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
+                if (curve.idCurve) {
+                    payload.idDesCurve = curve.idCurve;
+                    curveInfo.idCurve = curve.idCurve;
+                } else {
+                    payload.curveName = curveInfo.name
+                }
+                wiApiService.processingDataCurve(payload, function (ret) {
+                    if(!curve.idCurve) curveInfo.idCurve = ret.idCurve;
+                    callback();
+                })
             })
         });
     }
@@ -711,13 +714,14 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     function createLogplotFromResult(wfInput, wfOutput, callback) {
         let payload = {
             idWell: wfOutput.idWell,
-            name: wfOutput.plotName
+            name: wfOutput.plotName,
+            override: true
         };
 
         wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
             wfOutput.idPlot = response.idPlot;
             let currentOrderNum = 'a';
-            async.eachSeries(wfInput.inputs, (ipt, done1) => {
+            async.eachSeries(wfInput.inputs, function(ipt, done1) {
                 wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                     //create line
                     wiApiService.createLine({
@@ -730,7 +734,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     })
                 }, {
                         title: ipt.name
-                    });
+                });
             }, function (err) {
                 if (err) toastr.error(err);
                 async.eachSeries(wfOutput, (opt, done2) => {
@@ -756,18 +760,22 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     }
 
     this.runWorkflow = function (wf) {
+        if(__running_wf) return;
         let run = petrophysics[wf.function];
         if (wf.inputData && wf.inputData.length && run) {
-            if (!wf.outputData || !Array.isArray(wf.outputData)) wf.outputData = new Array();
-            async.eachOfSeries(wf.inputData, (data, idx, callback) => {
+            __running_wf = true;
+            if (!wf.outputData || !Array.isArray(wf.outputData)) {
+                wf.outputData = new Array();
+            }
+            async.eachOfSeries(wf.inputData, function(data, idx, callback) {
                 let curvesData = [];
-                async.eachOfSeries(data.inputs, (curve, index, cb) => {
+                async.eachOfSeries(data.inputs, function(curve, index, cb) {
                     let idCurve = curve.value.id;
                     wiApiService.dataCurve(idCurve, function (data) {
                         curvesData.push(data.map(d => parseFloat(d.x)));
                         cb();
                     })
-                }, (err) => {
+                }, function(err) {
                     if (err) console.log(err);
                     run(curvesData, wf.parameters, function (ret) {
                         wf.outputData[idx] = new Array();
@@ -780,26 +788,34 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                         async.each(wf.outputData[idx], (d, cb2) => {
                             let dataset = data.dataset;
                             d.idDataset = dataset.idDataset;
-                            saveCurve(dataset.curves, d, cb2);
+                            d.idWell = data.well.idWell;
+                            saveCurve(d, function(){
+                                delete d.data;
+                                cb2();
+                            });
                         }, (err) => {
                             console.log("save curves done");
                             createLogplotFromResult(wf.inputData[idx], wf.outputData[idx], callback);
-                            // callback();
-                        })
+                        });
                     })
                 })
-            }, (err) => {
+            }, function(err) {
                 if (err) console.log(err);
-                refreshProject();
+                //refreshProject();
                 utils.refreshProjectState();
                 console.log("done!", wf.outputData);
-            }
-            )
+                let wiWorkflow = wiComponentService.getComponent("workflow" + self.idWorkflow + "Area");
+                wiWorkflow.wfOutputData = wf.outputData;
+                __running_wf = false;
+            });
         }
     }
 
     this.finishWizard = function () {
         console.log("Finish him!");
+    }
+    this.rightWidth = function() {
+        return $('wi-workflow-player').width() *2 /3;
     }
 }
 
