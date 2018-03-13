@@ -163,7 +163,7 @@ module.exports = function (ModalService, well, plotModel, callback) {
         }
 
         this.IsNotValid = function(){
-            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
+            return self.props.referenceTopDepth == null || self.props.referenceBottomDepth == null ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || self.props.referenceVertLineNumber == null;
         }
 
         this.onApplyButtonClicked = function() {

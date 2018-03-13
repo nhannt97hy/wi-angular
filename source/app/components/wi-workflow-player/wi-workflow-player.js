@@ -746,7 +746,58 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             orderNum: currentOrderNum
                         }, function(line){
                             currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                            done2();
+                            let bgColor = null;
+                            switch (opt.family) {
+                                case "Net Reservoir Flag": 
+                                    bgColor = "green";
+                                    break;
+                                case "Net Pay Flag":
+                                    bgColor = "red";
+                                    break;
+                            }
+                            if (!bgColor) {
+                                done2();
+                                return;
+                            }
+                            wiApiService.createShading({
+                                idTrack:trackData.idTrack,
+                                name:opt.name + "-left",
+
+                                negativeFill : {
+                                    display: false, 
+                                    sadingType: "pattern",
+                                    pattern: {
+                                        background : "blue",
+                                        foreground : "black",
+                                        name : "none"
+                                    }
+                                },
+                                positiveFill: {
+                                    display: false, 
+                                    sadingType: "pattern",
+                                    pattern: {
+                                        background : "blue",
+                                        foreground : "black",
+                                        name : "none"
+                                    }
+                                },
+                                fill:{
+                                    display:true,
+                                    shadingType:"pattern",
+                                    pattern:{
+                                        name: "none",
+                                        foreground:"black",
+                                        background:bgColor
+                                    }
+                                },
+                                isNegPosFill:false,
+                                idLeftLine:null,
+                                idRightLine:line.idLine,
+                                leftFixedValue:0,
+                                idControlCurve:opt.idCurve
+                            }, function(shadingProps) {
+                                done2();
+                            });
                         })
                     }, {
                             title: opt.name
@@ -759,63 +810,83 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         })
     }
 
-    this.runWorkflow = function (wf) {
+    this.runWorkflow = runWorkflow;
+    this.safeRunWorkflow = safeRunWorkflow;
+    function safeRunWorkflow(wf) {
         if(__running_wf) return;
-        let run = petrophysics[wf.function];
-        if (wf.inputData && wf.inputData.length && run) {
+        if (wf.inputData && wf.inputData.length) {
             __running_wf = true;
-            if (!wf.outputData || !Array.isArray(wf.outputData)) {
-                wf.outputData = new Array();
-            }
-            async.eachOfSeries(wf.inputData, function(data, idx, callback) {
-                let curvesData = [];
-                async.eachOfSeries(data.inputs, function(curve, index, cb) {
-                    let idCurve = curve.value.id;
-                    wiApiService.dataCurve(idCurve, function (data) {
-                        curvesData.push(data.map(d => parseFloat(d.x)));
-                        cb();
-                    })
-                }, function(err) {
-                    if (err) console.log(err);
-                    run(curvesData, wf.parameters, function (ret) {
-                        
-                        wf.outputData[idx] = new Object();
-                        wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
-                        wf.outputData[idx].plotName = self.workflowConfig.name + wf.name + wf.inputData[idx].dataset.name;
-                        wf.outputData[idx].outputCurves = new Array();
-                        wf.outputs.forEach((o, i) => {
-                            wf.outputData[idx].outputCurves[i] = o;
-                            wf.outputData[idx].outputCurves[i].data = ret[i];
-                        })
-                        async.each(wf.outputData[idx].outputCurves, (d, cb2) => {
-                            let dataset = data.dataset;
-                            d.idDataset = dataset.idDataset;
-                            d.idWell = data.well.idWell;
-                            saveCurve(d, function(){
-                                delete d.data;
-                                cb2();
-                            });
-                        }, (err) => {
-                            console.log("save curves done");
-                            createLogplotFromResult(wf.inputData[idx], wf.outputData[idx], callback);
-                        });
-                    })
-                })
-            }, function(err) {
-                if (err) console.log(err);
-                //refreshProject();
-                //utils.refreshProjectState();
-                console.log("done!", wf.outputData);
-                //let wiWorkflow = wiComponentService.getComponent("workflow" + self.idWorkflow + "Area");
-                //wiWorkflow.wfOutputData = wf.outputData;
+            runWorkflow(wf, function() {
                 __running_wf = false;
-                saveWorkflow();
+                utils.refreshProjectState();
+                self.saveWorkflow();
+                console.log("done!", wf.outputData);
             });
         }
     }
+    function runWorkflow(wf, finCallback) {
+        let run = petrophysics[wf.function];
+        if (!wf.outputData || !Array.isArray(wf.outputData)) {
+            wf.outputData = new Array();
+        }
+        // Loop each dataset
+        async.eachOf(wf.inputData, function(data, idx, callback) {
+            let curvesData = [];
+            // loop each input curves
+            async.eachSeries(data.inputs, function(curve, cb) {
+                let idCurve = curve.value.id;
+                wiApiService.dataCurve(idCurve, function (data) {
+                    curvesData.push(data.map(d => parseFloat(d.x)));
+                    cb();
+                });
+            }, function(err) {
+                // done get all curves
+                if (err) console.log(err);
+                run(curvesData, wf.parameters, function (ret) {
+                    wf.outputData[idx] = new Object();
+                    wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
+                    wf.outputData[idx].plotName = self.workflowConfig.name + '-' + wf.name + '-' + wf.inputData[idx].dataset.name;
+                    wf.outputData[idx].outputCurves = new Array();
+                    wf.outputs.forEach((o, i) => {
+                        wf.outputData[idx].outputCurves[i] = o;
+                        wf.outputData[idx].outputCurves[i].data = ret[i];
+                    });
+                    async.each(wf.outputData[idx].outputCurves, function(d, cb2) {
+                        let dataset = data.dataset;
+                        d.idDataset = dataset.idDataset;
+                        d.idWell = data.well.idWell;
+                        saveCurve(d, function() {
+                            delete d.data;
+                            cb2();
+                        });
+                    }, function(err) {
+                        createLogplotFromResult(wf.inputData[idx], wf.outputData[idx], callback);
+                    });
+                });
+            });
+        }, function(err) {
+            if (err) console.log(err);
+            //refreshProject();
+            if (finCallback) finCallback();
+        });
+    }
 
     this.finishWizard = function () {
-        console.log("Finish him!");
+        console.log("Finish him!", self.workflowConfig);
+        __running_wf = true;
+        async.eachOfSeries(self.workflowConfig.steps, function(step, idx, done){
+            if( step.disabled ) {
+                async.setImmediate(done);
+                return;
+            }
+            runWorkflow(step, done);
+        }, function(err) {
+            if (err) toastr.error(err);
+            console.log('finish');
+            __running_wf = false;
+            utils.refreshProjectState();
+            self.saveWorkflow();
+        });
     }
     this.rightWidth = function() {
         return $($('wi-workflow')[0].parentNode).width() *2 /3;
@@ -831,6 +902,19 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 idWell: plot.idWell
             }
         });
+    }
+    this.removePlot = function(outputData) {
+        delete outputData.idPlot;
+        delete outputData.plotName;
+        self.saveWorkflow();
+    }
+    this.running = function() {
+        return __running_wf;
+    }
+    this.createSpinner = function() {
+        $timeout( () => {
+            document.getElementById("workflow-" + self.idWorkflow + "-spinner").appendChild((new Spinner()).spin().el);
+        }, 700);
     }
 }
 

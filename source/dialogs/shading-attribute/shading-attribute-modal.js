@@ -69,7 +69,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             },
             positiveFill : {
                 display : this.shadingOptions.isNegPosFill && this.shadingOptions.positiveFill.display,
-                pattern : this.shadingOptions.positiveFill.pattern ? this.shadingOptions.positiveFill.pattern : {
+                pattern : (this.shadingOptions.positiveFill || {}).pattern ? this.shadingOptions.positiveFill.pattern : {
                     name : 'none',
                     foreground : 'black',
                     background : 'blue'
@@ -77,7 +77,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             },
             negativeFill : {
                 display : this.shadingOptions.isNegPosFill && this.shadingOptions.negativeFill.display,
-                pattern : this.shadingOptions.negativeFill.pattern ? this.shadingOptions.negativeFill.pattern : {
+                pattern : (this.shadingOptions.negativeFill || {}).pattern ? this.shadingOptions.negativeFill.pattern : {
                     name : 'none',
                     foreground : 'black',
                     background : 'blue'

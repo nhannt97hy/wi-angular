@@ -1,25 +1,10 @@
-<div class="workflow-toolbar-wrapper">
+<!-- <div class="workflow-toolbar-wrapper">
     <wi-toolbar>
         <wi-button name="SaveFormatButton" icon="save-16x16" type="small" tooltip="Save Workflow" handler="wiWorkflow.SaveWorkflowButtonClicked">
         </wi-button>
         <wi-button name="EditFormatButton" icon="properties-16x16" type="small" tooltip="Edit Workflow" handler="wiWorkflow.EditWorkflowButtonClicked">
     </wi-toolbar>
-    <wi-toolbar>
-        <wi-button name='ToggleOutputButton' icon="fa fa-terminal" type="small" tooltip="Toggle Output" handler="wiWorkflow.toggleOutput"></wi-button>
-    </wi-toolbar>
-</div>
+</div> -->
 <div class="workflow-main-content">
     <wi-workflow-player name='{{wiWorkflow.WorkflowPlayerName}}' id-project='wiWorkflow.getCurrentProjectId()' id-workflow="wiWorkflow.id"></wi-workflow-player>
-    <!--<ul resizable r-directions="['top']" r-flex="true" class="output-pane" ng-show='true'>
-        <h5 class="output-header">
-            <label>Ouputs</label>
-        </h5>
-        <ul>
-            <li ng-repeat="resultPlot in wiWorkflow.wfOutputData">
-                <button class="btn btn-default" ng-click='wiWorkflow.openPlot(resultPlot)'>
-                    {{resultPlot.plotName}}
-                </button>
-            </li>
-        </ul>
-    </ul>-->
 </div>
