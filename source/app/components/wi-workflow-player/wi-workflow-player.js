@@ -778,7 +778,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 }, function(err) {
                     if (err) console.log(err);
                     run(curvesData, wf.parameters, function (ret) {
-                        
+
                         wf.outputData[idx] = new Object();
                         wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
                         wf.outputData[idx].plotName = self.workflowConfig.name + wf.name + wf.inputData[idx].dataset.name;
