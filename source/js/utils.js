@@ -63,7 +63,7 @@ exports.warning = warning;
 exports.doLogin = function doLogin (cb) {
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('refreshToken');
-    window.localStorage.removeItem('username');
+    // window.localStorage.removeItem('username');
     window.localStorage.removeItem('rememberAuth');
     $('.modal').remove();
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -72,16 +72,18 @@ exports.doLogin = function doLogin (cb) {
         if (userInfo.remember) {
             window.localStorage.setItem('rememberAuth', true);
         }
+        let sameUser = userInfo.username == window.localStorage.getItem('username');
         window.localStorage.setItem('username', userInfo.username);
         window.localStorage.setItem('token', userInfo.token);
         window.localStorage.setItem('refreshToken', userInfo.refreshToken);
         __GLOBAL.wiApiService.setAuthenticationInfo(userInfo);
         wiComponentService.getComponent('user').userUpdate();
-        cb && cb();
+        cb && cb(sameUser);
     });
 }
 
-exports.projectOpen = function (wiComponentService, projectData) {
+exports.projectOpen = function (projectData) {
+    let wiComponentService = __GLOBAL.wiComponentService;
     let LProject = {id:projectData.idProject, name:projectData.name};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     window.history.pushState(LProject, LProject.name, '?idProject=' + LProject.id);
@@ -91,7 +93,8 @@ exports.projectOpen = function (wiComponentService, projectData) {
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
 
-exports.projectClose = function (wiComponentService) {
+exports.projectClose = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
     window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
     window.history.replaceState({}, 'home', '/');

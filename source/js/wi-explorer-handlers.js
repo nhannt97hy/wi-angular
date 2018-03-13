@@ -212,7 +212,7 @@ exports.BrowseProjectButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, projectData);
+        utils.projectOpen(projectData);
     });
 }
 
