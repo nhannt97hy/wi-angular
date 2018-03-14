@@ -113,9 +113,9 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
                             if (self.zoneSets[i].properties.idZoneSet == pointSet.idZoneSet) {
                                 self.selectedZoneSet = self.zoneSets[i];
                             }
-                            if (!self.zoneSets[i].children || !self.zoneSets[i].children.length) {
+                            /*if (!self.zoneSets[i].children || !self.zoneSets[i].children.length) {
                                 self.zoneSets.splice(i, 1);
-                            }
+                            }*/
                         }
                     }
                 }

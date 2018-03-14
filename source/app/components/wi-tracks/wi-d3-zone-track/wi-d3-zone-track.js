@@ -55,7 +55,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         });
     }
     this.update = function (baseSource) {
-        if(baseSource) {
+        if(baseSource && baseSource.idZoneSet == self.viTrack.idZoneSet) {
             _plotZoneTrack(baseSource, self.viTrack);
         } else {
             self.viTrack.removeAllZones();
@@ -135,7 +135,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         Utils.listenEvent('zone-updated', function(eventData) {
             console.log('zone updated event', eventData, eventData == self.viTrack);
             if(eventData && eventData.isZoneTrack && eventData.isZoneTrack()) {
-                if(eventData.id == self.viTrack.id) {
+                if(eventData.id == self.viTrack.id || eventData == self.viTrack) {
+                    return;
+                }
+                if(eventData.idZoneSet != self.viTrack.idZoneSet) {
                     return;
                 }
                 self.update(eventData);
