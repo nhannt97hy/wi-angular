@@ -514,6 +514,18 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         }
         return [];
     }
+    function updateChoices(newCurveProps) {
+        for (let step of self.workflowConfig.steps) {
+            for (let iptData of step.inputData) {
+                let dataset = iptData.dataset;
+                let idx = dataset.curves.indexOf(newCurveProps);
+                if (idx < 0) dataset.curves.push(newCurveProps);
+                for (let inputIdx in iptData.inputs) {
+                    iptData.inputs[inputIdx].choices = matchCurves(dataset.curves, step.inputs[inputIdx]);
+                }
+            }
+        }
+    }
     this.droppableSetting = function () {
         $("wi-workflow-player .wi-droppable").droppable({
             drop: function (event, ui) {
@@ -537,13 +549,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     );
                     if (options.found) break;
                 }
-                // populate data into self.inputArray
                 if (!options.result) {
                     toastr.error("Dataset doesn't not exist");
                     return;
                 }
                 let datasetModel = options.result;
-                // let datasetName = datasetModel.properties.name;
+
                 let idWell = datasetModel.properties.idWell;
                 let wellModel = self.projectConfig.find(
                     well => well.id == idWell
@@ -553,20 +564,25 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 for (let wf of self.workflowConfig.steps) {
                     if (!wf.inputData || !Array.isArray(wf.inputData))
                         wf.inputData = new Array();
-                    let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
+                    let existDataset = wf.inputData.find(
+                        i => i.dataset.idDataset == datasetModel.properties.idDataset
+                    );
                     if (existDataset) return;
                     let inputItems = wf.inputs.map(function (ipt) {
                         let tempItem = {
                             name: ipt.name,
-                            choices: matchCurves(datasetModel.children, ipt)
+                            choices: matchCurves(datasetModel.properties.curves, ipt)
                         };
                         tempItem.value = tempItem.choices.length
                             ? tempItem.choices[0]
                             : null;
                         return tempItem;
                     });
+                    let _well = angular.copy(wellModel.properties);
+                    delete _well.well_headers;
+                    _well_.well_headers = undefined;
                     let input = {
-                        well: wellModel.properties,
+                        well: _well,
                         dataset: datasetModel.properties,
                         inputs: inputItems,
                         parameters: angular.copy(wf.parameters)
@@ -577,12 +593,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                         self.saveWorkflow();
                     });
                 }
-                $timeout(
-                    () =>
-                        (self.wiDroppableHeight =
-                            $("wi-workflow-player .wi-droppable>div").height() +
-                            6)
-                );
+                $timeout( function() {
+                    self.wiDroppableHeight = $("wi-workflow-player .wi-droppable>div").height() + 6;
+                });
             }
         });
     };
@@ -705,7 +718,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 }
                 wiApiService.processingDataCurve(payload, function (ret) {
                     if(!curve.idCurve) curveInfo.idCurve = ret.idCurve;
-                    callback();
+                    callback(ret);
                 })
             })
         });
@@ -834,7 +847,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             let curvesData = [];
             // loop each input curves
             async.eachSeries(data.inputs, function(curve, cb) {
-                let idCurve = curve.value.id;
+                let idCurve = (curve.value.properties || {}).idCurve || curve.value.idCurve;
                 wiApiService.dataCurve(idCurve, function (data) {
                     curvesData.push(data.map(d => parseFloat(d.x)));
                     cb();
@@ -855,8 +868,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                         let dataset = data.dataset;
                         d.idDataset = dataset.idDataset;
                         d.idWell = data.well.idWell;
-                        saveCurve(d, function() {
+                        saveCurve(d, function(curveProps) {
                             delete d.data;
+                            updateChoices(curveProps);
                             cb2();
                         });
                     }, function(err) {

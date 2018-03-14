@@ -532,6 +532,10 @@ Crossplot.prototype.createContainer = function() {
         .attr('class', 'vi-crossplot-footer-container');
     */
     this.footerContainer = this.root.select('.vi-crossplot-footer-container');
+    this.footerLeft = this.footerContainer.append('div')
+        .attr('class', 'vi-crossplot-footer-left');
+    this.footerRight = this.footerContainer.append('div')
+        .attr('class', 'vi-crossplot-footer-right');
 }
 
 Crossplot.prototype.adjustSize = function() {
@@ -597,6 +601,13 @@ Crossplot.prototype._doPlot = function() {
     // if (this.viSelection) {
         this.plotSelections();
     // }
+
+    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points ploteed out of " 
+                        + this.data.length + '( ' 
+                        + this.outliers + ' outliers, ' 
+                        + this.nullDatas + ' nulls)';
+    this.footerRight
+        .text(footerString);
 }
 
 Crossplot.prototype.updateClipPath = function() {
@@ -1248,7 +1259,7 @@ Crossplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY
 Crossplot.prototype.plotUserLine = function() {
     let userLineContainer = this.svgContainer.select('g.vi-crossplot-user-line');
     userLineContainer.selectAll('path').remove();
-    this.footerContainer.text('');
+    this.footerLeft.text('');
 
     if (!this.userLine || !this.userLine.points || this.userLine.points.length < 2) return;
 
@@ -1268,7 +1279,7 @@ Crossplot.prototype.plotUserLine = function() {
     let equation = Utils.getLinearEquation(this.userLine.points[0], this.userLine.points[1]);
     equation = equation.replace('x', this.getLabelX());
     equation = equation.replace('y', this.getLabelY());
-    this.footerContainer.text(equation);
+    this.footerLeft.text(equation);
 }
 
 Crossplot.prototype.plotArea = function() {
@@ -1354,6 +1365,8 @@ Crossplot.prototype.plotSymbols = function() {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
     let rect = this.getPlotRect();
+    let windowX = this.getWindowX();
+    let windowY = this.getWindowY();
 
     let ctx = this.ctx;
     ctx.clearRect(0, 0, rect.width, rect.height);
@@ -1370,10 +1383,14 @@ Crossplot.prototype.plotSymbols = function() {
 
     let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
     if (typeof plotFunc != 'function') return;
+    this.outliers = 0;
     this.data.forEach(function(d) {
         if (shouldPlotZ) {
             helper.strokeStyle = transformZ(d.z);
             helper.fillStyle = transformZ(d.z);
+        }
+        if(!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
+            self.outliers ++;
         }
         plotFunc.call(helper, transformX(d.x), transformY(d.y));
     });
@@ -1464,6 +1481,7 @@ Crossplot.prototype.prepareData = function() {
             });
         }
     }
+    self.nullDatas = 0;
     Utils.parseData(this.pointSet.curveY.data).forEach(function(d) {
         if (zonalOrInterval == 'zonalDepth') {
             if (!self.isInZones(d, zones)) return;
@@ -1490,6 +1508,8 @@ Crossplot.prototype.prepareData = function() {
                 z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
                 depth: d.y
             });
+        } else {
+            self.nullDatas ++;
         }
     });
 }
