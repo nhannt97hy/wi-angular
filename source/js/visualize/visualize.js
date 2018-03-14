@@ -247,22 +247,8 @@ exports.plotSelection = function (wiD3Ctrl, selectionId, newDatum) {
     let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
     logTracks.forEach(t => {
         let selection = t.getSelection(selectionId);
-        // const data = selection.data;
-        // let newStartPos, newStopPos;
-        // const datum = data.find(d => {
-        //     if (newDatum.startDepth < d.startDepth && newDatum.startDepth < d.stopDepth) newStartPos = -1;
-        //     if (newDatum.startDepth >= d.startDepth && newDatum.startDepth <= d.stopDepth) newStartPos = 0;
-        //     if (newDatum.startDepth > d.startDepth && newDatum.startDepth > d.stopDepth) newStartPos = 1;
-        //     if (newDatum.stopDepth < d.startDepth && newDatum.stopDepth < d.stopDepth) newStartPos = -1;
-        //     if (newDatum.stopDepth >= d.startDepth && newDatum.stopDepth <= d.stopDepth) newStartPos = 0;
-        //     if (newDatum.stopDepth > d.startDepth && newDatum.stopDepth > d.stopDepth) newStartPos = 1;
-
-        //     d.startDepth === newDatum.startDepth
-        // });
-        // if (datum) data.splice(data.indexOf(datum), 1, newDatum);
         selection.setProperties({maskData: newDatum});
         selection._doPlot();
-        // t.plotDrawing(selection);
     })
 }
 

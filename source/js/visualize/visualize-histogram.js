@@ -166,13 +166,9 @@ Histogram.prototype.getFullData = function() {
 }
 Histogram.prototype.getSelectionData = function(selectionData) {
     var self = this;
-    let processedSelectionData = [];
-    selectionData.forEach(function(data) {
-        processedSelectionData.push(self.discriminatorData.filter(function(d) {
-            return self.filterSelection.call(self, d, data);
-        }).map(function(d) { return parseFloat(d.x); }));
-    });
-    return processedSelectionData;
+    return this.discriminatorData.filter(d => {
+        return selectionData.includes(+d.y);
+    }).map(function(d) { return parseFloat(d.x); });
 }
 
 function __reverseBins(bins) {
@@ -325,22 +321,16 @@ Histogram.prototype._doPlot = function() {
         if (step < 0) __reverseBins(this.intervalBins);
     }
 
-    // if (this.viSelection) {
-        this.selectionSvgContainer.forEach(function(selection) {
-            let selectionData = self.getSelectionData(selection.data);
-            let selectionBins = [];
-            selectionData.forEach(function(data) {
-                let bins = histogramGenerator(data);
-                selectionBins.push(bins);
-            })
-            selection.setSelectionBins(selectionBins);
-            if (step < 0) __reverseBins(function() {
-                return selectionBins.forEach(function(bin) {
-                    return bin;
-                })
-            });
-        });
-    // }
+    this.selectionSvgContainer.forEach(function(selection) {
+        let selectionData = self.getSelectionData(selection.data);
+        let selectionBins = [];
+        let bins = histogramGenerator(selectionData);
+        selectionBins.push(bins);
+        selection.setSelectionBins(selectionBins);
+        if (step < 0) {
+            selectionBins.forEach(bin => __reverseBins(bin));
+        }
+    });
 
     // Calculate average and standardDeviation
     self.unsetJoinedZoneData(); // IMPORTANT ! Clear joinZoneData for calculate statistics
@@ -414,8 +404,7 @@ Histogram.prototype._doPlot = function() {
 //        .style('transform', 'translateX(' + (vpX[1] - 100) + 'px)');
     if(self.histogramModel.properties.plot === "Bar") {
         drawBarHistogram();
-        // if (self.viSelection)
-            drawSelectionHistogram();
+        drawSelectionHistogram();
     } else if(self.histogramModel.properties.plot === "Curve"){
         drawCurveHistogram();
     }
@@ -589,14 +578,14 @@ Histogram.prototype._doPlot = function() {
                             fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                             selectionBinHeight = fullBinHeight;
                             for (let k = 0; k <= arrIdx; k++) {
-                                selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][self.fullBins.length - 1 - i].length * 100 / len));
+                                selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][i].length * 100 / len));
                             }
                             return selectionBinHeight;
                         }
                         fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length));
                         selectionBinHeight = fullBinHeight;
                         for (let k = 0; k <= arrIdx; k++) {
-                            selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][self.fullBins.length - 1 - i].length));
+                            selectionBinHeight = selectionBinHeight - (transformY(wdY[0]) - transformY(selectionBins[k][i].length));
                         }
                         return selectionBinHeight;
                     })
@@ -604,13 +593,13 @@ Histogram.prototype._doPlot = function() {
                         if (self.histogramModel.properties.plotType != 'Frequency') {
                             let len = self.getLength();
                             return transformY(wdY[0])
-                            - transformY(selectionBins[arrIdx][self.fullBins.length - 1 - i].length * 100 / len);
+                            - transformY(selectionBins[arrIdx][i].length * 100 / len);
                         }
-                        return transformY(wdY[0]) - transformY(selectionBins[arrIdx][self.fullBins.length - 1 - i].length);
+                        return transformY(wdY[0]) - transformY(selectionBins[arrIdx][i].length);
                     })
                     .attr('fill', selectionSvg.color);
             }
-            selectionBars.selectAll('rect[height="0"]').remove();
+            // selectionBars.selectAll('rect[height="0"]').remove();
         });
     }
 
@@ -1142,4 +1131,8 @@ Histogram.prototype.initSelectionArea = function(viSelections) {
         viSelection.initSvg(self.container, 'histogram');
         self.selectionSvgContainer.push(viSelection);
     });
+}
+
+Histogram.prototype.getSelection = function(id) {
+    return this.selectionSvgContainer.find(d => d.isSelection() && d.idSelectionTool == id);
 }
