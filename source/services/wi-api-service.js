@@ -374,7 +374,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        if (err.reason) toastr.error(err.reason);
+                        //if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });

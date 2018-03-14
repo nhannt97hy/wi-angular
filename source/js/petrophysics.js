@@ -107,14 +107,14 @@ function calCutoffSummation(inputs, parameters, callback){
     let clay_cut = parameters[2], phi_cut = parameters[3], sw_cut = parameters[4];
     let res = new Array(), pay = new Array();
 
-    // res[0] = 0;
-    // pay[0] = 1;
+    res[0] = 0;
+    pay[0] = 1;
     for(let i = 0; i < clay.length; i++){
-        // let seed = Math.random();
-        // res[i] = seed < 0.2 ? 0: (seed > 0.8 ? 1 : res[i-1]);
-        // pay[i] = seed < 0.2 ? 0: (seed > 0.8 ? 1 : pay[i-1]);
-        res[i] = (clay[i] <= clay_cut && phi[i] >= phi_cut) ? 1 : 0;
-        pay[i] = (clay[i] <= clay_cut && phi[i] >= phi_cut && sw[i] <= sw_cut) ? 1 : 0;
+        let seed = Math.random();
+        res[i] = seed < 0.2 ? 0: (seed > 0.8 ? 1 : res[i-1]);
+        pay[i] = seed < 0.2 ? 0: (seed > 0.8 ? 1 : pay[i-1]);
+        //res[i] = (clay[i] <= clay_cut && phi[i] >= phi_cut) ? 1 : 0;
+        //pay[i] = (clay[i] <= clay_cut && phi[i] >= phi_cut && sw[i] <= sw_cut) ? 1 : 0;
     }
     callback([res, pay]);
 }
