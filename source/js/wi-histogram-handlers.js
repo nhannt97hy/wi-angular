@@ -74,12 +74,12 @@ function PlotBarsButtonClicked() {
     let wiHistogramCtrl = this.wiHistogram;
     let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
     switch(currentPlot) {
-        case 'Bar': 
+        case 'Bar':
             wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
             break;
         default:
             wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
-    } 
+    }
     // wiHistogramCtrl.histogramModel.properties.plot = "Bar";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
@@ -91,28 +91,28 @@ exports.PlotCurvesButtonClicked = function() {
     let wiHistogramCtrl = this.wiHistogram;
     let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
     switch(currentPlot) {
-        case 'Bar': 
+        case 'Bar':
             wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
             break;
         default:
             wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
-    } 
+    }
     //wiHistogramCtrl.histogramModel.properties.plot = "Curve";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
-    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();   
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.FrequencyButtonClicked = FrequencyButtonClicked;
 function FrequencyButtonClicked() {
     console.log('FrequencyButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    var temp = wiHistogramCtrl.histogramModel.properties.plotType;
+    var temp = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType;
     switch(temp) {
     case 'Percent':
-        wiHistogramCtrl.histogramModel.properties.plotType = "Frequency";
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType = "Frequency";
         break;
     default:
-        wiHistogramCtrl.histogramModel.properties.plotType = "Percent";
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType = "Percent";
     }
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update frequency/percentile");
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
