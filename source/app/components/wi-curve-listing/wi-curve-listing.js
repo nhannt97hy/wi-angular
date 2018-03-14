@@ -151,8 +151,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             $timeout(function () {
                 async.series([function (callback) {
                     self.wells = utils.findWells();
-                    self.curvesData = new Array(self.wells.length).fill().map(u => { return new Array() });
-                    self.depthArr = new Array(self.wells.length).fill().map(u => { return new Array() });
+                    // self.curvesData = new Array(self.wells.length).fill().map(u => { return new Array() });
+                    // self.depthArr = new Array(self.wells.length).fill().map(u => { return new Array() });
                     self.SelectedWell = self.wells.find(w => { return w.id == self.SelectedWell.id });
                     if (!self.SelectedWell) {
                         self.curvesData.splice(self.currentIndex, 1);

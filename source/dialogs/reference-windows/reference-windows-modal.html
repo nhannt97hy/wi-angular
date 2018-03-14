@@ -23,7 +23,7 @@
                             <div class="col-sm-7">
                                 <input type="number" class="form-control wi-form-control" step="any"
                                 ng-model="wiModal.props.referenceBottomDepth"
-                                ng-blur="wiModal.roundDepth()"                                
+                                ng-blur="wiModal.roundDepth()"
                                 max="{{wiModal.getBottomFromWell()}}">
                             </div>
                         </div>
@@ -102,22 +102,22 @@
                                         </td>
                                         <td width="9%">
                                             <div class='checkbox'>
-                                                <input style='margin-left:-10px;' 
-                                                    type="checkbox" 
+                                                <input style='margin-left:-10px;'
+                                                    type="checkbox"
                                                     ng-model="ref_curve.visiable"
                                                     ng-change="wiModal.onRefCurveChange($index)">
                                             </div>
                                         </td>
                                         <td width="9%">
                                             <div class='checkbox'>
-                                                <input style='margin-left:-10px;' 
-                                                    type="checkbox" 
+                                                <input style='margin-left:-10px;'
+                                                    type="checkbox"
                                                     ng-model="ref_curve.log"
                                                     ng-change="wiModal.onRefCurveChange($index)">
                                             </div>
                                         </td>
                                         <td width="10%">
-                                            <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);" 
+                                            <input ng-style="{'background-color':ref_curve.color}" ng-click="wiModal.chooseRefCurveColor($index);"
                                                     class="form-control wi-form-control width-80px thick-border" type="button">
                                         </td>
                                         <td width="6%" style="text-align: center;">
