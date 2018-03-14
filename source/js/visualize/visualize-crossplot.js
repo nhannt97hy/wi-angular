@@ -480,7 +480,7 @@ Crossplot.prototype.init = function(domElem) {
 
     this.svgContainer = this.bodyContainer.append('svg')
         .attr('class', 'vi-crossplot-svg-container')
-        .style('pointer-events', 'none')
+        // .style('pointer-events', 'none')
         .attr('width', rect.width)
         .attr('height', rect.height);
 
