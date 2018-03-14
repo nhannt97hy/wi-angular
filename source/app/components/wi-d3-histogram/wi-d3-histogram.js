@@ -336,7 +336,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         }, {
             name: "ShowTooltip",
-            label: "Show/Hide Tooltip",
+            label: "Show Tooltip",
+            isCheckType: "true",
+            checked: self.histogramModel.properties.showTooltip || false,
             handler: function () {
                 self.histogramModel.properties.showTooltip = !(self.histogramModel.properties.showTooltip || false);
             }
