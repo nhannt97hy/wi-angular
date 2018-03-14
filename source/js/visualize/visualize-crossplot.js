@@ -602,7 +602,7 @@ Crossplot.prototype._doPlot = function() {
         this.plotSelections();
     // }
 
-    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points ploteed out of " 
+    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points plotted out of " 
                         + this.data.length + '( ' 
                         + this.outliers + ' outliers, ' 
                         + this.nullDatas + ' nulls)';
