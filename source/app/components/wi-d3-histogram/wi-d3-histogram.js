@@ -16,7 +16,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     self.histogramModel = null;
     self.curveModel = null;
-    let zoneCtrl = null, refWindCtrl = null;
+    let refWindCtrl = null;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
@@ -94,7 +94,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.zoneSetModel= utils.getModel('zoneset', self.histogramModel.properties.idZoneSet);
                 if (self.visHistogram && isFunction(self.visHistogram.setHistogramModel) )
                     self.visHistogram.setHistogramModel(self.histogramModel);
-                if (self.getZoneCtrl()) zoneCtrl.zones = self.zoneSetModel.children;
+                if (self.getZoneCtrl()) self.getZoneCtrl().zones = self.zoneSetModel.children;
                 setWiHistogramZoneArr(self.zoneSetModel.children);
             }
             else {
@@ -135,12 +135,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     xplotProps.referenceTopDepth,
                     xplotProps.referenceBottomDepth,
                     xplotProps.referenceShowDepthGrid);
+
+            if (self.getZoneCtrl()) self.getZoneCtrl().zoneUpdate();                    
         })
     }
     this.refreshHistogram = function() {
         if (self.visHistogram) {
             let activeZones = null;
-            if (self.getZoneCtrl()) activeZones = zoneCtrl.getActiveZones();
+            if (self.getZoneCtrl()) activeZones = self.getZoneCtrl().getActiveZones();
             console.warn("---", activeZones);
             if ( isFunction(self.visHistogram.setHistogramModel) )
                 self.visHistogram.setHistogramModel(self.histogramModel);
@@ -150,17 +152,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if ( isFunction(self.visHistogram.signal) ) 
             self.visHistogram.signal('histogram-update', "refresh");
     }
-    this.onZoneCtrlReady = function(zoneCtrl) {
-        zoneCtrl.trap('zone-data', function() {
-            self.refreshHistogram();
-        });
-    }
+    // this.onZoneCtrlReady = function(zoneCtrl) {
+    //     zoneCtrl.trap('zone-data', function() {
+    //         self.refreshHistogram();
+//     });
+    // }
     
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
     this.getZoneCtrl = function () {
-        if (!zoneCtrl) zoneCtrl =  wiComponentService.getComponent(self.getWiZoneCtrlName());
+        let zoneCtrl =  wiComponentService.getComponent(self.getWiZoneCtrlName());
         return zoneCtrl;
     }
     this.getWiRefWindCtrlName = function () {
@@ -215,7 +217,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     }
                 }
                 self.linkModels();
-                if (self.getZoneCtrl()) zoneCtrl.zoneUpdate();
+                // if (self.getZoneCtrl()) self.getZoneCtrl().zoneUpdate();
             }
         );
     }
