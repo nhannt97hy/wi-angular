@@ -10,6 +10,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	this.$onInit = function () {
 		self.wiD3AreaName = self.name + 'D3Area';
 		self.idD3Area = self.id + self.name;
+		self.toolBox = self.model.properties.toolBox;
 
 		if (self.name) wiComponentService.putComponent(self.name, self);
 
@@ -33,7 +34,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	}
 
 	this.editTool = function () {
-		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.model.properties.toolBox, self.id, function(data) {
+		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.toolBox, self.id, function(data) {
 			if (!data) return;
 			self.toolBox = data;
 		});
@@ -42,12 +43,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	this.useSelector = function (selector) {
 		console.log(selector);
 		let wiD3Comboview = self.getwiD3Ctrl();
-		wiD3Comboview.drawSelectionOnLogplot(selector);
-		wiD3Comboview.drawSelectionOnCrossplot(selector);
+		wiD3Comboview.drawSelectionOnLogplot(selector, 'select');
+		wiD3Comboview.drawSelectionOnCrossplot(selector, 'select');
+		wiD3Comboview.drawSelectionOnHistogram(selector, 'select');
 	}
 
 	this.useEraser = function (eraser) {
 		console.log(eraser);
+		let wiD3Comboview = self.getwiD3Ctrl();
+		wiD3Comboview.drawSelectionOnLogplot(eraser, 'erase');
+		wiD3Comboview.drawSelectionOnCrossplot(eraser, 'erase');
+		wiD3Comboview.drawSelectionOnHistogram(eraser, 'erase');
 	}
 
 	this.$onDestroy = function () {

@@ -2395,7 +2395,7 @@ function openComboviewTab(comboviewModel) {
         }
         let plots = data.plots;
         let histograms = data.histograms;
-        let crossplots = data.crossplots;
+        let crossplots = data.cross_plots;
         // self.init();
         comboviewModel.properties.toolBox = toolBox;
         comboviewModel.properties.selections = selections;
