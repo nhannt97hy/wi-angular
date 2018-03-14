@@ -580,7 +580,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                     });
                     let _well = angular.copy(wellModel.properties);
                     delete _well.well_headers;
-                    _well_.well_headers = undefined;
+                    _well.well_headers = undefined;
                     let input = {
                         well: _well,
                         dataset: datasetModel.properties,
