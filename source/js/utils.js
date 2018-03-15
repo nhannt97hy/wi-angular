@@ -2934,20 +2934,16 @@ function updateWiCurveListingOnModelDeleted(model){
             let idCurve = model.properties.idCurve;
             let wellModel = findWellByCurve(idCurve);
             if(wiCurveListing){
-                let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
-                let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
+                let indexCurve = wiCurveListing.curvesData[wellModel.name].findIndex(c => {return c.id == idCurve});
                 if(indexCurve != -1){
-                    wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+                    wiCurveListing.curvesData[wellModel.name].splice(indexCurve,1);
                 }
             }
             break;
         case 'well':
             if(wiCurveListing){
-                let indexWell = wiCurveListing.wells.findIndex(w => w.id == model.id);
-                if(indexWell != -1){
-                    wiCurveListing.curvesData.splice(indexWell, 1);
-                    wiCurveListing.depthArr.splice(indexWell, 1);
-                }
+                delete wiCurveListing.curvesData[model.name];
+                delete wiCurveListing.depthArr[model.name];
             }
             break;
         default:
