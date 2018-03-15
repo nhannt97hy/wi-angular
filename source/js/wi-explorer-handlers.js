@@ -121,6 +121,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                             modelsWithTab.forEach(function (model) {
                                 if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
                             });
+                            utils.updateWiCurveListingOnModelDeleted(selectedNode);
                         }
                         break;
                     case 'dataset':
@@ -211,7 +212,7 @@ exports.BrowseProjectButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, projectData);
+        utils.projectOpen(projectData);
     });
 }
 

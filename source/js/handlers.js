@@ -5,13 +5,13 @@ exports.NewProjectButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.newProjectDialog(ModalService, function (data) {
         self.wiApiService.createProject(data, function (response) {
-            if(!response.name){
+            if (!response.name) {
                 DialogUtils.errorMessageDialog(ModalService, "Project: " + data.name + " existed!");
-            }else{
+            } else {
                 wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
                 let utils = self.wiComponentService.getComponent('UTILS');
                 self.wiApiService.getProject({ idProject: response.idProject }, function (response) {
-                    utils.projectOpen(self.wiComponentService, response);
+                    utils.projectOpen(response);
                 });
             }
         });
@@ -25,7 +25,7 @@ exports.OpenProjectButtonClicked = function () {
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         wiComponentService.getComponent(wiComponentService.HISTORYSTATE).removeHistory();
         let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, projectData);
+        utils.projectOpen(projectData);
     });
 };
 
@@ -35,7 +35,7 @@ exports.CloseProjectButtonClicked = function () {
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.confirmDialog(this.ModalService, "Close project", "Are you sure to close project?", function (yesOrNo) {
         if (yesOrNo) {
-            utils.projectClose(self.wiComponentService);
+            utils.projectClose();
         }
     })
 };
@@ -56,14 +56,44 @@ exports.SaveProjectAsButtonClicked = function () {
     console.log('SaveProjectAsButton is clicked');
 };
 
-exports.InventoryButtonClicked = function() {
+exports.InventoryButtonClicked = function () {
+    let self = this;
     let wiComponentService = this.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.inventoryDialog(this.ModalService);
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'inventory-inspection',
+        title: 'Inventory Inspection',
+        tabIcon: 'project-normal-16x16',
+        componentState: {
+            html: `
+                <div style="height:100%;display:flex;flex-direction:row;">
+                    <wii-explorer name='wiiExplorer' style="margin-left:1em;flex: 4"></wii-explorer>
+                    <wii-items name="wiiItems" style="flex: 3;overflow:hidden;"></wii-items>
+                    <wii-properties name="wiiProperties" style="flex: 3;overflow:auto;"></wii-properties>
+                </div>
+            `,
+            name: 'wiInventory'
+        }
+    })
 }
 
-exports.ImportButtonClicked = function() {
+exports.ImportButtonClicked = function () {
     exports.ImportFromInventoryButtonClicked.call(this);
+    /*
+    let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        type:'component',
+        componentName: 'html-block',
+        id: "TestPane",
+        componentState: {
+            html: `
+                <wi-logplot name="logplot5" id="5">
+                </wi-logplot>
+            `
+        },
+        title: `<span class="logplot-blank-16x16"></span> <span>logplot5</span>`
+    });*/
 }
 
 exports.ProjectButtonClicked = function () {
@@ -77,24 +107,65 @@ exports.ProjectButtonClicked = function () {
         wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
     }
 };
-
-exports.WorkflowsButtonClicked = function () {
-    console.log('WorkflowsButton is clicked');
-    // let wiComponentService = this.wiComponentService;
-    // let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    // layoutManager.putRight('workflow-block', "Workflow", "workflow-16x16");
+exports.NewWorkflowButtonClicked = function () {
+    console.log('NewWorkflowButton is clicked');
+    let self = this;
     let wiComponentService = this.wiComponentService;
-    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    layoutManager.putTabRight({
-        id: 'Workflow',
-        title: 'Workflow',
-        tabIcon: 'workflow-16x16',
-        componentState: {
-            html: `<wi-workflow></wi-workflow>`,
-            name: 'Workflow'
-        }
-    })
-};
+    let ModalService = this.ModalService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let utils = self.wiComponentService.getComponent('UTILS');
+    DialogUtils.newWorkflowDialog(ModalService, function (data) {
+        self.wiApiService.createWorkflow(data, function (response, err) {
+            if (err) {
+                toastr.error(err);
+            } else {
+                let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                layoutManager.putTabRight({
+                    id: 'workflow' + response.idWorkflow,
+                    title: response.name,
+                    tabIcon: 'workflow-16x16',
+                    componentState: {
+                        html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
+                        name: 'Workflow'
+                    }
+                });
+            }
+        });
+    });
+}
+
+exports.OpenWorkflowButtonClicked = function () {
+    console.log('OpenWorkflowButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.openWorkflowDialog(this.ModalService, function (response) {
+        let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        layoutManager.putTabRight({
+            id: 'workflow' + response.idWorkflow,
+            title: response.name,
+            tabIcon: 'workflow-16x16',
+            componentState: {
+                html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
+                name: 'Workflow'
+            }
+        })
+    });
+}
+// exports.WorkflowsButtonClicked = function () {
+//     console.log('WorkflowsButton is clicked');
+//     let wiComponentService = this.wiComponentService;
+//     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+//     layoutManager.putTabRight({
+//         id: 'Workflow',
+//         title: 'Workflow',
+//         tabIcon: 'workflow-16x16',
+//         componentState: {
+//             html: `<wi-workflow id="1"></wi-workflow>`,
+//             name: 'Workflow'
+//         }
+//     })
+// };
 
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
@@ -114,9 +185,11 @@ exports.ExitButtonClicked = function () {
     DialogUtils.confirmDialog(this.ModalService, "Exit Program", "Are you sure to exit program?", function (isExit) {
         if (isExit) {
             window.localStorage.removeItem('token');
-            window.localStorage.removeItem('username');
+            // window.localStorage.removeItem('username');
             window.localStorage.removeItem('password');
             window.localStorage.removeItem('rememberAuth');
+            window.history.replaceState({}, 'home', '/');
+            document.title = 'Well Insight';
             location.reload();
         }
     })
@@ -211,15 +284,20 @@ exports.ImportFromInventoryButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     // let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
     // DialogUtils.importFromInventoryDialog(this.ModalService)
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
-        id: 'inventory',
-        title: 'Inventory',
-        tabIcon: 'project_normal_32x32',
+        id: 'inventory-connect',
+        title: 'Inventory Connect',
+        tabIcon: 'project-normal-16x16',
         componentState: {
-            html: `<wi-inventory></wi-inventory`,
+            html: `
+                <div style='height:100%;display:flex;flex-direction:column;'>
+                    <wi-inventory style='flex:1;' id-project=${loadedProject.idProject}></wi-inventory>
+                </div>
+            `,
             name: 'wiInventory'
         }
     })
@@ -299,22 +377,22 @@ exports.BlankLogplotButtonClicked = function () {
         inputName: 'Log Plot Name',
         input: 'BlankLogPlot'
     }
-    DialogUtils.promptDialog(ModalService, promptConfig,function (logplotName) {
+    DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
-            .then(function(logplot) {
+            .then(function (logplot) {
                 console.log("Created new log plot", logplot);
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
-                    wiD3Ctrl.addDepthTrack(function() {
+                    wiD3Ctrl.addDepthTrack(function () {
                         wiD3Ctrl.addLogTrack('Track 1');
                     });
                 });
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 exports.BlankLogplotButtonClicked.call(self);
             });
     });
@@ -343,10 +421,10 @@ exports.TrippleComboButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    if(logplot.familiesWithoutCurve.length > 0){
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
+                    if (logplot.familiesWithoutCurve.length > 0) {
                         let message = "Not Found Curves in families : ";
-                        logplot.familiesWithoutCurve.forEach(function(r){
+                        logplot.familiesWithoutCurve.forEach(function (r) {
                             message += r + "<br>";
                         });
                         // setTimeout(function(){
@@ -384,10 +462,10 @@ exports.DensityNeutronButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    if(logplot.familiesWithoutCurve.length > 0){
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
+                    if (logplot.familiesWithoutCurve.length > 0) {
                         let message = "Not Found Curves in families : ";
-                        logplot.familiesWithoutCurve.forEach(function(r){
+                        logplot.familiesWithoutCurve.forEach(function (r) {
                             message += r + "<br>";
                         });
                         // setTimeout(function(){
@@ -425,10 +503,10 @@ exports.ResistivitySonicButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
-                    if(logplot.familiesWithoutCurve.length > 0){
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
+                    if (logplot.familiesWithoutCurve.length > 0) {
                         let message = "Not Found Curves in families : ";
-                        logplot.familiesWithoutCurve.forEach(function(r){
+                        logplot.familiesWithoutCurve.forEach(function (r) {
                             message += r + "<br>";
                         });
                         // setTimeout(function(){
@@ -466,12 +544,12 @@ exports.TriTracksBlankButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Track 1', function() {
-                            wiD3Ctrl.addLogTrack('Track 2', function() {
+                        wiD3Ctrl.addLogTrack('Track 1', undefined, function () {
+                            wiD3Ctrl.addLogTrack('Track 2', undefined, function () {
                                 wiD3Ctrl.addLogTrack('Track 3');
                             });
                         });
@@ -507,13 +585,13 @@ exports.InputCurveButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Grammaray', function() {
-                            wiD3Ctrl.addLogTrack('Density', function() {
-                                wiD3Ctrl.addLogTrack('Neutron', function() {
+                        wiD3Ctrl.addLogTrack('Grammaray', function () {
+                            wiD3Ctrl.addLogTrack('Density', function () {
+                                wiD3Ctrl.addLogTrack('Neutron', function () {
                                     wiD3Ctrl.addLogTrack('Sonic');
                                 });
                             });
@@ -550,16 +628,16 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Lithology', function() {
-                            wiD3Ctrl.addLogTrack('Gramma Ray', function() {
-                                wiD3Ctrl.addLogTrack('Density', function() {
-                                    wiD3Ctrl.addLogTrack('Neutron', function() {
-                                        wiD3Ctrl.addLogTrack('Sonic', function() {
-                                            wiD3Ctrl.addLogTrack('Resistivity', function() {
+                        wiD3Ctrl.addLogTrack('Lithology', function () {
+                            wiD3Ctrl.addLogTrack('Gramma Ray', function () {
+                                wiD3Ctrl.addLogTrack('Density', function () {
+                                    wiD3Ctrl.addLogTrack('Neutron', function () {
+                                        wiD3Ctrl.addLogTrack('Sonic', function () {
+                                            wiD3Ctrl.addLogTrack('Resistivity', function () {
                                                 wiD3Ctrl.addLogTrack('PHI_TOTAL');
                                             });
                                         });
@@ -599,14 +677,14 @@ exports.Syn_CurveButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Lithology', function() {
-                            wiD3Ctrl.addLogTrack('Gramma Ray', function() {
-                                wiD3Ctrl.addLogTrack('Density', function() {
-                                    wiD3Ctrl.addLogTrack('Neutron', function() {
+                        wiD3Ctrl.addLogTrack('Lithology', function () {
+                            wiD3Ctrl.addLogTrack('Gramma Ray', function () {
+                                wiD3Ctrl.addLogTrack('Density', function () {
+                                    wiD3Ctrl.addLogTrack('Neutron', function () {
                                         wiD3Ctrl.addLogTrack('Sonic');
                                     });
                                 });
@@ -644,17 +722,17 @@ exports.ResultButtonClicked = function () {
                 let logplotModel = utils.logplotToTreeConfig(logplot);
                 let selectedLogplot = utils.getSelectedNode();
                 selectedLogplot.children.push(logplotModel);
-                utils.openLogplotTab(wiComponentService, logplotModel, function() {
+                utils.openLogplotTab(wiComponentService, logplotModel, function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Lithology', function() {
-                            wiD3Ctrl.addLogTrack('GR-DT-RHOB-NPHI', function() {
-                                wiD3Ctrl.addLogTrack('Resistivity', function() {
+                        wiD3Ctrl.addLogTrack('Lithology', function () {
+                            wiD3Ctrl.addLogTrack('GR-DT-RHOB-NPHI', function () {
+                                wiD3Ctrl.addLogTrack('Resistivity', function () {
                                     wiD3Ctrl.addDepthTrack(function () {
-                                        wiD3Ctrl.addLogTrack('Total Porosity', function() {
-                                            wiD3Ctrl.addLogTrack('Fracture Porosity', function() {
-                                                wiD3Ctrl.addLogTrack('Water Saturation', function() {
+                                        wiD3Ctrl.addLogTrack('Total Porosity', function () {
+                                            wiD3Ctrl.addLogTrack('Fracture Porosity', function () {
+                                                wiD3Ctrl.addLogTrack('Water Saturation', function () {
                                                     wiD3Ctrl.addLogTrack('Permeability');
                                                 })
                                             });
@@ -688,7 +766,7 @@ exports.BlankCrossPlotButtonClicked = function () {
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function(err, crossplotModel) {
+        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
             if (err) {
                 exports.BlankCrossPlotButtonClicked.call(self);
             }
@@ -712,7 +790,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         console.log("CROSS NAME : ", crossplotName);
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function(err, crossplotModel){
+        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
             if (err) {
                 newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
             }
@@ -815,7 +893,7 @@ exports.BlankHistogramButtonClicked = function () {
     });
 }
 
-function newTemplateHistogram(name, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback){
+function newTemplateHistogram(name, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback) {
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -861,7 +939,7 @@ exports.NeutronButtonClicked = function () {
 
 exports.DensityButtonClicked = function () {
     console.log('DensityButton is clicked');
-    newTemplateHistogram("RHOB Histogram" ,"Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
+    newTemplateHistogram("RHOB Histogram", "Density", this.wiComponentService, this.ModalService, this.wiApiService, this.$timeout, function () {
 
     });
 };
@@ -1214,6 +1292,44 @@ exports.BlankComboviewButtonClicked = function () {
     DialogUtils.promptDialog(ModalService, promptConfig, function (combinedPlotName) {
         utils.createComboview(selectedNode.properties.idWell, combinedPlotName, null)
             .then(function (combinedPlot) {
+                let defaultToolBox = [
+                    {
+                        name: 'Default Tool 1',
+                        color: 'red',
+                        idCombinedBox: combinedPlot.idCombinedBox
+                    },
+                    {
+                        name: 'Default Tool 2',
+                        color: 'green',
+                        idCombinedBox: combinedPlot.idCombinedBox
+                    },
+                    {
+                        name: 'Default Tool 3',
+                        color: 'blue',
+                        idCombinedBox: combinedPlot.idCombinedBox
+                    }
+                ];
+                async.eachSeries(defaultToolBox, function (tool, nextTool) {
+                    wiApiService.createCombinedBoxTool(tool, function (data) {
+                        if (data) {
+                            let reqSelection = {
+                                idCombinedBox: data.idCombinedBox,
+                                idCombinedBoxTool: data.idCombinedBoxTool,
+                                data: []
+                            }
+                            wiApiService.createSelectionTool(reqSelection, function (returnedSelection) {
+                                nextTool();
+                            });
+                        } else {
+                            nextTool();
+                        }
+                    });
+                }, function () {
+                    let comboviewModel = utils.comboviewToTreeConfig(combinedPlot);
+                    utils.refreshProjectState().then(function () {
+                        utils.openComboviewTab(comboviewModel);
+                    });
+                });
             })
             .catch(function (err) {
                 utils.error(combinedPlotName + " existed!", function () {

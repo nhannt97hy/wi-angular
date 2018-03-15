@@ -12,7 +12,9 @@ const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 
 // route: GET, CREATE, UPDATE, DELETE
-const USER_INFO = '/user/info'
+const USER_INFO = '/user/info';
+
+const EXPORT_WELL='/export';
 
 const UPLOAD_FILES = '/upload/lases';
 
@@ -345,6 +347,14 @@ Service.prototype.editCurve = function (curve, callback) {
 
 Service.prototype.deleteCurve = function (idCurve, callback) {
     this.post(DELETE_CURVE, {idCurve: idCurve}, callback);
+}
+
+Service.prototype.exportAllItems = function(idWell, callback){
+    this.post(EXPORT_WELL, {idWell: idWell}, callback);
+}
+
+Service.prototype.getFileUrl = function(url){
+    return this.baseUrl + url;
 }
 
 Service.prototype.getCaptcha = function () {

@@ -133,3 +133,5 @@ exports.badholeCoalSaltDialog = require('./badhole-coal-salt-modal');
 
 exports.depthShiftDialog = require('./depth-shift-modal');
 exports.curveFamilyDialog = require('./curve-family-modal');
+exports.newWorkflowDialog = require('./new-workflow-modal');
+exports.openWorkflowDialog = require('./open-workflow-modal');

@@ -82,6 +82,10 @@ let wiD3Comboview = require('./wi-d3-comboview');
 let wiScroll = require('./wi-scroll');
 let wiItemDropdown = require('./wi-item-dropdown');
 
+let wiiExplorer = require('./wii-explorer');
+let wiiItems = require('./wii-items');
+let wiiProperties = require('./wii-properties');
+
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
 
@@ -122,6 +126,7 @@ let wiZone = require('./wi-zone');
 let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
+let wiOnlineInvService = require('./wi-online-inv-service');
 let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
@@ -189,6 +194,7 @@ let app = angular.module('wiapp',
         // wiLogplotModel.name,
 
         wiApiService.name,
+        wiOnlineInvService.name,
         wiComponentService.name,
 
         wiCanvasRect.name,
@@ -199,6 +205,11 @@ let app = angular.module('wiapp',
         wiMultiselect.name,
 
         wiConditionNode.name,
+
+        wiiExplorer.name,
+        wiiItems.name,
+        wiiProperties.name,
+        
         ngInfiniteScroll,
 
         'angularModalService',
@@ -214,7 +225,7 @@ let app = angular.module('wiapp',
         'mgo-angular-wizard'
     ]);
 
-function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -224,6 +235,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiComponentService,
         ModalService,
         wiApiService,
+        wiOnlineInvService,
         $timeout
     };
     // Logplot Handlers
@@ -342,32 +354,16 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.extendedTimeOut = 10000;
     toastr.options.preventDuplicates = true;
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
-    let functionBindingProp = {
-        $scope,
-        wiComponentService,
-        ModalService,
-        wiApiService,
-        $timeout
-    };
-    window.utils = utils;
-    utils.setGlobalObj(functionBindingProp);
-    wiComponentService.putComponent(wiComponentService.UTILS, utils);
-    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    if(!window.localStorage.getItem('rememberAuth')) {
-        utils.doLogin(function () {
-            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-        })
-    }else{
-        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-        let query = queryString.parse(location.search);
+
+function restoreProject($timeout, wiApiService, ModalService){
+    let query = queryString.parse(location.search);
         if(Object.keys(query).length && query.idProject){
             $timeout(function () {
                 wiApiService.getProjectInfo(query.idProject, function (project) {
                     if (project.name) {
                         wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
                             if (projectData.name) {
-                                utils.projectOpen(wiComponentService, projectData);
+                                utils.projectOpen(projectData);
                             } else {
                                 utils.error("Project not exist!");
                             }
@@ -386,8 +382,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                                     wiApiService.getProject({
                                         idProject: lastProject.id
                                     }, function (projectData) {
-                                        let utils = wiComponentService.getComponent('UTILS');
-                                        utils.projectOpen(wiComponentService, projectData);
+                                        // let utils = wiComponentService.getComponent('UTILS');
+                                        utils.projectOpen(projectData);
                                     });
                                 }
                             })
@@ -398,5 +394,27 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                 },100);
             }
         }
+}
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
+    let functionBindingProp = {
+        $scope,
+        wiComponentService,
+        ModalService,
+        wiApiService,
+        wiOnlineInvService,
+        $timeout
+    };
+    window.utils = utils;
+    utils.setGlobalObj(functionBindingProp);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
+    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    if(!window.localStorage.getItem('rememberAuth')) {
+        utils.doLogin(function (sameUser) {
+            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+            if(sameUser) restoreProject($timeout, wiApiService, ModalService);
+        })
+    }else{
+        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+        restoreProject($timeout, wiApiService, ModalService);
     }
 });

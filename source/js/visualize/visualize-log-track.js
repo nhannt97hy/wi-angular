@@ -254,7 +254,7 @@ LogTrack.prototype.getExtentY = function() {
 }
 
 LogTrack.prototype.getSelection = function(id) {
-    return this.drawings.find(d => d.isSelection() && d.id == id);
+    return this.drawings.find(d => d.isSelection() && d.idSelectionTool == id);
 }
 
 /**
@@ -1245,17 +1245,22 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
     });
 }
 
-LogTrack.prototype.addSelection = function(config) {
-    let selection = new Selection(config);
-
-    selection.initCanvas(this.plotContainer, 'logplot');
-    this.drawings.push(selection);
-
-    return selection;
+LogTrack.prototype.initSelectionArea = function(viSelections) {
+    let self = this;
+    viSelections.forEach((viSelection) => {
+        viSelection.initCanvasLogtrack(self.plotContainer, 'logplot');
+        self.drawings.push(viSelection);
+    });
 }
 
-LogTrack.prototype.initSelectionArea = function(masks) {
-    masks.forEach((m) => {
-        this.addSelection(m);
-    })
+LogTrack.prototype.pushSelectionAreas = function() {
+    let self = this;
+    this.drawings.forEach(function(drawing) {
+        if (drawing.isSelection()) {
+            let windowY = self.getWindowY();
+            drawing.minY = windowY[0];
+            drawing.maxY = windowY[1];
+            drawing.doPlot();
+        }
+    });
 }

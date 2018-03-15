@@ -12,6 +12,7 @@ let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
 let Histogram = require('./visualize-histogram');
+let Selection = require('./visualize-selection');
 
 exports.CanvasHelper = CanvasHelper;
 
@@ -242,11 +243,16 @@ exports.createHistogram = function(config, depthStep, startDepth, endDepth, domE
     return histogram;
 }
 
-exports.plotSelection = function (wiD3Ctrl, selectionId, data) {
+exports.plotSelection = function (wiD3Ctrl, selectionId, newDatum) {
     let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
     logTracks.forEach(t => {
         let selection = t.getSelection(selectionId);
-        selection.setProperties({maskData: data});
-        t.plotDrawing(selection);
+        selection.setProperties({maskData: newDatum});
+        selection._doPlot();
     })
+}
+
+exports.createSelection = function (config) {
+    let selection = new Selection(config);
+    return selection;
 }

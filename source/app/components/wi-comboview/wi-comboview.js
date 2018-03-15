@@ -1,7 +1,7 @@
 const componentName = 'wiComboview';
 const moduleName = 'wi-comboview';
 
-function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout, $compile) {
 	let self = this;
 	let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 	let comboviewHandlers = wiComponentService.getComponent('COMBOVIEW_HANDLERS');
@@ -9,7 +9,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
 	this.$onInit = function () {
 		self.wiD3AreaName = self.name + 'D3Area';
-		self.comboviewModel = self.getModel();
+		self.idD3Area = self.id + self.name;
+		self.toolBox = self.model.properties.toolBox;
 
 		if (self.name) wiComponentService.putComponent(self.name, self);
 
@@ -22,29 +23,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 		    $timeout: $timeout,
 		    wiComboview: self
 		});
-		wiApiService.listCombinedBoxTool(self.id, function (data) {
-			if (data.length) self.toolBox = data;
-			else self.toolBox = [
-				{
-					name: 'Default Tool 1',
-					color: 'red',
-					idCombinedBox: self.id,
-					flag: 'default'
-				},
-				{
-					name: 'Default Tool 2',
-					color: 'green',
-					idCombinedBox: self.id,
-					flag: 'default'
-				},
-				{
-					name: 'Default Tool 3',
-					color: 'blue',
-					idCombinedBox: self.id,
-					flag: 'default'
-				}
-			];
-		});
 	}
 
 	this.getwiD3Ctrl = function () {
@@ -54,9 +32,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	this.getModel = function () {
 		return utils.findComboviewModelById(self.id);
 	}
-
-	// this.colorset = ['red', 'blue', 'green', , 'orange',
-	// 				'pink', 'lime', 'cyan', 'olive', 'maroon'];
 
 	this.editTool = function () {
 		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.toolBox, self.id, function(data) {
@@ -68,11 +43,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	this.useSelector = function (selector) {
 		console.log(selector);
 		let wiD3Comboview = self.getwiD3Ctrl();
-		wiD3Comboview.drawSelectionOnLogplot(selector);
+		wiD3Comboview.drawSelectionOnLogplot(selector, 'select');
+		wiD3Comboview.drawSelectionOnCrossplot(selector, 'select');
+		wiD3Comboview.drawSelectionOnHistogram(selector, 'select');
 	}
 
 	this.useEraser = function (eraser) {
 		console.log(eraser);
+		let wiD3Comboview = self.getwiD3Ctrl();
+		wiD3Comboview.drawSelectionOnLogplot(eraser, 'erase');
+		wiD3Comboview.drawSelectionOnCrossplot(eraser, 'erase');
+		wiD3Comboview.drawSelectionOnHistogram(eraser, 'erase');
 	}
 
 	this.$onDestroy = function () {
@@ -88,7 +69,8 @@ app.component(componentName, {
 	transclude: true,
 	bindings: {
 		name: '@',
-		id: '@'
+		id: '@',
+		model: '<'
 	}
 });
 

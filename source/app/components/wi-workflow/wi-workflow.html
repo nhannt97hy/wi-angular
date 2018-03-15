@@ -1,5 +1,10 @@
-<!-- <div>WorkFlow</div> -->
-<!-- <div ng-transclude></div> -->
-<!-- <wi-workflow-player name='VCLfromGammaRayStep' id-project='wiWorkflow.getCurrentProjectId();' input-config="wiWorkflow.inputConfig"
-    parameter-config="wiWorkflow.parameterConfig"></wi-workflow-player> -->
-<wi-workflow-player name='VCLfromGammaRayStep' id-project='wiWorkflow.getCurrentProjectId();' workflow-config="wiWorkflow.workflowConfig"></wi-workflow-player>
+<!-- <div class="workflow-toolbar-wrapper">
+    <wi-toolbar>
+        <wi-button name="SaveFormatButton" icon="save-16x16" type="small" tooltip="Save Workflow" handler="wiWorkflow.SaveWorkflowButtonClicked">
+        </wi-button>
+        <wi-button name="EditFormatButton" icon="properties-16x16" type="small" tooltip="Edit Workflow" handler="wiWorkflow.EditWorkflowButtonClicked">
+    </wi-toolbar>
+</div> -->
+<div class="workflow-main-content">
+    <wi-workflow-player name='{{wiWorkflow.WorkflowPlayerName}}' id-project='wiWorkflow.getCurrentProjectId()' id-workflow="wiWorkflow.id"></wi-workflow-player>
+</div>

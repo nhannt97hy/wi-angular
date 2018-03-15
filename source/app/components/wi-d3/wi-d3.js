@@ -6,6 +6,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let LayoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     let logplotHandlers = {};
 
     /* private variables */
@@ -332,18 +333,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: 0.65
             }, function (depthTrack) {
                 self.pushDepthTrack(depthTrack);
-                if (callback) callback();
+                $timeout(callback);
             });
         }
         else {
             Utils.error('can not create depth track');
         }
     }
-    this.addLogTrack = function (trackTitle, idCurve) {
+    this.addLogTrack = function (trackTitle, idCurve, onFinished) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
             const logTracks = self.getTracks().filter(track => track.type == 'log-track');
-            let logTrackProps;
+            let createdLogTrack;
             let logTrack;
             async.series([
                 function (callback) {
@@ -372,8 +373,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     callback();
                 }, function (callback) {
                     $timeout(function() {
-                        if(idCurve) {
-                            let LogtrackController = self.trackComponents.find(function(component) { return component.props == logTrack;}).controller;
+                        if (idCurve && !isNaN(idCurve)) {
+                            let LogtrackController = self.trackComponents.find(function (component) { return component.props == logTrack; }).controller;
                             let newViTrack = LogtrackController.viTrack;
                             wiApiService.createLine({
                                 idTrack: newViTrack.id,
@@ -387,10 +388,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 console.log('created Line', line);
                                 callback();
                             });
-                        }
+                        } else callback();
                     })
                 }
-            ]);
+            ], function (err, results) {
+                if (!err && typeof onFinished === 'function') onFinished();
+            });
         }
         else {
             error('Cannot add Log track');
@@ -511,8 +514,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $timeout(function() {
             let track = getComponentCtrlByProperties(logTrackProps).viTrack;
             if (self.containerName) {
-                self.selectionMasks.map(m => m.id = m.idCombinedBoxTool);
-                track.initSelectionArea(self.selectionMasks);
+                track.initSelectionArea(self.viSelections);
+                track.pushSelectionAreas();
             }
         });
     }
@@ -806,7 +809,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
         self.slider.noUiSlider.on('update', function(values) {
-            console.log('value', values);
+            // console.log('value', values);
             let difference = self.contentWidth - self.sliderWidth + 20;
             let val = parseFloat(values[0]);
             let left = -1*difference * val / 100.;
@@ -1225,6 +1228,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
                 _fitWindow = false;
             }
+            LayoutManager.triggerResize();
         });
     }
     function _onPlotMouseWheelCallback(track) {
@@ -1495,7 +1499,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
-        selectionMasks: '<',
+        viSelections: '<',
         containerName: '@'
     }
 });
