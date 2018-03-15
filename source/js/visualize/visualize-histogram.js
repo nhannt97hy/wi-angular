@@ -541,7 +541,8 @@ Histogram.prototype._doPlot = function() {
                         }
                         return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
                     })
-                    .attr('fill', self.zoneSet[j].properties.background?self.zoneSet[j].properties.background:'steelblue')
+                    .attr('fill', self.histogramModel.properties.colorBy == 'curve' ? self.histogramModel.properties.color : (self.zoneSet[j].properties.background || 'steelblue'))
+                    .attr('stroke', self.histogramModel.properties.colorBy == 'curve' ? 'black' : 'transparent')
                     .on('mousemove', function(d, i) {
                         if (self.histogramModel.properties.showTooltip)
                         showTooltip(self.zoneBins[j][i]);
