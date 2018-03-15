@@ -28,6 +28,7 @@ function Crossplot(config) {
     this.rectZWidth = 0;
 
     this.viSelection = null;
+    this.showTooltip = true;
 }
 
 Crossplot.prototype.AREA_LINE_COLOR = 'DarkCyan';
@@ -511,7 +512,7 @@ Crossplot.prototype.init = function(domElem) {
 
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-overlay-line');
-    
+
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-tooltip');
 
@@ -625,9 +626,9 @@ Crossplot.prototype._doPlot = function() {
         this.plotSelections();
     // }
 
-    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points plotted out of " 
-                        + this.data.length + '( ' 
-                        + this.outliers + ' outliers, ' 
+    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points plotted out of "
+                        + this.data.length + '( '
+                        + this.outliers + ' outliers, '
                         + this.nullDatas + ' nulls)';
     this.footerRight
         .text(footerString);
@@ -1857,7 +1858,11 @@ Crossplot.prototype.mouseMoveCallback = function() {
         }
     }
     else {
-        this.tooltip(x, y);
+        if(this.showTooltip) {
+            this.tooltip(x, y);
+        } else {
+            this.tooltip(null, null, true);
+        }
     }
 }
 
@@ -2078,23 +2083,22 @@ Crossplot.prototype.tooltip = function(x, y, notShow) {
     let container = self.svgContainer.select('.vi-crossplot-tooltip');
     if(notShow || isNaN(xCoord) || isNaN(yCoord)  || !x || !y) {
         container.selectAll('*').remove();
-        return;       
+        return;
     }
 
     let text = container.selectAll('text')
         .data([x, y]);
     text.enter()
         .append('text')
-        .style('font-size', 14)
-        .style('font-weight', 'bold')
+        .style('font-size', 12)
         .attr('x', xCoord)
-        .attr('y', (d, i) => { return yCoord + 15 + 20*i;})
-        .text(function (d, i) { 
+        .attr('y', (d, i) => { return yCoord + 15 + 15*i;})
+        .text(function (d, i) {
             return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
         });
     text.attr('x', xCoord)
-        .attr('y', (d, i) => { return yCoord + 15 + 20*i;})
-        .text(function (d, i) { 
+        .attr('y', (d, i) => { return yCoord + 15 + 15*i;})
+        .text(function (d, i) {
         return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
     });
     text.exit().remove();
@@ -2113,7 +2117,7 @@ Crossplot.prototype.tooltip = function(x, y, notShow) {
             .attr('fill-opacity', 0.9)
             .attr('stroke', '#444')
             .attr('rx', 7)
-            .attr('ry', 7); 
+            .attr('ry', 7);
     rect.attr('x', (d)=> d.x - 5)
         .attr('y', (d)=> d.y - 5)
         .attr('width', maxWidth + 10)
