@@ -603,8 +603,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 },{
                     name: "ShowTooltip",
                     label: "Show Tooltip",
-                    handler: function () {
-
+                    isCheckType: "true",
+                    checked: self.viCrossplot.showTooltip ? self.viCrossplot.showTooltip : true,
+                    handler: function (index) {
+                        self.viCrossplot.showTooltip = !self.viCrossplot.showTooltip;
+                        self.contextMenu[index].checked = self.viCrossplot.showTooltip;
                     }
                 }, {
                     name: "ShowHistogram",
@@ -613,7 +616,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     checked: (self.crossplotModel && self.crossplotModel.properties)?self.crossplotModel.properties.showHistogram:false,
                     handler: function (index) {
                         self.doShowHistogram();
-                        self.contextMenu[index].checked = self.crossplotModel.properties.showHistogram;;
+                        self.contextMenu[index].checked = self.crossplotModel.properties.showHistogram;
                     }
                 }, {
                     name: "Function",
