@@ -406,7 +406,12 @@ LogTrack.prototype.getShadingOrderKey = function (shading) {
 }
 
 LogTrack.prototype.rearrangeShadings = function () {
-    this.plotContainer.selectAll('.vi-track-shading').sort();
+    // this.plotContainer.selectAll(this.getShadings().filter(s => s !== this.currentDrawing).map(s => s.canvas.node())).sort();
+    let currentDatum = null;
+    try {
+        currentDatum = this.currentDrawing.canvas.datum();
+    } catch (error) {}
+    this.plotContainer.selectAll('.vi-track-shading').filter((d) => d !== currentDatum).sort();
     this.headerContainer.selectAll('.vi-shading-header').sort((a,b) => b.localeCompare(a));
 };
 
@@ -741,7 +746,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     else {
         drawing.doPlot();
     }
-    this.getShadings().forEach(s => s.lower());
+    this.getShadings().filter(s => s !== this.currentDrawing).forEach(s => s.lower());
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
     this.svgContainer.raise();

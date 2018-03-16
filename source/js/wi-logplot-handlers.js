@@ -139,7 +139,13 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     let depthHeightCm = heightCm * rangeUnit;
     let depthHeightM = depthHeightCm / 100;
     depthRange[1] = depthRange[0] + depthHeightM;
-    if (depthRange[1] > wiD3Ctrl.getMaxDepth()) depthRange[1] = wiD3Ctrl.getMaxDepth();
+    const displayView = wiD3Ctrl.getDisplayView();
+    const minDepth = +displayView[0];
+    const maxDepth = +displayView[1];
+    if (depthRange[1] > maxDepth) {
+        depthRange[0] = Math.max(depthRange[0] - depthRange[1] + maxDepth, minDepth);
+        depthRange[1] = maxDepth;
+    }
     wiD3Ctrl.setDepthRange(depthRange, true);
     wiD3Ctrl.processZoomFactor();
     wiD3Ctrl.plotAll();
@@ -161,9 +167,33 @@ exports.ScalePreviousState = function (top, bottom) {
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 };
 
+exports.Scale1ButtonClicked = function() {
+    let rangeUnit = 1;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale2ButtonClicked = function() {
+    let rangeUnit = 2;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale4ButtonClicked = function() {
+    let rangeUnit = 4;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale5ButtonClicked = function() {
+    let rangeUnit = 5;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale10ButtonClicked = function() {
+    let rangeUnit = 10;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
 exports.Scale20ButtonClicked = function () {
     let rangeUnit = 20;
-    console.log(this);
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
 
@@ -193,7 +223,6 @@ exports.Scale500ButtonClicked = function () {
 };
 
 exports.Scale1000ButtonClicked = function () {
-    console.log('scale 1:1000');
     let rangeUnit = 1000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
@@ -217,6 +246,26 @@ exports.Scale5000ButtonClicked = function () {
     let rangeUnit = 5000;
     scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
 };
+
+exports.Scale10000ButtonClicked = function() {
+    let rangeUnit = 10000;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale20000ButtonClicked = function() {
+    let rangeUnit = 20000;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale50000ButtonClicked = function() {
+    let rangeUnit = 50000;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
+
+exports.Scale100000ButtonClicked = function() {
+    let rangeUnit = 100000;
+    scaleTo(rangeUnit, this.wiLogplot, this.wiComponentService);
+}
 
 exports.ScaleFullButtonClicked = function () {
     let rangeUnit = this.wiLogplot.getwiD3Ctrl().getMaxDepth() * 100;
