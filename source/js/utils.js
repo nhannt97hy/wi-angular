@@ -169,7 +169,7 @@ function shadingToTreeConfig(shading, paletteList) {
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
     shadingModel.idRightLine = shading.idRightLine;
-    shadingModel.data = {
+    shadingModel.data = Object.assign({}, shading, {
         id: shading.idShading,
         name: shading.name,
         refX: shading.refX,
@@ -182,7 +182,7 @@ function shadingToTreeConfig(shading, paletteList) {
         refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
-    };
+    });
     if (shadingModel.data.fill && shadingModel.data.fill.varShading) {
         shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palName];
     }

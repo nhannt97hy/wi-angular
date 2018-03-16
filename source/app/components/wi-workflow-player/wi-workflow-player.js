@@ -745,7 +745,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
 
         wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
             wfOutput.idPlot = response.idPlot;
-            let currentOrderNum = 'a';
+            let currentOrderNum = 'm';
             async.eachSeries(wfInput.inputs, function(ipt, done1) {
                 wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                     //create line
@@ -765,12 +765,12 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
                     wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                         // create line
+                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                         wiApiService.createLine({
                             idTrack: trackData.idTrack,
                             idCurve: opt.idCurve,
-                            orderNum: currentOrderNum
+                            orderNum: 'm'
                         }, function(line){
-                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                             let bgColor = null;
                             switch (opt.family) {
                                 case "Net Reservoir Flag":
@@ -787,7 +787,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             wiApiService.createShading({
                                 idTrack:trackData.idTrack,
                                 name:opt.name + "-left",
-
+                                orderNum: 'm',
                                 negativeFill : {
                                     display: false,
                                     sadingType: "pattern",

@@ -185,11 +185,11 @@ Track.prototype.createHeaderContainer = function() {
             d3.event.stopPropagation();
             self.trackContainer.node().focus();
         })
-        .call(d3.drag()
-            .on('drag', function() {
-                self.headerScrollCallback();
-            })
-        );
+        // .call(d3.drag()
+        //     .on('drag', function() {
+        //         self.headerScrollCallback();
+        //     })
+        // );
 }
 
 /**
@@ -305,7 +305,7 @@ Track.prototype.headerScrollCallback = function() {
     let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? (0 - step) : step);
     let top = parseInt(this.drawingHeaderContainer.style('top').replace('px', '')) + dy;
     let maxTop = rowHeight + extraHeight;
-    let minTop = this.headerContainer.node().clientHeight - this.drawingHeaderContainer.node().clientHeight + extraHeight;
+    let minTop = this.headerContainer.node().clientHeight - this.drawingHeaderContainer.node().clientHeight + extraHeight - 3;
 
     top = minTop < maxTop ? visUtils.clip(top, [minTop, maxTop]) : maxTop;
     this.drawingHeaderContainer

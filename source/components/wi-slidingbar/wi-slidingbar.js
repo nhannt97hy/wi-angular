@@ -180,6 +180,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     let saveStateToServer = _.debounce(function () {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        if (!wiD3Controller) return;
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
