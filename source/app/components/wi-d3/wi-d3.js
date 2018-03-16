@@ -566,11 +566,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         this.wiLogplotCtrl.updateScale(this.scale);
     }
     this.setCurrentTrack = function (track) {
-        if (_currentTrack == track) return;
-        _previousTrack = _currentTrack;
-        _currentTrack = track;
-        _currentTrack.highlightCallback();
-        _clearPreviousHighlight();
+        _setCurrentTrack(track);
     }
     this.setDepthRange = function (depthRange, notPlot) {
         _depthRange = depthRange;
@@ -1170,7 +1166,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (_tracks.length <= 0) {
             return 'm';
         }
-        if (!track) track = _currentTrack;
+        if (!track) track = _currentTrack || _tracks[_tracks.length - 1];
         var currentIdx = _tracks.indexOf(track);
         if (currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
             currentIdx = _tracks.length - 1;
@@ -1198,6 +1194,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _setCurrentTrack(track);
         });
         track.on('mousedown', function () {
+            d3.event.stopPropagation();
             _setCurrentTrack(track);
             // if (d3.event.button == 2) _trackOnRightClick(track);
         });

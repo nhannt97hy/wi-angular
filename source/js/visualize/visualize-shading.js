@@ -312,6 +312,7 @@ Shading.prototype.doPlot = function(highlight) {
         drawRefLine(self);
         // self.canvas.lower();
     });
+    this.updateOrderNum();
     return this;
 }
 

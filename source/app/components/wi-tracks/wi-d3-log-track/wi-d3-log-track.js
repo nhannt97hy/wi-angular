@@ -961,7 +961,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         if(!shading) return;
-        track.setCurrentDrawing(shading);
+        // track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
             if (d3.event.button == 2) {
                 // _shadingOnRightClick();
