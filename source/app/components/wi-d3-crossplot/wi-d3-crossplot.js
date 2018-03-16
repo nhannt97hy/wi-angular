@@ -143,8 +143,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             histogramProps.color = pointSet.pointColor;
             histogramProps.activeZone = pointSet.activeZone;
             histogramProps.divisions = ((xy == 'xCurve')?pointSet.majorX:pointSet.majorY) * 10;
+            histogramProps.loga = (xy == 'xCurve') ? pointSet.logX:pointSet.logY;
         }
-        histogramProps.loga = false;
         histogramProps.showGrid = false;
         histogramProps.showGaussian = true;
         histogramProps.showCumulative = true;
@@ -708,6 +708,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (_histogram.properties.plot == "Bar")
                     _histogram.properties.plot = "Curve";
                 else _histogram.properties.plot = "Bar";
+                index = index || 0;
                 self.hisContextMenu[index].checked = _histogram ? (_histogram.properties.plot == "Curve") : false;
                 visHistogram.signal('histogram-update', "plot curve/bar");
             }
