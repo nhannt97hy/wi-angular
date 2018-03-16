@@ -1302,17 +1302,21 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 }
                 if (wiD3Ctrl && !track) {
                     let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
-                    if (errorCode > 0) {
+                    if (errorCode >= 0) {
                         wiD3Ctrl.addLogTrack(null, idCurves[0]);
                     }
+                    /*
                     else if (errorCode === 0) {
-                        toastr.error("Cannot drop curve from another well");
+                        // toastr.error("Cannot drop curve from another well");
+                        // another well case
+                        // wiD3Ctrl.addLogTrack(null, idCurves[0]);
                     }
+                    */
                     return;
                 }
                 if (wiD3Ctrl && track) {
                     async.eachSeries(idCurves, (idCurve, next) => {
-                        let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                        let errorCode = wiD3Ctrl.verifyDroppedIdCurveOnTrack(idCurve, track);
                         if (errorCode > 0) {
                             apiService.createLine({
                                 idTrack: track.id,
@@ -1327,7 +1331,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                             });
                         }
                         else if (errorCode === 0) {
-                            toastr.error("Cannot drop curve from another well");
+                            toastr.error("Cannot drop curve from another well to this track");
                         }
                         return;
                     })

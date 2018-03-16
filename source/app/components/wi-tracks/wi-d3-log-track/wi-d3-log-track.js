@@ -638,11 +638,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.onCurveDrag(function (desTrack) {
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
-            curve.idTrack = desTrack.id;
-            wiApiService.editLine(curve, function (res) {
-                self.wiD3Ctrl.updateTrack(track);
-                self.wiD3Ctrl.updateTrack(desTrack);
-            });
+            let errorCode = self.wiD3Ctrl.verifyDroppedIdCurveOnTrack(curve.idCurve, desTrack);
+            if(errorCode > 0) {
+                curve.idTrack = desTrack.id;
+                wiApiService.editLine(curve, function (res) {
+                    self.wiD3Ctrl.updateTrack(track);
+                    self.wiD3Ctrl.updateTrack(desTrack);
+                });
+            } else if(errorCode === 0) {
+                toastr.error('Cannot drop curve from another well to this track');
+            }
         });
     }
     function _onPlotMouseDownCallback(track) {

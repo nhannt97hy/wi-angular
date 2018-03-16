@@ -313,6 +313,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
         return 0;
     }
+    this.verifyDroppedIdCurveOnTrack = function (idCurve, track) {
+        let curveWell = Utils.findWellByCurve(idCurve) || {properties: {}};
+        let trackWell = {properties: {}};
+        if(track.isLogTrack() && track.drawings.length) {
+            let curveOnTrack = track.drawings[0];
+            trackWell = Utils.findWellByCurve(curveOnTrack.idCurve);
+        }
+        if(curveWell.properties.idWell && track.isLogTrack() && !track.drawings.length) return 1;
+        if(!curveWell.properties.idWell || !trackWell.properties.idWell) return -1;
+        if(curveWell.properties.idWell && trackWell.properties.idWell && (curveWell.properties.idWell == trackWell.properties.idWell)) return 1;
+        return 0;
+    }
     this.depthShiftDialog = function () {
         if(!_currentTrack.isLogTrack()) {
             DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
