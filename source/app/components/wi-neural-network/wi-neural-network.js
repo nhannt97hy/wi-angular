@@ -11,17 +11,33 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.onReady = function () {
         this.viNeuralNetwork = graph.createNNPlayground(self.getConfigs(), document.getElementById(self.neuralNetworkPlotAreaId));
     }
-    this.$onChanges = function (changeObj) {
-        // console.log("objectChanges: ", changeObj);
-        if(self.viNeuralNetwork) {
-            // // when visualization element is ready
-            Object.keys(changeObj).forEach((key)=> {
-                let change = {};
-                change[key] = self[key];
-                self.viNeuralNetwork.setProperties(change);
-                self.viNeuralNetwork.prepareLayers();
-            });
+    this.$onInit = function() {
+        if (self.container) self.container.wiNNCtrl = self;
+    }
+    // this.$onChanges = function (changeObj) {
+    //     // console.log("objectChanges: ", changeObj);
+    //     if(self.viNeuralNetwork) {
+    //         // // when visualization element is ready
+    //         Object.keys(changeObj).forEach((key)=> {
+    //             let change = {};
+    //             change[key] = self[key];
+    //             self.viNeuralNetwork.setProperties(change);
+    //             self.viNeuralNetwork.prepareLayers();
+    //         });
+    //     }
+    // }
+    this.update = function(nnConfig) {
+        if (nnConfig) {
+            self.inputCurves = nnConfig.inputs;
+            self.outputCurves = nnConfig.outputs;
+            self.hiddenLayer = nnConfig.layers;
         }
+        self.viNeuralNetwork.setProperties({
+            inputCurves:self.inputCurves,
+            outputCurves: self.outputCurves,
+            hiddenLayer: self.hiddenLayer
+        });
+        self.viNeuralNetwork.prepareLayers();
     }
     this.neuralNetWorkProperties = function () {
         let config = self.getConfigs();
@@ -57,7 +73,8 @@ app.component(componentName, {
         // nLayers: '<',
         // nNodes: '<',
         outputCurves: '<',
-        hiddenLayer: '<'
+        hiddenLayer: '<',
+        container: '<'
     }
 });
 

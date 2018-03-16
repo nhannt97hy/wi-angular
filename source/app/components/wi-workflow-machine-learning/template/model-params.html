@@ -1,0 +1,73 @@
+<div style="display:flex;flex:1;overflow:hidden;flex-direction:column;">
+    <div style="padding: 10px;display:flex;flex:1;flex-direction:row;">
+        <div style="display:flex;flex-direction:column;flex:0.3;padding:10px;overflow:auto;">
+            <form class="form-horizontal">
+                <div class="bordered" style="padding:10px; margin-bottom: 10px" ng-show="!wiWorkflowMachineLearning.workflowConfig.steps[0].disabled">
+                    <h4 style="text-align: center">Edit infomation model</h4>
+                    <div class="form-group">
+                        <label class="control-label col-sm-3" for="email">Type</label>
+                        <div class="col-sm-9">
+                            <wi-item-dropdown on-wi-dropdown-init="wiWorkflowMachineLearning.onModelTypeListInit" style='width:100%;'
+                                on-item-changed="wiWorkflowMachineLearning.onModelTypeChanged"></wi-item-dropdown>
+                        </div>
+                    </div>
+                    <div class='form-group' ng-repeat='param in wiWorkflowMachineLearning.currentModelType.parameters'>
+                        <label ng-if='param.type != "nnconfig"' class="control-label col-sm-3">{{param.name}}</label>
+                        <div ng-if="param.type == 'number'" class='col-sm-9'>
+                            <input style="width: 100%;" class="form-control wi-form-control"
+                                type="number" ng-model="param.value" step='{{param.step}}' min="{{param.min}}" max="{{param.max}}">
+                        </div>
+                        <div ng-if="param.type=='select'" class='col-sm-9'>
+                            <ui-select ng-model="param.value">
+                                <ui-select-match>
+                                    {{param.value.name}}
+                                </ui-select-match>
+                                <ui-select-choices style="width: 100%;" repeat='choice in param.choices'>
+                                    {{choice.name}}
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div ng-if="param.type=='nnconfig'" class='col-sm-12' >
+                            <div class="well container-fluid">
+                                <h4>{{param.name}}</h4>
+                                <label class="control-label col-sm-3">Layers</label>
+                                <div class="col-sm-9">
+                                    <input ng-model='param.value.nLayer' 
+                                        ng-change="wiWorkflowMachineLearning.nnConfigNLayerChanged(param.value);wiWorkflowMachineLearning.updateNNConfig();" 
+                                        class="form-control wi-form-control">
+                                </div>
+                                <div ng-repeat="layer in param.value.layerConfig">
+                                    <label class="control-label col-sm-3">{{layer.name}}</label>
+                                    <div class="col-sm-9">
+                                        <input class="form-control wi-form-control" ng-model="layer.value" 
+                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="bordered" style="display:flex;flex:0.7;flex-direction:column;padding:10px;overflow:auto;"  ng-if="wiWorkflowMachineLearning.currentModelType.name === 'MultiPerceptron' || wiWorkflowMachineLearning.currentModelType.name === 'ConjugateGradient'" style="display:flex;flex:9;flex-direction:column;padding:10px;overflow:auto;">
+            <wi-neural-network style='flex:1;' 
+                container='wiWorkflowMachineLearning'
+                input-curves="wiWorkflowMachineLearning.nnConfig.inputs" 
+                output-curves="wiWorkflowMachineLearning.nnConfig.outputs" 
+                hidden-layer="wiWorkflowMachineLearning.nnConfig.layers"></wi-neural-network>
+        </div>
+        <div class="hidden-nn" style="display:flex;flex:0.7;flex-direction:column;padding:10px;overflow:auto;padding-top: 100px;"  ng-if="wiWorkflowMachineLearning.currentModelType.name !== 'MultiPerceptron' && wiWorkflowMachineLearning.currentModelType.name !== 'ConjugateGradient'">
+            Neural Network is disabled
+        </div>
+    </div>
+    <div style="padding:0 10px;">
+        <button wz-previous class='btn btn-default' style='float: left;'>
+            <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
+            <span>Back</span>
+        </button>
+        <button wz-next class='btn btn-default' style='float: right;' ng-click="wiWorkflowMachineLearning.refreshInputData();">
+            <span>Next</span>
+            <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
+        </button>
+    </div>
+</div>

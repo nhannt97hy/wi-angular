@@ -117,6 +117,7 @@ let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 let wiChunkedUploadService = require('./wi-chunked-upload-service');
 let wiBatchApiService = require('./wi-batch-api-service');
+let wiMachineLearningApiService = require('./wi-machine-learning-api-service');
 let wiOnlineInvService = require('./wi-online-inv-service');
 
 let wiConditionNode = require('./wi-condition-node');
@@ -189,6 +190,7 @@ let app = angular.module('wiapp',
         wiComponentService.name,
         wiChunkedUploadService.name,
         wiBatchApiService.name,
+        wiMachineLearningApiService.name,
         wiOnlineInvService.name,
 
         wiCanvasRect.name,
@@ -234,6 +236,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiChunkedUploadService,
         wiOnlineInvService,
         wiBatchApiService,
+        wiMachineLearningApiService,
         $timeout
     };
     // Logplot Handlers
