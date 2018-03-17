@@ -374,7 +374,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     };
     let __inputDataLen = 0;
 
-    this.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
+    this.nnConfig = {inputs: [], outputs:[], layers: []};
 
     function updateNNConfig() {
         if (!self.currentModelType) {

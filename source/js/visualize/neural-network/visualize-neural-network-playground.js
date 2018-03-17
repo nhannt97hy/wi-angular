@@ -7,8 +7,6 @@ const LAYER_LABEL_CONTAINER_HEIGHT = NODE_SIZE + 20;
 
 function NeuralNetwork(config) {
     this.inputCurves = config.inputCurves;
-    // this.nLayers = config.nLayers;
-    // this.nNodes = config.nNodes;
     this.outputCurves = config.outputCurves;
     this.hiddenLayer = config.hiddenLayer;
 }
@@ -32,8 +30,6 @@ NeuralNetwork.prototype.init = function (domElem) {
 
 NeuralNetwork.prototype.setProperties = function (newProps) {
     this.inputCurves = newProps.inputCurves || this.inputCurves;
-    // this.nLayers = newProps.nLayers == undefined || newProps.nLayers == null ? this.nLayers:newProps.nLayers;
-    // this.nNodes = newProps.nNodes == undefined || newProps.nNodes == null ? this.nNodes:newProps.nNodes;
     this.outputCurves = newProps.outputCurves || this.outputCurves;
     this.hiddenLayer = newProps.hiddenLayer || this.hiddenLayer;
 }
@@ -124,6 +120,8 @@ NeuralNetwork.prototype.prepareLayers = function () {
     var zoomIdentity = d3.zoomIdentity.scale(scaleFactor);
     self.svgContainer.call(zoom.transform, zoomIdentity);
 
+    if(!self.inputCurves.length || !self.outputCurves.length) return;
+
     let nodes = self.getNodes();
     let layerSizes = {};
     let links = [];
@@ -145,9 +143,12 @@ NeuralNetwork.prototype.prepareLayers = function () {
     let labelContainer = container.append('g')
         .attr('class', 'neural-network-labels');
     inputLabelX = nodes.find((n) => n.layer == 1).x;
-    hiddenLabelStartX = nodes.find((n) => n.layer == 2).x;
-    hiddenLabelStopX = nodes.find((n) => n.layer == self.nLayers + 1).x;
     outputLabelX = nodes.find((n) => n.layer == self.nLayers + 2).x;
+
+    hiddenStartNode = nodes.find((n) => n.layer == 2)
+    hiddenLabelStartX = hiddenStartNode ? hiddenStartNode.x : inputLabelX + NODE_SIZE*3;
+    hiddenStopNode = nodes.find((n) => n.layer == self.nLayers + 1);
+    hiddenLabelStopX = hiddenStopNode ? hiddenStopNode.x : outputLabelX - NODE_SIZE;
     labelContainer.append('text')
         .attr('class', 'input-layer-label')
         .attr('text-anchor', 'middle')
@@ -338,29 +339,6 @@ NeuralNetwork.prototype.prepareLayers = function () {
             .text(function(d) { return d.label; });
 
         node.exit().remove();
-
-        // draw hidden layer selector
-        let selector = container.selectAll(".layer-selector")
-            .data(hiddenLayerNodes)
-            .enter().append('rect')
-                .attr('x', function(d) { return d[0].x - NODE_SIZE* 3/2;})
-                .attr('y', function(d) { return d[0].y - NODE_SIZE* 3/2;})
-                .attr('width', 3 * NODE_SIZE)
-                .attr('height', function(d) { return d[d.length-1].y - d[0].y + NODE_SIZE * 3; })
-                .attr('fill', 'lightgreen')
-                .attr('fill-opacity', 0)
-                .attr('stroke', 'none')
-                .attr('stroke-width', 1)
-                .attr('rx', 10)
-                .attr('ry', 10)
-                .on('mouseover', handleHiddenLayerMouseOver)
-                .on('mouseleave', handleHiddenLayerMouseLeave);
-        // update
-        selector.attr('x', function(d) { return d[0].x - NODE_SIZE* 3/2;})
-            .attr('y', function(d) { return d[0].y - NODE_SIZE* 3/2;})
-            .attr('width', 3 * NODE_SIZE)
-            .attr('height', function(d) { return d[d.length-1].y - d[0].y + NODE_SIZE * 3; })
-        selector.exit().remove();
     }
     draw();
 }
