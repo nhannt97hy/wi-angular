@@ -8,7 +8,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.crossplotModel = null;
     this.viCrossplot = {};
-    let _well = null;
+    // let _well = null;
 
     var saveCrossplot= _.debounce(function() {
         saveCrossplotNow(function() {console.log('Updated');});
@@ -239,9 +239,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.getWell = getWell;
     function getWell() {
-        if (!_well) {
-            _well = utils.findWellByCrossplot(self.idCrossplot || self.wiCrossplotCtrl.id);
-        }
+        // if (!_well) {
+        let _well = utils.findWellByCrossplot(self.idCrossplot || self.wiCrossplotCtrl.id);
+        // }
         return _well;
     }
 
