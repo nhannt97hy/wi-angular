@@ -26,8 +26,8 @@
         </div>
         <div style="flex:3.5;display:flex;flex-direction:column; margin-left:5px;padding:0 5px;overflow:hidden;">
             <div style="flex:1;padding:10px 0;overflow:auto;width:100%;">
-                <div ng-repeat='wf in wiWorkflowMachineLearning.workflowConfig.steps' ng-hide='wf.disabled' class='bordered panel panel-default' style='display:table;min-width:100%;'
-                    wi-element-ready="wiWorkflowMachineLearning.droppableSetting(wf);" id="{{wf.name}}">
+                <div ng-repeat='wf in wiWorkflowMachineLearning.workflowConfig.steps' class='bordered panel panel-default' style='display:table;min-width:100%;'
+                    wi-element-ready="wiWorkflowMachineLearning.droppableSetting(wf);" id="{{wf.name}}" ng-init="wf.expanded=true">
                     <div class='panel-heading' style='background-color:#eee;'>
                         <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
                             style='margin-right:5px;'>
@@ -41,7 +41,7 @@
                             <li style="width: 61px;">Remove</li>
                             <li>Well</li>
                             <li>Dataset</li>
-                            <li ng-repeat='inputItem in wf.inputs'>{{inputItem.name}}</li>
+                            <li ng-repeat='inputItem in wf.inputs'>{{inputItem.type}}</li>
                         </ul>
                         <ul class='table-row' ng-repeat="item in wf.inputData track by $index">
                             <li style="width: 61px; text-align: center;cursor: pointer;" ng-click="wiWorkflowMachineLearning.removeWell(wf, $index);">X</li>

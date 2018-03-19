@@ -191,7 +191,7 @@
             }
         </style>
         <wizard indicators-position="top" on-finish="wiWorkflowMachineLearning.finishWizard()">
-            <wz-step wz-title="Choose inputs&output curve">
+            <wz-step wz-title="Selection curve">
                 <div style='display:flex; flex-direction:column;flex:1;'>
                     <div style='padding:10px;display:flex;flex-direction:row;flex:1;'>
                         <div style='flex:1;display:flex;flex-direction:column;margin-bottom:0;' class='bordered panel panel-default'>
@@ -223,17 +223,40 @@
                             </wi-scroll>
                         </div>
                         <div style="margin-left:5px;flex:2;padding:0 5px;overflow-y:auto;">
-                            <div style="padding-bottom: 5px; text-align: right">
-                                <button ng-click="wiWorkflowMachineLearning.addCurveInput()" class="btn btn-default">
-                                    <span>Add input curve</span>
-                                    <i class="curve-new-16x16"></i>
-                                </button>
-                                <button ng-click="wiWorkflowMachineLearning.removeCurveInput()" class="btn btn-default">
-                                    <span>Remove input curve</span>
-                                    <i class="curve-remove-16x16"></i>
-                                </button>
+            
+                        <!-- start edit step 1 -->
+            
+                            <div style='width:100%;' class='bordered panel panel-default'>
+                                <div style='background-color:#eee;' class='panel-heading'>
+                                    <span style='font-weight:700;'>Selection curve</span>
+                                    <span ng-click="wiWorkflowMachineLearning.addCurveInput()" style="float: right; cursor: pointer; font-size: 14px;"><i class="ti-plus"></i>  Add input curve</span>
+                                </div>
+                                <div style='border-top: 1px solid #eee;' class='panel-body'>
+                                    <ul style='padding-left:0;'>
+                                        <li style="display:flex;flex-direction:row; margin-bottom:5px;" 
+                                            ng-style="wiWorkflowMachineLearning.outputCurveStyle($index)"
+                                            ng-repeat="item in wiWorkflowMachineLearning.workflowConfig.model.inputs track by $index">
+                                            <div style='flex-basis:20em;text-align:right;margin-right:5px;'>
+                                                <button style='width:100%;vertical-align:baseline;' class="btn btn-default" type="button"
+                                                    ng-click="wiWorkflowMachineLearning.onSelectTemplate($index);"
+                                                    ng-disabled='wf.disabled'>{{item.class}}
+                                                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                            <div style="flex:1;position:relative;">
+                                                <span ng-class="{'zone-table-16x16': item.type==wiWorkflowMachineLearning.FAMILY_GROUP_SELECTION, 'user-define-16x16': item.type==wiWorkflowMachineLearning.FAMILY_SELECTION, 'curve-16x16': item.type==wiWorkflowMachineLearning.CURVE_SELECTION}"
+                                                    style='position:absolute;top:50%;transform:translateY(-50%);left:0.5em;'></span>
+                                                <input type="text" style='padding-left:2em;' class='form-control' ng-model='item.label' disabled>
+                                            </div>
+                                            <span ng-if="$index < (wiWorkflowMachineLearning.workflowConfig.model.inputs.length - 1)" ng-click="wiWorkflowMachineLearning.removeCurveInput($index)" style="padding-top: 10px; padding-left: 10px; cursor: pointer"><i class="ti-close"></i></span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div ng-repeat="wf in wiWorkflowMachineLearning.workflowConfig.steps" style='width:100%;' class='bordered panel panel-default' ng-init='wf.expanded = true;parentIdx = $index;'>
+
+                        <!-- end edit step 1 -->
+
+                            <!-- <div ng-repeat="wf in wiWorkflowMachineLearning.workflowConfig.steps" style='width:100%;' class='bordered panel panel-default' ng-init='wf.expanded = true;parentIdx = $index;'>
                                 <div style='background-color:#eee;' class='panel-heading'>
                                     <span class="control-button" ng-class="{'fa fa-chevron-up': wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
                                         style='margin-right:5px;'>
@@ -260,19 +283,28 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> -->
+                            <!-- <div style="padding-bottom: 5px; text-align: right">
+                                <button ng-click="wiWorkflowMachineLearning.addCurveInput()" class="btn btn-default">
+                                    <span>Add input curve</span>
+                                    <i class="curve-new-16x16"></i>
+                                </button>
+                                <button ng-click="wiWorkflowMachineLearning.removeCurveInput()" class="btn btn-default">
+                                    <span>Remove input curve</span>
+                                    <i class="curve-remove-16x16"></i>
+                                </button>
+                            </div> -->
                         </div>
                     </div>
-    
-                </div>
-                <div style="padding:0 10px;">
-                    <button ng-disabled="!wiWorkflowMachineLearning.validate();" ng-click="wiWorkflowMachineLearning.getListModel();" wz-next class='btn btn-default' style='float: right;'>
-                        <span>Next</span>
-                        <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
-                    </button>
+                    <div class="wizard-control">
+                        <button ng-disabled="!wiWorkflowMachineLearning.validate();" ng-click="wiWorkflowMachineLearning.updateNNConfig();" wz-next class='btn btn-default' style='float: right;'>
+                            <span>Next</span>
+                            <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
+                        </button>
+                    </div>
                 </div>
             </wz-step>
-            <wz-step wz-title="Edit infomation model">
+            <wz-step wz-title="Model Params">
                 <div style="display:flex;flex:1;overflow:hidden;flex-direction:column;">
                     <div style="padding: 10px;display:flex;flex:1;flex-direction:row;">
                         <div style="display:flex;flex-direction:column;flex:0.3;padding:10px;overflow:auto;">
@@ -307,15 +339,15 @@
                                                 <h4>{{param.name}}</h4>
                                                 <label class="control-label col-sm-3">Layers</label>
                                                 <div class="col-sm-9">
-                                                    <input ng-model='param.value.nLayer' 
+                                                    <input ng-model='param.value.nLayer' type="number"
                                                         ng-change="wiWorkflowMachineLearning.nnConfigNLayerChanged(param.value);wiWorkflowMachineLearning.updateNNConfig();" 
-                                                        class="form-control wi-form-control">
+                                                        class="form-control wi-form-control" min="1">
                                                 </div>
                                                 <div ng-repeat="layer in param.value.layerConfig">
                                                     <label class="control-label col-sm-3">{{layer.name}}</label>
                                                     <div class="col-sm-9">
-                                                        <input class="form-control wi-form-control" ng-model="layer.value" 
-                                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();">
+                                                        <input class="form-control wi-form-control" ng-model="layer.value" type="number"
+                                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();" min="1">
                                                     </div>
                                                 </div>
                                             </div>
@@ -347,7 +379,7 @@
                     </div>
                 </div>
             </wz-step>
-            <wz-step wz-title='Select Inputs'>
+            <wz-step wz-title='Data Inputs'>
                 <div style='display:flex; flex-direction:column;flex:1;'>
                     <div style="display:flex;flex:1;flex-direction:row;padding:10px;">
                         <div class="bordered panel panel-default inventory-side">
@@ -376,8 +408,8 @@
                         </div>
                         <div style="flex:3.5;display:flex;flex-direction:column; margin-left:5px;padding:0 5px;overflow:hidden;">
                             <div style="flex:1;padding:10px 0;overflow:auto;width:100%;">
-                                <div ng-repeat='wf in wiWorkflowMachineLearning.workflowConfig.steps' ng-hide='wf.disabled' class='bordered panel panel-default' style='display:table;min-width:100%;'
-                                    wi-element-ready="wiWorkflowMachineLearning.droppableSetting(wf);" id="{{wf.name}}">
+                                <div ng-repeat='wf in wiWorkflowMachineLearning.workflowConfig.steps' class='bordered panel panel-default' style='display:table;min-width:100%;'
+                                    wi-element-ready="wiWorkflowMachineLearning.droppableSetting(wf);" id="{{wf.name}}" ng-init="wf.expanded=true">
                                     <div class='panel-heading' style='background-color:#eee;'>
                                         <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
                                             style='margin-right:5px;'>
@@ -391,7 +423,7 @@
                                             <li style="width: 61px;">Remove</li>
                                             <li>Well</li>
                                             <li>Dataset</li>
-                                            <li ng-repeat='inputItem in wf.inputs'>{{inputItem.name}}</li>
+                                            <li ng-repeat='inputItem in wf.inputs'>{{inputItem.type}}</li>
                                         </ul>
                                         <ul class='table-row' ng-repeat="item in wf.inputData track by $index">
                                             <li style="width: 61px; text-align: center;cursor: pointer;" ng-click="wiWorkflowMachineLearning.removeWell(wf, $index);">X</li>

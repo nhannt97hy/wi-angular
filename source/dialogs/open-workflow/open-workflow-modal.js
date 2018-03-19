@@ -3,13 +3,25 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
-        this.workflows = [];
+        //this.workflows = [];
         this.selectedWorkflow = null;
-
-        wiApiService.getWorkflowList(function (workflows) {
-            self.workflows = workflows;
-            self.selectedWorkflow = self.workflows.length ? self.workflows[0] : null;
-        });
+        this.getWorkflowList = function(wiItemDropdownCtrl) {
+            wiApiService.getWorkflowList(function (workflows) {
+                wiItemDropdownCtrl.items = workflows.map(function(wf) {
+                    return {
+                        data: {
+                            label: wf.name
+                        },
+                        properties: wf
+                    }
+                });
+                //self.workflows = workflows;
+                //self.selectedWorkflow = self.workflows.length ? self.workflows[0] : null;
+            });
+        }
+        this.workflowChanged = function(wfProps) {
+            self.selectedWorkflow = wfProps;
+        }
 
         this.onOkButtonClicked = function () {
             close(self.selectedWorkflow);
@@ -17,6 +29,15 @@ module.exports = function (ModalService, callback) {
 
         this.onCancelButtonClicked = function () {
             close(null);
+        }
+
+        this.deleteWorkflow = function(workflowModel, $event, wiItemDropdownCtrl) {
+            $event.stopPropagation();
+            $event.preventDefault();
+            console.log(workflowModel);
+            wiApiService.removeWorkflow(workflowModel.properties.idWorkflow, function() {
+                self.getWorkflowList(wiItemDropdownCtrl);
+            });
         }
     }
 

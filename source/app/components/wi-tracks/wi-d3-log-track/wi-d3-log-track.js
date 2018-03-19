@@ -427,7 +427,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve,
+            orderNum: _currentTrack.getShadingOrderKey()
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
@@ -960,7 +961,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         if(!shading) return;
-        track.setCurrentDrawing(shading);
+        // track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
             if (d3.event.button == 2) {
                 // _shadingOnRightClick();

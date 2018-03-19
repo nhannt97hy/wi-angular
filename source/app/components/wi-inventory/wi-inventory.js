@@ -175,7 +175,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
         if(modelProps.well_headers && modelProps.well_headers.length) {
             modelProps.well_headers.forEach(function(wellheader) {
                 switch (wellheader.header) {
-                    case 'STRT': 
+                    case 'TOP': 
                         modelProps.topDepth = wellheader.value;
                         break;
                     case 'STOP': 

@@ -354,33 +354,16 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.extendedTimeOut = 10000;
     toastr.options.preventDuplicates = true;
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
-    let functionBindingProp = {
-        $scope,
-        wiComponentService,
-        ModalService,
-        wiApiService,
-        wiOnlineInvService,
-        $timeout
-    };
-    window.utils = utils;
-    utils.setGlobalObj(functionBindingProp);
-    wiComponentService.putComponent(wiComponentService.UTILS, utils);
-    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    if(!window.localStorage.getItem('rememberAuth')) {
-        utils.doLogin(function () {
-            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
-        })
-    }else{
-        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
-        let query = queryString.parse(location.search);
+
+function restoreProject($timeout, wiApiService, ModalService){
+    let query = queryString.parse(location.search);
         if(Object.keys(query).length && query.idProject){
             $timeout(function () {
                 wiApiService.getProjectInfo(query.idProject, function (project) {
                     if (project.name) {
                         wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
                             if (projectData.name) {
-                                utils.projectOpen(wiComponentService, projectData);
+                                utils.projectOpen(projectData);
                             } else {
                                 utils.error("Project not exist!");
                             }
@@ -399,8 +382,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                                     wiApiService.getProject({
                                         idProject: lastProject.id
                                     }, function (projectData) {
-                                        let utils = wiComponentService.getComponent('UTILS');
-                                        utils.projectOpen(wiComponentService, projectData);
+                                        // let utils = wiComponentService.getComponent('UTILS');
+                                        utils.projectOpen(projectData);
                                     });
                                 }
                             })
@@ -411,5 +394,27 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                 },100);
             }
         }
+}
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
+    let functionBindingProp = {
+        $scope,
+        wiComponentService,
+        ModalService,
+        wiApiService,
+        wiOnlineInvService,
+        $timeout
+    };
+    window.utils = utils;
+    utils.setGlobalObj(functionBindingProp);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
+    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    if(!window.localStorage.getItem('rememberAuth')) {
+        utils.doLogin(function (sameUser) {
+            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+            if(sameUser) restoreProject($timeout, wiApiService, ModalService);
+        })
+    }else{
+        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+        restoreProject($timeout, wiApiService, ModalService);
     }
 });

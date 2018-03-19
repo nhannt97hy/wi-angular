@@ -9,6 +9,7 @@ module.exports = function (ModalService, well, plotModel, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.props = angular.copy(plotModel.properties);
+        this.props.referenceDisplay = true;
         this.ref_Curves_Arr = plotModel.properties.reference_curves?angular.copy(plotModel.properties.reference_curves):[];
         this.SelectedRefCurve = self.ref_Curves_Arr && self.ref_Curves_Arr.length ? 0: -1;
         this.well = well;
@@ -163,7 +164,7 @@ module.exports = function (ModalService, well, plotModel, callback) {
         }
 
         this.IsNotValid = function(){
-            return !self.props.referenceTopDepth || !self.props.referenceBottomDepth ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || !self.props.referenceVertLineNumber;
+            return self.props.referenceTopDepth == null || self.props.referenceBottomDepth == null ||self.props.referenceTopDepth >= self.props.referenceBottomDepth || self.props.referenceVertLineNumber == null;
         }
 
         this.onApplyButtonClicked = function() {

@@ -191,13 +191,13 @@
             }
         </style>
         <wizard indicators-position="top" on-finish="wiWorkflowMachineLearning.finishWizard()">
-            <wz-step wz-title="Choose inputs&output curve">
+            <wz-step wz-title="Selection curve">
                 @@include('./curve-selection.html')
             </wz-step>
-            <wz-step wz-title="Edit infomation model">
+            <wz-step wz-title="Model Params">
                 @@include('./model-params.html')
             </wz-step>
-            <wz-step wz-title='Select Inputs'>
+            <wz-step wz-title='Data Inputs'>
                 @@include('./data-input.html')
             </wz-step>
         </wizard>

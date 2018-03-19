@@ -32,15 +32,15 @@
                                 <h4>{{param.name}}</h4>
                                 <label class="control-label col-sm-3">Layers</label>
                                 <div class="col-sm-9">
-                                    <input ng-model='param.value.nLayer' 
+                                    <input ng-model='param.value.nLayer' type="number"
                                         ng-change="wiWorkflowMachineLearning.nnConfigNLayerChanged(param.value);wiWorkflowMachineLearning.updateNNConfig();" 
-                                        class="form-control wi-form-control">
+                                        class="form-control wi-form-control" min="1">
                                 </div>
                                 <div ng-repeat="layer in param.value.layerConfig">
                                     <label class="control-label col-sm-3">{{layer.name}}</label>
                                     <div class="col-sm-9">
-                                        <input class="form-control wi-form-control" ng-model="layer.value" 
-                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();">
+                                        <input class="form-control wi-form-control" ng-model="layer.value" type="number"
+                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();" min="1">
                                     </div>
                                 </div>
                             </div>

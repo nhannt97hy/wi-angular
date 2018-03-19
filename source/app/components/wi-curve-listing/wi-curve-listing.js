@@ -73,8 +73,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.onChangeWell = function (clear) {
         getDatasets();
         self.focus = null;
-        self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id });
-        if (!self.depthArr[self.currentIndex].length) {
+        self.currentIndex = self.SelectedWell.name;
+        if (!self.depthArr[self.currentIndex]) {
             spinner.show();
             let step = self.SelectedWell.step;
             let topDepth = self.SelectedWell.topDepth;
@@ -95,6 +95,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.loaded = self.depthArr[self.currentIndex].slice(0, threshold);
             self.first = 0;
         }
+
+        if(!self.curvesData[self.currentIndex]) self.curvesData[self.currentIndex] = new Array();
 
         if (clear) {
             self.curvesData[self.currentIndex].forEach(curve => {
@@ -121,8 +123,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.datasets = [];
         self.curvesArr = [];
         self.wells = utils.findWells();
-        self.curvesData = new Array(self.wells.length).fill().map(u => { return new Array() });
-        self.depthArr = new Array(self.wells.length).fill().map(u => { return new Array() });
+        self.curvesData = new Object();
+        self.depthArr = new Object();
         if (selectedNodes && selectedNodes.length) {
             switch (selectedNodes[0].type) {
                 case 'well':
@@ -144,18 +146,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         else {
             self.SelectedWell = self.wells && self.wells.length ? self.wells[0] : null;
         }
-        self.currentIndex = self.wells.findIndex(w => { return w.id == self.SelectedWell.id });
 
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function () {
             self.applyingInProgress = false;
             $timeout(function () {
                 async.series([function (callback) {
                     self.wells = utils.findWells();
-                    self.curvesData = new Array(self.wells.length).fill().map(u => { return new Array() });
-                    self.depthArr = new Array(self.wells.length).fill().map(u => { return new Array() });
                     self.SelectedWell = self.wells.find(w => { return w.id == self.SelectedWell.id });
                     if (!self.SelectedWell) {
-                        self.curvesData.splice(self.currentIndex, 1);
+                        delete self.curvesData[self.currentIndex];
+                        delete self.depthArr[self.currentIndex];
                         self.SelectedWell = self.wells[0];
                     }
                     callback();

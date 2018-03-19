@@ -10,7 +10,9 @@ Utils.extend(Drawing, Selection);
 function Selection(config) {
     // this.maskData = config.maskData || [];
     this.maskData = config.data || {};
-    this.selectionData = [];
+    this.selectionPointData = [];
+    this.newSelectionData = [];
+    this.well = null;
     this.selectionBins = [];
     this.currentMask = null;
     this.idCombinedBoxTool = config.idCombinedBoxTool;
@@ -25,7 +27,7 @@ Selection.prototype.setProperties = function (props) {
     Utils.setIfNotUndefined(this, 'idCombinedBoxTool', props.idCombinedBoxTool);
     Utils.setIfNotUndefined(this, 'idCombinedBox', props.idCombinedBox);
     Utils.setIfNotUndefined(this, 'idSelectionTool', props.idSelectionTool);
-    Utils.setIfNotNull(this, 'data', props.data);
+    // Utils.setIfNotNull(this, 'data', props.data);
     Utils.setIfNotNull(this, 'maskData', Object.assign({}, this.maskData, props.maskData));
     Utils.setIfNotNull(this, 'currentMask', props.maskData);
 }
@@ -46,17 +48,20 @@ Selection.prototype.setSelectionBins = function (selectionBins) {
     this.selectionBins = selectionBins;
 }
 
-Selection.prototype.setMode = function(mode, place) {
+Selection.prototype.setMode = function (mode, place) {
     switch (place) {
         case 'logplot':
+            if (!this.canvasLogtrack) break;
             this.canvasLogtrack.raise();
             this.canvasLogtrack.style('cursor', mode == null ? 'default' : 'copy');
             break;
         case 'histogram':
+            if (!this.svg) break;
             this.svg.raise();
             this.svg.style('cursor', mode == null ? 'default' : 'copy');
             break;
         case 'crossplot':
+            if (!this.canvas) break;
             this.canvas.raise();
             this.canvas.style('cursor', mode == null ? 'default' : 'copy');
             break;
@@ -137,17 +142,36 @@ Selection.prototype._doPlot = function () {
 
 Selection.prototype.doPlot = function () {
     let transformY = this.getTransformY();
-    this.data.forEach(d => {
-        const minDepth = Math.min(+d.startDepth, +d.stopDepth);
-        if (+d.startDepth != minDepth) {
-            d.startDepth = minDepth;
-            d.stopDepth = +d.startDepth;
-        }
-        let start = transformY(+d.startDepth);
-        let stop = transformY(+d.stopDepth);
-        this.rect = Utils.getBoundingClientDimension(this.root.node());
-        this.canvasLogtrack.raise();
-        this.selectionDrawingArea.fillStyle = this.color;
-        this.selectionDrawingArea.fillRect(0, start, this.rect.width, stop - start);
-    })
+    // const topDepth = this.well.topDepth;
+    // const step = this.well.step;
+
+    // test only for W4 now
+    const topDepth = 1119.8352;
+    const step = 0.1524;
+
+    if (this.newSelectionData.length) {
+        this.newSelectionData.forEach(d => {
+            let depth = topDepth + step * d;
+            let pxlY = transformY(depth);
+            this.rect = Utils.getBoundingClientDimension(this.root.node());
+            this.canvasLogtrack.raise();
+            this.selectionDrawingArea.strokeStyle = this.color;
+            this.selectionDrawingArea.beginPath();
+            this.selectionDrawingArea.moveTo(0, pxlY);
+            this.selectionDrawingArea.lineTo(this.rect.width, pxlY);
+            this.selectionDrawingArea.stroke();
+        });
+    } else {
+        this.data.forEach(d => {
+            let depth = topDepth + step * d;
+            let pxlY = transformY(depth);
+            this.rect = Utils.getBoundingClientDimension(this.root.node());
+            this.canvasLogtrack.raise();
+            this.selectionDrawingArea.strokeStyle = this.color;
+            this.selectionDrawingArea.beginPath();
+            this.selectionDrawingArea.moveTo(0, pxlY);
+            this.selectionDrawingArea.lineTo(this.rect.width, pxlY);
+            this.selectionDrawingArea.stroke();
+        });
+    }
 }

@@ -77,6 +77,7 @@ const CUT_CURVE = '/project/well/dataset/curve/move';
 const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
 const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
+const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -246,6 +247,10 @@ const GET_WORKFLOW = '/workflow/info';
 const EDIT_WORKFLOW = '/workflow/edit';
 const DELETE_WORKFLOW = '/workflow/delete';
 const GET_WORKFLOW_LIST = "/workflow/list";
+
+const CREATE_WORKFLOW_SPEC = '/workflow-spec/new';
+const GET_WORKFLOW_SPEC_LIST = '/workflow-spec/list';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -369,7 +374,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        if (err.reason) toastr.error(err.reason);
+                        //if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });
@@ -1799,9 +1804,18 @@ Service.prototype.getWorkflow = function (idWorkflow, callback) {
 }
 
 Service.prototype.removeWorkflow = function (idWorkflow, callback) {
-    this.post(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
+    this.delete(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
 }
 
 Service.prototype.getWorkflowList = function(callback){
     this.post(GET_WORKFLOW_LIST, null, callback);
+}
+Service.prototype.createWorkflowSpec = function(name, spec, callback) {
+    this.post(CREATE_WORKFLOW_SPEC, {name:name, content:spec}, callback);
+}
+Service.prototype.getWorkflowSpecList = function(callback) {
+    this.post(GET_WORKFLOW_SPEC_LIST, null, callback);
+}
+Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
+    this.post(IS_EXISTED_CURVE, {name: curveName, idDataset: idDataset}, callback);
 }

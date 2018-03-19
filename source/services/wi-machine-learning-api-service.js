@@ -18,30 +18,37 @@ const wiMachineLearningURL = "http://54.169.13.92:3002/store/api";
 
 const LIST_MODEL = wiMachineLearningURL + "/model/list";
 const TRAIN_MODEL = wiMachineLearningURL + "/model/new";
-const RETRAIN_MODEL = wiMachineLearningURL + "/model/retrain";
 const PREDICT = wiMachineLearningURL + "/predict";
 
 
 let app = angular.module(moduleName, []);
 
-app.factory(wiServiceName, function ($http, Upload) {
-    return new WiMachineLearningApi($http, Upload);
+app.factory(wiServiceName, function ($http, Upload, wiComponentService) {
+    return new WiMachineLearningApi($http, Upload, this.wiComponentService);
 });
 
-function WiMachineLearningApi($http, Upload) {
+function WiMachineLearningApi($http, Upload, wiComponentService) {
     this.$http = $http;
     this.Upload = Upload;
+    this.wiComponentService = wiComponentService;
 }
 
 WiMachineLearningApi.prototype.doPost = function(url, paramObj, callback) {
+    let wiComponentService = this.wiComponentService;
+    wiComponentService.getComponent('SPINNER').show();
     this.$http({
         method: 'POST',
         url: url,
         data: paramObj
     }).then(function(response) {
-        callback(response.data);
+        wiComponentService.getComponent('SPINNER').hide();
+        if(response.data.statusCode != 200)
+            toastr.error(response.data.content, '');
+        else
+            callback(response.data.content);
     }, function(err) {
-        callback({statusCode: 400, content: err});
+        wiComponentService.getComponent('SPINNER').hide();
+        toastr.error(err, '');
     });
 }
 
@@ -51,10 +58,6 @@ WiMachineLearningApi.prototype.listModel = function(callback) {
 
 WiMachineLearningApi.prototype.trainModel = function(payload, callback) {
     this.doPost(TRAIN_MODEL, payload, callback);
-}
-
-WiMachineLearningApi.prototype.retrainModel = function(payload, callback) {
-    this.doPost(RETRAIN_MODEL, payload, callback);
 }
 
 WiMachineLearningApi.prototype.predict = function(payload, callback) {

@@ -1,4 +1,9 @@
 <div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <style>
+        .line-height-1_5 {
+            line-height: 1.5;
+        }
+    </style>
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -14,11 +19,20 @@
                 <form class="form-horizontal">
                     <div class="form-group">
                         <label class="control-label col-sm-3">Workflow name:</label>
+                        <wi-item-dropdown class='col-sm-9 height34px position-fixed'
+                            on-wi-dropdown-init="wiModal.getWorkflowList"
+                            on-item-changed="wiModal.workflowChanged"
+                            place-holder="Select workflow"
+                            ctrl-btn-icon='fa fa-times-circle line-height-1_5'
+                            on-ctrl-btn-click='wiModal.deleteWorkflow'>
+                        </wi-item-dropdown>
+                        <!--
                         <div class="col-sm-9">
                             <select ng-model="wiModal.selectedWorkflow" class="form-control"
                             ng-options="wf.name for wf in wiModal.workflows track by wf.idWorkflow">
                             </select>
                         </div>
+                        -->
                     </div>
                 </form>
             </div>

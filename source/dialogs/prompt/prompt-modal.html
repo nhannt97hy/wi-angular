@@ -6,15 +6,13 @@
 				<h4 ng-bind-html="wiModal.title"></h4>
 			</div>
 			<div class="modal-body text-center">
-				<form class="form-horizontal" action="" name="modalBlankPlot">
+				<div class="form-horizontal">
 					<div class="form-group">
 						<label class="control-label col-sm-4" for="name">{{wiModal.inputName}}:</label>
 						<div class="col-sm-8">
 							<input ng-if="wiModal.type != 'select'" type="{{wiModal.type}}" class="form-control"
 								ng-model="wiModal.input"
-                                wi-enter="wiModal.onOkButtonClicked()" 
-                                ng-click="wiModal.error = null"
-                                ng-blur="wiModal.onBlur();"
+								ng-click="wiModal.error = null"
 								required autofocus>
 							<select ng-if="wiModal.type == 'select'"
 											class="form-control wi-form-control"
@@ -23,7 +21,7 @@
 											ng-options="option as option.label for option in wiModal.options"></select>
 						</div>
 					</div>
-				</form>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'

@@ -16,14 +16,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     );
     this.currentModelType = null;
     
-    
     const LINEAR_REGRESSION_PARAMS = [];
 
     const HUBER_REGRESSOR_PARAMS = [{
         name: 'max_iter', 
         type: 'number', 
         value: 100,
-        min: 1
+        min: 100,
+        max: 1000
     }, {
         name: "alpha",
         type: 'number',
@@ -52,11 +52,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     const LASSOS_PARAMS = [{
         name: 'max_iter', 
         type: 'number', 
-        value: 1000
+        value: 1000,
+        min: 100,
+        max: 1000
     }, {
         name: "alpha",
         type: 'number',
-        value: 1,
+        value: 0.1,
         step: 0.1
     }, {
         name: "data_min",
@@ -131,7 +133,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "n_estimators",
         type: 'number',
-        value: 10
+        value: 10,
+        min: 10,
+        max: 100
     }, {
         name: "data_min",
         type: 'number',
@@ -170,9 +174,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "gamma",
         type: 'number',
-        value: 10,
+        value: 0.1,
         nullValue: 'auto',
-        step: 0.1
+        step: 0.1,
+        max: 1
     }, {
         name: "C",
         type: 'number',
@@ -285,7 +290,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             }]
         }
     }];
-
+            
+    let inputs = [{class: 'curve input'}, {class: 'curve input'}, {class: 'curve output'}]
     this.workflowConfig = {
         name: "MachineLearning",
         model: {
@@ -327,28 +333,22 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     parameters: CONJUGATE_GRADIENT_PARAMS
                 }] 
             },
-            inputs: [{name: "curve input"}, {name:'curve input'}, {name: 'curve output'}]
+            inputs: inputs
         },
         steps: [
             {
                 name: "Training",
-                inputs: [{ name: "Curve input" }, { name: "Curve output" }],
-                parameters: [],
-                outputs: [],
                 function: train
             },
             {
                 name: "Verify",
-                inputs: [{ name: "Curve input" }, { name: "Curve verify" }],
                 parameters: [],
                 outputs: [],
                 function: verify
             },
             {
                 name: "Predict",
-                inputs: [{ name: "Curve input" }],
                 parameters: [],
-                outputs: [],
                 function: predict
             }
         ]
@@ -378,20 +378,22 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
 
     function updateNNConfig() {
         if (!self.currentModelType) {
-            self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
+            // self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
             return;
         }
         if (!self.currentModelType.parameters.length) {
-            self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
+            // self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
             return;
         }
         let config = self.currentModelType.parameters[self.currentModelType.parameters.length -1];
         if (config.type != 'nnconfig') {
-            self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
+            // self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
             return;
         }
-        self.nnConfig.inputs = [{name: "a0"},{name: "a0"},{name: "a0"}];
-        self.nnConfig.outputs = [{name: "a0"}];
+        self.nnConfig = {inputs: [], outputs:[], layers: []};
+        
+        self.nnConfig.inputs = inputs.filter(function(input){return input.class == 'curve input'});
+        self.nnConfig.outputs = inputs.filter(function(input){return input.class == 'curve output'});
         self.nnConfig.layers = config.value.layerConfig.map(function(item){
             return item.value;
         });
@@ -399,7 +401,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             self.wiNNCtrl.update(self.nnConfig);
         });
     }
-    this.updateNNConfig = _.debounce(updateNNConfig, 1000);    
+    
+    this.updateNNConfig = _.debounce(updateNNConfig);    
+    setInterval(self.updateNNConfig(), 1000);
     
     this.$onInit = function () {
         if (self.name) wiComponentService.putComponent(self.name, self);
@@ -674,24 +678,43 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             });
         });
     }
-    this.onSelectTemplate = function (parentIdx, itemIdx) {
+    this.onSelectTemplate = function (itemIdx) {
         let __SELECTED_NODE = self.selectionList.find(function (d) {
             return d.data.selected;
         });
         if (__SELECTED_NODE) {
-            let step = self.workflowConfig.steps[parentIdx];
-            let item = step.inputs[itemIdx];
+            let inputs = self.workflowConfig.model.inputs;
+            let item = inputs[itemIdx];
             item.label = __SELECTED_NODE.data.label;
             item.value = __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
+            item.name = item.label;
             item.type = self.selectionType;
             __inputChanged.status = true;
             let tmp = new Set(__inputChanged.index);
-            tmp.add(parentIdx);
+            tmp.add(0,1,2);
             __inputChanged.index = Array.from(tmp);
         } else {
             toastr.error("please select data type!");
         }
     };
+    // this.onSelectTemplate = function (parentIdx, itemIdx) {
+    //     let __SELECTED_NODE = self.selectionList.find(function (d) {
+    //         return d.data.selected;
+    //     });
+    //     if (__SELECTED_NODE) {
+    //         let step = self.workflowConfig.steps[parentIdx];
+    //         let item = step.inputs[itemIdx];
+    //         item.label = __SELECTED_NODE.data.label;
+    //         item.value = __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
+    //         item.type = self.selectionType;
+    //         __inputChanged.status = true;
+    //         let tmp = new Set(__inputChanged.index);
+    //         tmp.add(parentIdx);
+    //         __inputChanged.index = Array.from(tmp);
+    //     } else {
+    //         toastr.error("please select data type!");
+    //     }
+    // };
 
     this.onDeleteInput = function (idx) {
         for (let wf of self.workflowConfig.steps) {
@@ -788,17 +811,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }
     }
     this.refreshProject = refreshProject;
-    this.getListModel = function(){
-        wiMachineLearningApiService.listModel(function(res){
-            console.log('list: ', res);
-            if(res.statusCode != 200)
-                toastr.error(res.content);
-            else {
-                self.listModel = res.content;
-                self.modelVerify = self.modelPredict = self.modelRetrain = self.listModel[0];
-            }
-        });
-    };
+    
     this.getProjectList = function (wiItemDropdownCtrl) {
         if (!self.idProject) {
             wiApiService.getProjectList(null, function (projectList) {
@@ -916,17 +929,18 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 );
                 let wellName = wellModel.properties.name;
                 if (!wf.inputData || !Array.isArray(wf.inputData))
-                    wf.inputData = new Array();
+                wf.inputData = new Array();
                 let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
                 if (existDataset) return;
+                
                 let inputItems = wf.inputs.map(function (ipt) {
                     let tempItem = {
                         name: ipt.name,
                         choices: matchCurves(datasetModel.children, ipt)
                     };
                     tempItem.value = tempItem.choices.length
-                        ? tempItem.choices[0]
-                        : null;
+                    ? tempItem.choices[0]
+                    : null;
                     return tempItem;
                 });
                 let input = {
@@ -939,6 +953,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     wf.inputData.push(input);
                     __inputDataLen = wf.inputData.length;
                 });
+                console.log(wf.inputData);
             }
         });
     };
@@ -1031,15 +1046,21 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
 
     this.validate = function () {
-        for (let step of self.workflowConfig.steps) {
-            if (!step.disabled) {
-                for (let input of step.inputs) {
-                    if (!input.value) return false;
-                }
-            }
+        for (let input of inputs) {
+            if (!input.value) return false;
         }
         return true;
     };
+    // this.validate = function () {
+    //     for (let step of self.workflowConfig.steps) {
+    //         if (!step.disabled) {
+    //             for (let input of step.inputs) {
+    //                 if (!input.value) return false;
+    //             }
+    //         }
+    //     }
+    //     return true;
+    // };
 
     function saveCurve(curveList, curveInfo, callback) {
         getFamilyList(familyList => {
@@ -1155,69 +1176,51 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     this.finishWizard = function () {
         console.log("Finish him!");
     }
-    this.addCurveInput = function(){
-        self.workflowConfig.steps.forEach(function(step){
-            step.inputs.unshift({name: "Curve input"});
-        });
-    }
-    this.removeCurveInput = function(){
-        let i = self.workflowConfig.steps[0].inputs.length;
-        if(i==2)
-            toastr.error('Need least at 1 curve input', '');
-        else{
-            self.workflowConfig.steps.forEach(function(step){
-                step.inputs.splice(0, 1);
-            });
-        }
-    }
-    this.isCurveOutput = function(wf, i){
-        if(wf.name=='Predict')
-            return false;
-        if(i==wf.inputs.length-1)
-            return true;
-        return false;
-    }
     this.removeWell = function(wf, i){
         wf.inputData.splice(i, 1);
     }
+    this.addCurveInput = function(){
+        self.workflowConfig.model.inputs.unshift({class: "curve input"});
+    }
+    this.removeCurveInput = function(index){
+        let i = self.workflowConfig.model.inputs.length;
+        if(i==2)
+            toastr.error('Need least at 1 curve input', '');
+        else{
+            self.workflowConfig.model.inputs.splice(index, 1);
+        }
+    }
+    this.outputCurveStyle = function(idx){
+        if(idx == self.workflowConfig.model.inputs.length -1)
+            return {
+                "margin-top": "30px"
+            }
+        return {};
+    }
     
-    let listCurves = [];
     function getDataCurves(k, callback){
-        listCurves = [];
-        // console.log(self.workflowConfig);
+        let curveInputs = [];
         let inputData = self.workflowConfig.steps[k].inputData;
         if(inputData){
-            let listInputData = [];
-            inputData.forEach(function(data){
-                let checkFullCurve = true;
-                for(let j =0 ; j<data.inputs.length; j++){
-                    if(!data.inputs[j].value){
-                        checkFullCurve = false;
-                        break;
-                    }
-                }
-                if(checkFullCurve)
-                listInputData.push(data.inputs);
+            let filterInputData = inputData.filter(function(iptData){
+                let inputsNull = iptData.inputs.filter(function(ipt){return ipt.value==null;});
+                return inputsNull.length>0?false:true;
             });
-            for(let i =0; i< inputData[0].inputs.length; i++){
-                listCurves[i] = [];
-            }
-            listInputData.forEach(function(input_data, i){
+            filterInputData.forEach(function(iptData, i){
                 let j=-1;
-                async.each(input_data, function(curve,__end){
-                    wiApiService.dataCurve(curve.value.id, function(data){
+                async.each(iptData.inputs, function(curveInfo,__end){
+                    wiApiService.dataCurve(curveInfo.value.id, function(curveData){
                         j++;
-                        data.forEach(function(point){
-                            listCurves[j].push(parseFloat(point.x));
+                        if(i==0)
+                            curveInputs[j] = [];
+                        curveData.forEach(function(data){
+                            curveInputs[j].push(parseFloat(data.x));
                         });
                         __end();
                     });
                 }, function(err){
-                    if(i==listInputData.length-1){
-                        // if(k!=0)
-                        //     listCurves.splice(listCurves.length-1, 1);
-                        // console.log(listCurves);
-                        callback(listCurves);
+                    if(i==filterInputData.length-1){
+                        callback(curveInputs);
                     }
                 });
             });
@@ -1234,204 +1237,134 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         for(let i = 0; i<curves[0].length; i++){
             let checkNull = true;
             for(let j=0; j<l; j++)
-                if(isNaN(curves[j][i]))
+                if(isNaN(curves[j][i])){
                     checkNull = false;
+                    break;
+                }
             if(checkNull)
                 for(let j = 0; j<l; j++){
                     filterCurves[j].push(curves[j][i]);
                 }
         }
-        // console.log('result of filterNull: ', filterCurves);
         return filterCurves;
     }
     function train(){
         getDataCurves(0, function(list_curves){
             let curves = filterNull(list_curves);
+            let params;
+            if(self.currentModelType.name == 'LinearRegression')
+                params = {};
+            else{
+                let parameters = self.currentModelType.parameters;
+                function getValueParam(name){
+                    let param = parameters.filter(function(param){return param.name==name;});
+                    if(param.length){
+                        if(param[0].type=='number'){
+                            return param[0].value;
+                        }
+                        else if(param[0].type=='select'){
+                            if(Number.isInteger(param[0].value))
+                                return param[0].choices[0].name;
+                            else
+                                return param[0].value.name;
+                        }
+                        else {
+                            let layers = [];
+                            param[0].value.layerConfig.forEach(function(layer){layers.push(layer.value);});
+                            return layers;
+                        }
+                    }
+                }
+                params = {
+                    data_scale: [getValueParam('data_min'), getValueParam('data_max')],
+                    target_scale: [getValueParam('target_min'), getValueParam('target_max')],
+                    max_iter: getValueParam('max_iter'),
+                    alpha: getValueParam('alpha'),
+                    max_features: getValueParam('max_features'),
+                    kernel: getValueParam('kernel'),
+                    gamma: getValueParam('gamma'),
+                    C: getValueParam('C'),
+                    n_estimators: getValueParam('n_estimators'),
+                    layers: getValueParam('Neuron Network Structure'),
+                    activation: getValueParam('activation')
+                }
+
+            }
             let payload = {
-                name: self.nameModel,
+                id: self.currentModelType.name + new Date(),
                 type: self.currentModelType.name,
-                data: [],
-                target: [],
-                description: self.description,
+                params: params,
+                train: {
+                    target: curves.splice(curves.length-1, 1),
+                    data: curves
+                },
                 user_created: username,
-                params: {
-                    data_scale: self.data_scale,
-                    target_scale: self.target_scale,
-                    max_iter: self.max_iter,
-                    alpha: self.alpha,
-                    max_features: self.max_features,
-                    kernel: self.kernel,
-                    gamma: (self.gammaAuto==true)?"auto":self.gamma,
-                    C: self.C,
-                    n_estimators: self.n_estimators,
-                    layers: self.hiddenLayer,
-                    activation: self.activation
-                }
             };
-            for(let i=0; i<curves.length-1; i++)
-                payload.data.push(curves[i]);
-            curves[curves.length-1].forEach(function(x){
-                payload.target.push(x);
-            });
-            wiComponentService.getComponent('SPINNER').show();   
+            console.log(payload);
             wiMachineLearningApiService.trainModel(payload, function(res){
-                wiComponentService.getComponent('SPINNER').hide();   
-                if(res.statusCode == 200){
-                    console.log(res);
-                    self.model_id_last_train = res.model_id;
-                    toastr.success('Train model success!', '');
+                if(res){
+                    self.idModel = payload.id;
+                    console.log('train model success', res);
                 }else{
-                    toastr.error(res.content, '');
+                    console.log('train model fail');
                 }
-            });    
+            });
+            // wiComponentService.getComponent('SPINNER').show();   
+            // wiMachineLearningApiService.trainModel(payload, function(res){
+            //     wiComponentService.getComponent('SPINNER').hide();   
+            //     if(res.statusCode == 200){
+            //         console.log(res);
+            //         self.model_id_last_train = res.model_id;
+            //         toastr.success('Train model success!', '');
+            //     }else{
+            //         toastr.error(res.content, '');
+            //     }
+            // });    
         });
     };
     function verify(){
         getDataCurves(1, function(list_curves){
-            let temp =[];
-            for(let i=0; i<list_curves.length-1;i++)
-                temp.push(list_curves[i]);
-            let curves = filterNull(temp);
+            let verifyCurve = list_curves.splice(list_curves.length-1, 1);
+            let dataCurve = filterNull(list_curves);
             let payload = {
-                model_id: self.modelVerify.id,
-                data: []
+                model_id: self.idModel,
+                data: dataCurve
             };
-            if(!self.workflowConfig.steps[0].disabled)
-                payload.model_id = self.model_id_last_train;
-            curves.forEach(function(curve){
-                payload.data.push(curve);
-            });
-            // console.log("data-verify:", payload.data);
-            wiComponentService.getComponent('SPINNER').show();  
+            
             wiMachineLearningApiService.predict(payload, function(res){
-                wiComponentService.getComponent('SPINNER').hide();
-                console.log(res);
-                if(res.statusCode ==200){
-                    toastr.success('Verify success!', '');
-                    let target = [];
-                    res.content.forEach(function(x){
-                        target.push(x);
-                    });
-                    for(let i = 0; i<list_curves[0].length; i++)
-                    {
-                        let checkNull = true;
-                        for(let j=0; j< list_curves.length-1; j++)
-                            if(isNaN(list_curves[j][i])){
-                                checkNull = false;
-                                break;
-                            }
-                        if(!checkNull)
-                            target.splice(i,0,NaN);
-                    }
-                    console.log('result of verify: ', target);
-                    console.log('verify curve: ', list_curves[list_curves.length-1]);
+                if(res){
+                    console.log('verify success', res);
                 }else{
-                    toastr.error(res.content, '');
+                    console.log('verify fail');
                 }
             });
         });
     };
     function predict(){
         getDataCurves(2, function(list_curves){
-            let curves = filterNull(list_curves);
+            let dataCurve = filterNull(list_curves);
             let payload = {
-                model_id: self.modelPredict.id,
-                data: curves
+                model_id: self.idModel,
+                data: dataCurve
             };
-            console.log('data predict: ', payload.data);
-            if(!self.workflowConfig.steps[0].disabled)
-                payload.model_id = self.model_id_last_train;
-            wiComponentService.getComponent('SPINNER').show(); 
+            
             wiMachineLearningApiService.predict(payload, function(res){
-                wiComponentService.getComponent('SPINNER').hide();
-                if(res.statusCode == 200){
-                    toastr.success('Predict observation success!', '');
-                    let target = [];
-                    res.content.forEach(function(x){
-                        target.push(x);
-                    });
-                    for(let i = 0; i<list_curves[0].length; i++)
-                    {
-                        let checkNull = true;
-                        for(let j=0; j< list_curves.length; j++)
-                            if(isNaN(list_curves[j][i])){
-                                checkNull = false;
-                                break;
-                            }
-                        if(!checkNull)
-                            target.splice(i,0,NaN);
-                    }
-                    console.log('target of predict after fill null: ', target);
+                if(res){
+                    console.log('predict success', res);
                 }else{
-                    toastr.error(res.content, '');
+                    console.log('predict fail');
                 }
             });
         });
     };
     
-    this.listKernel = ["rbf", "linear", "poly", "sigmoid"];
-    this.kernel = this.listKernel[0];
-    this.listActivation = ["Tanh", "Sigmoid"];
-    this.activation = this.listActivation[0];
-    this.nameModel = "New Model";
-    this.max_iter = 100;
-    this.alpha = 0.0001;
-    this.C = 0.1;this.gamma = 0.1;
-    this.listFeatures = ['auto', 'sqrt', 'log2'];
-    this.max_features = self.listFeatures[0];
-    this.n_estimators = 10;
-    this.data_scale = [0,1];
-    this.target_scale = [0,1];
-    this.nLayers = this.nNodes = 1;
-    this.description = 'description';
-    this.inputCurves = [];this.outputCurves = [];
-    self.hiddenLayer = [4,4,4,4];
-    this.change = function(){
-        self.inputCurves = [];
-        self.outputCurves = [];
-        let leng = self.workflowConfig.steps[0].inputs.length;
-        for(let i=0; i<leng-1; i++)
-        self.inputCurves.push({name: self.workflowConfig.steps[0].inputs[i].value});
-        self.outputCurves.push({name: self.workflowConfig.steps[0].inputs[leng-1].value});
-    }
-    this.addHiddenLayerButtonClicked = function () {
-        self.hiddenLayer.push(2);
-        self.hiddenLayer = angular.copy(self.hiddenLayer);
-    }
-    this.removeHiddenLayerButtonClicked = function () {
-        if(self.hiddenLayer.length>1){
-            self.hiddenLayer.pop();
-            self.hiddenLayer = angular.copy(self.hiddenLayer);
-        }
-    }
     this.refreshInputData = function(){
         self.workflowConfig.steps.forEach(function(step){
             step.inputData = [];
         });
     }
-    this.hideConfig = function(wf){
-        if(wf.name=="Training"){
-            return wf.disabled;
-        }else
-            return !self.workflowConfig.steps[0].disabled;
-    }
-    this.style = {
-        "flex": "1"
-    };
-    this.removeNode = function(i){
-        if(self.hiddenLayer[i]>=2)
-        self.hiddenLayer[i] --;
-        self.hiddenLayer = angular.copy(self.hiddenLayer);
-        console.log(self.hiddenLayer);
-    }
-    this.addNode = function(i){
-        self.hiddenLayer[i]++;
-        self.hiddenLayer = angular.copy(self.hiddenLayer);
-        console.log(self.hiddenLayer);
-    }
 
     this.onModelTypeListInit = function(wiItemDropdownCtrl) {
-        console.log('model type list init');
         wiItemDropdownCtrl.items = self.workflowConfig.model.modelType.choices.map(function(choice) {
             return {
                 data: {label: choice.name},

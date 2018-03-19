@@ -9,9 +9,6 @@ module.exports = function (ModalService, promptConfig, callback) {
         // type: [select, text]
         this.type = promptConfig.type ? promptConfig.type : 'text';
         this.options = promptConfig.options;
-        this.onBlur = function(args) {
-            console.log('onBlur', args);
-        }
         this.onOkButtonClicked = function () {
             close(self.input);
         }

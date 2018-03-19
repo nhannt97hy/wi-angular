@@ -3,6 +3,8 @@ const moduleName = "wi-workflow";
 
 function Controller(wiComponentService, wiApiService) {
     let self = this;
+
+    /*
     this.workflowConfig = {
         name: "Clastic",
         steps: [
@@ -157,6 +159,10 @@ function Controller(wiComponentService, wiApiService) {
         ]
 
     };
+    wiApiService.createWorkflowSpec('Clastic', this.workflowConfig, function(res){
+        console.log(res);
+    });
+    */
     /*
     this.workflowConfig = {
         name: "Missing curve reconstruction",
@@ -181,17 +187,11 @@ function Controller(wiComponentService, wiApiService) {
         ]
     };
     */
-    function getWorkflowConfig() {
-        wiApiService.getWorkflow(self.id, function (wfData) {
-            self.workflowConfig = wfData;
-        })
-    }
 
     this.$onInit = function () {
         self.name = 'workflow' + self.id + "Area";
         self.WorkflowPlayerName = "workflowplayer" + self.id + "Area";
         wiComponentService.putComponent(self.name, self);
-        self.showOutput = true;
     };
     this.getCurrentProjectId = function () {
         if (self.idProject) return self.idProject;
@@ -200,17 +200,6 @@ function Controller(wiComponentService, wiApiService) {
         );
         return (openProject || {}).idProject;
     };
-
-    this.SaveWorkflowButtonClicked = function () {
-        console.log("Save workflow");
-    }
-
-    this.EditWorkflowButtonClicked = function () {
-        console.log("Edit workflow");
-    }
-    this.toggleOutput = function () {
-        self.showOutput = !self.showOutput;
-    }
 }
 
 let app = angular.module(moduleName, []);

@@ -69,7 +69,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             },
             positiveFill : {
                 display : this.shadingOptions.isNegPosFill && this.shadingOptions.positiveFill.display,
-                pattern : this.shadingOptions.positiveFill.pattern ? this.shadingOptions.positiveFill.pattern : {
+                pattern : (this.shadingOptions.positiveFill || {}).pattern ? this.shadingOptions.positiveFill.pattern : {
                     name : 'none',
                     foreground : 'black',
                     background : 'blue'
@@ -77,7 +77,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             },
             negativeFill : {
                 display : this.shadingOptions.isNegPosFill && this.shadingOptions.negativeFill.display,
-                pattern : this.shadingOptions.negativeFill.pattern ? this.shadingOptions.negativeFill.pattern : {
+                pattern : (this.shadingOptions.negativeFill || {}).pattern ? this.shadingOptions.negativeFill.pattern : {
                     name : 'none',
                     foreground : 'black',
                     background : 'blue'
@@ -321,8 +321,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             utils.getPalettes(function(paletteList){
                 paletteNameArr = Object.keys(paletteList);
                 paletteValArr = JSON.stringify(Object.values(paletteList));
-                console.log("getPalettes");
-
                 callback();
 
             });
@@ -455,9 +453,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         }
 
         this.customFillsList = null;
-
+        let cfEmpty = [{name: '', content: []}];
         wiApiService.getCustomFills(function(customFillsList){
-            self.customFillsList = customFillsList;
+            self.customFillsList = cfEmpty.concat(customFillsList);
+
         });
         this.setCustomFills = function(){
             self.variableShadingOptions.fill.varShading.customFills = angular.copy(self.customFillsCurrent);
@@ -465,17 +464,28 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         this.saveCustomFills = function() {
             self.customFillsCurrent = self.variableShadingOptions.fill.varShading.customFills
             if(!self.customFillsCurrent.name) {
-                DialogUtils.errorMessageDialog(ModalService, "Add name CustomFills to save!");
+                DialogUtils.errorMessageDialog(ModalService, 'Add name CustomFills to save!');
             }
             else {
-                wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
-                    DialogUtils.confirmDialog(ModalService, "Save CustomFills", "CustomFills: " + customFills.name + " saved successfully!", function(){
-                        wiApiService.getCustomFills(function(customFillsList){
-                            self.customFillsList = customFillsList;
+                wiApiService.getCustomFills(function(customFillsList){
+                    let checkName = false;
+                    customFillsList.forEach(function(c) {
+                        if(self.customFillsCurrent.name == c.name) checkName = true;
+                    });
+                    if(checkName) {
+                        DialogUtils.confirmDialog(ModalService, 'Save CustomFills', 'Template "'+ self.customFillsCurrent.name + '" existed. Do you want to overwrite the existing object?', function(ret) {
+                            if(ret) saveCF();
                         });
+                    } else saveCF();
+                });
+            };
+            function saveCF() {
+                wiApiService.saveCustomFills(self.customFillsCurrent, function(customFills){
+                    wiApiService.getCustomFills(function(customFillsList){
+                        self.customFillsList = cfEmpty.concat(customFillsList);
                     });
                 });
-            }
+            };
         };
         this.setVarShadingType = function() {
             if(self.varShadingType == 'customFills') {
@@ -575,8 +585,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 message = validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
             }
             if(!message) {
-                let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions)
-                console.log("gg",self.shadingOptions);
+                let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions);
                 self._options = {
                     _index : shadingOptions._index,
                     changed : (!utils.isEmpty(shadingOptions.changed) &&  shadingOptions.changed == 0)
