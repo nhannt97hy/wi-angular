@@ -1,7 +1,7 @@
 <div>
         <style>
             wi-workflow-machine-learning>div {
-                height: calc(100% - 100px);
+                height: 100%;
                 flex: 1;
                 display: flex;
                 background-color: #f7f7f7;
@@ -188,6 +188,12 @@
                 background: white;
                 border-radius: 50%;
                 border: 1px solid #888;
+            }
+            .wizard-control {
+                position:absolute;
+                top: 5px;
+                left: 5px;
+                right: 5px;
             }
         </style>
         <wizard indicators-position="top" on-finish="wiWorkflowMachineLearning.finishWizard()">

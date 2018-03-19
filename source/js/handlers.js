@@ -152,6 +152,26 @@ exports.OpenWorkflowButtonClicked = function () {
         })
     });
 }
+exports.NewModelButtonClicked = function() {
+    console.log("new model");
+}
+
+exports.OpenModelButtonClicked = function() {
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    // let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'machine-learning',
+        title: "machine learning",
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: '<wi-workflow-machine-learning id-project="1" name="ABC" ></wi-workflow-machine-learning>',
+            name: 'Machine Learning'
+        }
+    })
+}
+
 // exports.WorkflowsButtonClicked = function () {
 //     console.log('WorkflowsButton is clicked');
 //     let wiComponentService = this.wiComponentService;

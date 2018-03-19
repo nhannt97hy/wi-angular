@@ -291,7 +291,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }
     }];
             
-    let inputs = [{class: 'curve input'}, {class: 'curve input'}, {class: 'curve output'}]
     this.workflowConfig = {
         name: "MachineLearning",
         model: {
@@ -333,7 +332,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     parameters: CONJUGATE_GRADIENT_PARAMS
                 }] 
             },
-            inputs: inputs
+            inputs: [{class: 'curve input'}, {class: 'curve input'}, {class: 'curve output'}]
         },
         steps: [
             {
@@ -342,13 +341,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             },
             {
                 name: "Verify",
-                parameters: [],
-                outputs: [],
                 function: verify
             },
             {
                 name: "Predict",
-                parameters: [],
                 function: predict
             }
         ]
@@ -392,8 +388,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }
         self.nnConfig = {inputs: [], outputs:[], layers: []};
         
-        self.nnConfig.inputs = inputs.filter(function(input){return input.class == 'curve input'});
-        self.nnConfig.outputs = inputs.filter(function(input){return input.class == 'curve output'});
+        self.nnConfig.inputs = self.workflowConfig.model.inputs.filter(function(input){return input.class == 'curve input'});
+        self.nnConfig.outputs = self.workflowConfig.model.inputs.filter(function(input){return input.class == 'curve output'});
         self.nnConfig.layers = config.value.layerConfig.map(function(item){
             return item.value;
         });
@@ -430,8 +426,17 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     console.log("inputs in step " + __inputChanged.index + " has changed! Must be refresh!");
                     __inputChanged.index.forEach(item => {
                         let step = self.workflowConfig.steps[item];
+                        let inputs = self.workflowConfig.model.inputs;
+                        if(item==2)
+                            inputs = inputs.filter(function(ipt){ipt.class=='curve input';});
+                        // step.inputData.forEach(child => {
+                        //     child.inputs.forEach((ipt, idx) => {
+                        //         ipt.choices = matchCurves(child.dataset.curves, step.inputs[idx]);
+                        //         ipt.value = ipt.choices.length ? ipt.choices[0] : null;
+                        //     })
+                        // })
                         step.inputData.forEach(child => {
-                            child.inputs.forEach((ipt, idx) => {
+                            inputs.forEach((ipt, idx) => {
                                 ipt.choices = matchCurves(child.dataset.curves, step.inputs[idx]);
                                 ipt.value = ipt.choices.length ? ipt.choices[0] : null;
                             })
@@ -933,7 +938,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
                 if (existDataset) return;
                 
-                let inputItems = wf.inputs.map(function (ipt) {
+                let inputs = self.workflowConfig.model.inputs;
+                if(wf.name=='Predict')
+                    inputs.filter(function(ipt){return ipt.class=='curve input';});
+                let inputItems = inputs.map(function (ipt) {
                     let tempItem = {
                         name: ipt.name,
                         choices: matchCurves(datasetModel.children, ipt)
@@ -1046,7 +1054,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
 
     this.validate = function () {
-        for (let input of inputs) {
+        for (let input of self.workflowConfig.model.inputs) {
             if (!input.value) return false;
         }
         return true;
@@ -1255,7 +1263,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             if(self.currentModelType.name == 'LinearRegression')
                 params = {};
             else{
-                let parameters = self.currentModelType.parameters;
+                let parameters = self.currentModelType.parameters; // -> param
                 function getValueParam(name){
                     let param = parameters.filter(function(param){return param.name==name;});
                     if(param.length){

@@ -1,7 +1,7 @@
 <div>
         <style>
             wi-workflow-machine-learning>div {
-                height: calc(100% - 100px);
+                height: 100%;
                 flex: 1;
                 display: flex;
                 background-color: #f7f7f7;
@@ -189,6 +189,12 @@
                 border-radius: 50%;
                 border: 1px solid #888;
             }
+            .wizard-control {
+                position:absolute;
+                top: 5px;
+                left: 5px;
+                right: 5px;
+            }
         </style>
         <wizard indicators-position="top" on-finish="wiWorkflowMachineLearning.finishWizard()">
             <wz-step wz-title="Selection curve">
@@ -367,7 +373,7 @@
                             Neural Network is disabled
                         </div>
                     </div>
-                    <div style="padding:0 10px;">
+                    <div class="wizard-control">
                         <button wz-previous class='btn btn-default' style='float: left;'>
                             <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
                             <span>Back</span>
@@ -445,7 +451,7 @@
                             </div>
                         </div>
                     </div>
-                    <div style="padding:0 10px;">
+                    <div class="wizard-control">
                         <button wz-previous ng-click="wiWorkflowMachineLearning.getListModel();" class=' btn btn-default' style='float: left;'>
                             <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
                             <span>Back</span>
