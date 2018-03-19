@@ -393,6 +393,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             newHeight = parentHeight;
         }
         updateSlidingHandler(newTop, newHeight);
+        saveStateToServer();
     };
 
     this.updateRangeSlidingHandler = function (rangePercent) {
