@@ -548,8 +548,8 @@ exports.TriTracksBlankButtonClicked = function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
-                        wiD3Ctrl.addLogTrack('Track 1', undefined, function () {
-                            wiD3Ctrl.addLogTrack('Track 2', undefined, function () {
+                        wiD3Ctrl.addLogTrack('Track 1', function () {
+                            wiD3Ctrl.addLogTrack('Track 2', function () {
                                 wiD3Ctrl.addLogTrack('Track 3');
                             });
                         });
