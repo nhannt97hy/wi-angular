@@ -1168,6 +1168,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
         d3.event.currentDrawing = this.currentDrawing;
         return;
     }
+    // selection priorities: curves ... biggest orderNum shading ... smallest orderNum shading
     this.getCurves().concat(this.getShadings().reverse()).forEach(function(d) {
         if (!current && d.nearPoint(x, y)) {
             current = d;

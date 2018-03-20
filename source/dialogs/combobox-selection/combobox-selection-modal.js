@@ -84,6 +84,7 @@ module.exports = function (ModalService, toolBox, idCombinedBox, callback) {
                             self.tools[i].idCombinedBox = idCombinedBox;
                             wiApiService.createCombinedBoxTool(self.tools[i], function(data) {
                                 self.tools[i] = data;
+                                self.tools[i].status = _NEW;
                                 callback();
                             });
                             break;

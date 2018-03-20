@@ -6,6 +6,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 	let comboviewHandlers = wiComponentService.getComponent('COMBOVIEW_HANDLERS');
 	let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+	let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
 
 	this.$onInit = function () {
 		self.wiD3AreaName = self.name + 'D3Area';
@@ -37,6 +38,23 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.toolBox, self.id, function(data) {
 			if (!data) return;
 			self.toolBox = data;
+			if (!self.toolBox.length) {
+				self.getwiD3Ctrl().viSelections = [];
+				return;
+			}
+			const _NEW = 'created';
+			self.toolBox.forEach(function(tool) {
+				switch (tool.status) {
+					case _NEW:
+						delete tool.status;
+						tool.data = [];
+						wiApiService.createSelectionTool(tool, function(selection) {
+							let viSelection = graph.createSelection(selection);
+							self.getwiD3Ctrl().viSelections.push(viSelection);
+						});
+						break;
+				}
+			});
 		});
 	}
 
