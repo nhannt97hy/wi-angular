@@ -161,7 +161,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log("width", _tracks);
         let sumOfOriWidth = 0;
         let widths = [];
-        // let fitWindowWidths = [];
         _tracks.forEach(function(t) {
             widths.push(t.width);
             sumOfOriWidth += t.width;
@@ -217,6 +216,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
             t.doPlot();
         })
+    }
+    this._fitWindow = function() {
+        return _fitWindow;
     }
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);

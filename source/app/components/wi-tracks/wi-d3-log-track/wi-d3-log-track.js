@@ -636,6 +636,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.wiD3Ctrl._drawTooltip(track);
         });
         track.onCurveDrag(function (desTrack) {
+            console.log("fitWindow", self.wiD3Ctrl._fitWindow());
+            let widths = [track.width, desTrack.width];
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
             curve.idTrack = desTrack.id;
@@ -961,7 +963,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         if(!shading) return;
-        // track.setCurrentDrawing(shading);
+        track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
             if (d3.event.button == 2) {
                 // _shadingOnRightClick();
