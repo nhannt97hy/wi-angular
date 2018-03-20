@@ -41,7 +41,7 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
-let wiNeuralNetwork = require('./wi-neural-network');
+
 let wiPlot = require('./wi-plot');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
