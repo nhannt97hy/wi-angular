@@ -127,6 +127,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             histogramProps.intervalDepthBottom = pointSet.intervalDepthBottom;
             histogramProps.color = pointSet.pointColor;
             histogramProps.activeZone = pointSet.activeZone;
+            histogramProps.loga = (xy == 'xCurve') ? pointSet.logX:pointSet.logY;
         }
     }
     function buildHistogramProps(crossplotModel, xy) {
