@@ -137,6 +137,13 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
             });
             wiD3CrossplotCtrl.pickVertex(idx, function(vertex) {
                 $("#ternary-modal").modal("show");
+                if(!vertex || typeof(vertex) == 'string') {
+                    toastr.error(vertex || "Invalid point!");
+                    viCrossplot.onMouseDown(
+                        wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    );
+                    return;
+                }
                 vertex = angular.copy(vertex);
                 vertex.x = +parseFloat(vertex.x).toFixed(4);
                 vertex.y = +parseFloat(vertex.y).toFixed(4);

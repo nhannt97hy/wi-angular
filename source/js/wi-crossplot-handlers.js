@@ -12,6 +12,7 @@ exports.EditFormatButtonClicked = function() {
 
 exports.ActiveZoneButtonClicked = function() {
     console.log('ActiveZoneButton is clicked');
+    this.wiCrossplot.getWiD3CrossplotCtrl().switchReferenceZone();
 }
 
 exports.FrequencyInfoButtonClicked = function() {
