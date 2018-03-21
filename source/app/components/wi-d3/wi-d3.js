@@ -217,9 +217,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             t.doPlot();
         })
     }
-    this._fitWindow = function() {
-        return _fitWindow;
-    }
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);
         let trackName = getTrackName(trackProperties);
