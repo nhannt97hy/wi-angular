@@ -50,10 +50,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let logplotId = logPlotCtrl.id;
 
+        let wiD3Ctrl = wiComponentService.getD3AreaForSlidingBar(self.name);
+
         let well = utils.findWellByLogplot(logplotId);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-        let minY = well.topDepth;
-        let maxY = well.bottomDepth;
+        let minY = wiD3Ctrl ? wiD3Ctrl.getMinDepth() : well.topDepth;
+        let maxY = wiD3Ctrl ? wiD3Ctrl.getMaxDepth() : well.bottomDepth;
         let stepY = well.step;
         wiApiService.infoCurve(idCurve, function (infoCurve) {
             let config = {
@@ -62,7 +64,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 minY: minY,
                 maxY: maxY,
                 yStep: stepY,
-                offsetY: minY,
+                offsetY: well.topDepth,
                 //scale: "Logarithmic" || "Linear",
                 scale: infoCurve.LineProperty ? infoCurve.LineProperty.displayType : "Linear",
                 line: {
@@ -94,6 +96,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                     _viCurve.setProperties({displayType: config.scale});
                     _viCurve.doPlot();
                 }
+                self.refCurve = _viCurve;
             });
         })
     }
@@ -138,6 +141,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         */
     }
 
+    this.updateDepthRange = function() {
+        if(self.refCurve) {
+            createPreview(self.refCurve.idCurve);
+        }
+    }
+
     function update(ui) {
         let parentHeight = actual(self.contentId, 'height');
         let tempTinyWindowsHeight = self.tinyWindow.height;
@@ -180,6 +189,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     let saveStateToServer = _.debounce(function () {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        if (!wiD3Controller) return;
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100.;

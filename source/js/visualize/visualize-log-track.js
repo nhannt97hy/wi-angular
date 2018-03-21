@@ -207,9 +207,8 @@ LogTrack.prototype.getCurves = function() {
  * @returns {Array}
  */
 LogTrack.prototype.getShadings = function() {
-    return this.drawings.filter(function(d) {
-        return d.isShading();
-    });
+    return this.drawings.filter(d => d.isShading())
+        .sort((a, b) => a.orderNum.localeCompare(b.orderNum));
 }
 
 LogTrack.prototype.getImages = function() {
@@ -391,6 +390,74 @@ LogTrack.prototype.addCurve = function(data, config) {
     return curve;
 }
 
+LogTrack.prototype.getShadingOrderKey = function (shading) {
+    let shadings = this.getShadings();
+    if (shadings.length <= 0) {
+        return 'm';
+    }
+    if (!shading) shading = shadings[shadings.length-1];
+    let currentIdx = shadings.indexOf(shading);
+    if (currentIdx < 0 || currentIdx == (shadings.length - 1)) {
+        currentIdx = shadings.length - 1;
+        let currentOrderKey = shadings[currentIdx].orderNum;
+        return String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+    }
+    return shadings[currentIdx].orderNum + shadings[currentIdx + 1].orderNum;
+}
+
+LogTrack.prototype.rearrangeShadings = function () {
+    // this.plotContainer.selectAll(this.getShadings().filter(s => s !== this.currentDrawing).map(s => s.canvas.node())).sort();
+    let currentDatum = null;
+    try {
+        currentDatum = this.currentDrawing.canvas.datum();
+    } catch (error) {}
+    this.plotContainer.selectAll('.vi-track-shading').filter((d) => d !== currentDatum).sort();
+    this.headerContainer.selectAll('.vi-shading-header').sort((a,b) => b.localeCompare(a));
+};
+
+function onShadingHeaderDrag(shading, callbackDrop) {
+    const headerElem = shading.header.node();
+    function dropHandler(event) {
+        if (shading === event.desShading) return;
+        callbackDrop && callbackDrop(event.desShading);
+    }
+    $(headerElem).draggable({
+        axis: 'y',
+        containment: headerElem.parentNode.parentNode,
+        helper: function () {
+            const canvasData = $(headerElem).find('canvas.vi-shading-header-canvas').get(0).toDataURL();
+            const $elem = $(headerElem).clone().css({ width: headerElem.clientWidth, 'z-index': 2 });
+            $elem.find('canvas.vi-shading-header-canvas').replaceWith(
+                $('<img></img>')
+                    .prop({ src: canvasData })
+                    .css({
+                        position: 'absolute',
+                        top: 0,
+                        left: 0
+                    })
+            );
+            return $elem;
+        },
+        distance: 10,
+        scope: 'shading-header',
+        start: function (event, ui) {
+            document.addEventListener('onshadingdrop', dropHandler);
+        },
+        stop: function () {
+            document.removeEventListener('onshadingdrop', dropHandler);
+        }
+    })
+    $(headerElem).droppable({
+        accept: '.vi-shading-header',
+        scope: 'shading-header',
+        tolerance: 'pointer',
+        drop: function (event, ui) {
+            let e = new Event('onshadingdrop');
+            e.desShading = shading;
+            document.dispatchEvent(e);
+        }
+    });
+}
 
 /**
  * Add shading to track
@@ -455,11 +522,32 @@ LogTrack.prototype.addShading = function(leftCurve, rightCurve, refX, config) {
     }
     function updateShading(shading, callback) {
         let request = shading.getProperties();
-        self.wiApiService.editShading(request, function(res) {
-            if (callback) callback(res);
+        self.wiApiService.editShading(request, function(res, err) {
+            if (callback) callback(res, err);
         })
     }
     this.drawings.push(shading);
+
+    onShadingHeaderDrag(shading, function (desShading) {
+        let orderNum = self.getShadingOrderKey(desShading);
+        let shadings = self.getShadings();
+        if (shading.orderNum > desShading.orderNum) {
+            let desTrackIndex = shadings.findIndex(track => track == desShading);
+            if (desTrackIndex === 0) {
+                orderNum = String.fromCharCode(shadings[0].orderNum.charCodeAt(0) - 1);
+            } else {
+                desShading = shadings[desTrackIndex - 1];
+                orderNum = self.getShadingOrderKey(desShading);
+            }
+        }
+        const orderBackup = shading.orderNum;
+        shading.orderNum = orderNum;
+        updateShading(shading, function (res, err) {
+            if (err) return shading.orderNum = orderBackup;
+            shading.updateOrderNum();
+            self.rearrangeShadings();
+        });
+    });
     return shading;
 }
 
@@ -651,11 +739,14 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     drawing.maxY = windowY[1];
     if (drawing == this.currentDrawing || drawing == this.tmpCurve) {
         drawing.doPlot(true);
-        drawing.raise();
+        setTimeout(() => {
+            drawing.raise();
+        }, 10);
     }
     else {
         drawing.doPlot();
     }
+    this.getShadings().filter(s => s !== this.currentDrawing).forEach(s => s.lower());
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
     this.svgContainer.raise();
@@ -669,6 +760,8 @@ LogTrack.prototype.plotDrawing = function(drawing) {
 LogTrack.prototype.plotCurve = function(curve) {
     if (!curve || !curve.isCurve || !curve.isCurve()) return;
     this.plotDrawing(curve);
+    curve.updateOrderNum();
+    this.rearrangeCurves();
 }
 
 /**
@@ -678,6 +771,8 @@ LogTrack.prototype.plotCurve = function(curve) {
 LogTrack.prototype.plotShading = function(shading) {
     if (!shading || !shading.isShading || !shading.isShading()) return;
     this.plotDrawing(shading);
+    shading.updateOrderNum();
+    this.rearrangeShadings();
 }
 
 LogTrack.prototype.plotMarker = function(marker) {
@@ -690,9 +785,10 @@ LogTrack.prototype.plotMarker = function(marker) {
  */
 LogTrack.prototype.plotAllDrawings = function() {
     let self = this;
-    this.drawings.forEach(function(d) {
+    this.drawings.forEach(function (d) {
         self.plotDrawing(d);
     });
+    self.rearrangeShadings();
 }
 
 /**
@@ -997,7 +1093,7 @@ LogTrack.prototype.addShadingHeader = function(shading) {
     let valueBlocks = header.selectAll('div')
         .data(valueClasses)
         .enter()
-        .append('div')     
+        .append('div')
             .attr('class', d => d)
             .classed('vi-shading-header-item', true)
             .text('.');
@@ -1072,7 +1168,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
         d3.event.currentDrawing = this.currentDrawing;
         return;
     }
-    this.getCurves().concat(this.getShadings()).forEach(function(d) {
+    this.getCurves().concat(this.getShadings().reverse()).forEach(function(d) {
         if (!current && d.nearPoint(x, y)) {
             current = d;
             d3.event.currentDrawing = current;

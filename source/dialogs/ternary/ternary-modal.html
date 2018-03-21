@@ -204,10 +204,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button ng-click="wiModal.onSaveCurveButtonClicked()" class="btn btn-default" ng-disabled="!result.outputCurve">
+                <button ng-click="wiModal.onSaveCurveButtonClicked()" class="btn btn-default" ng-disabled="!result.outputCurve || updating">
                     Save Curve
                 </button>
-                <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3">
+                <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3 || updating">
                     Calculate
                 </button>
                 <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default" ng-disabled="updating">

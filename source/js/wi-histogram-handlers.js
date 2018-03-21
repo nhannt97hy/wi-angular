@@ -122,12 +122,26 @@ exports.PercentButtonClicked = function() {
     console.log('PercentButton is clicked');
     FrequencyButtonClicked.call(this);
 }
-
+function colorByButtonClick(){
+    let wiHistogramCtrl = this.wiHistogram;
+    var temp = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.colorBy;
+    switch(temp) {
+    case 'zone':
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.colorBy = "curve";
+        break;
+    default:
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.colorBy = "zone";
+    }
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update curve/zone");
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
+}
 exports.ColorByZoneButtonClicked = function() {
     console.log('ColorByZoneButton is clicked');
+    colorByButtonClick.call(this);
 }
 
 exports.ColorByInputCurveButtonClicked = function() {
     console.log('ColorByInputCurveButton is clicked');
+    colorByButtonClick.call(this);
 }
 

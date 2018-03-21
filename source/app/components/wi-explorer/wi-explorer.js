@@ -13,12 +13,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-            // THANG HARD CODE
-            projectLoaded.multiLogplots = [{
-                idPlot: 1,
-                idProject: projectLoaded.idProject,
-                name: 'multiLogplot1'
-            }];
             let projectModel = utils.projectToTreeConfig(projectLoaded);
             let dustbinModel = utils.dustbinToTreeConfig();
             self.treeConfig = [projectModel, dustbinModel];
@@ -1148,60 +1142,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "delete-16x16",
                         handler: function () {
                             self.handlers.DeleteItemButtonClicked();
-                        }
-                    }, {
-                        separator: '1'
-                    }
-                ];
-            case 'multiLogplots':
-                return [
-                    {
-                        name: "NewMultiLogplot",
-                        label: "New Multiple Log Plot",
-                        // icon: "link-view-16x16",
-                        class: "has-more",
-                        handler: function () {
-
-                        },
-                        childContextMenu: [
-                            {
-                                name: "BlankMultiLogplot",
-                                label: "Blank Multiple Log Plot",
-                                icon: "logplot-blank-16x16",
-                                handler: function () {
-                                    console.log('blank multiLogplot button clicked')
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        separator: "1"
-                    }
-                ];
-            case 'multiLogplot':
-                return [
-                    {
-                        name: "Open",
-                        label: "Open",
-                        icon: "play-16x16",
-                        handler: function() {
-                            let multiLogplot = utils.getSelectedNode();
-                            console.log(multiLogplot.properties.name + ' open button clicked');
-                            utils.openMultiLogplotTab(wiComponentService, multiLogplot);
-                        }
-                    }, {
-                        name: "Rename",
-                        label: "Rename",
-                        icon: "annotation-16x16-edit",
-                        handler: function() {
-                            console.log(utils.getSelectedNode().properties.name + ' rename button clicked');
-                        }
-                    }, {
-                        name: "Delete",
-                        label: "Delete",
-                        icon: "delete-16x16",
-                        handler: function () {
-                            console.log(utils.getSelectedNode().properties.name + ' delete button clicked');
                         }
                     }, {
                         separator: '1'

@@ -244,20 +244,33 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
     }
     this.getMaxDepth = function () {
-        let wellProps = self.getWellProps();
-        if (wellProps.bottomDepth)
-        return parseFloat(wellProps.bottomDepth);
+        let currentWellProps = self.getWellProps();
+        let currentWellBottomDepth = -1;
+        if (currentWellProps.bottomDepth)
+        // return parseFloat(wellProps.bottomDepth);
+            currentWellBottomDepth = parseFloat(currentWellProps.bottomDepth);
 
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getExtentY) return track.getExtentY()[1];
             return -1;
         });
-        _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
-        return _maxDepth;
+        // _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
+        // return _maxDepth;
+        return maxDepth || currentWellBottomDepth;
     };
     this.getMinDepth = function () {
-        let wellProps = self.getWellProps();
-        return parseFloat(wellProps.topDepth) || 0;
+        let currentWellProps = self.getWellProps();
+        let currentWellTopDepth = 100000;
+        if(currentWellProps.topDepth) {
+            currentWellTopDepth = parseFloat(currentWellProps.topDepth);
+        }
+        let minDepth = d3.min(_tracks, function (track) {
+            if (track.getExtentY && track.drawings.length) {
+                return track.getExtentY()[0];
+            }
+            return 100000;
+        });
+        return minDepth || currentWellTopDepth;
     }
 
     this.getDepthRange = function () {
@@ -298,7 +311,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let top = (vY[0] - minDepth) * 100 / (maxDepth - minDepth);
         let range = (vY[1] - minDepth) * 100 / (maxDepth - minDepth) - top;
-        slidingBar.resetView();
+        // slidingBar.resetView();
         slidingBar.updateSlidingHandlerByPercent(top, range);
     }
     this._removeTooltip = _removeTooltip;
@@ -578,11 +591,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         this.wiLogplotCtrl.updateScale(this.scale);
     }
     this.setCurrentTrack = function (track) {
-        if (_currentTrack == track) return;
-        _previousTrack = _currentTrack;
-        _currentTrack = track;
-        _currentTrack.highlightCallback();
-        _clearPreviousHighlight();
+        _setCurrentTrack(track);
     }
     this.setDepthRange = function (depthRange, notPlot) {
         _depthRange = depthRange;
@@ -613,7 +622,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _drawTooltip(_currentTrack);
     }
     this.zoom = function (zoomOut) {
-        const MIN_STEPS_OF_VIEW = 20; // Dupplicate code . See wi-slidingbar.js, getMinRange() function
+        const fixedScales = [1, 2, 4, 5, 10, 20, 50, 100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 10000, 20000, 50000, 100000];
+        let scale = +this.scale.scale.replace('1:', '');
+        if (fixedScales.indexOf(scale) < 0) fixedScales.push(scale);
+        fixedScales.sort((a, b) => a - b);
+        if (zoomOut) {
+            scale = fixedScales[fixedScales.indexOf(scale) + 1] || 'Full';
+        } else {
+            scale = fixedScales[fixedScales.indexOf(scale) - 1];
+        }
+        const handler = logplotHandlers['Scale' + scale + 'ButtonClicked'];
+        if (typeof handler === 'function') handler();
+        /* const MIN_STEPS_OF_VIEW = 20; // Dupplicate code . See wi-slidingbar.js, getMinRange() function
         let range = _depthRange[1] - _depthRange[0];
         let low, high;
         let maxDepth = self.getMaxDepth();
@@ -636,7 +656,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.processZoomFactor();
         self.plotAll();
         self.adjustSlidingBarFromDepthRange([low, high]);
-        // _drawTooltip(_currentTrack);
+        _drawTooltip(_currentTrack); */
     }
     this.processZoomFactor = function () {
         let maxZoomFactor = d3.max(_tracks, function (track) {
@@ -1182,7 +1202,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (_tracks.length <= 0) {
             return 'm';
         }
-        if (!track) track = _currentTrack;
+        if (!track) track = _currentTrack || _tracks[_tracks.length - 1];
         var currentIdx = _tracks.indexOf(track);
         if (currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
             currentIdx = _tracks.length - 1;
@@ -1210,6 +1230,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _setCurrentTrack(track);
         });
         track.on('mousedown', function () {
+            d3.event.stopPropagation();
             _setCurrentTrack(track);
             // if (d3.event.button == 2) _trackOnRightClick(track);
         });
@@ -1249,7 +1270,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (mouse[1] < 0) return;
 
         if (d3.event.ctrlKey) {
-            self.zoom(d3.event.deltaY < 0);
+            self.zoom(d3.event.deltaY > 0);
             d3.event.preventDefault();
             d3.event.stopPropagation();
         }
@@ -1450,6 +1471,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 track.removeDrawing(shading);
                             });
                         }
+                        wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
                     });
                 }
                 else if (drawing.isShading()) {
