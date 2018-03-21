@@ -402,6 +402,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             newHeight = parentHeight;
         }
         updateSlidingHandler(newTop, newHeight);
+        saveStateToServer();
     };
 
     this.updateRangeSlidingHandler = function (rangePercent) {
@@ -497,6 +498,36 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
 
         saveStateToServer();
+    }
+
+    this.updateScale = function (scale) {
+        const handleElem = $(self.handleId);
+        const currentViewContainer = handleElem.find('.current-view-container');
+        currentViewContainer.find('.current-view-top').text(scale.currentView[0]);
+        currentViewContainer.find('.current-view-bottom').text(scale.currentView[1]);
+        const css = {
+            default: {
+                height: '100%',
+                top: 0
+            },
+            overflow: {
+                height: 'calc(100% + 40px)',
+                top: -20
+            },
+            top: {
+                height: 'calc(100% + 20px)',
+                top: 0
+            },
+            bottom: {
+                height: 'calc(100% + 20px)',
+                top: -20
+            }
+        }
+        if (handleElem.height() < 40) {
+            currentViewContainer.css(css.overflow);
+            if (handleElem.css('top').replace('px','') < 20) currentViewContainer.css(css.top)
+            else if ($(self.contentId).height() - handleElem.height() - handleElem.css('top').replace('px','') < 20) currentViewContainer.css(css.bottom);
+        } else currentViewContainer.css(css.default);
     }
 
 	this.$onDestroy = function () {

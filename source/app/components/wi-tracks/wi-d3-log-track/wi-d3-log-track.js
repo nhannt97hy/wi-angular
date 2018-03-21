@@ -491,8 +491,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             delete options.rightCurve;
             delete options.leftCurve;
 
+            let width = _currentTrack.width;
             wiApiService.editShading(request, function (shading) {
                 self.wiD3Ctrl.updateTrack(_currentTrack);
+                $timeout(function() {
+                    _currentTrack.width = width;
+                    _currentTrack.doPlot();
+                }, 1000);
             });
         }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
     };
@@ -639,6 +644,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.wiD3Ctrl._drawTooltip(track);
         });
         track.onCurveDrag(function (desTrack) {
+            let widths = [track.width, desTrack.width];
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
             let errorCode = self.wiD3Ctrl.verifyDroppedIdCurveOnTrack(curve.idCurve, desTrack);
@@ -648,6 +654,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     self.wiD3Ctrl.updateTrack(track);
                     self.wiD3Ctrl.updateTrack(desTrack);
                 });
+                $timeout(function() {
+                    track.width = widths[0];
+                    desTrack.width = widths[1];
+                    track.doPlot();
+                    desTrack.doPlot();
+                }, 1500);
             } else if(errorCode === 0) {
                 toastr.error('Cannot drop curve from another well to this track');
             }
@@ -969,7 +981,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     function _registerShadingHeaderMouseDownCallback(track, shading) {
         if(!shading) return;
-        // track.setCurrentDrawing(shading);
+        track.setCurrentDrawing(shading);
         track.onShadingHeaderMouseDown(shading, function () {
             if (d3.event.button == 2) {
                 // _shadingOnRightClick();

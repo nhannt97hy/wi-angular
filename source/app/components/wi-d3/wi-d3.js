@@ -161,7 +161,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         console.log("width", _tracks);
         let sumOfOriWidth = 0;
         let widths = [];
-        // let fitWindowWidths = [];
         _tracks.forEach(function(t) {
             widths.push(t.width);
             sumOfOriWidth += t.width;
@@ -365,7 +364,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             Utils.error('can not create depth track');
         }
     }
-    this.addLogTrack = function (trackTitle, idCurve, onFinished) {
+    this.addLogTrack = function (trackTitle, onFinished) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
             const logTracks = self.getTracks().filter(track => track.type == 'log-track');
@@ -395,33 +394,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }, function (callback) {
                     self.pushLogTrack(logTrack);
-                    callback();
-                }, function (callback) {
-                    $timeout(function() {
-                        if (idCurve && !isNaN(idCurve)) {
-                            let LogtrackController = self.trackComponents.find(function (component) { return component.props == logTrack; }).controller;
-                            let newViTrack = LogtrackController.viTrack;
-                            wiApiService.createLine({
-                                idTrack: newViTrack.id,
-                                idCurve: idCurve,
-                                orderNum: newViTrack.getCurveOrderKey()
-                            }, function (line) {
-                                let lineModel = Utils.lineToTreeConfig(line);
-                                Utils.getCurveData(wiApiService, idCurve, function (err, data) {
-                                    if (!err) LogtrackController.addCurveToTrack(newViTrack, data, lineModel.data);
-                                });
-                                console.log('created Line', line);
-                                callback();
-                            });
-                        } else callback();
-                    })
+                    setTimeout(() => {
+                        callback();
+                    });
                 }
             ], function (err, results) {
-                if (!err && typeof onFinished === 'function') onFinished();
+                const logTrackController = self.trackComponents.find(function (component) { return component.props == logTrack; }).controller;
+                if (!err && typeof onFinished === 'function') onFinished(logTrackController);
             });
         }
         else {
-            error('Cannot add Log track');
+            toastr.error('Cannot add Log track');
         }
     }
     this.addZoneTrack = function (callback) {

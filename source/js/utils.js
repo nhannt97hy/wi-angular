@@ -1238,17 +1238,27 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     return;
                 }
                 if (wiD3Ctrl && !track) {
-                    let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                    const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
                     if (errorCode >= 0) {
-                        wiD3Ctrl.addLogTrack(null, idCurves[0]);
+                        wiD3Ctrl.addLogTrack(null, function (logTrackController) {
+                            async.eachSeries(idCurves, (idCurve, next) => {
+                                const viTrack = logTrackController.viTrack;
+                                apiService.createLine({
+                                    idTrack: viTrack.id,
+                                    idCurve: idCurve,
+                                    orderNum: viTrack.getCurveOrderKey()
+                                }, function (line) {
+                                    let lineModel = lineToTreeConfig(line);
+                                    getCurveData(apiService, idCurve, function (err, data) {
+                                        if (!err) logTrackController.addCurveToTrack(viTrack, data, lineModel.data);
+                                        next(err);
+                                    });
+                                });
+                            });
+                        });
+                    } else if (errorCode < 0) {
+                        toastr.error("Cannot drop curve from another well");
                     }
-                    /*
-                    else if (errorCode === 0) {
-                        // toastr.error("Cannot drop curve from another well");
-                        // another well case
-                        // wiD3Ctrl.addLogTrack(null, idCurves[0]);
-                    }
-                    */
                     return;
                 }
                 if (wiD3Ctrl && track) {

@@ -134,6 +134,14 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 			};
 			if (logplot) {
 				if (logplot.properties) logplot.idPlot = logplot.properties.idPlot;
+				let wells = wiComponentService.getComponent('project-loaded').wells;
+				for (let i = 0; i < wells.length; i++) {
+					wells[i].idWell = logplot.idWell;
+					for (let j = 0; j < self.viSelections.length; j++) {
+						self.viSelections[j].wellForLogplot = wells[i];
+					}
+					break;
+				}
 				self.addLogplot(logplot);
 				dataRequest.idLogPlots = logplot.idPlot;
 			}
@@ -251,10 +259,9 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 						data: selection.data
 					};
 
-					// wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
-						// if (!returnedSelection) return;
-						// let selectionProps = returnedSelection;
-						let selectionProps = selection;
+					wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
+						if (!returnedSelection) return;
+						let selectionProps = returnedSelection;
 						selectionProps.name = selection.name;
 						selectionProps.color = selection.color;
 						if (self.plotModels.histogram) {
@@ -275,7 +282,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 							viCrossplot.setSelection(selectionProps);
 							viCrossplot._doPlot();
 						}
-					// });
+					});
 				})
 			);
 		});
@@ -314,6 +321,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 				if (nearPoint(pointerX, pointerY, viCrossplot.ctx)) {
 					ctx.beginPath();
+					ctx.fillStyle = viSelection.color;
 					switch (type) {
 						case 'select':
 							ctx.arc(pointerX, pointerY, 1.5, 0, Math.PI*2, true);
@@ -340,7 +348,15 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 					const topDepth = well.topDepth;
 					const step = well.step;
 					let newSelectionData = [];
-					let epsilon = 0.5;
+					let epsilon;
+					switch (type) {
+						case 'select':
+							epsilon = 1;
+							break;
+						case 'erase':
+							epsilon = 1.5;
+							break;
+					}
 					newSelectionData = rootData.filter(d => {
 						let objPoint = drawnPoints.find(p => Math.abs(p.x - d.x) <= epsilon && Math.abs(p.y - d.y) <= epsilon);
 						return objPoint;
@@ -362,10 +378,9 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 						data: selection.data
 					};
 
-					// wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
-						// if (!returnedSelection) return;
-						// let selectionProps = returnedSelection;
-						let selectionProps = selection;
+					wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
+						if (!returnedSelection) return;
+						let selectionProps = returnedSelection;
 						selectionProps.name = selection.name;
 						selectionProps.color = selection.color;
 						viCrossplot._doPlot();
@@ -388,7 +403,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 							visHistogram.setSelection(selectionProps);
 							visHistogram._doPlot();
 						}
-					// });
+					});
 				}
 			})
 		);
@@ -462,31 +477,40 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 
 				resolveSelectionData(selection.idSelectionTool, newSelectionData, type);
 
-				let selectionProps = selection;
-				selectionProps.name = selection.name;
-				selectionProps.color = selection.color;
-				visHistogram._doPlot();
+				let reqSelection = {
+					idCombinedBox: selection.idCombinedBox,
+					idCombinedBoxTool: selection.idCombinedBoxTool,
+					idSelectionTool: selection.idSelectionTool,
+					data: selection.data
+				};
 
-				if (self.plotModels.logplot) {
-					let createdLogplotId = self.plotModels.logplot.properties.idPlot;
-					let wiD3Ctrl = wiComponentService.getComponent('logplot' + createdLogplotId + self.suffix).getwiD3Ctrl();
-					let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
-					logTracks.forEach(function (tr) {
-						tr.setMode(null);
-						tr.plotContainer.on('.drag', null);
-						tr.plotAllDrawings();
-					});
-					// viSelection.doPlot();
-				}
-				if (self.plotModels.crossplot) {
-					let createdCrossplotId = self.plotModels.crossplot.properties.idCrossPlot;
-					let createdCrossplotComponent = 'crossplot' + createdCrossplotId + 'comboview' + self.wiComboviewCtrl.id;
-					let createdCrossplot = wiComponentService.getComponent(createdCrossplotComponent);
-					let createdCrossplotD3Area = wiComponentService.getComponent(createdCrossplotComponent + 'D3Area');
-					let viCrossplot = createdCrossplotD3Area.viCrossplot;
-					viCrossplot.setSelection(selectionProps);
-					viCrossplot._doPlot();
-				}
+				wiApiService.editSelectionTool(reqSelection, function (returnedSelection) {
+					let selectionProps = returnedSelection;
+					selectionProps.name = selection.name;
+					selectionProps.color = selection.color;
+					visHistogram._doPlot();
+
+					if (self.plotModels.logplot) {
+						let createdLogplotId = self.plotModels.logplot.properties.idPlot;
+						let wiD3Ctrl = wiComponentService.getComponent('logplot' + createdLogplotId + self.suffix).getwiD3Ctrl();
+						let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
+						logTracks.forEach(function (tr) {
+							tr.setMode(null);
+							tr.plotContainer.on('.drag', null);
+							tr.plotAllDrawings();
+						});
+						// viSelection.doPlot();
+					}
+					if (self.plotModels.crossplot) {
+						let createdCrossplotId = self.plotModels.crossplot.properties.idCrossPlot;
+						let createdCrossplotComponent = 'crossplot' + createdCrossplotId + 'comboview' + self.wiComboviewCtrl.id;
+						let createdCrossplot = wiComponentService.getComponent(createdCrossplotComponent);
+						let createdCrossplotD3Area = wiComponentService.getComponent(createdCrossplotComponent + 'D3Area');
+						let viCrossplot = createdCrossplotD3Area.viCrossplot;
+						viCrossplot.setSelection(selectionProps);
+						viCrossplot._doPlot();
+					}
+				});
 			})
 		)
 	}

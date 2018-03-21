@@ -173,7 +173,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                     imgzone.setProperties(imgProps);
                                     imgzone.header.attr('id', 'id' + imgzone.idImageOfTrack);
                                     if (!imgzone.showName) imgzone.header.select('div').remove();
-                                    drawImageZone(imgzone, imgProps, isNewDraw);
+                                    self.drawImageZone(imgzone, imgProps, isNewDraw);
                                     track.plotImageZone(imgzone);
                                     track.rearrangeHeaders();
                                     _currentImage = imgzone.getProperties();
@@ -192,7 +192,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                         delete imgzone.header;
                                         imgzone.header = track.addImageZoneHeader(imgzone, false);
                                     }
-                                    drawImageZone(imgzone, imgProps, isNewDraw);
+                                    self.drawImageZone(imgzone, imgProps, isNewDraw);
                                     track.onImageZoneHeaderMouseDown(imgzone, function() {
                                         self.wiD3Ctrl.setCurrentTrack(track);
                                         let depthRange = imgzone.getDepthRange();
@@ -245,7 +245,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         let track = _currentTrack;
         let imgzone = track.getCurrentImageZone();
-        DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), function () {
+        DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), self.wiD3Ctrl.trackComponents, function () {
         });
     }
     function imageProperties() {
@@ -265,7 +265,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         imgzone.header.select('div').remove();
                         delete imgzone.header;
                         imgzone.header = track.addImageZoneHeader(imgzone, false);
-                		drawImageZone(imgzone, imgProps, false);
+                		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
                         track.onImageZoneHeaderMouseDown(imgzone, function() {
                             self.wiD3Ctrl.setCurrentTrack(track);
@@ -319,7 +319,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
-    function drawImageZone (imgzone, props, isNewDraw) {
+    this.drawImageZone = function (imgzone, props, isNewDraw) {
         if (!imgzone) return;
         let imageConfig = {
             fill: props.fill,
