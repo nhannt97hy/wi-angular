@@ -27,7 +27,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style='height: 111px;' id='ternaryBody'>
                                 <tr ng-repeat="vertex in wiModal.getVertices() track by $index" ng-class="{selected:$index == selectedRow}" ng-click="wiModal.setClickedRow($index)">
                                     <td width="2%">{{$index + 1}}</td>
                                     <td width="20%">
