@@ -14,12 +14,26 @@ function getAuthInfo() {
 }
 getAuthInfo();
 
-const wiMachineLearningURL = "http://54.169.13.92:3002/store/api";
+const machineLearningUrl = "http://54.169.13.92:3002/atore/api"
+const mlToolkitUrl = "http://54.169.13.92:4002/wipm/api/task/regression";
 
-const TRAIN_MODEL = wiMachineLearningURL + "/model/train";
-const SAVE_MODEL = wiMachineLearningURL + "/model/save";
-const PREDICT = wiMachineLearningURL + "/predict";
 
+const ML_TOOL_KIT = {
+    TRAIN: mlToolkitUrl + '/curve/model',
+    PREDICT_CURVE: mlToolkitUrl + '/curve/predict',
+    PREDICT_ANFIS: mlToolkitUrl + '/anfis/predict',
+    PREDICT_FACIES:  mlToolkitUrl + '/faces/predict'
+}
+
+const ML = {
+    TRAIN: machineLearningUrl + '/model/train',
+    PREDICT_CURVE: machineLearningUrl + '/curve/predict',
+    PREDICT_ANFIS: machineLearningUrl + '/anfis/predict',
+    ML_PREDICT_FACIES: machineLearningUrl + '/facies/predict',
+}
+
+const URL = ML_TOOL_KIT;
+const wiMachineLearningURL = machineLearningUrl;
 
 let app = angular.module(moduleName, []);
 
@@ -45,11 +59,11 @@ WiMachineLearningApi.prototype.doPost = function(url, paramObj, callback) {
         wiComponentService.getComponent('SPINNER').hide();
         console.log(response);
         if(response.data.status != 200) {
-            toastr.error(response.data.content);
+            toastr.error(response.data.message);
             callback(null);
         }
         else
-            callback(response.data.content);
+            callback(response.data);
     }, function(err) {
         wiComponentService.getComponent('SPINNER').hide();
         console.log(err);
@@ -59,15 +73,23 @@ WiMachineLearningApi.prototype.doPost = function(url, paramObj, callback) {
 }
 
 WiMachineLearningApi.prototype.trainModel = function(payload, callback) {
-    this.doPost(TRAIN_MODEL, payload, callback);
+    this.doPost(URL.TRAIN, payload, callback);
 }
 
-WiMachineLearningApi.prototype.saveModel = function(payload, callback) {
-    this.doPost(SAVE_MODEL, payload, callback);
+// WiMachineLearningApi.prototype.saveModel = function(payload, callback) {
+//     this.doPost(SAVE_MODEL, payload, callback);
+// }
+
+WiMachineLearningApi.prototype.predictCurve = function(payload, callback) {
+    this.doPost(URL.PREDICT_CURVE, payload, callback);
 }
 
-WiMachineLearningApi.prototype.predict = function(payload, callback) {
-    this.doPost(PREDICT, payload, callback);
+WiMachineLearningApi.prototype.predictAnfis = function(payload, callback) {
+    this.doPost(URL.PREDICT_ANFIS, payload, callback);
+}
+
+WiMachineLearningApi.prototype.predictFacies = function(payload, callback) {
+    this.doPost(URL.PREDICT_FACIES, payload, callback);
 }
 
 WiMachineLearningApi.prototype.getwiMachineLeaningUrl = function() { return wiMachineLeaningURL; }
