@@ -859,7 +859,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             let curvesData = [];
             // loop each input curves
             async.eachSeries(data.inputs, function(curve, cb) {
-                if(curve.choices){
+                if(curve.choices && curve.choices.length){
                     if(!curve.value) curve.value = curve.choices[0];
                     let idCurve = (curve.value.properties || {}).idCurve || curve.value.idCurve;
                     wiApiService.dataCurve(idCurve, function (data) {

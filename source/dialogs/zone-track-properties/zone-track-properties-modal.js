@@ -48,7 +48,7 @@ module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, cal
                 self.color = colorStr;
             });
         }
-        this.onOkButtonClicked = function () {
+        function doApply(cb) {
             self.error = null;
             if (!self.idZoneSet) {
                 self.error = "Zone Set is required";
@@ -65,7 +65,17 @@ module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, cal
                 zoomFactor: self.zoomFactor
             }
             if (self.error) return;
-            close(props, 100);
+            if(cb) cb();
+        }
+        this.onApplyButtonClicked = function () {
+            doApply(function(){
+                callback(props);
+            });
+        }
+        this.onOkButtonClicked = function () {
+            doApply(function() {
+                close(props, 100);
+            });
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);

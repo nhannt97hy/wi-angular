@@ -12,7 +12,7 @@ function Selection(config) {
     this.maskData = config.data || {};
     this.selectionPointData = [];
     this.newSelectionData = [];
-    this.well = null;
+    this.wellForLogplot = null;
     this.selectionBins = [];
     this.currentMask = null;
     this.idCombinedBoxTool = config.idCombinedBoxTool;
@@ -142,12 +142,8 @@ Selection.prototype._doPlot = function () {
 
 Selection.prototype.doPlot = function () {
     let transformY = this.getTransformY();
-    // const topDepth = this.well.topDepth;
-    // const step = this.well.step;
-
-    // test only for W4 now
-    const topDepth = 1119.8352;
-    const step = 0.1524;
+    const topDepth = +this.wellForLogplot.topDepth;
+    const step = +this.wellForLogplot.step;
 
     if (this.newSelectionData.length) {
         this.newSelectionData.forEach(d => {

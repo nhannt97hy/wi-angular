@@ -153,7 +153,7 @@ exports.createTooltipLines = function(domSvg) {
     let x = mousePosition[0];
     let y = mousePosition[1];
     let lineData = [
-        {x1: x, y1: 0, x2: x, y2: domSvg.clientHeight},
+        // {x1: x, y1: 0, x2: x, y2: domSvg.clientHeight},
         {x1: 0, y1: y, x2: domSvg.clientWidth, y2: y}
     ];
     let lines = svg.selectAll('line.tooltip-line')

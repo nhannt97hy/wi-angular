@@ -20,8 +20,8 @@ let app = angular.module(moduleName, []);
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
-//const INVENTORY_SERVICE = 'http://inv.sflow.me';
-const INVENTORY_SERVICE = 'http://13.229.66.151';
+const INVENTORY_SERVICE = 'http://inv.sflow.me';
+//const INVENTORY_SERVICE = 'http://13.229.66.151';
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
@@ -374,7 +374,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        //if (err.reason) toastr.error(err.reason);
+                        if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });
