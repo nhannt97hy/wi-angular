@@ -1,11 +1,11 @@
 <div class="comboview-toolbar-wrapper">
-    
+
     <wi-toolbar name="ComboviewToolbar1">
     		<wi-dropdown name="SelectorsButton" icon="selector-tool-16x16" type="small" tooltip="Selectors">
-                <wi-button ng-repeat="tool in wiComboview.model.properties.toolBox" 
+                <wi-button ng-repeat="tool in wiComboview.toolBox"
                     icon="rect-16x16"
-                    style="{{tool.color}}" 
-                    label="{{tool.name}}" 
+                    style="{{tool.color}}"
+                    label="{{tool.name}}"
                     layout="icon-left" class="height-auto"
                     handler="handlers.SelectorButtonClicked"
                     handler-args="tool">
@@ -17,7 +17,7 @@
             </wi-dropdown>
 
     		<wi-dropdown name="ErasersButton" icon="eraser-tool-16x16" type="small" tooltip="Erasers">
-                <wi-button ng-repeat="tool in wiComboview.model.properties.toolBox" 
+                <wi-button ng-repeat="tool in wiComboview.toolBox"
                     icon="rect-16x16"
                     style="{{tool.color}}"
                     label="{{tool.name}}"

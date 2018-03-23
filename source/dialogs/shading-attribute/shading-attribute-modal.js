@@ -53,7 +53,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         this.leftLimit = customLimit.concat(self.curveList);
 
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
-        this.curves = utils.getAllCurvesOfWell(this.well);
 
         this.fillPatternOptions = {};
         this.variableShadingOptions = {};

@@ -342,6 +342,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     this.onDeleteInput = function (idx) {
         for (let wf of self.workflowConfig.steps) {
             wf.inputData.splice(idx, 1);
+            wf.outputData.splice(idx, 1);
         }
         __inputDataLen--;
     };
@@ -518,7 +519,10 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
         for (let step of self.workflowConfig.steps) {
             for (let iptData of step.inputData) {
                 let dataset = iptData.dataset;
-                let idx = dataset.curves.indexOf(newCurveProps);
+                let idx = dataset.curves.findIndex(c => {
+                    let id = c.properties ? c.properties.idCurve : c.idCurve;
+                    return id == newCurveProps.idCurve;
+                });
                 if (idx < 0) dataset.curves.push(newCurveProps);
                 for (let inputIdx in iptData.inputs) {
                     iptData.inputs[inputIdx].choices = matchCurves(dataset.curves, step.inputs[inputIdx]);
@@ -718,7 +722,15 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 }
                 wiApiService.processingDataCurve(payload, function (ret) {
                     if(!curve.idCurve) curveInfo.idCurve = ret.idCurve;
-                    callback(ret);
+                    let _ret = null;
+                    if(!curve.idCurve) {
+                        _ret = ret;
+                    }else{
+                        _ret = curveInfo;
+                        _ret.idFamily = payload.idFamily;
+                    }
+
+                    callback(_ret);
                 })
             })
         });
@@ -733,7 +745,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
 
         wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
             wfOutput.idPlot = response.idPlot;
-            let currentOrderNum = 'a';
+            let currentOrderNum = 'm';
             async.eachSeries(wfInput.inputs, function(ipt, done1) {
                 wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                     //create line
@@ -753,15 +765,15 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                 async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
                     wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                         // create line
+                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                         wiApiService.createLine({
                             idTrack: trackData.idTrack,
                             idCurve: opt.idCurve,
-                            orderNum: currentOrderNum
+                            orderNum: 'm'
                         }, function(line){
-                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                             let bgColor = null;
                             switch (opt.family) {
-                                case "Net Reservoir Flag": 
+                                case "Net Reservoir Flag":
                                     bgColor = "green";
                                     break;
                                 case "Net Pay Flag":
@@ -775,9 +787,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             wiApiService.createShading({
                                 idTrack:trackData.idTrack,
                                 name:opt.name + "-left",
-
+                                orderNum: 'm',
                                 negativeFill : {
-                                    display: false, 
+                                    display: false,
                                     sadingType: "pattern",
                                     pattern: {
                                         background : "blue",
@@ -786,7 +798,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                                     }
                                 },
                                 positiveFill: {
-                                    display: false, 
+                                    display: false,
                                     sadingType: "pattern",
                                     pattern: {
                                         background : "blue",
@@ -847,36 +859,45 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             let curvesData = [];
             // loop each input curves
             async.eachSeries(data.inputs, function(curve, cb) {
-                let idCurve = (curve.value.properties || {}).idCurve || curve.value.idCurve;
-                wiApiService.dataCurve(idCurve, function (data) {
-                    curvesData.push(data.map(d => parseFloat(d.x)));
-                    cb();
-                });
+                if(curve.choices && curve.choices.length){
+                    if(!curve.value) curve.value = curve.choices[0];
+                    let idCurve = (curve.value.properties || {}).idCurve || curve.value.idCurve;
+                    wiApiService.dataCurve(idCurve, function (data) {
+                        curvesData.push(data.map(d => parseFloat(d.x)));
+                        cb();
+                    });
+                }else{
+                    cb('no choices');
+                }
             }, function(err) {
                 // done get all curves
-                if (err) console.log(err);
-                run(curvesData, wf.parameters, function (ret) {
-                    wf.outputData[idx] = new Object();
-                    wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
-                    wf.outputData[idx].plotName = self.workflowConfig.name + '-' + wf.name + '-' + wf.inputData[idx].dataset.name;
-                    wf.outputData[idx].outputCurves = new Array();
-                    wf.outputs.forEach((o, i) => {
-                        wf.outputData[idx].outputCurves[i] = o;
-                        wf.outputData[idx].outputCurves[i].data = ret[i];
-                    });
-                    async.each(wf.outputData[idx].outputCurves, function(d, cb2) {
-                        let dataset = data.dataset;
-                        d.idDataset = dataset.idDataset;
-                        d.idWell = data.well.idWell;
-                        saveCurve(d, function(curveProps) {
-                            delete d.data;
-                            updateChoices(curveProps);
-                            cb2();
+                if (err) {
+                    console.log(err);
+                    callback(err);
+                }else{
+                    run(curvesData, wf.parameters, function (ret) {
+                        wf.outputData[idx] = new Object();
+                        wf.outputData[idx].idWell = wf.inputData[idx].well.idWell;
+                        wf.outputData[idx].plotName = self.workflowConfig.name + '-' + wf.name + '-' + wf.inputData[idx].dataset.name;
+                        wf.outputData[idx].outputCurves = new Array();
+                        wf.outputs.forEach((o, i) => {
+                            wf.outputData[idx].outputCurves[i] = o;
+                            wf.outputData[idx].outputCurves[i].data = ret[i];
                         });
-                    }, function(err) {
-                        createLogplotFromResult(wf.inputData[idx], wf.outputData[idx], callback);
+                        async.each(wf.outputData[idx].outputCurves, function(d, cb2) {
+                            let dataset = data.dataset;
+                            d.idDataset = dataset.idDataset;
+                            d.idWell = data.well.idWell;
+                            saveCurve(d, function(curveProps) {
+                                delete d.data;
+                                updateChoices(curveProps);
+                                cb2();
+                            });
+                        }, function(err) {
+                            createLogplotFromResult(wf.inputData[idx], wf.outputData[idx], callback);
+                        });
                     });
-                });
+                }
             });
         }, function(err) {
             if (err) console.log(err);

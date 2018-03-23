@@ -424,8 +424,7 @@ Curve.prototype.getCanvasTranslateXForWrapMode = function() {
 
 Curve.prototype.updateOrderNum = function(orderNum) {
     this.orderNum = orderNum || this.orderNum;
-    this.header.datum(this.orderNum + this.name)
-        .attr('tabindex', isNaN(this.orderNum) ? -1 : this.orderNum)
+    this.header.datum(this.orderNum + '-' + this.name)
         .attr('data-order-num', function(d) { return d; });
 }
 

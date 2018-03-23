@@ -169,7 +169,7 @@ function shadingToTreeConfig(shading, paletteList) {
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
     shadingModel.idRightLine = shading.idRightLine;
-    shadingModel.data = {
+    shadingModel.data = Object.assign({}, shading, {
         id: shading.idShading,
         name: shading.name,
         refX: shading.refX,
@@ -182,7 +182,7 @@ function shadingToTreeConfig(shading, paletteList) {
         refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
-    };
+    });
     if (shadingModel.data.fill && shadingModel.data.fill.varShading) {
         shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palName];
     }
@@ -1235,11 +1235,25 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     return;
                 }
                 if (wiD3Ctrl && !track) {
-                    let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                    const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
                     if (errorCode > 0) {
-                        wiD3Ctrl.addLogTrack(null, idCurves[0]);
-                    }
-                    else if (errorCode === 0) {
+                        wiD3Ctrl.addLogTrack(null, function (logTrackController) {
+                            async.eachSeries(idCurves, (idCurve, next) => {
+                                const viTrack = logTrackController.viTrack;
+                                apiService.createLine({
+                                    idTrack: viTrack.id,
+                                    idCurve: idCurve,
+                                    orderNum: viTrack.getCurveOrderKey()
+                                }, function (line) {
+                                    let lineModel = lineToTreeConfig(line);
+                                    getCurveData(apiService, idCurve, function (err, data) {
+                                        if (!err) logTrackController.addCurveToTrack(viTrack, data, lineModel.data);
+                                        next(err);
+                                    });
+                                });
+                            });
+                        });
+                    } else if (errorCode === 0) {
                         toastr.error("Cannot drop curve from another well");
                     }
                     return;
@@ -2395,7 +2409,7 @@ function openComboviewTab(comboviewModel) {
         }
         let plots = data.plots;
         let histograms = data.histograms;
-        let crossplots = data.crossplots;
+        let crossplots = data.cross_plots;
         // self.init();
         comboviewModel.properties.toolBox = toolBox;
         comboviewModel.properties.selections = selections;
@@ -2934,20 +2948,16 @@ function updateWiCurveListingOnModelDeleted(model){
             let idCurve = model.properties.idCurve;
             let wellModel = findWellByCurve(idCurve);
             if(wiCurveListing){
-                let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
-                let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
+                let indexCurve = wiCurveListing.curvesData[wellModel.name].findIndex(c => {return c.id == idCurve});
                 if(indexCurve != -1){
-                    wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+                    wiCurveListing.curvesData[wellModel.name].splice(indexCurve,1);
                 }
             }
             break;
         case 'well':
             if(wiCurveListing){
-                let indexWell = wiCurveListing.wells.findIndex(w => w.id == model.id);
-                if(indexWell != -1){
-                    wiCurveListing.curvesData.splice(indexWell, 1);
-                    wiCurveListing.depthArr.splice(indexWell, 1);
-                }
+                delete wiCurveListing.curvesData[model.name];
+                delete wiCurveListing.depthArr[model.name];
             }
             break;
         default:

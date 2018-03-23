@@ -14,6 +14,7 @@ module.exports = function (ModalService, wiLogplotCtrl) {
         let depthTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'depth-track');
         let imageTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'image-track');
         let zoneTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'zone-track');
+        let objectTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'object-track');
 
         this.unit = "inch";
         if (Array.isArray(logTracks) && logTracks.length) {
@@ -28,6 +29,9 @@ module.exports = function (ModalService, wiLogplotCtrl) {
         } else if (Array.isArray(imageTracks) && imageTracks.length) {
             this.width = utils.pixelToInch(imageTracks[0].width);
             this.image = true;
+        } else if (Array.isArray(objectTracks) && objectTracks.length) {
+            this.width = utils.pixelToInch(objectTracks[0].width);
+            this.object = true;
         } else {
             this.width = 0;
         }
@@ -77,6 +81,18 @@ module.exports = function (ModalService, wiLogplotCtrl) {
                     wiApiService.editZoneTrack(request, function(res){
                         z.width = utils.inchToPixel(self.width);
                         z.doPlot();
+                    });
+                })
+            }
+            if(self.object && Array.isArray(objectTracks) && objectTracks.length) {
+                objectTracks.forEach(function(o){
+                    let request = {
+                        idObjectTrack : o.id,
+                        width: self.width
+                    }
+                    wiApiService.editObjectTrack(request, function(res){
+                        o.width = utils.inchToPixel(self.width);
+                        o.doPlot();
                     });
                 })
             }

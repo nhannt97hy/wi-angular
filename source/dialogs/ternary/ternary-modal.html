@@ -1,213 +1,182 @@
 <div id="ternary-modal" class="modal fade" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled="updating">&times;</button>
-                <h4><span class=""></span>&nbsp;Ternary diagram</h4>
+                <h4>
+                    <span class=""></span>&nbsp;Ternary diagram</h4>
             </div>
-
             <div class="modal-body">
-                <!-- <multiselect class="input-xlarge" multiple="true"
-                    ng-model="wiModal.idPolygonTest"
-                    options="p for p in wiModal.polygonList"
-                    change="selected()">
-                </multiselect>
-                {{calculateOptions.area.polygons}} -->
                 <div class="container-fluid padding-0">
-                    <div class="col-sm-11 padding-right-0">
-                        <form class="form-horizontal form-condensed dialog-style" action="" name="modalTernary">
-                            <h5 class="normal-text">Vertices Manager</h5>
-                            <br>
-                            <table class="font-size-10px table table-bordered ternaryTable">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>X</th>
-                                        <th>Y</th>
-                                        <th>Name</th>
-                                        <th>Style</th>
-                                        <th>Used in ternary</th>
-                                        <th>Show/Hide</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="vertex in wiModal.getVertices() track by $index"
-                                        ng-class="{selected:$index == selectedRow}"
-                                        ng-click="wiModal.setClickedRow($index)">
-                                        <td>{{$index + 1}}</td>
-                                        <td>
-                                            <input ng-model="vertex.x"
-                                                    type="text" class="form-control wi-form-control valign-middle pull-left"
-                                                    ng-change="wiModal.onChange(vertex.index)" />
-                                        </td>
-                                        <td>
-                                            <input ng-model="vertex.y"
-                                                    type="text" class="form-control wi-form-control valign-middle pull-left"
-                                                    ng-change="wiModal.onChange(vertex.index)" />
-                                        </td>
-                                        <td>
-                                            <input ng-model="vertex.name"
-                                                    type="text" class="form-control wi-form-control valign-middle pull-left"
-                                                    ng-change="wiModal.onChange(vertex.index)" />
-                                        </td>
-                                        <td>
-                                            <select ng-model="vertex.style"
-                                                    class="form-control wi-form-control"
-                                                    ng-change="wiModal.onChange(vertex.index)"
-                                                    ng-selected="vertex.style">
-                                                <option value="Circle">Circle</option>
-                                                <option value="Square">Square</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input ng-model="vertex.used"
-                                                    type="checkbox"
-                                                    ng-change="wiModal.onChange(vertex.index)" />
-                                        </td>
-                                        <td>
-                                            <input ng-model="vertex.showed"
-                                                    type="checkbox"
-                                                    ng-change="wiModal.onChange(vertex.index)" />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <form class="form-horizontal form-condensed dialog-style" name="modalTernary">
+                        <h5 class="normal-text">Vertices Manager</h5>
+                        <table class="table table-bordered refCurve availableCurve">
+                            <thead>
+                                <tr>
+                                    <th width="2%">#</th>
+                                    <th width="20%">X</th>
+                                    <th width="20%">Y</th>
+                                    <th width="20%">Name</th>
+                                    <th width="11%">Style</th>
+                                    <th width="6%">Used</th>
+                                    <th width="6%">Show</th>
+                                    <th width="5%">
+                                        <button class="btn btn-default" type="button" ng-click="wiModal.addRow();">
+                                            <span class="plus-16x16"></span>
+                                        </button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody style='height: 111px;' id='ternaryBody'>
+                                <tr ng-repeat="vertex in wiModal.getVertices() track by $index" ng-class="{selected:$index == selectedRow}" ng-click="wiModal.setClickedRow($index)">
+                                    <td width="2%">{{$index + 1}}</td>
+                                    <td width="20%">
+                                        <input ng-model="vertex.x" type="number" step='any'
+                                        class="form-control wi-form-control valign-middle pull-left"
+                                        ng-change="wiModal.onChange(vertex.index)"
+                                        wi-decimal-places='4'/>
+                                    </td>
+                                    <td width="20%">
+                                        <input ng-model="vertex.y" type="number"
+                                        class="form-control wi-form-control valign-middle pull-left"
+                                        ng-change="wiModal.onChange(vertex.index)"
+                                        step='any' wi-decimal-places='4'/>
+                                    </td>
+                                    <td width="20%">
+                                        <input ng-model="vertex.name" type="text" class="form-control wi-form-control valign-middle pull-left" ng-change="wiModal.onChange(vertex.index)"
+                                        />
+                                    </td>
+                                    <td width="11%">
+                                        <select ng-model="vertex.style" class="form-control wi-form-control" ng-change="wiModal.onChange(vertex.index)" ng-selected="vertex.style">
+                                            <option value="Circle">Circle</option>
+                                            <option value="Square">Square</option>
+                                        </select>
+                                    </td>
+                                    <td width="6%" style="text-align: center;">
+                                        <input ng-model="vertex.used" type="checkbox" ng-change="wiModal.onChange(vertex.index)" />
+                                    </td>
+                                    <td width="6%" style="text-align: center;">
+                                        <input ng-model="vertex.showed" type="checkbox" ng-change="wiModal.onChange(vertex.index)" />
+                                    </td>
+                                    <td width="5%" style="text-align: center;">
+                                        <button class="btn btn-default" type="button" ng-click="wiModal.removeRow($index);">
+                                            <span class="delete-16x16"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                            <div class="text-right">
-                                <button class="btn btn-default normal-text" type="button" ng-click="wiModal.pickVertex()" class="wi-form-control">
-                                    Pick from CrossPlot
-                                </button>
-                                <button class="btn btn-default normal-text" type="button" ng-click="wiModal.importVertices()" class="wi-form-control">
-                                    Import
-                                </button>
-                                <button class="btn btn-default normal-text" type="button" ng-click="wiModal.exportVertices()" class="wi-form-control">
-                                    Export
-                                </button>
-                            </div>
+                        <div class="text-right">
+                            <button class="btn btn-default normal-text" type="button" ng-click="wiModal.pickVertex()">
+                                Pick from CrossPlot
+                            </button>
+                            <label class="btn btn-default normal-text">
+                                <input class="display-none" type="file" accept=".csv" ngf-select ng-model="wiModal.ImportFile" ng-change="wiModal.importVertices()"
+                                /> Import
+                            </label>
+                            <button class="btn btn-default normal-text" type="button" ng-click="wiModal.exportVertices()">
+                                Export
+                            </button>
+                        </div>
 
-                            <h5 class="normal-tex">Calculate</h5>
-                            <div class="row">
-                                <div class="col-sm-2">
-                                    <label>
-                                        <input type="radio" ng-model="calculateOptions.type" value="Point" />
-                                        Point
-                                    </label>
-                                </div>
-                                <div class="form-group col-sm-3">
-                                    <label class="control-label col-sm-3">X: </label>
-                                    <div class="col-sm-8 padding-0">
-                                        <input type="text" ng-model="calculateOptions.point.x"
-                                            ng-disabled="calculateOptions.type != 'Point'"
-                                            class="form-control wi-form-control valign-middle">
-                                    </div>
-                                </div>
-                                <div class="form-group col-sm-3">
-                                    <label class="control-label col-sm-3">Y: </label>
-                                    <div class="col-sm-8 padding-0">
-                                        <input type="text" ng-model="calculateOptions.point.y"
-                                            ng-disabled="calculateOptions.type != 'Point'"
-                                            class="form-control wi-form-control valign-middle">
-                                    </div>
-                                </div>
-                                <div class="col-sm-2">
-                                    <button class="btn btn-default normal-text" type="button"
-                                        ng-click="wiModal.pickPoint()"
-                                        class="wi-form-control"
-                                        style="padding: 2px 12px;"
-                                        ng-disabled="calculateOptions.type != 'Point'">
-                                            Pick Point
-                                    </button>
+                        <h5 class="normal-tex">Calculate</h5>
+                        <div class="form-group">
+                            <div class="col-sm-2">
+                                <label>
+                                    <input type="radio" ng-model="calculateOptions.type" value="Point" ng-click="result.outputCurve = false" /> Point
+                                </label>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="col-sm-3">X: </label>
+                                <div class="col-sm-9">
+                                    <input type="number" ng-model="calculateOptions.point.x" ng-disabled="calculateOptions.type != 'Point'" class="form-control wi-form-control valign-middle"
+                                        step='any' wi-decimal-places='4'>
                                 </div>
                             </div>
-                            <br>
-                            <div class="row">
-                                <div class="col-sm-2">
-                                    <label>
-                                        <input id="ternary-calculate-area" type="radio" ng-model="calculateOptions.type" value="Area" />
-                                        Area
-                                    </label>
-                                </div>
-                                <div class="col-sm-2" ng-repeat="i in [1]"
-                                    style="padding-right: 0; margin-left: 23px; padding-left:19px;">
-                                    <multiselect class="selectPolygons" multiple="true"
-                                        ng-model="calculateOptions.area.polygons"
-                                        options="p for p in wiModal.polygonList"
-                                        change="selected()"
-                                        disabled="calculateOptions.type != 'Area'">
-                                    </multiselect>
-                                </div>
-                                <div class="form-group col-sm-2"
-                                    style="margin-left: 50px; padding-left: 5px;">
-                                    <select ng-model="calculateOptions.area.exclude"
-                                            class="form-control wi-form-control"
-                                            ng-disabled="calculateOptions.type != 'Area'"
-                                            ng-options="(item ? 'Exclude' : 'Include') for item in [true, false]">
-                                    </select>
+                            <div class="col-sm-4">
+                                <label class="col-sm-3">Y: </label>
+                                <div class="col-sm-9">
+                                    <input type="number" ng-model="calculateOptions.point.y" ng-disabled="calculateOptions.type != 'Point'" class="form-control wi-form-control valign-middle"
+                                        step='any' wi-decimal-places='4'>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <label>
-                                        <input id="ternary-calculate-all" type="radio" ng-model="calculateOptions.type" value="All" />
-                                        All points in Ternary
-                                    </label>
-                                </div>
+                            <div class="col-sm-2">
+                                <button class="btn btn-default normal-text" type="button" ng-click="wiModal.pickPoint()" class="wi-form-control" style="padding: 2px 12px;"
+                                    ng-disabled="calculateOptions.type != 'Point'">
+                                    Pick Point
+                                </button>
                             </div>
-                            <h5 class="normal-text">Results</h5>
-                            <div class="row">
-                                <span ng-repeat="vertex in wiModal.getTernaryVertices() track by $index" class="col-sm-3">
-                                    <span ng-show="$index <3">
-                                        {{vertex.name}}
-                                        <input type="text" ng-model="result.materials[$index]"
-                                                class="form-control wi-form-control valign-middle display-inline-block"/>
-                                        &nbsp;
-                                    </span>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2">
+                                <label>
+                                    <input id="ternary-calculate-area" type="radio" ng-model="calculateOptions.type" value="Area" /> Area
+                                </label>
+                            </div>
+                            <div class="col-sm-4" ng-repeat="i in [1]">
+                                <multiselect class="selectPolygons" multiple="true" ng-model="calculateOptions.area.polygons" options="p for p in wiModal.polygonList"
+                                    change="selected()" disabled="calculateOptions.type != 'Area'">
+                                </multiselect>
+                            </div>
+                            <div class="col-sm-4">
+                                <select ng-model="calculateOptions.area.exclude" class="form-control wi-form-control" ng-disabled="calculateOptions.type != 'Area'"
+                                    ng-options="(item ? 'Exclude' : 'Include') for item in [true, false]">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <label>
+                                    <input id="ternary-calculate-all" type="radio" ng-model="calculateOptions.type" value="All" /> All points in Ternary
+                                </label>
+                            </div>
+                        </div>
+                        <h5 class="normal-text">Results</h5>
+                        <div class="form-group">
+                            <span ng-repeat="vertex in wiModal.getTernaryVertices() track by $index" class="col-sm-3">
+                                <span ng-show="$index <3">
+                                    {{vertex.name}}
+                                    <input type="text" ng-model="result.materials[$index]" class="form-control wi-form-control valign-middle display-inline-block"
+                                        disabled/>
                                 </span>
+                            </span>
+                        </div>
+                        <div class="form-group" ng-if="calculateOptions.type != 'Point'">
+                            <span class="col-sm-3">
+                                <label>
+                                    <input type="checkbox" ng-model="result.outputCurve" /> Output Curve
+                                </label>
+                            </span>
+                            <div class="col-sm-3" class="form-control wi-form-control">
+                                <ui-select ng-model="result.selectedDataset" ng-disabled="!result.outputCurve">
+                                    <ui-select-match>{{result.selectedDataset.name}}</ui-select-match>
+                                    <ui-select-choices repeat='dataset as dataset in datasets | filter: {name:$select.search} track by dataset.id'>
+                                        {{dataset.properties.name}}
+                                    </ui-select-choices>
+                                    <ui-select-no-choice>
+                                        Dataset not found!
+                                    </ui-select-no-choice>
+                                </ui-select>
                             </div>
-                            <div class="row">
-                                <span class="col-sm-3">
-                                    <label>
-                                        <input type="checkbox" ng-model="result.outputCurve" />
-                                        Output Curve
-                                    </label>
-                                </span>
-                                <div class="col-sm-3" class="form-control wi-form-control">
-                                    <ui-select ng-model="result.selectedDataset" ng-disabled="!result.outputCurve">
-                                        <ui-select-match >{{result.selectedDataset.name}}</ui-select-match>
-                                        <ui-select-choices repeat='dataset as dataset in datasets'>
-                                            <div class="padding-left-20px">{{dataset.properties.name}}</div>
-                                        </ui-select-choices>
-                                    </ui-select>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <span class="col-sm-3" ng-repeat="curveName in result.curveNames track by $index">
-                                    <label>
-                                        Curve {{$index + 1}}
-                                        <input type="text" ng-model="result.curveNames[$index]"
-                                            class="form-control wi-form-control valign-middle display-inline-block" ng-disabled="!result.outputCurve"/>
-                                    </label>
-                                </span>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="col-sm-1">
-                        <br><br>
-                        <button class="btn btn-default" type="button" ng-click="wiModal.removeRow();">
-                            <span class="delete-16x16"></span>
-                        </button>
-                        <button class="btn btn-default" type="button" ng-click="wiModal.addRow();">
-                            <span class="plus-16x16"></span>
-                        </button>
-                    </div>
+                        </div>
+                        <div class="form-group" ng-if="calculateOptions.type != 'Point'">
+                            <span class="col-sm-3" ng-repeat="curveName in result.curveNames track by $index">
+                                <label>
+                                    Curve {{$index + 1}}
+                                    <input type="text" ng-model="result.curveNames[$index]" class="form-control wi-form-control valign-middle display-inline-block"
+                                        ng-disabled="!result.outputCurve" />
+                                </label>
+                            </span>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="modal-footer">
-                <button ng-click="wiModal.onSaveCurveButtonClicked()" class="btn btn-default" ng-disabled="!result.outputCurve">
+                <button ng-click="wiModal.onSaveCurveButtonClicked()" class="btn btn-default" ng-disabled="!result.outputCurve || updating">
                     Save Curve
                 </button>
-                <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3">
+                <button ng-click="wiModal.onCalculateButtonClicked()" class="btn btn-default" ng-disabled="wiModal.getTernaryVertices().length != 3 || updating">
                     Calculate
                 </button>
                 <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default" ng-disabled="updating">

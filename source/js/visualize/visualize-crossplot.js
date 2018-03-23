@@ -28,6 +28,7 @@ function Crossplot(config) {
     this.rectZWidth = 0;
 
     this.viSelection = null;
+    this.showTooltip = true;
 }
 
 Crossplot.prototype.AREA_LINE_COLOR = 'DarkCyan';
@@ -480,6 +481,7 @@ Crossplot.prototype.init = function(domElem) {
 
     this.svgContainer = this.bodyContainer.append('svg')
         .attr('class', 'vi-crossplot-svg-container')
+        // .style('pointer-events', 'none')
         .attr('width', rect.width)
         .attr('height', rect.height);
 
@@ -510,7 +512,7 @@ Crossplot.prototype.init = function(domElem) {
 
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-overlay-line');
-    
+
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-tooltip');
 
@@ -519,6 +521,28 @@ Crossplot.prototype.init = function(domElem) {
     this.on('mousedown', function() { self.mouseDownCallback() });
     this.on('mousemove', function() { self.mouseMoveCallback() });
     this.on('mouseleave', function() { self.tooltip(null, null, true);})
+
+    // let zoom = d3.zoom()
+    //     .scaleExtent([1, 40])
+    //     .translateExtent([[-100, -100], [drawContainerSize.x + drawContainerSize.width + 90, drawContainerSize.y + drawContainerSize.height + 100]])
+    //     .on('zoom', zoomed);
+    // function zoomed() {
+    //     var transform = d3.event.transform;
+    //     self.ctx.save();
+    //     self.ctx.clearRect(0, 0, rect.width, rect.height);
+    //     self.ctx.translate(transform.x, transform.y);
+    //     self.ctx.scale(transform.k, transform.k);
+    //     self._doPlot();
+    //     self.ctx.restore();
+    //     self.view.attr('transform', d3.event.transform);
+    //     gX.call(xAxis.scale(d3.event.transform.rescaleX(self.getTransformX())));
+    //     gY.call(yAxis.scale(d3.event.transform.rescaleY(self.getTransformY())));
+    //     gXBottom.call(xAxisBottom.scale(d3.event.transform.rescaleX(self.getTransformX())));
+    //     gYLeft.call(yAxisLeft.scale(d3.event.transform.rescaleY(self.getTransformY())));
+    // }
+    // this.canvas.call(zoom.transform, d3.zoomIdentity);
+    // this.canvas.call(zoom);
+    // this.canvas.on('dblclick.zoom', null);
 }
 
 Crossplot.prototype.createContainer = function() {
@@ -602,9 +626,9 @@ Crossplot.prototype._doPlot = function() {
         this.plotSelections();
     // }
 
-    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points ploteed out of " 
-                        + this.data.length + '( ' 
-                        + this.outliers + ' outliers, ' 
+    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points plotted out of "
+                        + this.data.length + '( '
+                        + this.outliers + ' outliers, '
                         + this.nullDatas + ' nulls)';
     this.footerRight
         .text(footerString);
@@ -866,15 +890,12 @@ Crossplot.prototype.isInZones = function(point, zones) {
     return false;
 }
 
-Crossplot.prototype.isInSelections = function(point, data) {
-    // for (let i = 0; i < data.length; i++) {
-        // if (Utils.isWithinYRange(point, [selections[i][0], selections[i][selections[i].length - 1]]))
-
-        // assuming 'selections' is only 1 'selection', above is true
-        if (Utils.isWithinYRange(point, [data.startDepth, data.stopDepth]))
-            return true;
-    // }
-    return false;
+Crossplot.prototype.isInSelections = function(point, dataY) {
+        // if (Utils.isWithinYRange(point, [data.startDepth, data.stopDepth]))
+    const topDepth = this.well.topDepth;
+    const step = this.well.step;
+    const y = Math.round((point.y - topDepth) / step);
+    return dataY.includes(y);
 }
 
 Crossplot.prototype.filterByPolygons = function(polygons, data, exclude) {
@@ -1424,11 +1445,26 @@ Crossplot.prototype.plotSelections = function() {
 
         let plotFunc = helper[Utils.lowercase(self.pointSet.pointSymbol)];
         if (typeof plotFunc != 'function') return;
-        let processedSelectionData = self.prepareSelectionData(selectionCanvas.data);
-        processedSelectionData.forEach(function(data) {
-            data.forEach(function(d) {
-                plotFunc.call(helper, transformX(d.x), transformY(d.y));
-            });
+        // for the first time open crossplot
+        if (!selectionCanvas.selectionPointData.length && selectionCanvas.data.length
+            || !selectionCanvas.newSelectionData.length) {
+            selectionCanvas.selectionPointData = self.prepareSelectionData([ ...new Set(selectionCanvas.data) ]);
+        }
+        if (selectionCanvas.newSelectionData.length) {
+            selectionCanvas.selectionPointData = selectionCanvas.selectionPointData
+                .concat(self.prepareSelectionData([ ...new Set(selectionCanvas.newSelectionData) ]))
+                .sort();
+            selectionCanvas.data = selectionCanvas.data
+                .concat(selectionCanvas.newSelectionData)
+                .sort();
+            selectionCanvas.data = [ ...new Set(selectionCanvas.data) ];
+            selectionCanvas.newSelectionData = [];
+        }
+        // if (selectionCanvas.selectionPointData.length != selectionCanvas.data.length) {
+        //     selectionCanvas.selectionPointData = self.prepareSelectionData([ ...new Set(selectionCanvas.data) ]);
+        // }
+        selectionCanvas.selectionPointData.forEach(function(d) {
+            plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
         selectionCtx.restore();
     });
@@ -1514,7 +1550,7 @@ Crossplot.prototype.prepareData = function() {
     });
 }
 
-Crossplot.prototype.prepareSelectionData = function(depthData) {
+Crossplot.prototype.prepareSelectionData = function(dataY) {
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
@@ -1543,27 +1579,22 @@ Crossplot.prototype.prepareSelectionData = function(depthData) {
 
     let self = this;
     let selectionData = [];
-    depthData.forEach(function(data) {
-        let selectionPoints = [];
-        Utils.parseData(self.pointSet.curveY.data).forEach(function(d) {
-            if (!self.isInSelections(d, data)) return;
-            if (self.discriminatorData.length) {
-                let well = self.well;
-                let index = Math.round((d.y - well.topDepth) / well.step);
-                if (!self.discriminatorData[index]) return;
-            }
-
-            if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
-                selectionPoints.push({
-                    x: mapX[d.y],
-                    y: d.x,
-                    z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
-                    depth: d.y
-                });
-            }
-        });
-        selectionData.push(selectionPoints);
+    Utils.parseData(self.pointSet.curveY.data).forEach(function(d) {
+        if (!self.isInSelections(d, dataY)) return;
+        if (self.discriminatorData.length) {
+            let well = self.well;
+            let index = Math.round((d.y - well.topDepth) / well.step);
+            if (!self.discriminatorData[index]) return;
+        }
+        if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
+            selectionData.push({
+                x: mapX[d.y],
+                y: d.x,
+                depth: d.y
+            });
+        }
     });
+
     return selectionData;
 }
 
@@ -1827,7 +1858,11 @@ Crossplot.prototype.mouseMoveCallback = function() {
         }
     }
     else {
-        this.tooltip(x, y);
+        if(this.showTooltip) {
+            this.tooltip(x, y);
+        } else {
+            this.tooltip(null, null, true);
+        }
     }
 }
 
@@ -2048,23 +2083,22 @@ Crossplot.prototype.tooltip = function(x, y, notShow) {
     let container = self.svgContainer.select('.vi-crossplot-tooltip');
     if(notShow || isNaN(xCoord) || isNaN(yCoord)  || !x || !y) {
         container.selectAll('*').remove();
-        return;       
+        return;
     }
 
     let text = container.selectAll('text')
         .data([x, y]);
     text.enter()
         .append('text')
-        .style('font-size', 14)
-        .style('font-weight', 'bold')
+        .style('font-size', 12)
         .attr('x', xCoord)
-        .attr('y', (d, i) => { return yCoord + 15 + 20*i;})
-        .text(function (d, i) { 
+        .attr('y', (d, i) => { return yCoord + 15 + 15*i;})
+        .text(function (d, i) {
             return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
         });
     text.attr('x', xCoord)
-        .attr('y', (d, i) => { return yCoord + 15 + 20*i;})
-        .text(function (d, i) { 
+        .attr('y', (d, i) => { return yCoord + 15 + 15*i;})
+        .text(function (d, i) {
         return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
     });
     text.exit().remove();
@@ -2083,7 +2117,7 @@ Crossplot.prototype.tooltip = function(x, y, notShow) {
             .attr('fill-opacity', 0.9)
             .attr('stroke', '#444')
             .attr('rx', 7)
-            .attr('ry', 7); 
+            .attr('ry', 7);
     rect.attr('x', (d)=> d.x - 5)
         .attr('y', (d)=> d.y - 5)
         .attr('width', maxWidth + 10)
