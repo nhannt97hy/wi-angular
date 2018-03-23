@@ -1,4 +1,4 @@
-<div  style="display:flex;flex:1;overflow:hidden;flex-direction:column;">
+<div style="display:flex;flex:1;overflow:hidden;flex-direction:column;">
     <div style="padding: 10px;display:flex;flex:1;flex-direction:row;">
         <div style="display:flex;flex-direction:column;flex:0.3;padding:10px;overflow:auto;">
             <form class="form-horizontal">
@@ -7,18 +7,24 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3">Type</label>
                         <div class="col-sm-9">
-                            <wi-item-dropdown on-wi-dropdown-init="wiWorkflowMachineLearning.onModelTypeListInit" style='width:100%;'
-                                on-item-changed="wiWorkflowMachineLearning.onModelTypeChanged"></wi-item-dropdown>
+                            <wi-item-dropdown on-wi-dropdown-init="wiWorkflowMachineLearning.onModelTypeListInit" 
+                                style='width:100%;' place-holder="model type"
+                                choice-styles="width:100%;"
+                                on-item-changed="wiWorkflowMachineLearning.onModelTypeChanged">
+                            </wi-item-dropdown>
                         </div>
                     </div>
                     <div class='form-group' ng-repeat='param in wiWorkflowMachineLearning.currentModelType.parameters'>
                         <label ng-if='param.type != "nnconfig"' class="control-label col-sm-3">{{param.name}}</label>
                         <div ng-if="param.type == 'number'" class='col-sm-9'>
                             <input style="width: 100%;" class="form-control wi-form-control"
-                                type="number" ng-model="param.value" step='{{param.step}}' min="{{param.min}}" max="{{param.max}}">
+                                type="number" ng-model="param.value" 
+                                step='{{param.step}}' min="{{param.min}}" max="{{param.max}}"
+                                ng-change='wiWorkflowMachineLearning.saveWorkflow();'>
                         </div>
                         <div ng-if="param.type=='select'" class='col-sm-9'>
-                            <ui-select ng-model="param.value">
+                            <ui-select ng-model="param.value" 
+                                ng-change='wiWorkflowMachineLearning.saveWorkflow();'>
                                 <ui-select-match>
                                     {{param.value.name}}
                                 </ui-select-match>
@@ -30,17 +36,17 @@
                         <div ng-if="param.type=='nnconfig'" class='col-sm-12' >
                             <div class="well container-fluid">
                                 <h4>{{param.name}}</h4>
-                                <label class="control-label col-sm-3">Layers</label>
-                                <div class="col-sm-9">
+                                <label class="control-label col-sm-4">Layers</label>
+                                <div class="col-sm-8">
                                     <input ng-model='param.value.nLayer' type="number"
-                                        ng-change="wiWorkflowMachineLearning.nnConfigNLayerChanged(param.value);wiWorkflowMachineLearning.updateNNConfig();" 
+                                        ng-change="wiWorkflowMachineLearning.nnConfigNLayerChanged(param.value);wiWorkflowMachineLearning.updateNNConfig();wiWorkflowMachineLearning.saveWorkflow();" 
                                         class="form-control wi-form-control" min="1">
                                 </div>
                                 <div ng-repeat="layer in param.value.layerConfig">
-                                    <label class="control-label col-sm-3">{{layer.name}}</label>
-                                    <div class="col-sm-9">
+                                    <label class="control-label col-sm-4">{{layer.name}}</label>
+                                    <div class="col-sm-8">
                                         <input class="form-control wi-form-control" ng-model="layer.value" type="number"
-                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();" min="1">
+                                            ng-change="wiWorkflowMachineLearning.updateNNConfig();wiWorkflowMachineLearning.saveWorkflow();" min="1">
                                     </div>
                                 </div>
                             </div>

@@ -14,8 +14,9 @@ function getAuthInfo() {
 }
 getAuthInfo();
 
-const machineLearningUrl = "http://54.169.13.92:3002/atore/api"
-const mlToolkitUrl = "http://54.169.13.92:4002/wipm/api/task/regression";
+//const machineLearningUrl = "http://54.169.13.92:3002/atore/api"
+//const mlToolkitUrl = "http://54.169.13.92:4002/wipm/api/task/regression";
+const mlToolkitUrl = "http://13.251.24.65:4002/wipm/api/task/regression";
 
 
 const ML_TOOL_KIT = {
@@ -25,15 +26,9 @@ const ML_TOOL_KIT = {
     PREDICT_FACIES:  mlToolkitUrl + '/faces/predict'
 }
 
-const ML = {
-    TRAIN: machineLearningUrl + '/model/train',
-    PREDICT_CURVE: machineLearningUrl + '/curve/predict',
-    PREDICT_ANFIS: machineLearningUrl + '/anfis/predict',
-    ML_PREDICT_FACIES: machineLearningUrl + '/facies/predict',
-}
-
 const URL = ML_TOOL_KIT;
-const wiMachineLearningURL = machineLearningUrl;
+//const wiMachineLearningURL = machineLearningUrl;
+const wiMachineLearningURL = mlToolkitUrl;;
 
 let app = angular.module(moduleName, []);
 

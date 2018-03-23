@@ -34,6 +34,7 @@ let wiStatusBar = require('./wi-status-bar');
 let wiSlidingbar = require('./wi-slidingbar');
 
 let wiList = require('./wi-list');
+let wiNeuralNetwork = require('./wi-neural-network');
 
 let wiContextMenu = require('./wi-context-menu');
 let wiSpinner = require('./wi-spinner');

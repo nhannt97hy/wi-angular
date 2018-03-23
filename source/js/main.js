@@ -54,6 +54,8 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiPlot = require('./wi-plot');
+
 let wiInventory = require('./wi-inventory');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
@@ -175,6 +177,7 @@ let app = angular.module('wiapp',
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
         wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,

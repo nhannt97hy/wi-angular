@@ -51,22 +51,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         min: 0.0001,
         max: 1,
         step: 0.0001
-    }, {
-        name: "data_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "data_max",
-        type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
-        value: 1000
     }];
 
     const LASSO_PARAMS = [{
@@ -78,30 +62,21 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "alpha",
         type: 'number',
-        value: 0.1,
-        step: 0.1
-    }, {
-        name: "data_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "data_max",
-        type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
-        value: 1000
+        //value: 0.1,
+        //step: 0.1
+        value: 0.0001,
+        step: 0.0001,
+        min: 0.0001,
+        max: 1
     }];
 
     const DECISION_TREE_PARAMS = [{
         name: 'max_features', 
-        type: 'select', 
-        value: 1,
+        type: 'select', // or number
+        value: {
+            name: 'log2',
+            value: 1
+        },
         choices: [{
             name: 'log2',
             value: 1
@@ -115,28 +90,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: 'None',
             value: 4
         }]
-    }, {
-        name: "data_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "data_max",
-        type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
-        value: 1000
     }];
 
     const RANDOM_FOREST_REGRESSOR_PARAMS = [{
         name: 'max_features', 
-        type: 'select', 
-        value: 1,
+        type: 'select', // or number
+        value: {
+            name: 'log2',
+            value: 1
+        },
         choices: [{
             name: 'log2',
             value: 1
@@ -156,28 +118,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         value: 10,
         min: 10,
         max: 100
-    }, {
-        name: "data_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "data_max",
-        type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
-        value: 1000
     }];
 
     const SUPPORT_VECTOR_MACHINE_PARAMS = [{
         name: 'kernel', 
         type: 'select', 
-        value: 1,
+        value: {
+            name: 'rbf',
+            value: 1
+        },
         choices: [{
             name: 'rbf',
             value: 1
@@ -195,36 +144,24 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: "gamma",
         type: 'number',
         value: 0.1,
-        nullValue: 'auto',
         step: 0.1,
         max: 1
     }, {
         name: "C",
         type: 'number',
-        value: 0.1,
-        step: 0.1
-    }, {
-        name: "data_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "data_max",
-        type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
-        value: 1000
+        value: 0.001,
+        step: 0.001,
+        min: 0.001,
+        max: 100
     }];
 
     const MULTIPERCEPTRON_PARAMS = [{
         name: 'activation',
         type: 'select',
-        value: 1,
+        value: {
+            name: 'Sigmoid',
+            value: 1
+        },
         choices: [{
             name: 'Sigmoid',
             value: 1
@@ -232,21 +169,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: 'Tanh',
             value: 2
         }]
-    },{
-        name: "data_min",
-        type: 'number',
-        value: 0
     }, {
-        name: "data_max",
+        name: 'epochs',
         type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
+        min: 1,
         value: 1000
     }, {
         name: 'Neuron Network Structure',
@@ -264,12 +190,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 value:3
             }]
         }
-    },];
+    }];
 
     const CONJUGATE_GRADIENT_PARAMS = [{
         name: 'activation',
         type: 'select',
-        value: 1,
+        value: {
+            name: 'Sigmoid',
+            value: 1
+        },
         choices: [{
             name: 'Sigmoid',
             value: 1
@@ -278,20 +207,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             value: 2
         }]
     },{
-        name: "data_min",
+        name: 'epochs',
         type: 'number',
-        value: 0
-    }, {
-        name: "data_max",
-        type: 'number',
-        value: 1000
-    }, {
-        name: "target_min",
-        type: 'number',
-        value: 0
-    }, {
-        name: "target_max",
-        type: 'number',
+        min: 1,
         value: 1000
     },{
         name: 'Neuron Network Structure',
@@ -399,7 +317,54 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     //         }
     //     ]
     // };
-    this.runStep = function(wf, cb) {
+    
+    this.workflowResults = [ {
+        name: TRAIN_STEP_NAME,
+        outputData: []
+    }, {
+        name: VERIFY_STEP_NAME,
+        outputData: []
+    }, {
+        name: PREDICT_STEP_NAME,
+        outputData: []
+    }];
+    /*this.workflowResults = [ {
+        name: TRAIN_STEP_NAME,
+        outputData: [{
+            idErrorPlot: 1,
+            name: 'Train Error', value:[]
+        },{
+            idErrorPlot: 2,
+            name: 'Validation Error', value: []
+        }]
+    }, {
+        name: VERIFY_STEP_NAME,
+        outputData: [{
+            idPlot: 1,
+            plotName: "GR_ML"
+        }, {
+            idPlot: 1,
+            plotName: "GR_ML"
+        }]
+    }, {
+        name: PREDICT_STEP_NAME,
+        outputData: [{
+            idPlot: 1,
+            plotName: "GR_ML1"
+        }]
+    }];*/
+
+    this.safeRunStep = function(wf, cb) {
+        __running_wf = true;
+        runStep(wf, function() {
+            __running_wf = false;
+            utils.refreshProjectState();
+            self.saveWorkflow();
+            if (cb) cb();
+        });
+    }
+    this.runStep = runStep;
+    function runStep(wf, cb) {
         switch(wf.name) {
             case TRAIN_STEP_NAME: 
                 console.log('runstep train');
@@ -504,6 +469,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         };
         return __names[name];
     }
+    function genModelId() {
+        return __USERINFO.username + '-idWorkflow:' + self.idWorkflow;
+    }
     function outputCurveName() {
         let modelType = self.workflowConfig.model.type;
         switch(modelType){
@@ -560,8 +528,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     }
                 }
                 params = {
-                    data_scale: [getValueParam('data_min', self.currentModelType), getValueParam('data_max', self.currentModelType)],
-                    target_scale: [getValueParam('target_min', self.currentModelType), getValueParam('target_max', self.currentModelType)],
                     max_iter: getValueParam('max_iter', self.currentModelType),
                     alpha: getValueParam('alpha', self.currentModelType),
                     max_features: getValueParam('max_features', self.currentModelType),
@@ -574,14 +540,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 }
             }
             let payload = {
-                model_id: __USERINFO.username + '-idWorkflow:' + self.idWorkflow,
+                model_id: genModelId(),
                 model_type: self.currentModelType.name,
                 params: params,
                 train: {
-                    target: target,
-                    data: data
-                },
-                validation: {
                     target: target,
                     data: data
                 }
@@ -591,15 +553,73 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 if(res){
                     toastr.success('Train model success');
                     console.log('train model success', res);
-                    cb();
+
+                    self.workflowResults[0].outputData.length = 0;
+                    if (res.error_path && res.error_path.training_errors)
+                        self.workflowResults[0].outputData.push({
+                            idErrorPlot: 1,
+                            name: "Training Errors",
+                            value: res.error_path.training_errors
+                        });
+                    if (res.error_path && res.error_path.validation_errors)
+                        self.workflowResults[0].outputData.push({
+                            idErrorPlot: 2,
+                            name: "Validation Errors",
+                            value: res.error_path.validation_errors
+                        });
+
+                    if (cb) cb();
                 }else{
                     console.log('train model fail');
-                    cb('train model fail');
+                    if (cb) cb('train model fail');
                 }
             });
         });
-    };
+    }
     
+    function saveCurveAndCreatePlot(curveInfo, step, cb) {
+        /*let _stepVerify = self.workflowConfig.steps.filter(function(step){
+            return step.name==VERIFY_STEP_NAME;
+        })[0];*/
+        saveCurve(curveInfo, function(curveProps) {
+            delete curveInfo.data;
+
+            let inCurves = step.inputData[0].inputs.map(function(ipt) {
+                return ipt.value;
+            });
+            let outCurves = [];
+            
+            if (step.name == VERIFY_STEP_NAME) {
+                outCurves = inCurves.splice(inCurves.length - 1, 1);
+            }
+
+            outCurves.push({
+                idCurve:curveProps.idCurve,
+                name: curveProps.name
+            });
+            
+            createVerifyLogplot(
+                curveProps.idWell, 
+                step.name + '-' + curveProps.name, 
+                inCurves, outCurves,
+                function(err, response) {
+                    if (err) {
+                        console.error(err);
+                        toastr.error(err.message);
+                        if (cb) cb(err);
+                        return;
+                    }
+                    let wfResult = self.workflowResults.find(function(wfr) {
+                        return wfr.name == step.name;
+                    });
+                    wfResult.outputData.length = 0;
+                    wfResult.outputData.push(response);
+
+                    if (cb) cb();
+                }
+            );
+        });
+    }
     function verify(cb){
         let _stepVerify = self.workflowConfig.steps.filter(function(step){return step.name==VERIFY_STEP_NAME;})[0];
         getDataCurves(_stepVerify, function(list_curves){
@@ -611,12 +631,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             switch(self.workflowConfig.model.type) {
                 case CURVE_MODEL:
                     payload = {
-                        model_id: self.workflowConfig.name,
+                        model_id: genModelId(),
                         data: dataCurves
                     };
                     wiMachineLearningApiService.predictCurve(payload, function(res){
                         if (res){
-                            toastr.success('Predict curve success');
+                            toastr.success('Verification success');
                             console.log('verify success', res);
                             fillNullInCurve(nullPositions, res.target)
                             let lastIdx = _stepVerify.inputData[0].inputs.length - 1;
@@ -624,16 +644,17 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 idDataset: _stepVerify.inputData[0].dataset.idDataset,
                                 idFamily: _stepVerify.inputData[0].inputs[lastIdx].value.idFamily,
                                 idWell: _stepVerify.inputData[0].well.idWell,
-                                // name: _stepVerify.inputData[0].inputs[lastIdx].value.name + '_ML',
                                 name: outputCurveName(),
                                 data: res.target
                             }
-                            saveCurve(curveInfo, function(curveProps) {
-                                delete curveInfo.data;
-                                cb();
+                            saveCurveAndCreatePlot(curveInfo, _stepVerify, function(err) {
+                                if (err) {
+                                    toastr.error(err.message);
+                                }
+                                if (cb) cb(err);
                             });
                         } else{
-                            cb('verify fail');
+                            if (cb) cb('verify fail');
                         }
                     });
                     break;
@@ -643,8 +664,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     };
                     wiMachineLearningApiService.predictAnfis(payload, function(res){
                         if (res){
-                            toastr.success('Predict curve success');
-                            console.log('verify success', res);
+                            toastr.success('Verification curve success');
+                            console.log('Prediction success', res);
                             fillNullInCurve(nullPositions, res.target)
                             let lastIdx = _stepVerify.inputData[0].inputs.length - 1;
                             let curveInfo = {
@@ -654,12 +675,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 name: outputCurveName(),
                                 data: res.target
                             }
-                            saveCurve(curveInfo, function(curveProps) {
-                                delete curveInfo.data;
-                                cb();
+                            saveCurveAndCreatePlot(curveInfo, _stepVerify, function(err) {
+                                if (err) {
+                                    toastr.error(err.message);
+                                }
+                                if (cb) cb(err);
                             });
                         } else{
-                            cb('verify fail');
+                            if (cb) cb('verify fail');
                         }
                     });
                     break;
@@ -680,12 +703,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 name: outputCurveName(),
                                 data: res.target
                             }
-                            saveCurve(curveInfo, function(curveProps) {
-                                delete curveInfo.data;
-                                cb();
+                            saveCurveAndCreatePlot(curveInfo, _stepVerify, function(err) {
+                                if (err) {
+                                    toastr.error(err.message);
+                                }
+                                if (cb) cb(err);
                             });
                         } else{
-                            cb('verify fail');
+                            if (cb) cb('verify fail');
                         }
                     });
                     break;
@@ -704,7 +729,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             switch(self.workflowConfig.model.type){
                 case CURVE_MODEL:
                     payload = {
-                        model_id: self.workflowConfig.name,
+                        model_id: genModelId(),
                         data: dataCurves
                     };
                     wiMachineLearningApiService.predictCurve(payload, function(res){
@@ -724,12 +749,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 name: outputCurveName(),
                                 data: res.target
                             }
-                            saveCurve(curveInfo, function(curveProps) {
-                                delete curveInfo.data;
-                                cb();
+                            saveCurveAndCreatePlot(curveInfo, _stepPredict, function(err) {
+                                if (err) {
+                                    toastr.error(err.message);
+                                }
+                                if (cb) cb(err);
                             });
                         }else{
-                            cb('predict fail');
+                            if (cb) cb('predict fail');
                         }
                     });
                     break;
@@ -750,12 +777,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 name: outputCurveName(),
                                 data: res.target
                             }
-                            saveCurve(curveInfo, function(curveProps) {
-                                delete curveInfo.data;
-                                cb();
+                            saveCurveAndCreatePlot(curveInfo, _stepPredict, function(err) {
+                                if (err) {
+                                    toastr.error(err.message);
+                                }
+                                if (cb) cb(err);
                             });
                         }else{
-                            cb('predict fail');
+                            if (cb) cb('predict fail');
                         }
                     });
                     break;
@@ -776,12 +805,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 name: outputCurveName(),
                                 data: res.target
                             }
-                            saveCurve(curveInfo, function(curveProps) {
-                                delete curveInfo.data;
-                                cb();
+                            saveCurveAndCreatePlot(curveInfo, _stepPredict, function(err) {
+                                if (err) {
+                                    toastr.error(err.message);
+                                }
+                                if (cb) cb(err);
                             });
                         }else{
-                            cb('predict fail');
+                            if (cb) cb('predict fail');
                         }
                     });
                     break;
@@ -829,7 +860,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         self.nnConfig.layers = config.value.layerConfig.map(function(item){
             return item.value;
         });
-        saveWorkflow();
+        self.saveWorkflow();
         $timeout( function() {
             self.wiNNCtrl.update(self.nnConfig);
         });
@@ -844,6 +875,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (self.idWorkflow) {
             wiApiService.getWorkflow(self.idWorkflow, function(workflow) {
                 self.workflowConfig = workflow.content;
+                self.workflowName = workflow.name;
+                self.currentModelType = self.workflowConfig.model.currentModelType;
+                self.workflowResults[1] = self.workflowConfig.steps[1].result || self.workflowResults[1];
+                self.workflowResults[2] = self.workflowConfig.steps[2].result || self.workflowResults[2];
             });
         }
 
@@ -1108,7 +1143,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             let tmp = new Set(__inputChanged.index);
             tmp.add(0,1,2);
             __inputChanged.index = Array.from(tmp);
-            saveWorkflow();
+            self.saveWorkflow();
         } else {
             toastr.error("please select data type!");
         }
@@ -1117,7 +1152,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         for (let wf of self.workflowConfig.steps) {
             wf.inputData.splice(idx, 1);
         }
-        saveWorkflow();
+        self.saveWorkflow();
         __inputDataLen--;
     };
     this.upTrigger = function (cb) {
@@ -1173,6 +1208,40 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             });
         } else cb([]);
     };
+    this.downTriggerPrj = function(cb) {
+        let wells = self.projectConfig;
+        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
+            wiApiService.listWells({
+                idProject: __idProject,
+                start: wells[wells.length - 1].properties.idWell, 
+                limit: 10, 
+                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
+                forward: true
+            }, function(listOfWells) {
+                let lowm = new Array();
+                modelFrom(lowm, listOfWells);
+                if (cb) cb(lowm, wells);
+            });
+        }
+        else if (cb) cb([]);
+    }
+    this.upTriggerPrj = function(cb) {
+        let wells = self.projectConfig;
+        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
+            wiApiService.listWells({
+                idProject: __idProject,
+                start: wells[0].properties.idWell, 
+                limit: 10,
+                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
+                forward: false
+            }, function(listOfWells) {
+                let lowm = new Array();
+                modelFrom(lowm, listOfWells);
+                if (cb) cb(lowm, wells);
+            });
+        }
+        else if (cb) cb([]);
+    }
     this.onFilterEnterKey = function (filterText) {
         self.filterText = filterText;
         if (self.selectionType == FAMILY_SELECTION) {
@@ -1372,17 +1441,17 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 switch(wf.name) {
                     case TRAIN_STEP_NAME:
                         $timeout(() => {
-                            saveWorkflow();
                             wf.inputData.push(input);
                             __inputDataLen = wf.inputData.length;
+                            self.saveWorkflow();
                         });
                         break;
                     case PREDICT_STEP_NAME:
                     case VERIFY_STEP_NAME:
                         $timeout(() => {
-                            saveWorkflow();
                             wf.inputData[0] = input;
                             __inputDataLen = wf.inputData.length;
+                            self.saveWorkflow();
                         });
 
                 }
@@ -1521,7 +1590,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
 
     this.removeWell = function(wf, i){
         wf.inputData.splice(i, 1);
-        saveWorkflow();
+        self.saveWorkflow();
     }
     this.addCurveInput = function(){
         self.workflowConfig.model.inputs.unshift({class: "curve input"});
@@ -1532,7 +1601,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             toastr.error('Need least at 1 curve input', '');
         else{
             self.workflowConfig.model.inputs.splice(index, 1);
-            saveWorkflow();
+            self.saveWorkflow();
         }
     }
     this.outputCurveStyle = function(idx){
@@ -1550,12 +1619,23 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 properties: choice
             }
         });
-        wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
-        self.currentModelType = wiItemDropdownCtrl.selectedItem.properties;
+        if (!self.currentModelType) {
+            if (wiItemDropdownCtrl.items.length) {
+                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
+                self.currentModelType = wiItemDropdownCtrl.selectedItem;
+            }
+        }
+        else {
+            wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(function(item) {
+                return item.properties.name == self.currentModelType.name;
+            });
+        }
     }
     this.onModelTypeChanged = function(type) {
-        self.currentModelType = type;
+        self.workflowConfig.model.currentModelType = type;
+        self.currentModelType = self.workflowConfig.model.currentModelType;
         self.updateNNConfig();
+        self.saveWorkflow();
     }
     this.nnConfigNLayerChanged = function(nnConfig) {
         if (nnConfig.nLayer < nnConfig.layerConfig.length) {
@@ -1575,6 +1655,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     let __running_wf = false;
     function saveWorkflow() {
         if (!self.idWorkflow || __running_wf) return;
+        self.workflowConfig.steps[1].result = self.workflowResults[1];
+        self.workflowConfig.steps[2].result = self.workflowResults[2];
         wiApiService.editWorkflow({
             idWorkflow: self.idWorkflow,
             content:self.workflowConfig
@@ -1597,6 +1679,251 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             console.log('finish');
             utils.refreshProjectState();
             saveWorkflow();
+        });
+    }
+    this.running = function() {
+        return __running_wf;
+    }
+    this.createSpinner = function() {
+        $timeout( () => {
+            document.getElementById("workflow-" + self.idWorkflow + "-spinner").appendChild((new Spinner()).spin().el);
+        }, 700);
+    }
+
+    this.openPlot = function(plot){
+        console.log('openPlot');
+        let layout = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        layout.putTabRightWithModel({
+            id: plot.idPlot,
+            type: 'logplot',
+            properties: {
+                idPlot: plot.idPlot,
+                name: plot.name,
+                idWell: plot.idWell
+            }
+        });
+    }
+    this.removePlot = function(odata) {
+        delete odata.idPlot;
+        delete odata.plotName;
+        self.saveWorkflow();
+    }
+    this.openErrorPlot = function(odata) {
+        console.log('openErrorPlot');
+        let layout = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        let tabId = self.workflowName + '-' + self.idWorkflow + '-' + odata.idErrorPlot;
+
+        let rightContainer = layout.getItemById('right');
+        let tabItem = rightContainer.getItemsById(tabId)[0];
+        if (tabItem) {
+            rightContainer.setActiveContentItem(tabItem);
+            return;
+        }
+        let htmlTemplate = `<wi-plot style='height:100%;width:100%;display: flex;' configs='${plotConfig(odata)}' options='${plotOption(odata)}'></wi-plot>`;
+        console.log(htmlTemplate);
+        rightContainer.addChild({
+            type: 'component',
+            id: tabId,
+            isClosable: true,
+            componentName: 'html-block',
+            componentState: {
+                html: htmlTemplate
+            },
+            title: `${self.workflowName} - ${odata.name}`
+        });
+    }
+    this.removeErrorPlot = function(odata) {
+        delete odata.idErrorPlot;
+        delete odata.name;
+        delete odata.value;
+        self.saveWorkflow();
+    }
+    function createVerifyLogplot(idWell, plotName, inCurves, outCurves, callback) {
+        let payload = {
+            idWell: idWell,
+            name: plotName,
+            override: true
+        };
+        wiApiService.post(wiApiService.CREATE_PLOT, payload, function(response, err) {
+            if (err) return;
+
+            let currentOrderNum = 'm';
+            async.series([function plotInCurves(done) {
+                async.eachSeries(inCurves, function(curve, done1) {
+                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                        //create line
+                        wiApiService.createLine({
+                            idTrack: trackData.idTrack,
+                            idCurve: curve.idCurve,
+                            orderNum: currentOrderNum
+                        }, function(line){
+                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                            done1();
+                        })
+                    }, {
+                            title: curve.name
+                    });
+                    
+                }, function(err) {
+                    if (err) {
+                        done(err);
+                    }
+                    else done();
+                });
+            }, function plotOutCurves(done) {
+                wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                    async.each(outCurves, function(curve, done1) {
+                        //create line
+                        wiApiService.createLine({
+                            idTrack: trackData.idTrack,
+                            idCurve: curve.idCurve,
+                            orderNum: currentOrderNum
+                        }, function(line){
+                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                            done1();
+                        })
+                    }, function(err) {
+                        if (err) {
+                            done(err);
+                        }
+                        else done();
+                    });
+                },{
+                    title: outCurves[0].name
+                });
+            }], function(err) {
+                if (err) callback(err);
+                else callback(null, response);
+            });
+        });
+        
+    } 
+
+
+
+    function createLogplotFromResult(wfInput, wfOutput, callback) {
+        let payload = {
+            idWell: wfOutput.idWell,
+            name: wfOutput.plotName,
+            override: true
+        };
+
+        wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
+            wfOutput.idPlot = response.idPlot;
+            let currentOrderNum = 'm';
+            async.eachSeries(wfInput.inputs, function(ipt, done1) {
+                wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                    //create line
+                    wiApiService.createLine({
+                        idTrack: trackData.idTrack,
+                        idCurve: ipt.value.properties ? ipt.value.properties.idCurve : ipt.value.idCurve,
+                        orderNum: currentOrderNum
+                    }, function(line){
+                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                        done1();
+                    })
+                }, {
+                        title: ipt.name
+                });
+            }, function (err) {
+                if (err) toastr.error(err);
+                async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
+                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                        // create line
+                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                        wiApiService.createLine({
+                            idTrack: trackData.idTrack,
+                            idCurve: opt.idCurve,
+                            orderNum: 'm'
+                        }, function(line){
+                            let bgColor = null;
+                            switch (opt.family) {
+                                case "Net Reservoir Flag":
+                                    bgColor = "green";
+                                    break;
+                                case "Net Pay Flag":
+                                    bgColor = "red";
+                                    break;
+                            }
+                            if (!bgColor) {
+                                done2();
+                                return;
+                            }
+                            wiApiService.createShading({
+                                idTrack:trackData.idTrack,
+                                name:opt.name + "-left",
+                                orderNum: 'm',
+                                negativeFill : {
+                                    display: false,
+                                    sadingType: "pattern",
+                                    pattern: {
+                                        background : "blue",
+                                        foreground : "black",
+                                        name : "none"
+                                    }
+                                },
+                                positiveFill: {
+                                    display: false,
+                                    sadingType: "pattern",
+                                    pattern: {
+                                        background : "blue",
+                                        foreground : "black",
+                                        name : "none"
+                                    }
+                                },
+                                fill:{
+                                    display:true,
+                                    shadingType:"pattern",
+                                    pattern:{
+                                        name: "none",
+                                        foreground:"black",
+                                        background:bgColor
+                                    }
+                                },
+                                isNegPosFill:false,
+                                idLeftLine:null,
+                                idRightLine:line.idLine,
+                                leftFixedValue:0,
+                                idControlCurve:opt.idCurve
+                            }, function(shadingProps) {
+                                done2();
+                            });
+                        })
+                    }, {
+                            title: opt.name
+                        })
+                }, function (err) {
+                    if (err) toastr.error(err);
+                    callback();
+                })
+            })
+        })
+    }
+    function plotConfig(odata) {
+        let extent = d3.extent(odata.value);
+        return JSON.stringify({
+            y: {
+                label: odata.name + ' (%)',
+                min: extent[0],
+                max: extent[1],
+                data: odata.value
+            },
+            x: {
+                label: 'Iterations',
+                min: 0,
+                max: odata.value.length,
+                data: odata.value.map(function(d,i) {return i + 1;})
+            }
+        });
+    }
+    function plotOption(odata) {
+        return JSON.stringify({
+            lineColor: 'blue',
+            lineStyle: 'solid',
+            pointColor: 'black',
+            pointStyle: 'circle',
+            showPoint: true,
+            showLine: true
         });
     }
 }

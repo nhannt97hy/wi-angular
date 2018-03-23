@@ -8,8 +8,8 @@ exports.warningMessageDialog = require('./warning-message-modal');
 exports.runImportDialog = require('./run-import-modal');
 exports.runImportWHDialog = require('./run-import-well-header-modal');
 exports.runImportWTDialog = require('./run-import-well-top-modal');
-exports.trainModelDialog = require('./train-model-modal');
-exports.predictModelDialog = require('./predict-model-modal');
+//exports.trainModelDialog = require('./train-model-modal');
+//exports.predictModelDialog = require('./predict-model-modal');
 
 // WELL INSIGHT MODALS
 exports.aboutDialog = require('./about-modal');

@@ -32,7 +32,7 @@
             <div style='width:100%;' class='bordered panel panel-default'>
                 <div style='background-color:#eee;' class='panel-heading'>
                     <span style='font-weight:700;'>Predict {{wiWorkflowMachineLearning.workflowConfig.model.type}}</span>
-                    <span ng-click="wiWorkflowMachineLearning.addCurveInput()" 
+                    <span ng-click="wiWorkflowMachineLearning.addCurveInput();wiWorkflowMachineLearning.saveWorkflow();" 
                         ng-if="wiWorkflowMachineLearning.workflowConfig.model.type=='curve'"
                         style="float: right; cursor: pointer; font-size: 14px;">
                         <i class="ti-plus"></i>  Add input curve
