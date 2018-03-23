@@ -1,4 +1,4 @@
-<div class="modal fade" data-backdrop="static" data-keyboard="false">
+<div wi-element-ready="wiModal.onReady()" class="modal fade" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -6,21 +6,28 @@
                 <h4 class="modal-title">Image View - {{wiModal.currentImageName}}</h4>
             </div>
             <div class="modal-body">
-                <div class="image">
-                    <img src="{{wiModal.currentImageUrl}}" alt="{{wiModal.currentImageName}}">
+                <div id="image-view-container">
+                    <div class="depth-axis"></div>
+                    <div class="image">
+                        <img src="{{wiModal.currentImageUrl}}" alt="{{wiModal.currentImageName}}">
+                    </div>
                 </div>
                 <p class="dialog-error" ng-if="wiModal.error">Error: {{wiModal.error}}</p>
             </div>
         </div>
     </div>
     <style>
-        .image {
-            text-align: center;
-            overflow: auto;
+        #image-view-container {
+            overflow-y: auto;
+            display: flex;
+            height: calc(100% - 160px);
         }
-        .image img {
-            max-width: auto;
-            max-height: auto;
+        .depth-axis {
+            flex: 0 0 60px;
+        }
+        .image {
+            position: relative;
+            flex: 1;
         }
     </style>
 </div>
