@@ -251,8 +251,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (track.getExtentY) return track.getExtentY()[1];
             return -1;
         });
-        _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
-        return _maxDepth;
+        maxDepth = (maxDepth > 0) ? maxDepth : 100000;
+        return maxDepth;
     };
     this.getMinDepth = function () {
         let wellProps = self.getWellProps();
@@ -387,43 +387,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (trackOrder) {
             const zoneTracks = self.getTracks().filter(track => track.type == 'zone-track');
             const defaultZoneTrackProp = {
+                idPlot: self.wiLogplotCtrl.id,
+                orderNum: trackOrder,
                 showTitle: true,
                 title: "Zone Track " + (zoneTracks.length + 1),
                 topJustification: "center",
                 color: '#ffffff',
-                width: Utils.inchToPixel(1),
+                width: 1,
                 parameterSet: null,
                 zoomFactor: 1.0
             }
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, self.wiLogplotCtrl, defaultZoneTrackProp, function (zoneTrackProperties) {
-                let dataRequest = {
-                    idPlot: self.wiLogplotCtrl.id,
-                    title: zoneTrackProperties.title,
-                    showTitle: zoneTrackProperties.isShowTitle,
-                    topJustification: zoneTrackProperties.topJustification,
-                    bottomJustification: zoneTrackProperties.bottomJustification,
-                    color: zoneTrackProperties.color,
-                    width: zoneTrackProperties.width,
-                    idZoneSet: zoneTrackProperties.idZoneSet,
-                    orderNum: trackOrder,
-                    zoomFactor: zoneTrackProperties.zoomFactor
-                }
-                wiApiService.createZoneTrack(dataRequest, function (returnZoneTrack) {
-                    let zoneTrack = dataRequest;
-                    zoneTrack.idZoneTrack = returnZoneTrack.idZoneTrack;
-                    // wiApiService.getZoneSet(zoneTrack.idZoneSet, function (zoneset) {
-                    //     let viTrack = self.pushZoneTrack(zoneTrack);
-                    //     for (let zone of zoneset.zones) {
-                    //         self.addZoneToTrack(viTrack, zone);
-                    //     }
-                    // })
-
-                    self.pushZoneTrack(zoneTrack);
-                })
-            })
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self, defaultZoneTrackProp);
         }
         else {
-            error('Cannot create zone track');
+            toastr.error('Cannot create zone track');
         }
     }
     this.addImageTrack = function (callback) {
@@ -888,19 +865,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             async.setImmediate(_callback);
                         }
                         else if (aTrack.idTrack) {
-                            let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
+                            wiD3Ctrl.pushLogTrack(aTrack);
                             trackProps.push(aTrack);
                             async.setImmediate(_callback);
                         } else if (aTrack.idZoneTrack) {
-                            let viTrack = wiD3Ctrl.pushZoneTrack(aTrack);
+                            wiD3Ctrl.pushZoneTrack(aTrack);
                             trackProps.push(aTrack);
                             async.setImmediate(_callback);
                         } else if(aTrack.idImageTrack) {
-                            let viTrack = wiD3Ctrl.pushImageTrack(aTrack);
+                            wiD3Ctrl.pushImageTrack(aTrack);
                             trackProps.push(aTrack);
                             async.setImmediate(_callback);
                         } else if(aTrack.idObjectTrack) {
-                            let viTrack = wiD3Ctrl.pushObjectTrack(aTrack);
+                            wiD3Ctrl.pushObjectTrack(aTrack);
                             trackProps.push(aTrack);
                             async.setImmediate(_callback);
                         } else {
@@ -1473,11 +1450,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
     function getComponentCtrlByViTrack(viTrack) {
-        return self.trackComponents.find(component => component.controller.viTrack == viTrack).controller || {};
+        return _.get(self.trackComponents.find(component => component.controller.viTrack == viTrack), 'controller');
     }
     function getComponentCtrlByProperties(props) {
         let nameOfTrack = getTrackName(props);
-        return self.trackComponents.find(component => component.name == nameOfTrack).controller || {};
+        return _.get(self.trackComponents.find(component => component.name == nameOfTrack), 'controller');
     }
 }
 
