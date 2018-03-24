@@ -599,7 +599,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             });
             
             createVerifyLogplot(
-                curveProps.idWell, 
+                curveInfo.idWell, 
                 step.name + '-' + curveProps.name, 
                 inCurves, outCurves,
                 function(err, response) {
@@ -1622,7 +1622,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (!self.currentModelType) {
             if (wiItemDropdownCtrl.items.length) {
                 wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
-                self.currentModelType = wiItemDropdownCtrl.selectedItem;
+                self.currentModelType = wiItemDropdownCtrl.selectedItem.properties;
+                self.workflowConfig.model.currentModelType = self.currentModelType;
             }
         }
         else {
