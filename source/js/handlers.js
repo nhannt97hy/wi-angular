@@ -48,6 +48,21 @@ exports.UnitSettingsButtonClicked = function () {
     })
 };
 
+exports.ShareProjectButtonClicked = function () {
+    console.log("ShareProjectButton is clicked");
+    let self = this;
+    let ModalService = this.ModalService;
+    let wiApiService = this.wiApiService;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    wiApiService.listGroup({}, function (groups) {
+        wiApiService.listUser({}, function (users) {
+            DialogUtils.shareProjectDialog(ModalService, function () {
+            }, groups, users);
+        });
+    });
+};
+
 exports.SaveProjectButtonClicked = function () {
     console.log('SaveProjectButton is clicked');
 };
@@ -143,7 +158,7 @@ exports.OpenWorkflowButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openWorkflowDialog(this.ModalService, function (response) {
         let machineLearning = true;
-        if (response.workflowSpec.name == "Clastic") machineLearning = false; 
+        if (response.workflowSpec.name == "Clastic") machineLearning = false;
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         layoutManager.putTabRight({
             id: 'workflow' + response.idWorkflow,
