@@ -52,7 +52,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         let wiD3Ctrl = wiComponentService.getD3AreaForSlidingBar(self.name);
 
-        let well = utils.findWellByLogplot(logplotId);
+        let well = utils.findWellByCurve(idCurve);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let minY = wiD3Ctrl ? wiD3Ctrl.getMinDepth() : well.topDepth;
         let maxY = wiD3Ctrl ? wiD3Ctrl.getMaxDepth() : well.bottomDepth;

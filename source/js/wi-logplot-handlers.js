@@ -579,6 +579,12 @@ exports.CurveBulkUpdateButtonClicked = function () {
     });
 };
 
+exports.AutoOrganizeTrackButtonClicked = function () {
+    let self = this;
+    let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
+    let wiLogplot = this.wiLogplot;
+    wiLogplot.getwiD3Ctrl().reOrganizeTrackByWell();
+}
 
 exports.SaveAsLogplotNameButtonClicked = function () {
     const wiApiService = this.wiApiService;

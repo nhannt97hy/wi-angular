@@ -1223,7 +1223,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     let idCurve = idCurves[0];
                     let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
                     console.log('drop curve into slidingBar', errorCode);
-                    if (errorCode > 0) {
+                    if (errorCode >= 0) {
                         wiSlidingBarCtrl.createPreview(idCurve);
                         let logplotModel = wiSlidingBarCtrl.logPlotCtrl.getLogplotModel();
                         let logplotRequest = angular.copy(logplotModel.properties);

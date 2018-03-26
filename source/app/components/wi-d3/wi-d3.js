@@ -79,6 +79,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.compileFunc = $compile;
     this.scopeObj = $scope;
     this.trackComponents = [];
+    this.wellsAttrs = [ {
+        color: '#88CC88',
+        tracks: []
+    }];
+    this.listWells = [];
 
     /* public method */
     this.buildContextMenu = function (contextMenuItems) {
@@ -244,7 +249,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.getMaxDepth = function () {
         let currentWellProps = self.getWellProps();
-        let currentWellBottomDepth = -1;
+        let currentWellBottomDepth = 100000;
         if (currentWellProps.bottomDepth)
         // return parseFloat(wellProps.bottomDepth);
             currentWellBottomDepth = parseFloat(currentWellProps.bottomDepth);
@@ -255,11 +260,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         // _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
         // return _maxDepth;
-        return maxDepth || currentWellBottomDepth;
+        return (maxDepth > -1 && maxDepth < 100000 ? maxDepth:currentWellBottomDepth);
     };
     this.getMinDepth = function () {
         let currentWellProps = self.getWellProps();
-        let currentWellTopDepth = 100000;
+        let currentWellTopDepth = 0;
         if(currentWellProps.topDepth) {
             currentWellTopDepth = parseFloat(currentWellProps.topDepth);
         }
@@ -269,7 +274,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
             return 100000;
         });
-        return minDepth || currentWellTopDepth;
+        return (minDepth > -1 && minDepth < 100000 ? minDepth:currentWellTopDepth);
     }
 
     this.getDepthRange = function () {
@@ -345,7 +350,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.depthShiftDialog();
     }
-
+    this.getListWells = function () {
+        return self.listWells.map(function (wellId, idx) {
+            self.wellsAttrs[idx].properties = utils.findWellById(wellId).properties;
+            return self.wellsAttrs[idx];
+        }).filter(function(wellAttr) { return wellAttr.tracks.length != 0;});
+    }
+    this.reOrganizeTrackByWell = function () {
+        reindexAllTracks(true);
+    }
 
     /* handle context menu */
     this.addDepthTrack = function (callback) {
@@ -662,6 +675,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.removeTrack(_currentTrack);
     }
     this.removeTrack = function (track) {
+        if(track.isLogTrack()) {
+            let curves = track.getCurves();
+            let wellProps = curves.length ? utils.findWellByCurve(curves[0].idCurve).properties:_getWellProps();
+            let wellIdx = self.listWells.indexOf(wellProps.idWell);
+            self.wellsAttrs[wellIdx].tracks.splice(self.wellsAttrs[wellIdx].tracks.indexOf(getComponentCtrlByViTrack(track)), 1);
+        }
         // remove visualizeTrack
         let trackIdx = _tracks.indexOf(track);
         if (trackIdx < 0) return;
@@ -689,6 +708,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $(`[name=`+ component.controller.name +`]`).remove();
         self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
         // wiComponentService.putComponent(name, null);
+        // update depthRange & wells list for multi Logplots feature
+        wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
         updateSlider();
     }
     this.getTracks = function () {
@@ -696,8 +717,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
-    this.updateTrack = function (viTrack) {
-        getComponentCtrlByViTrack(viTrack).update();
+    this.updateTrack = function (viTrack, onlyStatus) {
+        getComponentCtrlByViTrack(viTrack).update(onlyStatus);
     }
     // image track
     this.addImageZoneToTrack = function (track, config) {
@@ -788,6 +809,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //     dragMan.wiD3Ctrl = null;
             // });
         }, 1000)
+
+        // multiwell feature. By default, current well is the first well in the array
+        self.listWells.push(_getWellProps().idWell);
 
         window._WiD3CTRL = self;
     }
@@ -1348,14 +1372,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             graph.rearrangeTracks(self);
         })
     }
-    function reindexAllTracks() {
+    function reindexAllTracks(byWell) {
         let promises = [];
         let backupTracks = angular.copy(_tracks);
         for (var i = 0; i < _tracks.length; i++) {
             let viTrack = _tracks[i];
             let orderNum;
-            if (i == 0) orderNum = 'm';
-            else orderNum = String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(0) + 1);
+            if(byWell) {
+                let trackComponent = getComponentCtrlByViTrack(viTrack);
+                let wellAttrContainTrack = self.wellsAttrs.find(function (wellAttr) {
+                    return wellAttr.tracks.indexOf(trackComponent) >= 0;
+                })
+                let wellIdx = self.wellsAttrs.indexOf(wellAttrContainTrack) || 0;
+
+                orderNum = String.fromCharCode(wellIdx + 77);
+
+                if (i == 0) orderNum += 'm';
+                else orderNum += String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(1) + 1);
+            } else {
+                if (i == 0) orderNum = 'm';
+                else orderNum = String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(0) + 1);
+            }
             viTrack.orderNum = orderNum;
             promises.push(new Promise((resolve, reject) => {
                 if (viTrack.isLogTrack()) {
@@ -1455,6 +1492,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             });
                         }
                         wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
+                        // update multi Logplots status
+                        if(track.getCurves().length == 0) {
+                            let curveWellId = utils.findWellByCurve(curve.idCurve).properties.idWell;
+                            let wellIdx = self.listWells.indexOf(curveWellId);
+                            self.wellsAttrs[wellIdx].tracks.splice(self.wellsAttrs[wellIdx].tracks.indexOf(getComponentCtrlByViTrack(track)), 1);
+                        }
                     });
                 }
                 else if (drawing.isShading()) {

@@ -102,7 +102,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             tabs: ['true', 'true', 'true']
         });
     }
-    this.update = function () {
+    this.update = function (onlyStatus) {
         let viTrack = this.viTrack;
         if (!viTrack.isLogTrack()) return;
 
@@ -126,71 +126,91 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 }
             })
         }
-        wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
-            viTrack.getMarkers().forEach(viMarker => {
-                let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
-                viTrack.removeDrawing(viMarker);
-                if (marker) {
-                    self.addMarkerToTrack(viTrack, marker);
-                } // add if viMarker in track
-            });
-            logTrack.markers.forEach(marker => {
-                if(!viTrack.getMarkers().find(viMarker => viMarker.id == marker.idMarker)) {
-                    self.addMarkerToTrack(viTrack, marker);
-                } // add if marker not in viTrack
-            });
-            viTrack.getAnnotations().forEach(viAnno => {
-                let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
-                viTrack.removeDrawing(viAnno);
-                if (anno) {
-                    self.addAnnotationToTrack(viTrack, anno);
-                }
-            });
-            logTrack.annotations.forEach(anno => {
-                if(!viTrack.getAnnotations().find(viAnno => viAnno.id == anno.idAnnotation)) {
-                    self.addAnnotationToTrack(viTrack, anno);
-                }
-            });
-            let promises = [];
-            viTrack.getCurves().forEach(viCurve => {
-                let line = logTrack.lines.find(line => line.idLine == viCurve.id);
-                let curveData = viCurve.rawData;
-                viTrack.removeDrawing(viCurve);
-                if (line) {
-                    self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
-                }
-            });
-            logTrack.lines.forEach(line => {
-                if(!viTrack.getCurves().find(viCurve => viCurve.id == line.idLine)) {
-                    promises.push(new Promise(resolve => {
-                        wiApiService.dataCurve(line.idCurve, function (curveData) {
-                            self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
-                            resolve();
-                        })
-                    }))
-                }
-            });
-            Promise.all(promises)
-                .then(function () {
-                    viTrack.getShadings().forEach(viShading => {
-                        let shading = logTrack.shadings.find(shading => shading.idShading == viShading.id);
-                        viTrack.removeDrawing(viShading);
-                        if (!shading) return;
-                        // _addShadingToTrack(shading);
-                    });
-                    logTrack.shadings.forEach(shading => {
-                        if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
-                        _addShadingToTrack(shading);
-                    });
+        function updateMultiLogplotStatus() {
+            wiComponentService.getSlidingBarForD3Area(self.wiD3Ctrl.name).updateDepthRange();
+            if (viTrack.drawings.length == 0) {
+                // return to track's default color
+                viTrack.headerNameBlock.style('background-color', viTrack.HEADER_NAME_COLOR);
+                // update wi-d3 controller
+                self.wiD3Ctrl.wellsAttrs.forEach(function(wellAttrs, idx) {
+                    let indexOfThisTrack = wellAttrs.tracks.indexOf(self);
+                    if(indexOfThisTrack >= 0) {
+                        self.wiD3Ctrl.wellsAttrs[idx].tracks.splice(indexOfThisTrack, 1);
+                    }
+                })
+            }
+        }
+        if(onlyStatus) {
+            updateMultiLogplotStatus();
+        } else {
+            // update whole track
+            wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
+                viTrack.getMarkers().forEach(viMarker => {
+                    let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
+                    viTrack.removeDrawing(viMarker);
+                    if (marker) {
+                        self.addMarkerToTrack(viTrack, marker);
+                    } // add if viMarker in track
+                });
+                logTrack.markers.forEach(marker => {
+                    if(!viTrack.getMarkers().find(viMarker => viMarker.id == marker.idMarker)) {
+                        self.addMarkerToTrack(viTrack, marker);
+                    } // add if marker not in viTrack
+                });
+                viTrack.getAnnotations().forEach(viAnno => {
+                    let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
+                    viTrack.removeDrawing(viAnno);
+                    if (anno) {
+                        self.addAnnotationToTrack(viTrack, anno);
+                    }
+                });
+                logTrack.annotations.forEach(anno => {
+                    if(!viTrack.getAnnotations().find(viAnno => viAnno.id == anno.idAnnotation)) {
+                        self.addAnnotationToTrack(viTrack, anno);
+                    }
+                });
+                let promises = [];
+                viTrack.getCurves().forEach(viCurve => {
+                    let line = logTrack.lines.find(line => line.idLine == viCurve.id);
+                    let curveData = viCurve.rawData;
+                    viTrack.removeDrawing(viCurve);
+                    if (line) {
+                        self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
+                    }
+                });
+                logTrack.lines.forEach(line => {
+                    if(!viTrack.getCurves().find(viCurve => viCurve.id == line.idLine)) {
+                        promises.push(new Promise(resolve => {
+                            wiApiService.dataCurve(line.idCurve, function (curveData) {
+                                self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
+                                resolve();
+                            })
+                        }))
+                    }
+                });
+                Promise.all(promises)
+                    .then(function () {
+                        viTrack.getShadings().forEach(viShading => {
+                            let shading = logTrack.shadings.find(shading => shading.idShading == viShading.id);
+                            viTrack.removeDrawing(viShading);
+                            if (!shading) return;
+                            // _addShadingToTrack(shading);
+                        });
+                        logTrack.shadings.forEach(shading => {
+                            if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
+                            _addShadingToTrack(shading);
+                        });
 
-                    logTrack.width = Utils.inchToPixel(logTrack.width);
-                    viTrack.setProperties(logTrack);
-                    viTrack.doPlot();
-                })
-                .catch(function (err) {
-                    console.error(err);
-                })
-        });
+                        logTrack.width = Utils.inchToPixel(logTrack.width);
+                        viTrack.setProperties(logTrack);
+                        viTrack.doPlot();
+                        updateMultiLogplotStatus();
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                    })
+            });
+        }
     }
     this.depthShiftDialog = function () {
         _currentTrack = self.wiD3Ctrl.getCurrentTrack();
@@ -319,6 +339,30 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
         // update sliding bar
         wiComponentService.getSlidingBarForD3Area(self.wiD3Ctrl.name).updateDepthRange();
+        // update track's well
+        let trackWellId = Utils.findWellByCurve(config.idCurve).properties.idWell;
+        if(self.wiD3Ctrl.listWells.indexOf(trackWellId) < 0)
+            self.wiD3Ctrl.listWells.push(trackWellId);
+        track.headerNameBlock.style('background-color', function() {
+            let indexWell = self.wiD3Ctrl.listWells.indexOf(trackWellId);
+            if(!self.wiD3Ctrl.wellsAttrs[indexWell]) {
+                function getRandomColor(wellIdx) {
+                    if(wellIdx && wellIdx > 0 && wellIdx < 6) {
+                        const DEFAULT_COLOR = ['#defddf', '#c07b7b', '#0b5a8a', '#c67151', '#205153'];
+                        return DEFAULT_COLOR[wellIdx - 1];
+                    }
+                    let letters = 'BCDEF'.split('');
+                    let color = '#';
+                    for (let i = 0; i < 6; i++ ) {
+                        color += letters[Math.floor(Math.random() * letters.length)];
+                    }
+                    return color;
+                }
+                self.wiD3Ctrl.wellsAttrs[indexWell] = { color: getRandomColor(indexWell), tracks: []};
+            }
+            self.wiD3Ctrl.wellsAttrs[indexWell].tracks.push(self);
+            return self.wiD3Ctrl.wellsAttrs[indexWell].color;
+        });
         return curve;
     };
     this.addLeftShadingToTrack = function (track, curve, config) {
@@ -370,6 +414,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.removeCurveFromTrack = function (track, curve) {
         if (!track || !track.removeCurve) return;
         track.removeCurve(curve);
+        wiComponentService.getSlidingBarForD3Area(self.wiD3Ctrl.name).updateDepthRange();
+        // update multi Logplots status
+        self.wiD3Ctrl.updateTrack(track, true);
     }
     this.removeMarkerFromTrack = function (track, marker) {
         if (!track || !track.removeMarker) return;
@@ -995,7 +1042,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
 
 }
-
 
 let app = angular.module(moduleName, []);
 app.component(componentName, {

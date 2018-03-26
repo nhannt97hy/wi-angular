@@ -3,7 +3,10 @@
 </div>
 <div class="logplot-header">
     <div class="well-name-container">
-        <div class="well-name" ng-bind="wiLogplot.wellModel.properties.name"></div>
+        <!-- <div class="well-name" ng-bind="wiLogplot.wellModel.properties.name"></div> -->
+        <div class="well-name" ng-repeat="well in wiLogplot.getwiD3Ctrl().getListWells() track by $index" ng-style="{'background-color': well.color}">
+            {{ well.properties.name }}
+        </div>
     </div>
     <div class="scale-container">
         <div ng-if="wiLogplot.currentView">Current View [{{wiLogplot.currentView[0]}},{{wiLogplot.currentView[1]}}]</div>
