@@ -65,7 +65,7 @@ const REGRESSION_LINE_SCHEMA = {
         exclude: { type: 'Boolean', default: false },
         polygons: {
             type: 'Array',
-            item: { type: 'Integer' },
+            item: { type: 'Object' },
             default: []
         },
         fitX: { type: 'Float' },
@@ -332,22 +332,10 @@ Crossplot.prototype.getViewportY = function() {
 }
 
 Crossplot.prototype.getWindowX = function() {
-    if(this.pointSet.logX) {
-        let left = this.pointSet.scaleLeft > 0 ? this.pointSet.scaleLeft : 0.001;
-        let right = this.pointSet.scaleRight ? this.pointSet.scaleRight : 0.001;
-
-        return [left, right];
-    }
     return [this.pointSet.scaleLeft, this.pointSet.scaleRight];
 }
 
 Crossplot.prototype.getWindowY = function() {
-    if(this.pointSet.logY) {
-        let bottom = this.pointSet.scaleBottom > 0 ? this.pointSet.scaleBottom : 0.001;
-        let top = this.pointSet.scaleTop ? this.pointSet.scaleTop : 0.001;
-
-        return [bottom, top];
-    }
     return [this.pointSet.scaleBottom, this.pointSet.scaleTop];
 }
 
@@ -668,16 +656,20 @@ Crossplot.prototype.updateAxisTicks = function() {
     let wdY = this.getWindowY();
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
+    let xTickValues = this.genXTickValues();
+    let yTickValues = this.genYTickValues();
 
     let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX || 1);
     let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY || 1);
 
     let axisX = d3.axisBottom(this.getTransformX())
-        .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        // .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        .tickValues(xTickValues)
         .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsX));
 
     let axisY = d3.axisLeft(this.getTransformY())
-        .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        // .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        .tickValues(yTickValues)
         .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsY));
 
     this.axisContainer.select('g.vi-crossplot-axis-x-ticks')
@@ -736,17 +728,23 @@ Crossplot.prototype.updateAxisGrids = function() {
     let wdY = this.getWindowY();
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
+    let xTickValues = this.genXTickValues();
+    let yTickValues = this.genYTickValues();
+    let xTickType = (this.pointSet.logX) ? xLogMajorTest : xLinearMajorTest;
+    let yTickType = (this.pointSet.logY) ? yLogMajorTest : yLinearMajorTest;
 
     let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX*this.pointSet.minorX || 1);
     let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY*this.pointSet.minorY || 1);
 
     let gridX = d3.axisBottom(this.getTransformX())
-        .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        // .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        .tickValues(xTickValues)
         .tickFormat('')
         .tickSize(-Math.abs(vpY[1] - vpY[0]));
 
     let gridY = d3.axisLeft(this.getTransformY())
-        .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        // .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        .tickValues(yTickValues)
         .tickFormat('')
         .tickSize(-Math.abs(vpX[1] - vpX[0]));
 
@@ -755,7 +753,8 @@ Crossplot.prototype.updateAxisGrids = function() {
         .style('transform', 'translateY(' + vpY[0] + 'px)')
         .selectAll('.tick line')
             .attr('class', function(d, i) {
-                return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                // return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                return (xTickType(i)) ? 'vi-major-tick' : 'vi-minor-tick';
             });
 
     this.axisContainer.select('g.vi-crossplot-axis-y-grids')
@@ -763,8 +762,23 @@ Crossplot.prototype.updateAxisGrids = function() {
         .style('transform', 'translateX(' + vpX[0] + 'px)')
         .selectAll('.tick line')
             .attr('class', function(d, i) {
-                return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                // return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                return (yTickType(i)) ? 'vi-major-tick' : 'vi-minor-tick';
             });
+
+    function xLinearMajorTest(i) {
+        return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? true : false;
+    }
+    function yLinearMajorTest(i) {
+        return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? true : false;
+    }
+
+    function xLogMajorTest(i) {
+        return Number.isInteger(Math.log10(xTickValues[i])) ? true : false;
+    }
+    function yLogMajorTest(i) {
+        return Number.isInteger(Math.log10(yTickValues[i])) ? true : false;
+    }
 }
 
 Crossplot.prototype.updateAxisZRects = function() {
@@ -2060,6 +2074,13 @@ Crossplot.prototype.endEditPolygon = function() {
     return edittedPolygon;
 }
 
+Crossplot.prototype.addViSelectionToCrossplot = function(selectionConfig) {
+    let viSelection = new Selection(selectionConfig);
+    viSelection.initCanvas(this.bodyContainer, 'crossplot');
+    this.selectionCanvasContainer.push(viSelection);
+    return viSelection;
+}
+
 Crossplot.prototype.initSelectionArea = function(viSelections) {
     let self = this;
     viSelections.forEach((viSelection) => {
@@ -2124,4 +2145,36 @@ Crossplot.prototype.tooltip = function(x, y, notShow) {
         .attr('height', maxHeight + 10);
     rect.exit().remove();
     text.raise();
+}
+
+Crossplot.prototype.genXTickValues =  function () {
+    let self = this;
+    let wdX = self.getWindowX();
+    if(self.pointSet.logX) {
+        if (wdX[0] < wdX[1])
+            return Utils.genLogTickValues(wdX[0], wdX[1]);
+        else {
+            return Utils.genLogTickValues(wdX[1], wdX[0]).reverse();
+        }
+    }
+    else {
+        let stepX = (wdX[1]-wdX[0]) / (self.pointSet.majorX || 1);
+        return d3.range(wdX[0], wdX[1] + stepX/2, stepX);
+    }
+}
+
+Crossplot.prototype.genYTickValues =  function () {
+    let self = this;
+    let wdY = self.getWindowY();
+    if(self.pointSet.logY) {
+        if (wdY[0] < wdY[1])
+            return Utils.genLogTickValues(wdY[0], wdY[1]);
+        else {
+            return Utils.genLogTickValues(wdY[1], wdY[0]).reverse();
+        }
+    }
+    else {
+        let stepY = (wdY[1]-wdY[0]) / (self.pointSet.majorY || 1);
+        return d3.range(wdY[0], wdY[1] + stepY/2, stepY);
+    }
 }
