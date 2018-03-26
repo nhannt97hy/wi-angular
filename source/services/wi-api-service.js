@@ -20,8 +20,9 @@ let app = angular.module(moduleName, []);
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
-//const INVENTORY_SERVICE = 'http://13.229.66.151';
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
+//inv server for dev
+const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
@@ -33,7 +34,7 @@ const INVENTORY_SERVICE = 'http://inv.sflow.me';
 // const BASE_URL = 'http://localhost:3000';
 // const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const PROCESSING_SERVICE = 'http://54.169.13.92';
-// const INVENTORY_SERVICE = 'http://inv.sflow.me';
+// const INVENTORY_SERVICE = '13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
