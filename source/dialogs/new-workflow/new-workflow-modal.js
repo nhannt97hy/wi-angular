@@ -2,10 +2,10 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
-        this.disabled = false;
+        // this.disabled = false;
 
         this.onOkButtonClicked = function () {
-            self.disabled = true;
+            // self.disabled = true;
 
             let data = {
                 name: $scope.name,

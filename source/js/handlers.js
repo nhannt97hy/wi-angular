@@ -114,7 +114,9 @@ exports.NewWorkflowButtonClicked = function () {
     let ModalService = this.ModalService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     let utils = self.wiComponentService.getComponent('UTILS');
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     DialogUtils.newWorkflowDialog(ModalService, function (data) {
+        data.idProject = project.idProject;
         self.wiApiService.createWorkflow(data, function (response, err) {
             if (err) {
                 toastr.error(err);
