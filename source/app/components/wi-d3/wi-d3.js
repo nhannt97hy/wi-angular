@@ -747,10 +747,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandler);
     }
-    this.onReady = function(args) {
-        function handler () {
+    this.onReady = function () {
+
+        let sensor = new ResizeSensor($(self.plotAreaId), function () {
             updateSlider();
             self.plotAll();
+        });
+        function handler() {
+            if (!sensor || !sensor.detach) return;
+            sensor.detach();
+            sensor = new ResizeSensor($(self.plotAreaId), function () {
+                updateSlider();
+                self.plotAll();
+            });
         }
         self.resizeHandler = function (event) {
             let model = event.model;
@@ -1103,7 +1112,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
                 _fitWindow = false;
             }
-            LayoutManager.triggerResize();
         });
     }
     function _onPlotMouseWheelCallback(track) {

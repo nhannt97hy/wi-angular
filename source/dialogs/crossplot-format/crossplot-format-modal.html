@@ -36,14 +36,18 @@
                                         <label class="control-label col-sm-4 font-weight-normal">Left</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleLeft">
+                                                    id="scaleLeft"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleLeft"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.crossplotModelProps.pointsets[0].scaleLeft, 'scaleLeft')">
                                         </div>
                                     </div>
                                     <div class="col-sm-2">
                                         <label class="control-label col-sm-4 font-weight-normal">Right</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleRight">
+                                                    id="scaleRight"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleRight"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.crossplotModelProps.pointsets[0].scaleRight, 'scaleRight')">
                                         </div>
                                     </div>
                                     <div class="col-sm-1">
@@ -77,14 +81,18 @@
                                         <label class="control-label col-sm-4 font-weight-normal">Bottom</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleBottom">
+                                                    id="scaleBottom"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleBottom"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.crossplotModelProps.pointsets[0].scaleBottom, 'scaleBottom')">
                                         </div>
                                     </div>
                                     <div class="col-sm-2">
                                         <label class="control-label col-sm-4 font-weight-normal">Top</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleTop">
+                                                    id="scaleTop"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleTop"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.crossplotModelProps.pointsets[0].scaleTop, 'scaleTop')">
                                         </div>
                                     </div>
                                     <div class="col-sm-1">
