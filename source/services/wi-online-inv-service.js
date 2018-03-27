@@ -274,8 +274,8 @@ Service.prototype.postWithFile = function (route, dataPayload) {
     });
 }
 
-Service.prototype.uploadFiles = function (files, callback) {
-    this.postWithFile(UPLOAD_FILES, {file: files})
+Service.prototype.uploadFiles = function (payload, callback) {
+    this.postWithFile(UPLOAD_FILES, payload)
         .then(function (response) {
             if (callback) callback(response);
         })
