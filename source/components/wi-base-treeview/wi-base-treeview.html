@@ -31,8 +31,12 @@
                 </div>
             </div>
         </div>
-
-        <div class="wi-parent-unit" ng-show="item.data.unit"
+        <div class="wi-parent-family"
+            ng-click="wiBaseTreeview.onClick($index, $event, item)"
+            ng-dblclick="wiBaseTreeview.onDoubleClick($index)">
+            <span class='display-inline-block' style='text-indent:10px;' title="{{item.data.familyName}}">{{item.data.familyName}}</span>
+        </div>
+        <div class="wi-parent-unit"
             ng-click="wiBaseTreeview.onClick($index, $event, item)"
             ng-dblclick="wiBaseTreeview.onDoubleClick($index)">
             <span class='display-inline-block' style='text-indent:10px;' title="{{item.data.unit}}">{{item.data.unit}}</span>
