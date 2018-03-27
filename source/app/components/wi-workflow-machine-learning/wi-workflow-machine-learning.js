@@ -1569,7 +1569,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             let payload = {
                 data: curveInfo.data,
                 idDataset: curveInfo.idDataset,
-                idFamily: (family || {}).id || null
+                idFamily: curveInfo.idFamily || (family || {}).id || null
             }
             wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
                 if (curve.idCurve) {
@@ -1629,7 +1629,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             if (wiItemDropdownCtrl.items.length) {
                 wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
                 self.currentModelType = wiItemDropdownCtrl.selectedItem.properties;
-                self.workflowConfig.model.currentModelType = self.currentModelType;
+                if (self.workflowConfig && self.workflowConfig.model) 
+                    self.workflowConfig.model.currentModelType = self.currentModelType;
             }
         }
         else {
@@ -1681,6 +1682,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (predictStepIdx >= 0) {
             self.workflowConfig.steps[predictStepIdx].result = predictResult;
         }
+        self.workflowConfig.model.currentModelType = self.currentModelType;
         wiApiService.editWorkflow({
             idWorkflow: self.idWorkflow,
             content:self.workflowConfig
