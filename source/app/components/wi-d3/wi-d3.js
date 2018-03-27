@@ -749,14 +749,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.onReady = function () {
 
-        let sensor = new ResizeSensor($(self.plotAreaId), function () {
+        let sensor = new ResizeSensor($('#' + self.plotAreaId), function () {
             updateSlider();
             self.plotAll();
         });
         function handler() {
             if (!sensor || !sensor.detach) return;
             sensor.detach();
-            sensor = new ResizeSensor($(self.plotAreaId), function () {
+            sensor = new ResizeSensor($('#' + self.plotAreaId), function () {
                 updateSlider();
                 self.plotAll();
             });
