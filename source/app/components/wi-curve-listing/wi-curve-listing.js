@@ -42,6 +42,7 @@ function Controller(
         });
     }
     this.onChangeWell = function() {
+        $scope.Filter = null;
         self.currentIndex = self.SelectedWell.id;
         self.wellConfig = self.SelectedWell.children
             .filter(c => c.type == "dataset")
@@ -386,7 +387,7 @@ function Controller(
             DialogUtils.saveCurvesDialog(ModalService, modifiedCurves, function(
                 savedCurves
             ) {
-                console.log("save curves successed!");
+                toastr.success("Save curve(s) successed!");
                 $timeout(function() {
                     savedCurves.forEach(curve => {
                         // check curve as saved

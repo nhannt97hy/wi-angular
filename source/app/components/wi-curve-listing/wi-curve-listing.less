@@ -35,11 +35,12 @@ wi-curve-listing{
         font-size: 3em;
         width: 100%;
         display: inline-block;
-        text-align: center;
+        text-align: right;
         position: absolute;
         top: 50%;
-        left: 0;
+        right: 10px;
         transform: translateY(-50%);
+        z-index: 99;
     }
 
     #dragElement{
@@ -49,7 +50,7 @@ wi-curve-listing{
             border: 1px solid steelblue;
             border-radius: 5px;
         }
-        .wi-parent-unit, .icon-expanded{
+        .wi-parent-unit, .icon-expanded, .wi-parent-family{
             display: none;
         }
     }
