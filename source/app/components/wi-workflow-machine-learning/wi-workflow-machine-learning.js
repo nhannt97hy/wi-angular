@@ -877,8 +877,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 self.workflowConfig = workflow.content;
                 self.workflowName = workflow.name;
                 self.currentModelType = self.workflowConfig.model.currentModelType;
-                self.workflowResults[1] = self.workflowConfig.steps[1].result || self.workflowResults[1];
-                self.workflowResults[2] = self.workflowConfig.steps[2].result || self.workflowResults[2];
+                self.workflowResults[1] = self.workflowConfig.steps.find(function(step) {
+                    return step.name == self.workflowResults[1].name;
+                }).result || self.workflowResults[1];
+                self.workflowResults[2] = self.workflowConfig.steps.find(function(step) {
+                    return step.name == self.workflowResults[2].name;
+                }).result || self.workflowResults[2];
+                //self.workflowResults[1] = self.workflowConfig.steps[1].result || self.workflowResults[1];
+                //self.workflowResults[2] = self.workflowConfig.steps[2].result || self.workflowResults[2];
             });
         }
 
@@ -1656,8 +1662,25 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     let __running_wf = false;
     function saveWorkflow() {
         if (!self.idWorkflow || __running_wf) return;
-        self.workflowConfig.steps[1].result = self.workflowResults[1];
-        self.workflowConfig.steps[2].result = self.workflowResults[2];
+        let verifyResult = self.workflowResults[1];
+        let predictResult = self.workflowResults[2];
+        let verifyStepIdx = -1;
+        let predictStepIdx = -1;
+        for (let idx in self.workflowConfig.steps) {
+            if (self.workflowConfig.steps[idx].name == verifyResult.name) {
+                verifyStepIdx = idx;
+            }
+            if (self.workflowConfig.steps[idx].name == predictResult.name) {
+                predictStepIdx = idx;
+            }
+        };
+        
+        if (verifyStepIdx >= 0) {
+            self.workflowConfig.steps[verifyStepIdx].result = verifyResult;
+        }
+        if (predictStepIdx >= 0) {
+            self.workflowConfig.steps[predictStepIdx].result = predictResult;
+        }
         wiApiService.editWorkflow({
             idWorkflow: self.idWorkflow,
             content:self.workflowConfig

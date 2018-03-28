@@ -23,7 +23,7 @@
                         <div class="form-group">
                             <label class="control-label col-sm-3">Workflow Spec</label>
                             <wi-item-dropdown class='col-sm-9 height34px position-fixed adjust-width'
-                                on-wi-dropdown-init="wiModal.getWorkflowSpecs" 
+                                on-wi-dropdown-init="wiModal.getWorkflowSpecs"
                                 on-item-changed="wiModal.workflowSpecChanged"
                                 place-holder="Select workflow spec">
                             </wi-item-dropdown>
@@ -35,7 +35,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" ng-disabled="wiModal.disabled || !modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid)"
+                <button type="button" class="btn btn-default" ng-disabled="(!modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid)) || !wiModal.idWorkflowSpec"
                     ng-click="wiModal.onOkButtonClicked()">
                     <span class="ok-16x16"></span>&nbsp;OK
                 </button>

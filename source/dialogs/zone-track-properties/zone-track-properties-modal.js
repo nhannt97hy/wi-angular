@@ -1,22 +1,23 @@
 let helper = require('./DialogHelper');
 
-module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, callback) {
+module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
+        let wiLogplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let viZoneTrack;
         let props = zoneTrackProperties || {
             showTitle: true,
             title: "New Zone",
             topJustification: "center",
             color: '#ffffff',
-            width: utils.inchToPixel(2),
+            width: 1,
             parameterSet: null
         }
-        props.width = utils.pixelToInch(props.width);
         console.log(props);
-        this.isShowTitle = props.showTitle;
+        if (props.idZoneTrack) viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
+        this.showTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
         this.color = props.color;
@@ -49,32 +50,52 @@ module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, cal
             });
         }
         function doApply(cb) {
-            self.error = null;
-            if (!self.idZoneSet) {
-                self.error = "Zone Set is required";
-                return;
-            }
-            props = {
-                showTitle: self.isShowTitle,
+            if (!self.idZoneSet) return toastr.error("Zone Set is required");
+            const zoneSetChanged = self.idZoneSet !== props.idZoneSet;
+            Object.assign(props, {
+                showTitle: self.showTitle,
                 title: self.title,
                 topJustification: self.topJustification,
                 color: self.color,
                 width: self.width,
+                zoomFactor: self.zoomFactor,
                 parameterSet: self.parameterSet,
                 idZoneSet: self.idZoneSet,
-                zoomFactor: self.zoomFactor
+            })
+            if (props.idZoneTrack) {
+                wiApiService.editZoneTrack(props, function () {
+                    const viZoneTrackProps = Object.assign({}, props, {
+                        width: utils.inchToPixel(props.width)
+                    })
+                    viZoneTrack.setProperties(viZoneTrackProps);
+                    if (zoneSetChanged) {
+                        wiApiService.getZoneSet(viZoneTrack.idZoneSet, function (zoneset) {
+                            viZoneTrack.removeAllZones();
+                            for (let zone of zoneset.zones) {
+                                self.addZoneToTrack(viZoneTrack, zone);
+                            }
+                        })
+                    }
+                    viZoneTrack.doPlot(true);
+                });
+            } else {
+                wiApiService.createZoneTrack(props, function (res, err) {
+                    if (err) return;
+                    props.idZoneTrack = res.idZoneTrack;
+                    wiD3Ctrl.pushZoneTrack(props);
+                    setTimeout(() => {
+                        viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
+                    });
+                })
             }
-            if (self.error) return;
-            if(cb) cb();
+            cb && cb();
         }
         this.onApplyButtonClicked = function () {
-            doApply(function(){
-                callback(props);
-            });
+            doApply();
         }
         this.onOkButtonClicked = function () {
             doApply(function() {
-                close(props, 100);
+                close(null, 100);
             });
         };
         this.onCancelButtonClicked = function () {
@@ -87,9 +108,8 @@ module.exports = function (ModalService, wiLogplotCtrl, zoneTrackProperties, cal
         controllerAs: "wiModal"
     }).then(function (modal) {
         helper.initModal(modal);
-        modal.close.then(function (data) {
+        modal.close.then(function () {
             helper.removeBackdrop();
-            if (data) callback(data);
         });
     });
 }
