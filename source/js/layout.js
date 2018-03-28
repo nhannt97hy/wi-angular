@@ -20,7 +20,7 @@ let layoutConfig = {
                     type: 'column',
                     id: 'left',
                     isClosable: false,
-                    width: 15,
+                    width: 20,
                     content: []
                 }, {
                     type: 'stack',
@@ -318,3 +318,4 @@ module.exports.getItemById = function (itemId) {
 module.exports.getRoot = function() {
     return layoutManager.root;
 }
+

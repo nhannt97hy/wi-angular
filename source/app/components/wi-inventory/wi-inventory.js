@@ -413,7 +413,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 if (cb) cb(lowm, wells);
             });
         }
-        else if (cb) cb(0);
+        else if (cb) cb([]);
     }
     
     this.downTrigger = function(cb) {
@@ -434,7 +434,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 if (cb) cb(lowm, wells);
             });
         }
-        else if (cb) cb(0);
+        else if (cb) cb([]);
     }
     this.upTriggerPrj = function(cb) {
         console.log('up-trigger prj');
@@ -456,7 +456,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 if (cb) cb(lowm, wells);
             });
         }
-        else if (cb) cb(0);
+        else if (cb) cb([]);
     }
     this.downTriggerPrj = function(cb) {
         console.log('down-trigger prj');
@@ -478,7 +478,7 @@ function Controller($scope, wiComponentService, wiApiService, wiOnlineInvService
                 if (cb) cb(lowm, wells);
             });
         }
-        else if (cb) cb(0);
+        else if (cb) cb([]);
     }
 
     this.selectHandler = selectHandler;

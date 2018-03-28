@@ -315,7 +315,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
             }, function (err) {
                 done();
             });
-
         });
     }
     this.onSelectTemplate = function (parentIdx, itemIdx) {
@@ -706,6 +705,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     };
 
     function saveCurve(curveInfo, callback) {
+        console.log('save curve', curveInfo);
         getFamilyList(familyList => {
             let family = familyList.find(f => f.data.label == curveInfo.family);
             let payload = {
@@ -888,6 +888,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope) {
                             let dataset = data.dataset;
                             d.idDataset = dataset.idDataset;
                             d.idWell = data.well.idWell;
+                            console.log(d);
                             saveCurve(d, function(curveProps) {
                                 delete d.data;
                                 updateChoices(curveProps);

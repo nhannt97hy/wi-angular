@@ -35,7 +35,8 @@ app.component(name, {
         onItemChanged: "<",
         placeHolder: "@",
         ctrlBtnIcon: "@",
-        onCtrlBtnClick: "<"
+        onCtrlBtnClick: "<",
+        choiceStyles: '@'
     }
 });
 
