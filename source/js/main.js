@@ -364,45 +364,59 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.preventDuplicates = true;
 }
 
-function restoreProject($timeout, wiApiService, ModalService){
+function restoreProject($timeout, wiApiService, ModalService) {
     let query = queryString.parse(location.search);
-        if(Object.keys(query).length && query.idProject){
+    if (Object.keys(query).length && query.idProject) {
+        $timeout(function () {
+            wiApiService.getProjectInfo(query.idProject, function (project) {
+                if (project.name) {
+                    wiApiService.getProject({
+                        idProject: query.idProject,
+                        name: query.name,
+                        shared: query.shared,
+                        owner: query.owner
+                    }, function (projectData) {
+                        if (projectData.name) {
+                            projectData.name = query.name;
+                            projectData.shared = query.shared;
+                            projectData.owner = query.owner;
+                            utils.projectOpen(projectData);
+                        } else {
+                            utils.error("Project not exist!");
+                        }
+                    })
+                }
+            })
+        }, 100);
+    } else {
+        let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
+        if (lastProject) {
             $timeout(function () {
-                wiApiService.getProjectInfo(query.idProject, function (project) {
-                    if (project.name) {
-                        wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                            if (projectData.name) {
-                                utils.projectOpen(projectData);
-                            } else {
-                                utils.error("Project not exist!");
+                wiApiService.getProjectInfo(lastProject.id, function (project, err) {
+                    if (!err) {
+                        DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name + "</b>.</br>Do you want to open it?", function (ret) {
+                            if (ret) {
+                                wiApiService.getProject({
+                                    idProject: lastProject.id,
+                                    name: lastProject.name,
+                                    owner: lastProject.owner,
+                                    shared: lastProject.shared
+                                }, function (projectData) {
+                                    // let utils = wiComponentService.getComponent('UTILS');
+                                    projectData.name = lastProject.name;
+                                    projectData.shared = lastProject.shared;
+                                    projectData.owner = lastProject.owner;
+                                    utils.projectOpen(projectData);
+                                });
                             }
                         })
+                    } else {
+                        window.localStorage.removeItem('LProject');
                     }
                 })
             }, 100);
-        }else{
-            let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
-            if(lastProject){
-                $timeout(function(){
-                    wiApiService.getProjectInfo(lastProject.id, function(project, err) {
-                        if(!err){
-                            DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name +"</b>.</br>Do you want to open it?", function(ret){
-                                if(ret){
-                                    wiApiService.getProject({
-                                        idProject: lastProject.id
-                                    }, function (projectData) {
-                                        // let utils = wiComponentService.getComponent('UTILS');
-                                        utils.projectOpen(projectData);
-                                    });
-                                }
-                            })
-                        }else{
-                            window.localStorage.removeItem('LProject');
-                        }
-                    })
-                },100);
-            }
         }
+    }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     let functionBindingProp = {

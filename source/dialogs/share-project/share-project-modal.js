@@ -1,13 +1,13 @@
 let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback, groups, users) {
-    function ModalController($scope, close, wiApiService, wiComponentService) {
+    function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.groups = groups;
         this.users = users;
-        this.selectedGroup = {};
-        this.selectedUser = {};
+        this.selectedGroup = null;
+        this.selectedUser = null;
         this.showUserList = true;
         this.isSelectedGroup = false;
         this.isSelectedUser = false;
@@ -15,7 +15,15 @@ module.exports = function (ModalService, callback, groups, users) {
 
         function reload() {
             wiApiService.listGroup({}, function (groups) {
-                self.groups = groups;
+                $timeout(function () {
+                    self.groups = groups;
+                    if (!self.selectedGroup) return;
+
+                    self.selectedGroup = self.groups.find(g => g.idGroup === self.selectedGroup.idGroup);
+                    self.users = users.filter(
+                        u => !self.selectedGroup.users.find(uInSelectdGroup => uInSelectdGroup.idUser === u.idUser)
+                    );
+                });
             });
         }
 
@@ -33,6 +41,7 @@ module.exports = function (ModalService, callback, groups, users) {
         };
         this.deleteGroup = function () {
             wiApiService.removeGroup({idGroup: self.selectedGroup.idGroup}, function (response) {
+                self.selectedGroup = null;
                 reload();
             });
         };

@@ -42,6 +42,8 @@ module.exports = function (ModalService, callback) {
             };
 
             wiApiService.getProject(data, function (response) {
+                response.owner = self.selectedProject.owner;
+                response.shared = self.selectedProject.shared;
                 close(response, 500);
                 $timeout(function () {
                     $scope.$apply();

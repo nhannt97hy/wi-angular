@@ -30,10 +30,10 @@ let app = angular.module(moduleName, []);
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
-const BASE_URL = 'http://localhost:3000';
-const AUTHENTICATION_SERVICE = 'http://localhost:2999';
+const BASE_URL = 'http://test.sflow.me';
+const AUTHENTICATION_SERVICE = 'http://login.test.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
+const INVENTORY_SERVICE = 'http://http://13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
