@@ -2943,27 +2943,7 @@ exports.getVisualizeShading = getVisualizeShading;
 function updateWiCurveListingOnModelDeleted(model){
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiCurveListing = wiComponentService.getComponent('WCL');
-    switch (model.type) {
-        case 'curve':
-            let idCurve = model.properties.idCurve;
-            let wellModel = findWellByCurve(idCurve);
-            if(wiCurveListing){
-                let indexCurve = wiCurveListing.curvesData[wellModel.name].findIndex(c => {return c.id == idCurve});
-                if(indexCurve != -1){
-                    wiCurveListing.curvesData[wellModel.name].splice(indexCurve,1);
-                }
-            }
-            break;
-        case 'well':
-            if(wiCurveListing){
-                delete wiCurveListing.curvesData[model.name];
-                delete wiCurveListing.depthArr[model.name];
-            }
-            break;
-        default:
-            console.log('not implemented')
-            break;
-    }
+    if(wiCurveListing) wiCurveListing.removeModel(model);
 }
 function getSelectedNode(rootNode) {
     return getSelectedPath(null, rootNode).pop();
