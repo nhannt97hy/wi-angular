@@ -86,7 +86,11 @@ exports.projectOpen = function (projectData) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let LProject = {id:projectData.idProject, name:projectData.name, shared: projectData.shared, owner: projectData.owner};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
-    window.history.pushState(LProject, LProject.name, '?idProject=' + LProject.id + '&name=' + LProject.name + "&shared=" + LProject.shared + "&owner=" + LProject.owner);
+    let queryString = LProject.id ? '?idProject=' + LProject.id : null;
+    queryString += LProject.name ? '&name=' + LProject.name : '';
+    queryString += LProject.shared ? '&shared=' + LProject.shared : '';
+    queryString += LProject.owner ? '&owner=' + LProject.owner : '';
+    window.history.pushState(LProject, LProject.name, queryString);
     document.title = LProject.name + " - Well Insight";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
