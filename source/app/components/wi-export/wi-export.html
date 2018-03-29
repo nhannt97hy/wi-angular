@@ -2,11 +2,14 @@
     <div class="left-container">
         <div class="panel panel-default export-left">
             <div style='display:flex;' class='panel-heading'>
-                <h5 style='margin-right:10px;'>Project</h5>
-                <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiExport.getProjectList'
+                <h5 style='margin-right:10px;'>Inventory</h5>
+                <!-- <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiExport.getProjectList'
                     on-item-changed="wiExport.projectChanged">
-                </wi-item-dropdown>
-                <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiExport.refreshProject()">
+                </wi-item-dropdown> -->
+                <!-- <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiExport.refreshProject()">
+                    <i class="fa fa-refresh"></i>
+                </button> -->
+                <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default pull-right' title="Reload project" ng-click="wiExport.refreshInventory()">
                     <i class="fa fa-refresh"></i>
                 </button>
             </div>
@@ -23,7 +26,16 @@
             <div style="flex:1;display:flex;padding:0px;" class="panel-body">
                 <wi-scroll id-scroll="exportTreeScroll" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiExport.upTriggerPrj'
                     down-trigger='wiExport.downTriggerPrj'>
-                    <wi-base-treeview name="exportTreeview" config="wiExport.projectConfig" container="wiExport" on-click-function="wiExport.prjClickFunction"
+                    <!-- <wi-base-treeview name="exportTreeview" 
+                        config="wiExport.projectConfig" 
+                        container="wiExport" 
+                        on-click-function="wiExport.prjClickFunction"
+                        filter="{{wiExport.prjFilter}}">
+                    </wi-base-treeview> -->
+                    <wi-base-treeview name="exportTreeview" 
+                        config="wiExport.inventoryConfig" 
+                        container="wiExport" 
+                        on-click-function="wiExport.invClickFunction"
                         filter="{{wiExport.prjFilter}}">
                     </wi-base-treeview>
                 </wi-scroll>
@@ -44,7 +56,7 @@
         <div class='panel panel-default export-center'>
             <div class='panel-heading' style='display:flex;'>
                 <h5 style='flex:1;'>Export Queue</h5>
-                <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExport.exportQueueItems.length = 0;">
+                <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExport.clearExportQueueItems()">
                     <span class='ti-brush-alt'></span>
                 </button>
             </div>
@@ -55,8 +67,12 @@
                         size='10'>
                 </form>
             </div>
-            <wi-base-treeview name="ExportQueueTreeview" style="flex:1;overflow-x:hidden;overflow-y:auto;" config="wiExport.exportQueueItems"
-                container="wiExport" on-click-function="wiExport.pendingQueueClickFunction" filter="{{wiExport.queueFilter}}">
+            <wi-base-treeview name="ExportQueueTreeview" 
+                style="flex:1;overflow-x:hidden;overflow-y:auto;" 
+                config="wiExport.exportQueueItems"
+                container="wiExport" 
+                on-click-function="wiExport.exportQueueClickFunction" 
+                filter="{{wiExport.queueFilter}}">
             </wi-base-treeview>
         </div>
     </div>

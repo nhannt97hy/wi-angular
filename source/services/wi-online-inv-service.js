@@ -14,7 +14,7 @@ const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // route: GET, CREATE, UPDATE, DELETE
 const USER_INFO = '/user/info';
 
-const EXPORT_WELL='/export';
+const EXPORT_WELL = '/export/well';
 
 const UPLOAD_FILES = '/upload/lases';
 
@@ -349,8 +349,9 @@ Service.prototype.deleteCurve = function (idCurve, callback) {
     this.post(DELETE_CURVE, {idCurve: idCurve}, callback);
 }
 
-Service.prototype.exportAllItems = function(idWell, callback){
-    this.post(EXPORT_WELL, {idWell: idWell}, callback);
+Service.prototype.exportAllItems = function(idObj, callback){
+    console.log('idObj', idObj);
+    this.post(EXPORT_WELL, {idObj: idObj}, callback);
 }
 
 Service.prototype.getFileUrl = function(url){

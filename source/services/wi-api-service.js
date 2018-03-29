@@ -18,6 +18,7 @@ let app = angular.module(moduleName, []);
 
 //dev
 const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
 //const INVENTORY_SERVICE = 'http://inv.sflow.me';
@@ -867,6 +868,7 @@ Service.prototype.removeWell = function (idWell, callback) {
 
 Service.prototype.getWell = function (idWell, callback) {
     this.post(INFO_WELL, {idWell : idWell}, callback);
+    console.log('self.baseurl', self.baseUrl);
 }
 
 Service.prototype.createDataset = function (infoDataset, callback) {
