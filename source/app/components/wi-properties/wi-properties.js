@@ -138,7 +138,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                             });
                         },
                         value: itemProperties.idFamily,
-                        valueLabel: curveFamily.name || '<span class="family-edit-16x16"></span>',
+                        valueLabel: '<span class="family-edit-16x16"></span>' + (curveFamily.name || ''),
                         editable: true
                     }, {
                         key: 'name',
