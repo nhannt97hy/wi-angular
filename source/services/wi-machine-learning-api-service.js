@@ -16,14 +16,14 @@ getAuthInfo();
 
 //const machineLearningUrl = "http://54.169.13.92:3002/atore/api"
 //const mlToolkitUrl = "http://54.169.13.92:4002/wipm/api/task/regression";
-const mlToolkitUrl = "http://13.251.24.65:4002/wipm/api/task/regression";
+const mlToolkitUrl = "http://13.251.24.65:4002/wipm/api/task";
 
 
 const ML_TOOL_KIT = {
-    TRAIN: mlToolkitUrl + '/curve/model',
-    PREDICT_CURVE: mlToolkitUrl + '/curve/predict',
-    PREDICT_ANFIS: mlToolkitUrl + '/anfis/predict',
-    PREDICT_FACIES:  mlToolkitUrl + '/faces/predict'
+    TRAIN: mlToolkitUrl + '/regression/curve/model',
+    PREDICT_CURVE: mlToolkitUrl + '/regression/curve/predict',
+    PREDICT_ANFIS: mlToolkitUrl + '/regression/anfis/predict',
+    PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict'
 }
 
 const URL = ML_TOOL_KIT;

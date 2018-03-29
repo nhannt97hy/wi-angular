@@ -19,7 +19,7 @@ function Controller($scope) {
     this.onChanged = function(){
         if(self.model.idDesCurve) self.model.idDesCurve = null;
         let curveModel = self.options.find(curve => {
-            return curve.properties.name == self.model.curveName && curve.properties.idDataset == self.model.idDataset;
+            return curve.properties.name.toUpperCase() == self.model.curveName.toUpperCase() && curve.properties.idDataset == self.model.idDataset;
         });
         if(curveModel) {
             self.model.idDesCurve = curveModel.properties.idCurve;
