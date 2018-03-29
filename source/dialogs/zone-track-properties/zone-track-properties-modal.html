@@ -12,21 +12,21 @@
                             <h5 class="normal-text">Header</h5>
                             <div class="form-group">
                                 <div class="col-sm-7">
-                                    <label for="isShowTitle" class="padding-left-2em">
-                                        <input type="checkbox" id="isShowTitle" ng-model="wiModal.isShowTitle">Show title
+                                    <label for="showTitle" class="padding-left-2em">
+                                        <input type="checkbox" id="showTitle" ng-model="wiModal.showTitle">Show title
                                     </label>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-sm-5 padding-left-3em" for="title">Title</label>
                                 <div class="col-sm-7">
-                                    <input type="text" class="form-control wi-form-control" value="" name="title" id="title" ng-model="wiModal.title" ng-disabled="!wiModal.isShowTitle">
+                                    <input type="text" class="form-control wi-form-control" value="" name="title" id="title" ng-model="wiModal.title" ng-disabled="!wiModal.showTitle">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="topJust" class="control-label col-sm-5 padding-left-3em">Top Justification</label>
                                 <div class="col-sm-7">
-                                    <select ng-model="wiModal.topJustification" name="topJust" value="" class="form-control wi-form-control" id="topJust" ng-disabled="!wiModal.isShowTitle">
+                                    <select ng-model="wiModal.topJustification" name="topJust" value="" class="form-control wi-form-control" id="topJust" ng-disabled="!wiModal.showTitle">
                                         <option value="left">Left</option>
                                         <option value="center">Center</option>
                                         <option value="right">Right</option>

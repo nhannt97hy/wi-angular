@@ -21,22 +21,26 @@
                                     <th width="6%">Used</th>
                                     <th width="6%">Show</th>
                                     <th width="5%">
-                                        <button class="btn btn-default" type="button"
-                                        ng-click="wiModal.addRow();">
+                                        <button class="btn btn-default" type="button" ng-click="wiModal.addRow();">
                                             <span class="plus-16x16"></span>
                                         </button>
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style='height: 111px;' id='ternaryBody'>
                                 <tr ng-repeat="vertex in wiModal.getVertices() track by $index" ng-class="{selected:$index == selectedRow}" ng-click="wiModal.setClickedRow($index)">
                                     <td width="2%">{{$index + 1}}</td>
                                     <td width="20%">
-                                        <input ng-model="vertex.x" type="number" step='any' class="form-control wi-form-control valign-middle pull-left"
-                                        ng-change="wiModal.onChange(vertex.index)"/>
+                                        <input ng-model="vertex.x" type="number" step='any'
+                                        class="form-control wi-form-control valign-middle pull-left"
+                                        ng-change="wiModal.onChange(vertex.index)"
+                                        wi-decimal-places='4'/>
                                     </td>
                                     <td width="20%">
-                                        <input ng-model="vertex.y" type="number" class="form-control wi-form-control valign-middle pull-left" ng-change="wiModal.onChange(vertex.index)" step='any' />
+                                        <input ng-model="vertex.y" type="number"
+                                        class="form-control wi-form-control valign-middle pull-left"
+                                        ng-change="wiModal.onChange(vertex.index)"
+                                        step='any' wi-decimal-places='4'/>
                                     </td>
                                     <td width="20%">
                                         <input ng-model="vertex.name" type="text" class="form-control wi-form-control valign-middle pull-left" ng-change="wiModal.onChange(vertex.index)"
@@ -68,8 +72,8 @@
                                 Pick from CrossPlot
                             </button>
                             <label class="btn btn-default normal-text">
-                                <input class="display-none" type="file" accept=".csv" ngf-select ng-model="wiModal.ImportFile"
-                                    ng-change="wiModal.importVertices()" /> Import
+                                <input class="display-none" type="file" accept=".csv" ngf-select ng-model="wiModal.ImportFile" ng-change="wiModal.importVertices()"
+                                /> Import
                             </label>
                             <button class="btn btn-default normal-text" type="button" ng-click="wiModal.exportVertices()">
                                 Export
@@ -86,13 +90,15 @@
                             <div class="col-sm-4">
                                 <label class="col-sm-3">X: </label>
                                 <div class="col-sm-9">
-                                    <input type="number" ng-model="calculateOptions.point.x" ng-disabled="calculateOptions.type != 'Point'" class="form-control wi-form-control valign-middle" step='any'>
+                                    <input type="number" ng-model="calculateOptions.point.x" ng-disabled="calculateOptions.type != 'Point'" class="form-control wi-form-control valign-middle"
+                                        step='any' wi-decimal-places='4'>
                                 </div>
                             </div>
                             <div class="col-sm-4">
                                 <label class="col-sm-3">Y: </label>
                                 <div class="col-sm-9">
-                                    <input type="number" ng-model="calculateOptions.point.y" ng-disabled="calculateOptions.type != 'Point'" class="form-control wi-form-control valign-middle" step='any'>
+                                    <input type="number" ng-model="calculateOptions.point.y" ng-disabled="calculateOptions.type != 'Point'" class="form-control wi-form-control valign-middle"
+                                        step='any' wi-decimal-places='4'>
                                 </div>
                             </div>
                             <div class="col-sm-2">
@@ -164,16 +170,6 @@
                             </span>
                         </div>
                     </form>
-                    <!-- </div> -->
-                    <!-- <div class="col-sm-1">
-                        <br><br>
-                        <button class="btn btn-default" type="button" ng-click="wiModal.removeRow();">
-                            <span class="delete-16x16"></span>
-                        </button>
-                        <button class="btn btn-default" type="button" ng-click="wiModal.addRow();">
-                            <span class="plus-16x16"></span>
-                        </button>
-                    </div> -->
                 </div>
             </div>
             <div class="modal-footer">

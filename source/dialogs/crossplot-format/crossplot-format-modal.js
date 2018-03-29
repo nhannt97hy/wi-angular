@@ -256,6 +256,43 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             return item.properties.dataset;
         }
 
+        this.checkLogValueX = function (value, label) {
+            if (self.crossplotModelProps.pointsets[0].logX) {
+                switch (label) {
+                    case 'scaleLeft':
+                        self.crossplotModelProps.pointsets[0].scaleLeft = value == 0 ? 1 : value;
+                        break;
+                    case 'scaleRight':
+                        self.crossplotModelProps.pointsets[0].scaleRight = value == 0 ? 1 : value;
+                        break;
+                }
+                if(Math.round(value) == 0) {
+                    $('#' + label).css('box-shadow', '0px 0px 5px red');
+                    $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                    }, 255)
+                }
+            }
+        }
+        this.checkLogValueY = function (value, label) {
+            switch (label) {
+                case 'scaleBottom':
+                    self.crossplotModelProps.pointsets[0].scaleBottom = value == 0 ? 1 : value;
+                    break;
+                case 'scaleTop':
+                    self.crossplotModelProps.pointsets[0].scaleTop = value == 0 ? 1 : value;
+                    break;
+            }
+            if (self.crossplotModelProps.pointsets[0].logY) {
+                if(Math.round(value) == 0) {
+                    $('#' + label).css('box-shadow', '0px 0px 5px red');
+                    $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                    }, 255)
+                }
+            }
+        }
+
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
         //     delete props.pointsets[0].curveX;
@@ -279,11 +316,11 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             $scope.selectedAxisColorRow = indexRow;
         };
 
-        $scope.removeAxisColorRow = function () {
-            if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
-            $scope.axisColors.splice($scope.selectedAxisColorRow, 1);
+        $scope.removeAxisColorRow = function (index) {
+            // if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
+            $scope.axisColors.splice(index, 1);
             if ($scope.axisColors.length) {
-                $scope.setClickedAxisColorRow(0);
+                $scope.setClickedAxisColorRow(index - 1 ||0);
             }
         };
 
@@ -295,7 +332,9 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         }
 
         $scope.addAxisColorRow = function () {
-            $scope.axisColors.push({});
+            $scope.axisColors.push({
+                color: utils.colorGenerator()
+            });
             $scope.setClickedAxisColorRow($scope.axisColors.length - 1);
         };
 
@@ -323,6 +362,20 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         function updateCrossplot() {
             self.crossplotModelProps.isDefineDepthColors = $scope.isDefineDepthColors;
             self.crossplotModelProps.axisColors = JSON.stringify($scope.axisColors);
+            if (self.crossplotModelProps.pointsets[0].logX) {
+                if (self.crossplotModelProps.pointsets[0].scaleLeft == 0
+                    || self.crossplotModelProps.pointsets[0].scaleRight == 0) {
+                        toastr.error("Scale can't be 0 in Logarithmic");
+                        return;
+                    }
+            }
+            if (self.crossplotModelProps.pointsets[0].logY) {
+                if (self.crossplotModelProps.pointsets[0].scaleBottom == 0
+                    || self.crossplotModelProps.pointsets[0].scaleTop == 0) {
+                        toastr.error("Scale can't be 0 in Logarithmic");
+                        return;
+                    }
+            }
             if ($scope.isDefineDepthColors) {
                 for (let c of $scope.axisColors) {
                     if (c.minValue == null || c.maxValue == null || c.color == null) {

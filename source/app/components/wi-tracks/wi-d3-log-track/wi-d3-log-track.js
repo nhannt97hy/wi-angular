@@ -102,16 +102,26 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             tabs: ['true', 'true', 'true']
         });
     }
-    this.update = function (onlyStatus) {
+    this.update = function (callback, onlyStatus) {
         let viTrack = this.viTrack;
         if (!viTrack.isLogTrack()) return;
 
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+        function getDataCurve(idCurve, _cb) {
+            const line = viTrack.getCurves().find(l => l.idCurve === idCurve) || {};
+            let dataCurve = line.rawData;
+            if (Array.isArray(dataCurve)) _cb(dataCurve);
+            else wiApiService.dataCurve(idCurve, function (dataCurve, err) {
+                if (err) _cb(null, err);
+                else _cb(dataCurve);
+            });
+        }
         function _addShadingToTrack (shading) {
-            wiApiService.dataCurve(shading.idControlCurve, function(dataCurve) {
+            getDataCurve(shading.idControlCurve, function (dataCurve, err) {
+                if (err) return;
                 let shadingModel = Utils.shadingToTreeConfig(shading, palettes);
-                shadingModel.data.selectedCurve = graph.buildCurve({idCurve: shading.idControlCurve}, dataCurve, _getWellProps());
+                shadingModel.data.selectedCurve = graph.buildCurve({ idCurve: shading.idControlCurve }, dataCurve, _getWellProps());
                 if (!shadingModel.idRightLine) return;
                 if (!shadingModel.idLeftLine) {
                     let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
@@ -121,10 +131,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 else {
                     let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
                     let lineObj2 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idLeftLine);
-                    if (!lineObj1 || ! lineObj2) return;
+                    if (!lineObj1 || !lineObj2) return;
                     self.addPairShadingToTrack(viTrack, lineObj2, lineObj1, shadingModel.data);
                 }
-            })
+            });
         }
         function updateMultiLogplotStatus() {
             wiComponentService.getSlidingBarForD3Area(self.wiD3Ctrl.name).updateDepthRange();
@@ -204,7 +214,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         logTrack.width = Utils.inchToPixel(logTrack.width);
                         viTrack.setProperties(logTrack);
                         viTrack.doPlot();
-                        updateMultiLogplotStatus();
+                        callback && callback();
                     })
                     .catch(function (err) {
                         console.error(err);

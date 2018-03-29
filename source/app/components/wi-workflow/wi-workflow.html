@@ -6,5 +6,12 @@
     </wi-toolbar>
 </div> -->
 <div class="workflow-main-content">
-    <wi-workflow-player name='{{wiWorkflow.WorkflowPlayerName}}' id-project='wiWorkflow.getCurrentProjectId()' id-workflow="wiWorkflow.id"></wi-workflow-player>
+    <wi-workflow-machine-learning ng-if="wiWorkflow.machineLearning" 
+        name='{{wiWorkflow.WorkflowPlayerName}}' 
+        id-project='wiWorkflow.getCurrentProjectId()' id-workflow="wiWorkflow.id">
+    </wi-workflow-machine-learning>
+    <wi-workflow-player ng-if="!wiWorkflow.machineLearning" 
+        name='{{wiWorkflow.WorkflowPlayerName}}' 
+        id-project='wiWorkflow.getCurrentProjectId()' 
+        id-workflow="wiWorkflow.id"></wi-workflow-player>
 </div>

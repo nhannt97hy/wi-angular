@@ -1,0 +1,25 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Predict Model</h4>
+            </div>
+            <div style='display:flex;flex-direction:column;' class="modal-body">
+                <form id="predict">
+                    <div class="form-group form-inline">
+                        <label class="control-label col-sm-3">Model name</label>
+                        <select ng-options="x as x.name for x in wiModal.models track by x.id" 
+                                ng-model="wiModal.model" 
+                                class="form-control wi-form-control"
+                                required>
+                        </select>
+                    </div>
+                </form> 
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Run</button>
+            </div>
+        </div>
+    </div>
+</div>

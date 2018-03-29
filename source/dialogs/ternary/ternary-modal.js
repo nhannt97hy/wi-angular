@@ -7,6 +7,17 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
             wiComponentService.DIALOG_UTILS
         );
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        wiComponentService.on(
+            wiComponentService.PROJECT_REFRESH_EVENT,
+            function() {
+                $scope.updating = false;
+                let well = wiD3CrossplotCtrl.getWell();
+                $scope.datasets = well.children.filter(function(node) {
+                    return node.type == "dataset";
+                });
+                $scope.result.selectedDataset = $scope.datasets.find(d => d.id == $scope.result.selectedDataset.id);
+            }
+        );
 
         let change = ($scope.change = {
             unchanged: 0,
@@ -121,10 +132,14 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
                 index: self.vertices.length,
                 style: "Circle",
                 showed: true,
-                used: false,
+                used: self.getTernaryVertices().length >= 3 ? false : true,
                 name: "Material_" + (self.vertices.length + 1)
             });
             self.setClickedRow(self.getVertices().length - 1);
+            $timeout(() => {
+                let body = $('#ternaryBody');
+                body.scrollTop(body[0].scrollHeight);
+            });
         };
 
         this.pickVertex = function() {
@@ -137,6 +152,13 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
             });
             wiD3CrossplotCtrl.pickVertex(idx, function(vertex) {
                 $("#ternary-modal").modal("show");
+                if(!vertex || typeof(vertex) == 'string') {
+                    toastr.error(vertex || "Invalid point!");
+                    viCrossplot.onMouseDown(
+                        wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    );
+                    return;
+                }
                 vertex = angular.copy(vertex);
                 vertex.x = +parseFloat(vertex.x).toFixed(4);
                 vertex.y = +parseFloat(vertex.y).toFixed(4);
@@ -370,10 +392,9 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
                 },
                 err => {
                     if (err) toastr.error(err);
-                    else {
+                    // else {
                         utils.refreshProjectState();
-                    }
-                    $scope.updating = false;
+                    // }
                 }
             );
         }
@@ -403,7 +424,7 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
             let existed = 0;
             curveNames.forEach(name => {
                 let curve = $scope.result.selectedDataset.children.find(
-                    c => c.name == name
+                    c => c.name.toUpperCase() == name.toUpperCase()
                 );
                 if (curve) existed++;
             });

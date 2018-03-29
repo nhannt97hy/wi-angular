@@ -12,7 +12,7 @@ wi-custom-input {
     .custom-input-menu {
         min-width: -webkit-fill-available;
         max-height: 200px;
-        overflow-y: scroll;
+        overflow-y: overlay;
         overflow-x: hidden;
     }
     .custom-item {
@@ -38,26 +38,28 @@ wi-custom-input {
     .custom-value {
         display: flex;
         flex: 1;
-        margin-right: 1em;
+        margin-right: 1rem;
     }
     .custom-label {
         display: flex;
         flex-direction: row-reverse;
         flex: 1;
         opacity: 0.5;
+        margin-right: 1rem;
     }
    .custom-btn {
        position: absolute;
-       top: 0px;
-       right: 0px;
-       height: 23px;
+       top: 50%;
+       transform: translateY(-50%);
+       right: 5px;
+    //    height: 23px;
        width: 23px;
-       padding: 2px;
+    //    padding: 2px;
        border: 1px solid transparent;
        background: transparent;
-       &:hover:enabled {
-           background-color: #ccc;
-       }
+    //    &:hover:enabled {
+    //        background-color: #ccc;
+    //    }
        &:disabled {
            cursor: not-allowed;
        }

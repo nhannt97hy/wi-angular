@@ -15,6 +15,7 @@ let utils = require('./utils');
 
 //let DialogUtils = require('./DialogUtils');
 let DialogUtils = require('./SimpleDialogUtils');
+// let graph = require('./SimpleVisualize');
 
 let wiInitialization = require('./wi-initialization.js');
 let wiButton = require('./wi-button.js');
@@ -33,6 +34,7 @@ let wiStatusBar = require('./wi-status-bar');
 let wiSlidingbar = require('./wi-slidingbar');
 
 let wiList = require('./wi-list');
+let wiNeuralNetwork = require('./wi-neural-network');
 
 let wiContextMenu = require('./wi-context-menu');
 let wiSpinner = require('./wi-spinner');
@@ -40,6 +42,8 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+
+let wiPlot = require('./wi-plot');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -64,7 +68,7 @@ let wiItemDropdown = require('./wi-item-dropdown');
 let wiScroll = require('./wi-scroll');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
-// let wiStep = require('./wi-step');
+let wiWorkflowMachineLearning = require('./wi-workflow-machine-learning');
 
 let wiiExplorer = require('./wii-explorer');
 let wiiItems = require('./wii-items');
@@ -114,12 +118,10 @@ let wiApiService = require('./wi-api-service');
 let wiComponentService = require('./wi-component-service');
 let wiChunkedUploadService = require('./wi-chunked-upload-service');
 let wiBatchApiService = require('./wi-batch-api-service');
+let wiMachineLearningApiService = require('./wi-machine-learning-api-service');
 let wiOnlineInvService = require('./wi-online-inv-service');
 
 let wiConditionNode = require('./wi-condition-node');
-
-let wipm = require('./wi-predict-model');
-let wiTest = require('./wi-test');
 
 let wiExport = require('./wi-export');
 
@@ -154,6 +156,8 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -163,6 +167,7 @@ let app = angular.module('wiapp',
         wiScroll.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
+        wiWorkflowMachineLearning.name,
         // wiStep.name,
 
         wiElementReady.name,
@@ -186,6 +191,7 @@ let app = angular.module('wiapp',
         wiComponentService.name,
         wiChunkedUploadService.name,
         wiBatchApiService.name,
+        wiMachineLearningApiService.name,
         wiOnlineInvService.name,
 
         wiCanvasRect.name,
@@ -205,8 +211,6 @@ let app = angular.module('wiapp',
         wiiProperties.name,
 
         ngInfiniteScroll,
-        wipm.name,
-        wiTest.name,
         wiExport.name,
         'angularModalService',
         'angularResizable',
@@ -233,6 +237,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiChunkedUploadService,
         wiOnlineInvService,
         wiBatchApiService,
+        wiMachineLearningApiService,
         $timeout
     };
     // Logplot Handlers
@@ -324,36 +329,12 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         wiApiService,
         $timeout
     };
-    $scope.myWorkflowConfig = {
-        name: "Missing curve reconstruction",
-        steps: [
-            {
-                name: "Train",
-                inputs: [{ name: "Curve 1 " },{ name: "Curve 2 " },{ name: "Curve 3 " }],
-                parameters: [],
-                processFunction: function() {console.log(1);}
-            },
-            {
-                name: "Verify",
-                inputs: [{ name: "Curve 1" },{ name: "Curve 2 " },{ name: "Curve 3 " }],
-                parameters: [],
-                processFunction: function() {console.log(2);}
-            },
-            {
-                name: "Predict",
-                inputs: [
-                    { name: "Curve 1 " },{ name: "Curve 2 " } 
-                ],
-                parameters: [],
-                processFunction: function() {console.log(3);}
-            }
-        ]
-    }
     $scope.wiBatchApiService = wiBatchApiService;
     window.utils = utils;
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    wiComponentService.putComponent(wiComponentService.GRAPH, graph);
     appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiChunkedUploadService, wiOnlineInvService, wiBatchApiService);
     if(!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function () {
@@ -472,9 +453,9 @@ app.controller('zipArchiveManager', function($scope, $timeout, wiBatchApiService
         });
     }
 });
-const monthNames = [ 
-    "Jan", "Feb", "Mar", "Apr", 
-    "May", "Jun", "Jul", "Aug", 
+const monthNames = [
+    "Jan", "Feb", "Mar", "Apr",
+    "May", "Jun", "Jul", "Aug",
     "Sep", "Oct", "Nov", "Dec"
 ];
 app.controller('runImport', function($scope, $rootScope, $timeout) {
@@ -488,7 +469,7 @@ app.controller('runImport', function($scope, $rootScope, $timeout) {
     $scope.animateClass = "";
     $scope.msgQueue = [];
 
-    if (!$scope.selected.zipArchive) 
+    if (!$scope.selected.zipArchive)
         $scope.selected.zipArchive = $rootScope.zipArchives && $rootScope.zipArchives.length ? $rootScope.zipArchives[0] : null;
 
     $scope.zipArchives = $rootScope.zipArchives;
@@ -545,8 +526,8 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
             else {
                 let wells = wiItemListCtrl.items;
                 wiOnlineInvService.listWells({
-                    start: wells[0].properties.idWell, 
-                    limit: 10, 
+                    start: wells[0].properties.idWell,
+                    limit: 10,
                     forward: false
                 }, function(listOfWells) {
                     $timeout(function() {
@@ -571,8 +552,8 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
             else {
                 let wells = wiItemListCtrl.items;
                 wiOnlineInvService.listWells({
-                    start: wells[wells.length - 1].properties.idWell, 
-                    limit: 10, 
+                    start: wells[wells.length - 1].properties.idWell,
+                    limit: 10,
                     forward: true
                 }, function(listOfWells) {
                     $timeout(function() {
@@ -590,6 +571,139 @@ app.controller('InventoryInspect', function($scope, wiOnlineInvService) {
         });
     }
 });
+
+app.controller('NeuralController', function($scope, ModalService) {
+    console.log('controller: ', this, $scope);
+    let self = this;
+    // fake datas
+    self.nNodes = 16;
+    self.nLayers = 6;
+    self.inputCurves = [{name: 'DTCO3'}, {name: 'ECGR'}, {name: 'DTCO3'}, {name: 'DTCO3'}, {name: 'DTCO3'},
+                        {name: 'ECGR'}, {name: 'DTCO3'}, {name: 'DTCO3'}];;
+    self.outputCurves = [{name: 'C2'}, {name: 'ECGR'}, {name: 'DTCO3'}];
+    self.hiddenLayer = [5,7,1,8,9];
+    console.log('controller: ', this, $scope);
+    this.addHiddenLayerButtonClicked = function () {
+        self.hiddenLayer.push(2);
+        self.hiddenLayer = angular.copy(self.hiddenLayer);
+    }
+    this.removeHiddenLayerButtonClicked = function () {
+        self.hiddenLayer.pop();
+        self.hiddenLayer = angular.copy(self.hiddenLayer);
+    }
+    this.addNodeButtonClicked = function () {
+        this.nNodes ++;
+    }
+    this.removeNodeButtonClicked = function () {
+        this.nNodes = (--this.nNodes) < 0 ? 0:this.nNodes;
+    }
+    this.neuralNetWorkProperties = function () {
+        let config = self.getConfigs();
+        DialogUtils.neuralNetWorkPropertiesDialog(ModalService, config, function (nnConfig) {
+            self.setConfigs(nnConfig);
+        });
+    }
+    this.getConfigs = function () {
+        return {
+            inputCurves: self.inputCurves,
+            // nLayers: self.nLayers,
+            // nNodes: self.nNodes,
+            outputCurves: self.outputCurves,
+            hiddenLayer: self.hiddenLayer
+        }
+    }
+
+    this.setConfigs = function (newConfig) {
+        // change reference of 2 array to invoke $onChanges methods
+        self.inputCurves = angular.copy(newConfig.inputCurves);
+        self.outputCurves = angular.copy(newConfig.outputCurves);
+        self.hiddenLayer = angular.copy(newConfig.hiddenLayer);
+        // self.nLayers = newConfig.nLayers;
+        // self.nNodes = newConfig.nNodes;
+    }
+});
+
+app.controller('wiPlotPlaygroundController', function($scope) {
+    let self = this;
+    function getRandomData(start, stop, size, isIncArr) {
+        let result = [];
+        let range = stop - start;
+        let step = range / size;
+        for( let i = 0; i < size; ++i) {
+            if(isIncArr) {
+                if(i == 0) {
+                    result.push(/*Math.random()*/step + start);
+                    continue;
+                }
+                result.push(/*Math.random()*/step + result[i-1]);
+            } else {
+                result.push(Math.random()*range + start);
+            }
+        }
+        return result;
+    }
+    let x = {
+        label: 'DTCO3',
+        data: getRandomData(0, 9, 200, true),
+        min: -1,
+        max: 10
+    };
+    let y = {
+        label: 'ECGR',
+        data: getRandomData(10, 90, 200),
+        min: 0,
+        max: 100
+    }
+    this.makeRandomData = function () {
+        this.plotConfig = angular.copy(this.plotConfig);
+        this.plotConfig.x.max = Math.round(Math.random()*10 + 10);
+        this.plotConfig.x.min = Math.round(Math.random()*10 + -10);
+        this.plotConfig.y.max = Math.round(Math.random()*20 + 90);
+        this.plotConfig.y.min = Math.round(Math.random()*20 + -10);
+        this.plotConfig.x.data = getRandomData(this.plotConfig.x.min, this.plotConfig.x.max, 200, true);
+        this.plotConfig.y.data = getRandomData(this.plotConfig.y.min, this.plotConfig.y.max, 200);
+    }
+
+    function genRandomColor() {
+        let r = Math.round(Math.random() * 150 + 50);
+        let g = Math.round(Math.random() * 150 + 50);
+        let b = Math.round(Math.random() * 150 + 50);
+        return 'rgb(' + [r,g,b].join(",") + ')'
+    }
+
+    this.makeLineColor = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.lineColor = genRandomColor();
+    }
+
+    this.makePointColor = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.pointColor = genRandomColor();
+    }
+
+    this.toggleLine = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.showLine = !self.plotOption.showLine;
+    }
+
+    this.togglePoint = function () {
+        self.plotOption = angular.copy(self.plotOption);
+        self.plotOption.showPoint = !self.plotOption.showPoint;
+    }
+
+    this.plotConfig = {
+        x: x,
+        y: y
+    };
+    this.plotOption = {
+        lineColor: 'blue',
+        lineStyle: 'solid',
+        pointColor: 'black',
+        pointStyle: 'circle',
+        showPoint: true,
+        showLine: true
+    }
+})
 
 app.filter('datetimeFormat', function() {
     return function(timestamp) {

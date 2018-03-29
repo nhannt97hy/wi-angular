@@ -90,7 +90,9 @@ exports.projectOpen = function (projectData) {
     document.title = LProject.name + " - Well Insight";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
-    wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+    putListFamily(function () {
+        wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+    })
 };
 
 exports.projectClose = function () {
@@ -555,12 +557,14 @@ function createCurveModel (curve) {
     curveModel.type = 'curve';
     curveModel.id = curve.idCurve;
     curveModel.properties = curve;
+    const listFamily = getListFamily() || [];
     Object.assign(curveModel.properties, {
         idDataset: curve.idDataset,
         idCurve: curve.idCurve,
         idFamily: curve.idFamily,
+        family: listFamily.find(f => f.idFamily === curve.idFamily),
         name: curve.name,
-        unit: curve.unit || "NA",
+        unit: curve.unit,
         alias: curve.name
     });
     // curveModel.datasetName = curve.dataset;
@@ -568,7 +572,8 @@ function createCurveModel (curve) {
         childExpanded: false,
         icon: 'curve-16x16',
         label: curve.name,
-        unit: curveModel.properties.unit
+        unit: curveModel.properties.unit,
+        familyName: _.get(curveModel,'properties.family.name')
     };
     curveModel.lineProperties = curve.LineProperty;
     curveModel.curveData = null;
@@ -595,7 +600,7 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
             idCurve: curve.idCurve,
             idFamily: curve.idFamily,
             name: curve.name,
-            unit: curve.unit || "NA",
+            unit: curve.unit,
             alias: curve.name
         };
         // curveModel.datasetName = curve.dataset;
@@ -2946,27 +2951,7 @@ exports.getVisualizeShading = getVisualizeShading;
 function updateWiCurveListingOnModelDeleted(model){
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiCurveListing = wiComponentService.getComponent('WCL');
-    switch (model.type) {
-        case 'curve':
-            let idCurve = model.properties.idCurve;
-            let wellModel = findWellByCurve(idCurve);
-            if(wiCurveListing){
-                let indexCurve = wiCurveListing.curvesData[wellModel.name].findIndex(c => {return c.id == idCurve});
-                if(indexCurve != -1){
-                    wiCurveListing.curvesData[wellModel.name].splice(indexCurve,1);
-                }
-            }
-            break;
-        case 'well':
-            if(wiCurveListing){
-                delete wiCurveListing.curvesData[model.name];
-                delete wiCurveListing.depthArr[model.name];
-            }
-            break;
-        default:
-            console.log('not implemented')
-            break;
-    }
+    if(wiCurveListing) wiCurveListing.removeModel(model);
 }
 function getSelectedNode(rootNode) {
     return getSelectedPath(null, rootNode).pop();
@@ -3004,3 +2989,9 @@ function swapValue (a, b) {
     b = t;
 }
 exports.swapValue = swapValue;
+exports.colorGenerator = function(){
+    let rand = function () {
+        return Math.floor(Math.random() * 255);
+    }
+    return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+}

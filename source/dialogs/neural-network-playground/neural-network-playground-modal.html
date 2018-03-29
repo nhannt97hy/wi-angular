@@ -1,0 +1,84 @@
+<style media="screen">
+    .input-curves-area {
+        overflow: auto;
+        max-height: 100px;
+    }
+    .neural-network-curve {
+        text-align: center;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        width: 50px;
+        border-radius: 3px;
+        margin: 2px;
+        font-size: 12px;
+        font-weight: bold;
+        float: left;
+    }
+</style>
+<div class='modal fade' id="inventory-modal" data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog modal-lg'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4>Neural Network Configurations</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="">
+                        <div class="form-group row">
+                            <label for="" class="control-label col-sm-3 padding-left-3em">Input Curves</label>
+                            <div class="col-sm-6">
+                                <div class="input-curves-area">
+                                    <div ng-repeat="curve in wiModal.nnConfig.inputCurves"
+                                        class="neural-network-curve"
+                                        ng-style="{'background-color': curve.color || 'steelblue'}"
+                                        ng-click="wiModal.selectInputCurve($event, $index, curve)"
+                                        ng-attr-id="{{ 'input-curve-' + $index }}">{{curve.name}}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 handle-input-curves-area">
+                                <button type="button" class="btn btn-default" name="button" ng-click="wiModal.addInputCurveButtonClicked()"><span class="ok-16x16"></span>Add</button>
+                                <button type="button" class="btn btn-default" name="button" ng-click="wiModal.removeInputCurveButtonClicked()"><span class="close-16x16"></span>Remove</button>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="nLayers" class="control-label col-sm-3 padding-left-3em">Layers: </label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" name="nLayers" ng-model="wiModal.nnConfig.nLayers" step="1">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="nNodes" class="control-label col-sm-3 padding-left-3em">Nodes: </label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" name="nNodes" ng-model="wiModal.nnConfig.nNodes" step="1">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="" class="control-label col-sm-3 padding-left-3em">Output Curves</label>
+                            <div class="col-sm-6">
+                                <div class="input-curves-area">
+                                    <div ng-repeat="curve in wiModal.nnConfig.outputCurves"
+                                        class="neural-network-curve"
+                                        ng-style="{'background-color': curve.color || 'steelblue'}"
+                                        ng-click="wiModal.selectOutputCurve($event, $index, curve)"
+                                        ng-attr-id="{{ 'output-curve-' + $index }}">{{curve.name}}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 handle-input-curves-area">
+                                <button type="button" class="btn btn-default" name="button" ng-click="wiModal.addOutputCurveButtonClicked()"><span class="ok-16x16"></span>Add</button>
+                                <button type="button" class="btn btn-default" name="button" ng-click="wiModal.removeOutputCurveButtonClicked()"><span class="close-16x16"></span>Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok
+                </button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span
+                    class="close-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

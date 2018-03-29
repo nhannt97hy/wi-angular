@@ -25,20 +25,22 @@ wi-base-treeview {
             height: 26px;
             line-height: 26px;
             cursor: pointer;
-            .wi-parent-unit {
-                overflow:hidden;
-                flex: 1;
+            & > div {
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 overflow: hidden;
             }
-
+            .wi-parent-unit {
+                overflow:hidden;
+                flex: 1;
+            }
+            .wi-parent-family {
+                overflow:hidden;
+                flex: 2;
+            }
             .wi-parent-content {
                 display: flex;
                 flex: 3;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
                 .icon-expanded {
                     width: 25px;
                     padding-top: 6px;

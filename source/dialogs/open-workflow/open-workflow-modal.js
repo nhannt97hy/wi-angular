@@ -1,13 +1,14 @@
 let helper = require('./DialogHelper');
 
 module.exports = function (ModalService, callback) {
-    function ModalController($scope, close, wiApiService, $timeout) {
+    function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
+        let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         let self = this;
         //this.workflows = [];
         this.selectedWorkflow = null;
-        this.getWorkflowList = function(wiItemDropdownCtrl) {
-            wiApiService.getWorkflowList(function (workflows) {
-                wiItemDropdownCtrl.items = workflows.map(function(wf) {
+        this.getWorkflowList = function (wiItemDropdownCtrl) {
+            wiApiService.getWorkflowList({idProject: project.idProject}, function (workflows) {
+                wiItemDropdownCtrl.items = workflows.map(function (wf) {
                     return {
                         data: {
                             label: wf.name
@@ -19,7 +20,7 @@ module.exports = function (ModalService, callback) {
                 //self.selectedWorkflow = self.workflows.length ? self.workflows[0] : null;
             });
         }
-        this.workflowChanged = function(wfProps) {
+        this.workflowChanged = function (wfProps) {
             self.selectedWorkflow = wfProps;
         }
 
@@ -31,11 +32,11 @@ module.exports = function (ModalService, callback) {
             close(null);
         }
 
-        this.deleteWorkflow = function(workflowModel, $event, wiItemDropdownCtrl) {
+        this.deleteWorkflow = function (workflowModel, $event, wiItemDropdownCtrl) {
             $event.stopPropagation();
             $event.preventDefault();
             console.log(workflowModel);
-            wiApiService.removeWorkflow(workflowModel.properties.idWorkflow, function() {
+            wiApiService.removeWorkflow(workflowModel.properties.idWorkflow, function () {
                 self.getWorkflowList(wiItemDropdownCtrl);
             });
         }
