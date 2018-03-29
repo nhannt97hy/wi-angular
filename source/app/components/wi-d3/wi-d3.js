@@ -352,9 +352,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.getListWells = function () {
         return self.listWells.map(function (wellId, idx) {
-            self.wellsAttrs[idx].properties = utils.findWellById(wellId).properties;
+            let wellFound = utils.findWellById(wellId) || {properties: {}};
+            self.wellsAttrs[idx].properties = wellFound.properties;
             return self.wellsAttrs[idx];
-        }).filter(function(wellAttr) { return wellAttr.tracks.length != 0;});
+        }).filter(function(wellAttr) { return wellAttr.tracks && wellAttr.tracks.length != 0;});
     }
     this.reOrganizeTrackByWell = function () {
         reindexAllTracks(true);
@@ -1271,11 +1272,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let viTrack = _tracks[i];
             let orderNum;
             if(byWell) {
-                let trackComponent = getComponentCtrlByViTrack(viTrack);
-                let wellAttrContainTrack = self.wellsAttrs.find(function (wellAttr) {
-                    return wellAttr.tracks.indexOf(trackComponent) >= 0;
-                })
-                let wellIdx = self.wellsAttrs.indexOf(wellAttrContainTrack) || 0;
+                /* first version */
+                // let trackComponent = getComponentCtrlByViTrack(viTrack);
+                // let wellAttrContainTrack = self.wellsAttrs.find(function (wellAttr) {
+                //     return wellAttr.tracks.indexOf(trackComponent) >= 0;
+                // })
+                // let wellIdx = self.wellsAttrs.indexOf(wellAttrContainTrack) || 0;
+
+                /* second version: improve performance */
+                let wellIdx = 0;    // set default to first well
+                if(viTrack.isLogTrack()) {
+                    if(viTrack.getCurves().length) {
+                        let wellContainTrack = utils.findWellByCurve(viTrack.getCurves()[0].idCurve).properties.idWell;
+                        wellIdx = self.listWells.indexOf(wellContainTrack);
+                    }
+                };
 
                 orderNum = String.fromCharCode(wellIdx + 77);
 

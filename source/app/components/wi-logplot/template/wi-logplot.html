@@ -2,7 +2,7 @@
     @@include('./toolbar/index.html')
 </div>
 <div class="logplot-header">
-    <div class="well-name-container">
+    <div class="well-name-container" style="display: none;">
         <!-- <div class="well-name" ng-bind="wiLogplot.wellModel.properties.name"></div> -->
         <div class="well-name" ng-repeat="well in wiLogplot.getwiD3Ctrl().getListWells() track by $index" ng-style="{'background-color': well.color}">
             {{ well.properties.name }}
@@ -29,5 +29,17 @@
                vi-selections='$parent.viSelections'
                wi-logplot-ctrl='wiLogplot'>
         </wi-d3>
+    </div>
+</div>
+<div class="logplot-footer">
+    <div class="well-name-container" ng-if="wiLogplot.showFooter">
+        <!-- <div class="well-name" ng-bind="wiLogplot.wellModel.properties.name"></div> -->
+        <div style="font-size:14px; font-weight: bold;">List Wells</div>
+        <div class="well-name" ng-repeat="well in wiLogplot.getwiD3Ctrl().getListWells() track by $index" ng-style="{'background-color': well.color}">
+            {{ well.properties.name }}
+        </div>
+    </div>
+    <div class="footer-icon">
+        <span class="info-frp-32x32 font-size-16" ng-mouseover="wiLogplot.showFooter = true" ng-mouseleave="wiLogplot.showFooter = false"></span>
     </div>
 </div>

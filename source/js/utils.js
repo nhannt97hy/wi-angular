@@ -85,6 +85,7 @@ exports.doLogin = function doLogin (cb) {
 exports.projectOpen = function (projectData) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let LProject = {id:projectData.idProject, name:projectData.name};
+    wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     window.history.pushState(LProject, LProject.name, '?idProject=' + LProject.id);
     document.title = LProject.name + " - Well Insight";
