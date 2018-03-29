@@ -1,10 +1,12 @@
 <ui-select style='width:100%;' ng-model="wiItemDropdown.selectedItem" ng-change="wiItemDropdown.onChange();">
-    <ui-select-match placeholder="[ Select project ]">
+    <ui-select-match placeholder="[ {{wiItemDropdown.placeHolder}} ]">
         {{wiItemDropdown.selectedItem.data.label}}
     </ui-select-match>
 
-    <ui-select-choices repeat="item in wiItemDropdown.items|filter:{data:{label:$select.search}}">
-        <div><span class='{{wiItemDropdown.icon}}'></span>&nbsp;&nbsp;{{item.data.label}}</div>
+    <ui-select-choices style='{{wiItemDropdown.choiceStyles}}' repeat="item in wiItemDropdown.items|filter:{data:{label:$select.search}}">
+        <div><span class='{{wiItemDropdown.icon}}'></span>&nbsp;&nbsp;{{item.data.label}}
+            <span style='float:right;display:block;' ng-if="wiItemDropdown.onCtrlBtnClick" class='{{wiItemDropdown.ctrlBtnIcon}}' ng-click="wiItemDropdown.onCtrlBtnClick(item, $event, wiItemDropdown);"></span>
+        </div>
     </ui-select-choices>
 
 </ui-select>

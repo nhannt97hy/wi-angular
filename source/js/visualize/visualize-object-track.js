@@ -55,7 +55,11 @@ ObjectTrack.prototype.init = function (baseElement) {
             self.setCurrentDrawing(null);
         });
     this.svgContainer = this.plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-track-svg-container');
+        .attr('class', 'vi-track-drawing vi-track-svg-container vi-object-svg-container');
+    
+    this.svgTooltipContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing vi-track-svg-container vi-tooltip-svg-container')
+        .attr('pointer-events', 'none');
 }
 
 ObjectTrack.prototype.setCurrentDrawing = function (drawing) {
@@ -221,7 +225,7 @@ ObjectTrack.prototype.onObjectHeaderMouseDown = function (object, callback) {
 
 ObjectTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
-    let svg = this.svgContainer;
+    let svg = this.svgTooltipContainer;
     let y = this.getTransformY()(depth);
     let x = d3.mouse(this.plotContainer.node())[0];
     let lineData = drawVertical ? [
@@ -246,14 +250,14 @@ ObjectTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
 }
 
 ObjectTrack.prototype.removeTooltipLines = function() {
-    this.svgContainer.selectAll('line.tooltip-line').remove();
+    this.svgTooltipContainer.selectAll('line.tooltip-line').remove();
 }
 ObjectTrack.prototype.drawTooltipText = function(depth, showDepth) {
 
     let plotMouse = d3.mouse(this.plotContainer.node());
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let y = this.getTransformY()(depth);
-    let svg = this.svgContainer;
+    let svg = this.svgTooltipContainer;
 
     svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
     let tooltip = svg.append('text')
@@ -308,5 +312,5 @@ ObjectTrack.prototype.drawTooltipText = function(depth, showDepth) {
 }
 
 ObjectTrack.prototype.removeTooltipText = function() {
-    this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
+    this.svgTooltipContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }

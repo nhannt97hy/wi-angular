@@ -1,32 +1,45 @@
-let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
-
-    function ModalController($scope, wiComponentService, wiApiService, close) {
+let helper = require("./DialogHelper");
+module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        window.TNR = this;
+        let DialogUtils = wiComponentService.getComponent(
+            wiComponentService.DIALOG_UTILS
+        );
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        wiComponentService.on(
+            wiComponentService.PROJECT_REFRESH_EVENT,
+            function() {
+                $scope.updating = false;
+                let well = wiD3CrossplotCtrl.getWell();
+                $scope.datasets = well.children.filter(function(node) {
+                    return node.type == "dataset";
+                });
+                $scope.result.selectedDataset = $scope.datasets.find(d => d.id == $scope.result.selectedDataset.id);
+            }
+        );
 
-        let change = $scope.change = {
+        let change = ($scope.change = {
             unchanged: 0,
             created: 1,
             updated: 2,
             deleted: 3,
             uncreated: 4
-        };
+        });
 
-        $scope.selectDataSetting = {
-            showCheckAll: false,
-            showUncheckAll: false,
-            displayProp: 'id',
-            checkBoxes: true
-        };
+        // $scope.selectDataSetting = {
+        //     showCheckAll: false,
+        //     showUncheckAll: false,
+        //     displayProp: "id",
+        //     checkBoxes: true
+        // };
         this.idPolygonTest = [];
         let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
         let props = angular.copy(viCrossplot.getProperties());
-        let ternary = this.ternary = props.ternary;
+        let ternary = (this.ternary = props.ternary);
         let well = wiD3CrossplotCtrl.getWell();
         $scope.datasets = well.children.filter(function(node) {
-            return node.type == 'dataset';
+            return node.type == "dataset";
         });
 
         function prepareVertices(vertices) {
@@ -49,12 +62,11 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
         if (!this.vertices || !this.vertices.length) {
             this.__idx = null;
             $scope.selectedRow = null;
-        }
-        else {
+        } else {
             this.__idx = 0;
             $scope.selectedRow = 0;
         }
-        let calculateOptions = $scope.calculateOptions = ternary.calculate;
+        let calculateOptions = ($scope.calculateOptions = ternary.calculate);
         $scope.result = ternary.result || {
             outputCurve: false,
             selectedDataset: $scope.datasets[0]
@@ -69,38 +81,44 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
             });
         });
 
-        this.getVertices = function () {
-            return self.vertices.filter(function (item, index) {
-               return (item.change != change.deleted && item.change != change.uncreated);
-           });
+        this.getVertices = function() {
+            return self.vertices.filter(function(item, index) {
+                return (
+                    item.change != change.deleted &&
+                    item.change != change.uncreated
+                );
+            });
         };
 
         this.getTernaryVertices = function() {
             return self.getVertices().filter(function(item) {
                 return item.used;
-            })
-        }
+            });
+        };
 
-        this.setClickedRow = function (indexRow) {
+        this.setClickedRow = function(indexRow) {
             $scope.selectedRow = indexRow;
             self.__idx = self.getVertices()[indexRow].index;
         };
 
-        this.onChange = function (index) {
-            if(self.vertices[index] && self.vertices[index].change == change.unchanged)
+        this.onChange = function(index) {
+            if (
+                self.vertices[index] &&
+                self.vertices[index].change == change.unchanged
+            )
                 self.vertices[index].change = change.updated;
         };
 
-        this.removeRow = function () {
+        this.removeRow = function(indexRow) {
+            self.__idx = self.getVertices()[indexRow].index;
             if (!self.vertices[self.__idx]) return;
             if (self.vertices[self.__idx].change == change.created) {
                 self.vertices[self.__idx].change = change.uncreated;
-            }
-            else {
+            } else {
                 self.vertices[self.__idx].change = change.deleted;
             }
             if (self.getVertices().length) {
-                self.setClickedRow(0);
+                self.setClickedRow(self.getVertices().length - 1);
             }
             viCrossplot.setProperties({
                 ternary: { vertices: self.getVertices() }
@@ -108,55 +126,67 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
             viCrossplot.plotTernary();
         };
 
-        this.addRow = function () {
+        this.addRow = function() {
             self.vertices.push({
                 change: change.created,
                 index: self.vertices.length,
-                style: 'Circle',
+                style: "Circle",
                 showed: true,
-                name: 'Material_' + (self.vertices.length + 1),
+                used: self.getTernaryVertices().length >= 3 ? false : true,
+                name: "Material_" + (self.vertices.length + 1)
             });
             self.setClickedRow(self.getVertices().length - 1);
+            $timeout(() => {
+                let body = $('#ternaryBody');
+                body.scrollTop(body[0].scrollHeight);
+            });
         };
 
-        this.pickVertex = function () {
-            $('#ternary-modal').modal('hide');
+        this.pickVertex = function() {
+            $("#ternary-modal").modal("hide");
             let idx = $scope.selectedRow;
             viCrossplot.setProperties({
                 ternary: {
                     vertices: self.getVertices()
                 }
-            })
+            });
             wiD3CrossplotCtrl.pickVertex(idx, function(vertex) {
-                $('#ternary-modal').modal('show');
+                $("#ternary-modal").modal("show");
+                if(!vertex || typeof(vertex) == 'string') {
+                    toastr.error(vertex || "Invalid point!");
+                    viCrossplot.onMouseDown(
+                        wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    );
+                    return;
+                }
                 vertex = angular.copy(vertex);
                 vertex.x = +parseFloat(vertex.x).toFixed(4);
                 vertex.y = +parseFloat(vertex.y).toFixed(4);
 
                 if (idx == null) {
-                    vertex.name = 'Material_' + (self.vertices.length + 1);
+                    vertex.name = "Material_" + (self.vertices.length + 1);
                     viCrossplot.plotTernary();
                     vertex.change = change.created;
                     vertex.index = self.vertices.length;
                     self.vertices.push(vertex);
-                }
-                else {
+                } else {
                     if (self.vertices[self.__idx].change == change.unchanged)
                         vertex.change = change.updated;
-                    else
-                        vertex.change = change.created;
+                    else vertex.change = change.created;
                     vertex.index = self.vertices[self.__idx].index;
                     self.vertices[self.__idx] = vertex;
                 }
                 $scope.$apply();
-                viCrossplot.onMouseDown(wiD3CrossplotCtrl.viCrossplotMouseDownCallback);
+                viCrossplot.onMouseDown(
+                    wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                );
             });
         };
 
-        this.pickPoint = function () {
-            $('#ternary-modal').modal('hide');
+        this.pickPoint = function() {
+            $("#ternary-modal").modal("hide");
             wiD3CrossplotCtrl.pickPoint(function(point) {
-                $('#ternary-modal').modal('show');
+                $("#ternary-modal").modal("show");
                 if (point) {
                     point = angular.copy(point);
                     point.x = +parseFloat(point.x).toFixed(4);
@@ -165,134 +195,254 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
                     calculateOptions.point = point;
                     $scope.$apply();
                 }
-                viCrossplot.onMouseDown(wiD3CrossplotCtrl.viCrossplotMouseDownCallback);
+                viCrossplot.onMouseDown(
+                    wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                );
             });
         };
 
-        this.importVertices = function () {
-            utils.error('Not yet implemented')
+        this.importVertices = function() {
+        console.log("Import");
+        if (self.ImportFile) {
+            if (self.ImportFile.name.toLowerCase().includes(".csv")) {
+                self.vertices.forEach(v => {
+                    switch(v.change){
+                        case change.created:
+                        v.change = change.uncreated;
+                        break;
+
+                        case change.updated:
+                        case change.unchanged:
+                        v.change = change.deleted;
+                        break;
+                    }
+                })
+                let reader = new FileReader();
+                reader.onload = function(event) {
+                    let lines = this.result.split("\n");
+                    for (let i = 1; i < lines.length; i++) {
+                        let ele = lines[i]
+                            .trim()
+                            .split(",");
+                        if (ele.length >= 6) $timeout(() => {
+                                self.vertices.push({
+                                    change: change.created,
+                                    index: self.vertices.length,
+                                    x: parseFloat(ele[0]),
+                                    y: parseFloat(ele[1]),
+                                    name: ele[2],
+                                    style: ele[3],
+                                    used: ele[4].toLowerCase() == 'true',
+                                    showed: ele[5].toLowerCase() == 'true'
+                                });
+                            });
+                    }
+                };
+                reader.readAsText(self.ImportFile);
+            } else {
+                toastr.error("Supported csv file(.csv) only!");
+                delete self.ImportFile;
+            }
+        }
         };
 
-        this.exportVertices = function () {
-            utils.error('Not yet implemented')
+        this.exportVertices = function() {
+        console.log("Export Ternary!");
+        if (self.getVertices().length) {
+            let text = "X,Y,Name,Style,Used in ternary,Show/Hide\r\n";
+            self.getVertices().forEach(point => {
+                text = text + point.x + "," + point.y + "," + point.name + "," + point.style + "," + point.used + "," + point.showed + "\r\n";
+            });
+            let blob = new Blob([text], { type: "text/csv" });
+            let a = document.createElement("a");
+            let fileName = "ternary.csv";
+            a.download = fileName;
+            a.href = URL.createObjectURL(blob);
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            a.parentNode.removeChild(a);
+        } else {
+            toastr.error("Export error!");
+        }
         };
 
         function setVertices(callback) {
             let usedVertices = self.getVertices().filter(function(d) {
-                return d.used && d.x != null && d.y != null && !isNaN(d.x) && !isNaN(d.y);
+                return (
+                    d.used &&
+                    d.x != null &&
+                    d.y != null &&
+                    !isNaN(d.x) &&
+                    !isNaN(d.y)
+                );
             });
             if (usedVertices.length > 3) {
-                utils.error('There can not be more than 3 vertices used in ternary');
+                utils.error(
+                    "There can not be more than 3 vertices used in ternary"
+                );
                 return;
             }
 
-            async.eachOfSeries(self.vertices, function(vertex, idx, cb){
-                vertex = self.vertices[idx];
-                let data = {
-                    xValue: vertex.x,
-                    yValue: vertex.y,
-                    name: vertex.name,
-                    style: vertex.style,
-                    usedIn: vertex.used,
-                    show: vertex.showed,
-                    idTernary: vertex.idVertex,
-                    idCrossPlot: props.idCrossPlot
-                };
+            async.eachOfSeries(
+                self.vertices,
+                function(vertex, idx, cb) {
+                    vertex = self.vertices[idx];
+                    let data = {
+                        xValue: vertex.x,
+                        yValue: vertex.y,
+                        name: vertex.name,
+                        style: vertex.style,
+                        usedIn: vertex.used,
+                        show: vertex.showed,
+                        idTernary: vertex.idVertex,
+                        idCrossPlot: props.idCrossPlot
+                    };
 
-                switch(self.vertices[idx].change) {
-                    case change.created:
-                        wiApiService.createTernary(data, function(response) {
-                            self.vertices[idx].idVertex = response.idTernary;
+                    switch (self.vertices[idx].change) {
+                        case change.created:
+                            wiApiService.createTernary(data, function(
+                                response
+                            ) {
+                                self.vertices[idx].idVertex =
+                                    response.idTernary;
+                                cb();
+                            });
+                            break;
+                        case change.updated:
+                            wiApiService.editTernary(data, function(response) {
+                                cb();
+                            });
+                            break;
+                        case change.deleted:
+                            wiApiService.removeTernary(
+                                self.vertices[idx].idVertex,
+                                function(response) {
+                                    cb();
+                                }
+                            );
+                            break;
+                        default:
                             cb();
-                        });
-                        break;
-                    case change.updated:
-                        wiApiService.editTernary(data, function(response) {
-                            cb();
-                        });
-                        break;
-                    case change.deleted:
-                        wiApiService.removeTernary(self.vertices[idx].idVertex, function(response) {
-                            cb();
-                        });
-                        break;
-                    default:
-                        cb();
-                }
-            }, function() {
-                for (let i = self.vertices.length - 1; i >= 0; i--){
-                    if (self.vertices[i].change == change.deleted || self.vertices[i].change == change.uncreated) {
-                        self.vertices.splice(i, 1);
                     }
+                },
+                function() {
+                    for (let i = self.vertices.length - 1; i >= 0; i--) {
+                        if (
+                            self.vertices[i].change == change.deleted ||
+                            self.vertices[i].change == change.uncreated
+                        ) {
+                            self.vertices.splice(i, 1);
+                        }
+                    }
+                    prepareVertices(self.vertices);
+                    savedTernary.vertices = self.getVertices();
+                    savedTernary.calculate = calculateOptions;
+                    if (usedVertices.length < 3) $scope.result = {};
+                    savedTernary.result = $scope.result;
+                    viCrossplot.setProperties({ ternary: savedTernary });
+                    viCrossplot.plotTernary();
+                    savedTernary = angular.copy(savedTernary);
+                    if (callback) callback();
                 }
-                prepareVertices(self.vertices);
-                savedTernary.vertices = self.getVertices();
-                savedTernary.calculate = calculateOptions;
-                if (usedVertices.length < 3) $scope.result = {};
-                savedTernary.result = $scope.result;
-                viCrossplot.setProperties({ ternary: savedTernary });
-                viCrossplot.plotTernary();
-                savedTernary = angular.copy(savedTernary);
-                if (callback) callback();
-            });
+            );
         }
 
+        function save(curves, curveNames) {
+            let topDepth = parseFloat(well.properties.topDepth);
+            let step = parseFloat(well.properties.step);
+
+            $scope.updating = true;
+            async.eachOf(
+                curves,
+                (curve, i, callback) => {
+                    let dict = {};
+                    curve.forEach(function(point) {
+                        dict[Math.round((point.y - topDepth) / step)] = point.x;
+                    });
+                    let indices = Object.keys(dict).map(k => parseInt(k));
+                    let maxIndex = Math.max.apply(null, indices);
+
+                    let values = [];
+                    for (let i = 0; i <= maxIndex; i++) {
+                        values.push(dict[i] === undefined ? null : dict[i]);
+                    }
+                    let payload = {
+                        data: values,
+                        idDataset: $scope.result.selectedDataset.id
+                    };
+
+                    wiApiService.checkCurveExisted(
+                        curveNames[i],
+                        $scope.result.selectedDataset.id,
+                        curve => {
+                            if (curve.idCurve) {
+                                payload.idDesCurve = curve.idCurve;
+                            } else {
+                                payload.curveName = curveNames[i];
+                            }
+                            wiApiService.processingDataCurve(payload, function(
+                                res,
+                                err
+                            ) {
+                                callback(err);
+                            });
+                        }
+                    );
+                },
+                err => {
+                    if (err) toastr.error(err);
+                    // else {
+                        utils.refreshProjectState();
+                    // }
+                }
+            );
+        }
         this.onSaveCurveButtonClicked = function() {
-            if (!$scope.result.selectedDataset || $scope.result.selectedDataset.id == null) {
-                toastr.error('No dataset selected');
+            if (
+                !$scope.result.selectedDataset ||
+                $scope.result.selectedDataset.id == null
+            ) {
+                toastr.error("No dataset selected");
                 return;
             }
 
             let curves = $scope.result.curves;
             if (!curves || !curves.length) {
-                toastr.error('No curves to save');
+                toastr.error("No curves to save");
                 return;
             }
-            let curveNames = ($scope.result.curveNames || []).filter(function(n) {
+            let curveNames = ($scope.result.curveNames || []).filter(function(
+                n
+            ) {
                 return n; // n != null, n != ''
             });
             if (curveNames.length < 3) {
-                toastr.error('Curve name can not be blank');
+                toastr.error("Curve name can not be blank");
                 return;
             }
-            let topDepth = parseFloat(well.properties.topDepth);
-            let step = parseFloat(well.properties.step);
-
-            let payloads = []
-            curves.forEach(function(curve, i) {
-                dict = {}
-                curve.forEach(function(point) {
-                    dict[Math.round((point.y - topDepth)/step)] = point.x;
-                });
-                indices = Object.keys(dict).map(k => parseInt(k));
-                maxIndex = Math.max.apply(null, indices);
-
-                values = []
-                for (let i = 0; i <= maxIndex; i ++) {
-                    values.push(dict[i] === undefined ? null : dict[i]);
-                }
-                payloads.push({
-                    data: values,
-                    idDataset: $scope.result.selectedDataset.id,
-                    curveName: curveNames[i]
-                });
+            let existed = 0;
+            curveNames.forEach(name => {
+                let curve = $scope.result.selectedDataset.children.find(
+                    c => c.name == name
+                );
+                if (curve) existed++;
             });
-            $scope.updating = true;
-            async.each(payloads, function(p, callback) {
-                wiApiService.processingDataCurve(p, function(res, err) {
-                    callback(err, res);
-                });
-            }, function(err) {
-                if (err) toastr.error(err);
-                else {
-                    utils.refreshProjectState();
-                }
-                $scope.updating = false;
-            })
+            if (existed) {
+                DialogUtils.confirmDialog(
+                    ModalService,
+                    "Save Curve",
+                    "Overwrite?",
+                    ret => {
+                        if (ret) save(curves, curveNames);
+                    }
+                );
+            } else {
+                save(curves, curveNames);
+            }
+        };
 
-        }
-
-        this.onCalculateButtonClicked = function () {
+        this.onCalculateButtonClicked = function() {
             let tmpTernary = {
                 idTernary: savedTernary.idTernary,
                 vertices: self.getVertices(),
@@ -300,28 +450,31 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
             };
             viCrossplot.setProperties({ ternary: tmpTernary });
             let result = viCrossplot.calculateTernary();
-            if (result.error)
-                utils.error(result.error);
+            if (result.error) utils.error(result.error);
             else {
                 result.materials = result.materials.map(function(m) {
                     return +parseFloat(m).toFixed(4);
                 });
                 $scope.result = Object.assign($scope.result, result);
                 if (!$scope.result.curveNames) {
-                    $scope.result.curveNames = ['Material_1', 'Material_2', 'Material_3'];
+                    $scope.result.curveNames = [
+                        "Material_1",
+                        "Material_2",
+                        "Material_3"
+                    ];
                 }
             }
-        }
+        };
 
-        this.onOkButtonClicked = function () {
+        this.onOkButtonClicked = function() {
             setVertices(function() {
                 close(null);
-            })
+            });
         };
         this.onApplyButtonClicked = function(callback) {
             setVertices();
         };
-        this.onCancelButtonClicked = function () {
+        this.onCancelButtonClicked = function() {
             viCrossplot.setProperties({ ternary: savedTernary });
             viCrossplot.plotTernary();
             close(null);
@@ -332,9 +485,9 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback){
         templateUrl: "ternary-modal.html",
         controller: ModalController,
         controllerAs: "wiModal"
-    }).then(function (modal) {
+    }).then(function(modal) {
         helper.initModal(modal);
-        modal.close.then(function (ret) {
+        modal.close.then(function(ret) {
             helper.removeBackdrop();
             if (ret && callback) callback(ret);
         });

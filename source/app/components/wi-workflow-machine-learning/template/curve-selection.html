@@ -1,0 +1,71 @@
+<div style='display:flex; flex-direction:column;flex:1;'>
+    <div style='padding:10px;display:flex;flex-direction:row;flex:1;'>
+        <div style='flex:1;display:flex;flex-direction:column;margin-bottom:0;' class='bordered panel panel-default'>
+            <div class='panel-heading' style='padding:5px;'>
+                <h5 style="margin-right:10px;display:inline;line-height:2;">Data type</h5>
+                <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowMachineLearning.onSelectionTypeChanged(wiWorkflowMachineLearning.FAMILY_GROUP_SELECTION)"
+                    ng-class='{active: wiWorkflowMachineLearning.selectionType==wiWorkflowMachineLearning.FAMILY_GROUP_SELECTION}'
+                    title="Main Family">
+                    <span class='zone-table-16x16'></span>
+                </label>
+                <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowMachineLearning.onSelectionTypeChanged(wiWorkflowMachineLearning.FAMILY_SELECTION)"
+                    ng-class='{active: wiWorkflowMachineLearning.selectionType==wiWorkflowMachineLearning.FAMILY_SELECTION}' title="Family">
+                    <span class='user-define-16x16'></span>
+                </label>
+                <label class="btn btn-default" style='float:right; margin-right: 5px;' ng-click="wiWorkflowMachineLearning.onSelectionTypeChanged(wiWorkflowMachineLearning.CURVE_SELECTION)"
+                    ng-class='{active: wiWorkflowMachineLearning.selectionType==wiWorkflowMachineLearning.CURVE_SELECTION}' title="Curve">
+                    <span class='curve-16x16'></span>
+                </label>
+            </div>
+            <div style='position:relative;'>
+                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                <input wi-enter="wiWorkflowMachineLearning.onFilterEnterKey(wiWorkflowMachineLearning.filterText1);" style='text-indent:1.5em;' class='form-control'
+                    type='text' ng-model='wiWorkflowMachineLearning.filterText1'>
+            </div>
+            <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiWorkflowMachineLearning.upTrigger"
+                down-trigger="wiWorkflowMachineLearning.downTrigger">
+                <wi-base-treeview id='tplTree' config='wiWorkflowMachineLearning.selectionList' on-click-function="wiWorkflowMachineLearning.onClick" filter="{{wiWorkflowMachineLearning.selectionType == wiWorkflowMachineLearning.FAMILY_SELECTION?wiWorkflowMachineLearning.filterText:wiWorkflowMachineLearning.filterText1}}">
+                </wi-base-treeview>
+            </wi-scroll>
+        </div>
+        <div style="margin-left:5px;flex:2;padding:0 5px;overflow-y:auto;">
+            <div style='width:100%;' class='bordered panel panel-default'>
+                <div style='background-color:#eee;' class='panel-heading'>
+                    <span style='font-weight:700;'>Predict {{wiWorkflowMachineLearning.workflowConfig.model.type}}</span>
+                    <span ng-click="wiWorkflowMachineLearning.addCurveInput();wiWorkflowMachineLearning.saveWorkflow();" 
+                        ng-if="wiWorkflowMachineLearning.workflowConfig.model.type=='curve'"
+                        style="float: right; cursor: pointer; font-size: 14px;">
+                        <i class="ti-plus"></i>  Add input curve
+                    </span>
+                </div>
+                <div style='border-top: 1px solid #eee;' class='panel-body'>
+                    <ul style='padding-left:0;'>
+                        <li style="display:flex;flex-direction:row; margin-bottom:5px;" 
+                            ng-style="wiWorkflowMachineLearning.outputCurveStyle($index)"
+                            ng-repeat="item in wiWorkflowMachineLearning.workflowConfig.model.inputs track by $index">
+                            <div style='flex-basis:20em;text-align:right;margin-right:5px;'>
+                                <button style='width:100%;vertical-align:baseline;' class="btn btn-default" type="button"
+                                    ng-click="wiWorkflowMachineLearning.onSelectTemplate($index);"
+                                    ng-disabled='wf.disabled'>{{item.class}}
+                                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div style="flex:1;position:relative;">
+                                <span ng-class="{'zone-table-16x16': item.type==wiWorkflowMachineLearning.FAMILY_GROUP_SELECTION, 'user-define-16x16': item.type==wiWorkflowMachineLearning.FAMILY_SELECTION, 'curve-16x16': item.type==wiWorkflowMachineLearning.CURVE_SELECTION}"
+                                    style='position:absolute;top:50%;transform:translateY(-50%);left:0.5em;'></span>
+                                <input type="text" style='padding-left:2em;' class='form-control' ng-model='item.label' disabled>
+                            </div>
+                            <span ng-if="$index < (wiWorkflowMachineLearning.workflowConfig.model.inputs.length - 1) && wiWorkflowMachineLearning.workflowConfig.model.type=='curve'" ng-click="wiWorkflowMachineLearning.removeCurveInput($index)" style="padding-top: 10px; padding-left: 10px; cursor: pointer"><i class="ti-close"></i></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="wizard-control">
+        <button ng-disabled="!wiWorkflowMachineLearning.validate();" ng-click="wiWorkflowMachineLearning.updateNNConfig();" wz-next class='btn btn-default' style='float: right;'>
+            <span>Next</span>
+            <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
+        </button>
+    </div>
+</div>

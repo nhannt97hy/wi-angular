@@ -28,19 +28,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 break;
             default:
                 let items = self.wiD3Ctrl.getCommonContextMenuItems();
-                items.trackProperties.push({
-                    name: "SwitchToLogarithmic",
-                    label: "Switch Linear/Logarithmic",
-                    icon: 'logarithmic-switch-16x16',
-                    handler: function () {
-                        let scale = _currentTrack.scale;
-                        if (scale.toLowerCase() == 'linear')
-                            _currentTrack.scale = 'logarithmic';
-                        else if (scale.toLowerCase() == 'logarithmic')
-                            _currentTrack.scale = 'linear';
-                        _currentTrack.doPlot(true);
-                    }
-                });
 
                 let trackItemsCreationArray = [{
                         name: "AddMarker",
@@ -440,7 +427,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve,
+            orderNum: _currentTrack.getShadingOrderKey()
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
@@ -457,18 +445,19 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let currentShading = _currentTrack.getCurrentShading();
         let shadingOptions = currentShading.getProperties();
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+        console.log("onWiD3", shadingOptions);
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
-            let leftLineBk = options.leftLine;
-            options.leftLine = null;
-            let rightLineBk = options.rightLine;
-            options.rightLine = null;
+            let leftCurveBk = options.leftCurve;
+            options.leftCurve = null;
+            let rightCurveBk = options.rightCurve;
+            options.rightCurve = null;
 
             let request = angular.copy(options);
 
-            request.leftLine = leftLineBk;
-            request.rightLine = rightLineBk;
-            options.leftLine = leftLineBk;
-            options.rightLine = rightLineBk;
+            request.leftCurve = leftCurveBk;
+            request.rightCurve = rightCurveBk;
+            options.leftCurve = leftCurveBk;
+            options.rightCurve = rightCurveBk;
 
             if(options.idLeftLine == -3) {
                 options.type = 'custom';
@@ -482,43 +471,30 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             if(options.idLeftLine > 0) {
                 options.type = 'pair';
             }
-            delete request.leftLine;
-            delete request.rightLine;
+            delete request.leftCurve;
+            delete request.rightCurve;
 
             if (options.idLeftLine < 0) {
                 request.idLeftLine = null;
-                options.leftLine = null;
+                options.leftCurve = null;
                 options.idLeftLine = null;
             }
             else {
                 request.leftFixedValue = null;
                 request.idLeftLine = parseInt(options.idLeftLine);
             }
-            options.rightCurve = options.rightLine;
-            options.leftCurve = options.leftLine;
-            delete options.rightLine;
-            delete options.leftLine;
+            options.rightCurve = options.rightCurve;
+            options.leftCurve = options.leftCurve;
+            delete options.rightCurve;
+            delete options.leftCurve;
 
+            let width = _currentTrack.width;
             wiApiService.editShading(request, function (shading) {
-                Utils.getPalettes(function(paletteList){
-                    wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                        options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
-                        if(!options.isNegPosFill) {
-                            if(options.fill.varShading && options.fill.varShading.palName)
-                                options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
-                        }
-                        else {
-                            if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
-                                options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                            if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
-                                options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                        }
-                        currentShading.setProperties(options);
-                        $timeout(function() {
-                            _currentTrack.plotAllDrawings();
-                        });
-                    });
-                });
+                self.wiD3Ctrl.updateTrack(_currentTrack);
+                $timeout(function() {
+                    _currentTrack.width = width;
+                    _currentTrack.doPlot();
+                }, 1000);
             });
         }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
     };
@@ -665,6 +641,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.wiD3Ctrl._drawTooltip(track);
         });
         track.onCurveDrag(function (desTrack) {
+            let widths = [track.width, desTrack.width];
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
             curve.idTrack = desTrack.id;
@@ -672,6 +649,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 self.wiD3Ctrl.updateTrack(track);
                 self.wiD3Ctrl.updateTrack(desTrack);
             });
+            $timeout(function() {
+                track.width = widths[0];
+                desTrack.width = widths[1];
+                track.doPlot();
+                desTrack.doPlot();
+            }, 1500);
         });
     }
     function _onPlotMouseDownCallback(track) {

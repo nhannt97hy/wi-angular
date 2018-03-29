@@ -1,7 +1,7 @@
 const componentName = 'wiTreeview';
 const moduleName = 'wi-treeview';
 
-function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
+function Controller(wiComponentService, wiApiService, WiProperty) {
     let self = this;
     if (!window.exTree) window.exTree = [];
     window.exTree.push(this);
@@ -94,41 +94,41 @@ function Controller(wiComponentService, wiApiService, WiProperty, WiWell) {
         }
     };
 
-    this.updateWellItem = function (well) {
-        let wellSelected = self.findWellById(well.idWell);
+    // this.updateWellItem = function (well) {
+    //     let wellSelected = self.findWellById(well.idWell);
 
-        let newWell = new WiWell(well);
+    //     let newWell = new WiWell(well);
 
-        if (wellSelected) {
-            angular.copy(newWell, wellSelected);
-        } else {
-            let wells = getItemByName('wells');
+    //     if (wellSelected) {
+    //         angular.copy(newWell, wellSelected);
+    //     } else {
+    //         let wells = getItemByName('wells');
 
-            if (wells) wells.children.unshift(newWell);
-        }
-    };
+    //         if (wells) wells.children.unshift(newWell);
+    //     }
+    // };
 
-    this.updateWellsItem = function(wells) {
-        for(let well of wells) {
-            self.updateWellItem(well);
-        }
-    };
+    // this.updateWellsItem = function(wells) {
+    //     for(let well of wells) {
+    //         self.updateWellItem(well);
+    //     }
+    // };
 
-    this.updateLogplotItem = function (logplot) {
-        let plotSelected = self.findWellById(logplot.idPlot);
+    // this.updateLogplotItem = function (logplot) {
+    //     let plotSelected = self.findWellById(logplot.idPlot);
 
-        let newPlotItem = new WiLogplotModel();
+    //     let newPlotItem = new WiLogplotModel();
 
-        let newWell = new WiWell(well);
+    //     let newWell = new WiWell(well);
 
-        if (wellSelected) {
-            angular.copy(newWell, wellSelected);
-        } else {
-            let wells = getItemByName('wells');
+    //     if (wellSelected) {
+    //         angular.copy(newWell, wellSelected);
+    //     } else {
+    //         let wells = getItemByName('wells');
 
-            if (wells) wells.children.unshift(newWell);
-        }
-    };
+    //         if (wells) wells.children.unshift(newWell);
+    //     }
+    // };
 
     // item has id to identify
     this.updateChildItem = function (parentItemName, item) {

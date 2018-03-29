@@ -55,7 +55,7 @@ exports.ZoneButtonClicked = function() {
 exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    wiHistogramCtrl.histogramModel.properties.showGaussian = !wiHistogramCtrl.histogramModel.properties.showGaussian;
+    wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian;
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Gaussian');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
@@ -63,7 +63,7 @@ exports.GaussianButtonClicked = function() {
 exports.CumulativeButtonClicked = function() {
     console.log('CumulativeButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    wiHistogramCtrl.histogramModel.properties.showCumulative = !wiHistogramCtrl.histogramModel.properties.showCumulative;
+    wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative;
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Cumulative');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
@@ -72,14 +72,14 @@ exports.PlotBarsButtonClicked = PlotBarsButtonClicked;
 function PlotBarsButtonClicked() {
     console.log('PlotBarsButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    let currentPlot = wiHistogramCtrl.histogramModel.properties.plot;
+    let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
     switch(currentPlot) {
-        case 'Bar': 
-            wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+        case 'Bar':
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
             break;
         default:
-            wiHistogramCtrl.histogramModel.properties.plot = "Bar";
-    } 
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
+    }
     // wiHistogramCtrl.histogramModel.properties.plot = "Bar";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
@@ -89,30 +89,30 @@ exports.PlotCurvesButtonClicked = function() {
     console.log('PlotCurvesButton is clicked');
     // PlotBarsButtonClicked.call(this);
     let wiHistogramCtrl = this.wiHistogram;
-    let currentPlot = wiHistogramCtrl.histogramModel.properties.plot;
+    let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
     switch(currentPlot) {
-        case 'Bar': 
-            wiHistogramCtrl.histogramModel.properties.plot = "Curve";
+        case 'Bar':
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
             break;
         default:
-            wiHistogramCtrl.histogramModel.properties.plot = "Bar";
-    } 
+            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
+    }
     //wiHistogramCtrl.histogramModel.properties.plot = "Curve";
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
-    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();   
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.FrequencyButtonClicked = FrequencyButtonClicked;
 function FrequencyButtonClicked() {
     console.log('FrequencyButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    var temp = wiHistogramCtrl.histogramModel.properties.plotType;
+    var temp = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType;
     switch(temp) {
     case 'Percent':
-        wiHistogramCtrl.histogramModel.properties.plotType = "Frequency";
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType = "Frequency";
         break;
     default:
-        wiHistogramCtrl.histogramModel.properties.plotType = "Percent";
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType = "Percent";
     }
     wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update frequency/percentile");
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
@@ -122,12 +122,26 @@ exports.PercentButtonClicked = function() {
     console.log('PercentButton is clicked');
     FrequencyButtonClicked.call(this);
 }
-
+function colorByButtonClick(){
+    let wiHistogramCtrl = this.wiHistogram;
+    var temp = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.colorBy;
+    switch(temp) {
+    case 'zone':
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.colorBy = "curve";
+        break;
+    default:
+        wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.colorBy = "zone";
+    }
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update curve/zone");
+    wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
+}
 exports.ColorByZoneButtonClicked = function() {
     console.log('ColorByZoneButton is clicked');
+    colorByButtonClick.call(this);
 }
 
 exports.ColorByInputCurveButtonClicked = function() {
     console.log('ColorByInputCurveButton is clicked');
+    colorByButtonClick.call(this);
 }
 

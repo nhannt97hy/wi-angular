@@ -7,7 +7,7 @@ function initModal(modal) {
         const offsetWidth = elem.width()/3;
         const offsetHeight = elem.height()/3;
         elem.draggable({
-            containment:[-2*offsetWidth, -10, $(window).width()-offsetWidth, $(window).height()-offsetHeight],
+            containment:[-2*offsetWidth, -10, window.innerWidth-offsetWidth, window.innerHeight-offsetHeight],
             handle: '.modal-header'
         });
     }, 700);

@@ -61,13 +61,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
         let projectItem = stack.getItemsById("explorer-block");
         let propertiesItem = stack.getItemsById("property-block");
         if(projectItem.length || propertiesItem.length){
-            // console.log('do nothing');            
+            // console.log('do nothing');
         }else{
             // console.log('add more control');
             let control = $($("#stack-header-control").html()),
             previousBtn = control.find("#previousBtn"),
             nextBtn = control.find("#nextBtn");
-    
+
             let previous = function(){
                 let current = stack.getActiveContentItem().config.id;
                 let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
@@ -76,7 +76,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                     stack.setActiveContentItem(stack.contentItems[preIdx]);
                 }
             }
-    
+
             let next = function(){
                 let current = stack.getActiveContentItem().config.id;
                 let currentIdx = stack.contentItems.findIndex(d => d.config.id == current);
@@ -86,7 +86,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
                 }
             }
 
-            previousBtn.click(previous);    
+            previousBtn.click(previous);
             nextBtn.click(next);
 
             // Add the colorDropdown to the header
@@ -128,6 +128,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
+        newScope.model = componentState.model;
         container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
         if (componentState.model) tabComponents[container.parent.config.id] = container.parent;
@@ -167,18 +168,18 @@ module.exports.putLeft = function (templateId, title) {
     });
 }
 
+// module.exports.putRight = function (templateId, title) {
+//     layoutManager.root.getItemsById('right')[0].addChild({
+//         type: 'component',
+//         id: templateId,
+//         componentName: 'wi-block',
+//         componentState: {
+//             templateId: templateId
+//         },
+//         title: title
+//     });
+// }
 /*
-module.exports.putRight = function (templateId, title) {
-    layoutManager.root.getItemsById('right')[0].addChild({
-        type: 'component',
-        id: templateId,
-        componentName: 'wi-block',
-        componentState: {
-            templateId: templateId
-        },
-        title: title
-    });
-}
 module.exports.putComponentRight = function (text, title) {
     layoutManager.root.getItemsById('layout')[0].addChild(
         {
@@ -204,38 +205,40 @@ module.exports.putTabRight = function (config) {
         title: 'Title'
     }
     Object.assign(childConfig, config);
+    childConfig.title = `<span class="${config.tabIcon}"></span> <span>${config.title}</span>`
     layoutManager.root.getItemsById('right')[0].addChild(childConfig);
 }
 
 module.exports.putTabRightWithModel = function (model, isClosable = true) {
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
-    let itemType, itemId, tabIcon, name, htmlTemplate;
+    let itemId, tabIcon, htmlTemplate;
     console.log(model);
     switch (model.type) {
         case 'logplot':
-            itemId = 'logplot' + model.id;
+            itemId = 'logplot' + model.properties.idPlot;
             tabIcon = 'logplot-blank-16x16';
-            name = 'logplot' + model.properties.idPlot;
-            htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
+            htmlTemplate = '<wi-logplot name="' + itemId + '" id="' + model.properties.idPlot + '"></wi-logplot>'
             break;
         case 'crossplot':
-            itemId = 'crossplot' + model.id;
+            itemId = 'crossplot' + model.properties.idCrossPlot;
             tabIcon = 'crossplot-blank-16x16';
-            name = 'crossplot' + model.properties.idCrossPlot;
-            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
+            htmlTemplate = '<wi-crossplot name="' + itemId + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
             break;
         case 'histogram':
-            itemId = 'histogram' + model.id;
+            itemId = 'histogram' + model.properties.idHistogram;
             tabIcon = 'histogram-blank-16x16';
-            name = 'histogram' + model.properties.idHistogram;
-            htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
+            htmlTemplate = '<wi-histogram name="' + itemId + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
             break;
         case 'comboview':
-            itemId = 'comboview' + model.id;
+            itemId = 'comboview' + model.properties.idCombinedBox;
             tabIcon = 'link-view-16x16';
-            name = 'comboview' + model.id;
-            htmlTemplate = '<wi-comboview name="' + name + '" id="' + model.properties.idCombinedBox + '"></wi-comboview>'
+            htmlTemplate = `
+                <wi-comboview
+                    name="${itemId}" id="${model.properties.idCombinedBox}"
+                    model="model">
+                </wi-comboview>
+            `;
             break;
         default:
             console.error('model type is not valid');
@@ -315,3 +318,4 @@ module.exports.getItemById = function (itemId) {
 module.exports.getRoot = function() {
     return layoutManager.root;
 }
+

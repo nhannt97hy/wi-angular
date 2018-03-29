@@ -63,7 +63,7 @@ exports.warning = warning;
 exports.doLogin = function doLogin (cb) {
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('refreshToken');
-    window.localStorage.removeItem('username');
+    // window.localStorage.removeItem('username');
     window.localStorage.removeItem('rememberAuth');
     $('.modal').remove();
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -72,16 +72,18 @@ exports.doLogin = function doLogin (cb) {
         if (userInfo.remember) {
             window.localStorage.setItem('rememberAuth', true);
         }
+        let sameUser = userInfo.username == window.localStorage.getItem('username');
         window.localStorage.setItem('username', userInfo.username);
-    window.localStorage.setItem('token', userInfo.token);
+        window.localStorage.setItem('token', userInfo.token);
         window.localStorage.setItem('refreshToken', userInfo.refreshToken);
         __GLOBAL.wiApiService.setAuthenticationInfo(userInfo);
         wiComponentService.getComponent('user').userUpdate();
-        cb && cb();
+        cb && cb(sameUser);
     });
 }
 
-exports.projectOpen = function (wiComponentService, projectData) {
+exports.projectOpen = function (projectData) {
+    let wiComponentService = __GLOBAL.wiComponentService;
     let LProject = {id:projectData.idProject, name:projectData.name};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
     window.history.pushState(LProject, LProject.name, '?idProject=' + LProject.id);
@@ -91,7 +93,8 @@ exports.projectOpen = function (wiComponentService, projectData) {
     wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
 };
 
-exports.projectClose = function (wiComponentService) {
+exports.projectClose = function () {
+    let wiComponentService = __GLOBAL.wiComponentService;
     window.localStorage.removeItem('LProject');
     wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
     window.history.replaceState({}, 'home', '/');
@@ -166,7 +169,7 @@ function shadingToTreeConfig(shading, paletteList) {
     shadingModel.id = shading.idShading;
     shadingModel.idLeftLine = shading.idLeftLine;
     shadingModel.idRightLine = shading.idRightLine;
-    shadingModel.data = {
+    shadingModel.data = Object.assign({}, shading, {
         id: shading.idShading,
         name: shading.name,
         refX: shading.refX,
@@ -179,7 +182,7 @@ function shadingToTreeConfig(shading, paletteList) {
         refLineWidth: shading.refLineWidth || 1,
         refLineColor: shading.refLineColor || '#3e3e3e',
         showRefLine: shading.showRefLine
-    };
+    });
     if (shadingModel.data.fill && shadingModel.data.fill.varShading) {
         shadingModel.data.fill.varShading.palette = paletteList[shadingModel.data.fill.varShading.palName];
     }
@@ -573,12 +576,12 @@ exports.createCurveModel = createCurveModel;
 
 function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) {
     let curveModel = createCurveModel(curve);
-    let dModel = datasetModel || getModel('dataset', curve.idDataset);
-    let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
+    // let dModel = datasetModel || getModel('dataset', curve.idDataset);
+    // let wModel = wellModel || getModel('well', datasetModel.properties.idWell, treeRoot);
     setTimeout(() => {
-        let datasetModel = getModel('dataset', curve.idDataset);
-        let wellModel = getModel('well', datasetModel.properties.idWell);
-        curveModel.parentDataArr = [wellModel.data, datasetModel.data];
+        //let datasetModel = getModel('dataset', curve.idDataset);
+        //let wellModel = getModel('well', datasetModel.properties.idWell);
+        curveModel.parentDataArr = [(wellModel||{}).data, (datasetModel||{}).data];
     });
     if (isDeleted) {
         curveModel.name = 'curve-deleted-child';
@@ -786,7 +789,7 @@ function createLogplotsNode(parent, options = {}) {
         });
     } else {
         parent.plots.forEach(function (plot) {
-            plotsModel.children.push(logplotToTreeConfig(plot));
+            plotsModel.children.push(logplotToTreeConfig(plot, options));
         });
     }
     return plotsModel;
@@ -984,7 +987,7 @@ function wellToTreeConfig(well, isDeleted) {
             });
         }
         let zoneSetsNode = createZoneSetsNode(well);
-        let logplotNode = createLogplotsNode(well);
+        let logplotNode = createLogplotsNode(well, {wellModel});
         let crossplotNode = createCrossplotsNode(well);
         let histogramNode = createHistogramsNode(well);
         let comboviewNode = createComboviewsNode(well);
@@ -1232,17 +1235,31 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     return;
                 }
                 if (wiD3Ctrl && !track) {
-                    let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                    const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
                     if (errorCode > 0) {
-                        wiD3Ctrl.addLogTrack(null, idCurves[0]);
-                    }
-                    else if (errorCode === 0) {
+                        wiD3Ctrl.addLogTrack(null, function (logTrackController) {
+                            async.eachSeries(idCurves, (idCurve, next) => {
+                                const viTrack = logTrackController.viTrack;
+                                apiService.createLine({
+                                    idTrack: viTrack.id,
+                                    idCurve: idCurve,
+                                    orderNum: viTrack.getCurveOrderKey()
+                                }, function (line) {
+                                    let lineModel = lineToTreeConfig(line);
+                                    getCurveData(apiService, idCurve, function (err, data) {
+                                        if (!err) logTrackController.addCurveToTrack(viTrack, data, lineModel.data);
+                                        next(err);
+                                    });
+                                });
+                            });
+                        });
+                    } else if (errorCode === 0) {
                         toastr.error("Cannot drop curve from another well");
                     }
                     return;
                 }
                 if (wiD3Ctrl && track) {
-                    idCurves.forEach(idCurve => {
+                    async.eachSeries(idCurves, (idCurve, next) => {
                         let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
                         if (errorCode > 0) {
                             apiService.createLine({
@@ -1253,6 +1270,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                                 let lineModel = lineToTreeConfig(line);
                                 getCurveData(apiService, idCurve, function (err, data) {
                                     if (!err) wiD3Ctrl.getComponentCtrlByViTrack(track).addCurveToTrack(track, data, lineModel.data);
+                                    next(err);
                                 });
                             });
                         }
@@ -1453,17 +1471,18 @@ function findZoneSetById(idZoneSet) {
 
 exports.findZoneSetById = findZoneSetById;
 
-function findWellById(idWell) {
+function getRootFromWiExplorer() {
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
-    if (!wiExplorer) {
-        return wiComponentService.getComponent('WELL_MODEL');
-    }
-    let rootNodes = wiExplorer.treeConfig;
-    if (!rootNodes || !rootNodes.length) return;
+    if (!wiExplorer || !wiExplorer.treeConfig) return null;
+    return wiExplorer.treeConfig[0];
+}
+function findWellById(idWell, rootNode) {
+    let root = rootNode;
+    if (!root) root = getRootFromWiExplorer();
+    if (!root) return {};
     let well = null;
-    visit(rootNodes[0], function (node) {
-
+    visit(root, function (node) {
         if (node.type == 'well' && node.id == idWell) {
             well = node;
         }
@@ -2370,10 +2389,6 @@ exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
         __GLOBAL.wiApiService.createCombinedBox(dataRequest, function (combinedBox) {
             if (combinedBox.name) {
                 resolve(combinedBox);
-                let comboviewModel = comboviewToTreeConfig(combinedBox);
-                refreshProjectState().then(function () {
-                    openComboviewTab(comboviewModel);
-                });
             } else {
                 reject(combinedBox);
             }
@@ -2384,9 +2399,27 @@ exports.createComboview = function (idWell, comboviewName, comboviewTemplate) {
 function openComboviewTab(comboviewModel) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    layoutManager.putTabRightWithModel(comboviewModel);
-    if (comboviewModel.data.opened) return;
-    comboviewModel.data.opened = true;
+    __GLOBAL.wiApiService.getCombinedBox(comboviewModel.properties.idCombinedBox, function (data) {
+        let toolBox = data.combined_box_tools;
+        let selections = data.selection_tools;
+        for (let i = 0; i < selections.length; i++) {
+            let tool = toolBox.find(tool => tool.idCombinedBoxTool == selections[i].idCombinedBoxTool);
+            selections[i].color = tool.color;
+            selections[i].name = tool.name;
+        }
+        let plots = data.plots;
+        let histograms = data.histograms;
+        let crossplots = data.cross_plots;
+        // self.init();
+        comboviewModel.properties.toolBox = toolBox;
+        comboviewModel.properties.selections = selections;
+        comboviewModel.properties.plots = plots;
+        comboviewModel.properties.histograms = histograms;
+        comboviewModel.properties.crossplots = crossplots;
+        layoutManager.putTabRightWithModel(comboviewModel);
+        if (comboviewModel.data.opened) return;
+        comboviewModel.data.opened = true;
+    });
 }
 
 exports.openComboviewTab = openComboviewTab;
@@ -2410,7 +2443,7 @@ function inchToPixel(inch) {
 exports.inchToPixel = inchToPixel;
 
 function pixelToInch(px) {
-    let inch = Math.round(px / getDpi() * 1000) / 1000;
+    let inch = Math.round(px / getDpi() * 10000) / 10000;
     return inch
 }
 
@@ -2909,22 +2942,27 @@ exports.getVisualizeShading = getVisualizeShading;
 
 function updateWiCurveListingOnModelDeleted(model){
     let wiComponentService = __GLOBAL.wiComponentService;
+    let wiCurveListing = wiComponentService.getComponent('WCL');
     switch (model.type) {
         case 'curve':
             let idCurve = model.properties.idCurve;
             let wellModel = findWellByCurve(idCurve);
-            let wiCurveListing = wiComponentService.getComponent('WCL');
             if(wiCurveListing){
-                let indexWell = wiCurveListing.wells.findIndex(w => { return w.id == wellModel.id});
-                let indexCurve = wiCurveListing.curvesData[indexWell].findIndex(c => {return c.id == idCurve});
-                if(indexCurve){
-                    wiCurveListing.curvesData[indexWell].splice(indexCurve,1);
+                let indexCurve = wiCurveListing.curvesData[wellModel.name].findIndex(c => {return c.id == idCurve});
+                if(indexCurve != -1){
+                    wiCurveListing.curvesData[wellModel.name].splice(indexCurve,1);
                 }
+            }
+            break;
+        case 'well':
+            if(wiCurveListing){
+                delete wiCurveListing.curvesData[model.name];
+                delete wiCurveListing.depthArr[model.name];
             }
             break;
         default:
             console.log('not implemented')
-            return;
+            break;
     }
 }
 function getSelectedNode(rootNode) {

@@ -27,9 +27,9 @@ console.log('hic hic');
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
-let petrophysics = require('./petrophysics');
 
 let DialogUtils = require('./DialogUtils');
+// let WorkFlowUtils = require('./WorkFlowUtils');
 
 let wiButton = require('./wi-button.js');
 let wiDropdown = require('./wi-dropdown.js');
@@ -54,7 +54,13 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiPlot = require('./wi-plot');
+
 let wiInventory = require('./wi-inventory');
+let wiWorkflow = require('./wi-workflow');
+let wiWorkflowPlayer = require('./wi-workflow-player');
+let wiWFMachineLearning = require('./wi-workflow-machine-learning');
+let wiNeuralNetwork = require('./wi-neural-network');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -77,6 +83,12 @@ let wiCustomInput = require('./wi-custom-input');
 
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
+let wiScroll = require('./wi-scroll');
+let wiItemDropdown = require('./wi-item-dropdown');
+
+let wiiExplorer = require('./wii-explorer');
+let wiiItems = require('./wii-items');
+let wiiProperties = require('./wii-properties');
 
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
@@ -104,20 +116,22 @@ let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
 
 // models
-let wiDepth = require('./wi-depth.model');
-let wiCurve = require('./wi-curve.model');
-let wiDataset = require('./wi-dataset.model');
-let wiProperty = require('./wi-property.model');
-let wiListview = require('./wi-listview.model');
-let wiTreeConfig = require('./wi-tree-config.model');
-let wiTreeItem = require('./wi-tree-item.model');
-let wiWell = require('./wi-well.model');
-let wiLogplotsModel = require('./wi-logplots.model');
-let wiLogplotModel = require('./wi-logplot.model');
+// let wiDepth = require('./wi-depth.model');
+// let wiCurve = require('./wi-curve.model');
+// let wiDataset = require('./wi-dataset.model');
+// let wiProperty = require('./wi-property.model');
+// let wiListview = require('./wi-listview.model');
+// let wiTreeConfig = require('./wi-tree-config.model');
+// let wiTreeItem = require('./wi-tree-item.model');
+// let wiWell = require('./wi-well.model');
+// let wiLogplotsModel = require('./wi-logplots.model');
+// let wiLogplotModel = require('./wi-logplot.model');
 let wiZone = require('./wi-zone');
 let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
+let wiOnlineInvService = require('./wi-online-inv-service');
+let wiMachineLearningApiService = require('./wi-machine-learning-api-service');
 let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
@@ -159,9 +173,16 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiWorkflow.name,
+        wiWorkflowPlayer.name,
+        wiWFMachineLearning.name,
+        wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
+        wiScroll.name,
+        wiItemDropdown.name,
 
         wiElementReady.name,
         wiRightClick.name,
@@ -169,18 +190,20 @@ let app = angular.module('wiapp',
         wiDecimalPlaces.name,
 
         // models
-        wiDepth.name,
-        wiCurve.name,
-        wiDataset.name,
-        wiProperty.name,
-        wiListview.name,
-        wiTreeConfig.name,
-        wiTreeItem.name,
-        wiWell.name,
-        wiLogplotsModel.name,
-        wiLogplotModel.name,
+        // wiDepth.name,
+        // wiCurve.name,
+        // wiDataset.name,
+        // wiProperty.name,
+        // wiListview.name,
+        // wiTreeConfig.name,
+        // wiTreeItem.name,
+        // wiWell.name,
+        // wiLogplotsModel.name,
+        // wiLogplotModel.name,
 
         wiApiService.name,
+        wiMachineLearningApiService.name,
+        wiOnlineInvService.name,
         wiComponentService.name,
 
         wiCanvasRect.name,
@@ -191,12 +214,18 @@ let app = angular.module('wiapp',
         wiMultiselect.name,
 
         wiConditionNode.name,
+
+        wiiExplorer.name,
+        wiiItems.name,
+        wiiProperties.name,
+        
         ngInfiniteScroll,
 
         'angularModalService',
         'angularResizable',
 
         // 3rd lib
+
         'ngFileUpload',
         'ui.bootstrap',
         'ngSanitize',
@@ -205,7 +234,7 @@ let app = angular.module('wiapp',
         'mgo-angular-wizard'
     ]);
 
-function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -215,6 +244,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiComponentService,
         ModalService,
         wiApiService,
+        wiOnlineInvService,
         $timeout
     };
     // Logplot Handlers
@@ -222,7 +252,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // Crossplot Handlers
     wiComponentService.putComponent(wiComponentService.CROSSPLOT_HANDLERS, crossplotHanders);
     // dependency 3rd component
-    // wiComponentService.putComponent(wiComponentService.MOMENT, moment);
 
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
@@ -239,7 +268,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
     // config explorer block - treeview
-    // $scope.myTreeviewConfig = appConfig.TREE_CONFIG_TEST;
     $scope.myTreeviewConfig = {};
     // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
 
@@ -335,33 +363,16 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.extendedTimeOut = 10000;
     toastr.options.preventDuplicates = true;
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
-    let functionBindingProp = {
-        $scope,
-        wiComponentService,
-        ModalService,
-        wiApiService,
-        $timeout
-    };
-    window.utils = utils;
-    utils.setGlobalObj(functionBindingProp);
-    wiComponentService.putComponent(wiComponentService.UTILS, utils);
-    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    wiComponentService.putComponent(wiComponentService.PETROPHYSICS, petrophysics);
-    if(!window.localStorage.getItem('rememberAuth')) {
-        utils.doLogin(function () {
-            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-        })
-    }else{
-        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-        let query = queryString.parse(location.search);
+
+function restoreProject($timeout, wiApiService, ModalService){
+    let query = queryString.parse(location.search);
         if(Object.keys(query).length && query.idProject){
             $timeout(function () {
                 wiApiService.getProjectInfo(query.idProject, function (project) {
                     if (project.name) {
                         wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
                             if (projectData.name) {
-                                utils.projectOpen(wiComponentService, projectData);
+                                utils.projectOpen(projectData);
                             } else {
                                 utils.error("Project not exist!");
                             }
@@ -380,8 +391,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                                     wiApiService.getProject({
                                         idProject: lastProject.id
                                     }, function (projectData) {
-                                        let utils = wiComponentService.getComponent('UTILS');
-                                        utils.projectOpen(wiComponentService, projectData);
+                                        // let utils = wiComponentService.getComponent('UTILS');
+                                        utils.projectOpen(projectData);
                                     });
                                 }
                             })
@@ -392,5 +403,27 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
                 },100);
             }
         }
+}
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
+    let functionBindingProp = {
+        $scope,
+        wiComponentService,
+        ModalService,
+        wiApiService,
+        wiOnlineInvService,
+        $timeout
+    };
+    window.utils = utils;
+    utils.setGlobalObj(functionBindingProp);
+    wiComponentService.putComponent(wiComponentService.UTILS, utils);
+    wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
+    if(!window.localStorage.getItem('rememberAuth')) {
+        utils.doLogin(function (sameUser) {
+            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+            if(sameUser) restoreProject($timeout, wiApiService, ModalService);
+        })
+    }else{
+        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+        restoreProject($timeout, wiApiService, ModalService);
     }
 });

@@ -1,0 +1,76 @@
+<div style='display:flex; flex-direction:column;flex:1;'>
+    <div style="display:flex;flex:1;flex-direction:row;padding:10px;">
+        <div class="bordered panel panel-default inventory-side">
+            <div style='display:flex;' class='panel-heading'>
+                <h5 style='margin-right:10px;'>Project</h5>
+                <wi-item-dropdown ng-show='!wiWorkflowMachineLearning.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'"
+                    on-wi-dropdown-init='wiWorkflowMachineLearning.getProjectList' on-item-changed="wiWorkflowMachineLearning.projectChanged">
+                </wi-item-dropdown>
+                <input style='flex:1;margin:5px 0; height:24px;font-size:14px;' class='form-control' ng-show='wiWorkflowMachineLearning.isFrozen'
+                    ng-model='wiWorkflowMachineLearning.projectName' ng-disabled='true'>
+                <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiWorkflowMachineLearning.refreshProject()">
+                    <i class="fa fa-refresh"></i>
+                </button>
+            </div>
+            <div style='position:relative;'>
+                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                <input type='text' style='text-indent:1.5em;' ng-model='wiWorkflowMachineLearning.prjFilter' size='10' class="form-control">
+            </div>
+            <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiWorkflowMachineLearning.upTriggerPrj'
+                down-trigger='wiWorkflowMachineLearning.downTriggerPrj'>
+                <wi-base-treeview id='__projectWellTree' name="projectTreeview" config="wiWorkflowMachineLearning.projectConfig" container="wiWorkflowPlayer"
+                    on-click-function="wiWorkflowMachineLearning.prjClickFunction" filter="{{wiWorkflowMachineLearning.prjFilter}}"
+                    show-id="true">
+                </wi-base-treeview>
+            </wi-scroll>
+        </div>
+        <div style="flex:3.5;display:flex;flex-direction:column; margin-left:5px;padding:0 5px;overflow:hidden;">
+            <div style="flex:1;padding:10px 0;overflow:auto;width:100%;">
+                <div ng-repeat='wf in wiWorkflowMachineLearning.workflowConfig.steps' class='bordered panel panel-default' style='display:table;min-width:100%;'
+                    wi-element-ready="wiWorkflowMachineLearning.droppableSetting(wf);" id="{{wf.name}}" ng-init="wf.expanded=true">
+                    <div class='panel-heading' style='background-color:#eee;'>
+                        <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
+                            style='margin-right:5px;'>
+                        </span>
+                        <span style='margin-right:10px;padding-right:2px;' ng-click="wiWorkflowMachineLearning.safeRunStep(wf);" class='fa fa-play control-button block-button'
+                            title="test run"></span>
+                        <span style='font-weight:700;'>{{wf.name}}</span>
+                    </div>
+                    <div ng-show="wf.expanded" class='panel-body' style="border-top: 1px solid #eee;overflow:visible;">
+                        <ul ng-if='wf.inputData.length' class='table-row table-head'>
+                            <li style="width: 61px;">Remove</li>
+                            <li>Well</li>
+                            <li>Dataset</li>
+                            <li ng-repeat='inputItem in wf.inputs'>{{inputItem.type}}</li>
+                        </ul>
+                        <ul class='table-row' ng-repeat="item in wf.inputData track by $index">
+                            <li style="width: 61px; text-align: center;cursor: pointer;" ng-click="wiWorkflowMachineLearning.removeWell(wf, $index);">X</li>
+                            <li title='{{item.well.name}}'>{{item.well.name}}</li>
+                            <li title='{{item.dataset.name}}'>{{item.dataset.name}}</li>
+                            <li style='height:auto;overflow:visible;padding:0;' ng-repeat="input in item.inputs">
+                                <ui-select ng-model="input.value">
+                                    <ui-select-match>
+                                        {{$select.selected.name}}
+                                    </ui-select-match>
+                                    <ui-select-choices style="width: 100%" repeat="curve in input.choices">
+                                        {{curve.name}}
+                                    </ui-select-choices>
+                                </ui-select>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="wizard-control">
+        <button wz-previous ng-click="" class=' btn btn-default' style='float: left;'>
+            <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
+            <span>Back</span>
+        </button>
+        <button wz-next class='btn btn-default' style='float:right;'>
+            <span>Run All</span>
+            <i class='run-16x16' style='vertical-align:text-bottom;'></i>
+        </button>
+    </div>
+</div>

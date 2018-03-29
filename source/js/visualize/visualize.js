@@ -12,6 +12,10 @@ let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
 let Histogram = require('./visualize-histogram');
+let neuralNetworkPlayground = require('./neural-network/visualize-neural-network-playground');
+let visualizeWiPlot = require('./visualize-wi-plot');
+
+let Selection = require('./visualize-selection');
 
 exports.CanvasHelper = CanvasHelper;
 
@@ -149,7 +153,7 @@ exports.createTooltipLines = function(domSvg) {
     let x = mousePosition[0];
     let y = mousePosition[1];
     let lineData = [
-        {x1: x, y1: 0, x2: x, y2: domSvg.clientHeight},
+        // {x1: x, y1: 0, x2: x, y2: domSvg.clientHeight},
         {x1: 0, y1: y, x2: domSvg.clientWidth, y2: y}
     ];
     let lines = svg.selectAll('line.tooltip-line')
@@ -242,11 +246,27 @@ exports.createHistogram = function(config, depthStep, startDepth, endDepth, domE
     return histogram;
 }
 
-exports.plotSelection = function (wiD3Ctrl, selectionId, data) {
+exports.plotSelection = function (wiD3Ctrl, selectionId, newDatum) {
     let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
     logTracks.forEach(t => {
         let selection = t.getSelection(selectionId);
-        selection.setProperties({maskData: data});
-        t.plotDrawing(selection);
+        selection.setProperties({maskData: newDatum});
+        selection._doPlot();
     })
+}
+
+exports.createNNPlayground = function (config, domElem) {
+    let neuralNetWork = new neuralNetworkPlayground(config);
+    neuralNetWork.init(domElem);
+    return neuralNetWork;
+}
+exports.createSelection = function (config) {
+    let selection = new Selection(config);
+    return selection;
+}
+
+exports.createVisualizeWiPlot = function (config, domElem) {
+    let viWiPlot = new visualizeWiPlot(config);
+    viWiPlot.init(domElem);
+    return viWiPlot;
 }

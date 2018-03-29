@@ -8,6 +8,7 @@
     <link href="vendor/css/font-awesome.min.css" rel="stylesheet">
     <link href="vendor/css/themify-icons.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="vendor/css/toastr.min.css">
+    <link rel="stylesheet" type="text/css" href="vendor/css/angular-wizard.min.css">
     <!-- color picker -->
     <link rel="stylesheet" type="text/css" href="vendor/css/bootstrap-colorpicker.min.css">
     <link rel="stylesheet" type="text/css" href="css/color-picker.css">
@@ -95,6 +96,7 @@
     <!--select line style && line width-->
     <script src="vendor/js/angular-sanitize.min.js"></script>
     <script src="vendor/js/toastr.min.js"></script>
+    <script type="text/javascript" src="vendor/js/angular-wizard.min.js"></script>
 
     <!-- <script src="vendor/js/angular-toastr.tpls.js"></script>
     <link rel="stylesheet" href="vendor/css/angular-toastr.css" /> -->
@@ -111,10 +113,13 @@
                         </wi-button>
                         <wi-button name="InventoryConnect" icon="browse-project-32x32" label="Invt. Connect" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.InventoryConnectButtonClicked">
                         </wi-button>
-                        <wi-button name="WipmButton" icon="fluid-zone-32x32" label="WIPM" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.WipmButtonClicked">
-                        </wi-button>
+
                         <wi-button name="BatchTools" icon="well-load-32x32" label="Batch Tools" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.BatchToolsClicked"></wi-button>
+                        <wi-button name="MachineLearning" icon="caculation-multilinerregression-32x32" label="Machine Learning" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.MachineLearningButtonClicked"></wi-button>
+
                         <wi-button name="ExportTool" icon="export-well-top-32x32" label="Export Tool" container="ribbon" disable="handlers.isDisabled()" class="height65" handler="handlers.ExportToolButtonClicked"></wi-button>
+                        <wi-button name="NeuralNetWorkPlayground" icon="browse-project-32x32" label="NN Playground" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.NeuralNetworkPlaygroundButtonClicked"></wi-button>
+                        <wi-button name="wiPlotPlayground" icon="browse-project-32x32" label="Wi Plot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiPlotButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -125,9 +130,43 @@
         <wi-context-menu name="ContextMenu"></wi-context-menu>
         <wi-spinner name="SPINNER"></wi-spinner>
     </div>
-    <template id="wipm" >
-        <wi-predict-model name="wipm"></wi-predict-model>
-        <!-- @@include('./wipm/index.html') -->
+
+    <template id="wi-plot-playground">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wiPlotPlaygroundController as wiPlotCtrl">
+            <h3 class="content-heading">Wi Plot Sample</h3>
+            <div class="row container-fluid">
+                <div class="col-md-1"></div>
+                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.makeRandomData()">Random data</button>
+                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.makeLineColor()">Random Line Color</button>
+                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.makePointColor()">Random Point Color</button>
+                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.toggleLine()" ng-class="wiPlotCtrl.plotOption.showLine ? 'active':''">Show Line</button>
+                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.togglePoint()" ng-class="wiPlotCtrl.plotOption.showPoint ? 'active':''">Show Point</button>
+            </div>
+            <wi-plot style='flex:1; display: flex;' configs="wiPlotCtrl.plotConfig" options="wiPlotCtrl.plotOption"></wi-plot>
+        </div>
+    </template>
+
+    <template id="neural-network-playground">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="NeuralController as network">
+            <h3 class="content-heading">Neural Network Playground</h3>
+            <!--<wi-inventory style='flex:1;' id-project='1'></wi-inventory>-->
+            <div class="row">
+                <div class="col-md-6 col-md-offset-2">
+                    <span class="lead">
+                        <button type="button" class="btn btn-default" name="removeLayers" ng-click="network.removeHiddenLayerButtonClicked()">-</button>
+                        <span class="label label-success">{{ network.hiddenLayer.length }}</span>
+                        <button type="button" class="btn btn-default" name="addLayers" ng-click="network.addHiddenLayerButtonClicked()">+</button>
+                        Hidden Layers
+                    </span>
+
+                </div>
+               
+                <!-- <div class="col-md-2">
+                    <button type="button" class="btn btn-primary" name="button" ng-click="network.neuralNetWorkProperties()">Configure network</button>
+                </div> -->
+            </div>
+            <wi-neural-network style='flex:1;' input-curves="network.inputCurves" output-curves="network.outputCurves" hidden-layer="network.hiddenLayer"></wi-neural-network>
+        </div>
     </template>
 
     <template id="well-import">
@@ -147,10 +186,18 @@
     <template id='inventory-connect'>
         <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
             <h3 class="content-heading">Inventory Connect</h3>
-            <!--<wi-inventory style='flex:1;' id-project='1'></wi-inventory>-->
-            <wi-inventory style='flex:1;'></wi-inventory>
+            <wi-inventory style='flex:1;' id-project='1'></wi-inventory>
+            <!-- <wi-inventory style='flex:1;'></wi-inventory> -->
         </div>
     </template>
+
+    <template id='machine-learning'>
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Machine Learning</h3>
+            <wi-workflow-machine-learning name="wiWorkflowPlayer" id-project='1'></wi-workflow-machine-learning>
+        </div>
+    </template>
+    <div id="testElement"></div>
 
     <template id="export-tool">
         <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
@@ -158,7 +205,7 @@
             <wi-export></wi-export>
         </div>
     </template>
-    
+
     <script src="js/simpleLayout.js.bundle.js"></script>
     <!--<script src="http://192.168.0.91:33333/socket.io/socket.io.js"></script>-->
     <script src="http://batch.sflow.me/socket.io/socket.io.js"></script>

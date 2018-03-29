@@ -157,6 +157,7 @@
         stroke: black;
         stroke-dasharray: 2, 1;
         stroke-width: 1px;
+        pointer-events: none;
     }
 
     .tooltip-rect {
@@ -164,6 +165,7 @@
         stroke-width: 1px;
         fill: rgba(255, 255, 160, 0.9);
         font-size: 10;
+        pointer-events: none;
     }
 
     .tooltip-text {
@@ -246,8 +248,16 @@
     height: 20px;
     line-height: 20px;
     background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
 }
-
+.vi-crossplot-footer-left {
+    flex: 1;
+}
+.vi-crossplot-footer-right {
+    flex: 1;
+    text-align: right;
+}
 .vi-crossplot-container {
     position: relative;
     flex: 1;
@@ -280,6 +290,10 @@
             text {
                 font-size: 10px;
             }
+        }
+
+        .vi-crossplot-tooltip {
+            pointer-events: none;
         }
     }
 

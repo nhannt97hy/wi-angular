@@ -1,0 +1,17 @@
+<!-- <div class="workflow-toolbar-wrapper">
+    <wi-toolbar>
+        <wi-button name="SaveFormatButton" icon="save-16x16" type="small" tooltip="Save Workflow" handler="wiWorkflow.SaveWorkflowButtonClicked">
+        </wi-button>
+        <wi-button name="EditFormatButton" icon="properties-16x16" type="small" tooltip="Edit Workflow" handler="wiWorkflow.EditWorkflowButtonClicked">
+    </wi-toolbar>
+</div> -->
+<div class="workflow-main-content">
+    <wi-workflow-machine-learning ng-if="wiWorkflow.machineLearning" 
+        name='{{wiWorkflow.WorkflowPlayerName}}' 
+        id-project='wiWorkflow.getCurrentProjectId()' id-workflow="wiWorkflow.id">
+    </wi-workflow-machine-learning>
+    <wi-workflow-player ng-if="!wiWorkflow.machineLearning" 
+        name='{{wiWorkflow.WorkflowPlayerName}}' 
+        id-project='wiWorkflow.getCurrentProjectId()' 
+        id-workflow="wiWorkflow.id"></wi-workflow-player>
+</div>
