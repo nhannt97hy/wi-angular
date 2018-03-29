@@ -55,12 +55,17 @@ exports.ShareProjectButtonClicked = function () {
     let wiApiService = this.wiApiService;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
-    wiApiService.listGroup({}, function (groups) {
-        wiApiService.listUser({}, function (users) {
-            DialogUtils.shareProjectDialog(ModalService, function () {
-            }, groups, users);
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    if(project.owner){
+        toastr.error("You can't share this project!");
+    } else {
+        wiApiService.listGroup({}, function (groups) {
+            wiApiService.listUser({}, function (users) {
+                DialogUtils.shareProjectDialog(ModalService, function () {
+                }, groups, users);
+            });
         });
-    });
+    }
 };
 
 exports.SaveProjectButtonClicked = function () {

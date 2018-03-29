@@ -252,6 +252,15 @@ const GET_WORKFLOW_LIST = "/workflow/list";
 const CREATE_WORKFLOW_SPEC = '/workflow-spec/new';
 const GET_WORKFLOW_SPEC_LIST = '/workflow-spec/list';
 
+const UG_ADD_GROUP = '/group/new';
+const UG_REMOVE_GROUP = '/group/delete';
+const UG_ADD_USER_TO_GROUP = '/group/add-user';
+const UG_LIST_GROUP = '/group/list';
+const UG_REMOVE_USER_FROM_GROUP = '/group/remove-user';
+const UG_LIST_USER = '/user/list';
+const UG_SHARE_PROJECT = '/shared-project/new';
+const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group'
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -1820,3 +1829,29 @@ Service.prototype.getWorkflowSpecList = function(callback) {
 Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
     this.post(IS_EXISTED_CURVE, {name: curveName, idDataset: idDataset}, callback);
 }
+
+////manager user and user's group
+Service.prototype.addUserGroup = function (payload, callback) {
+    this.post(UG_ADD_GROUP, payload, callback, 'auth');
+};
+Service.prototype.removeGroup = function (payload, callback) {
+    this.post(UG_REMOVE_GROUP, payload, callback, 'auth');
+};
+Service.prototype.addUserToGroup = function (payload, callback){
+    this.post(UG_ADD_USER_TO_GROUP, payload, callback, 'auth');
+};
+Service.prototype.listGroup = function (payload, callback) {
+    this.post(UG_LIST_GROUP, payload, callback, 'auth');
+};
+Service.prototype.removeUserFromGroup = function (payload, callback) {
+    this.post(UG_REMOVE_USER_FROM_GROUP, payload, callback, 'auth');
+};
+Service.prototype.listUser = function (payload, callback) {
+    this.post(UG_LIST_USER, payload, callback, 'auth');
+};
+Service.prototype.addSharedProject = function (payload, callback) {
+    this.post(UG_SHARE_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.addProjectToGroup = function (payload, callback) {
+    this.post(UG_ADD_SHARED_PROJECT_TO_GROUP, payload, callback, 'auth');
+};
