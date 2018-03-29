@@ -90,7 +90,9 @@ exports.projectOpen = function (projectData) {
     document.title = LProject.name + " - Well Insight";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
-    wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+    putListFamily(function () {
+        wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+    })
 };
 
 exports.projectClose = function () {
@@ -2984,3 +2986,9 @@ function swapValue (a, b) {
     b = t;
 }
 exports.swapValue = swapValue;
+exports.colorGenerator = function(){
+    let rand = function () {
+        return Math.floor(Math.random() * 255);
+    }
+    return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+}

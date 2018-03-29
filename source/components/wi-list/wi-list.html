@@ -17,7 +17,10 @@
                 <option value="{{undefined}}">&nbsp;</option>
                 <option ng-repeat="option in item.options" ng-value="option.value">{{option.label}}</option>
             </select>
-            <button ng-if="item.type == 'action'" ng-click="item.handle()" ng-bind-html="item.valueLabel || '&nbsp;'"></button>
+            <button ng-if="item.type == 'action'" ng-click="item.handle()">
+                <span ng-bind="item.valueLabel" title="{{item.valueLabel}}"></span>
+                <span ng-if="item.icon" ng-class="item.icon"></span>
+            </button>
         </td>
     </tr>
 </table>

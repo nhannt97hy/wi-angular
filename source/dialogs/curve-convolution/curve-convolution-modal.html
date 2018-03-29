@@ -5,13 +5,20 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true" ng-disabled="wiModal.applyingInProgress">&times;</button>
                 <h4><span ng-class="{'curve-convolution-16x16': !wiModal.isDeconvolution, 'curve-deconvolution-16x16': wiModal.isDeconvolution}"></span>&nbsp;Curve {{wiModal.isDeconvolution ? 'Deconvolution': 'Convolution'}}</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style='overflow: unset;'>
                 <form class="form-horizontal">
                     <h5 class="modal-infomation-title">Inputs</h5>
                     <div class="form-group">
                         <label class="col-sm-6">Select Well:</label>
                         <div class="col-sm-6">
-                            <select class="form-control wi-form-control" ng-model="wiModal.SelectedWell" ng-options="well as well.properties.name for well in wiModal.wellArr" ng-change='wiModal.onWellChanged()'></select>
+                            <!-- <select class="form-control wi-form-control" ng-model="wiModal.SelectedWell" ng-options="well as well.properties.name for well in wiModal.wellArr" ng-change='wiModal.onWellChanged()'></select> -->
+                            <ui-select ng-model="wiModal.SelectedWell"
+                            ng-change='wiModal.onWellChanged()'>
+                                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat='well in wiModal.wellArr | filter: {name: $select.search} track by $index'>
+                                    {{well.name}}</ui-select-choices>
+                                <ui-select-no-choice>Well not found</ui-select-no-choice>
+                            </ui-select>
                         </div>
                     </div>
                     <div class="form-group">
@@ -47,7 +54,13 @@
                     <div class="form-group">
                         <label class="col-sm-6">Dataset:</label>
                         <div class="col-sm-6">
-                            <select class="form-control wi-form-control" ng-model="wiModal.ResultCurve.idDataset" ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets"></select>
+                            <!-- <select class="form-control wi-form-control" ng-model="wiModal.ResultCurve.idDataset" ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets"></select> -->
+                            <ui-select ng-model="wiModal.ResultCurve.idDataset">
+                                <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat='dataset.id as dataset in wiModal.datasets | filter: {name: $select.search} track by $index'>
+                                    {{dataset.name}}</ui-select-choices>
+                                <ui-select-no-choice>Dataset not found</ui-select-no-choice>
+                            </ui-select>
                         </div>
                     </div>
                     <div class="form-group">

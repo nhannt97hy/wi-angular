@@ -12,12 +12,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.handlers = $scope.handlers;
 
         wiComponentService.on(wiComponentService.PROJECT_LOADED_EVENT, function () {
-            utils.putListFamily(function () {
-                let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-                let projectModel = utils.projectToTreeConfig(projectLoaded);
-                let dustbinModel = utils.dustbinToTreeConfig();
-                self.treeConfig = [projectModel, dustbinModel];
-            });
+            let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+            let projectModel = utils.projectToTreeConfig(projectLoaded);
+            let dustbinModel = utils.dustbinToTreeConfig();
+            self.treeConfig = [projectModel, dustbinModel];
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {

@@ -172,6 +172,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
                     self.overlayLines = blank.concat(ret);
                 }else{
                     self.overlayLines = ret;
+                    pointSet.idOverlayLine = null;
                 }
             });
         }
@@ -316,11 +317,11 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             $scope.selectedAxisColorRow = indexRow;
         };
 
-        $scope.removeAxisColorRow = function () {
-            if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
-            $scope.axisColors.splice($scope.selectedAxisColorRow, 1);
+        $scope.removeAxisColorRow = function (index) {
+            // if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
+            $scope.axisColors.splice(index, 1);
             if ($scope.axisColors.length) {
-                $scope.setClickedAxisColorRow(0);
+                $scope.setClickedAxisColorRow(index - 1 ||0);
             }
         };
 
@@ -332,7 +333,9 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         }
 
         $scope.addAxisColorRow = function () {
-            $scope.axisColors.push({});
+            $scope.axisColors.push({
+                color: utils.colorGenerator()
+            });
             $scope.setClickedAxisColorRow($scope.axisColors.length - 1);
         };
 

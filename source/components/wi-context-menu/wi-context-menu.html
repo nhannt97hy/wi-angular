@@ -15,6 +15,7 @@
                    checked='button.checked'
                    handler="button.handler"
                    separator='{{button.separator}}'
+                   disabled='button.disabled'
                    ng-mouseenter='wiContextMenu.onMouseEnterButton(button, $event, $index)'
                    ng-mouseleave='wiContextMenu.onMouseLeaveButton(button)'
                    ng-click="wiContextMenu.dismiss($event, button)">

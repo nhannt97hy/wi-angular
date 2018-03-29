@@ -3,7 +3,7 @@
     <input type="text" ng-if="wiCustomInput.type == 'curve'" ng-model="wiCustomInput.model.curveName" class="form-control wi-form-control"
     ng-change="wiCustomInput.onChanged()" ng-disabled='wiCustomInput.disabled'>
     <button uib-dropdown-toggle id="dropdownMenu" class="custom-btn" ng-disabled='wiCustomInput.disabled'>
-        <i class="ti-angle-down"></i>
+        <i class="caret"></i>
     </button>
     <ul class="dropdown-menu custom-input-menu" aria-labelledby="dropdownMenu" uib-dropdown-menu role="menu">
         <li ng-if="wiCustomInput.type == 'number'" ng-repeat="opt in wiCustomInput.options" ng-click="wiCustomInput.onClick(opt.value)" class="custom-item"
@@ -12,7 +12,7 @@
             <span class="custom-label">{{opt.label}}</span>
         </li>
         <li ng-if="wiCustomInput.type == 'curve'" ng-repeat="opt in wiCustomInput.options" ng-click="wiCustomInput.onClickCurve(opt)" class="custom-item"
-        ng-class="{'custom-item-selected': opt.properties.name==wiCustomInput.model.curveName && opt.properties.idDataset==wiCustomInput.model.idDataset}">
+        ng-class="{'custom-item-selected': opt.id==wiCustomInput.model.idDesCurve}">
             <span class="custom-value">{{opt.properties.name}}</span>
             <span class="custom-label">{{opt.properties.dataset}}</span>
         </li>
