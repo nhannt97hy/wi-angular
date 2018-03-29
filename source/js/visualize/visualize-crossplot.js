@@ -29,6 +29,7 @@ function Crossplot(config) {
 
     this.viSelection = null;
     this.showTooltip = true;
+    this.showOverlay = true;
 }
 
 Crossplot.prototype.AREA_LINE_COLOR = 'DarkCyan';
@@ -142,7 +143,7 @@ const POINTSET_SCHEMA = {
         standalone: { type: 'Boolean', default: false },
         overlayLine: { type: 'String' },
         activeZone: { type: 'String' },
-        overlayLine: { type: 'Object' },
+        OLLine: { type: 'Object' },
         zones: {
             type: 'Array',
             item: ZONE_SCHEMA,
@@ -958,7 +959,7 @@ Crossplot.prototype.plotOverlayLines = function() {
     let transformY = this.getTransformY();
     window.tX = transformX;
     window.tY = transformY;
-    let isSwap = (this.pointSet.overlayLine || {}).isSwap;
+    let isSwap = (this.pointSet.OLLine || {}).isSwap;
 
     let line = d3.line()
         .x(function(d) { return transformX(parseFloat(isSwap ? d.x : d.y)); })
@@ -967,7 +968,12 @@ Crossplot.prototype.plotOverlayLines = function() {
             return !isNaN(d.x) && !isNaN(d.y);
         });
 
-    let data = (this.pointSet.overlayLine || {}).lines || [];
+    let data;
+    if(this.showOverlay){
+        data = (this.pointSet.OLLine || {}).lines || [];
+    }else{
+        data = [];
+    }
     for (let i = 0; i < data.length; i ++) {
         data[i].data = data[i].data.filter(function(d) {
             return !isNaN(d.x) && !isNaN(d.y);

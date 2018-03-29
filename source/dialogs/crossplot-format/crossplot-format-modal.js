@@ -172,6 +172,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
                     self.overlayLines = blank.concat(ret);
                 }else{
                     self.overlayLines = ret;
+                    pointSet.idOverlayLine = null;
                 }
             });
         }
