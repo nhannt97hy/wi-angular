@@ -1146,6 +1146,7 @@ Crossplot.prototype.prepareUserDefineLines = function() {
         let func = self.getUserDefineFunc(l.function);
         if (!func) {
             l.invalid = true;
+            toastr.error('Function ' + l.function + ' is invalid!');
             return;
         }
         l.invalid = false;
