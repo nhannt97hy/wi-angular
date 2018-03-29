@@ -89,12 +89,12 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                 self.setClickedRow(0);
             }
         };
-        function genColor() {
-            let rand = function () {
-                return Math.floor(Math.random() * 255);
-            }
-            return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
-        }
+        // function genColor() {
+        //     let rand = function () {
+        //         return Math.floor(Math.random() * 255);
+        //     }
+        //     return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+        // }
 
         this.addRow = function () {
             self.regressionLines.push({
@@ -104,7 +104,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                 displayEquation: true,
                 regType: "Linear",
                 lineStyle: {
-                    lineColor: genColor(),
+                    lineColor: utils.colorGenerator(),
                     lineWidth: 1,
                     lineStyle: [10, 0]
                 },

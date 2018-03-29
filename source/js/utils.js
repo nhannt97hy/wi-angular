@@ -2984,3 +2984,9 @@ function swapValue (a, b) {
     b = t;
 }
 exports.swapValue = swapValue;
+exports.colorGenerator = function(){
+    let rand = function () {
+        return Math.floor(Math.random() * 255);
+    }
+    return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+}
