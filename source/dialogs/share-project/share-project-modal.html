@@ -9,8 +9,12 @@
             </div>
             <div class="modal-body">
                 <style>
+                    .list-body {
+                        flex: 1;
+                    }
+
                     .list-group {
-                        max-height: calc(80% - 220px);
+                        max-height: calc(35%);
                         overflow: auto;
                     }
 
@@ -29,16 +33,33 @@
                     .list-user {
 
                     }
+
                 </style>
                 <div style="display: flex">
                     <div style="flex:1; margin: 0 5px;">
                         <h4 style="text-align: center">User's Groups</h4>
                         <ul class="list-group">
                             <li ng-repeat="group in wiModal.groups"
-                                ng-click="wiModal.selectedGroup = group; wiModal.isSelectedGroup = true"
+                                ng-click="wiModal.groupClicked(group)"
                                 class="list-group-item"
-                                ng-class="{active: group.idGroup==wiModal.selectedGroup.idGroup}">
-                                {{group.name}}
+                                ng-class="{active: group.idGroup==wiModal.selectedGroup.idGroup}"
+                                style="display: flex; padding: 3px 15px">
+                                <span style="flex: 1; line-height: 36px; ">{{group.name}}</span>
+                                <button class="btn btn-default btn-sm pull-right margin-right-0_5em"
+                                        title="Share to this group" ng-click="wiModal.shareProjectToGroup(group)"
+                                        ng-show="!group.isShared">
+                                    <i class="apply-16x16"></i>
+                                </button>
+                                <button class="btn btn-default btn-sm pull-right margin-right-0_5em"
+                                        title="Unshare this group" ng-click="wiModal.unShareProjectFromGroup(group)"
+                                        ng-show="group.isShared">
+                                    <i class="exit-16x16"></i>
+                                </button>
+
+                                <button class="btn btn-default pull-right" title="Delete this group"
+                                        ng-click="wiModal.deleteGroup(group)" ng-disabled="!group.canDelete">
+                                    <i class="delete-16x16"></i>
+                                </button>
                             </li>
                         </ul>
                         <button class="btn btn-default display-block text-ellipsis float-left"
@@ -51,51 +72,66 @@
                         <!--<button class="btn btn-default display-block text-ellipsis float-left"-->
                         <!--style="margin-bottom:5px;margin-right: 5px;"-->
                         <!--ng-click="wiModal.deleteGroup()"-->
-                        <!--ng-disabled="">-->
-                        <!--<i class="edit-16x16"></i>-->
-                        <!--<span>Edit group</span>-->
+                        <!--ng-disabled="!wiModal.isSelectedGroup">-->
+                        <!--<i class="delete-16x16"></i>-->
+                        <!--<span>Delete</span>-->
                         <!--</button>-->
-                        <button class="btn btn-default display-block text-ellipsis float-left"
-                                style="margin-bottom:5px;margin-right: 5px;"
-                                ng-click="wiModal.deleteGroup()"
-                                ng-disabled="!wiModal.isSelectedGroup">
-                            <i class="delete-16x16"></i>
-                            <span>Delete</span>
-                        </button>
                     </div>
                     <div style="flex:1; margin: 0 5px;">
                         <h4 style="text-align: center">User in group</h4>
-                        <ul class="list-group">
-                            <li ng-repeat="user in wiModal.selectedGroup.users"
-                                ng-click="wiModal.selectedUser = user; wiModal.isSelectedUser = true"
-                                class="list-group-item" ng-class="{active: user.idUser == wiModal.selectedUser.idUser}">
-                                {{user.username}}
-                            </li>
-                        </ul>
-                        <button class="btn btn-default display-block text-ellipsis float-left"
-                                style="margin-bottom:5px;margin-right: 5px;"
-                                ng-click="wiModal.addUserToGroup()"
-                                ng-disabled="!wiModal.isSelectedGroup">
-                            <i class="plus-16x16"></i>
-                            <span>Add user to group</span>
-                        </button>
-                        <button class="btn btn-default display-block text-ellipsis float-left"
-                                style="margin-bottom:5px;margin-right: 5px;"
-                                ng-click="wiModal.removeUser()"
-                                ng-disabled="!wiModal.isSelectedUser">
-                            <i class="delete-16x16"></i>
-                            <span>Remove this user</span>
-                        </button>
-                        <div>
-                            <br>
-                            <hr>
+                        <div class="list-body">
+                            <!--<ul class="list-group">-->
+                            <!--<li ng-repeat="user in wiModal.selectedGroup.users"-->
+                            <!--ng-click="wiModal.selectedUser = user; wiModal.isSelectedUser = true"-->
+                            <!--class="list-group-item" ng-class="{active: user.idUser == wiModal.selectedUser.idUser}">-->
+                            <!--{{user.username}}-->
+                            <!--</li>-->
+                            <!--</ul>-->
+                            <ul class="list-group">
+                                <li ng-repeat="user in wiModal.users" class="list-group-item" ng-click=""
+                                    style="display: flex; padding: 3px 15px"><span
+                                        style="flex: 1; line-height: 36px; ">{{user.username}}</span>
+                                    <button class="btn btn-default pull-right"
+                                            title="Add user to group {{wiModal.selectedGroup.name}}"
+                                            ng-click="wiModal.addUser(user)"
+                                            ng-show="!user.isShared && wiModal.selectedGroup && wiModal.selectedGroup.canDelete">
+                                        <i class="apply-16x16"></i>
+                                    </button>
+                                    <button class="btn btn-default pull-right"
+                                            title="Remove user from group {{wiModal.selectedGroup.name}}"
+                                            ng-click="wiModal.removeUser(user)"
+                                            ng-show="user.isShared && wiModal.selectedGroup && wiModal.selectedGroup.canDelete">
+                                        <i class="exit-16x16"></i>
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
-                        <ul class="list-group" ng-hide="wiModal.showUserList">
-                            <li ng-repeat="user in wiModal.users" class="list-group-item"
-                                ng-click="wiModal.addUser(user)">
-                                {{user.username}}
-                            </li>
-                        </ul>
+                        <!--<div class="list-footer">-->
+                        <!--<button class="btn btn-default display-block text-ellipsis float-left"-->
+                        <!--style="margin-bottom:5px;margin-right: 5px;"-->
+                        <!--ng-click="wiModal.addUserToGroup()"-->
+                        <!--ng-disabled="!wiModal.isSelectedGroup">-->
+                        <!--<i class="plus-16x16"></i>-->
+                        <!--<span>Add user to group</span>-->
+                        <!--</button>-->
+                        <!--<button class="btn btn-default display-block text-ellipsis float-left"-->
+                        <!--style="margin-bottom:5px;margin-right: 5px;"-->
+                        <!--ng-click="wiModal.removeUser()"-->
+                        <!--ng-disabled="!wiModal.isSelectedUser">-->
+                        <!--<i class="delete-16x16"></i>-->
+                        <!--<span>Remove this user</span>-->
+                        <!--</button>-->
+                        <!--</div>-->
+                        <!--<div>-->
+                        <!--<br>-->
+                        <!--<hr>-->
+                        <!--</div>-->
+                        <!--<ul class="list-group" ng-hide="wiModal.showUserList">-->
+                        <!--<li ng-repeat="user in wiModal.users" class="list-group-item"-->
+                        <!--ng-click="wiModal.addUser(user)">-->
+                        <!--{{user.username}}-->
+                        <!--</li>-->
+                        <!--</ul>-->
                     </div>
                 </div>
 
