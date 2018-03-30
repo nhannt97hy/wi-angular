@@ -166,7 +166,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             sumOfOriWidth += t.width;
         });
         let ratioWidth = plotAreaWidth/sumOfOriWidth;
-        _tracks.forEach(function(t, index) {
+
+        /*_tracks.forEach(function(t, index) {
             if(_fitWindow) {
                 t.width = widths[index] * ratioWidth;
                 originalWidths.push(widths[index]);
@@ -215,7 +216,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             }
             t.doPlot();
-        })
+        })*/
     }
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);
@@ -1203,6 +1204,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _removeTooltip(track);
         })
         track.onVerticalResizerDrag(function () {
+            if(_fitWindow) return ;
             if (track.isLogTrack()) {
                 wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
                 _fitWindow = false;
