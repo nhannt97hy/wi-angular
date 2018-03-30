@@ -772,7 +772,7 @@ function createLogplotsNode(parent, options = {}) {
     plotsModel.data = {
         childExpanded: false,
         icon: 'logplot-blank-16x16',
-        label: "Logplots"
+        label: (parent && parent.idProject) ? "Multiple Logplots":"Logplots"
     }
     if (options.isDeleted) {
         plotsModel.name = 'logplots-deleted';
@@ -1091,10 +1091,13 @@ exports.projectToTreeConfig = function (project) {
             projectModel.children.push(wellToTreeConfig(well));
         }
     });
+    // multiLogplots
+    let multiLogplotsNode = createLogplotsNode(project);
 
     projectModel.children.push(projectLogplotsNode);
     projectModel.children.push(projectCrossplotsNode);
     projectModel.children.push(projectHistogramsNode);
+    projectModel.children.push(multiLogplotsNode);
     return projectModel;
 }
 

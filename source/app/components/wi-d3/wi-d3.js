@@ -79,10 +79,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.compileFunc = $compile;
     this.scopeObj = $scope;
     this.trackComponents = [];
-    this.wellsAttrs = [ {
-        color: '#88CC88',
-        tracks: []
-    }];
+    // this.wellsAttrs = [ {
+    //     color: '#88CC88',
+    //     tracks: []
+    // }];
     this.listWells = [];
 
     /* public method */
@@ -350,14 +350,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.depthShiftDialog();
     }
-    this.getListWells = function () {
-        return self.listWells.map(function (wellId, idx) {
-            let wellFound = utils.findWellById(wellId) || {properties: {}};
-            self.wellsAttrs[idx].properties = wellFound.properties;
-            return self.wellsAttrs[idx];
-        }).filter(function(wellAttr) { return wellAttr.tracks && wellAttr.tracks.length != 0;});
+
+    this.getListWells = function() {
+        return self.listWells.filter(function(well) {
+            return well.wellAttrs.tracks.length;
+        });
     }
-    this.reOrganizeTrackByWell = function () {
+
+    this.reOrganizeTracksByWell = function () {
         reindexAllTracks(true);
     }
 
@@ -686,8 +686,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         $(`[name=`+ component.controller.name +`]`).remove();
         self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
         // wiComponentService.putComponent(name, null);
-        // update depthRange & wells list for multi Logplots feature
-        wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
         updateSlider();
     }
     this.getTracks = function () {
@@ -789,7 +787,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }, 1000)
 
         // multiwell feature. By default, current well is the first well in the array
-        self.listWells.push(_getWellProps().idWell);
+        // self.listWells.push(_getWellProps().idWell);
+        self.listWells.push({
+            properties: _getWellProps(),
+            wellAttrs: {
+                color: '#88CC88',
+                tracks: []
+            }
+        });
 
         window._WiD3CTRL = self;
     }
@@ -1272,19 +1277,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let viTrack = _tracks[i];
             let orderNum;
             if(byWell) {
-                /* first version */
-                // let trackComponent = getComponentCtrlByViTrack(viTrack);
-                // let wellAttrContainTrack = self.wellsAttrs.find(function (wellAttr) {
-                //     return wellAttr.tracks.indexOf(trackComponent) >= 0;
-                // })
-                // let wellIdx = self.wellsAttrs.indexOf(wellAttrContainTrack) || 0;
-
-                /* second version: improve performance */
-                let wellIdx = 0;    // set default to first well
+                let wellIdx = -1;    // set default
                 if(viTrack.isLogTrack()) {
                     if(viTrack.getCurves().length) {
-                        let wellContainTrack = utils.findWellByCurve(viTrack.getCurves()[0].idCurve).properties.idWell;
-                        wellIdx = self.listWells.indexOf(wellContainTrack);
+                        let trackWellProps = utils.findWellByCurve(viTrack.getCurves()[0].idCurve).properties;
+                        for(let i = 0; i < self.listWells.length; ++i) {
+                            if(self.listWells[i].properties.idWell === trackWellProps.idWell) {
+                                wellIdx = i;
+                                break;
+                            }
+                        }
                     }
                 };
 
@@ -1384,22 +1386,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (drawing.isCurve()) {
                     let curve = drawing;
                     let props = curve.getProperties();
-                    console.log(props);
                     let idLine = props.idLine;
                     wiApiService.removeLine(idLine, function (res) {
-                        track.removeCurve(curve);
-                        if (Array.isArray(res.shadings) && res.shadings.length) {
-                            res.shadings.forEach(function(s) {
-                                let shading = utils.getVisualizeShading(track, s.idShading);
-                                track.removeDrawing(shading);
-                            });
-                        }
-                        wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
-                        // update multi Logplots status
-                        if(track.getCurves().length == 0) {
-                            let curveWellId = utils.findWellByCurve(curve.idCurve).properties.idWell;
-                            let wellIdx = self.listWells.indexOf(curveWellId);
-                            self.wellsAttrs[wellIdx].tracks.splice(self.wellsAttrs[wellIdx].tracks.indexOf(getComponentCtrlByViTrack(track)), 1);
+                        let trackControler = getComponentCtrlByViTrack(track);
+                        if(trackControler && trackControler.removeCurveFromTrack) {
+                            trackControler.removeCurveFromTrack(track, curve, res);
                         }
                     });
                 }

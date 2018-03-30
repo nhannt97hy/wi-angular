@@ -121,7 +121,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         if (!well) return;
         let firstCurve = well.children[0].children[0];
 
-        createPreview(firstCurve.properties.idCurve);
+        self.createPreview(firstCurve.properties.idCurve);
         /*
         utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function (err, data) {
             let config = {
@@ -143,7 +143,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.updateDepthRange = function() {
         if(self.refCurve) {
-            createPreview(self.refCurve.idCurve);
+            self.createPreview(self.refCurve.idCurve);
         }
     }
 

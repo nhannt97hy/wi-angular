@@ -583,7 +583,7 @@ exports.AutoOrganizeTrackButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
-    wiLogplot.getwiD3Ctrl().reOrganizeTrackByWell();
+    wiLogplot.getwiD3Ctrl().reOrganizeTracksByWell();
 }
 
 exports.SaveAsLogplotNameButtonClicked = function () {

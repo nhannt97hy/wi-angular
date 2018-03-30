@@ -35,7 +35,7 @@
     <div class="well-name-container" ng-if="wiLogplot.showFooter">
         <!-- <div class="well-name" ng-bind="wiLogplot.wellModel.properties.name"></div> -->
         <div style="font-size:14px; font-weight: bold;">List Wells</div>
-        <div class="well-name" ng-repeat="well in wiLogplot.getwiD3Ctrl().getListWells() track by $index" ng-style="{'background-color': well.color}">
+        <div class="well-name" ng-repeat="well in wiLogplot.getwiD3Ctrl().getListWells() track by $index" ng-style="{'background-color': well.wellAttrs.color}">
             {{ well.properties.name }}
         </div>
     </div>
