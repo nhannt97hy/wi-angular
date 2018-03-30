@@ -145,7 +145,7 @@ exports.OpenWorkflowButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openWorkflowDialog(this.ModalService, function (response) {
         let machineLearning = true;
-        if (response.workflowSpec.name == "Clastic") machineLearning = false; 
+        if (response.workflowSpec.name == "Clastic") machineLearning = false;
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         layoutManager.putTabRight({
             id: 'workflow' + response.idWorkflow,
@@ -404,6 +404,7 @@ exports.BlankLogplotButtonClicked = function () {
         input: 'BlankLogPlot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -440,7 +441,7 @@ exports.TrippleComboButtonClicked = function () {
         input: 'TripleCombo'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "TripleCombo")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -481,7 +482,7 @@ exports.DensityNeutronButtonClicked = function () {
         input: 'DensityNeutron'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "DensityNeutron")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -522,7 +523,7 @@ exports.ResistivitySonicButtonClicked = function () {
         input: 'ResistivitySonic'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "ResistivitySonic")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -563,7 +564,7 @@ exports.TriTracksBlankButtonClicked = function () {
         input: '3TrackBlank'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -604,7 +605,7 @@ exports.InputCurveButtonClicked = function () {
         input: 'InputCurves'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -647,7 +648,7 @@ exports.LithoPlusSyn_CurveButtonClicked = function () {
         input: 'Lithosyn'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -696,7 +697,7 @@ exports.Syn_CurveButtonClicked = function () {
         input: 'SynCurves'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -741,7 +742,7 @@ exports.ResultButtonClicked = function () {
         input: 'Result'
     };
     DialogUtils.promptDialog(ModalService, promptConfig, function (logplotName) {
-        console.log(logplotName);
+        if(!logplotName) return;
         utils.createNewBlankLogPlot(wiComponentService, wiApiService, logplotName, "")
             .then(function (logplot) {
                 console.log("Created new log plot", logplot);
@@ -792,6 +793,7 @@ exports.BlankCrossPlotButtonClicked = function () {
         input: 'BlankCrossplot'
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+        if(!crossplotName) return;
         utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
             if (err) {
                 exports.BlankCrossPlotButtonClicked.call(self);
@@ -815,7 +817,8 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
         input: templateCross
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
-        console.log("CROSS NAME : ", crossplotName);
+        // console.log("CROSS NAME : ", crossplotName);
+        if(!crossplotName) return;
         utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
             if (err) {
                 newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
@@ -910,6 +913,7 @@ exports.BlankHistogramButtonClicked = function () {
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+        if(!histogramName) return;
         utils.createHistogram(currentWell.properties.idWell, null, histogramName)
             .then(function (histogram) {
             })
@@ -932,6 +936,7 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+        if(!histogramName) return;
         utils.createHistogram(currentWell.properties.idWell, null, histogramName, templateHistogram)
             .then(function (histogram) {
             })
@@ -1316,6 +1321,7 @@ exports.BlankComboviewButtonClicked = function () {
     }
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (combinedPlotName) {
+        if(!combinedPlotName) return;
         utils.createComboview(selectedNode.properties.idWell, combinedPlotName, null)
             .then(function (combinedPlot) {
                 let defaultToolBox = [
