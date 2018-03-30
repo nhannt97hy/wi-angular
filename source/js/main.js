@@ -54,9 +54,13 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiPlot = require('./wi-plot');
+
 let wiInventory = require('./wi-inventory');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
+let wiWFMachineLearning = require('./wi-workflow-machine-learning');
+let wiNeuralNetwork = require('./wi-neural-network');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -127,6 +131,7 @@ let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
 let wiOnlineInvService = require('./wi-online-inv-service');
+let wiMachineLearningApiService = require('./wi-machine-learning-api-service');
 let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
@@ -170,6 +175,9 @@ let app = angular.module('wiapp',
         wiInventory.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
+        wiWFMachineLearning.name,
+        wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -194,6 +202,7 @@ let app = angular.module('wiapp',
         // wiLogplotModel.name,
 
         wiApiService.name,
+        wiMachineLearningApiService.name,
         wiOnlineInvService.name,
         wiComponentService.name,
 

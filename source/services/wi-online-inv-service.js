@@ -4,9 +4,9 @@ const moduleName = 'wi-online-inv-service';
 
 let app = angular.module(moduleName, []);
 
-//const BASE_URL = 'http://inv.sflow.me';
+const BASE_URL = 'http://13.250.197.210';
 // const BASE_URL = 'http://13.229.66.151';
-const BASE_URL = 'http://13.250.177.181';
+//const BASE_URL = 'http://13.250.177.181';
 // const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
@@ -274,8 +274,8 @@ Service.prototype.postWithFile = function (route, dataPayload) {
     });
 }
 
-Service.prototype.uploadFiles = function (files, callback) {
-    this.postWithFile(UPLOAD_FILES, {file: files})
+Service.prototype.uploadFiles = function (payload, callback) {
+    this.postWithFile(UPLOAD_FILES, payload)
         .then(function (response) {
             if (callback) callback(response);
         })

@@ -211,6 +211,7 @@ app.component(name, {
     transclude: true,
     bindings: {
         idProject: "<",
+        machineLearning: '<',
         id: "<"
     }
 });

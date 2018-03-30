@@ -351,7 +351,7 @@ LogTrack.prototype.getCurveOrderKey = function (curve) {
 }
 
 LogTrack.prototype.rearrangeCurves = function () {
-    this.headerContainer.selectAll('.vi-curve-header').sort();
+    this.headerContainer.selectAll('.vi-curve-header').sort((a,b) => b.localeCompare(a));
 }
 
 /**

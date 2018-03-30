@@ -5,8 +5,8 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
                 <h4 class="modal-title"><span class="curve-new-32x32"></span>&nbsp;Add New Curve</h4>
             </div>
-            <div class="modal-body">
-                <style>
+            <div class="modal-body" style="overflow:unset;">
+                <!-- <style>
                     .ui-select-choices {
                         position: fixed;
                         top: auto;
@@ -14,25 +14,31 @@
                         width: auto !important;
                         min-width: calc( 50% - 50px);
                     }
-                </style>
+                </style> -->
                 <div class="container-fluid">
                     <h5 class="modal-infomation-title">&nbsp;Curve Infomation</h5>
                     <form class="form-horizontal" action="" name="modalAddCurve">
                         <div class="form-group">
                             <label class="col-sm-6">Well:</label>
                             <div class="col-sm-6">
-                                <select class="form-control wi-form-control" ng-model="wiModal.SelectedWell"
-                                ng-options="well as well.properties.name for well in wiModal.wellArr"
-                                ng-change='wiModal.onWellChanged()'></select>
+                                <ui-select ng-model='wiModal.SelectedWell'
+                                ng-change='wiModal.onWellChanged()'>
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat='well in wiModal.wellArr | filter: {name: $select.search} track by $index'>
+                                        {{well.name}}</ui-select-choices>
+                                        <ui-select-no-choice>Well not found</ui-select-no-choice>
+                                </ui-select>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-sm-6">Datasets:</label>
                             <div class="col-sm-6">
-                                <select class="form-control wi-form-control"
-                                  ng-model="wiModal.datasetName"
-                                  ng-options="dataset.id as dataset.properties.name for dataset in wiModal.datasets">
-                                  </select>
+                                  <ui-select ng-model='wiModal.datasetName'>
+                                      <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                      <ui-select-choices repeat='dataset.id as dataset in wiModal.datasets | filter: {name: $select.search} track by $index'>
+                                          {{dataset.name}}</ui-select-choices>
+                                        <ui-select-no-choice>Dataset not found</ui-select-no-choice>
+                                  </ui-select>
                             </div>
                         </div>
                         <div class="form-group">
@@ -43,8 +49,9 @@
                                     <ui-select-match placeholder='Select a main family'>{{$select.selected}}</ui-select-match>
                                     <ui-select-choices
                                     repeat='item in wiModal.mainFamilies | filter:$select.search'>
-                                        <div class="padding-left-20px">{{item}}</div>
+                                        {{item}}
                                     </ui-select-choices>
+                                    <ui-select-no-choice>Main Family not found</ui-select-no-choice>
                                 </ui-select>
                             </div>
                         </div>
@@ -56,8 +63,9 @@
                                     <ui-select-match placeholder='Select a family'>{{$select.selected.name}}</ui-select-match>
                                     <ui-select-choices
                                     repeat='family in wiModal.families | filter:{name:$select.search} | filter: wiModal.mainFamilyFilter track by $index'>
-                                        <div class="padding-left-20px">{{family.name}}</div>
+                                        {{family.name}}
                                     </ui-select-choices>
+                                    <ui-select-no-choice>Family not found</ui-select-no-choice>
                                 </ui-select>
                             </div>
                         </div>
@@ -74,7 +82,7 @@
                                     <ui-select-match placeholder='Select a unit'>{{$select.selected.unit}}</ui-select-match>
                                     <ui-select-choices
                                     repeat='spec.unit as spec in wiModal.selectedFamily.family_spec track by $index'>
-                                        <div class="padding-left-20px">{{spec.unit}}</div>
+                                        {{spec.unit}}
                                     </ui-select-choices>
                                 </ui-select>
                             </div>

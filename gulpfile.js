@@ -251,7 +251,18 @@ gulp.task('wi-explorer-include', function () {
         }))
         .pipe(gulp.dest(outputDir));
 });
+gulp.task('wi-workflow-machine-learning-include', function () {
+    var templateFile = './source/app/components/wi-workflow-machine-learning/template/wi-workflow-machine-learning.html';
+    var outputDir = './source/app/components/wi-workflow-machine-learning';
 
+    return gulp.src([templateFile])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest(outputDir));
+});
 function to_json(workbook) {
     var text = '';
     workbook.SheetNames.forEach(function (sheetName) {
@@ -359,7 +370,7 @@ gulp.task('pre', ['gen-template', 'gen-functions'], function () {
 });
 
 const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor',
-                    'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include'];
+                    'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include', 'wi-workflow-machine-learning-include'];
 gulp.task('build-full', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {

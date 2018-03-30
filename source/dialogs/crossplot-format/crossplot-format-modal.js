@@ -172,6 +172,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
                     self.overlayLines = blank.concat(ret);
                 }else{
                     self.overlayLines = ret;
+                    pointSet.idOverlayLine = null;
                 }
             });
         }
@@ -279,11 +280,11 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             $scope.selectedAxisColorRow = indexRow;
         };
 
-        $scope.removeAxisColorRow = function () {
-            if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
-            $scope.axisColors.splice($scope.selectedAxisColorRow, 1);
+        $scope.removeAxisColorRow = function (index) {
+            // if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
+            $scope.axisColors.splice(index, 1);
             if ($scope.axisColors.length) {
-                $scope.setClickedAxisColorRow(0);
+                $scope.setClickedAxisColorRow(index - 1 ||0);
             }
         };
 
@@ -295,7 +296,9 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         }
 
         $scope.addAxisColorRow = function () {
-            $scope.axisColors.push({});
+            $scope.axisColors.push({
+                color: utils.colorGenerator()
+            });
             $scope.setClickedAxisColorRow($scope.axisColors.length - 1);
         };
 
@@ -323,6 +326,20 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         function updateCrossplot() {
             self.crossplotModelProps.isDefineDepthColors = $scope.isDefineDepthColors;
             self.crossplotModelProps.axisColors = JSON.stringify($scope.axisColors);
+            if (self.crossplotModelProps.pointsets[0].logX) {
+                if (self.crossplotModelProps.pointsets[0].scaleLeft == 0
+                    || self.crossplotModelProps.pointsets[0].scaleRight == 0) {
+                        toastr.error("Scale can't be 0 in Logarithmic");
+                        return;
+                    }
+            }
+            if (self.crossplotModelProps.pointsets[0].logY) {
+                if (self.crossplotModelProps.pointsets[0].scaleBottom == 0
+                    || self.crossplotModelProps.pointsets[0].scaleTop == 0) {
+                        toastr.error("Scale can't be 0 in Logarithmic");
+                        return;
+                    }
+            }
             if ($scope.isDefineDepthColors) {
                 for (let c of $scope.axisColors) {
                     if (c.minValue == null || c.maxValue == null || c.color == null) {

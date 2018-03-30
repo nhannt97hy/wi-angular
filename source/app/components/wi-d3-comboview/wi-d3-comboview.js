@@ -42,7 +42,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 					let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
 					historyState.removePlotFromHistory(model.type, model.id);
 				}
-				if (componentState.name) wiComponentService.dropComponent(componentState.name);
+				if (state.name) wiComponentService.dropComponent(state.name);
 				newScope.$destroy();
 			});
 			container.on('resize', wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize);
@@ -196,7 +196,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 			track.setMode('UseSelector');
 			selection.canvasLogtrack.raise();
 			let transformY = track.getTransformY();
-			let startDepth, stopDepth, maskData = {};
+			let startDepth, endDepth, maskData = {};
 			track.plotContainer.call(d3.drag()
 				.on('drag', function () {
 					if (track.mode != 'UseSelector') return;

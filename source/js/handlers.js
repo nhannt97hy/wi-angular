@@ -114,18 +114,22 @@ exports.NewWorkflowButtonClicked = function () {
     let ModalService = this.ModalService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     let utils = self.wiComponentService.getComponent('UTILS');
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     DialogUtils.newWorkflowDialog(ModalService, function (data) {
+        data.idProject = project.idProject;
         self.wiApiService.createWorkflow(data, function (response, err) {
             if (err) {
                 toastr.error(err);
             } else {
+                let machineLearning = true;
+                if (!data.content.model) machineLearning = false;
                 let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
                 layoutManager.putTabRight({
                     id: 'workflow' + response.idWorkflow,
                     title: response.name,
                     tabIcon: 'workflow-16x16',
                     componentState: {
-                        html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
+                        html: '<wi-workflow id="' + response.idWorkflow + '" machine-learning="' + machineLearning + '"></wi-workflow>',
                         name: 'Workflow'
                     }
                 });
@@ -140,18 +144,40 @@ exports.OpenWorkflowButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openWorkflowDialog(this.ModalService, function (response) {
+        let machineLearning = true;
+        if (response.workflowSpec.name == "Clastic") machineLearning = false; 
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         layoutManager.putTabRight({
             id: 'workflow' + response.idWorkflow,
             title: response.name,
             tabIcon: 'workflow-16x16',
             componentState: {
-                html: '<wi-workflow id="' + response.idWorkflow + '"></wi-workflow>',
+                html: '<wi-workflow id="' + response.idWorkflow + '" machine-learning="' + machineLearning + '"></wi-workflow>',
                 name: 'Workflow'
             }
         })
     });
 }
+exports.NewModelButtonClicked = function() {
+    console.log("new model");
+}
+
+exports.OpenModelButtonClicked = function() {
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    // let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'machine-learning',
+        title: "machine learning",
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: '<wi-workflow-machine-learning id-project="1" name="ABC"></wi-workflow-machine-learning>',
+            name: 'Machine Learning'
+        }
+    })
+}
+
 // exports.WorkflowsButtonClicked = function () {
 //     console.log('WorkflowsButton is clicked');
 //     let wiComponentService = this.wiComponentService;
