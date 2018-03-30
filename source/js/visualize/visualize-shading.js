@@ -313,6 +313,7 @@ Shading.prototype.doPlot = function(highlight) {
         // self.canvas.lower();
     });
     this.updateOrderNum();
+    this.onSetCurrentShading(highlight);
     return this;
 }
 
@@ -538,14 +539,16 @@ function drawCurveLine(ctx, data, highlight) {
     data.forEach(function(item) {
         ctx.lineTo(item.x, item.y);
     });
-    // if (highlight) {
-    //     ctx.shadowColor = 'grey';
-    //     ctx.shadowOffsetX = 2;
-    //     ctx.shadowOffsetY = 2;
-    //     ctx.shadowBlur = 2;
-    //     ctx.lineWidth = 0;
-    //     ctx.stroke();
-    // }
+    if (highlight) {
+        ctx.shadowColor = 'grey';
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.shadowBlur = 2;
+        ctx.strokeStyle = ctx.fillStyle;
+        // ctx.lineWidth = 2;
+
+        ctx.stroke();
+    }
 }
 
 function drawRefLine(shading) {
@@ -647,4 +650,10 @@ Shading.prototype.updateOrderNum = function(orderNum) {
         .attr('data-order-num', function (d) { return d; });
     this.canvas.datum(this.orderNum + '-' + this.name)
         .attr('data-order-num', function (d) { return d; });
+}
+
+Shading.prototype.onSetCurrentShading = function (check) {
+    if(check == true)
+        this.canvas.style('opacity', '0.8');
+    else this.canvas.style('opacity', '1');
 }

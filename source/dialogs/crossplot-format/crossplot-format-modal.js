@@ -257,43 +257,6 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             return item.properties.dataset;
         }
 
-        this.checkLogValueX = function (value, label) {
-            if (self.crossplotModelProps.pointsets[0].logX) {
-                switch (label) {
-                    case 'scaleLeft':
-                        self.crossplotModelProps.pointsets[0].scaleLeft = value == 0 ? 1 : value;
-                        break;
-                    case 'scaleRight':
-                        self.crossplotModelProps.pointsets[0].scaleRight = value == 0 ? 1 : value;
-                        break;
-                }
-                if(Math.round(value) == 0) {
-                    $('#' + label).css('box-shadow', '0px 0px 5px red');
-                    $timeout(function () {
-                    $('#' + label).css('box-shadow', '');
-                    }, 255)
-                }
-            }
-        }
-        this.checkLogValueY = function (value, label) {
-            switch (label) {
-                case 'scaleBottom':
-                    self.crossplotModelProps.pointsets[0].scaleBottom = value == 0 ? 1 : value;
-                    break;
-                case 'scaleTop':
-                    self.crossplotModelProps.pointsets[0].scaleTop = value == 0 ? 1 : value;
-                    break;
-            }
-            if (self.crossplotModelProps.pointsets[0].logY) {
-                if(Math.round(value) == 0) {
-                    $('#' + label).css('box-shadow', '0px 0px 5px red');
-                    $timeout(function () {
-                    $('#' + label).css('box-shadow', '');
-                    }, 255)
-                }
-            }
-        }
-
         // function buildPayload(crossplotProps) {
         //     let props = crossplotProps;
         //     delete props.pointsets[0].curveX;
