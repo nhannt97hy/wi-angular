@@ -1177,7 +1177,10 @@ Crossplot.prototype.prepareRegressionLines = function() {
     let self = this;
     regLines.forEach(function(l) {
         let polygons = self.polygons.filter(function(p) {
-            return l.polygons.indexOf(p.idPolygon) > -1;
+            return l.polygons.findIndex(lp => {
+                return lp.idPolygon ? lp.idPolygon == p.idPolygon : lp == p.idPolygon;
+            }) > -1;
+            // return l.polygons.indexOf(p.idPolygon) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {

@@ -4,13 +4,13 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        console.log("wiD3Crossplot", wiD3Crossplot);
+        // console.log("wiD3Crossplot", wiD3Crossplot);
         let change = {
             unchanged: 0,
             created: 1,
             updated: 2,
-            deleted: 3,
-            uncreated: 4
+            deleted: 3
+            // uncreated: 4
         }
         // let polygons = angular.copy(wiD3Crossplot.getPolygons());
         // this.polygonList = new Array();
@@ -30,25 +30,29 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                 bgColor: polygonItem.lineStyle
             });
         });
-        // this.polygonList = angular.copy(wiD3Crossplot.getPolygons());
+        // console.log('polygonList',self.polygonList);
 
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
-        console.log("vi111", this.viCross, this.polygonList);
+        // console.log("vi111", this.viCross, this.polygonList);
         let regressionLinesProps = this.viCross.regressionLines;
 
-        regressionLinesProps.forEach(function(regLineItem, index) {
+        regressionLinesProps.forEach(function(item, index) {
+            let regLineItem = angular.copy(item);
             regLineItem.change = change.unchanged;
             regLineItem.index = index;
+            regLineItem.polygons = item.polygons.map(p => {
+                return p.idPolygon;
+            })
             self.regressionLines.push(regLineItem);
         });
 
         $scope.change = change;
-        console.log("wiD3Crossplot", wiD3Crossplot, viCrossplot, self.regressionLines);
+        // console.log("wiD3Crossplot", wiD3Crossplot, viCrossplot, self.regressionLines);
         this.getRegressionLines = function () {
             return self.regressionLines.filter(function (item, index) {
-               return (item.change != change.deleted && item.change != change.uncreated);
+               return item.change != change.deleted;
            });
         }
         this.polygonsArr = new Array();
@@ -78,15 +82,15 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             if(self.regressionLines[index].change == change.unchanged) self.regressionLines[index].change = change.updated;
         }
         // modal buttons
-        this.removeRow = function () {
-            if (!self.regressionLines[self.__idx]) return;
-            if(self.regressionLines[self.__idx].change == change.created) {
-                self.regressionLines.splice(self.__idx, 1);
+        this.removeRow = function (idx) {
+            // if (!self.regressionLines[self.__idx]) return;
+            if(self.regressionLines[idx].change == change.created) {
+                self.regressionLines.splice(idx, 1);
             } else {
-                self.regressionLines[self.__idx].change = change.deleted;
+                self.regressionLines[idx].change = change.deleted;
             }
             if (self.getRegressionLines().length) {
-                self.setClickedRow(0);
+                self.setClickedRow((idx - 1) || 0);
             }
         };
         // function genColor() {
@@ -114,7 +118,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             });
             console.log("addRow", self.regressionLines);
         };
-        console.log("regressionLines", this.regressionLines);
+        // console.log("regressionLines", this.regressionLines);
         this.onselectedPolygonsChange = function(){
             if(self.selectedCurveX) self.pointSet.idCurveX = self.selectedCurveX;
         }
@@ -185,18 +189,18 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
         }
         this.onOkButtonClicked = function () {
             setRegressionLines(function() {
-                self.viCross.regressionLines = self.regressionLines;
-                viCrossplot.setProperties(self.viCross);
-                viCrossplot.doPlot();
+                // self.viCross.regressionLines = self.regressionLines;
+                // viCrossplot.setProperties(self.viCross);
+                // viCrossplot.doPlot();
                 close();
             });
         };
         this.onApplyButtonClicked = function() {
             setRegressionLines(function() {
                 console.log("okii", self.viCross);
-                self.viCross.regressionLines = self.regressionLines;
-                viCrossplot.setProperties(self.viCross);
-                viCrossplot.doPlot();
+                // self.viCross.regressionLines = self.regressionLines;
+                // viCrossplot.setProperties(self.viCross);
+                // viCrossplot.doPlot();
             });
         };
         this.onCancelButtonClicked = function () {
