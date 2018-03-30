@@ -638,6 +638,13 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             self.leftLimit = customLimit.concat(self.curveList);
         }
         function updateShadingsTab(updateShadingsTabCb) {
+            let currentOrderKey;
+            const lastUnchangedShadings = _.last(self.getShadings().filter(s => s.changed === changed.unchanged)) || {};
+            function getOrderKey() {
+                if (!currentOrderKey) currentOrderKey = lastUnchangedShadings.orderNum || 'h';
+                currentOrderKey = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+                return currentOrderKey;
+            }
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
                 if (item.rightCurve && item.leftCurve) {
                     if (!item.idControlCurve) {
@@ -663,7 +670,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                     request.rightCurve = rightCurveBk;
                     item.leftCurve = leftCurveBk;
                     item.rightCurve = rightCurveBk;
-
+                    if (item.changed !== changed.deleted && item.changed !== changed.unchanged) request.orderNum = getOrderKey();
                     if(item.idLeftLine == -3) {
                         item.type = 'custom';
                     };

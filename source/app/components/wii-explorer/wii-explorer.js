@@ -312,7 +312,7 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         selectFile(function (files) {
             console.log(files);
             if (files) {
-                wiOnlineInvService.uploadFiles(files, function (response) {
+                wiOnlineInvService.uploadFiles({ file: files, override: true }, function (response) {
                     console.log('upload files done', response);
                     if (response === 'UPLOAD FILES FAILED') {
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);

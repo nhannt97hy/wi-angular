@@ -12,6 +12,11 @@
                 <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default pull-right' title="Reload project" ng-click="wiExport.refreshInventory()">
                     <i class="fa fa-refresh"></i>
                 </button>
+                <button style='margin:5px 0px 5px 5px;padding:0 10px;' title="Toggle Well name/File name"
+                    class='btn btn-default'
+                    ng-click="wiExport.switchLabelTooltip(wiExport.inventoryConfig)">
+                <i class="fa fa-exchange"></i>
+            </button>
             </div>
             <div style='background-color:white;border:none;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
                 <form style='width:100%;display:flex;' ng-submit='wiExport.prjSearch()'>

@@ -192,12 +192,12 @@ module.exports = function (ModalService, item) {
             self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
         }
 
-        this.genColor = function () {
-            let rand = function () {
-                return Math.floor(Math.random() * 255);
-            }
-            return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
-        }
+        // this.genColor = function () {
+        //     let rand = function () {
+        //         return Math.floor(Math.random() * 255);
+        //     }
+        //     return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
+        // }
 
         this.addZone = function (index, top, bottom) {
             let newZone = {
@@ -205,7 +205,7 @@ module.exports = function (ModalService, item) {
                 properties: {
                     fill: {
                         pattern: {
-                            background: self.genColor(),
+                            background: utils.colorGenerator(),
                             foreground: 'white',
                             name: 'none'
                         }

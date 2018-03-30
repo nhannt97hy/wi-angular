@@ -16,7 +16,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
         let viCrossplot = wiD3Crossplot.getViCrossplot();
         this.userDefineLines = [];
         this.viCross = viCrossplot.getProperties()
-        console.log("vi111", this.viCross);
+        // console.log("vi111", this.viCross);
         let udLinesProps = this.viCross.userDefineLines;
 
         udLinesProps.forEach(function(udLineItem, index) {
@@ -57,7 +57,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                 change: change.created,
                 index: self.userDefineLines.length,
                 lineStyle: {
-                    lineColor: "blue",
+                    lineColor: utils.colorGenerator(),
                     lineWidth: 1,
                     lineStyle: [10, 0]
                 },
@@ -67,7 +67,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             });
             console.log("addRow", self.userDefineLines);
         };
-        console.log("userDefineLines", this.userDefineLines);
+        // console.log("userDefineLines", this.userDefineLines);
 
         this.onEditLineStyleButtonClicked = function(index) {
             console.log("onEditLineStyleButtonClicked", self.userDefineLines);
@@ -76,6 +76,21 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                 self.userDefineLines[index].lineStyle = lineStyleObj.lineStyle;
             }, self.userDefineLines[index]);
         };
+
+        function inValid(){
+            if(self.userDefineLines && self.userDefineLines.length){
+                self.userDefineLines.forEach(l => {
+                    let func = viCrossplot.getUserDefineFunc(l.function);
+                    if(!func) {
+                        l.invalid = true
+                    }else{
+                        l.invalid = false;
+                    }
+                })
+                return self.userDefineLines.filter(l => l.invalid).length;
+            }
+            return false;
+        }
         function setUDLines(callback) {
             if(self.userDefineLines && self.userDefineLines.length) {
                 async.eachOfSeries(self.userDefineLines, function(udLine, idx, callback){
@@ -128,12 +143,20 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             }
         }
         this.onOkButtonClicked = function () {
-            setUDLines(function(){
-                close();
-            })
+            if(inValid()) {
+                utils.error('The current equations format are not correct. Please use the following format x+a, x-a, x*a, x/a, x^a, Math.sqrt(x), Math.sin(x), Math.cos(x), Math.tan(x), Math.exp(x)...');
+            }else{
+                setUDLines(function(){
+                    close();
+                })
+            }
         };
         this.onApplyButtonClicked = function() {
-            setUDLines();
+            if(inValid()) {
+                utils.error('The current equations format are not correct. Please use the following format x+a, x-a, x*a, x/b, x^a, Math.sqrt(x), Math.sin(x), Math.cos(x), Math.tan(x), Math.exp(x)...');
+            }else{
+                setUDLines();
+            }
         };
         this.onCancelButtonClicked = function () {
             console.log("cancel", self.regressionLines);

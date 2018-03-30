@@ -16,7 +16,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             let projectModel = utils.projectToTreeConfig(projectLoaded);
             let dustbinModel = utils.dustbinToTreeConfig();
             self.treeConfig = [projectModel, dustbinModel];
-            utils.putListFamily();
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {

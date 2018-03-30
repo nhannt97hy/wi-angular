@@ -47,7 +47,19 @@ wi-list {
 				}
 				button {
 					padding: 3px;
-					margin: -3px;
+					margin: -3px 5px;
+					width: 95%;
+					text-align: left;
+					display: flex;
+					> *:first-child {
+						flex: 1;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+					> *:last-child {
+						width: 16px;
+						height: 16px;
+					}
 				}
 			}
 			td:first-child {

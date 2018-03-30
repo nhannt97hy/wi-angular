@@ -21,8 +21,9 @@ const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
-//const INVENTORY_SERVICE = 'http://13.229.66.151';
+const INVENTORY_SERVICE = 'http://13.250.197.210';
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
+//inv server for dev
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
@@ -34,7 +35,7 @@ const INVENTORY_SERVICE = 'http://inv.sflow.me';
 // const BASE_URL = 'http://localhost:3000';
 // const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const PROCESSING_SERVICE = 'http://54.169.13.92';
-// const INVENTORY_SERVICE = 'http://inv.sflow.me';
+// const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
@@ -375,7 +376,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        if (err.reason) toastr.error(err.reason);
+                        // if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });
@@ -1808,8 +1809,8 @@ Service.prototype.removeWorkflow = function (idWorkflow, callback) {
     this.delete(DELETE_WORKFLOW, { idWorkflow: idWorkflow }, callback);
 }
 
-Service.prototype.getWorkflowList = function(callback){
-    this.post(GET_WORKFLOW_LIST, null, callback);
+Service.prototype.getWorkflowList = function(payload, callback){
+    this.post(GET_WORKFLOW_LIST, payload, callback);
 }
 Service.prototype.createWorkflowSpec = function(name, spec, callback) {
     this.post(CREATE_WORKFLOW_SPEC, {name:name, content:spec}, callback);

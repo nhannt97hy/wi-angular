@@ -26,7 +26,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     ////////////////////////////////////////
     const ___PERM_FAM_ID = 172;
     const ___FACIES_FAM_ID = 1198;
-    const CURVE_MODEL = 'curve';
+    const CURVE_PREDICTION = 'curve';
     const PERM_DUAL_MODEL = 'anfis';
     const FACIES_SINGLE_MODEL = 'facies';
     const PERM_CURVE_NAME = 'PERM_CORE';
@@ -173,7 +173,17 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'epochs',
         type: 'number',
         min: 1,
-        value: 1000
+        value: 50
+    }, {
+        name: 'learning_rate',
+        type: 'number',
+        value: 1,
+        step: 0.1
+    }, {
+        name: 'tol',
+        type: 'number',
+        value: 0.03,
+        step: 0.01
     }, {
         name: 'Neuron Network Structure',
         type: 'nnconfig',
@@ -206,12 +216,22 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: 'Tanh',
             value: 2
         }]
-    },{
+    }, {
         name: 'epochs',
         type: 'number',
         min: 1,
-        value: 1000
-    },{
+        value: 50
+    }, {
+        name: 'learning_rate',
+        type: 'number',
+        value: 1,
+        step: 0.1
+    }, {
+        name: 'tol',
+        type: 'number',
+        value: 0.03,
+        step: 0.01
+    }, {
         name: 'Neuron Network Structure',
         type: 'nnconfig',
         value: {
@@ -268,56 +288,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }] 
     };
 
-    // this.workflowConfig = {
-    //     name: 'CURVE_PREDICTION',
-    //     model: {
-    //         type: CURVE_MODEL,
-    //         inputs: [{class: 'curve input'}, {class: 'curve input'}, {class: 'curve output'}]
-    //     },
-    //     steps: [
-    //         {
-    //             name: TRAIN_STEP_NAME
-    //         },
-    //         {
-    //             name: VERIFY_STEP_NAME
-    //         },
-    //         {
-    //             name: PREDICT_STEP_NAME
-    //         }
-    //     ]
-    // };
-    
-    // this.workflowConfig = {
-    //     name: 'PERM_DUAL_MODEL',
-    //     model: {
-    //         type: PERM_DUAL_MODEL,
-    //         inputs: [{class: 'GR'},{class: 'NPHI'},{class: 'RHOB'},{class: 'DT'},{class: 'VCL'},{class: 'PHIE'},{class: 'PERM_CORE'}]
-    //     },
-    //     steps: [
-    //         {
-    //             name: VERIFY_STEP_NAME
-    //         },
-    //         {
-    //             name: PREDICT_STEP_NAME
-    //         }
-    //     ]
-    // };
-    // this.workflowConfig = {
-    //     name: 'FACIES_SINGLE_MODEL',
-    //     model: {
-    //         type: FACIES_SINGLE_MODEL,
-    //         inputs: [{class: 'MD'},{class: 'TVDSS'},{class: 'GR'},{class: 'NPHI'},{class: 'RHOZ'},{class: 'DT'},{class: 'VCL'},{class: 'PHIE'},{class: 'DELTAIC_FACIES'}]
-    //     },
-    //     steps: [
-    //         {
-    //             name: VERIFY_STEP_NAME
-    //         },
-    //         {
-    //             name: PREDICT_STEP_NAME
-    //         }
-    //     ]
-    // };
-    
     this.workflowResults = [ {
         name: TRAIN_STEP_NAME,
         outputData: []
@@ -328,31 +298,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: PREDICT_STEP_NAME,
         outputData: []
     }];
-    /*this.workflowResults = [ {
-        name: TRAIN_STEP_NAME,
-        outputData: [{
-            idErrorPlot: 1,
-            name: 'Train Error', value:[]
-        },{
-            idErrorPlot: 2,
-            name: 'Validation Error', value: []
-        }]
-    }, {
-        name: VERIFY_STEP_NAME,
-        outputData: [{
-            idPlot: 1,
-            plotName: "GR_ML"
-        }, {
-            idPlot: 1,
-            plotName: "GR_ML"
-        }]
-    }, {
-        name: PREDICT_STEP_NAME,
-        outputData: [{
-            idPlot: 1,
-            plotName: "GR_ML1"
-        }]
-    }];*/
 
     this.safeRunStep = function(wf, cb) {
         __running_wf = true;
@@ -382,24 +327,31 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
 
     function getDataCurves(step, callback) {
+        let listInputCurves = [];
         let inputCurves = [];
         let inputData = step.inputData;
-        if(inputData && inputData.length === 1){
-            let inputSet = inputData[0];
-            async.eachOf(inputSet.inputs, function(curveInfo, idx, __end){
-                wiApiService.dataCurve(curveInfo.value.idCurve, function(curveData){
-                    inputCurves[idx] = curveData.map(function(d) {
-                        return parseFloat(d.x);
+        if(inputData){
+            async.eachOf(inputData, function(iptData, idx, _end){
+                let inputSet = iptData;
+                listInputCurves[idx] = [];
+                async.eachOf(inputSet.inputs, function(curveInfo, idx1, __end){
+                    listInputCurves[idx][idx1] = [];
+                    wiApiService.dataCurve(curveInfo.value.idCurve, function(curveData){
+                        listInputCurves[idx][idx1] = curveData.map(function(d) {
+                            return parseFloat(d.x);
+                        });
+                        __end();
                     });
-                    __end();
+                }, function(err){
+                    _end();
                 });
-            }, function(err){
-                callback(inputCurves);
-            });
+            }, function(err) {
+                callback(listInputCurves);
+            })
 
         } else {
-            console.error("inputData must be an array with one element !!", inputData);
-            toastr.error('Choose one dataset');
+            console.error("inputData is empty !!", inputData);
+            toastr.error('Choose dataset');
         }
     }
     function getDataCurvesAndJoin(step, callback){
@@ -454,7 +406,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
     function fillNullInCurve(fillArr, curve) {
         for(let i in fillArr)
-            curve.splice(i, 0, NaN);
+            curve.splice(fillArr[i], 0, NaN);
     }
     function shortName(name) {
         const __names = {
@@ -475,7 +427,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     function outputCurveName() {
         let modelType = self.workflowConfig.model.type;
         switch(modelType){
-            case CURVE_MODEL:
+            case CURVE_PREDICTION:
                 let steps = self.workflowConfig.steps;
                 let trainingStep = steps[0];
                 let trainingCurves = trainingStep.inputData[0].inputs;
@@ -535,6 +487,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     gamma: getValueParam('gamma', self.currentModelType),
                     C: getValueParam('C', self.currentModelType),
                     n_estimators: getValueParam('n_estimators', self.currentModelType),
+                    epochs: getValueParam('epochs', self.currentModelType),
+                    learning_rate: getValueParam('learning_rate', self.currentModelType),
+                    tol: getValueParam('tol', self.currentModelType),
                     layers: getValueParam('Neuron Network Structure', self.currentModelType),
                     activation: getValueParam('activation', self.currentModelType)
                 }
@@ -549,6 +504,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 }
             };
             console.log(payload);
+            window.trainData = payload;
             wiMachineLearningApiService.trainModel(payload, function(res){
                 if(res){
                     toastr.success('Train model success');
@@ -577,14 +533,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         });
     }
     
-    function saveCurveAndCreatePlot(curveInfo, step, cb) {
+    function saveCurveAndCreatePlot(curveInfo, step, index, cb) {
         /*let _stepVerify = self.workflowConfig.steps.filter(function(step){
             return step.name==VERIFY_STEP_NAME;
         })[0];*/
         saveCurve(curveInfo, function(curveProps) {
             delete curveInfo.data;
 
-            let inCurves = step.inputData[0].inputs.map(function(ipt) {
+            let inCurves = step.inputData[index].inputs.map(function(ipt) {
                 return ipt.value;
             });
             let outCurves = [];
@@ -600,7 +556,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             
             createVerifyLogplot(
                 curveInfo.idWell, 
-                step.name + '-' + curveProps.name, 
+                step.inputData[index].well.name + '-' + curveProps.name, 
                 inCurves, outCurves,
                 function(err, response) {
                     if (err) {
@@ -612,7 +568,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     let wfResult = self.workflowResults.find(function(wfr) {
                         return wfr.name == step.name;
                     });
-                    wfResult.outputData.length = 0;
+                    // wfResult.outputData.length = 0;
                     wfResult.outputData.push(response);
 
                     if (cb) cb();
@@ -622,201 +578,242 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
     function verify(cb){
         let _stepVerify = self.workflowConfig.steps.filter(function(step){return step.name==VERIFY_STEP_NAME;})[0];
-        getDataCurves(_stepVerify, function(list_curves){
-            let verifyCurve = list_curves.splice(list_curves.length-1, 1)[0];
-            let indicesObj = filterNull(list_curves);
-            let dataCurves = indicesObj.filterCurves;
-            let nullPositions = indicesObj.fillNull;
-            let payload = null;
-            switch(self.workflowConfig.model.type) {
-                case CURVE_MODEL:
-                    payload = {
-                        model_id: genModelId(),
-                        data: dataCurves
-                    };
-                    wiMachineLearningApiService.predictCurve(payload, function(res){
-                        if (res){
-                            toastr.success('Verification success');
-                            console.log('verify success', res);
-                            fillNullInCurve(nullPositions, res.target)
-                            let lastIdx = _stepVerify.inputData[0].inputs.length - 1;
-                            let curveInfo = {
-                                idDataset: _stepVerify.inputData[0].dataset.idDataset,
-                                idFamily: _stepVerify.inputData[0].inputs[lastIdx].value.idFamily,
-                                idWell: _stepVerify.inputData[0].well.idWell,
-                                name: outputCurveName(),
-                                data: res.target
-                            }
-                            saveCurveAndCreatePlot(curveInfo, _stepVerify, function(err) {
-                                if (err) {
-                                    toastr.error(err.message);
+        let wfResult = self.workflowResults.find(function(wfr) {
+            return wfr.name == VERIFY_STEP_NAME;
+        });
+        wfResult.outputData.length = 0;
+        getDataCurves(_stepVerify, function(list_input){
+            async.forEachOfSeries(list_input, function(list_curves, index, __done){
+                let length  = list_curves.length;
+                let verifyCurve = [];
+                list_curves[length-1].forEach(function(x){
+                    verifyCurve.push(x);
+                })
+                //  = list_curves.splice(list_curves.length-1, 1)[0];
+                let indicesObj = filterNull(list_curves);
+                indicesObj.filterCurves.splice(indicesObj.filterCurves.length-1, 1);
+                let dataCurves = indicesObj.filterCurves;
+                let nullPositions = indicesObj.fillNull;
+                let payload = null;
+                switch(self.workflowConfig.model.type) {
+                    case CURVE_PREDICTION:
+                        payload = {
+                            model_id: genModelId(),
+                            data: dataCurves
+                        };
+                        console.log(payload);
+                        window.verifyData = payload;
+                        wiMachineLearningApiService.predictCurve(payload, function(res){
+                            if (res){
+                                toastr.success('Verification success');
+                                console.log('verify success', res);
+
+                                window.tar = [];
+                                res.target.forEach(function(x){
+                                    window.tar.push(x);
+                                });
+                                fillNullInCurve(nullPositions, res.target);
+                                for(let i =0; i<res.target.length; i++)
+                                console.log(verifyCurve[i],' - ', res.target[i]);
+                                let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                let curveInfo = {
+                                    idDataset: _stepVerify.inputData[index].dataset.idDataset,
+                                    idFamily: _stepVerify.inputData[index].inputs[lastIdx].value.idFamily,
+                                    idWell: _stepVerify.inputData[index].well.idWell,
+                                    name: outputCurveName(),
+                                    data: res.target
                                 }
-                                if (cb) cb(err);
-                            });
-                        } else{
-                            if (cb) cb('verify fail');
-                        }
-                    });
-                    break;
-                case PERM_DUAL_MODEL:
-                    payload = {
-                        data: dataCurves
-                    };
-                    wiMachineLearningApiService.predictAnfis(payload, function(res){
-                        if (res){
-                            toastr.success('Verification curve success');
-                            console.log('Prediction success', res);
-                            fillNullInCurve(nullPositions, res.target)
-                            let lastIdx = _stepVerify.inputData[0].inputs.length - 1;
-                            let curveInfo = {
-                                idDataset: _stepVerify.inputData[0].dataset.idDataset,
-                                idFamily: ___PERM_FAM_ID,
-                                idWell: _stepVerify.inputData[0].well.idWell,
-                                name: outputCurveName(),
-                                data: res.target
+                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function(err) {
+                                    if (err) {
+                                        toastr.error(err.message);
+                                        __done(err);
+                                    }
+                                    __done();
+                                    // if (cb) cb(err);
+                                });
+                            } else{
+                                __done('fail');
+                                // if (cb) cb('verify fail');
                             }
-                            saveCurveAndCreatePlot(curveInfo, _stepVerify, function(err) {
-                                if (err) {
-                                    toastr.error(err.message);
+                        });
+                        break;
+                    case PERM_DUAL_MODEL:
+                        payload = {
+                            data: dataCurves
+                        };
+                        console.log(payload);
+                        wiMachineLearningApiService.predictAnfis(payload, function(res){
+                            if (res){
+                                toastr.success('Verification curve success');
+                                console.log('Prediction success', res);
+                                fillNullInCurve(nullPositions, res.target)
+                                let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                let curveInfo = {
+                                    idDataset: _stepVerify.inputData[index].dataset.idDataset,
+                                    idFamily: ___PERM_FAM_ID,
+                                    idWell: _stepVerify.inputData[index].well.idWell,
+                                    name: outputCurveName(),
+                                    data: res.target
                                 }
-                                if (cb) cb(err);
-                            });
-                        } else{
-                            if (cb) cb('verify fail');
-                        }
-                    });
-                    break;
-                case FACIES_SINGLE_MODEL:
-                    payload = {
-                        data: dataCurves
-                    };
-                    wiMachineLearningApiService.predictFacies(payload, function(res){
-                        if (res){
-                            toastr.success('Predict curve success');
-                            console.log('verify success', res);
-                            fillNullInCurve(nullPositions, res.target)
-                            let lastIdx = _stepVerify.inputData[0].inputs.length - 1;
-                            let curveInfo = {
-                                idDataset: _stepVerify.inputData[0].dataset.idDataset,
-                                idFamily: ___FACIES_FAM_ID,
-                                idWell: _stepVerify.inputData[0].well.idWell,
-                                name: outputCurveName(),
-                                data: res.target
+                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function(err) {
+                                    if (err) {
+                                        toastr.error(err.message);
+                                        __done(err);
+                                    }
+                                    __done();
+                                });
+                            } else{
+                                __done('fail');
                             }
-                            saveCurveAndCreatePlot(curveInfo, _stepVerify, function(err) {
-                                if (err) {
-                                    toastr.error(err.message);
+                        });
+                        break;
+                    case FACIES_SINGLE_MODEL:
+                        payload = {
+                            data: dataCurves
+                        };
+                        window.face = payload;
+                        wiMachineLearningApiService.predictFacies(payload, function(res){
+                            if (res){
+                                toastr.success('Verification curve success');
+                                console.log('verify success', res);
+                                fillNullInCurve(nullPositions, res.target)
+                                let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                let curveInfo = {
+                                    idDataset: _stepVerify.inputData[index].dataset.idDataset,
+                                    idFamily: ___FACIES_FAM_ID,
+                                    idWell: _stepVerify.inputData[index].well.idWell,
+                                    name: outputCurveName(),
+                                    data: res.target
                                 }
-                                if (cb) cb(err);
-                            });
-                        } else{
-                            if (cb) cb('verify fail');
-                        }
-                    });
-                    break;
-            };
+                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function(err) {
+                                    if (err) {
+                                        toastr.error(err.message);
+                                        __done(err);
+                                    }
+                                    __done();
+                                });
+                            } else{
+                                __done('fail');
+                            }
+                        });
+                        break;
+                };
+            }, function(err){
+                if (cb) cb();
+            });
         });
     };
+    
     function predict(cb){
         let _stepPredict = self.workflowConfig.steps.filter(function(step){return step.name==PREDICT_STEP_NAME;})[0];
         let _stepTrain = self.workflowConfig.steps.filter(function(step){return step.name==TRAIN_STEP_NAME;})[0];
-        getDataCurves(_stepPredict, function(list_curves){
-            let indicesObj = filterNull(list_curves);
-            let dataCurves = indicesObj.filterCurves;
-            let nullPositions = indicesObj.fillNull;
-            let payload = null;
-
-            switch(self.workflowConfig.model.type){
-                case CURVE_MODEL:
-                    payload = {
-                        model_id: genModelId(),
-                        data: dataCurves
-                    };
-                    wiMachineLearningApiService.predictCurve(payload, function(res){
-                        if(res){
-                            toastr.success('Predict curve success');
-                            console.log('predict success', res);
-                            fillNullInCurve(nullPositions, res.target);
-                            if(!_stepTrain.inputData.length){
-                                toastr.error('Need train model before predict');
-                                return;
-                            }
-                            let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
-                            let curveInfo = {
-                                idDataset: _stepPredict.inputData[0].dataset.idDataset,
-                                idFamily: _stepTrain.inputData[0].inputs[lastIdx].value.idFamily,
-                                idWell: _stepPredict.inputData[0].well.idWell,
-                                name: outputCurveName(),
-                                data: res.target
-                            }
-                            saveCurveAndCreatePlot(curveInfo, _stepPredict, function(err) {
-                                if (err) {
-                                    toastr.error(err.message);
+        let wfResult = self.workflowResults.find(function(wfr) {
+            return wfr.name == PREDICT_STEP_NAME;
+        });
+        wfResult.outputData.length = 0;
+        getDataCurves(_stepPredict, function(list_input){
+            async.forEachOfSeries(list_input, function(list_curves, index, __done) {
+                let indicesObj = filterNull(list_curves);
+                let dataCurves = indicesObj.filterCurves;
+                let nullPositions = indicesObj.fillNull;
+                let payload = null;
+    
+                switch(self.workflowConfig.model.type){
+                    case CURVE_PREDICTION:
+                        payload = {
+                            model_id: genModelId(),
+                            data: dataCurves
+                        };
+                        console.log(payload);
+                        wiMachineLearningApiService.predictCurve(payload, function(res){
+                            if(res){
+                                toastr.success('Predict curve success');
+                                console.log('predict success', res);
+                                fillNullInCurve(nullPositions, res.target);
+                                if(!_stepTrain.inputData.length){
+                                    toastr.error('Need train model before predict');
+                                    return;
                                 }
-                                if (cb) cb(err);
-                            });
-                        }else{
-                            if (cb) cb('predict fail');
-                        }
-                    });
-                    break;
-                case PERM_DUAL_MODEL:
-                    payload = {
-                        data: dataCurves
-                    };
-                    wiMachineLearningApiService.predictAnfis(payload, function(res){
-                        if(res){
-                            toastr.success('Predict curve success');
-                            console.log('predict success', res);
-                            fillNullInCurve(nullPositions, res.target);
-                            // let lastIdx = self.workflowConfig.model.inputs.length - 1;
-                            let curveInfo = {
-                                idDataset: _stepPredict.inputData[0].dataset.idDataset,
-                                idFamily: ___PERM_FAM_ID,
-                                idWell: _stepPredict.inputData[0].well.idWell,
-                                name: outputCurveName(),
-                                data: res.target
-                            }
-                            saveCurveAndCreatePlot(curveInfo, _stepPredict, function(err) {
-                                if (err) {
-                                    toastr.error(err.message);
+                                let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
+                                let curveInfo = {
+                                    idDataset: _stepPredict.inputData[index].dataset.idDataset,
+                                    idFamily: _stepTrain.inputData[0].inputs[lastIdx].value.idFamily,
+                                    idWell: _stepPredict.inputData[index].well.idWell,
+                                    name: outputCurveName(),
+                                    data: res.target
                                 }
-                                if (cb) cb(err);
-                            });
-                        }else{
-                            if (cb) cb('predict fail');
-                        }
-                    });
-                    break;
-                case FACIES_SINGLE_MODEL:
-                    payload = {
-                        data: dataCurves
-                    };
-                    wiMachineLearningApiService.predictFacies(payload, function(res){
-                        if(res){
-                            toastr.success('Predict curve success');
-                            console.log('predict success', res);
-                            fillNullInCurve(nullPositions, res.target);
-                            // let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
-                            let curveInfo = {
-                                idDataset: _stepPredict.inputData[0].dataset.idDataset,
-                                idFamily: ___FACIES_FAM_ID,
-                                idWell: _stepPredict.inputData[0].well.idWell,
-                                name: outputCurveName(),
-                                data: res.target
+                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function(err) {
+                                    if (err) {
+                                        toastr.error(err.message);
+                                        __done(err);
+                                    }
+                                    __done();
+                                });
+                            }else{
+                                __done('fail');
                             }
-                            saveCurveAndCreatePlot(curveInfo, _stepPredict, function(err) {
-                                if (err) {
-                                    toastr.error(err.message);
+                        });
+                        break;
+                    case PERM_DUAL_MODEL:
+                        payload = {
+                            data: dataCurves
+                        };
+                        wiMachineLearningApiService.predictAnfis(payload, function(res){
+                            if(res){
+                                toastr.success('Predict curve success');
+                                console.log('predict success', res);
+                                fillNullInCurve(nullPositions, res.target);
+                                let curveInfo = {
+                                    idDataset: _stepPredict.inputData[index].dataset.idDataset,
+                                    idFamily: ___PERM_FAM_ID,
+                                    idWell: _stepPredict.inputData[index].well.idWell,
+                                    name: outputCurveName(),
+                                    data: res.target
                                 }
-                                if (cb) cb(err);
-                            });
-                        }else{
-                            if (cb) cb('predict fail');
-                        }
-                    });
-                    break;
-            }
+                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function(err) {
+                                    if (err) {
+                                        toastr.error(err.message);
+                                        __done(err);
+                                    }
+                                    __done();
+                                });
+                            }else{
+                                __done('fail');
+                            }
+                        });
+                        break;
+                    case FACIES_SINGLE_MODEL:
+                        payload = {
+                            data: dataCurves
+                        };
+                        wiMachineLearningApiService.predictFacies(payload, function(res){
+                            if(res){
+                                toastr.success('Predict curve success');
+                                console.log('predict success', res);
+                                fillNullInCurve(nullPositions, res.target);
+                                let curveInfo = {
+                                    idDataset: _stepPredict.inputData[index].dataset.idDataset,
+                                    idFamily: ___FACIES_FAM_ID,
+                                    idWell: _stepPredict.inputData[index].well.idWell,
+                                    name: outputCurveName(),
+                                    data: res.target
+                                }
+                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function(err) {
+                                    if (err) {
+                                        toastr.error(err.message);
+                                        __done(err);
+                                    }
+                                    __done();
+                                });
+                            }else{
+                                __done('fail');
+                            }
+                        });
+                        break;
+                }
+            }, function(err) {
+                if (cb) cb();
+            });
         });
     };
     let __selectionTop = 0;
@@ -841,16 +838,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
 
     function updateNNConfig() {
         if (!self.currentModelType) {
-            // self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
             return;
         }
         if (!self.currentModelType.parameters.length) {
-            // self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
             return;
         }
         let config = self.currentModelType.parameters[self.currentModelType.parameters.length -1];
         if (config.type != 'nnconfig') {
-            // self.nnConfig = {inputs: [{name: "a0"},{name: "a0"},{name: "a0"}], outputs:[{name: "a0"}], layers: [2,2]};
             return;
         }
         self.nnConfig = {inputs: [], outputs:[], layers: []};
@@ -883,8 +877,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 self.workflowResults[2] = self.workflowConfig.steps.find(function(step) {
                     return step.name == self.workflowResults[2].name;
                 }).result || self.workflowResults[2];
-                //self.workflowResults[1] = self.workflowConfig.steps[1].result || self.workflowResults[1];
-                //self.workflowResults[2] = self.workflowConfig.steps[2].result || self.workflowResults[2];
             });
         }
 
@@ -1135,12 +1127,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         });
     }
     this.onSelectTemplate = function (itemIdx) {
+        self.changeCurveSelection = false;
         let __SELECTED_NODE = self.selectionList.find(function (d) {
             return d.data.selected;
         });
         if (__SELECTED_NODE) {
             let inputs = self.workflowConfig.model.inputs;
             let item = inputs[itemIdx];
+            if(item.label != __SELECTED_NODE.data.label)
+                self.changeCurveSelection = true;
             item.label = __SELECTED_NODE.data.label;
             item.value = __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
             item.name = item.label;
@@ -1154,6 +1149,17 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             toastr.error("please select data type!");
         }
     };
+    this.updateCurveSelection = function() {
+        if(self.changeCurveSelection) {
+            self.workflowConfig.steps.forEach(function(step){
+                console.log(step.inputData);
+                step.inputData = [];
+                
+            });
+            self.saveWorkflow();
+            self.changeCurveSelection = false;
+        }
+    }
     this.onDeleteInput = function (idx) {
         for (let wf of self.workflowConfig.steps) {
             wf.inputData.splice(idx, 1);
@@ -1395,7 +1401,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     return;
                 }
                 let datasetModel = options.result;
-                // let datasetName = datasetModel.properties.name;
                 let idWell = datasetModel.properties.idWell;
                 let wellModel = self.projectConfig.find(
                     well => well.id == idWell
@@ -1444,24 +1449,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     },
                     inputs: inputItems
                 };
-                switch(wf.name) {
-                    case TRAIN_STEP_NAME:
-                        $timeout(() => {
-                            wf.inputData.push(input);
-                            __inputDataLen = wf.inputData.length;
-                            self.saveWorkflow();
-                        });
-                        break;
-                    case PREDICT_STEP_NAME:
-                    case VERIFY_STEP_NAME:
-                        $timeout(() => {
-                            wf.inputData[0] = input;
-                            __inputDataLen = wf.inputData.length;
-                            self.saveWorkflow();
-                        });
-
-                }
-                console.log(wf.inputData);
+                $timeout(() => {
+                    wf.inputData.push(input);
+                    __inputDataLen = wf.inputData.length;
+                    self.saveWorkflow();
+                });
             }
         });
     };
@@ -1569,7 +1561,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             let payload = {
                 data: curveInfo.data,
                 idDataset: curveInfo.idDataset,
-                idFamily: (family || {}).id || null
+                idFamily: curveInfo.idFamily || (family || {}).id || null
             }
             wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
                 if (curve.idCurve) {
@@ -1600,6 +1592,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
     this.addCurveInput = function(){
         self.workflowConfig.model.inputs.unshift({class: "curve input"});
+        self.changeCurveSelection = true;
     }
     this.removeCurveInput = function(index){
         let i = self.workflowConfig.model.inputs.length;
@@ -1607,6 +1600,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             toastr.error('Need least at 1 curve input', '');
         else{
             self.workflowConfig.model.inputs.splice(index, 1);
+            self.changeCurveSelection = true;
             self.saveWorkflow();
         }
     }
@@ -1629,7 +1623,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             if (wiItemDropdownCtrl.items.length) {
                 wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
                 self.currentModelType = wiItemDropdownCtrl.selectedItem.properties;
-                self.workflowConfig.model.currentModelType = self.currentModelType;
+                if (self.workflowConfig && self.workflowConfig.model) 
+                    self.workflowConfig.model.currentModelType = self.currentModelType;
             }
         }
         else {
@@ -1681,6 +1676,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (predictStepIdx >= 0) {
             self.workflowConfig.steps[predictStepIdx].result = predictResult;
         }
+        self.workflowConfig.model.currentModelType = self.currentModelType;
         wiApiService.editWorkflow({
             idWorkflow: self.idWorkflow,
             content:self.workflowConfig
@@ -1691,7 +1687,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     this.saveWorkflow = _.debounce(saveWorkflow, 3000);    
     this.finishWizard = function() {
         __running_wf = true;
-        async.eachOfSeries(self.workflowConfig.steps, function(step, idx, done){
+        self.workflowResults.forEach(function(step) {
+            step.outputData.length = 0;
+        })
+        async.forEachOfSeries(self.workflowConfig.steps, function(step, idx, done){
             if( step.inputData && step.inputData.length != 0) {
                 self.runStep(step, done);
             }else {

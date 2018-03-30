@@ -424,7 +424,7 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
             let existed = 0;
             curveNames.forEach(name => {
                 let curve = $scope.result.selectedDataset.children.find(
-                    c => c.name == name
+                    c => c.name.toUpperCase() == name.toUpperCase()
                 );
                 if (curve) existed++;
             });

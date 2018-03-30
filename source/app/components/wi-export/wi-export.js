@@ -283,8 +283,11 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
         if (Array.isArray(self.inventoryConfig && self.inventoryConfig.__SELECTED_NODES)) {                    
             // for (child of self.projectConfig.__SELECTED_NODES) {
                 // pushNodeToQueue(child, self.projectConfig);
-            for (child of self.inventoryConfig.__SELECTED_NODES) {                  
-                pushNodeToQueue(child, self.inventoryConfig);                    
+            for (child of self.inventoryConfig.__SELECTED_NODES) {  
+                console.log('selectedNode', self.inventoryConfig.__SELECTED_NODES);      
+                let childCopy = angular.copy(child);
+                childCopy.data.toggle = true;          
+                pushNodeToQueue(childCopy, self.inventoryConfig);                    
                 console.log('self.idExportQueueItems', self.idExportQueueItems);
             }
         }
@@ -507,31 +510,32 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
         self.idExportQueueItems.length = 0;
         console.log('clear export queue id', self.idExportQueueItems);
     }
+    this.switchLabelTooltip = function(wellNodes) {
+        self.labelToggle = !self.labelToggle;
+        console.log('labelToggle', self.labelToggle);
+        wellNodes.forEach(function(node) {
+            node.data.toggle = self.labelToggle;
+        });
+    }
     this.exportAllItems = function () {
         if (self.exportQueueItems.length > 0) {
             for (idObj of self.idExportQueueItems) { 
                 console.log('self.idExportQueueItem', self.idExportQueueItems);    
-                wiOnlineInvService.exportAllItems(idObj, function (path) {
-                    if (path) {  
-                        for (p of path){ 
-                            if(p!==null){
-                                getFileLink(p);
+                wiOnlineInvService.exportAllItems(idObj, function (response) {
+                    if (response) {  
+                        for (r of response){ 
+                            if(r!==null){
+                                let url = wiOnlineInvService.getFileUrl(r.path);
+                                self.lasFiles.push({
+                                    name: r.datasetName + "_" + r.wellName,
+                                    url: url
+                                })
                             }
                         }    
                     }
                 });
             } 
         }
-        // wiApiService.getWell(1 , function(well) {console.log('well', well);});
-    }
-    function getFileLink (path){
-        let fileName = path.split("").reverse().join("");
-        fileName = fileName.slice(0, fileName.indexOf("\\")).split("").reverse().join("");
-        let url = wiOnlineInvService.getFileUrl(path);
-        self.lasFiles.push({
-            name: fileName,
-            url: url
-        })
     }
 }
 
