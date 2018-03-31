@@ -1315,7 +1315,9 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
     let currentWell = getCurrentWell();
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let dataRequest = {
+        idProject: project.idProject,
         idWell: currentWell.properties.idWell,
         name: logplotName,
         option: 'blank-plot',

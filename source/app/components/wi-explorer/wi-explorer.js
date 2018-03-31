@@ -15,15 +15,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
             /* Start faking data */
             // fake project's multiple Logplots
-            let multiLogplots = [];
-            projectLoaded.wells.forEach(function(well) {
-                well.plots.forEach(function(plot) {
-                    if(plot.idPlot == 16) {
-                        multiLogplots.push(plot);
-                    }
-                })
-            })
-            projectLoaded.plots = multiLogplots;
+            // let multiLogplots = projectLoaded.plots;
+            // projectLoaded.wells.forEach(function(well) {
+            //     well.plots.forEach(function(plot) {
+            //         if(plot.idPlot == 16) {
+            //             multiLogplots.push(plot);
+            //         }
+            //     })
+            // })
+            // projectLoaded.plots = multiLogplots;
             /* End of faking data */
             let projectModel = utils.projectToTreeConfig(projectLoaded);
             let dustbinModel = utils.dustbinToTreeConfig();
