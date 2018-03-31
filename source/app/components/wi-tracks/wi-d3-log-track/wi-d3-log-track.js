@@ -525,6 +525,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 input: curve1.name + '_' + curve2.name
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+                if(!crossplotName) return;
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                 Utils.createCrossplot(idWell, crossplotName, function(err, crossplotModel) {
                     if (err) {
@@ -557,6 +558,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 input: curve.name + 'histogram'
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+                if(!histogramName) return;
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                 Utils.createHistogram(idWell, curve, histogramName);
             })

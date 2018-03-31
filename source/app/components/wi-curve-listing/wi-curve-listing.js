@@ -12,6 +12,7 @@ function Controller(
     let dataContainer;
     let dataCtrl;
     let __dragging = false;
+    let dialogOpened = false;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
@@ -56,14 +57,18 @@ function Controller(
             self.dataSettings[self.currentIndex] = new Object();
             let _current = self.dataSettings[self.currentIndex];
             _current.curves = new Object();
+            let step = self.SelectedWell.step;
+            let topDepth = self.SelectedWell.topDepth;
+            let bottomDepth = self.SelectedWell.bottomDepth;
+            let length = Math.round((bottomDepth - topDepth) / step) + 1;
             // _current.setting = {
             //     data: Handsontable.helper.createSpreadsheetData(100, 10),
             //     colHeaders: true
             // }
             _current.setting = {
-                colHeaders: ["Index", "Depth"],
+                colHeaders: ["Depth"],
                 manualColumnResize: true,
-                fixedColumnsLeft: 2,
+                fixedColumnsLeft: 1,
                 contextMenu: {
                     items: {
                         rm_col: {
@@ -87,9 +92,9 @@ function Controller(
                                 let selected = dataCtrl.getSelected();
                                 return (
                                     selected[0][1] == 0 ||
-                                    selected[0][1] == 1 ||
-                                    selected[0][3] == 0 ||
-                                    selected[0][3] == 1
+                                    // selected[0][1] == 1 ||
+                                    selected[0][3] == 0
+                                    // selected[0][3] == 1
                                 );
                             }
                         },
@@ -98,20 +103,22 @@ function Controller(
                         hsep2: "---------",
                         undo: {},
                         redo: {},
+                        hsep3: "---------",
                         copy: {},
                         cut: {}
                     }
                 },
                 columns: [
-                    {
-                        data: "id",
-                        readOnly: true
-                    },
+                    // {
+                    //     data: "id",
+                    //     readOnly: true
+                    // },
                     {
                         data: "depth",
                         readOnly: true
                     }
                 ],
+                copyRowsLimit: length,
                 afterChange: function(change, source) {
                     if (source == "loadData") return;
                     if (change && change.length) {
@@ -124,23 +131,21 @@ function Controller(
                     }
                 }
             };
-            let step = self.SelectedWell.step;
-            let topDepth = self.SelectedWell.topDepth;
-            let bottomDepth = self.SelectedWell.bottomDepth;
-            let length = Math.round((bottomDepth - topDepth) / step) + 1;
+
             _current.length = length;
             _current.setting.data = new Array(length)
                 .fill()
                 .map(d => new Object());
             for (let i = 0; i < length - 1; i++) {
-                _current.setting.data[i]["id"] = i;
+                // _current.setting.data[i]["id"] = i;
                 _current.setting.data[i]["depth"] = (
                     step * i +
                     topDepth
                 ).toFixed(4);
             }
-            _current.setting.data[length - 1]["id"] = length - 1;
+            // _current.setting.data[length - 1]["id"] = length - 1;
             _current.setting.data[length - 1]["depth"] = bottomDepth;
+            _current.setting.rowHeaders = _current.setting.data.map((r,i) => i);
         }
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
@@ -209,6 +214,8 @@ function Controller(
             document.addEventListener("keydown", function(event) {
                 if (event.ctrlKey && event.keyCode == 71) {
                     event.preventDefault();
+                    if(dialogOpened) return;
+                    dialogOpened = true;
                     // open go to dialog
                     let promptConfig = {
                         title:
@@ -222,6 +229,8 @@ function Controller(
                         ModalService,
                         promptConfig,
                         function(ret) {
+                            dialogOpened = false;
+                            if(!ret) return;
                             if (ret < 0) {
                                 ret = Math.abs(ret);
                             } else if (
