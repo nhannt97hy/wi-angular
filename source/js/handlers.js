@@ -193,6 +193,9 @@ exports.OpenModelButtonClicked = function() {
 //     })
 // };
 
+exports.ExportToolButtonClicked = function() {
+    console.log('ExportToolButton is clicked');
+}
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
     let wiComponentService = this.wiComponentService;
