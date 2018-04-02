@@ -4,10 +4,10 @@ const moduleName = 'wi-online-inv-service';
 
 let app = angular.module(moduleName, []);
 
-// const BASE_URL = 'http://13.250.197.210';
+const BASE_URL = 'http://13.250.197.210';
 // const BASE_URL = 'http://13.229.66.151';
 //const BASE_URL = 'http://13.250.177.181';
-const BASE_URL = 'http://localhost:9000';
+// const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const AUTHENTICATION_SERVICE = 'http://localhost:2999';
 
