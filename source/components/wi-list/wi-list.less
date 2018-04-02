@@ -1,24 +1,23 @@
 wi-list {
-    background: #fff;
-    display: block;
-    font-size: 13px;
+	background: #fff;
+	display: block;
+	font-size: 13px;
 
-    .list-heading {
-	  	border-top: 1px solid #cacbd3;
-	  	border-bottom: 1px solid #cacbd3;
-		background: rgba(248,248,249,1);
-		background: -moz-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
-		background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(248,248,249,1)), color-stop(100%, rgba(242,243,244,1)));
-		background: -webkit-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
-		background: -o-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
-		background: -ms-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
-		background: linear-gradient(to bottom, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
-		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f9', endColorstr='#f2f3f4', GradientType=0 );
+	.list-heading {
+		border-top: 1px solid #eee;
+		border-bottom: 1px solid #eee;
+		background: #f8f8f8;
+		// background: -moz-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+		// background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(248,248,249,1)), color-stop(100%, rgba(242,243,244,1)));
+		// background: -webkit-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+		// background: -o-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+		// background: -ms-linear-gradient(top, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+		// background: linear-gradient(to bottom, rgba(248,248,249,1) 0%, rgba(242,243,244,1) 100%);
+		// filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f9', endColorstr='#f2f3f4', GradientType=0 );
 		text-indent: 5px;
 		margin: 0;
 	}
 	table {
-		border-collapse: collapse;
 		width: 100%;
 		td, th {
 			text-align: left;
@@ -26,14 +25,24 @@ wi-list {
 			font-size: 12px;
 		}
 		tr{
-			display: flex;
+			// display: flex;
 			white-space: nowrap;
+			height: 2em;
+			border-bottom: 1px solid #eee;
 			td{
 				text-overflow: ellipsis;
 				overflow: hidden;
-				border-bottom: 1px solid #cacbd3;
-		 		border-right: 1px solid #cacbd3;
+		 		border-right: 1px solid #eee;
 				text-indent: 8px;
+			}
+			td:first-child {
+				// flex: 2;
+				width: 40%;
+				max-width: 0;
+			}
+			td:last-child{
+				flex: 3;
+				border-right: none;
 				> * {
 					background: transparent;
 					border-width: 0;
@@ -61,13 +70,6 @@ wi-list {
 						height: 16px;
 					}
 				}
-			}
-			td:first-child {
-				flex: 2;
-			}
-			td:last-child{
-				flex: 3;
-				border-right: none;
 			}
 		}
 	}
