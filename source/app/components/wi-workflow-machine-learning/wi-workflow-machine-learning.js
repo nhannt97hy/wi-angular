@@ -865,10 +865,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     
     this.updateNNConfig = _.debounce(updateNNConfig);    
     setInterval(self.updateNNConfig(), 1000);
-    
+    function getCurrentProjectId() {
+        let openProject = wiComponentService.getComponent(
+            wiComponentService.PROJECT_LOADED
+        );
+        return (openProject || {}).idProject;
+    };
     this.$onInit = function () {
+        self.idProject = getCurrentProjectId();
         if (self.name) wiComponentService.putComponent(self.name, self);
-
+        console.log(self.idWorkflow);
         if (self.idWorkflow) {
             wiApiService.getWorkflow(self.idWorkflow, function(workflow) {
                 self.workflowConfig = workflow.content;
@@ -1711,9 +1717,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         return __running_wf;
     }
     this.createSpinner = function() {
-        $timeout( () => {
-            document.getElementById("workflow-" + self.idWorkflow + "-spinner").appendChild((new Spinner()).spin().el);
-        }, 700);
+        // $timeout( () => {
+        //     document.getElementById("workflow-" + self.idWorkflow + "-spinner").appendChild((new Spinner()).spin().el);
+        // }, 700);
     }
 
     this.openPlot = function(plot){
@@ -1963,7 +1969,6 @@ app.component(name, {
     transclude: true,
     bindings: {
         name: "@",
-        idProject: "<",
         idWorkflow: "<"
     }
 });
