@@ -103,7 +103,7 @@
                 </form>
             </div>
             <ul>
-                <li ng-repeat='file in wiExport.lasFiles' filter='wiExport.lasFilesFilter'>
+                <li ng-repeat='file in wiExport.lasFiles | filter: wiExport.lasFilesFilter'>
                     <a href="{{file.url}}">
                         <i style="font-size: 16px;z-index:1;color:#aaa;" class="fa fa-file"></i>
                         <b>{{file.name}}</b>
