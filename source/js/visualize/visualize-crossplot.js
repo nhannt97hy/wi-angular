@@ -653,12 +653,15 @@ Crossplot.prototype.updateAxises = function() {
 }
 
 Crossplot.prototype.updateAxisTicks = function() {
+    let self = this;
     let wdX = this.getWindowX();
     let wdY = this.getWindowY();
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
     let xTickValues = this.genXTickValues();
     let yTickValues = this.genYTickValues();
+    let xTickType = (this.pointSet.logX) ? xLogMajorTest : xLinearMajorTest;
+    let yTickType = (this.pointSet.logY) ? yLogMajorTest : yLinearMajorTest;
 
     let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX || 1);
     let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY || 1);
@@ -675,11 +678,25 @@ Crossplot.prototype.updateAxisTicks = function() {
 
     this.axisContainer.select('g.vi-crossplot-axis-x-ticks')
         .call(axisX)
-        .style('transform', 'translateY(' + vpY[0] + 'px)');
+        .style('transform', 'translateY(' + vpY[0] + 'px)')
+        .selectAll('.tick text')
+            .style('display', function(d, i) {
+                if (self.pointSet.logX)
+                    return xTickType(i) ? 'block' : 'none';
+                else
+                    return 'block';
+            });
 
     this.axisContainer.select('g.vi-crossplot-axis-y-ticks')
         .call(axisY)
-        .style('transform', 'translateX(' + vpX[0] + 'px)');
+        .style('transform', 'translateX(' + vpX[0] + 'px)')
+        .selectAll('.tick text')
+            .style('display', function(d, i) {
+                if (self.pointSet.logY)
+                    return yTickType(i) ? 'block' : 'none';
+                else
+                    return 'block';
+            });
 
     if (!this.shouldPlotZAxis()) {
         this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
@@ -720,6 +737,20 @@ Crossplot.prototype.updateAxisTicks = function() {
         .call(axisZ)
         .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)')
         .style('display', 'block');
+
+    function xLinearMajorTest(i) {
+        return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? true : false;
+    }
+    function yLinearMajorTest(i) {
+        return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? true : false;
+    }
+
+    function xLogMajorTest(i) {
+        return Number.isInteger(Math.log10(xTickValues[i])) ? true : false;
+    }
+    function yLogMajorTest(i) {
+        return Number.isInteger(Math.log10(yTickValues[i])) ? true : false;
+    }
 }
 
 Crossplot.prototype.updateAxisGrids = function() {
@@ -1177,7 +1208,10 @@ Crossplot.prototype.prepareRegressionLines = function() {
     let self = this;
     regLines.forEach(function(l) {
         let polygons = self.polygons.filter(function(p) {
-            return l.polygons.indexOf(p.idPolygon) > -1;
+            return l.polygons.findIndex(lp => {
+                return lp.idPolygon ? lp.idPolygon == p.idPolygon : lp == p.idPolygon;
+            }) > -1;
+            // return l.polygons.indexOf(p.idPolygon) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {

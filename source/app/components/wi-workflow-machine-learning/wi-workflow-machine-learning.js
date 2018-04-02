@@ -331,10 +331,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let inputCurves = [];
         let inputData = step.inputData;
         if(inputData){
-            async.eachOf(inputData, function(iptData, idx, _end){
+            async.forEachOfSeries(inputData, function(iptData, idx, _end){
                 let inputSet = iptData;
                 listInputCurves[idx] = [];
-                async.eachOf(inputSet.inputs, function(curveInfo, idx1, __end){
+                async.forEachOfSeries(inputSet.inputs, function(curveInfo, idx1, __end){
                     listInputCurves[idx][idx1] = [];
                     wiApiService.dataCurve(curveInfo.value.idCurve, function(curveData){
                         listInputCurves[idx][idx1] = curveData.map(function(d) {
@@ -358,9 +358,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let curveInputs = [];
         let inputData = step.inputData;
         if(inputData){
-            inputData.forEach(function(iptData, i){
+            async.forEachOfSeries(inputData, function(iptData, i, __done){
                 let j=-1;
-                async.each(iptData.inputs, function(curveInfo,__end){
+                async.forEachOfSeries(iptData.inputs, function(curveInfo, idx, __end){
                     wiApiService.dataCurve(curveInfo.value.idCurve, function(curveData){
                         j++;
                         if(i==0) curveInputs[j] = [];
@@ -370,10 +370,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         __end();
                     });
                 }, function(err){
-                    if(i==inputData.length-1){
-                        callback(curveInputs);
-                    }
+                    if(err)
+                        __done(err);
+                    __done();
                 });
+            }, function(err) {
+                callback(curveInputs);
             });
         }else {
             toastr.error('Choose a dataset', '');
@@ -533,6 +535,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         });
     }
     
+    // }
     function saveCurveAndCreatePlot(curveInfo, step, index, cb) {
         /*let _stepVerify = self.workflowConfig.steps.filter(function(step){
             return step.name==VERIFY_STEP_NAME;
@@ -613,8 +616,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     window.tar.push(x);
                                 });
                                 fillNullInCurve(nullPositions, res.target);
-                                for(let i =0; i<res.target.length; i++)
-                                console.log(verifyCurve[i],' - ', res.target[i]);
+                                // for(let i =0; i<res.target.length; i++)
+                                // console.log(verifyCurve[i],' - ', res.target[i]);
                                 let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
                                 let curveInfo = {
                                     idDataset: _stepVerify.inputData[index].dataset.idDataset,

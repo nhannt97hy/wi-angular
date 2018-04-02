@@ -28,8 +28,7 @@ module.exports = function (ModalService, promptConfig, callback) {
         }, 500);
         modal.close.then(function (ret) {
             helper.removeBackdrop();
-            if (!ret) return;
-            callback(ret);
+            if (callback) callback(ret);
         });
     });
 }
