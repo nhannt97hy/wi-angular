@@ -230,130 +230,144 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
-        self.contextMenu = [{
-            name: "Refresh",
-            label: "Refresh",
-            icon: "reload-16x16",
-            handler: function () {
-
-            }
-        }, {
-            name: "Properties",
-            label: "Properties",
-            icon: "properties2-16x16",
-            handler: function () {
-                self.histogramFormat();
-            }
-        }, {
-            name: "Discriminator",
-            label: "Discriminator",
-            icon: "ti-filter",
-            handler: function () {
-                self.discriminator();
-            }
-        }, {
-            name: "ReferenceWindow",
-            label: "Reference Window",
-            icon: "ti-layout-tab-window",
-            handler: function () {
-                DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
-                    saveHistogramNow(function () {
-                        let refWindCtrl = self.getWiRefWindCtrl();
-                        if (refWindCtrl)
-                            refWindCtrl.update(getWell(),
-                                self.histogramModel.properties.reference_curves,
-                                self.histogramModel.properties.referenceScale,
-                                self.histogramModel.properties.referenceVertLineNumber,
-                                self.histogramModel.properties.referenceTopDepth,
-                                self.histogramModel.properties.referenceBottomDepth,
-                                self.histogramModel.properties.referenceShowDepthGrid);
-                    });
-                });
-            }
-        },{
-            name: "FlipHorizontalAxis",
-            label: "Flip Horizontal Axis",
-            "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.flipHorizontal : false,
-            handler: function (index) {
-                self.histogramModel.properties.flipHorizontal = !self.histogramModel.properties.flipHorizontal;
-                self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;
-                self.visHistogram.signal('histogram-update', 'flip horizontally');
-                saveHistogram();
-            }
-        }, {
-            name: "ShowGrid",
-            label: "Show Grid",
-            "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.showGrid : false,
-            handler: function (index) {
-                self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
-                self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
-                self.visHistogram.signal('histogram-update', 'show/hide grid');
-                saveHistogram();
-            }
-        }, {
-            name: "ShowGaussian",
-            label: "Show Gaussian",
-            "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.showGaussian : false,
-            handler: function (index) {
-                self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
-                self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
-                self.visHistogram.signal('histogram-update', 'show/hide gaussian');
-                saveHistogram();
-            }
-        }, {
-            name: "ShowAxisYAsPercent",
-            label: "Show Axis Y as Percent",
-            "isCheckType": "true",
-            checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false,
-            handler: function (index) {
-                if (self.histogramModel.properties.plotType == "Frequency")
-                    self.histogramModel.properties.plotType = "Percent";
-                else self.histogramModel.properties.plotType = "Frequency";
-                self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
-                self.visHistogram.signal('histogram-update', "update frequency/percentile");
-                saveHistogram();
-            }
-        }, {
-            name: "ShowReferenceWindow",
-            label: "Show Reference Window",
-            "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,
-            handler: function (index) {
-                self.switchReferenceWindow();
-                self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
-            }
-        },{
-            name: "ShowCumulative",
-            label: "Show Cumulative",
-            "isCheckType": "true",
-            checked: self.histogramModel ? self.histogramModel.properties.showCumulative : false,
-            handler: function (index) {
-                self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
-                self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
-                self.visHistogram.signal('histogram-update', "show/hide Cumulative curve");
-                saveHistogram();
-            }
-        }, {
-            name: "ShowTooltip",
-            label: "Show Tooltip",
-            isCheckType: "true",
-            checked: self.histogramModel.properties.showTooltip || false,
-            handler: function () {
-                self.histogramModel.properties.showTooltip = !(self.histogramModel.properties.showTooltip || false);
-            }
-        }, {
-            name: "FrequencyInfor",
-            label: "Frequency Infor",
-            icon: "ti-info-alt",
-            handler: function () {
-                if (self.visHistogram.data) {
-                    DialogUtils.histogramFrequencyInfoDialog(ModalService, self);
+        if (self.containerName && self.visHistogram.mode == 'UseSelector') {
+            let combinedPlotD3Ctrl = wiComponentService.getComponent(self.containerName + 'D3Area');
+            self.contextMenu = [
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        combinedPlotD3Ctrl.endAllSelections();
+                    }
                 }
-            }
-        }];
+            ];
+        } else {
+            self.contextMenu = [{
+                name: "Refresh",
+                label: "Refresh",
+                icon: "reload-16x16",
+                handler: function () {
+    
+                }
+            }, {
+                name: "Properties",
+                label: "Properties",
+                icon: "properties2-16x16",
+                handler: function () {
+                    self.histogramFormat();
+                }
+            }, {
+                name: "Discriminator",
+                label: "Discriminator",
+                icon: "ti-filter",
+                handler: function () {
+                    self.discriminator();
+                }
+            }, {
+                name: "ReferenceWindow",
+                label: "Reference Window",
+                icon: "ti-layout-tab-window",
+                handler: function () {
+                    DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
+                        saveHistogramNow(function () {
+                            let refWindCtrl = self.getWiRefWindCtrl();
+                            if (refWindCtrl)
+                                refWindCtrl.update(getWell(),
+                                    self.histogramModel.properties.reference_curves,
+                                    self.histogramModel.properties.referenceScale,
+                                    self.histogramModel.properties.referenceVertLineNumber,
+                                    self.histogramModel.properties.referenceTopDepth,
+                                    self.histogramModel.properties.referenceBottomDepth,
+                                    self.histogramModel.properties.referenceShowDepthGrid);
+                        });
+                    });
+                }
+            },{
+                name: "FlipHorizontalAxis",
+                label: "Flip Horizontal Axis",
+                "isCheckType": "true",
+                checked: self.histogramModel ? self.histogramModel.properties.flipHorizontal : false,
+                handler: function (index) {
+                    self.histogramModel.properties.flipHorizontal = !self.histogramModel.properties.flipHorizontal;
+                    self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;
+                    self.visHistogram.signal('histogram-update', 'flip horizontally');
+                    saveHistogram();
+                }
+            }, {
+                name: "ShowGrid",
+                label: "Show Grid",
+                "isCheckType": "true",
+                checked: self.histogramModel ? self.histogramModel.properties.showGrid : false,
+                handler: function (index) {
+                    self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
+                    self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
+                    self.visHistogram.signal('histogram-update', 'show/hide grid');
+                    saveHistogram();
+                }
+            }, {
+                name: "ShowGaussian",
+                label: "Show Gaussian",
+                "isCheckType": "true",
+                checked: self.histogramModel ? self.histogramModel.properties.showGaussian : false,
+                handler: function (index) {
+                    self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
+                    self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
+                    self.visHistogram.signal('histogram-update', 'show/hide gaussian');
+                    saveHistogram();
+                }
+            }, {
+                name: "ShowAxisYAsPercent",
+                label: "Show Axis Y as Percent",
+                "isCheckType": "true",
+                checked: self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false,
+                handler: function (index) {
+                    if (self.histogramModel.properties.plotType == "Frequency")
+                        self.histogramModel.properties.plotType = "Percent";
+                    else self.histogramModel.properties.plotType = "Frequency";
+                    self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
+                    self.visHistogram.signal('histogram-update', "update frequency/percentile");
+                    saveHistogram();
+                }
+            }, {
+                name: "ShowReferenceWindow",
+                label: "Show Reference Window",
+                "isCheckType": "true",
+                checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,
+                handler: function (index) {
+                    self.switchReferenceWindow();
+                    self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
+                }
+            },{
+                name: "ShowCumulative",
+                label: "Show Cumulative",
+                "isCheckType": "true",
+                checked: self.histogramModel ? self.histogramModel.properties.showCumulative : false,
+                handler: function (index) {
+                    self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
+                    self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
+                    self.visHistogram.signal('histogram-update', "show/hide Cumulative curve");
+                    saveHistogram();
+                }
+            }, {
+                name: "ShowTooltip",
+                label: "Show Tooltip",
+                isCheckType: "true",
+                checked: self.histogramModel.properties.showTooltip || false,
+                handler: function () {
+                    self.histogramModel.properties.showTooltip = !(self.histogramModel.properties.showTooltip || false);
+                }
+            }, {
+                name: "FrequencyInfor",
+                label: "Frequency Infor",
+                icon: "ti-info-alt",
+                handler: function () {
+                    if (self.visHistogram.data) {
+                        DialogUtils.histogramFrequencyInfoDialog(ModalService, self);
+                    }
+                }
+            }];
+        }
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
@@ -415,7 +429,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 well.topDepth, 
                 well.bottomDepth, elem);
         if (self.containerName) {
-            self.visHistogram.initSelectionArea(self.viSelections);
+            self.selections.forEach(function(selectionConfig) {
+                self.visHistogram.addViSelectionToHistogram(selectionConfig);
+            });
         }
         //self.visHistogram.zoneSetModel = self.zoneSetModel;
         //self.visHistogram.zoneSet = self.zoneSetModel?self.zoneSetModel.children : null;
@@ -488,7 +504,7 @@ app.component(componentName, {
         name: '@',
         wiHistogramCtrl: '<',
         idHistogram: '<',
-        viSelections: '<',
+        selections: '<',
         containerName: '@'
     }
 });

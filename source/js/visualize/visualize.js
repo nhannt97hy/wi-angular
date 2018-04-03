@@ -246,10 +246,10 @@ exports.createHistogram = function(config, depthStep, startDepth, endDepth, domE
     return histogram;
 }
 
-exports.plotSelection = function (wiD3Ctrl, selectionId, newDatum) {
-    let logTracks = wiD3Ctrl.getTracks().filter(t => t.isLogTrack());
+exports.plotSelection = function (logTracks, selectionId, color, newDatum) {
     logTracks.forEach(t => {
         let selection = t.getSelection(selectionId);
+        selection.color = color;
         selection.setProperties({maskData: newDatum});
         selection._doPlot();
     })

@@ -473,10 +473,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.pushLogTrack = function (logTrackProps) {
         self.pushTrackComponent(logTrackProps);
         $timeout(function() {
-            let track = getComponentCtrlByProperties(logTrackProps).viTrack;
+            let trackD3Ctrl = getComponentCtrlByProperties(logTrackProps);
+            let viTrack = trackD3Ctrl.viTrack;
             if (self.containerName) {
-                track.initSelectionArea(self.viSelections);
-                track.pushSelectionAreas();
+                let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id);
+                self.selections.forEach(function(selectionConfig) {
+                    selectionConfig.wellForLogplot = well;
+                    trackD3Ctrl.addViSelectionToTrack(viTrack, selectionConfig);
+                })
             }
         });
     }
@@ -1384,7 +1388,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
-        viSelections: '<',
+        selections: '<',
         containerName: '@'
     }
 });

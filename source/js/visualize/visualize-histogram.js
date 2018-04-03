@@ -71,6 +71,11 @@ Histogram.prototype.setSelection = function(viSelection) {
     this.viSelection = viSelection;
 }
 
+Histogram.prototype.setMode = function(mode) {
+    this.svgContainer.style('cursor', mode == null ? 'default' : 'copy');
+    this.mode = mode;
+}
+
 Histogram.prototype.getTickValuesY = function() {
     if (this.histogramModel.properties.plotType != "Frequency") { // Percentile
         return d3.range(0, 100, 10);
@@ -1126,14 +1131,22 @@ Histogram.prototype.getPercentile = function (p) {
     return calPercentile(this.joinZoneData(), p);
 }
 
-Histogram.prototype.initSelectionArea = function(viSelections) {
-    let self = this;
-    viSelections.forEach((viSelection) => {
-        viSelection.initSvg(self.container, 'histogram');
-        self.selectionSvgContainer.push(viSelection);
-    });
+Histogram.prototype.addViSelectionToHistogram = function(selectionConfig) {
+    let viSelection = new Selection(selectionConfig);
+    viSelection.initSvg(this.container, 'histogram');
+    this.selectionSvgContainer.push(viSelection);
+    return viSelection;
 }
 
 Histogram.prototype.getSelection = function(id) {
     return this.selectionSvgContainer.find(d => d.isSelection() && d.idSelectionTool == id);
+}
+
+Histogram.prototype.removeViSelection = function (viSelection) {
+    if (!viSelection) return;
+    viSelection.svg.remove();
+    viSelection.destroy();
+
+    let idx = this.selectionSvgContainer.indexOf(viSelection);
+    this.selectionSvgContainer.splice(idx, 1);
 }

@@ -2219,3 +2219,11 @@ Crossplot.prototype.genYTickValues =  function () {
         return d3.range(wdY[0], wdY[1] + stepY/2, stepY);
     }
 }
+
+Crossplot.prototype.removeViSelection = function (viSelection) {
+    if (!viSelection) return;
+    viSelection.destroy();
+
+    let idx = this.selectionCanvasContainer.indexOf(viSelection);
+    this.selectionCanvasContainer.splice(idx, 1);
+}
