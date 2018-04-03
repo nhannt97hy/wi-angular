@@ -1,70 +1,76 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, callback) {
+module.exports = function (ModalService, plotModels, callback) {
     function ModalController(wiComponentService, wiApiService, close) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let self = this;
 
-        // let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        // let wells = project.wells;
-
         let props = {
-            logplot: null,
-            histogram: null,
-            crossplot: null
+            logplots: [],
+            histograms: [],
+            crossplots: []
         };
 
-        // console.log('project loaded', project);
         let blank = [{
             id: null,
             name: ''
         }];
 
-        this.logplots = blank.concat(wiComponentService.getComponent('project-logplots'));
-        this.histograms = blank.concat(wiComponentService.getComponent('project-histograms'));
-        this.crossplots = blank.concat(wiComponentService.getComponent('project-crossplots'));
+        // this.mainLogplots = blank.concat(wiComponentService.getComponent('project-logplots'));
+        // this.mainHistograms = blank.concat(wiComponentService.getComponent('project-histograms'));
+        // this.mainCrossplots = blank.concat(wiComponentService.getComponent('project-crossplots'));
 
-        for (let i = 1; i < this.logplots.length; i++) this.logplots[i].wellName = this.logplots[i].parentData.label;
-        for (let i = 1; i < this.histograms.length; i++) this.histograms[i].wellName = this.histograms[i].parentData.label;
-        for (let i = 1; i < this.crossplots.length; i++) this.crossplots[i].wellName = this.crossplots[i].parentData.label;
-        // wells.forEach(function(well) {
-        //     well.plots.forEach(function(plot) {
-        //         plot.wellName = well.name;
-        //         self.logplots.push(plot);
-        //     });
+        this.mainLogplots = wiComponentService.getComponent('project-logplots');
+        this.mainHistograms = wiComponentService.getComponent('project-histograms');
+        this.mainCrossplots = wiComponentService.getComponent('project-crossplots');
 
-        //     well.histograms.forEach(function(histogram) {
-        //         histogram.wellName = well.name;
-        //         self.histograms.push(histogram);
-        //     });
+        for (let i = 0; i < this.mainLogplots.length; i++) this.mainLogplots[i].wellName = this.mainLogplots[i].parentData.label;
+        for (let i = 0; i < this.mainHistograms.length; i++) this.mainHistograms[i].wellName = this.mainHistograms[i].parentData.label;
+        for (let i = 0; i < this.mainCrossplots.length; i++) this.mainCrossplots[i].wellName = this.mainCrossplots[i].parentData.label;
 
-        //     well.crossplots.forEach(function(crossplot) {
-        //         crossplot.wellName = well.name;
-        //         self.crossplots.push(crossplot);
-        //     });
-        // });
+        this.logplots = this.mainLogplots;
+        this.histograms = this.mainHistograms;
+        this.crossplots = this.mainCrossplots;
 
-
-        // this.logplots = blank.concat(this.logplots);
-        // this.histograms = blank.concat(this.histograms);
-        // this.crossplots = blank.concat(this.crossplots);
-
-        // console.log('logplots', this.logplots);
-        // console.log('histograms', this.histograms);
-        // console.log('crossplots', this.crossplots);
-
-        this.onSelectLogplot = function(selectedLogplot) {
-            console.log(selectedLogplot);
-            props.logplot = selectedLogplot;
+        this.onSelectLogplot = function(selectedLogplots) {
+            props.logplots = selectedLogplots;
+            if (selectedLogplots.length) {
+                selectedLogplots.forEach(l => filterGroup(l.wellName));
+            } else {
+                filterGroup(null);
+            }
+            console.log(props.logplots);
         }
 
-        this.onSelectHistogram = function(selectedHistogram) {
-            console.log(selectedHistogram);
-            props.histogram = selectedHistogram;
+        this.onSelectHistogram = function(selectedHistograms) {
+            props.histograms = selectedHistograms;
+            if (selectedHistograms.length) {
+                selectedHistograms.forEach(h => filterGroup(h.wellName));
+            } else {
+                filterGroup(null);
+            }
+            console.log(props.histograms);
         }
 
-        this.onSelectCrossplot = function(selectedCrossplot) {
-            console.log(selectedCrossplot);
-            props.crossplot = selectedCrossplot;
+        this.onSelectCrossplot = function(selectedCrossplots) {
+            props.crossplots = selectedCrossplots;
+            if (selectedCrossplots.length) {
+                selectedCrossplots.forEach(c => filterGroup(c.wellName));
+            } else {
+                filterGroup(null);
+            }
+            console.log(props.crossplots);
+        }
+
+        function filterGroup (wellName) {
+            if (wellName) {
+                self.logplots =  self.mainLogplots.filter(logplot => logplot.wellName == wellName);
+                self.histograms = self.mainHistograms.filter(histogram => histogram.wellName == wellName);
+                self.crossplots = self.mainCrossplots.filter(crossplot => crossplot.wellName == wellName);
+            } else {
+                self.logplots = self.mainLogplots;
+                self.histograms = self.mainHistograms;
+                self.crossplots = self.mainCrossplots;
+            }
         }
 
         this.onOkButtonClicked = function () {
@@ -88,7 +94,7 @@ module.exports = function (ModalService, callback) {
         helper.initModal(modal);
         modal.close.then(function (ret) {
             helper.removeBackdrop();
-            callback(ret);
+            if (ret) callback(ret);
         });
     });
 }

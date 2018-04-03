@@ -90,6 +90,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 crossplotProps.pointSet = crossplotProps.pointsets[0];
             self.createVisualizeCrossplot(null, null, crossplotProps);
             self.switchReferenceZone(crossplotProps.pointSet.depthType == 'zonalDepth');
+            self.switchOverLay(crossplotProps.pointSet.idOverlayLine ? false : true);
             let refWindCtrl = self.getWiRefWindCtrl();
             if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
@@ -316,6 +317,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.yHistogram.doPlot();
         }
     }
+    this.switchOverLay = function(state){
+        const menuItem = self.contextMenu.find(c => c.name == 'ShowOverlay');
+        if (menuItem) {
+            menuItem.disabled = state;
+        }
+    }
 
     this.switchReferenceZone = function(state) {
         if (!self.wiCrossplotCtrl) return;
@@ -445,7 +452,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                         if (overlayLine) {
                             // overlayLine.isSwap = crossplotProps.pointSet.isOverlayLineSwap;
-                            crossplotProps.pointSet.overlayLine = overlayLine;
+                            crossplotProps.pointSet.OLLine = overlayLine;
+                        }else{
+                            crossplotProps.pointSet.OLLine = null;
                         }
                         //if (callback) callback(crossplotProps);
 
@@ -462,6 +471,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
                         self.viCrossplot.setProperties(crossplotProps);
                         // self.viCrossplot.doPlot();
+                        self.switchOverLay(crossplotProps.pointSet.idOverlayLine ? false : true);
                         try {
                             self.switchReferenceZone(depthType == 'zonalDepth');
                         }
@@ -567,9 +577,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }, {
                     name: "ShowOverlay",
                     label: "Show Overlay",
-                    icon: "",
-                    handler: function () {
-
+                    isCheckType: "true",
+                    disabled: ((self.viCrossplot || {}).pointSet || {}).idOverlayLine ? false : true,
+                    checked: self.viCrossplot.showOverlay ? self.viCrossplot.showOverlay : true,
+                    handler: function (index) {
+                        self.viCrossplot.showOverlay = !self.viCrossplot.showOverlay;
+                        self.viCrossplot.plotOverlayLines();
+                        self.contextMenu[index].checked = self.viCrossplot.showOverlay;
                     }
                 }, {
                     name: "ShowReferenceZone",
@@ -679,6 +693,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
+        if (self.containerName && self.viCrossplot.mode == 'UseSelector') {
+            let combinedPlotD3Ctrl = wiComponentService.getComponent(self.containerName + 'D3Area');
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        combinedPlotD3Ctrl.endAllSelections();
+                    }
+                }
+            ]);
+        }
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
     }
@@ -840,7 +867,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             function(callback) {
                 if (config.pointSet.idOverlayLine) {
                     wiApiService.getOverlayLine(config.pointSet.idOverlayLine, config.pointSet.idCurveX, config.pointSet.idCurveY, function(ret) {
-                        config.pointSet.overlayLine = (ret || {}).data;
+                        config.pointSet.OLLine = (ret || {}).data;
                         callback();
                     });
                 }
@@ -874,12 +901,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 if (self.containerName) {
-                    self.viCrossplot.initSelectionArea(self.viSelections);
+                    self.selections.forEach(function(selectionConfig) {
+                        self.viCrossplot.addViSelectionToCrossplot(selectionConfig);
+                    });
                 }
                 if(config.pointSet.idCurveX && config.pointSet.idCurveY && self.crossplotModel.properties.showHistogram) {
                     self.histogramXReady();
                     self.histogramYReady();
                 }
+                $timeout(function() {
+                    let container = self.viCrossplot.container;
+                    container.on('mousewheel', function() {
+                        _onPlotMouseWheelCallback(container);
+                    });
+                }, 1000);
                 self.loading = false;
             });
         }
@@ -1107,7 +1142,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandlerCross);
         document.removeEventListener('resize', self.resizeHandlerHis);
-	}
+    }
+
+    function _onPlotMouseWheelCallback (container) {
+        let mouse = d3.mouse(container.node());
+        if (d3.event.ctrlKey) {
+            zoom(d3.event.deltaY > 0);
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+        }
+    }
+
+    function zoom (zoomOut) {
+        console.log('zooming');
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -1120,7 +1168,7 @@ app.component(componentName, {
         name: '@',
         wiCrossplotCtrl: '<',
         idCrossplot: '<',
-        viSelections: '<',
+        selections: '<',
         containerName: '@'
     }
 });

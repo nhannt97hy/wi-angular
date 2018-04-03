@@ -136,12 +136,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
             delete tabComponents[component.config.id];
             if(modelRef){
                 let model = utils.getModel(modelRef.type, modelRef.id);
-                if (!model) return;
-                model.data.opened = false;
-                if (model.isReady) model.isReady = false;
-                wiComponentService.dropComponent(model.type + model.id);
-                let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
-                historyState.removePlotFromHistory(model.type, model.id);
+                if (model) {
+                    model.data.opened = false;
+                    if (model.isReady) model.isReady = false;
+                    wiComponentService.dropComponent(model.type + model.id);
+                    let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
+                    historyState.removePlotFromHistory(model.type, model.id);
+                }
             }
             if (componentState.name) wiComponentService.dropComponent(componentState.name);
             newScope.$destroy();

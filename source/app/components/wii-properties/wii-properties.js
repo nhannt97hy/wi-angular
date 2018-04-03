@@ -102,7 +102,7 @@ function Controller(wiComponentService, wiOnlineInvService, $timeout) {
         'PROJ': 'Project',
         'CODE': 'Code',
         'AREA': 'Area',
-        'TYPE': 'Area',
+        'TYPE': 'Type',
         'STATUS': 'Status',
         'GEN1': 'Gen 01',
         'GEN2': 'Gen 02',

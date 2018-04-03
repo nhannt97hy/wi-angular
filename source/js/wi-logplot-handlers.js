@@ -283,7 +283,7 @@ exports.ScaleCustomButtonClicked = function () {
         type: 'number'
     }
     DialogUtils.promptDialog(self.ModalService, promptConfig, function (scale) {
-        scaleTo(scale, self.wiLogplot, self.wiComponentService);
+        if(scale) scaleTo(scale, self.wiLogplot, self.wiComponentService);
     })
 }
 exports.ZoomInButtonClicked = function () {
@@ -600,6 +600,7 @@ exports.SaveAsLogplotNameButtonClicked = function () {
         input: wiLogplot.logplotModel.properties.name
     };
     DialogUtils.promptDialog(mds, promptConfig, function (logplotName) {
+        if(!logplotName) return;
         let idWell = wiLogplot.logplotModel.properties.idWell;
         let idPlot = wiLogplot.logplotModel.properties.idPlot;
         let plots = wics.getComponent(wics.PROJECT_LOADED).wells.find(w => w.idWell == idWell).plots;

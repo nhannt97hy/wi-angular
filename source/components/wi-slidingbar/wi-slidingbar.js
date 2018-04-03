@@ -169,9 +169,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             tempTinyWindowsTop = ((ui.position.top > 0) ? ui.position.top : 0) + _offsetTop;
         }
 
-        $timeout(function () {
-            updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
-        });
+        updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
     }
 
     function updateWid3() {
@@ -383,11 +381,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).css('top', (top - _offsetTop) + 'px');
         $(self.handleId).css('height', height + 'px');
         $(self.handleId).resizable("option", "minHeight", getMinTinyWinHeight());
-
-        $timeout(function () {
-            //updateState(top, height, parentHeight);
-            updateState(top, height);
-        });
+        updateState(top, height);
     }
 
     this.refreshHandler = function () {

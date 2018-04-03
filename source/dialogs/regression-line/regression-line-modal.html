@@ -1,5 +1,5 @@
 <div class='modal fade' data-backdrop="static" data-keyboard="false">
-    <div class='modal-dialog modal-lg'>
+    <div class='modal-dialog modal-1000'>
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
@@ -7,115 +7,82 @@
             </div>
             <div class="modal-body text-center">
                 <div class="container-fluid padding-0">
-                    <div class="col-sm-11 padding-right-0">
+                    <!-- <div class="col-sm-11 padding-right-0"> -->
                         <form class="form-horizontal">
-                            <table class="font-size-10px table table-bordered regressionLineTable">
-                                <thead>
-                                    <tr>
-                                        <td></td>
-                                        <td style="width: 7%">Display Line</td>
-                                        <td style="width: 7%">Display Equation</td>
-                                        <td>Line Style</td>
-                                        <td>Reg type</td>
-                                        <td style="width: 7%">Inverse Reg</td>
-                                        <td>Include/Exclude</td>
-                                        <td>Polygons</td>
-                                        <td>FitX</td>
-                                        <td>FitY</td>
-                                    </tr>
+                            <table class="font-size-10px table table-bordered regressionLineTable availableCurve">
+                            <thead>
+                                <tr>
+                                    <th style="width: 3%">#</th>
+                                    <th style="width: 7%">Display Line</th>
+                                    <th style="width: 7%">Display Equation</th>
+                                    <th style="width: 14%">Line Style</th>
+                                    <th style="width: 14%">Reg type</th>
+                                    <th style="width: 7%">Inverse Reg</th>
+                                    <th style="width: 14%">Include/Exclude</th>
+                                    <th>Polygons</th>
+                                    <th style="width: 7%">FitX</th>
+                                    <th style="width: 7%">FitY</th>
+                                    <th style="width: 7%">
+                                        <button class="btn btn-default" ng-click="wiModal.addRow();">
+                                            <span class="plus-16x16"></span>
+                                        </button>
+                                    </th>
+                                </tr>
                             </thead>
-                                <tbody>
-                                    <tr ng-repeat="regLine in wiModal.getRegressionLines() track by $index"
-                                    ng-class="{'selected':$index == selectedRow}"
-                                    ng-click="wiModal.setClickedRow($index)">
-                                        <td>{{$index+1}}</td>
-                                        <td style="width: 7%">
-                                            <input type="checkbox"
-                                                    ng-model="regLine.displayLine"
-                                                    ng-change="wiModal.onChange(regLine.index)">
-                                        </td>
-                                        <td style="width: 7%">
-                                            <input type="checkbox"
-                                                    ng-model="regLine.displayEquation"
-                                                    ng-change="wiModal.onChange(regLine.index)">
-                                        </td>
-                                        <td>    
-                                            <div ng-model="regLine.lineStyle" id="lineStyleSvg" 
-                                                    ng-change="wiModal.onChange(regLine.index)"
-                                                    ng-click="wiModal.onEditLineStyleButtonClicked(regLine.index); wiModal.onChange(regLine.index)">
-                                                <svg height="20" width="75">
-                                                    <line x1="0" y1="10" x2="75" y2="10" 
-                                                            stroke-dasharray="{{regLine.lineStyle.lineStyle.join(',')}}"
-                                                            style="stroke:{{regLine.lineStyle.lineColor}};stroke-width:{{regLine.lineStyle.lineWidth}}" />
-                                                </svg>
-                                            </div>
-                                            <!-- <button type="button" 
-                                                    ng-model="regLine.lineStyle"
-                                                    ng-change="wiModal.onChange(regLine.index)"
-                                                    ng-click="wiModal.onEditLineStyleButtonClicked(regLine.index)">...</button> -->
-                                                
-                                        </td>
-                                        <td>
-                                            <select ng-model="regLine.regType"
-                                                    class="form-control wi-form-control"
-                                                    ng-change="wiModal.onChange(regLine.index)">
-                                                <option value="Linear">Linear</option>
-                                                <option value="Exponent">Exponent</option>
-                                                <option value="Power">Power</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input ng-model="regLine.inverseReg"
-                                                    type="checkbox"
-                                                    ng-change="wiModal.onChange(regLine.index)">
-                                        </td>
-                                        <td>
-                                            <select ng-model="regLine.exclude"
-                                                class="form-control wi-form-control"
-                                                ng-change="wiModal.onChange(regLine.index)"
-                                                ng-options="(item?'Exclude':'Include') for item in [true, false]">
-                                            </select>
-                                        </td>
-                                        <td style="width: 15%">
-                                            <!-- <div ng-dropdown-multiselect=""
-                                                options="wiModal.polygonList" 
-                                                selected-model="regLine.polygons" 
-                                                extra-settings="selectDataSetting"
-                                                class="normal-text"></div> -->
-                                                <!-- item.id as item.datasetCurve for item in wiModal.curvesArr -->
-                                            <multiselect class="input-xlarge" multiple="true"
-                                                ng-model="regLine.polygons"
-                                                options="p for p in wiModal.polygonList"
-                                                change="selected()" 
-                                                ng-change="wiModal.onChange(regLine.index);">
-                                            </multiselect>
-                                        </td>
-                                        
-                                        <td style="width: 7%">
-                                            <input type="number" ng-model="regLine.fitX"
-                                                    class="form-control wi-form-control"
-                                                    ng-change="wiModal.onChange(regLine.index)">
-                                        </td>
-                                        <td style="width: 7%">
-                                            <input type="number" ng-model="regLine.fitY"
-                                                    class="form-control wi-form-control"
-                                                    ng-change="wiModal.onChange(regLine.index)">
-                                        </td>
-                                    </tr>
-                                </tbody>
+                            <tbody>
+                                <tr ng-repeat="regLine in wiModal.getRegressionLines() track by $index" ng-class="{'selected':$index == selectedRow}" ng-click="wiModal.setClickedRow($index)">
+                                    <td style="width: 3%">{{$index+1}}</td>
+                                    <td style="width: 7%">
+                                        <input type="checkbox" ng-model="regLine.displayLine" ng-change="wiModal.onChange(regLine.index)">
+                                    </td>
+                                    <td style="width: 7%">
+                                        <input type="checkbox" ng-model="regLine.displayEquation" ng-change="wiModal.onChange(regLine.index)">
+                                    </td>
+                                    <td style="width: 14%">
+                                        <div ng-model="regLine.lineStyle" id="lineStyleSvg" ng-change="wiModal.onChange(regLine.index)" ng-click="wiModal.onEditLineStyleButtonClicked(regLine.index); wiModal.onChange(regLine.index)">
+                                            <svg height="20" width="75">
+                                                <line x1="0" y1="10" x2="75" y2="10" stroke-dasharray="{{regLine.lineStyle.lineStyle.join(',')}}" style="stroke:{{regLine.lineStyle.lineColor}};stroke-width:{{regLine.lineStyle.lineWidth}}"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </td>
+                                    <td style="width: 14%">
+                                        <select ng-model="regLine.regType" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)">
+                                            <option value="Linear">Linear</option>
+                                            <option value="Exponent">Exponent</option>
+                                            <option value="Power">Power</option>
+                                        </select>
+                                    </td>
+                                    <td style="width: 7%">
+                                        <input ng-model="regLine.inverseReg" type="checkbox" ng-change="wiModal.onChange(regLine.index)">
+                                    </td>
+                                    <td style="width: 14%">
+                                        <select ng-model="regLine.exclude" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)" ng-options="(item?'Exclude':'Include') for item in [true, false]">
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <multiselect class="input-xlarge" multiple="true" ng-model="regLine.polygons" options="p for p in wiModal.polygonList" change="selected()"
+                                            ng-change="wiModal.onChange(regLine.index);">
+                                        </multiselect>
+                                    </td>
+                                    <td style="width: 7%">
+                                        <input type="number" ng-model="regLine.fitX" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)">
+                                    </td>
+                                    <td style="width: 7%">
+                                        <input type="number" ng-model="regLine.fitY" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)">
+                                    </td>
+                                    <td style="width: 7%">
+                                        <button class="btn btn-default" ng-click="wiModal.removeRow(regLine.index);">
+                                            <span class="delete-16x16"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
                             </table>
                         </form>
-                    </div>
-                    <div class="col-sm-1">
-                        <button class="btn btn-default" ng-click="wiModal.removeRow();">
-                            <span class="delete-16x16"></span>
-                        </button>
-                        <button class="btn btn-default" ng-click="wiModal.addRow();">
-                            <span class="plus-16x16"></span>
-                        </button>
-                    </div>
+                    <!-- </div> -->
                 </div>
-                
+
             </div>
 
             <div class="modal-footer">

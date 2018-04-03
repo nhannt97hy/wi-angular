@@ -94,6 +94,7 @@ module.exports = function (ModalService, toolBox, idCombinedBox, callback) {
                             self.tools[i].idCombinedBox = idCombinedBox;
                             wiApiService.editCombinedBoxTool(self.tools[i], function(data) {
                                 self.tools[i] = data;
+                                self.tools[i].status = _EDIT;
                                 callback();
                             });
                             break;
@@ -121,9 +122,7 @@ module.exports = function (ModalService, toolBox, idCombinedBox, callback) {
                                 break;
                         }
                     }
-                    utils.refreshProjectState().then(function() {
-                        if (callback) callback();
-                    });
+                    if (callback) callback();
                 });
             } else {
                 if (callback) callback();

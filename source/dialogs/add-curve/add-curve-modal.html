@@ -22,7 +22,8 @@
                             <label class="col-sm-6">Well:</label>
                             <div class="col-sm-6">
                                 <ui-select ng-model='wiModal.SelectedWell'
-                                ng-change='wiModal.onWellChanged()'>
+                                ng-change='wiModal.onWellChanged()'
+                                ng-disabled="wiModal.disabled">
                                     <ui-select-match>{{$select.selected.name}}</ui-select-match>
                                     <ui-select-choices repeat='well in wiModal.wellArr | filter: {name: $select.search} track by $index'>
                                         {{well.name}}</ui-select-choices>

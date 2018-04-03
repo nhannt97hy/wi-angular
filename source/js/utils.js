@@ -257,7 +257,7 @@ function zoneSetToTreeConfig(zoneSet, options = {}) {
         zoneSetModel.type = 'zoneset-deleted-child';
         return zoneSetModel;
     }
-    zoneSetModel.name = 'zoneset';
+    zoneSetModel.name = zoneSet.name;
     zoneSetModel.type = 'zoneset';
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
@@ -1231,7 +1231,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: function (event) {
             selectedObjs = $(`.wi-parent-node[type='curve']`).filter('.item-active').clone();
             let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-            if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) return $(event.currentTarget).clone();
+            if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) return $(event.currentTarget).find('div:nth-child(2)').clone();
             return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
         },
         start: function (event, ui) {
@@ -1709,8 +1709,10 @@ exports.renameWell = function renameWell (newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                selectedNode.name = ret;
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, selectedNode);
             })
         });
     });
@@ -1737,8 +1739,11 @@ exports.renameDataset = function renameDataset (newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                selectedNode.name = ret;
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
+                selectedNode.children.forEach(c => c.parent = ret);
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, selectedNode);
             })
         });
     });
@@ -1819,8 +1824,10 @@ exports.renameCurve = function renameCurve (newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                selectedNode.name = ret;
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, selectedNode);
             })
         });
     });
@@ -2599,8 +2606,10 @@ exports.renameZoneSet = function renameZoneSet (zoneSetModel, newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                zoneSetModel.name = ret;
                 zoneSetModel.properties.name = ret;
                 zoneSetModel.data.label = ret;
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, zoneSetModel);
             })
         });
     });
