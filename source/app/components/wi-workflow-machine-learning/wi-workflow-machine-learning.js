@@ -592,9 +592,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 list_curves[length-1].forEach(function(x){
                     verifyCurve.push(x);
                 })
-                //  = list_curves.splice(list_curves.length-1, 1)[0];
+                // verifyCurve  = list_curves.splice(list_curves.length-1, 1)[0];
+                // list_curves.splice(list_curves.length-1, 1);
+                list_curves.pop();
                 let indicesObj = filterNull(list_curves);
-                indicesObj.filterCurves.splice(indicesObj.filterCurves.length-1, 1);
+                // indicesObj.filterCurves.splice(indicesObj.filterCurves.length-1, 1);
                 let dataCurves = indicesObj.filterCurves;
                 let nullPositions = indicesObj.fillNull;
                 let payload = null;
