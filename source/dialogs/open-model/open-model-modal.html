@@ -1,0 +1,50 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <style>
+        .line-height-1_5 {
+            line-height: 1.5;
+        }
+    </style>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title">
+                    <span class="workflow-16x16"></span>&nbsp;Open Model</h4>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-infomation-title">
+                    <span class="workflow-16x16"></span>&nbsp;Model Information
+                </h5>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Model name:</label>
+                        <wi-item-dropdown class='col-sm-9 height34px position-fixed'
+                            on-wi-dropdown-init="wiModal.getWorkflowList"
+                            on-item-changed="wiModal.workflowChanged"
+                            place-holder="Select workflow"
+                            ctrl-btn-icon='fa fa-times-circle line-height-1_5'
+                            on-ctrl-btn-click='wiModal.deleteWorkflow'>
+                        </wi-item-dropdown>
+                        <!--
+                        <div class="col-sm-9">
+                            <select ng-model="wiModal.selectedWorkflow" class="form-control"
+                            ng-options="wf.name for wf in wiModal.workflows track by wf.idWorkflow">
+                            </select>
+                        </div>
+                        -->
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"
+                ng-disabled="!wiModal.selectedWorkflow">
+                    <span class="ok-16x16"></span>&nbsp;OK
+                </button>
+                <button type="button" class="btn btn-default" ng-click="wiModal.onCancelButtonClicked()">
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

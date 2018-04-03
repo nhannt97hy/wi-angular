@@ -9,7 +9,8 @@ module.exports = function (ModalService, callback) {
         this.getWorkflowList = function (wiItemDropdownCtrl) {
             wiApiService.getWorkflowList({idProject: project.idProject}, function (workflows) {
                 wiItemDropdownCtrl.items = workflows.map(function (wf) {
-                    if(!wf.workflowSpec.type)
+                    console.log(wf);
+                    if(wf.workflowSpec.type)
                     return {
                         data: {
                             label: wf.name
@@ -44,7 +45,7 @@ module.exports = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: 'open-workflow-modal.html',
+        templateUrl: 'open-model-modal.html',
         controller: ModalController,
         controllerAs: 'wiModal'
     }).then(function (modal) {

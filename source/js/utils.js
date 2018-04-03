@@ -1205,7 +1205,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: function (event) {
             selectedObjs = $(`.wi-parent-node[type='curve']`).filter('.item-active').clone();
             let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-            if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) return $(event.currentTarget).clone();
+            if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) return $(event.currentTarget).find('div:nth-child(2)').clone();
             return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
         },
         start: function (event, ui) {
