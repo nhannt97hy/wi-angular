@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function(ModalService){
+module.exports = function(ModalService, wiComponentService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.DERI = this;
@@ -91,7 +91,7 @@ module.exports = function(ModalService){
             }
         }
         this.onWellChange();
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+        this.onRefresh = function() {
             self.applyingInProgress = false;
             if(self.firstCurve.idDesCurve || (self.checked && self.secondCurve.idDesCurve)){
                 delete self.lastCurve;
@@ -101,7 +101,8 @@ module.exports = function(ModalService){
                     self.onWellChange();
                 });
             }, 0);
-        });
+        }
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
 
         this.onDatasetChange = function(){
             self.firstCurve.idDataset = self.selectedDataset;
@@ -114,8 +115,14 @@ module.exports = function(ModalService){
         function saveCurve(curve, reload, cb){
             let payload = angular.copy(curve);
             if(curve.idDesCurve) delete payload.curveName;
-            wiApiService.processingDataCurve(payload, function(){
+            wiApiService.processingDataCurve(payload, function(res){
                 console.log('Curve Saved!');
+                if(!res.idCurve) {
+                    wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                        idCurve: payload.idDesCurve,
+                        data: payload.data
+                    })
+                }
                 if(reload) utils.refreshProjectState();
                 if(cb) cb();
             })
@@ -209,6 +216,7 @@ module.exports = function(ModalService){
     }).then(function (modal) {
         helper.initModal(modal);
         modal.close.then(function () {
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh)
             helper.removeBackdrop();
         });
     });
