@@ -181,6 +181,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         } else {
             updateMultiLogplotStatus();
         }
+
         function getDataCurve(idCurve, _cb) {
             const line = viTrack.getCurves().find(l => l.idCurve === idCurve) || {};
             let dataCurve = line.rawData;
@@ -224,6 +225,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             }
             // default setup
             viTrack.headerNameBlock.style('background-color', viTrack.HEADER_NAME_COLOR);
+            let component = self;
+            self.wiD3Ctrl.listWells.forEach(function(well) {
+                let foundTrack = well.wellAttrs.tracks.find(function(track) {
+                    return track.name == component.name;
+                });
+                if(foundTrack) {
+                    well.wellAttrs.tracks = well.wellAttrs.tracks.filter(function(track) {
+                        return track.name != component.name;
+                    });
+                }
+            })
 
             // TO BE REVIEWED
             // if (viTrack.drawings.length == 0) {
@@ -689,8 +701,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             idPlot: logTrack.idPlot,
             orderNum: logTrack.orderNum,
             name: logTrack.title,
+
+            // TO BE REMOVED
             yStep: parseFloat(_getWellProps().step),
             offsetY: parseFloat(_getWellProps().topDepth),
+
             width: Utils.inchToPixel(logTrack.width),
             zoomFactor: logTrack.zoomFactor,
             xMajorTicks: logTrack.majorTicks,

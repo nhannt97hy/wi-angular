@@ -79,10 +79,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.compileFunc = $compile;
     this.scopeObj = $scope;
     this.trackComponents = [];
-    // this.wellsAttrs = [ {
-    //     color: '#88CC88',
-    //     tracks: []
-    // }];
     this.listWells = [];
 
     /* public method */
@@ -248,33 +244,37 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
     }
     this.getMaxDepth = function () {
+
+        let defaultBottomDepth = 100000;
+        /* TO BE REMOVED
         let currentWellProps = self.getWellProps();
-        let currentWellBottomDepth = 100000;
         if (currentWellProps.bottomDepth)
         // return parseFloat(wellProps.bottomDepth);
             currentWellBottomDepth = parseFloat(currentWellProps.bottomDepth);
-
+        */
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getExtentY) return track.getExtentY()[1];
             return -1;
         });
         // _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
         // return _maxDepth;
-        return (maxDepth > -1 && maxDepth < 100000 ? maxDepth:currentWellBottomDepth);
+        return (maxDepth > -1 && maxDepth < 100000 ? maxDepth:defaultBottomDepth);
     };
     this.getMinDepth = function () {
+        let defaultTopDepth = 0;
+        /* TO BE REMOVED
         let currentWellProps = self.getWellProps();
-        let currentWellTopDepth = 0;
         if(currentWellProps.topDepth) {
             currentWellTopDepth = parseFloat(currentWellProps.topDepth);
         }
+        */
         let minDepth = d3.min(_tracks, function (track) {
             if (track.getExtentY && track.drawings.length) {
                 return track.getExtentY()[0];
             }
             return 100000;
         });
-        return (minDepth > -1 && minDepth < 100000 ? minDepth:currentWellTopDepth);
+        return (minDepth > -1 && minDepth < 100000 ? minDepth:defaultTopDepth);
     }
 
     this.getDepthRange = function () {
@@ -293,7 +293,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
     }
+
+    // TO BE REMOVED
     this.getWellProps = _getWellProps;
+
     this.getLogplotHandler = function () {
         return logplotHandlers;
     }
@@ -323,6 +326,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
+    /* TO BE REMOVED
     this.verifyDroppedIdCurve = function (idCurve) {
         let well1 = self.getWellProps();
         let well2 = Utils.findWellByCurve(idCurve) || {properties: {}};
@@ -330,17 +334,41 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
         return 0;
     }
+    */
+    this.verifyDroppedIdCurve = function (idCurve) {
+        let curveWell = Utils.findWellByCurve(idCurve);
+        if(curveWell) return 1;
+        else return 0;
+    }
     this.verifyDroppedIdCurveOnTrack = function (idCurve, track) {
+        /* TO BE REMOVED
         let curveWell = Utils.findWellByCurve(idCurve) || {properties: {}};
         let trackWell = {properties: {}};
-        if(track.isLogTrack() && track.drawings.length) {
-            let curveOnTrack = track.drawings[0];
+        if(track.isLogTrack() && track.getCurves().length) {
+            let curveOnTrack = track.getCurves()[0];
             trackWell = Utils.findWellByCurve(curveOnTrack.idCurve);
         }
         if(curveWell.properties.idWell && track.isLogTrack() && !track.drawings.length) return 1;
         if(!curveWell.properties.idWell || !trackWell.properties.idWell) return -1;
         if(curveWell.properties.idWell && trackWell.properties.idWell && (curveWell.properties.idWell == trackWell.properties.idWell)) return 1;
         return 0;
+        */
+        let curveWell = Utils.findWellByCurve(idCurve);
+        let trackWell = self.detectWellForTrack(track);
+        if(curveWell && trackWell && curveWell.properties.idWell == trackWell.idWell) return 1;
+        if(curveWell && !trackWell) return 1;
+        return 0;
+    }
+    // detect well for a track, if no well contain track or track has no curve then return null
+    this.detectWellForTrack = function (track) {
+        if(track && track.isLogTrack() && track.getCurves().length) {
+            let curveOnTrack = track.getCurves()[0];
+            let trackWell = Utils.findWellByCurve(curveOnTrack.idCurve);
+            if(trackWell) return trackWell.properties;
+            else return null;
+        } else {
+            return null;
+        }
     }
     this.depthShiftDialog = function () {
         if(!_currentTrack.isLogTrack()) {
@@ -637,8 +665,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return track.zoomFactor;
         });
 
-        let topDepth = parseFloat(self.getWellProps().topDepth);
-        let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
+        // TO BE REMOVED
+        // let topDepth = parseFloat(self.getWellProps().topDepth);
+        // let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
+        let topDepth = self.getMinDepth();
+        let bottomDepth = self.getMaxDepth();
 
         let shouldRescaleWindowY = !(_depthRange[0] == topDepth && _depthRange[1] == bottomDepth);
         for (let track of _tracks) {
@@ -653,12 +684,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.removeTrack(_currentTrack);
     }
     this.removeTrack = function (track) {
-        if(track.isLogTrack()) {
-            let curves = track.getCurves();
-            let wellProps = curves.length ? utils.findWellByCurve(curves[0].idCurve).properties:_getWellProps();
-            let wellIdx = self.listWells.indexOf(wellProps.idWell);
-            self.wellsAttrs[wellIdx].tracks.splice(self.wellsAttrs[wellIdx].tracks.indexOf(getComponentCtrlByViTrack(track)), 1);
-        }
         // remove visualizeTrack
         let trackIdx = _tracks.indexOf(track);
         if (trackIdx < 0) return;
@@ -682,6 +707,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let component = self.trackComponents.find(function (trackComponent) {
             return trackComponent.controller.viTrack == track;
         });
+        self.listWells.forEach(function(well) {
+            console.log(component, " need to remove");
+            let foundTrack = well.wellAttrs.tracks.find(function(track) {
+                return track.name == component.name;
+            });
+            console.log('found track component', foundTrack);
+            if(foundTrack) {
+                well.wellAttrs.tracks = well.wellAttrs.tracks.filter(function(track) {
+                    return track.name != component.name;
+                });
+                console.log('track removed');
+            } else {
+                console.log('track is not removed');
+            }
+        })
         let name = component.controller.name;
         $(`[name=`+ component.controller.name +`]`).remove();
         self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
@@ -786,6 +826,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             // });
         }, 1000)
 
+        // TO BE REMOVED
         // multiwell feature. By default, current well is the first well in the array
         // self.listWells.push(_getWellProps().idWell);
         self.listWells.push({
@@ -1119,10 +1160,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
+    // TO BE REMOVED
     function _getWellProps() {
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
         return well.properties || {};
     }
+
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;
         if (_previousTrack != _currentTrack) {

@@ -303,6 +303,9 @@ exports.createZoneSet = function createZoneSet (idWell, callback) {
 
 function logplotToTreeConfig(plot, options = {}) {
     let plotModel = new Object();
+    // TO BE REMOVED
+    // logplots now belong to project
+    /*
     let wellModel = options.wellModel;
     if (!wellModel)
         wellModel = getModel('well', plot.idWell);
@@ -310,13 +313,24 @@ function logplotToTreeConfig(plot, options = {}) {
     setTimeout(() => {
         plotModel.parentData = wellModel.data;
     });
+    */
+
+    // TO BE REVIEWED
+    // let projectModel = options.projectModel;
+    // if(!projectModel)
+    //     projectModel = getModel('project', plot.idProject);
+    // setTimeout(() => {
+    //     plotModel.parentData = projectModel.data;
+    // });
 
     if (options.isDeleted) {
         plotModel.name = 'logplot-deleted-child';
         plotModel.type = 'logplot-deleted-child';
         plotModel.id = plot.idPlot;
         plotModel.properties = {
-            idWell: plot.idWell,
+            // TO BE REMOVED
+            // idWell: plot.idWell,
+            idProject: plot.idProject,
             idPlot: plot.idPlot,
             name: plot.name
         };
@@ -325,7 +339,9 @@ function logplotToTreeConfig(plot, options = {}) {
             icon: 'logplot-blank-16x16',
             label: plot.name
         }
-        plotModel.parent = 'well' + plot.idWell;
+        // TO BE REMOVED
+        // plotModel.parent = 'well' + plot.idWell;
+        plotModel.parent = 'project' + plot.idProject;
         return plotModel;
     }
     plotModel.name = 'logplot';
@@ -346,7 +362,10 @@ function logplotToTreeConfig(plot, options = {}) {
     plotModel.handler = function () {
         openLogplotTab(wiComponentService, plotModel);
     }
-    plotModel.parent = 'well' + plot.idWell;
+    // TO BE REMOVED
+    // plotModel.parent = 'well' + plot.idWell;
+    plotModel.parent = 'parent' + plot.idProject;
+
     let projectLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS)
     if (projectLogplots) projectLogplots.push(plotModel);
     return plotModel;
@@ -772,7 +791,7 @@ function createLogplotsNode(parent, options = {}) {
     plotsModel.data = {
         childExpanded: false,
         icon: 'logplot-blank-16x16',
-        label: (parent && parent.idProject) ? "Multiple Logplots":"Logplots"
+        label: "Logplots"
     }
     if (options.isDeleted) {
         plotsModel.name = 'logplots-deleted';
@@ -1232,7 +1251,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     let idCurve = idCurves[0];
                     let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
                     console.log('drop curve into slidingBar', errorCode);
-                    if (errorCode >= 0) {
+                    if (errorCode > 0) {
                         wiSlidingBarCtrl.createPreview(idCurve);
                         let logplotModel = wiSlidingBarCtrl.logPlotCtrl.getLogplotModel();
                         let logplotRequest = angular.copy(logplotModel.properties);
@@ -1248,7 +1267,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 }
                 if (wiD3Ctrl && !track) {
                     const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
-                    if (errorCode >= 0) {
+                    if (errorCode > 0) {
                         wiD3Ctrl.addLogTrack(null, function (logTrackController) {
                             async.eachSeries(idCurves, (idCurve, next) => {
                                 const viTrack = logTrackController.viTrack;
@@ -1265,7 +1284,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                                 });
                             });
                         });
-                    } else if (errorCode < 0) {
+                    } else if (errorCode === 0) {
                         toastr.error("Cannot drop curve from another well");
                     }
                     return;

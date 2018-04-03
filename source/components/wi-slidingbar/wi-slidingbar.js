@@ -33,12 +33,16 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     let logPlotCtrl = null;
     let __well = null;
 
+    /* TO BE REMOVED
     function getWell() {
         if (!__well) {
-            __well = utils.findWellByLogplot(logPlotCtrl.id);
+            //__well = utils.findWellByLogplot(logPlotCtrl.id);
+            if(self.refCurve)
+                __well = utils.findWellByCurve(self.refCurve.idCurve);
         }
         return __well;
     }
+    */
 
     function createPreview(idCurve) {
         console.log(idCurve);
@@ -102,12 +106,18 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.verifyDroppedIdCurve = function(idCurve) {
+        // TO BE REMOVED
+        /*
         let well1 = utils.findWellByLogplot(logPlotCtrl.id);
         let well2 = utils.findWellByCurve(idCurve) || {properties:{}};
 
         if (!well1.properties.idWell || !well2.properties.idWell) return -1;
         if (well1.properties.idWell && well2.properties.idWell && (well1.properties.idWell == well2.properties.idWell)) return 1;
         return 0;
+        */
+        let wiD3Ctrl = wiComponentService.getD3AreaForSlidingBar(self.name);
+        if(wiD3Ctrl) return wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+        else return -1;
     }
 
     this.createPreview = createPreview;
@@ -433,7 +443,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
             let max = wiD3Controller.getMaxDepth();
             let min = wiD3Controller.getMinDepth();
-            __minRange = MIN_STEPS_OF_VIEW * getWell().step / (max - min);
+            // TO BE REMOVED
+            // __minRange = MIN_STEPS_OF_VIEW * getWell().step / (max - min);
+
+            // TO BE REVIEWED
+            // hard code: assume step default = 1
+            __minRange = MIN_STEPS_OF_VIEW * 0.1 / (max - min);
         }
         return __minRange;
     }
