@@ -589,18 +589,36 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
         logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
     }
-    this.onReady = function () {
-        self.viTrack = createVisualizeLogTrack(getProperties());
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
-
-        Utils.listenEvent('curve-deleted', function (eventData) {
-            console.log('curve deleted event: ', eventData);
-            let hasCurve = self.viTrack.getCurves().find(function(curve) { return curve.idCurve == eventData.properties.idCurve;});
+    this.onDelete = function (model) {
+        console.log('onDelete LogTrack: ', model);
+        let hasCurve;
+        switch(model.type){
+            case 'curve':
+            hasCurve = self.viTrack.getCurves().find(curve => curve.idCurve == model.id);
             if(hasCurve) {
                 console.log('updating log track', self.viTrack);
                 self.update();
             }
-        })
+            break;
+
+            case 'dataset':
+            hasCurve = self.viTrack.getCurves().find(curve => curve.idDataset == model.id);
+            if(hasCurve) {
+                console.log('updating log track', self.viTrack);
+                self.update();
+            }
+            break;
+
+            default:
+            break;
+        }
+    }
+    this.onReady = function () {
+        self.viTrack = createVisualizeLogTrack(getProperties());
+        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+
+        // Utils.listenEvent('curve-deleted', )
         _registerLogTrackCallback(self.viTrack);
     }
 
@@ -1015,6 +1033,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             // Mousedown already set the shading to be current shading
             _shadingOnDoubleClick();
         });
+    }
+
+    this.$onDestroy = function(){
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
     }
 
 }

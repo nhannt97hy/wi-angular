@@ -119,7 +119,9 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         readOnly: true
                     }
                 ],
-                copyRowsLimit: length,
+                beforeCopy: function(data, coords){
+                    console.log(data, coords);
+                },
                 renderAllRows: false,
                 afterChange: function(change, source) {
                     if (source == "loadData") return;
@@ -262,9 +264,9 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 self.wells && self.wells.length ? self.wells[0] : null;
         }
         wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT,self.onRefresh)
-
         wiComponentService.on(wiComponentService.RENAME_MODEL, self.onRename)
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         document.addEventListener('resize', self.resizeHandler);
 
         angular.element(document).ready(function() {
@@ -410,7 +412,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             );
         }
     };
-    this.removeModel = function(model) {
+    this.onDelete = function(model) {
         switch (model.type) {
             case "curve":
                 let wellModel = utils.findWellByCurve(model.id);
@@ -428,16 +430,38 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     );
                     if (idx) {
                         _current.setting.columns.splice(idx, 1);
-                        dataCtrl.updateSettings(_current.setting);
                     }
                 }
                 break;
 
-                case "well":
-                let idWell = "" + model.id;
-                if (self.dataSettings.hasOwnProperty(idWell))
-                    delete self.dataSettings[idWell];
-                break;
+            case 'dataset':
+            let idDataset = model.id;
+            let current = self.dataSettings[model.properties.idWell];
+            if(current){
+                let hasCurve = [];
+                for( const [key, value] of Object.entries(current.curves)){
+                    if(value.idDataset == idDataset) {
+                        hasCurve.push(value.id);
+                    }
+                }
+                if(hasCurve.length){
+                    hasCurve.forEach(curve => {
+                        if(current.curves.hasOwnProperty(curve)) delete current.curves[curve];
+                        current.setting.data.forEach( r => {
+                            if(r.hasOwnProperty(curve)) delete r[curve];
+                        })
+                        let idx = current.setting.columns.findIndex(c => c.data == curve);
+                        if(idx) current.setting.columns.splice(idx, 1);
+                    })
+                }
+            }
+            break;
+
+            case "well":
+            let idWell = "" + model.id;
+            if (self.dataSettings.hasOwnProperty(idWell))
+                delete self.dataSettings[idWell];
+            break;
 
             default:
                 break;
@@ -451,6 +475,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
         wiComponentService.removeEvent(wiComponentService.RENAME_MODEL, self.onRename);
         wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
         document.removeEventListener('resize', self.resizeHandler);
     }
 }

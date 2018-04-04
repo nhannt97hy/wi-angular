@@ -121,7 +121,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                             modelsWithTab.forEach(function (model) {
                                 if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
                             });
-                            utils.updateWiCurveListingOnModelDeleted(selectedNode);
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'dataset':
@@ -131,20 +131,17 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                                 utils.updateWiLogplotOnModelDeleted(curve);
                                 utils.updateWiCrossplotOnModelDeleted(curve);
                                 utils.updateWiHistogramOnModelDeleted(curve);
-                                utils.updateWiCurveListingOnModelDeleted(curve);
                             });
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'curve':
                         deleteFunction = wiApiService.removeCurve;
                         cleanUpFunction = function () {
-                            /*
-                            utils.updateWiLogplotOnModelDeleted(selectedNode);
-                            */
-                            utils.emitEvent('curve-deleted', selectedNode);
+                            // utils.emitEvent('curve-deleted', selectedNode);
                             utils.updateWiCrossplotOnModelDeleted(selectedNode);
                             utils.updateWiHistogramOnModelDeleted(selectedNode);
-                            utils.updateWiCurveListingOnModelDeleted(selectedNode);
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'zoneset':

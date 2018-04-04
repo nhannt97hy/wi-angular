@@ -2954,18 +2954,11 @@ function getVisualizeShading (track, idShading) {
 }
 exports.getVisualizeShading = getVisualizeShading;
 
-function updateWiCurveListingOnModelDeleted(model){
-    let wiComponentService = __GLOBAL.wiComponentService;
-    let wiCurveListing = wiComponentService.getComponent('WCL');
-    if(wiCurveListing) wiCurveListing.removeModel(model);
-}
 function getSelectedNode(rootNode) {
     return getSelectedPath(null, rootNode).pop();
 }
 
 exports.getSelectedNode = getSelectedNode;
-
-exports.updateWiCurveListingOnModelDeleted = updateWiCurveListingOnModelDeleted;
 
 function getDepthCurve(well){
     let length = Math.round((well.bottomDepth - well.topDepth)/well.step) + 1;
