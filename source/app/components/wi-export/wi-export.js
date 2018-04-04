@@ -518,23 +518,21 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
         });
     }
     this.exportAllItems = function () {
-        if (self.exportQueueItems.length > 0) {
-            for (idObj of self.idExportQueueItems) { 
-                console.log('self.idExportQueueItem', self.idExportQueueItems);    
-                wiOnlineInvService.exportAllItems(idObj, function (response) {
-                    if (response) {  
-                        for (r of response){ 
-                            if(r!==null){
-                                let url = wiOnlineInvService.getFileUrl(r.path);
-                                self.lasFiles.push({
-                                    name: r.datasetName + "_" + r.wellName,
-                                    url: url
-                                })
-                            }
-                        }    
-                    }
-                });
-            } 
+        if (self.exportQueueItems.length > 0) { 
+            wiOnlineInvService.exportAllItems(self.idExportQueueItems, function (response) {
+                if (response) {  
+                    for (r of response){ 
+                        if(r!==null){
+                            let url = wiOnlineInvService.getFileUrl(r.path);
+                            self.lasFiles.push({
+                                name: r.datasetName + "_" + r.wellName,
+                                url: url
+                            })
+                        }
+                    }    
+                }
+            });
+            
         }
     }
 }
