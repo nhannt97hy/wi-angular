@@ -137,4 +137,5 @@ exports.depthShiftDialog = require('./depth-shift-modal');
 exports.curveFamilyDialog = require('./curve-family-modal');
 exports.newWorkflowDialog = require('./new-workflow-modal');
 exports.openWorkflowDialog = require('./open-workflow-modal');
-exports.shareProjectDialog = require('./share-project-modal');
+exports.newModelDialog = require('./new-model-modal');
+exports.openModelDialog = require('./open-model-modal');

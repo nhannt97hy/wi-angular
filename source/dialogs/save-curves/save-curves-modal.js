@@ -1,6 +1,6 @@
 let helper = require('./DialogHelper');
 module.exports = function(ModalService, curvesData, callback){
-    function ModalController(close, wiApiService){
+    function ModalController(close, wiApiService, wiComponentService){
         let self = this;
         window.SC = this;
         self.curvesData = curvesData;
@@ -13,10 +13,13 @@ module.exports = function(ModalService, curvesData, callback){
                 data: curve.data
             }
             wiApiService.processingDataCurve(payload, function(result, err){
-                if(err) {
-                    toastr.error(err)
-                }else{
+                if(!err) {
                     saved.push('' + curve.id);
+                    wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                        idCurve: payload.idDesCurve,
+                        data: payload.data,
+                        wcl: true
+                    })
                 }
                 callback();
             }, function(percent){
@@ -25,10 +28,6 @@ module.exports = function(ModalService, curvesData, callback){
         },function(err){
             close(saved);
         })
-
-        // this.onCancelButtonClicked = function(){
-        //     close(null);
-        // }
     }
 
     ModalService.showModal({

@@ -123,6 +123,7 @@ module.exports = function (ModalService, callback) {
         function groupNameDialog(groupName, callback) {
             let promptConfig = { title: 'New Group', inputName: 'Group Name', input: groupName || 'new_group' }
             dialogUtils.promptDialog(ModalService, promptConfig, function (newGroupName) {
+                if(!newGroupName) return;
                 if (isGroupNameValid(newGroupName)) callback(newGroupName);
                 else {
                     utils.error('Group name is existed!', function () {

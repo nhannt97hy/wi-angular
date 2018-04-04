@@ -157,10 +157,9 @@ Track.prototype.createHeaderContainer = function() {
         .style('text-align', this.justification)
         .style('position', 'relative')
         .style('background-color', this.HEADER_NAME_COLOR)
-        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('border-bottom', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('z-index', 1)
-        .style('margin', '0 1px')
         .style('white-space', 'nowrap')
         .text(this.name)
         .on('mousedown', function(d) {
@@ -171,7 +170,7 @@ Track.prototype.createHeaderContainer = function() {
     this.drawingHeaderContainer = this.headerContainer.append('div')
         .attr('class', 'vi-track-drawing-header-container')
         .style('position', 'absolute')
-        .style('top', this.headerNameBlock.node().clientHeight + this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        .style('top', this.headerNameBlock.node().clientHeight + this.HEADER_ITEM_BORDER_WIDTH + this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('width', 'calc(100% - 2px)')
         .style('margin', '0 1px')
         .lower()
@@ -229,11 +228,8 @@ Track.prototype.createVerticalResizer = function() {
     this.verticalResizer = this.root.append('div')
         .datum(this.orderNum + "*")
         .attr('class', 'vi-track-vertical-resizer')
-        .attr('data-order-num', function(d) {return d;})
-        .style('width', '5px')
-        .style('z-index', '1')
-        .style('cursor', 'col-resize')
-        //.style('margin-left', '-3px');
+        .attr('data-order-num', function (d) { return d; })
+    this.verticalResizer.append('div');
 }
 
 /**
@@ -298,7 +294,7 @@ Track.prototype.horizontalResizerDragCallback = function() {
  */
 Track.prototype.headerScrollCallback = function() {
     let rowHeight = this.headerNameBlock.node().clientHeight;
-    let extraHeight = this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM;
+    let extraHeight = this.HEADER_ITEM_BORDER_WIDTH + this.HEADER_ITEM_MARGIN_BOTTOM;
 
     //let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
     let step = this.headerContainer.node().clientHeight/5.;

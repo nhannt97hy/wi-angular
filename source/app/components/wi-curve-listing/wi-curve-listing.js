@@ -1,17 +1,12 @@
 const componentName = "wiCurveListing";
 const moduleName = "wi-curve-listing";
 
-function Controller(
-    $scope,
-    wiComponentService,
-    wiApiService,
-    ModalService,
-    $timeout
-) {
+function Controller( $scope, wiComponentService, wiApiService, ModalService, $timeout ) {
     let self = this;
     let dataContainer;
     let dataCtrl;
     let __dragging = false;
+    let dialogOpened = false;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
@@ -20,8 +15,6 @@ function Controller(
     let selectedNodes = wiComponentService.getComponent(
         wiComponentService.SELECTED_NODES
     );
-    let spinner = wiComponentService.getComponent("SPINNER");
-
     function draggableSetting() {
         $timeout(function() {
             $(
@@ -41,56 +34,73 @@ function Controller(
             });
         });
     }
-    this.onChangeWell = function() {
-        $scope.Filter = null;
-        self.currentIndex = self.SelectedWell.id;
+    function getWellConfig(){
         self.wellConfig = self.SelectedWell.children
             .filter(c => c.type == "dataset")
             .map(d => {
                 let tmp = angular.copy(d);
                 tmp.data.childExpanded = true;
+                delete tmp.data.selected;
                 return tmp;
             });
-        draggableSetting();
+    }
+    this.onChangeWell = function() {
+        $scope.Filter = null;
+        self.currentIndex = self.SelectedWell.id;
+        getWellConfig();
         if (!self.dataSettings[self.currentIndex]) {
             self.dataSettings[self.currentIndex] = new Object();
             let _current = self.dataSettings[self.currentIndex];
             _current.curves = new Object();
-            // _current.setting = {
-            //     data: Handsontable.helper.createSpreadsheetData(100, 10),
-            //     colHeaders: true
-            // }
+            let step = self.SelectedWell.step;
+            let topDepth = self.SelectedWell.topDepth;
+            let bottomDepth = self.SelectedWell.bottomDepth;
+            let length = Math.round((bottomDepth - topDepth) / step) + 1;
             _current.setting = {
-                colHeaders: ["Index", "Depth"],
+                colHeaders: function(col){
+                    switch (col){
+                        case 0:
+                        return 'Depth';
+
+                        default:
+                        let idCurve = self.dataSettings[self.currentIndex].setting.columns[col].data;
+                        let curve = self.dataSettings[self.currentIndex].curves[idCurve];
+                        let _header = curve.name;
+                        let datasets = self.SelectedWell.children.filter(c => c.type == 'dataset');
+                        if (datasets.length > 1) {
+                            let cName = datasets.filter(d => {
+                                return d.children.find(
+                                    c => c.name == curve.name
+                                );
+                            });
+                            if (cName.length > 1)
+                                _header = curve.name + "(" + curve.datasetName + ")";
+                        }
+                        if(curve.modified) {
+                            _header = '<i class="fa fa-exclamation" aria-hidden="true"></i>'+ _header;
+                        }
+                        return _header;
+                    }
+                },
                 manualColumnResize: true,
-                fixedColumnsLeft: 2,
+                fixedColumnsLeft: 1,
                 contextMenu: {
                     items: {
                         rm_col: {
-                            name: "Remove this column",
+                            name: "Remove column(s)",
                             callback: function() {
                                 let selected = dataCtrl.getSelected()[0];
                                 let idx = Math.min(selected[1], selected[3]);
                                 let len =
                                     Math.abs(selected[1] - selected[3]) + 1;
-                                self.dataSettings[
-                                    self.currentIndex
-                                ].setting.columns.splice(idx, len);
-                                self.dataSettings[
-                                    self.currentIndex
-                                ].setting.colHeaders.splice(idx, len);
+                                self.dataSettings[self.currentIndex].setting.columns.splice(idx, len);
                                 dataCtrl.updateSettings(
                                     self.dataSettings[self.currentIndex].setting
                                 );
                             },
                             disabled: function() {
                                 let selected = dataCtrl.getSelected();
-                                return (
-                                    selected[0][1] == 0 ||
-                                    selected[0][1] == 1 ||
-                                    selected[0][3] == 0 ||
-                                    selected[0][3] == 1
-                                );
+                                return (selected[0][1] == 0 ||selected[0][3] == 0);
                             }
                         },
                         hsep1: "---------",
@@ -98,49 +108,45 @@ function Controller(
                         hsep2: "---------",
                         undo: {},
                         redo: {},
+                        hsep3: "---------",
                         copy: {},
                         cut: {}
                     }
                 },
                 columns: [
                     {
-                        data: "id",
-                        readOnly: true
-                    },
-                    {
                         data: "depth",
                         readOnly: true
                     }
                 ],
+                beforeCopy: function(data, coords){
+                    console.log(data, coords);
+                },
+                renderAllRows: false,
                 afterChange: function(change, source) {
                     if (source == "loadData") return;
                     if (change && change.length) {
                         change.forEach(c => {
                             if (c[2] != c[3])
-                                self.dataSettings[self.currentIndex].curves[
-                                    c[1]
-                                ].modified = true;
+                                self.dataSettings[self.currentIndex].curves[c[1]].modified = true;
                         });
+                        dataCtrl.render();
                     }
                 }
             };
-            let step = self.SelectedWell.step;
-            let topDepth = self.SelectedWell.topDepth;
-            let bottomDepth = self.SelectedWell.bottomDepth;
-            let length = Math.round((bottomDepth - topDepth) / step) + 1;
+
             _current.length = length;
             _current.setting.data = new Array(length)
                 .fill()
                 .map(d => new Object());
             for (let i = 0; i < length - 1; i++) {
-                _current.setting.data[i]["id"] = i;
                 _current.setting.data[i]["depth"] = (
                     step * i +
                     topDepth
                 ).toFixed(4);
             }
-            _current.setting.data[length - 1]["id"] = length - 1;
             _current.setting.data[length - 1]["depth"] = bottomDepth;
+            _current.setting.rowHeaders = _current.setting.data.map((r,i) => i);
         }
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
@@ -152,7 +158,79 @@ function Controller(
                 self.dataSettings[self.currentIndex].setting
             );
         }
-    };
+    }
+    this.onRefresh = function() {
+        console.log('WCL refresh');
+        $timeout(function() {
+            self.wells = utils.findWells();
+            self.SelectedWell = self.wells.find(w => {
+                return w.id == self.SelectedWell.id;
+            });
+            if (!self.SelectedWell) {
+                delete self.dataSettings[self.currentIndex];
+                self.SelectedWell = self.wells[0];
+            }
+            self.onChangeWell();
+        });
+    }
+    this.onRename = function(model){
+        console.log(model);
+        let idWell;
+        switch(model.type){
+            case 'dataset':
+            idWell = model.properties.idWell;
+            if(self.dataSettings[idWell]){
+                let _current = self.dataSettings[idWell];
+                for (const [key, value] of Object.entries(_current.curves)){
+                    if(value.idDataset == model.id){
+                        value.datasetName = model.name;
+                    }
+                }
+            }
+            if(idWell == self.currentIndex){
+                getWellConfig();
+                dataCtrl.render();
+            }
+            break;
+
+            case 'curve':
+            idWell = utils.findWellByCurve(model.id).id;
+            if(self.dataSettings[idWell]){
+                let _current = self.dataSettings[idWell];
+                if (_current.curves[model.id]) _current.curves[model.id].name = model.name;
+            }
+            if(idWell == self.currentIndex){
+                getWellConfig();
+                dataCtrl.render();
+            }
+            break;
+
+            default:
+            break;
+        }
+    }
+
+    this.resizeHandler = function(event){
+        let model = event.model;
+        if(model.type == 'WCL'){
+            dataCtrl.render();
+        }
+    }
+
+    this.onModifiedCurve = function(curve){
+        if(curve.wcl) return;
+        let idWell = utils.findWellByCurve(curve.idCurve).id;
+        if(self.dataSettings[idWell]){
+            let _current = self.dataSettings[idWell];
+            if(_current.curves.hasOwnProperty(curve.idCurve)){
+                console.log('WCL overwrite data curve');
+                _current.curves[curve.idCurve].modified = false;
+                _current.setting.data.forEach((r, i) => {
+                    r[curve.idCurve] = curve.data[i] || NaN;
+                })
+            }
+        }
+    }
 
     this.$onInit = function() {
         wiComponentService.putComponent("WCL", self);
@@ -185,23 +263,11 @@ function Controller(
             self.SelectedWell =
                 self.wells && self.wells.length ? self.wells[0] : null;
         }
-
-        wiComponentService.on(
-            wiComponentService.PROJECT_REFRESH_EVENT,
-            function() {
-                $timeout(function() {
-                    self.wells = utils.findWells();
-                    self.SelectedWell = self.wells.find(w => {
-                        return w.id == self.SelectedWell.id;
-                    });
-                    if (!self.SelectedWell) {
-                        delete self.dataSettings[self.currentIndex];
-                        self.SelectedWell = self.wells[0];
-                    }
-                    self.onChangeWell();
-                });
-            }
-        );
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT,self.onRefresh)
+        wiComponentService.on(wiComponentService.RENAME_MODEL, self.onRename)
+        wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+        document.addEventListener('resize', self.resizeHandler);
 
         angular.element(document).ready(function() {
             dataContainer = document.getElementById("dataContainer");
@@ -209,6 +275,8 @@ function Controller(
             document.addEventListener("keydown", function(event) {
                 if (event.ctrlKey && event.keyCode == 71) {
                     event.preventDefault();
+                    if(dialogOpened) return;
+                    dialogOpened = true;
                     // open go to dialog
                     let promptConfig = {
                         title:
@@ -222,6 +290,8 @@ function Controller(
                         ModalService,
                         promptConfig,
                         function(ret) {
+                            dialogOpened = false;
+                            if(!ret) return;
                             if (ret < 0) {
                                 ret = Math.abs(ret);
                             } else if (
@@ -229,8 +299,7 @@ function Controller(
                                 self.dataSettings[self.currentIndex].length
                             ) {
                                 ret =
-                                    self.dataSettings[self.currentIndex]
-                                        .length - 1;
+                                    self.dataSettings[self.currentIndex].length - 1;
                             }
                             dataCtrl.selectRows(ret);
                             dataCtrl.scrollViewportTo(ret);
@@ -263,18 +332,6 @@ function Controller(
                                 culture: "en-US"
                             }
                         });
-                        let _header = cModel.name;
-                        if (self.wellConfig.length > 1) {
-                            let cName = self.wellConfig.filter(d => {
-                                return d.children.find(
-                                    c => c.name == cModel.name
-                                );
-                            });
-                            if (cName.length > 1)
-                                _header =
-                                    cModel.name + "(" + cModel.parent + ")";
-                        }
-                        _current.setting.colHeaders.push(_header);
                         dataCtrl.updateSettings(_current.setting);
                     }
                     dataCtrl.selectColumns(idCurve);
@@ -310,55 +367,9 @@ function Controller(
         });
     };
 
-    // function selectHandler(currentNode, noLoadData, rootNode, callback) {
-    //     function bareSelectHandler() {
-    //         if (currentNode.data) {
-    //             $timeout(function() {
-    //                 currentNode.data.selected = true;
-    //             });
-    //             let selectedNodes = rootNode.__SELECTED_NODES;
-    //             if (!Array.isArray(selectedNodes)) selectedNodes = [];
-    //             if (!selectedNodes.includes(currentNode)) {
-    //                 selectedNodes.push(currentNode);
-    //             }
-    //             rootNode.__SELECTED_NODES = selectedNodes;
-    //         }
-    //     }
-    //     bareSelectHandler();
-    //     callback && callback();
-    // }
-    // function unselectAllNodes(rootNode) {
-    //     rootNode.forEach(function(item) {
-    //         utils.visit(item, function(node) {
-    //             if (node.data) node.data.selected = false;
-    //         });
-    //     });
-    //     rootNode.__SELECTED_NODES = [];
-    // }
-    // this.prjClickFunction = function($index, $event, node) {
-    //     clickFunction($index, $event, node, self.wellConfig, true);
-    // };
-
-    // function clickFunction( $index, $event, node, rootNode, multiNodeFetch = false ) {
-    //     node.$index = $index;
-    //     if (!node) {
-    //         unselectAllNodes(rootNode);
-    //         return;
-    //     }
-    //     let selectedNodes = rootNode.__SELECTED_NODES;
-    //     if (!Array.isArray(selectedNodes)) selectedNodes = [];
-    //     if (selectedNodes.length) {
-    //         if (
-    //             !$event.ctrlKey ||
-    //             node.type != selectedNodes[0].type ||
-    //             node.parent != selectedNodes[0].parent
-    //         ) {
-    //             unselectAllNodes(rootNode);
-    //         }
-    //     }
-    //     selectHandler(node, false, rootNode, function() {
-    //     });
-    // }
+    this.onReady = function() {
+        draggableSetting();
+    };
 
     this.toggleRefWin = function() {
         self.isShowRefWin = !self.isShowRefWin;
@@ -375,11 +386,8 @@ function Controller(
             let curve = angular.copy(
                 self.dataSettings[self.currentIndex].curves[c]
             );
-            // console.log(curve);
             if (curve.modified) {
-                curve.data = self.dataSettings[
-                    self.currentIndex
-                ].setting.data.map(r => r["" + curve.id]);
+                curve.data = self.dataSettings[self.currentIndex].setting.data.map(r => r["" + curve.id]);
                 modifiedCurves.push(curve);
             }
         }
@@ -395,6 +403,7 @@ function Controller(
                             curve
                         ].modified = false;
                     });
+                    dataCtrl.render();
                 });
             });
         } else {
@@ -403,7 +412,7 @@ function Controller(
             );
         }
     };
-    this.removeModel = function(model) {
+    this.onDelete = function(model) {
         switch (model.type) {
             case "curve":
                 let wellModel = utils.findWellByCurve(model.id);
@@ -421,17 +430,38 @@ function Controller(
                     );
                     if (idx) {
                         _current.setting.columns.splice(idx, 1);
-                        _current.setting.colHeaders.splice(idx, 1);
-                        dataCtrl.updateSettings(_current.setting);
                     }
                 }
                 break;
 
+            case 'dataset':
+            let idDataset = model.id;
+            let current = self.dataSettings[model.properties.idWell];
+            if(current){
+                let hasCurve = [];
+                for( const [key, value] of Object.entries(current.curves)){
+                    if(value.idDataset == idDataset) {
+                        hasCurve.push(value.id);
+                    }
+                }
+                if(hasCurve.length){
+                    hasCurve.forEach(curve => {
+                        if(current.curves.hasOwnProperty(curve)) delete current.curves[curve];
+                        current.setting.data.forEach( r => {
+                            if(r.hasOwnProperty(curve)) delete r[curve];
+                        })
+                        let idx = current.setting.columns.findIndex(c => c.data == curve);
+                        if(idx) current.setting.columns.splice(idx, 1);
+                    })
+                }
+            }
+            break;
+
             case "well":
-                let idWell = "" + model.id;
-                if (self.dataSettings.hasOwnProperty(idWell))
-                    delete self.dataSettings[idWell];
-                break;
+            let idWell = "" + model.id;
+            if (self.dataSettings.hasOwnProperty(idWell))
+                delete self.dataSettings[idWell];
+            break;
 
             default:
                 break;
@@ -440,6 +470,14 @@ function Controller(
     this.onRefWinBtnClicked = function() {
         console.log("onRefWinBtnClicked");
     };
+
+    this.$onDestroy = function(){
+        wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
+        wiComponentService.removeEvent(wiComponentService.RENAME_MODEL, self.onRename);
+        wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
+        document.removeEventListener('resize', self.resizeHandler);
+    }
 }
 
 let app = angular.module(moduleName, []);
