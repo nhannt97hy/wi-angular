@@ -21,7 +21,7 @@ module.exports = function (ModalService, callback) {
         this.getWorkflowSpecs = function(wiItemDropdownCtrl) {
             wiApiService.getWorkflowSpecList(function(wfSpecs) {
                 wiItemDropdownCtrl.items = wfSpecs.map(function(wfSpec) {
-                    if(wfSpec.content.model)
+                    if(wfSpec.type)
                     return {
                         data: {
                             label: wfSpec.name

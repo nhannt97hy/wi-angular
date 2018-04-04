@@ -253,7 +253,7 @@ function zoneSetToTreeConfig(zoneSet, options = {}) {
         zoneSetModel.type = 'zoneset-deleted-child';
         return zoneSetModel;
     }
-    zoneSetModel.name = 'zoneset';
+    zoneSetModel.name = zoneSet.name;
     zoneSetModel.type = 'zoneset';
     zoneSetModel.children = new Array();
     if (!zoneSet.zones) return zoneSetModel;
@@ -1681,8 +1681,10 @@ exports.renameWell = function renameWell (newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                selectedNode.name = ret;
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, selectedNode);
             })
         });
     });
@@ -1709,8 +1711,11 @@ exports.renameDataset = function renameDataset (newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                selectedNode.name = ret;
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
+                selectedNode.children.forEach(c => c.parent = ret);
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, selectedNode);
             })
         });
     });
@@ -1791,8 +1796,10 @@ exports.renameCurve = function renameCurve (newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                selectedNode.name = ret;
                 selectedNode.properties.name = ret;
                 selectedNode.data.label = ret;
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, selectedNode);
             })
         });
     });
@@ -2571,8 +2578,10 @@ exports.renameZoneSet = function renameZoneSet (zoneSetModel, newName) {
                 return;
             }
             __GLOBAL.$timeout(function () {
+                zoneSetModel.name = ret;
                 zoneSetModel.properties.name = ret;
                 zoneSetModel.data.label = ret;
+                wiComponentService.emit(wiComponentService.RENAME_MODEL, zoneSetModel);
             })
         });
     });

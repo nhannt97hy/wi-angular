@@ -9,7 +9,8 @@ module.exports = function (ModalService, callback) {
         this.getWorkflowList = function (wiItemDropdownCtrl) {
             wiApiService.getWorkflowList({idProject: project.idProject}, function (workflows) {
                 wiItemDropdownCtrl.items = workflows.map(function (wf) {
-                    if(wf.content.model)
+                    console.log(wf);
+                    if(wf.workflowSpec.type)
                     return {
                         data: {
                             label: wf.name

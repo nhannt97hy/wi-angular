@@ -1361,3 +1361,11 @@ LogTrack.prototype.pushSelectionAreas = function() {
         }
     });
 }
+
+LogTrack.prototype.addSelection = function(selectionConfig) {
+    let viSelection = new Selection(selectionConfig);
+    viSelection.initCanvasLogtrack(this.plotContainer, 'logplot');
+    this.drawings.push(viSelection);
+    viSelection.doPlot();
+    return viSelection;
+}
