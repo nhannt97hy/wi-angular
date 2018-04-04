@@ -219,18 +219,67 @@ exports.EmptyAllButtonClicked = function () {
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-    console.log("===============", selectedNodes);
+    const selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (!Array.isArray(selectedNodes) || !selectedNodes.length) return;
+    const selectedNode = selectedNodes[0];
+    const ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete all children in ${selectedNode.data.label} permanently?`, function (yes) {
+        if (!yes) return;
+        async.eachOf(selectedNode.children, function (child, index, next) {
+            const type = child.type.replace('-deleted-child', '');
+            wiApiService.deleteObject({ type: type, idObject: child.id }, function (response, err) {
+                if (response == "WRONG_TYPE") {
+                    next(response);
+                } else if (response == "CANT_DELETE") {
+                    next(response);
+                } else {
+                    setTimeout(function () {
+                        child.data.deleted = true;
+                        next(err, response);
+                    });
+                }
+            });
+        }, function (err) {
+            if (err) {
+                dialogUtils.errorMessageDialog(ModalService, "Can not delete some children");
+            }
+            utils.refreshProjectState();
+        });
+    });
 }
 
 exports.RestoreAllButtonClicked = function () {
     const wiApiService = this.wiApiService;
-    const $timeout = this.$timeout;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-
+    const selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (!Array.isArray(selectedNodes) || !selectedNodes.length) return;
+    const selectedNode = selectedNodes[0];
+    const ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore all children in ${selectedNode.data.label}?`, function (yes) {
+        if (!yes) return;
+        async.eachOf(selectedNode.children, function (child, index, next) {
+            const type = child.type.replace('-deleted-child', '');
+            wiApiService.restoreObject({type: type, idObject: child.id}, function (response, err) {
+                if (response == "WRONG_TYPE") {
+                    next(response);
+                } else if (response == "CANT_RESTORE") {
+                    next(response);
+                } else {
+                    setTimeout(function () {
+                        child.data.deleted = true;
+                        next(err, response);
+                    });
+                }
+            });
+        }, function (err) {
+            if (err) {
+                dialogUtils.errorMessageDialog(ModalService, "Can not delete some children");
+            }
+            utils.refreshProjectState();
+        });
+    });
 }
 
 exports.EmptyButtonClicked = function () {
@@ -248,7 +297,7 @@ exports.EmptyButtonClicked = function () {
         selectedNodesName += ' ' + selectedNode.data.label;
     })
     ModalService = this.ModalService;
-    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete forever ${selectedNodesName} ?`, function (yes) {
+    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete ${selectedNodesName} permanently ?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
                 let type = selectedNode.type.substring(0, selectedNode.type.indexOf('-'));
