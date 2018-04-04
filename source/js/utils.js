@@ -211,7 +211,7 @@ function zoneToTreeConfig(zone, options = {}) {
         zoneModel.name = 'zone-deleted-child';
         zoneModel.type = 'zone-deleted-child';
     } else {
-        zoneModel.name = 'zone';
+        zoneModel.name = zone.name;
         zoneModel.type = 'zone';
     }
     zoneModel.id = zone.idZone;
@@ -2587,33 +2587,33 @@ exports.renameZoneSet = function renameZoneSet (zoneSetModel, newName) {
     });
 }
 
-exports.updateWiHistogramOnModelDeleted = function (model) {
-    let wiComponentService = __GLOBAL.wiComponentService;
-    switch (model.type) {
-        case 'curve':
-            let idCurve = model.properties.idCurve;
-            let wellModel = findWellByCurve(idCurve);
-            let histogramModels = wellModel.children.find(child => child.type == 'histograms');
-            histogramModels.children.forEach(function (histogramModel) {
-                let wiHistogramCtrl = wiComponentService.getComponent('histogram' + histogramModel.properties.idHistogram);
-                if (!wiHistogramCtrl) return;
-                let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
-                if (histogramModel.properties.idCurve && wiD3Ctrl.hasThisCurve(idCurve)) {
-                    wiD3Ctrl.unloadCurve();
-                }
-                let refWindCtrl = wiComponentService.getComponent(wiHistogramCtrl.getWiRefWindCtrlName());
-                if(refWindCtrl){
-                    for(let i = refWindCtrl._viCurves.length - 1; i >= 0; i--){
-                        if(refWindCtrl._viCurves[i].idCurve == idCurve) refWindCtrl.removeRefCurve(i);
-                    }
-                }
-            });
-            break;
-        default:
-            console.log('not implemented')
-            return;
-    }
-}
+// exports.updateWiHistogramOnModelDeleted = function (model) {
+//     let wiComponentService = __GLOBAL.wiComponentService;
+//     switch (model.type) {
+//         case 'curve':
+//             let idCurve = model.properties.idCurve;
+//             let wellModel = findWellByCurve(idCurve);
+//             let histogramModels = wellModel.children.find(child => child.type == 'histograms');
+//             histogramModels.children.forEach(function (histogramModel) {
+//                 let wiHistogramCtrl = wiComponentService.getComponent('histogram' + histogramModel.properties.idHistogram);
+//                 if (!wiHistogramCtrl) return;
+//                 let wiD3Ctrl = wiHistogramCtrl.getwiD3Ctrl();
+//                 if (histogramModel.properties.idCurve && wiD3Ctrl.hasThisCurve(idCurve)) {
+//                     wiD3Ctrl.unloadCurve();
+//                 }
+//                 let refWindCtrl = wiComponentService.getComponent(wiHistogramCtrl.getWiRefWindCtrlName());
+//                 if(refWindCtrl){
+//                     for(let i = refWindCtrl._viCurves.length - 1; i >= 0; i--){
+//                         if(refWindCtrl._viCurves[i].idCurve == idCurve) refWindCtrl.removeRefCurve(i);
+//                     }
+//                 }
+//             });
+//             break;
+//         default:
+//             console.log('not implemented')
+//             return;
+//     }
+// }
 
 // exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDeleted(model) {
 //     let wiComponentService = __GLOBAL.wiComponentService;
