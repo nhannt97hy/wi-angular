@@ -2615,59 +2615,59 @@ exports.updateWiHistogramOnModelDeleted = function (model) {
     }
 }
 
-exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDeleted(model) {
-    let wiComponentService = __GLOBAL.wiComponentService;
-    switch (model.type) {
-        case 'curve':
-            let idCurve = model.properties.idCurve;
-            let wellModel = findWellByCurve(idCurve);
-            let crossplotModels = wellModel.children.find(child => child.type == 'crossplots');
-            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-            crossplotModels.children.forEach(function (crossplotModel) {
-                let wiCrossplotCtrl = wiComponentService.getComponent('crossplot' + crossplotModel.properties.idCrossPlot);
-                if (!wiCrossplotCtrl) return;
-                let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-                let pointSet = wiD3CrossplotCtrl.getPointSet(wiD3CrossplotCtrl.crossplotModel.properties);
-                if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
-                    //layoutManager.removeTabWithModel(crossplotModel);
-                    wiD3CrossplotCtrl.removeVisualizeCrossplot();
-                } else if (idCurve == pointSet.idCurveZ) {
-                    wiD3CrossplotCtrl.updateAll();
-                }
-            });
-            break;
-        default:
-            console.log('not implemented')
-            return;
-    }
-}
+// exports.updateWiCrossplotOnModelDeleted = function updateWiCrossplotOnModelDeleted(model) {
+//     let wiComponentService = __GLOBAL.wiComponentService;
+//     switch (model.type) {
+//         case 'curve':
+//             let idCurve = model.properties.idCurve;
+//             let wellModel = findWellByCurve(idCurve);
+//             let crossplotModels = wellModel.children.find(child => child.type == 'crossplots');
+//             let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+//             crossplotModels.children.forEach(function (crossplotModel) {
+//                 let wiCrossplotCtrl = wiComponentService.getComponent('crossplot' + crossplotModel.properties.idCrossPlot);
+//                 if (!wiCrossplotCtrl) return;
+//                 let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
+//                 let pointSet = wiD3CrossplotCtrl.getPointSet(wiD3CrossplotCtrl.crossplotModel.properties);
+//                 if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
+//                     //layoutManager.removeTabWithModel(crossplotModel);
+//                     wiD3CrossplotCtrl.removeVisualizeCrossplot();
+//                 } else if (idCurve == pointSet.idCurveZ) {
+//                     wiD3CrossplotCtrl.updateAll();
+//                 }
+//             });
+//             break;
+//         default:
+//             console.log('not implemented')
+//             return;
+//     }
+// }
 
-exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted(model) {
-    let wiComponentService = __GLOBAL.wiComponentService;
-    switch (model.type) {
-        case 'curve':
-            let idCurve = model.properties.idCurve;
-            let wellModel = findWellByCurve(idCurve);
-            let logplotModels = wellModel.children.find(child => child.type == 'logplots');
-            logplotModels.children.forEach(function (logplotModel) {
-                let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
-                if (!wiLogplotCtrl) return;
-                let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-                let viTracks = wiD3Ctrl.getTracks();
-                viTracks.forEach(function (viTrack) {
-                    if (!viTrack.isLogTrack()) return;
-                    let curves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
-                    curves.forEach(curve => {
-                        viTrack.removeCurve(curve);
-                    })
-                })
-            });
-            break;
-        default:
-            console.log('not implemented')
-            return;
-    }
-}
+// exports.updateWiLogplotOnModelDeleted = function updateWiLogplotOnModelDeleted(model) {
+//     let wiComponentService = __GLOBAL.wiComponentService;
+//     switch (model.type) {
+//         case 'curve':
+//             let idCurve = model.properties.idCurve;
+//             let wellModel = findWellByCurve(idCurve);
+//             let logplotModels = wellModel.children.find(child => child.type == 'logplots');
+//             logplotModels.children.forEach(function (logplotModel) {
+//                 let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
+//                 if (!wiLogplotCtrl) return;
+//                 let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+//                 let viTracks = wiD3Ctrl.getTracks();
+//                 viTracks.forEach(function (viTrack) {
+//                     if (!viTrack.isLogTrack()) return;
+//                     let curves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
+//                     curves.forEach(curve => {
+//                         viTrack.removeCurve(curve);
+//                     })
+//                 })
+//             });
+//             break;
+//         default:
+//             console.log('not implemented')
+//             return;
+//     }
+// }
 
 function updateLinesOnCurveEdited(curveModel) {
     let wiComponentService = __GLOBAL.wiComponentService;

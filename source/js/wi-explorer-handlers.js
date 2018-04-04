@@ -128,8 +128,8 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         deleteFunction = wiApiService.removeDataset;
                         cleanUpFunction = function () {
                             selectedNode.children.forEach(function (curve) {
-                                utils.updateWiLogplotOnModelDeleted(curve);
-                                utils.updateWiCrossplotOnModelDeleted(curve);
+                                // utils.updateWiLogplotOnModelDeleted(curve);
+                                // utils.updateWiCrossplotOnModelDeleted(curve);
                                 utils.updateWiHistogramOnModelDeleted(curve);
                             });
                             wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
@@ -139,7 +139,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         deleteFunction = wiApiService.removeCurve;
                         cleanUpFunction = function () {
                             // utils.emitEvent('curve-deleted', selectedNode);
-                            utils.updateWiCrossplotOnModelDeleted(selectedNode);
+                            // utils.updateWiCrossplotOnModelDeleted(selectedNode);
                             utils.updateWiHistogramOnModelDeleted(selectedNode);
                             wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
