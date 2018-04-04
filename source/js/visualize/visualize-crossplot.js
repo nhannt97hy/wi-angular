@@ -681,10 +681,10 @@ Crossplot.prototype.updateAxisTicks = function() {
         .style('transform', 'translateY(' + vpY[0] + 'px)')
         .selectAll('.tick text')
             .style('display', function(d, i) {
-                if (self.pointSet.logX)
+                // if (self.pointSet.logX)
                     return xTickType(i) ? 'block' : 'none';
-                else
-                    return 'block';
+                // else
+                //     return 'block';
             });
 
     this.axisContainer.select('g.vi-crossplot-axis-y-ticks')
@@ -692,10 +692,10 @@ Crossplot.prototype.updateAxisTicks = function() {
         .style('transform', 'translateX(' + vpX[0] + 'px)')
         .selectAll('.tick text')
             .style('display', function(d, i) {
-                if (self.pointSet.logY)
+                // if (self.pointSet.logY)
                     return yTickType(i) ? 'block' : 'none';
-                else
-                    return 'block';
+                // else
+                //     return 'block';
             });
 
     if (!this.shouldPlotZAxis()) {
@@ -2199,7 +2199,7 @@ Crossplot.prototype.genXTickValues =  function () {
         }
     }
     else {
-        let stepX = (wdX[1]-wdX[0]) / (self.pointSet.majorX || 1);
+        let stepX = (wdX[1]-wdX[0]) / (self.pointSet.majorX * self.pointSet.minorX|| 1);
         return d3.range(wdX[0], wdX[1] + stepX/2, stepX);
     }
 }
@@ -2215,7 +2215,15 @@ Crossplot.prototype.genYTickValues =  function () {
         }
     }
     else {
-        let stepY = (wdY[1]-wdY[0]) / (self.pointSet.majorY || 1);
+        let stepY = (wdY[1]-wdY[0]) / (self.pointSet.majorY * self.pointSet.minorY || 1);
         return d3.range(wdY[0], wdY[1] + stepY/2, stepY);
     }
+}
+
+Crossplot.prototype.removeViSelection = function (viSelection) {
+    if (!viSelection) return;
+    viSelection.destroy();
+
+    let idx = this.selectionCanvasContainer.indexOf(viSelection);
+    this.selectionCanvasContainer.splice(idx, 1);
 }

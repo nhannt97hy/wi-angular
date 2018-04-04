@@ -1,5 +1,5 @@
 let helper = require("./DialogHelper");
-module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
+module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         window.TNR = this;
@@ -7,17 +7,17 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
             wiComponentService.DIALOG_UTILS
         );
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        wiComponentService.on(
-            wiComponentService.PROJECT_REFRESH_EVENT,
-            function() {
-                $scope.updating = false;
-                let well = wiD3CrossplotCtrl.getWell();
-                $scope.datasets = well.children.filter(function(node) {
-                    return node.type == "dataset";
-                });
-                $scope.result.selectedDataset = $scope.datasets.find(d => d.id == $scope.result.selectedDataset.id);
-            }
-        );
+        this.onRefresh = function() {
+            console.log('Ternary Dialog refresh');
+            $scope.updating = false;
+            let well = wiD3CrossplotCtrl.getWell();
+            $scope.datasets = well.children.filter(function(node) {
+                return node.type == "dataset";
+            });
+            $scope.result.selectedDataset = $scope.datasets.find(d => d.id == $scope.result.selectedDataset.id);
+        };
+
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT,self.onRefresh);
 
         let change = ($scope.change = {
             unchanged: 0,
@@ -381,20 +381,19 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
                             } else {
                                 payload.curveName = curveNames[i];
                             }
-                            wiApiService.processingDataCurve(payload, function(
-                                res,
-                                err
-                            ) {
-                                callback(err);
+                            wiApiService.processingDataCurve(payload, function( res, err ) {
+                                if(!res.idCurve) {
+                                    wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                                        idCurve: payload.idDesCurve,
+                                        data: payload.data
+                                    })
+                                }
+                                callback();
                             });
                         }
                     );
-                },
-                err => {
-                    if (err) toastr.error(err);
-                    // else {
-                        utils.refreshProjectState();
-                    // }
+                }, (err) => {
+                    utils.refreshProjectState();
                 }
             );
         }
@@ -489,6 +488,7 @@ module.exports = function(ModalService, wiD3CrossplotCtrl, callback) {
         helper.initModal(modal);
         modal.close.then(function(ret) {
             helper.removeBackdrop();
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
             if (ret && callback) callback(ret);
         });
     });

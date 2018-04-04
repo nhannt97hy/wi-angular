@@ -35,25 +35,48 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 	}
 
 	this.editTool = function () {
+		let selections = self.getwiD3Ctrl().selections;
+		let selection = {};
 		DialogUtils.editToolComboboxPropertiesDialog(ModalService, self.toolBox, self.id, function(data) {
 			if (!data) return;
 			self.toolBox = data;
-			if (!self.toolBox.length) {
-				self.getwiD3Ctrl().viSelections = [];
-				return;
-			}
+
 			const _NEW = 'created';
-			self.toolBox.forEach(function(tool) {
+			const _EDIT = 'edited';
+			async.eachSeries(self.toolBox, (tool, next) => {
+				console.log('tool', tool.status);
 				switch (tool.status) {
 					case _NEW:
 						delete tool.status;
 						tool.data = [];
-						wiApiService.createSelectionTool(tool, function(selection) {
-							let viSelection = graph.createSelection(selection);
-							self.getwiD3Ctrl().viSelections.push(viSelection);
+						wiApiService.createSelectionTool(tool, (s) => {
+							s.color = tool.color;
+							s.name = tool.name;
+							s.status = 'NEW';
+							selections.push(s);
+							next();
 						});
 						break;
+					case _EDIT:
+						delete tool.status;
+						selection = selections.find(s => s.idCombinedBoxTool == tool.idCombinedBoxTool);
+						selection.color = tool.color;
+						selection.name = tool.name;
+						wiApiService.editSelectionTool(selection, (s) => {
+							s.status = 'EDIT';
+							selections[selections.indexOf(selection)] = s;
+							next();
+						});
+						break;
+					default:
+						selection = selections.find(s => s.idCombinedBoxTool == tool.idCombinedBoxTool);
+						selection.status = 'DEFAULT';
+						next();
+						break;
 				}
+			}, (next) => {
+				console.log('selections', selections);
+				self.getwiD3Ctrl().updateSelections();
 			});
 		});
 	}

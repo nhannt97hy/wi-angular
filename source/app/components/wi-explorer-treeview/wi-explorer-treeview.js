@@ -18,7 +18,7 @@ function WiExpTreeController(
     this.onReady = function() {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let typeItemDragable = "curve";
-        let element = $(".wi-parent-node" + `[type='${typeItemDragable}']`);
+        let element = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
         utils.setupCurveDraggable(element, wiComponentService, wiApiService);
     };
 
