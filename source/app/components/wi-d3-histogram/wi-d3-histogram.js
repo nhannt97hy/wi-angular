@@ -219,6 +219,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return;
         }
     }
+    this.onModifiedCurve = function(curve){
+        if(self.hasThisCurve(curve.idCurve)) {
+            console.log('wi-d3-histogram reload curve on changed', curve.idCurve);
+            let data = curve.data.map((r,i) => {
+                return {
+                    y: i,
+                    x: r
+                    }
+                }
+            );
+            loadCurve(curve.idCurve, data);
+        }
+    }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.getModel();
@@ -228,6 +241,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
     };
 
     this.switchReferenceWindow = function(state){
@@ -498,17 +512,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.refreshHistogram();
         loadStatistics();
     }
-    function loadCurve(idCurve) {
+    function loadCurve(idCurve, dataCurve) {
         if (curveLoading) return;
         curveLoading = true;
-        wiApiService.dataCurve(idCurve, function (data) {
-            if (self.visHistogram) {
-                console.warn('curve loaded');
-                self.visHistogram.setCurve(data);
-                curveLoading = false;
-                self.refreshHistogram();
-            }
-        });
+        if(!dataCurve) {
+            wiApiService.dataCurve(idCurve, function (data) {
+                if (self.visHistogram) {
+                    console.warn('curve loaded');
+                    self.visHistogram.setCurve(data);
+                    curveLoading = false;
+                    self.refreshHistogram();
+                }
+            });
+        }else{
+            self.visHistogram.setCurve(dataCurve);
+            curveLoading = false;
+            self.refreshHistogram();
+        }
     }
 
     function loadStatistics() {
@@ -523,6 +543,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandler);
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 	}
 }
 

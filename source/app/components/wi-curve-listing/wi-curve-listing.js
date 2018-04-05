@@ -158,6 +158,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 self.dataSettings[self.currentIndex].setting
             );
         }
+        dataCtrl.render();
     }
     this.onRefresh = function() {
         console.log('WCL refresh');
