@@ -392,6 +392,7 @@ Curve.prototype.updateHeader = function() {
 
     let self = this;
     this.header
+        .style('color', self.line.color)
         .style('display', this.showHeader ? 'block' : 'none')
         .select('.vi-curve-name')
         .text(this.alias);
