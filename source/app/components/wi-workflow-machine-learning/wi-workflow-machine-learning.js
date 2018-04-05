@@ -26,9 +26,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     ////////////////////////////////////////
     const ___PERM_FAM_ID = 172;
     const ___FACIES_FAM_ID = 1198;
-    const CURVE_PREDICTION = 'curve';
-    const PERM_DUAL_MODEL = 'anfis';
-    const FACIES_SINGLE_MODEL = 'facies';
+    const ML_TOOLKIT = 'curve';
+    const PERMEABILITY_AI = 'anfis';
+    const FACIES_AI = 'facies';
     const PERM_CURVE_NAME = 'PERM_CORE';
     const FACIES_CURVE_NAME = 'DELTAIC_FACIES';
     const TRAIN_STEP_NAME = 'Train';
@@ -429,15 +429,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     function outputCurveName() {
         let modelType = self.workflowConfig.model.type;
         switch(modelType){
-            case CURVE_PREDICTION:
+            case ML_TOOLKIT:
                 let steps = self.workflowConfig.steps;
                 let trainingStep = steps[0];
                 let trainingCurves = trainingStep.inputData[0].inputs;
                 let lastTrainingInputCurve = trainingCurves[trainingCurves.length - 1];
                 return lastTrainingInputCurve.name + "-WF" + self.idWorkflow + '-' + shortName(self.currentModelType.name);
-            case PERM_DUAL_MODEL:
+            case PERMEABILITY_AI:
                 return 'PERM_CORE-WF' + self.idWorkflow;
-            case FACIES_SINGLE_MODEL:
+            case FACIES_AI:
                 return 'DELTAIC_FACIES-WF' + self.idWorkflow;
         }
         return 
@@ -600,8 +600,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 let dataCurves = indicesObj.filterCurves;
                 let nullPositions = indicesObj.fillNull;
                 let payload = null;
+                console.log(self.workflowConfig.model.type);
                 switch(self.workflowConfig.model.type) {
-                    case CURVE_PREDICTION:
+                    case ML_TOOLKIT:
                         payload = {
                             model_id: genModelId(),
                             data: dataCurves
@@ -642,7 +643,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             }
                         });
                         break;
-                    case PERM_DUAL_MODEL:
+                    case PERMEABILITY_AI:
                         payload = {
                             data: dataCurves
                         };
@@ -672,7 +673,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             }
                         });
                         break;
-                    case FACIES_SINGLE_MODEL:
+                    case FACIES_AI:
                         payload = {
                             data: dataCurves
                         };
@@ -724,7 +725,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 let payload = null;
     
                 switch(self.workflowConfig.model.type){
-                    case CURVE_PREDICTION:
+                    case ML_TOOLKIT:
                         payload = {
                             model_id: genModelId(),
                             data: dataCurves
@@ -759,7 +760,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             }
                         });
                         break;
-                    case PERM_DUAL_MODEL:
+                    case PERMEABILITY_AI:
                         payload = {
                             data: dataCurves
                         };
@@ -787,7 +788,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             }
                         });
                         break;
-                    case FACIES_SINGLE_MODEL:
+                    case FACIES_AI:
                         payload = {
                             data: dataCurves
                         };
