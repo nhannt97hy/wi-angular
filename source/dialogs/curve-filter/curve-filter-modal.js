@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function(ModalService){
+module.exports = function(ModalService, wiComponentService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.CFilter = this;
@@ -73,7 +73,7 @@ module.exports = function(ModalService){
             self.SelectedCurve = self.curvesArr[0];
         }
         this.onChangeWell();
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+        this.onRefresh = function() {
             self.applyingInProgress = false;
             self.percent = 0;
             $timeout(function(){
@@ -81,7 +81,8 @@ module.exports = function(ModalService){
                 self.SelectedWell = self.wells.find(w => {return w.id == self.SelectedWell.id});
                 self.onChangeWell();
             }, 0);
-        });
+        };
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
 
         this.onCancelButtonClicked = function(){
             close(null);
@@ -115,7 +116,7 @@ module.exports = function(ModalService){
         }
         function isExisted(curveName, dataset){
             return self.curvesArr.find(curve => {
-                return curve.name == curveName && curve.properties.idDataset == dataset;
+                return curve.name.toUpperCase() == curveName.toUpperCase() && curve.properties.idDataset == dataset;
             })
         }
         function getData(callback){
@@ -171,7 +172,13 @@ module.exports = function(ModalService){
                         delete payload.idDesCurve;
                     }
 
-                    wiApiService.processingDataCurve(payload, function(){
+                    wiApiService.processingDataCurve(payload, function(res){
+                        if(!res.idCurve) {
+                            wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                                idCurve: payload.idDesCurve,
+                                data: payload.data
+                            })
+                        }
                         utils.refreshProjectState();
                     },function(percent){
                         self.percent = percent;
@@ -388,6 +395,7 @@ module.exports = function(ModalService){
     }).then(function (modal) {
         helper.initModal(modal);
         modal.close.then(function () {
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh)
             helper.removeBackdrop();
         });
     });

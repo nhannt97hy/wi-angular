@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService) {
+module.exports = function (ModalService, wiComponentService) {
     function ModalController(wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         window.tvd = this;
@@ -95,14 +95,16 @@ module.exports = function (ModalService) {
             self.outyArr = new Array(length);
         }
         this.onChangeWell();
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+        this.onRefresh = function() {
             self.applyingInProgress = false;
             self.curvesData.length = 0;
             $timeout(function(){
                 self.wells = angular.copy(utils.findWells());
                 self.onChangeWell();
             }, 0);
-        });
+        };
+
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
         this.LoadMoreInputCurve = () => {
             let len = self.FullSizeCurve.length;
             self.FullSizeCurve.push(...self.FullSize.slice(len, len + 10));
@@ -397,7 +399,7 @@ module.exports = function (ModalService) {
             let names = ['TVD', 'TVDSS', 'X', 'Y', 'North', 'East', 'Deviation', 'Azimuth'];
             let curvesExist = [];
             self.curvesArr.forEach(curve => {
-                if(names.indexOf(curve.name) != -1 && curve.properties.idDataset == self.SelectedDataset.id){
+                if(names.indexOf(curve.name.toUpperCase()) != -1 && curve.properties.idDataset == self.SelectedDataset.id){
                     curvesExist.push(curve.name);
                 }
             })
@@ -459,7 +461,13 @@ module.exports = function (ModalService) {
                         delete payload.curveName;
                         payload.idDesCurve = overwrite.id;
                     }
-                    wiApiService.processingDataCurve(payload, function(){
+                    wiApiService.processingDataCurve(payload, function(res){
+                        if(!res.idCurve) {
+                            wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                                idCurve: payload.idDesCurve,
+                                data: payload.data
+                            })
+                        }
                         console.log('Saved', payload.curveName);
                         callback();
                     })
@@ -580,6 +588,7 @@ module.exports = function (ModalService) {
     }).then(function (modal) {
         helper.initModal(modal);
         modal.close.then(function () {
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh)
             helper.removeBackdrop();
         });
     });

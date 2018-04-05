@@ -65,6 +65,43 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function getCrossplotAreaId() {
         return self.name.replace('D3Area', '');
     }
+    this.onDelete = function(model){
+        console.log('wi-d3-crossplot onDelete', model);
+        switch (model.type) {
+            case 'curve':
+                let idCurve = model.id;
+                let wellModel = utils.findWellByCurve(idCurve);
+                if(wellModel.id == self.crossplotModel.properties.idWell){
+                    let pointSet = self.getPointSet(self.crossplotModel.properties);
+                    if (idCurve == pointSet.idCurveX || idCurve == pointSet.idCurveY) {
+                        self.removeVisualizeCrossplot();
+                    } else if (idCurve == pointSet.idCurveZ) {
+                        self.updateAll();
+                    }
+                }
+                break;
+            case 'dataset':
+            if(model.properties.idWell == self.crossplotModel.properties.idWell){
+                let pointSet = self.getPointSet(self.crossplotModel.properties);
+                if(model.id == utils.getModel('curve', pointSet.idCurveX).properties.idDataset ||
+                model.id == utils.getModel('curve', pointSet.idCurveY).properties.idDataset) {
+                    self.removeVisualizeCrossplot();
+                }else if (model.id == utils.getModel('curve', pointSet.idCurveZ).properties.idDataset) {
+                    self.updateAll();
+                }
+            }
+            break;
+
+            case 'zoneset':
+            case 'zone':
+            console.log('not now =))');
+            break;
+
+            default:
+                console.log('not implemented')
+                return;
+        }
+    }
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
@@ -74,6 +111,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
     };
 
     this.onLoading = function() {
@@ -693,6 +731,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         if (event.button != 2) return;
         event.stopPropagation();
+        if (self.containerName && self.viCrossplot.mode == 'UseSelector') {
+            let combinedPlotD3Ctrl = wiComponentService.getComponent(self.containerName + 'D3Area');
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        combinedPlotD3Ctrl.endAllSelections();
+                    }
+                }
+            ]);
+        }
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu);
     }
@@ -794,6 +845,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 crossplotProps.pointSet.idCurveY = null;
             }
             self.createVisualizeCrossplot(null, null, crossplotProps);
+            self.xHistogram.setCurve(null);
+            self.xHistogram.signal('histogram-update', "refresh");
+            self.yHistogram.setCurve(null);
+            self.yHistogram.signal('histogram-update', "refresh");
         }
     }
 
@@ -888,12 +943,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 if (self.containerName) {
-                    self.viCrossplot.initSelectionArea(self.viSelections);
+                    self.selections.forEach(function(selectionConfig) {
+                        self.viCrossplot.addViSelectionToCrossplot(selectionConfig);
+                    });
                 }
                 if(config.pointSet.idCurveX && config.pointSet.idCurveY && self.crossplotModel.properties.showHistogram) {
                     self.histogramXReady();
                     self.histogramYReady();
                 }
+                $timeout(function() {
+                    let container = self.viCrossplot.container;
+                    container.on('mousewheel', function() {
+                        _onPlotMouseWheelCallback(container);
+                    });
+                }, 1000);
                 self.loading = false;
             });
         }
@@ -1121,7 +1184,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandlerCross);
         document.removeEventListener('resize', self.resizeHandlerHis);
-	}
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
+    }
+
+    function _onPlotMouseWheelCallback (container) {
+        let mouse = d3.mouse(container.node());
+        if (d3.event.ctrlKey) {
+            zoom(d3.event.deltaY > 0);
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+        }
+    }
+
+    function zoom (zoomOut) {
+        console.log('zooming');
+    }
 }
 
 let app = angular.module(moduleName, []);
@@ -1134,7 +1211,7 @@ app.component(componentName, {
         name: '@',
         wiCrossplotCtrl: '<',
         idCrossplot: '<',
-        viSelections: '<',
+        selections: '<',
         containerName: '@'
     }
 });

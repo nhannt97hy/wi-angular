@@ -1,6 +1,6 @@
 <div class="curve-listing-toolbar-wrapper">
 	<wi-toolbar>
-		<wi-button icon="plus-16x16" layout="icon-left" type="small" label='Add Curve' tooltip="Add Curve" handler="wiCurveListing.onAddCurveButtonClicked"></wi-button>
+		<wi-button icon="curve-new-16x16" layout="icon-left" type="small" label='Add Curve' tooltip="Add Curve" handler="wiCurveListing.onAddCurveButtonClicked"></wi-button>
 		<wi-button icon="save-16x16" layout="icon-left" type="small" label='Save Curve(s)' tooltip="Save Curve(s)" handler="wiCurveListing.onSaveButtonClicked"></wi-button>
 	</wi-toolbar>
 	<wi-toolbar>
@@ -35,6 +35,7 @@
 			</div>
 			<div style='flex:1;display:flex;flex-direction:column;'>
 				<wi-base-treeview id='__listingtWellTree' name="listingTreeview" config="wiCurveListing.wellConfig" container="wiCurveListing"
+				on-ready-function='wiCurveListing.onReady'
 				filter="{{Filter}}" show-id="false">
 				</wi-base-treeview>
 			</div>

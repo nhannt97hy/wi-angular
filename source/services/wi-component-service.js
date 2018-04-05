@@ -81,7 +81,6 @@ app.factory(wiServiceName, function () {
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         HISTORYSTATE: 'HISTORY_STATE',
-        // WI_WORKFLOW: 'WiWorkFlow',
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         PROJECT_LOADED: 'project-loaded',
@@ -104,7 +103,10 @@ app.factory(wiServiceName, function () {
         DUSTBIN_REFRESH_EVENT: 'dustbin-refresh-event',
         PALETTES: 'PALETTES',
         LOGPLOT_LOADED_EVENT: 'logplot-loaded-event',
-        UPDATE_ITEMS_EVENT: 'UPDATE_ITEMS_EVENT'
+        UPDATE_ITEMS_EVENT: 'UPDATE_ITEMS_EVENT',
+        RENAME_MODEL: 'rename-model',
+        DELETE_MODEL: 'delete-model',
+        MODIFIED_CURVE_DATA: 'modified-curve-data'
     };
 });
 

@@ -11,6 +11,7 @@ module.exports = function (ModalService, Selwell) {
         this.wellArr = utils.findWells();
         if (Selwell) {
             self.SelectedWell = Selwell;
+            self.disabled = true;
         } else {
             if (selectedNodes && selectedNodes.length) {
                 switch (selectedNodes[0].type) {

@@ -1052,7 +1052,11 @@ exports.CurveListing_EditButtonClicked = function () {
         tabIcon: 'curve-listing-16x16',
         componentState: {
             html: `<wi-curve-listing></wi-curve-listing>`,
-            name: 'WCL'
+            name: 'WCL',
+            model: {
+                type: "WCL",
+                id: null
+            }
         }
     })
 };
@@ -1098,14 +1102,14 @@ exports.FillDataGapsButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.fillDataGapsDialog(this.ModalService);
+    DialogUtils.fillDataGapsDialog(this.ModalService, wiComponentService);
 };
 
 exports.CurveFilterButtonClicked = function () {
     console.log('CurveFilterButton is clicked');
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.curveFilterDialog(this.ModalService);
+    DialogUtils.curveFilterDialog(this.ModalService, wiComponentService);
 };
 
 exports.CurveConvolutionButtonClicked = function () {
@@ -1113,7 +1117,7 @@ exports.CurveConvolutionButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.curveConvolutionDialog(this.ModalService);
+    DialogUtils.curveConvolutionDialog(this.ModalService, wiComponentService);
 };
 
 exports.CurveDeconvolutionButtonClicked = function () {
@@ -1121,7 +1125,7 @@ exports.CurveDeconvolutionButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.curveConvolutionDialog(this.ModalService, true);
+    DialogUtils.curveConvolutionDialog(this.ModalService, wiComponentService, true);
 };
 
 exports.CurveDerivativeButtonClicked = function () {
@@ -1130,7 +1134,7 @@ exports.CurveDerivativeButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.curveDerivativeDialog(this.ModalService);
+    DialogUtils.curveDerivativeDialog(this.ModalService, wiComponentService);
 };
 
 exports.CurveRescaleButtonClicked = function () {
@@ -1207,9 +1211,7 @@ exports.TVDConversionButtonClicked = function () {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.TVDConversionDialog(this.ModalService, function (data) {
-        console.log("TVD");
-    });
+    DialogUtils.TVDConversionDialog(this.ModalService, wiComponentService);
 };
 
 exports.PCAAnalysisButtonClicked = function () {

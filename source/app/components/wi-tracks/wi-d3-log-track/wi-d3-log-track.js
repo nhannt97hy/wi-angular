@@ -13,23 +13,36 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     this.showContextMenu = function (event) {
         _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        switch(self.currentDrawingRightClicked) {
-            case 'curve':
-                _curveOnRightClick();
-                break;
-            case 'marker':
-                _markerOnRightClick();
-                break;
-            case 'annotation':
-                _annotationOnRightClick();
-                break;
-            case 'shading':
-                _shadingOnRightClick();
-                break;
-            default:
-                let items = self.wiD3Ctrl.getCommonContextMenuItems();
+        if (self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
+            let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        combinedPlotD3Ctrl.endAllSelections();
+                    }
+                }
+            ]);
+        } else {
+            switch (self.currentDrawingRightClicked) {
+                case 'curve':
+                    _curveOnRightClick();
+                    break;
+                case 'marker':
+                    _markerOnRightClick();
+                    break;
+                case 'annotation':
+                    _annotationOnRightClick();
+                    break;
+                case 'shading':
+                    _shadingOnRightClick();
+                    break;
+                default:
+                    let items = self.wiD3Ctrl.getCommonContextMenuItems();
 
-                let trackItemsCreationArray = [{
+                    let trackItemsCreationArray = [{
                         name: "AddMarker",
                         label: "Add Marker",
                         icon: 'marker-add-16x16',
@@ -55,37 +68,38 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                     console.log('logTrackPropertiesData', props);
                                 }
                             }, {
-                                tabs: ['false', 'false', 'true'],
-                                shadingOnly: true
-                            });
+                                    tabs: ['false', 'false', 'true'],
+                                    shadingOnly: true
+                                });
                         }
                     }];
-                items.trackItemsCreation = items.trackItemsCreation.concat(trackItemsCreationArray);
-                items.trackHandle.unshift({
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        logplotHandlers.DuplicateTrackButtonClicked();
-                    }
-                });
-                items.trackHandle = items.trackHandle.concat([{
-                    name: "ExportTrack",
-                    label: "Export Track",
-                    // icon: "track-delete-16x16",
-                    handler: function () {
-                        logplotHandlers.ExportTrackButtonClicked();
-                    }
-                }, {
-                    name: "ImportTrack",
-                    label: "Import Track",
-                    // icon: "track-delete-16x16",
-                    handler: function () {
-                        logplotHandlers.ImportTrackButtonClicked();
-                    }
-                }]);
+                    items.trackItemsCreation = items.trackItemsCreation.concat(trackItemsCreationArray);
+                    items.trackHandle.unshift({
+                        name: "DuplicateTrack",
+                        label: "Duplicate Track",
+                        icon: 'track-duplicate-16x16',
+                        handler: function () {
+                            logplotHandlers.DuplicateTrackButtonClicked();
+                        }
+                    });
+                    items.trackHandle = items.trackHandle.concat([{
+                        name: "ExportTrack",
+                        label: "Export Track",
+                        // icon: "track-delete-16x16",
+                        handler: function () {
+                            logplotHandlers.ExportTrackButtonClicked();
+                        }
+                    }, {
+                        name: "ImportTrack",
+                        label: "Import Track",
+                        // icon: "track-delete-16x16",
+                        handler: function () {
+                            logplotHandlers.ImportTrackButtonClicked();
+                        }
+                    }]);
 
-                self.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
+                    self.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
+            }
         }
         self.currentDrawingRightClicked = null;
     }
@@ -565,24 +579,46 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
 
+    this.addViSelectionToTrack = function (track, selectionConfig) {
+        track.addSelection(selectionConfig);
+    }
+
     this.$onInit = function () {
         this.plotAreaId = self.name + 'PlotArea';
         _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
         logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
     }
-    this.onReady = function () {
-        self.viTrack = createVisualizeLogTrack(getProperties());
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
-
-        Utils.listenEvent('curve-deleted', function (eventData) {
-            console.log('curve deleted event: ', eventData);
-            let hasCurve = self.viTrack.getCurves().find(function(curve) { return curve.idCurve == eventData.properties.idCurve;});
+    this.onDelete = function (model) {
+        console.log('onDelete LogTrack: ', model);
+        let hasCurve;
+        switch(model.type){
+            case 'curve':
+            hasCurve = self.viTrack.getCurves().find(curve => curve.idCurve == model.id);
             if(hasCurve) {
                 console.log('updating log track', self.viTrack);
                 self.update();
             }
-        })
+            break;
+
+            case 'dataset':
+            hasCurve = self.viTrack.getCurves().find(curve => curve.idDataset == model.id);
+            if(hasCurve) {
+                console.log('updating log track', self.viTrack);
+                self.update();
+            }
+            break;
+
+            default:
+            break;
+        }
+    }
+    this.onReady = function () {
+        self.viTrack = createVisualizeLogTrack(getProperties());
+        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+
+        // Utils.listenEvent('curve-deleted', )
         _registerLogTrackCallback(self.viTrack);
     }
 
@@ -997,6 +1033,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             // Mousedown already set the shading to be current shading
             _shadingOnDoubleClick();
         });
+    }
+
+    this.$onDestroy = function(){
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
     }
 
 }
