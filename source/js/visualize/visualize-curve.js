@@ -73,7 +73,7 @@ function Curve(config) {
     this.rawData = config._data || [];
 
     this.data = Utils.parseData(this.rawData);
-    this.data = Utils.trimData(this.data);
+    // this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
     this.orderNum = config.orderNum;
 
