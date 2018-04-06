@@ -192,6 +192,22 @@ Curve.prototype.setProperties = function(props) {
         // if (props.displayMode == 'Symbol') this.line = null;
     }
 
+    if(props.rawData && Array.isArray(props.rawData) && props.rawData.length){
+        this.rawData = props.rawData;
+        this.data = Utils.parseData(this.rawData);
+        this.data = this.data.map(function(d) {
+            return {
+                x: d.x,
+                y: d.y * self.yStep + self.offsetY
+            };
+        });
+        let dataMap = {};
+        this.data.forEach(function(d) {
+            dataMap[d.y] = d.x;
+        });
+        this.dataMap = dataMap;
+    }
+
     // if (props.displayMode == 'None') {
     //     this.symbol = null;
     //     this.line = null;

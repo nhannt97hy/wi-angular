@@ -124,7 +124,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 },
                 renderAllRows: false,
                 beforeChange: function(changes, source) {
-                    console.log(changes);
+                    // console.log(changes);
                     changes = changes.map(r => {
                         r[3] = '' + parseFloat(r[3]);
                         return r;
@@ -395,7 +395,10 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 self.dataSettings[self.currentIndex].curves[c]
             );
             if (curve.modified) {
-                curve.data = self.dataSettings[self.currentIndex].setting.data.map(r => parseFloat(r["" + curve.id]));
+                curve.data = self.dataSettings[self.currentIndex].setting.data.map(r => {
+                    let tmp = parseFloat(r["" + curve.id]);
+                    return isNaN(tmp) ? null : tmp;
+                });
                 modifiedCurves.push(curve);
             }
         }

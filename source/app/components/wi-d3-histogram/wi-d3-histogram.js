@@ -42,9 +42,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.getWell = getWell;
     function getWell() {
-        if (!_well) {
+        // if (!_well) {
             _well = utils.findWellByHistogram(self.idHistogram || self.wiHistogramCtrl.id);
-        }
+        // }
         return _well;
     }
 

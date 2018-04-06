@@ -613,10 +613,26 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             break;
         }
     }
+    this.onModifiedCurve = function(curve){
+        console.log('wi-d3-log-track onModifiedCurve', curve.idCurve);
+        let hasCurve = self.viTrack.getCurves().find(c => c.idCurve == curve.idCurve);
+        if(hasCurve){
+            hasCurve.setProperties({
+                rawData: curve.data.map((r,i) => {
+                    return {
+                        y: i,
+                        x: r
+                    }
+                })
+            })
+            self.update();
+        }
+    }
     this.onReady = function () {
         self.viTrack = createVisualizeLogTrack(getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 
         // Utils.listenEvent('curve-deleted', )
         _registerLogTrackCallback(self.viTrack);
