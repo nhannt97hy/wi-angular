@@ -22,10 +22,51 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     const CANVAS_WIDTH = 5;
     const CANVAS_STROKE_COLOR = 'Green';
 
+    this.onDelete = function(model){
+        console.log('wi-ref-win onDelete', model);
+        switch(model.type){
+            case 'curve':
+            let idx = self._viCurves.findIndex(c => c.idCurve == model.id);
+            if(idx){
+                self.removeRefCurve(idx);
+            }
+            refresh();
+            break;
+            case 'dataset':
+            let curves = self._viCurves.filter(c => c.idDataset == model.id);
+            if(curves.length){
+                curves.forEach(d => {
+                    let idx = self._viCurves.findIndex(c => c.idCurve == d.idCurve);
+                    self.removeRefCurve(idx);
+                })
+                refresh();
+            }
+            break;
+            default:
+            break;
+        }
+    }
+    this.onModifiedCurve = function(curve){
+        console.log('wi-ref-win onModifiedCurve', curve.idCurve);
+        let hasCurve = self._viCurves.find(c => c.idCurve == curve.idCurve);
+        if(hasCurve){
+            hasCurve.setProperties({
+                rawData: curve.data.map((r,i) => {
+                    return {
+                        y: i,
+                        x: r
+                    }
+                })
+            })
+            refresh();
+        }
+    }
     this.$onInit = function () {
         if (self.name) {
             // console.log('crossplot-reference-window', self.name);
             wiComponentService.putComponent(self.name, self);
+            wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+            wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         }
     }
     this.onReady = function() {
@@ -300,11 +341,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.loading = true;
             async.eachOf(referenceCurves, function(refCurve, idx, callback) {
                 if(refCurve.idCurve && refCurve.visiable){
-                    refCurve.datasetName = utils.findDatasetById(refCurve.curve.idDataset).properties.name;
+                    let dataset = utils.findDatasetById(refCurve.curve.idDataset);
                     // wiApiService.infoCurve(refCurve.idCurve, function (curve) {
                         let config = {
                             idCurve: refCurve.idCurve,
-                            name: refCurve.datasetName + '.' + refCurve.curve.name,
+                            idDataset: dataset.properties.idDataset,
+                            name: dataset.properties.name + '.' + refCurve.curve.name,
                             minX: refCurve.left,
                             maxX: refCurve.right,
                             minY: _top,
@@ -331,6 +373,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 	this.$onDestroy = function () {
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandler);
+        wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
 	}
 }
 

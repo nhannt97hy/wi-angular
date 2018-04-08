@@ -42,9 +42,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.getWell = getWell;
     function getWell() {
-        if (!_well) {
+        // if (!_well) {
             _well = utils.findWellByHistogram(self.idHistogram || self.wiHistogramCtrl.id);
-        }
+        // }
         return _well;
     }
 
@@ -108,7 +108,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         utils.evaluateExpr(getWell(), self.visHistogram.discriminator, function(result){
                             self.visHistogram.discriminatorArr = result;
                             console.log('link models');
-    
+
                             if (self.visHistogram.idCurve != self.histogramModel.properties.idCurve) {
                                 self.visHistogram.idCurve = self.histogramModel.properties.idCurve;
                                 loadCurve(self.visHistogram.idCurve);
@@ -128,7 +128,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.histogramModel.properties.xLabel = getXLabel();
 
             let refWindCtrl = self.getWiRefWindCtrl();
-            if (refWindCtrl) refWindCtrl.update(getWell(), 
+            if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
                     xplotProps.referenceScale,
                     xplotProps.referenceVertLineNumber,
@@ -136,7 +136,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     xplotProps.referenceBottomDepth,
                     xplotProps.referenceShowDepthGrid);
 
-            if (self.getZoneCtrl()) self.getZoneCtrl().zoneUpdate();                    
+            if (self.getZoneCtrl()) self.getZoneCtrl().zoneUpdate();
         })
     }
     this.refreshHistogram = function() {
@@ -146,10 +146,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             console.warn("---", activeZones);
             if ( isFunction(self.visHistogram.setHistogramModel) )
                 self.visHistogram.setHistogramModel(self.histogramModel);
-            if ( isFunction(self.visHistogram.setZoneSet) ) 
+            if ( isFunction(self.visHistogram.setZoneSet) )
                 self.visHistogram.setZoneSet(activeZones);
         }
-        if ( isFunction(self.visHistogram.signal) ) 
+        if ( isFunction(self.visHistogram.signal) )
             self.visHistogram.signal('histogram-update', "refresh");
     }
     // this.onZoneCtrlReady = function(zoneCtrl) {
@@ -157,7 +157,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     //         self.refreshHistogram();
 //     });
     // }
-    
+
     this.getWiZoneCtrlName = function () {
         return self.name + "Zone";
     }
@@ -189,6 +189,49 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         document.addEventListener('resize', self.resizeHandler);
     }
+    this.onDelete = function (model) {
+        console.log('wi-d3-histogram onDelete', model);
+        switch (model.type) {
+            case 'curve':
+                let idCurve = model.id;
+                let wellModel = utils.findWellByCurve(idCurve);
+                if(wellModel.id == self.histogramModel.properties.idWell){
+                    if (self.hasThisCurve(idCurve)) {
+                        self.unloadCurve();
+                    }
+                }
+                break;
+            case 'dataset':
+                let idDataset = model.id;
+                if(model.properties.idWell == self.histogramModel.properties.idWell){
+                    if (self.curveModel && self.curveModel.properties.idDataset == idDataset) {
+                        self.unloadCurve();
+                    }
+                }
+            break;
+
+            case 'zoneset':
+            case 'zone':
+            console.log('not now =))');
+            break;
+            default:
+                console.log('not implemented')
+                return;
+        }
+    }
+    this.onModifiedCurve = function(curve){
+        if(self.hasThisCurve(curve.idCurve)) {
+            console.log('wi-d3-histogram reload curve on changed', curve.idCurve);
+            let data = curve.data.map((r,i) => {
+                return {
+                    y: i,
+                    x: r
+                    }
+                }
+            );
+            loadCurve(curve.idCurve, data);
+        }
+    }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
         self.histogramModel = self.getModel();
@@ -197,6 +240,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.putComponent(self.name, self);
             wiComponentService.emit(self.name);
         }
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
     };
 
     this.switchReferenceWindow = function(state){
@@ -207,7 +252,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id, 
+        DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id,
             function(histogramProperties) {
                 if (self.wiHistogramCtrl) {
                     if(!histogramProperties.idZoneSet){
@@ -221,7 +266,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         );
     }
-    
+
     this.discriminator = function(){
         DialogUtils.discriminatorDialog(ModalService, self, function(data){
             console.log('Discriminator', data);
@@ -248,7 +293,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Refresh",
                 icon: "reload-16x16",
                 handler: function () {
-    
+
                 }
             }, {
                 name: "Properties",
@@ -397,7 +442,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 dash: histogramModel.properties.lineStyle
             },
             plot: histogramModel.properties.plot, // Bars or lines
-            plotType: histogramModel.properties.plotType, // Frequency or percent 
+            plotType: histogramModel.properties.plotType, // Frequency or percent
             fill: {
                 pattern: null,
                 background: histogramModel.properties.color,
@@ -425,8 +470,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         var elem = document.getElementById(self.histogramAreaId);
 
         var well = getWell();
-        self.visHistogram = graph.createHistogram(histogramModel, well.step, 
-                well.topDepth, 
+        self.visHistogram = graph.createHistogram(histogramModel, well.step,
+                well.topDepth,
                 well.bottomDepth, elem);
         if (self.containerName) {
             self.selections.forEach(function(selectionConfig) {
@@ -449,7 +494,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 if (self.visHistogram.idCurve) {
                     loadCurve(self.visHistogram.idCurve);
                 }
-            });            
+            });
         }else{
             if (self.visHistogram.idCurve) {
                 loadCurve(self.visHistogram.idCurve);
@@ -462,22 +507,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         curveLoading = true;
         self.curveModel = null;
         self.visHistogram.setCurve(null);
-        self.histogramModel.properties.xLabel = getXLabel();        
+        self.histogramModel.properties.xLabel = getXLabel();
         curveLoading = false;
         self.refreshHistogram();
         loadStatistics();
     }
-    function loadCurve(idCurve) {
+    function loadCurve(idCurve, dataCurve) {
         if (curveLoading) return;
         curveLoading = true;
-        wiApiService.dataCurve(idCurve, function (data) {
-            if (self.visHistogram) {
-                console.warn('curve loaded');
-                self.visHistogram.setCurve(data);
-                curveLoading = false;
-                self.refreshHistogram();
-            }
-        });
+        if(!dataCurve) {
+            wiApiService.dataCurve(idCurve, function (data) {
+                if (self.visHistogram) {
+                    console.warn('curve loaded');
+                    self.visHistogram.setCurve(data);
+                    curveLoading = false;
+                    self.refreshHistogram();
+                }
+            });
+        }else{
+            self.visHistogram.setCurve(dataCurve);
+            curveLoading = false;
+            self.refreshHistogram();
+        }
     }
 
     function loadStatistics() {
@@ -491,6 +542,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 	this.$onDestroy = function () {
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandler);
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 	}
 }
 

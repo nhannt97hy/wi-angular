@@ -315,6 +315,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                         */
                         self.viTrack.removeZone(zone);
                         Utils.emitEvent('zone-updated', self.viTrack);
+                        // wiComponentService.emit(wiComponentService.DELETE_MODEL, self.viTrack);
                         Utils.refreshProjectState();
                     });
                 }

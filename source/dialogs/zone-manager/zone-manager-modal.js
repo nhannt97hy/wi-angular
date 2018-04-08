@@ -43,13 +43,13 @@ module.exports = function (ModalService, item) {
                 setSelectedZoneSet(_currentZoneSetId);
             }, 0);
         });
-        switch (item.name) {
+        switch (item.type) {
             case 'well':
             self.wellArr.forEach(function(well, i){
                 if(well.id == item.id){
                     self.SelectedWell = self.wellArr[i];
                     self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                        return child.name == 'zonesets';
+                        return child.type == 'zonesets';
                     }).children;
                     self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
                     self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
@@ -63,7 +63,7 @@ module.exports = function (ModalService, item) {
                 if(well.id == item.properties.idWell){
                     self.SelectedWell = self.wellArr[i];
                     self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                        return child.name == 'zonesets';
+                        return child.type == 'zonesets';
                     }).children;
                     self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
                     _currentZoneSetId = self.SelectedZoneSet?self.SelectedZoneSet.properties.idZoneSet:null;
@@ -78,7 +78,7 @@ module.exports = function (ModalService, item) {
                 if(well.id == item.properties.idWell){
                     self.SelectedWell = self.wellArr[i];
                     self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                        return child.name == 'zonesets';
+                        return child.type == 'zonesets';
                     }).children;
 
                     _currentZoneSetId = item.id;
@@ -91,7 +91,7 @@ module.exports = function (ModalService, item) {
             case 'zone':
             self.wellArr.forEach(function(well, i){
                 let zonesetsArr = well.children.find(function (child) {
-                    return child.name == 'zonesets';
+                    return child.type == 'zonesets';
                 }).children;
 
                 zonesetsArr.forEach(function(zoneset, j){

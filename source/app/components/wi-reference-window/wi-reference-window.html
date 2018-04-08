@@ -1,7 +1,7 @@
 <div>
     <div class='plot' id="{{wiReferenceWindow.name}}" wi-element-ready="wiReferenceWindow.onReady();"></div>
     <div class='info'>
-        <div ng-repeat="ref in wiReferenceWindow._viCurves" class="infoItem"
+        <div ng-repeat="ref in wiReferenceWindow._viCurves track by $index" class="infoItem"
         ng-style="{'color': ref.line.color}">{{ref.name}}: {{ref.minX}} - {{ref.maxX}}</div>
     </div>
     <div ng-show="wiReferenceWindow.loading" style="background-color:white;position:absolute; top: -2; bottom:-2; left:-2;right:-2;z-index:10" id="{{wiReferenceWindow.name}}-spinner"></div>

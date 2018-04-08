@@ -1457,6 +1457,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         */
                         track.removeDrawing(drawing);
                         Utils.emitEvent('zone-updated', track);
+                        // wiComponentService.emit(wiComponentService.DELETE_MODEL, track);
                         Utils.refreshProjectState();
                     })
                 }
