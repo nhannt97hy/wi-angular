@@ -149,11 +149,6 @@ const POINTSET_SCHEMA = {
             item: ZONE_SCHEMA,
             default: []
         },
-        selections: {
-            type: 'Array',
-            item: SELECTION_SCHEMA,
-            default: []
-        },
         depthType: { type: 'String' }
     }
 };
@@ -248,7 +243,11 @@ Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
     idWell: { type: 'Integer'},
     name: { type: 'String', default: 'Noname' },
-    pointSet: POINTSET_SCHEMA,
+    pointsets: {
+        type: 'Array',
+        item: POINTSET_SCHEMA,
+        default: []
+    },
     polygons: {
         type: 'Array',
         item: POLYGON_SCHEMA,
@@ -299,24 +298,30 @@ Crossplot.prototype.PROPERTIES = {
             labelY: { type: 'String' },
             labelZ: { type: 'String' }
         }
+    },
+    isMultiPointset: {
+        type: 'Boolean',
+        default: false
     }
 };
 
 Crossplot.prototype.getProperties = function() {
     let props = Utils.getProperties(this);
-    if (props.pointSet && typeof props.pointSet.activeZone == 'array') {
-        props.pointSet.activeZone = props.pointSet.activeZone[0];
+    if (props.pointsets.length) {
+        props.pointsets.forEach(pointset => {
+            if (pointset && typeof pointset.activeZone == 'array') {
+                pointset.activeZone = pointset.activeZone[0];
+            }
+        });
     }
     return props;
 }
-
+// need fixing
 Crossplot.prototype.setProperties = function(props) {
     Utils.setProperties(this, props);
+    this.pointSet = this.pointsets[0];
+    // this.isMultiPointset = true;
 
-    //if(props.pointsets && props.pointsets.length) this.pointSet = props.pointsets[0];
-    // if (props.pointSet && props.pointSet.idZoneSet != null) {
-    //     this.pointSet.depthType = 'zonalDepth';
-    // }
     return this;
 }
 
@@ -331,33 +336,47 @@ Crossplot.prototype.getViewportX = function() {
 Crossplot.prototype.getViewportY = function() {
     return [this.bodyContainer.node().clientHeight - this.paddingBottom, this.paddingTop];
 }
-
-Crossplot.prototype.getWindowX = function() {
-    return [this.pointSet.scaleLeft, this.pointSet.scaleRight];
+// need fixing
+Crossplot.prototype.getWindowX = function(pointSet) {
+    return pointSet ? [pointSet.scaleLeft, pointSet.scaleRight] : [this.pointSet.scaleLeft, this.pointSet.scaleRight];
 }
-
-Crossplot.prototype.getWindowY = function() {
-    return [this.pointSet.scaleBottom, this.pointSet.scaleTop];
+// need fixing
+Crossplot.prototype.getWindowY = function(pointSet) {
+    return pointSet ? [pointSet.scaleBottom, pointSet.scaleTop] : [this.pointSet.scaleBottom, this.pointSet.scaleTop];
 }
-
-Crossplot.prototype.getWindowZ = function() {
-    return [this.pointSet.scaleMin, this.pointSet.scaleMax];
+// need fixing
+Crossplot.prototype.getWindowZ = function(pointSet) {
+    return pointSet ? [pointSet.scaleMin, pointSet.scaleMax] : [this.pointSet.scaleMin, this.pointSet.scaleMax];
 }
-
-Crossplot.prototype.getTransformX = function() {
-    let scaleFunc = this.pointSet.logX ? d3.scaleLog():d3.scaleLinear();
-    return scaleFunc
-        .domain(this.getWindowX())
-        .range(this.getViewportX());
+// need fixing
+Crossplot.prototype.getTransformX = function(pointSet) {
+    if (pointSet) {
+        let scaleFunc = pointSet.logX ? d3.scaleLog() : d3.scaleLinear();
+        return scaleFunc
+            .domain(this.getWindowX(pointSet))
+            .range(this.getViewportX());
+    } else {
+        let scaleFunc = this.pointSet.logX ? d3.scaleLog() : d3.scaleLinear();
+        return scaleFunc
+            .domain(this.getWindowX())
+            .range(this.getViewportX());
+    }
 }
-
-Crossplot.prototype.getTransformY = function() {
-    let scaleFunc = this.pointSet.logY ? d3.scaleLog():d3.scaleLinear();
-    return scaleFunc
-        .domain(this.getWindowY())
-        .range(this.getViewportY());
+// need fixing
+Crossplot.prototype.getTransformY = function(pointSet) {
+    if (pointSet) {
+        let scaleFunc = pointSet.logY ? d3.scaleLog() : d3.scaleLinear();
+        return scaleFunc
+            .domain(this.getWindowY(pointSet))
+            .range(this.getViewportY());
+    } else {
+        let scaleFunc = this.pointSet.logY ? d3.scaleLog() : d3.scaleLinear();
+        return scaleFunc
+            .domain(this.getWindowY())
+            .range(this.getViewportY());
+    }
 }
-
+// need fixing
 Crossplot.prototype.getTransformZ = function() {
     if (this.pointSet.depthType == 'intervalDepth') {
         let wdZ = this.getWindowZ();
@@ -399,15 +418,15 @@ Crossplot.prototype.getTransformZ = function() {
     }
     return null;
 }
-
+// need fixing
 Crossplot.prototype.getLabelX = function() {
     return this.title.labelX || (this.pointSet.curveX || {}).name;
 }
-
+// need fixing
 Crossplot.prototype.getLabelY = function() {
     return this.title.labelY || (this.pointSet.curveY || {}).name;
 }
-
+// need fixing
 Crossplot.prototype.getLabelZ = function() {
     return this.title.labelZ || (this.pointSet.curveZ || {}).name;
 }
@@ -420,9 +439,11 @@ Crossplot.prototype.setMode = function(mode) {
     this.svgContainer.style('cursor', mode == null ? 'default' : 'copy');
     this.mode = mode;
 }
-
+// need fixing
 Crossplot.prototype.showZonalOrInterval = function() {
-    return this.pointSet.depthType;
+    // return this.pointSet.depthType;
+    // fake
+    return this.pointsets[0].depthType;
 }
 
 Crossplot.prototype.init = function(domElem) {
@@ -509,28 +530,6 @@ Crossplot.prototype.init = function(domElem) {
     this.on('mousedown', function() { self.mouseDownCallback() });
     this.on('mousemove', function() { self.mouseMoveCallback() });
     this.on('mouseleave', function() { self.tooltip(null, null, true);})
-
-    // let zoom = d3.zoom()
-    //     .scaleExtent([1, 40])
-    //     .translateExtent([[-100, -100], [drawContainerSize.x + drawContainerSize.width + 90, drawContainerSize.y + drawContainerSize.height + 100]])
-    //     .on('zoom', zoomed);
-    // function zoomed() {
-    //     var transform = d3.event.transform;
-    //     self.ctx.save();
-    //     self.ctx.clearRect(0, 0, rect.width, rect.height);
-    //     self.ctx.translate(transform.x, transform.y);
-    //     self.ctx.scale(transform.k, transform.k);
-    //     self._doPlot();
-    //     self.ctx.restore();
-    //     self.view.attr('transform', d3.event.transform);
-    //     gX.call(xAxis.scale(d3.event.transform.rescaleX(self.getTransformX())));
-    //     gY.call(yAxis.scale(d3.event.transform.rescaleY(self.getTransformY())));
-    //     gXBottom.call(xAxisBottom.scale(d3.event.transform.rescaleX(self.getTransformX())));
-    //     gYLeft.call(yAxisLeft.scale(d3.event.transform.rescaleY(self.getTransformY())));
-    // }
-    // this.canvas.call(zoom.transform, d3.zoomIdentity);
-    // this.canvas.call(zoom);
-    // this.canvas.on('dblclick.zoom', null);
 }
 
 Crossplot.prototype.createContainer = function() {
@@ -588,14 +587,14 @@ Crossplot.prototype.doPlot = function(){
         self._doPlot();
     }, 500);
 };
-
+// need fixing
 Crossplot.prototype._doPlot = function() {
     console.log('PLOT CROSSPLOT', this.getProperties());
     if (!this.pointSet || !this.pointSet.curveX || !this.pointSet.curveY) return;
 
     this.prepareData();
-    if (!this.shouldUseAxisColors()) this.genColorList();
-    this.rectZWidth = this.shouldPlotZAxis() ? 20 : 0;
+    // if (!this.shouldUseAxisColors()) this.genColorList();
+    // this.rectZWidth = this.shouldPlotZAxis() ? 20 : 0;
 
     this.adjustSize();
     //this.updateHeader();
@@ -610,9 +609,7 @@ Crossplot.prototype._doPlot = function() {
     this.plotArea();
     this.plotUserLine();
     this.plotOverlayLines();
-    // if (this.viSelection) {
-        this.plotSelections();
-    // }
+    this.plotSelections();
 
     let footerString = (this.data.length - this.outliers) +" points plotted out of "
                         + (this.data.length + this.nullDatas) + '( '
@@ -650,7 +647,7 @@ Crossplot.prototype.updateAxises = function() {
     this.updateAxisZRects();
     this.updateAxisLabels();
 }
-
+// need fixing
 Crossplot.prototype.updateAxisTicks = function() {
     let self = this;
     let wdX = this.getWindowX();
@@ -751,7 +748,7 @@ Crossplot.prototype.updateAxisTicks = function() {
         return Number.isInteger(Math.log10(yTickValues[i])) ? true : false;
     }
 }
-
+// need fixing
 Crossplot.prototype.updateAxisGrids = function() {
     let self = this;
 
@@ -811,7 +808,7 @@ Crossplot.prototype.updateAxisGrids = function() {
         return Number.isInteger(Math.log10(yTickValues[i])) ? true : false;
     }
 }
-
+// need fixing
 Crossplot.prototype.updateAxisZRects = function() {
     let rectGroup = this.axisContainer.select('.vi-crossplot-axis-z-rects');
     if (!this.shouldPlotZAxis()) {
@@ -875,7 +872,7 @@ Crossplot.prototype.updateAxisZRects = function() {
 
 
 }
-
+// need fixing
 Crossplot.prototype.updateAxisLabels = function() {
     let rect = this.getPlotRect();
     let vpX = this.getViewportX();
@@ -936,7 +933,6 @@ Crossplot.prototype.isInZones = function(point, zones) {
 }
 
 Crossplot.prototype.isInSelections = function(point, dataY) {
-        // if (Utils.isWithinYRange(point, [data.startDepth, data.stopDepth]))
     const topDepth = this.well.topDepth;
     const step = this.well.step;
     const y = Math.round((point.y - topDepth) / step);
@@ -958,7 +954,7 @@ Crossplot.prototype.filterByPolygons = function(polygons, data, exclude) {
         return !pass;
     });
 }
-
+// need fixing
 Crossplot.prototype.plotEquations = function() {
     let self = this;
 
@@ -980,7 +976,7 @@ Crossplot.prototype.plotEquations = function() {
     let gWidth = equationContainer.node().getBoundingClientRect().width;
     equationContainer.attr('transform', 'translate(' + (this.getViewportX()[1] - gWidth) + ',' + this.getViewportY()[1] + ')' );
 }
-
+// need fixing
 Crossplot.prototype.plotOverlayLines = function() {
     let overlayLineContainer = this.svgContainer.select('g.vi-crossplot-overlay-line')
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
@@ -1099,7 +1095,7 @@ Crossplot.prototype.plotOverlayLines = function() {
         }
     }
 }
-
+// need fixing
 Crossplot.prototype.plotUserDefineLines = function() {
     this.prepareUserDefineLines();
 
@@ -1135,7 +1131,7 @@ Crossplot.prototype.plotUserDefineLines = function() {
 
     this.plotEquations();
 }
-
+// need fixing
 Crossplot.prototype.plotRegressionLines = function() {
     // if (this.data.length == 0) return;
     this.prepareRegressionLines();
@@ -1173,7 +1169,7 @@ Crossplot.prototype.plotRegressionLines = function() {
 
     this.plotEquations();
 }
-
+// need fixing
 Crossplot.prototype.prepareUserDefineLines = function() {
     let lines = this.userDefineLines;
 
@@ -1428,48 +1424,50 @@ Crossplot.prototype.shouldUseAxisColors = function() {
 
 Crossplot.prototype.plotSymbols = function() {
     let self = this;
-    let depthType = self.pointSet.depthType;
-    let shouldPlotZ = (depthType == 'intervalDepth' && self.pointSet.curveZ) || (depthType == 'zonalDepth' && self.pointSet.zones.length > 0);
+    this.pointsets.forEach(pointSet => {
+        let depthType = pointSet.depthType;
+        let shouldPlotZ = (depthType == 'intervalDepth' && pointSet.curveZ) || (depthType == 'zonalDepth' && pointSet.zones.length > 0);
 
-    let transformX = this.getTransformX();
-    let transformY = this.getTransformY();
-    let transformZ;
-    if (shouldPlotZ) {
-        transformZ = this.getTransformZ();
-    }
-    let vpX = this.getViewportX();
-    let vpY = this.getViewportY();
-    let rect = this.getPlotRect();
-    let windowX = this.getWindowX();
-    let windowY = this.getWindowY();
-
-    let ctx = this.ctx;
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    ctx.save();
-
-    ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX)-d3.min(vpX), d3.max(vpY)-d3.min(vpY));
-    ctx.clip();
-
-    let helper = new CanvasHelper(ctx, {
-        strokeStyle: this.pointSet.pointColor,
-        fillStyle: this.pointSet.pointColor,
-        size: this.pointSet.pointSize
-    });
-
-    let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
-    if (typeof plotFunc != 'function') return;
-    this.outliers = 0;
-    this.data.forEach(function(d) {
+        let transformX = self.getTransformX();
+        let transformY = self.getTransformY();
+        let transformZ;
         if (shouldPlotZ) {
-            helper.strokeStyle = transformZ(d.z);
-            helper.fillStyle = transformZ(d.z);
+            transformZ = self.getTransformZ();
         }
-        if(!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
-            self.outliers ++;
-        }
-        plotFunc.call(helper, transformX(d.x), transformY(d.y));
+        let vpX = self.getViewportX();
+        let vpY = self.getViewportY();
+        let rect = self.getPlotRect();
+        let windowX = self.getWindowX();
+        let windowY = self.getWindowY();
+
+        let ctx = self.ctx;
+        // ctx.save();
+        // ctx.clearRect(0, 0, rect.width, rect.height);
+
+        ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
+        ctx.clip();
+
+        let helper = new CanvasHelper(ctx, {
+            strokeStyle: pointSet.pointColor,
+            fillStyle: pointSet.pointColor,
+            size: pointSet.pointSize
+        });
+
+        let plotFunc = helper[Utils.lowercase(pointSet.pointSymbol)];
+        if (typeof plotFunc != 'function') return;
+        self.outliers = 0;
+        self.dataArr[self.pointsets.indexOf(pointSet)].forEach(function (d) {
+            if (shouldPlotZ) {
+                helper.strokeStyle = transformZ(d.z);
+                helper.fillStyle = transformZ(d.z);
+            }
+            if (!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
+                self.outliers++;
+            }
+            plotFunc.call(helper, transformX(d.x), transformY(d.y));
+        });
+        // ctx.restore();
     });
-    ctx.restore();
 }
 
 Crossplot.prototype.plotSelections = function() {
@@ -1525,85 +1523,89 @@ Crossplot.prototype.plotSelections = function() {
 }
 
 Crossplot.prototype.prepareData = function() {
-    if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
-        return;
-
-    Utils.setIfSelfNull(this.pointSet, 'scaleLeft', (this.pointSet.curveX || {}).minX);
-    Utils.setIfSelfNull(this.pointSet, 'scaleRight', (this.pointSet.curveX || {}).maxX);
-    Utils.setIfSelfNull(this.pointSet, 'labelX', (this.pointSet.curveX || {}).name);
-
-    Utils.setIfSelfNull(this.pointSet, 'scaleBottom', (this.pointSet.curveY || {}).minX);
-    Utils.setIfSelfNull(this.pointSet, 'scaleTop', (this.pointSet.curveY || {}).maxX);
-    Utils.setIfSelfNull(this.pointSet, 'labelY', (this.pointSet.curveY || {}).name);
-
-    Utils.setIfSelfNull(this.pointSet, 'scaleMin', (this.pointSet.curveZ || {}).minX);
-    Utils.setIfSelfNull(this.pointSet, 'scaleMax', (this.pointSet.curveZ || {}).maxX);
-
-    this.data = [];
-
-    let mapX = {};
-    Utils.parseData(this.pointSet.curveX.data).forEach(function(d) {
-        mapX[d.y] = d.x;
-    });
-
-    let mapZ = {};
-    if (this.pointSet.curveZ && this.pointSet.curveZ.data) {
-        Utils.parseData(this.pointSet.curveZ.data).forEach(function(d) {
-            mapZ[d.y] = d.x;
-        })
-    }
-
     let self = this;
-    let zonalOrInterval = this.showZonalOrInterval();
-    let zones = [];
-    if (zonalOrInterval == 'zonalDepth') {
-        if (self.pointSet.activeZone instanceof Array) {
-            zones = self.pointSet.zones.filter(function(zone) {
-                return self.pointSet.activeZone.indexOf(zone.idZone) > -1;
-            });
-        }
-        else if (Utils.lowercase(self.pointSet.activeZone) == 'all') {
-            zones = self.pointSet.zones;
-        }
-        else {
-            zones = self.pointSet.zones.filter(function(zone) {
-                return zone.idZone == self.pointSet.activeZone;
-            });
-        }
-    }
-    self.nullDatas = 0;
-    Utils.parseData(this.pointSet.curveY.data).forEach(function(d) {
-        if (zonalOrInterval == 'zonalDepth') {
-            if (!self.isInZones(d, zones)) return;
-        }
-        else if (zonalOrInterval == 'intervalDepth') {
-            if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) {
-                return;
-            }
-            if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) {
-                return;
-            }
+    this.dataArr = [];
+    this.pointsets.forEach(pointSet => {
+        if (!pointSet.curveX || !pointSet.curveY || !pointSet.curveX.data || !pointSet.curveY.data)
+            return;
+
+        Utils.setIfSelfNull(pointSet, 'scaleLeft', (pointSet.curveX || {}).minX);
+        Utils.setIfSelfNull(pointSet, 'scaleRight', (pointSet.curveX || {}).maxX);
+        Utils.setIfSelfNull(pointSet, 'labelX', (pointSet.curveX || {}).name);
+
+        Utils.setIfSelfNull(pointSet, 'scaleBottom', (pointSet.curveY || {}).minX);
+        Utils.setIfSelfNull(pointSet, 'scaleTop', (pointSet.curveY || {}).maxX);
+        Utils.setIfSelfNull(pointSet, 'labelY', (pointSet.curveY || {}).name);
+
+        Utils.setIfSelfNull(pointSet, 'scaleMin', (pointSet.curveZ || {}).minX);
+        Utils.setIfSelfNull(pointSet, 'scaleMax', (pointSet.curveZ || {}).maxX);
+
+        let data = [];
+
+        let mapX = {};
+        Utils.parseData(pointSet.curveX.data).forEach(function (d) {
+            mapX[d.y] = d.x;
+        });
+
+        let mapZ = {};
+        if (pointSet.curveZ && pointSet.curveZ.data) {
+            Utils.parseData(pointSet.curveZ.data).forEach(function (d) {
+                mapZ[d.y] = d.x;
+            })
         }
 
-        if (self.discriminatorData.length) {
-            let well = self.well;
-            let index = Math.round((d.y - well.topDepth) / well.step);
-            if (!self.discriminatorData[index]) {
-                self.nullDatas ++;
-                return;
-            }
-        }
+        // let zonalOrInterval = this.showZonalOrInterval();
+        // let zones = [];
+        // if (zonalOrInterval == 'zonalDepth') {
+        //     if (self.pointSet.activeZone instanceof Array) {
+        //         zones = self.pointSet.zones.filter(function (zone) {
+        //             return self.pointSet.activeZone.indexOf(zone.idZone) > -1;
+        //         });
+        //     }
+        //     else if (Utils.lowercase(self.pointSet.activeZone) == 'all') {
+        //         zones = self.pointSet.zones;
+        //     }
+        //     else {
+        //         zones = self.pointSet.zones.filter(function (zone) {
+        //             return zone.idZone == self.pointSet.activeZone;
+        //         });
+        //     }
+        // }
+        // self.nullDatas = 0;
+        Utils.parseData(pointSet.curveY.data).forEach(function (d) {
+            // if (zonalOrInterval == 'zonalDepth') {
+            //     if (!self.isInZones(d, zones)) return;
+            // }
+            // else if (zonalOrInterval == 'intervalDepth') {
+            //     if (self.pointSet.intervalDepthTop != null && d.y < self.pointSet.intervalDepthTop) {
+            //         return;
+            //     }
+            //     if (self.pointSet.intervalDepthBottom != null && d.y > self.pointSet.intervalDepthBottom) {
+            //         return;
+            //     }
+            // }
 
-        if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
-            self.data.push({
-                x: mapX[d.y],
-                y: d.x,
-                z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
-                depth: d.y
-            });
-        } else {
-            self.nullDatas ++;
-        }
+            if (self.discriminatorData.length) {
+                let well = self.well;
+                let index = Math.round((d.y - well.topDepth) / well.step);
+                if (!self.discriminatorData[index]) {
+                    self.nullDatas ++;
+                    return;
+                }
+            }
+
+            if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
+                data.push({
+                    x: mapX[d.y],
+                    y: d.x,
+                    z: pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
+                    depth: d.y
+                });
+            } else {
+                // self.nullDatas++;
+            }
+        });
+        self.dataArr.push(data);
     });
 }
 
