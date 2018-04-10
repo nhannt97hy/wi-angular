@@ -17,11 +17,10 @@ getAuthInfo();
 let app = angular.module(moduleName, []);
 
 //dev
-// const BASE_URL = 'http://dev.sflow.me';
-// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
-// const INVENTORY_SERVICE = 'http://13.250.197.210';
-// const INVENTORY_SERVICE = 'http://inv.sflow.me';
+const BASE_URL = 'http://dev.sflow.me';
+const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+const PROCESSING_SERVICE = 'http://54.169.13.92';
+const INVENTORY_SERVICE = 'http://13.250.197.210';
 //inv server for dev
 
 //production
@@ -31,10 +30,10 @@ let app = angular.module(moduleName, []);
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
-const BASE_URL = 'http://127.0.0.1:3000';
-const AUTHENTICATION_SERVICE = 'http://127.0.0.1:2999';
-const PROCESSING_SERVICE = 'http://54.169.13.92';
-const INVENTORY_SERVICE = 'http://13.250.197.210';
+// const BASE_URL = 'http://127.0.0.1:3000';
+// const AUTHENTICATION_SERVICE = 'http://127.0.0.1:2999';
+// const PROCESSING_SERVICE = 'http://54.169.13.92';
+// const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
