@@ -1,0 +1,225 @@
+<style>
+    wi-workflow-player>div {
+        flex: 1;
+        display: flex;
+        background-color: #f7f7f7;
+    }
+
+    wi-workflow-player .bordered {
+        border: 1px solid #aaa;
+        border-radius: 4px;
+        border-color: #aaa;
+    }
+
+    wi-workflow-player #tplTree .wi-treeview-container {
+        padding-left: 0;
+    }
+
+    wi-workflow-player .inventory-side {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        flex: 1;
+        overflow: hidden;
+        background-color: #ffffff;
+        margin-bottom: 0;
+    }
+
+    wi-workflow-player .inventory-side .panel-heading {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    wi-workflow-player .height24px span.btn.btn-default {
+        line-height: 20px;
+        height: 24px;
+    }
+
+    wi-workflow-player .ui-select-bootstrap>ul.ui-select-choices li,
+    wi-workflow-player .ui-select-bootstrap>ul.ui-select-no-choice li {
+        display: block;
+        width: 100%;
+    }
+
+    wi-workflow-player .ui-select-bootstrap>.ui-select-choices,
+    wi-workflow-player .ui-select-bootstrap>.ui-select-no-choice {
+        width: auto;
+    }
+
+    wi-workflow-player .ui-select-match-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #testElement .wi-parent-id,
+    #testElement .icon-expanded {
+        display: none;
+    }
+
+    wi-workflow-player .disabled-color {
+        opacity: 0.2;
+    }
+
+    /* wizard styles */
+
+    wi-workflow-player>div>div {
+        display: flex;
+        flex: 1;
+    }
+
+    wi-workflow-player div[indicators-position],
+    wi-workflow-player div.steps,
+    wi-workflow-player section {
+        display: flex;
+        flex: 1;
+    }
+
+    wi-workflow-player div[indicators-position] {
+        flex-direction: column;
+        position: relative;
+    }
+
+    wi-workflow-player div[indicators-position]>h2 {
+        text-align: center;
+        font-size: 2em;
+        margin-top: 6px;
+    }
+
+    wi-workflow-player ul.steps-indicator {
+        height: 60px;
+    }
+
+    wi-workflow-player .steps-indicator li a:before,
+    .steps-indicator:before {
+        background-color: #aaa;
+    }
+
+    @keyframes blink-animation {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    wi-workflow-player .steps-indicator li.current a:before {
+        background-color: blue;
+        animation: blink-animation 2s steps(5, start) infinite;
+        -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    /* end wizard styles */
+
+    wi-workflow-player .wi-droppable {
+        border: 4px dashed #ccc;
+        border-radius: 4px;
+        min-height: 5em;
+        position: relative;
+        padding: 1em;
+        margin-bottom: 20px;
+    }
+
+    wi-workflow-player .wi-droppable::after {
+        content: "DROP DATASETS HERE";
+        color: #ccc;
+        font-size: 3em;
+        width: 100%;
+        display: inline-block;
+        text-align: center;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+    }
+
+    wi-workflow-player ul.table-row {
+        list-style: none;
+        padding-left: 0;
+        white-space: nowrap;
+        display: table-row;
+    }
+
+    wi-workflow-player ul.table-head {
+        font-weight: 700;
+        background-color: #ddd;
+    }
+
+    wi-workflow-player ul.table-row.table-head li {
+        border-left-color: white;
+    }
+
+    wi-workflow-player ul.table-row>li {
+        padding: 0 0.5em;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border: 1px solid #ddd;
+        border-right-color: transparent;
+        vertical-align: middle;
+        height: 28px;
+        line-height: 28px;
+        width: 120px;
+    }
+
+    wi-workflow-player .control-button {
+        float: left;
+        cursor: pointer;
+        line-height: 1.5em;
+    }
+
+    wi-workflow-player .block-button {
+        padding-left: 6px;
+        padding-right: 6px;
+        background: white;
+        border-radius: 50%;
+        border: 1px solid #888;
+    }
+    wi-workflow-player .wizard-control{
+        padding: 0 10px;
+        text-align: right;
+        position:absolute;
+        top: -5em;
+        left:0;
+        right:0;
+    }
+    wi-workflow-player .wizard-step-container {
+        display:flex; 
+        flex-direction:column;
+        flex:1;
+        position:relative;
+    }
+</style>
+<div style='display:flex;flex-direction:column;position:relative;'>
+    <div style='flex:1;'>
+        <wizard indicators-position="top" on-finish="wiWorkflowPlayer.finishWizard()">
+            <wz-step wz-title="Configure Inputs">
+                @@include('./config-input.html')
+            </wz-step>
+            <wz-step wz-title="Configure Outputs">
+                @@include('./config-output.html')
+            </wz-step>
+            <wz-step wz-title='Select Inputs'>
+                @@include('./select-input.html')
+            </wz-step>
+        </wizard>
+    </div>
+    <div style='display: block; flex: none;'>
+        <ul style="padding-left:0px;">
+            <li ng-repeat="wf in wiWorkflowPlayer.workflowConfig.steps" style="display:inline-block;margin-left:0.5em;">
+                <ul style='list-style:none; padding-left: 5px;'>
+                    <li ng-repeat='odata in wf.outputData' style='display:inline-block;margin-left:0.5em;'>
+                        <span ng-if='odata.idPlot' style="border:1px solid #ccc;background-color:#ccc;border-radius:10px;padding:5px;box-shadow:1px 1px 2px #888;">
+                            <span style='cursor:pointer;' ng-click='wiWorkflowPlayer.openPlot(odata)'>{{odata.plotName}}</span>&nbsp;&nbsp;
+                            <span style='cursor:pointer;color:black;' ng-click="wiWorkflowPlayer.removePlot(odata);" class='fa fa-times-circle'></span>
+                        </span>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div ng-show="wiWorkflowPlayer.running();"
+        style='position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;background-color:rgba(255,255,255,0.5);' 
+        id="workflow-{{wiWorkflowPlayer.idWorkflow}}-spinner" wi-element-ready="wiWorkflowPlayer.createSpinner();">
+    </div>
+</div>
