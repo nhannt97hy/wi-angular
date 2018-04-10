@@ -371,15 +371,13 @@ function restoreProject($timeout, wiApiService, ModalService) {
     let query = queryString.parse(location.search);
     if (Object.keys(query).length && query.idProject) {
         $timeout(function () {
-            wiApiService.getProjectInfo(query.idProject, function (project) {
-                if (project.name) {
+            wiApiService.getProjectInfo(query.idProject, function (project, err) {
+                if (!err) {
                     wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                        if (projectData.name) {
                             utils.projectOpen(projectData);
-                        } else {
-                            utils.error("Project not exist!");
-                        }
-                    })
+                        })
+                }else {
+                    toastr.error("Project not exist!");
                 }
             })
         }, 100);
@@ -394,7 +392,6 @@ function restoreProject($timeout, wiApiService, ModalService) {
                                 wiApiService.getProject({
                                     idProject: lastProject.id
                                 }, function (projectData) {
-                                    // let utils = wiComponentService.getComponent('UTILS');
                                     utils.projectOpen(projectData);
                                 });
                             }
