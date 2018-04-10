@@ -338,6 +338,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         }
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
+        wiComponentService.dropComponent(wiComponentService.PROJECT_LOADED);
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
         historyState.removeHistory();
     });
