@@ -3,6 +3,8 @@ exports.NewProjectButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let ModalService = this.ModalService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    if (projectLoaded && projectLoaded.shared) return toastr.error("Can't add new project in shared project. Please close this project first");
     DialogUtils.newProjectDialog(ModalService, function (data) {
         self.wiApiService.createProject(data, function (response) {
             if (!response.name) {
