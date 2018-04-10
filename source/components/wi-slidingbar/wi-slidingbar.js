@@ -61,6 +61,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let minY = wiD3Ctrl ? wiD3Ctrl.getMinDepth() : well.topDepth;
         let maxY = wiD3Ctrl ? wiD3Ctrl.getMaxDepth() : well.bottomDepth;
         let stepY = well.step;
+
         wiApiService.infoCurve(idCurve, function (infoCurve) {
             let config = {
                 minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
@@ -73,7 +74,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 scale: infoCurve.LineProperty ? infoCurve.LineProperty.displayType : "Linear",
                 line: {
                     color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
-                }
+                },
+                idCurve: idCurve
             };
             utils.getCurveData(wiApiService, idCurve, function (err, dataCurve) {
                 if (err) {
@@ -127,9 +129,20 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let logplotId = logPlotCtrl.id;
-        let well = utils.findWellByLogplot(logplotId);
-        if (!well) return;
-        let firstCurve = well.children[0].children[0];
+
+        // TO BE REMOVED
+        // let well = utils.findWellByLogplot(logplotId);
+        // if (!well) return;
+        // let firstCurve = well.children[0].children[0];
+
+        let wiD3Ctrl = wiComponentService.getD3AreaForSlidingBar(self.name);
+        if(!wiD3Ctrl) return;
+        let curves = wiD3Ctrl.getTracks().find(function(track) {
+            return track.isLogTrack() && track.getCurves().length;
+        }).getCurves();
+        if(!curves.length) return;
+        let firstCurve = curves[0];
+        if(firstCurve && !firstCurve.properties) return;
 
         self.createPreview(firstCurve.properties.idCurve);
         /*
@@ -442,7 +455,9 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
             // TO BE REVIEWED
             // hard code: assume step default = 1
-            __minRange = MIN_STEPS_OF_VIEW * 0.1 / (max - min);
+            // let step = 0.1;
+            let step = self.refCurve ? parseFloat(Utils.findWellByCurve(self.refCurve.idCurve).properties.step) : 0.1;
+            __minRange = MIN_STEPS_OF_VIEW * step / (max - min);
         }
         return __minRange;
     }

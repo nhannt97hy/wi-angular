@@ -139,6 +139,24 @@ exports.buildCurve = function(config, data, well) {
 exports.rearrangeTracks = function(wiD3Ctrl) {
     let wiD3Name = wiD3Ctrl.name;
 
+    // TO BE REVIEWED
+    // separate between 2 track with difference well
+    /*
+    let tracks = wiD3Ctrl.getTracks();
+    tracks.forEach(function(track, idx) {
+        let currTrackWell = wiD3Ctrl.detectWellForTrack(track);
+        let nextTrack = tracks[idx + 1];
+        if(nextTrack) {
+            let nextTrackWell = wiD3Ctrl.detectWellForTrack(nextTrack);
+            if(currTrackWell != nextTrackWell) {
+                track.trackContainer.style('border-right', '2px solid black');
+            } else {
+                track.trackContainer.style('border-right', 'none');
+            }
+        }
+    })
+    */
+    
     // d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
 
     d3.select('[name=' + wiD3Name + ']').selectAll('.wi-d3-track-component').sort();

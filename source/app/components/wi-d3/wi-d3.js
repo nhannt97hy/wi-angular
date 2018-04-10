@@ -246,13 +246,26 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.getMaxDepth = function () {
 
-        let defaultBottomDepth = 100000;
+        let defaultBottomDepth = 100000.;
         /* TO BE REMOVED
         let currentWellProps = self.getWellProps();
         if (currentWellProps.bottomDepth)
         // return parseFloat(wellProps.bottomDepth);
             currentWellBottomDepth = parseFloat(currentWellProps.bottomDepth);
         */
+
+        let _maxDepth = defaultBottomDepth;
+        let listWells = self.getListWells();
+        if(listWells.length) {
+            _maxDepth = d3.max(listWells, function (well) {
+                let wellProps = well.properties;
+                return parseFloat(wellProps.bottomDepth);
+            })
+        }
+
+        return _maxDepth;
+
+        // TO BE REVIEWED
         let maxDepth = d3.max(_tracks, function (track) {
             if (track.getExtentY) return track.getExtentY()[1];
             return -1;
@@ -262,13 +275,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return (maxDepth > -1 && maxDepth < 100000 ? maxDepth:defaultBottomDepth);
     };
     this.getMinDepth = function () {
-        let defaultTopDepth = 0;
+        let defaultTopDepth = 0.;
         /* TO BE REMOVED
         let currentWellProps = self.getWellProps();
         if(currentWellProps.topDepth) {
             currentWellTopDepth = parseFloat(currentWellProps.topDepth);
         }
         */
+        let _minDepth = defaultTopDepth;
+        let listWells = self.getListWells();
+        if(listWells.length) {
+            _minDepth = d3.min(listWells, function (well) {
+                let wellProps = well.properties;
+                return parseFloat(wellProps.topDepth);
+            })
+        }
+
+        return _minDepth;
+
+        // TO BE REVIEWD
         let minDepth = d3.min(_tracks, function (track) {
             if (track.getExtentY && track.drawings.length) {
                 return track.getExtentY()[0];
@@ -277,7 +302,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         return (minDepth > -1 && minDepth < 100000 ? minDepth:defaultTopDepth);
     }
-
     this.getDepthRange = function () {
         return _depthRange.map(function (d) {
             return Math.round(d * 10000) / 10000;
@@ -673,6 +697,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // TO BE REMOVED
         // let topDepth = parseFloat(self.getWellProps().topDepth);
         // let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
+
         let topDepth = self.getMinDepth();
         let bottomDepth = self.getMaxDepth();
 
@@ -834,13 +859,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // TO BE REMOVED
         // multiwell feature. By default, current well is the first well in the array
         // self.listWells.push(_getWellProps().idWell);
-        self.listWells.push({
-            properties: _getWellProps(),
-            wellAttrs: {
-                color: '#88CC88',
-                tracks: []
-            }
-        });
+        // self.listWells.push({
+        //     properties: _getWellProps(),
+        //     wellAttrs: {
+        //         color: '#88CC88',
+        //         tracks: []
+        //     }
+        // });
 
         window._WiD3CTRL = self;
     }
@@ -903,9 +928,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiApiService.getLogplot(logplotModel.id,
                 function (plot, err) {
                     if (err) return;
-                    if (logplotModel.properties.referenceCurve) {
-                        logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
-                    }
+
                     const tracks = [].concat(plot.tracks || [])
                         .concat(plot.depth_axes || [])
                         .concat(plot.zone_tracks || [])
@@ -934,9 +957,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             async.setImmediate(_callback);
                         }
                     }, function(error) {
-                        buildTracks();
+                        buildTracks(function() {
+                            if (logplotModel.properties.referenceCurve) {
+                                logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
+                            }
+                        });
                     });
-                    function buildTracks() {
+                    function buildTracks(callback) {
                         let loadedTracks = wiD3Ctrl.getTracks();
                         async.eachOf(loadedTracks, function(aTrack, idx, _cb){
                             if (aTrack.type == "depth-track") {
@@ -1071,6 +1098,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
                             self.plotAll();
                             updateSlider();
+                            callback();
                         });
                     }
                 });

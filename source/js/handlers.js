@@ -418,8 +418,11 @@ exports.BlankLogplotButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+
+    // TO BE REMOVED
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
+
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;

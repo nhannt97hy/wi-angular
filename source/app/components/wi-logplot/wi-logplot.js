@@ -1,7 +1,7 @@
 const componentName = 'wiLogplot';
 const moduleName = 'wi-logplot';
 
-function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout, $element) {
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -33,6 +33,15 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
+
+    this.onFooterReady = function() {
+        // let parentSelector = d3.select($element[0]);
+        // let footerDOM = parentSelector.select('.logplot-footer').node();
+        // $(footerDOM).draggable();
+        // $(footerDOM).on('dragstop', function() {
+        //     self.showFooter = !self.showFooter;
+        // });
+    }
 
     this.$doCheck = function () {
         // if (!self.slidingBar) return;

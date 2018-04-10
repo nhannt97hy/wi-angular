@@ -66,11 +66,12 @@ wi-logplot {
     }
 
     .logplot-footer {
-        display: block;
-        position: absolute;
+        // display: block;
+        // position: absolute;
         right: 10px;
         bottom: 10px;
-
+        opacity: 0.5;
+        pointer-events: auto;
         .well-name-container {
             width: 100px;
             position: absolute;
@@ -81,6 +82,7 @@ wi-logplot {
             border-radius: 2px;
             background-color: #ffffe0;
             text-align: center;
+            filter: drop-shadow(2px 2px 5px gray);
         }
         .well-name {
             padding: 5px;
@@ -89,10 +91,14 @@ wi-logplot {
             font-weight: bold;
         }
         .footer-icon {
-            opacity: 0.4;
             position: absolute;
             right: 10px;
             bottom: 10px;
+            filter: drop-shadow(2px 2px 5px gray);
+        }
+
+        &:hover{
+            opacity: 0.9;
         }
     }
 }

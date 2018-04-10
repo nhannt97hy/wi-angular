@@ -225,8 +225,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
         }
         function updateMultiLogplotStatus() {
-            wiComponentService.getSlidingBarForD3Area(self.wiD3Ctrl.name).updateDepthRange();
-
+            $timeout(function() {
+                wiComponentService.getSlidingBarForD3Area(self.wiD3Ctrl.name).updateDepthRange();
+            })
             if(viTrack.getCurves().length) {
                 let curveWellProps = Utils.findWellByCurve(viTrack.getCurves()[0].idCurve).properties;
                 let foundWell = self.wiD3Ctrl.listWells.find(function(well) {
@@ -249,7 +250,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         return track.name != component.name;
                     });
                 }
-            })
+            });
 
             // TO BE REVIEWED
             // if (viTrack.drawings.length == 0) {
@@ -411,26 +412,27 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             };
             listWells.push(newWell);
         }
+
+        // create Preview on sliding bar
+        let logplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
+        let logplotModel = logplotCtrl.getLogplotModel();
+        if(!logplotModel.properties.referenceCurve) {
+            // create reference curve
+            let idCurve = config.idCurve;
+            let wiSlidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
+            let logplotRequest = angular.copy(logplotModel.properties);
+            logplotRequest.referenceCurve = idCurve;
+            wiApiService.editLogplot(logplotRequest, function (editedLogplot) {
+                console.log('logplot edited ref curve', editedLogplot);
+                logplotModel.properties.referenceCurve = idCurve;
+                wiSlidingBarCtrl.createPreview(idCurve);
+            });
+        }
         self.update(null, true);
         return curve;
 
-        // TO BE REMOVED
-        let trackWellId = Utils.findWellByCurve(config.idCurve).properties.idWell;
-        if(self.wiD3Ctrl.listWells.indexOf(trackWellId) < 0)
-            self.wiD3Ctrl.listWells.push(trackWellId);
-        track.headerNameBlock.style('background-color', function() {
-            let indexWell = self.wiD3Ctrl.listWells.indexOf(trackWellId);
-            if(!self.wiD3Ctrl.wellsAttrs[indexWell]) {
-
-                self.wiD3Ctrl.wellsAttrs[indexWell] = { color: getRandomColor(indexWell), tracks: []};
-            }
-            self.wiD3Ctrl.wellsAttrs[indexWell].tracks.push(self);
-            return self.wiD3Ctrl.wellsAttrs[indexWell].color;
-        });
-        return curve;
-
         function getRandomColor(wellIdx) {
-            const DEFAULT_COLOR = ['#defddf', '#c07b7b', '#0b5a8a', '#c67151', '#205153'];
+            const DEFAULT_COLOR = ['#68c7ec', '#cab5d5', '#f7a897', '#f3b86d', '#80ced0', '#b0d775'];
             if(wellIdx && wellIdx > 0 && wellIdx < DEFAULT_COLOR.length) {
                 return DEFAULT_COLOR[wellIdx - 1];
             }

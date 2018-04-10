@@ -1082,11 +1082,14 @@ exports.createProjectModel = createProjectModel;
 exports.projectToTreeConfig = function (project) {
     let projectModel = createProjectModel(project);
     let wiComponentService = __GLOBAL.wiComponentService;
+
+    // TO BE REMOVED
     // project logplots
-    let projectLogplots = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
-    let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
-    projectLogplotsNode.children = projectLogplots;
+    // let projectLogplots = [];
+    // wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
+    // let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
+    // projectLogplotsNode.children = projectLogplots;
+
     // project crossplots
     let projectCrossplots = [];
     wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
@@ -1113,7 +1116,9 @@ exports.projectToTreeConfig = function (project) {
     // multiLogplots
     let multiLogplotsNode = createLogplotsNode(project);
 
-    projectModel.children.push(projectLogplotsNode);
+    // TO BE REMOVED
+    // projectModel.children.push(projectLogplotsNode);
+
     projectModel.children.push(projectCrossplotsNode);
     projectModel.children.push(projectHistogramsNode);
     projectModel.children.push(multiLogplotsNode);
@@ -1333,11 +1338,12 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 };
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
-    let currentWell = getCurrentWell();
+    // let currentWell = getCurrentWell();
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let dataRequest = {
         idProject: project.idProject,
-        idWell: currentWell.properties.idWell,
+        // TO BE REMOVED
+        // idWell: currentWell.properties.idWell,
         name: logplotName,
         option: 'blank-plot',
         plotTemplate: type ? type : null
@@ -1347,7 +1353,10 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
             if (err) {
                 reject();
             } else {
-                logplot.parent = angular.copy(currentWell.properties);
+                // TO BE REMOVED
+                // logplot.parent = angular.copy(currentWell.properties);
+
+                logplot.parent = project;
                 resolve(logplot);
             }
 

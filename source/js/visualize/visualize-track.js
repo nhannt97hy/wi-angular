@@ -603,3 +603,9 @@ Track.prototype.prepareTicks = function() {
     //     })
     // ];
 }
+
+Track.prototype.updateLogplotProps = function(newLogplotProps) {
+    if(!newLogplotProps) return;
+    visUtils.setIfNotNull(this, 'yStep', parseFloat(newLogplotProps.step));
+    visUtils.setIfNotNull(this, 'offsetY', parseFloat(newLogplotProps.topDepth));
+}
