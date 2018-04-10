@@ -6,177 +6,169 @@
                 <h4 class="modal-title">Zone Management</h4>
             </div>
             <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row dialog-style">
-                        <form class='form-horizontal form-condensed zoneForm'>
-                            <div class="row">
-                                <div class="col-sm-8">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 padding-left-3em">Well</label>
-                                        <div class="col-sm-9">
-                                            <select class="form-control wi-form-control"
-                                                    ng-model="wiModal.SelectedWell"
-                                                    ng-change="wiModal.onChangeWell()"
-                                                    ng-options="well as well.properties.name for well in wiModal.wellArr track by well.id">
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-2">
-                                    <div class="form-group">
-                                        <input type="radio" name="type">
-                                        <label>Parameter</label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-2">
-                                    <div class="form-group">
-                                        <input type="radio" name="type">
-                                        <label>User Defined</label>
-                                    </div>
+                <div class="container-fluid row dialog-style">
+                    <form class='form-horizontal form-condensed zoneForm'>
+                        <div class="form-group">
+                            <label class="col-sm-3 padding-left-4em">Well</label>
+                            <div class="col-sm-3">
+                                <ui-select ng-model="wiModal.SelectedWell"
+                                        ng-change="wiModal.onChangeWell()">
+                                    <ui-select-match>
+                                        {{$select.selected.name}}
+                                    </ui-select-match>
+                                    <ui-select-choices repeat='well in wiModal.wellArr | filter: {name: $select.search} track by well.id'>
+                                        {{well.name}}</ui-select-choices>
+                                        <ui-select-no-choice>Well not found!</ui-select-no-choice>
+                                </ui-select>
+                            </div>
+                            <label class="col-sm-3">
+                                <input type="radio" name="type">
+                                Parameter
+                            </label>
+                            <label class="col-sm-3">
+                                <input type="radio" name="type">
+                                User Defined
+                            </label>
+                        </div>
+                        <h5>User Defined</h5>
+                        <div class="form-group">
+                            <label class="col-sm-3 padding-left-4em">Zone Set</label>
+                            <div class="col-sm-3">
+                                <ui-select ng-model="wiModal.SelectedZoneSet"
+                                ng-change="wiModal.onChangeZoneSet()">
+                                    <ui-select-match>{{$select.selected.name}}</ui-select-match>
+                                    <ui-select-choices repeat='zoneset in wiModal.zonesetsArr | filter: {name: $select.search} track by zoneset.id'>
+                                        {{zoneset.name}}</ui-select-choices>
+                                        <ui-select-no-choice>Zoneset not found!</ui-select-no-choice>
+                                </ui-select>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-default normal-text"
+                                ng-click="wiModal.onRenameZoneSet()"
+                                ng-disabled="!wiModal.SelectedZoneSet">Rename</button>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-default normal-text"
+                                ng-click="wiModal.onAddZoneSet()">Add Zone Set</button>
+                            </div>
+                        </div>
+                        <h5>Zones</h5>
+                            <div class="form-group">
+                                <label class="col-sm-3 padding-left-4em">Reference Depth</label>
+                                <div class="col-sm-3">
+                                    <select class="form-control wi-form-control">
+                                        <option value="MD">MD</option>
+                                        <option value="TVD" disabled>TVD</option>
+                                        <option value="TVDSS" disabled>TVDSS</option>
+                                    </select>
                                 </div>
                             </div>
-                            <h5>User Defined</h5>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label class="col-sm-2 padding-left-4em">Zone Set</label>
-                                    <div class="col-sm-6">
-                                        <select class="form-control wi-form-control"
-                                                ng-model="wiModal.SelectedZoneSet"
-                                                ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zonesetsArr"
-                                                ng-change="wiModal.onChangeZoneSet()">
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <button class="btn btn-default normal-text"
-                                        ng-click="wiModal.onRenameZoneSet()"
-                                        ng-disabled="!wiModal.SelectedZoneSet">Edit</button>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <button class="btn btn-default normal-text"
-                                        ng-click="wiModal.onAddZoneSet()">Add</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <h5>Zones</h5>
-                            <div class="row">
-                                <div class="form-group">
-                                    <label class="col-sm-2 padding-left-4em padding-right-0">Reference Depth</label>
-                                    <div class="col-sm-3">
-                                        <select class="form-control wi-form-control">
-                                            <option value="MD">MD</option>
-                                            <option value="TVD" disabled>TVD</option>
-                                            <option value="TVDSS" disabled>TVDSS</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row" style="height:43%">
-                                <div class='col-sm-9 col-xs-12 height-100-percent' style='overflow-x:hidden; overflow-y:auto;'>
-                                    <table class="table table-bordered zonesTable">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 5%"></th>
-                                                <th style="width: 15%">Name</th>
-                                                <th style="width: 15%">Top Depth</th>
-                                                <th style="width: 16%">Bottom Depth</th>
-                                                <th style="width: 13%">Foreground</th>
-                                                <th style="width: 14%">Background</th>
-                                                <th style="width: 22%">Pattern</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="zone in wiModal.zoneArr"
-                                                ng-class="{selected:$index == wiModal.SelectedZone, 'display-none': zone.flag === wiModal._FDEL,'color-red': zone.err == true}"
-                                                ng-click="wiModal.setClickedRow($index)">
-                                                <td style="width: 5%"><i ng-class="{'fa fa-chevron-circle-right': $index == wiModal.SelectedZone}"></i></td>
-                                                <td style="width: 15%">
-                                                    <input type="text" 
-                                                            ng-model="zone.properties.name"
-                                                            class="form-control wi-form-control"
-                                                            ng-change="wiModal.onZoneChanged($index);">
-                                                </td>
-                                                <td style="width: 15%">
-                                                    <input type="number" step="any"
-                                                            ng-model="zone.properties.startDepth"
-                                                            class="form-control wi-form-control"
-                                                            ng-change="wiModal.onZoneChanged($index);">
-                                                </td>
-                                                <td style="width: 16%">
-                                                    <input type="number" step="any" 
-                                                            ng-model="zone.properties.endDepth"
+                        <hr>
+                        <div class="form-group" style="height:43%">
+                            <div class='col-sm-9 col-xs-12 height-100-percent' style='overflow-x:hidden; overflow-y:auto;'>
+                                <table class="table table-bordered zonesTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 5%">#</th>
+                                            <th style="width: 15%">Name</th>
+                                            <th style="width: 15%">Top Depth</th>
+                                            <th style="width: 16%">Bottom Depth</th>
+                                            <th style="width: 13%">Foreground</th>
+                                            <th style="width: 14%">Background</th>
+                                            <th style="width: 22%">Pattern</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="zone in wiModal.zoneArr"
+                                            ng-class="{'display-none': zone.flag === wiModal._FDEL,'color-red': zone.err == true}"
+                                            ng-click="wiModal.setClickedRow($index)">
+                                            <td style="width: 5%"><i ng-class="{'fa fa-chevron-circle-right': $index == wiModal.SelectedZone}"></i></td>
+                                            <td style="width: 15%">
+                                                <input type="text"
+                                                        ng-model="zone.properties.name"
+                                                        class="form-control wi-form-control"
+                                                        ng-change="wiModal.onZoneChanged($index);">
+                                            </td>
+                                            <td style="width: 15%">
+                                                <input type="number" step="any"
+                                                        ng-model="zone.properties.startDepth"
+                                                        class="form-control wi-form-control"
+                                                        ng-change="wiModal.onZoneChanged($index);">
+                                            </td>
+                                            <td style="width: 16%">
+                                                <input type="number" step="any"
+                                                        ng-model="zone.properties.endDepth"
+                                                        ng-change="wiModal.onZoneChanged($index);"
+                                                        class="form-control wi-form-control">
+                                            </td>
+                                            <td style="width: 13%">
+                                                <button ng-click="wiModal.foregroundZone($index);"
+                                                        ng-style="{'background-color':zone.properties.fill.pattern.foreground}"
+                                                        class="form-control wi-form-control width-80px height-20px thick-border">
+                                                </button>
+                                            </td>
+                                            <td style="width: 14%">
+                                                <button ng-click="wiModal.backgroundZone($index);"
+                                                        ng-style="{'background-color':zone.properties.fill.pattern.background}"
+                                                        class="form-control wi-form-control width-80px height-20px thick-border">
+                                                </button>
+                                            </td>
+                                            <td style="width: 22%">
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="zone.properties.fill.pattern.name"
                                                             ng-change="wiModal.onZoneChanged($index);"
-                                                            class="form-control wi-form-control">
-                                                </td>
-                                                <td style="width: 13%">
-                                                    <button ng-click="wiModal.foregroundZone($index);"
-                                                            ng-style="{'background-color':zone.properties.fill.pattern.foreground}"
-                                                            class="form-control wi-form-control width-80px height-20px thick-border">
-                                                    </button>
-                                                </td>
-                                                <td style="width: 14%">
-                                                    <button ng-click="wiModal.backgroundZone($index);"
-                                                            ng-style="{'background-color':zone.properties.fill.pattern.background}"
-                                                            class="form-control wi-form-control width-80px height-20px thick-border">
-                                                    </button>
-                                                </td>
-                                                <td style="width: 22%">
-                                                    <ui-select theme="bootstrap" 
-                                                                ng-model="zone.properties.fill.pattern.name"
-                                                                ng-change="wiModal.onZoneChanged($index);"
-                                                                search-enabled="false">
-                                                        <ui-select-match>
-                                                            <wi-canvas-rect name="row_{{$index}}" 
-                                                                            pattern="{{zone.properties.fill.pattern.name}}" 
-                                                                            width="120" height="20" 
-                                                                            foreground="{{zone.properties.fill.pattern.foreground}}" 
-                                                                            background='{{zone.properties.fill.pattern.background}}'>
+                                                            search-enabled="false">
+                                                    <ui-select-match>
+                                                        <wi-canvas-rect name="row_{{$index}}"
+                                                                        pattern="{{zone.properties.fill.pattern.name}}"
+                                                                        width="120" height="20"
+                                                                        foreground="{{zone.properties.fill.pattern.foreground}}"
+                                                                        background='{{zone.properties.fill.pattern.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
+                                                        <div>
+                                                            <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
+                                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}"
+                                                                            width="50" height="20"
+                                                                            foreground="{{zone.properties.fill.pattern.foreground}}"
+                                                                            background="{{zone.properties.fill.pattern.background}}"
+                                                                            style="float: right;">
                                                             </wi-canvas-rect>
-                                                        </ui-select-match>
-                                                        <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
-                                                            <div>
-                                                                <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
-                                                                <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" 
-                                                                                width="50" height="20" 
-                                                                                foreground="{{zone.properties.fill.pattern.foreground}}" 
-                                                                                background="{{zone.properties.fill.pattern.background}}"
-                                                                                style="float: right;">
-                                                                </wi-canvas-rect>
-                                                            </div>
-                                                        </ui-select-choices>
-                                                    </ui-select>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                                        </div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class='col-sm-3 col-xs-12' style='position:relative;'>
+                                <div>
+                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Import</button>
+                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Export</button>
                                 </div>
-                                <div class='col-sm-3 col-xs-12' style='position:relative;'>
-                                    <div>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Import</button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;">Export</button>
-                                    </div>
-                                    <div style='margin-top:5em;'>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddAboveButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
-                                            <i class="plus-16x16"></i>
-                                            <span>Add Row Above</span>
-                                        </button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddBelowButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
-                                            <i class="plus-16x16"></i>                                                    
-                                            <span>Add Row Below</span>
-                                        </button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onDeleteButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
-                                            <i class="delete-16x16"></i>                                                    
-                                            <span>Delete Rows</span>
-                                        </button>
-                                        <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onClearAllButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
-                                            <i class="delete-16x16"></i>
-                                            <span>Clear All</span>
-                                        </button>
-                                    </div>
+                                <div style='margin-top:5em;'>
+                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddAboveButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
+                                        <i class="plus-16x16"></i>
+                                        <span>Add Row Above</span>
+                                    </button>
+                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onAddBelowButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
+                                        <i class="plus-16x16"></i>
+                                        <span>Add Row Below</span>
+                                    </button>
+                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onDeleteButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
+                                        <i class="delete-16x16"></i>
+                                        <span>Delete Rows</span>
+                                    </button>
+                                    <button class="btn btn-default display-block width-100-percent text-ellipsis" style="margin-bottom:5px;" ng-click="wiModal.onClearAllButtonClicked()" ng-disabled="wiModal.zonesetsArr.length == 0">
+                                        <i class="delete-16x16"></i>
+                                        <span>Clear All</span>
+                                    </button>
                                 </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="modal-footer">

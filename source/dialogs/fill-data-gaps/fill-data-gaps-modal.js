@@ -51,14 +51,14 @@ module.exports = function(ModalService, wiComponentService){
         this.getCurveData = function () {
             let curveModel = self.CurvesData.find(curve => {return curve.id == self.SelectedCurve.id;});
             if(curveModel){
-                self.Nullnumber = curveModel.data.filter(d => {return isNaN(d.x);}).length;
+                self.Nullnumber = curveModel.data.filter(d => {return isNaN(parseFloat(d.x));}).length;
             }else{
                 wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
                     self.CurvesData.push({
                         id: self.SelectedCurve.id,
                         data: data
                     });
-                    self.Nullnumber = data.filter(d => { return isNaN(d.x);}).length;
+                    self.Nullnumber = data.filter(d => { return isNaN(parseFloat(d.x));}).length;
                 })
             }
             self.curveName = self.SelectedCurve.properties.name;

@@ -384,7 +384,7 @@ Crossplot.prototype.getTransformZ = function() {
     }
     else if (this.pointSet.depthType == 'zonalDepth') {
         let domain = [];
-        let range = ['transparent']
+        let range = [];
         let zones = this.pointSet.zones.sort(function(a, b) {
             return a.startDepth - b.startDepth;
         })
@@ -392,7 +392,6 @@ Crossplot.prototype.getTransformZ = function() {
             domain.push(z.startDepth);
             domain.push(z.endDepth);
             range.push(z.fill.pattern.background);
-            range.push('transparent');
         });
         return d3.scaleQuantile()
             .domain(domain)
@@ -615,8 +614,8 @@ Crossplot.prototype._doPlot = function() {
         this.plotSelections();
     // }
 
-    let footerString = (this.data.length - this.outliers - this.nullDatas) +" points plotted out of "
-                        + this.data.length + '( '
+    let footerString = (this.data.length - this.outliers) +" points plotted out of "
+                        + (this.data.length + this.nullDatas) + '( '
                         + this.outliers + ' outliers, '
                         + this.nullDatas + ' nulls)';
     this.footerRight
@@ -1589,7 +1588,10 @@ Crossplot.prototype.prepareData = function() {
         if (self.discriminatorData.length) {
             let well = self.well;
             let index = Math.round((d.y - well.topDepth) / well.step);
-            if (!self.discriminatorData[index]) return;
+            if (!self.discriminatorData[index]) {
+                self.nullDatas ++;
+                return;
+            }
         }
 
         if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {

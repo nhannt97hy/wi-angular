@@ -102,6 +102,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return;
         }
     }
+    this.onModifiedCurve = function(curve){
+        let idCurve = curve.idCurve;
+        let wellModel = utils.findWellByCurve(idCurve);
+        if(wellModel.id == self.crossplotModel.properties.idWell){
+            let pointSet = self.getPointSet(self.crossplotModel.properties);
+            function updateData(type){
+                let curveProps = utils.getModel('curve', idCurve);
+                let data = curve.data.map((r,i) => {
+                    return {
+                        y: i,
+                        x: r
+                    }
+                });
+                let viCurve = graph.buildCurve(curveProps, data, wellModel.properties);
+                let crossProp = {
+                    pointSet : {}
+                };
+                crossProp.pointSet[type] = viCurve;
+                self.viCrossplot.setProperties(crossProp);
+                self.viCrossplot.doPlot();
+            }
+            switch(idCurve){
+                case pointSet.idCurveX:
+                updateData('curveX');
+                break;
+                case pointSet.idCurveY:
+                updateData('curveY');
+                break;
+                case pointSet.idCurveZ:
+                updateData('curveZ');
+                break;
+                default:
+                break;
+            }
+        }
+    }
     this.$onInit = function () {
         self.crossplotAreaId = self.name.replace('D3Area', '');
         self.crossplotModel = utils.getModel('crossplot', self.idCrossplot || self.wiCrossplotCtrl.id);
@@ -112,6 +148,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiComponentService.emit(self.name);
         }
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
     };
 
     this.onLoading = function() {
@@ -161,7 +198,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
             histogramProps.leftScale = (xy == 'xCurve')?pointSet.scaleLeft:pointSet.scaleBottom;
             histogramProps.rightScale = (xy == 'xCurve')?pointSet.scaleRight:pointSet.scaleTop;
-            histogramProps.idZoneSet = pointSet.idZoneSet;
+            histogramProps.idZoneSet = pointSet.depthType == 'intervalDepth' ? null : pointSet.idZoneSet;
             histogramProps.intervalDepthTop = pointSet.intervalDepthTop;
             histogramProps.intervalDepthBottom = pointSet.intervalDepthBottom;
             histogramProps.color = pointSet.pointColor;
@@ -177,7 +214,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             histogramProps.idCurve = (xy == 'xCurve')?pointSet.idCurveX:pointSet.idCurveY;
             histogramProps.leftScale = (xy == 'xCurve')?pointSet.scaleLeft:pointSet.scaleBottom;
             histogramProps.rightScale = (xy == 'xCurve')?pointSet.scaleRight:pointSet.scaleTop;
-            histogramProps.idZoneSet = pointSet.idZoneSet;
+            histogramProps.idZoneSet = pointSet.depthType == 'intervalDepth' ? null : pointSet.idZoneSet;
             histogramProps.intervalDepthTop = pointSet.intervalDepthTop;
             histogramProps.intervalDepthBottom = pointSet.intervalDepthBottom;
             histogramProps.color = pointSet.pointColor;
@@ -297,6 +334,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.crossplotModel.properties.pointsets[0].depthType = 'intervalDepth';
         }
         self.viCrossplot.pointSet.depthType = self.crossplotModel.properties.pointsets[0].depthType;
+        updateHistogram();
         self.switchReferenceZone();
     }
 
@@ -384,6 +422,40 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
 
+    function updateHistogram(curveZ){
+        if (self.histogramModelX) {
+            if ($('#' + self.name + "HistogramX").length) {
+                if(curveZ){
+                    $('#' + self.name + "HistogramX").css("margin-right","20px");
+                }else{
+                    $('#' + self.name + "HistogramX").css("margin-right","0px");
+                }
+                updateHistogramProps(self.crossplotModel, 'xCurve');
+                self.xHistogram.setHistogramModel(self.histogramModelX);
+                let zoneCtrl = self.getZoneCtrl();
+                if (!zoneCtrl) return;
+                let activeZones = zoneCtrl.getActiveZones();
+                self.xHistogram.setZoneSet(activeZones);
+                self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
+
+                self.xHistogram.doPlot();
+            }
+        }
+        if (self.histogramModelY) {
+            if ($('#' + self.name + "HistogramY").length) {
+                updateHistogramProps(self.crossplotModel, 'yCurve');
+                self.yHistogram.setHistogramModel(self.histogramModelY);
+                let zoneCtrl = self.getZoneCtrl();
+                if (!zoneCtrl) return;
+                let activeZones = zoneCtrl.getActiveZones();
+                self.yHistogram.setZoneSet(activeZones);
+                self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
+
+                self.yHistogram.doPlot();
+            }
+        }
+    }
+
     this.updateAll = function (callback) {
         wiApiService.getCrossplot(self.crossplotModel.properties.idCrossPlot, function (crossplot) {
             self.crossplotModel.properties = crossplot;
@@ -394,26 +466,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
             self.viCrossplot.setProperties(crossplot);
             self.viCrossplot.doPlot();
-            if (self.histogramModelX) {
-                if ($('#' + self.name + "HistogramX").length) {
-                    self.histogramModelX.properties = buildHistogramProps(self.crossplotModel, 'xCurve');
-                    self.xHistogram.setHistogramModel(self.histogramModelX);
-                    let activeZones = self.getZoneCtrl().getActiveZones();
-                    self.xHistogram.setZoneSet(activeZones);
-                    self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
-                    self.xHistogram.doPlot();
-                }
-            }
-            if (self.histogramModelY) {
-                if ($('#' + self.name + "HistogramY").length) {
-                    self.histogramModelY.properties = buildHistogramProps(self.crossplotModel, 'yCurve');
-                    self.yHistogram.setHistogramModel(self.histogramModelY);
-                    let activeZones = self.getZoneCtrl().getActiveZones();
-                    self.yHistogram.setZoneSet(activeZones);
-                    self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
-                    self.yHistogram.doPlot();
-                }
-            }
+            updateHistogram(crossplot.pointSet.idCurveZ);
             callback && callback();
         });
     }
@@ -517,41 +570,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             // Canh - Dont know why error :'(
                         }
 
-                        if (self.histogramModelX) {
-                            if ($('#' + self.name + "HistogramX").length) {
-                                if(crossplotProps.pointSet.idCurveZ){
-                                    $('#' + self.name + "HistogramX").css("margin-right","20px");
-                                }else{
-                                    $('#' + self.name + "HistogramX").css("margin-right","0px");
-                                }
-                                updateHistogramProps(self.crossplotModel, 'xCurve');
-                                self.xHistogram.setHistogramModel(self.histogramModelX);
-                                let zoneCtrl = self.getZoneCtrl();
-                                if (!zoneCtrl) return;
-                                let activeZones = zoneCtrl.getActiveZones();
-                                self.xHistogram.setZoneSet(activeZones);
-                                self.xHistogram.setCurve(self.viCrossplot.pointSet.curveX.rawData);
-
-                                self.xHistogram.doPlot();
-                            }
-                        }
-                        if (self.histogramModelY) {
-                            if ($('#' + self.name + "HistogramY").length) {
-                                updateHistogramProps(self.crossplotModel, 'yCurve');
-                                self.yHistogram.setHistogramModel(self.histogramModelY);
-                                let zoneCtrl = self.getZoneCtrl();
-                                if (!zoneCtrl) return;
-                                let activeZones = zoneCtrl.getActiveZones();
-                                self.yHistogram.setZoneSet(activeZones);
-                                self.yHistogram.setCurve(self.viCrossplot.pointSet.curveY.rawData);
-
-                                self.yHistogram.doPlot();
-                            }
-                        }
+                        updateHistogram(crossplotProps.pointSet.idCurveZ);
                     });
-
-
-
                 });
             });
         }
@@ -1185,6 +1205,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         document.removeEventListener('resize', self.resizeHandlerCross);
         document.removeEventListener('resize', self.resizeHandlerHis);
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
     }
 
     function _onPlotMouseWheelCallback (container) {

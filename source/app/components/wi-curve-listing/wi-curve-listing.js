@@ -123,6 +123,13 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     console.log(data, coords);
                 },
                 renderAllRows: false,
+                beforeChange: function(changes, source) {
+                    // console.log(changes);
+                    changes = changes.map(r => {
+                        r[3] = '' + parseFloat(r[3]);
+                        return r;
+                    })
+                },
                 afterChange: function(change, source) {
                     if (source == "loadData") return;
                     if (change && change.length) {
@@ -158,6 +165,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 self.dataSettings[self.currentIndex].setting
             );
         }
+        dataCtrl.render();
     }
     this.onRefresh = function() {
         console.log('WCL refresh');
@@ -356,7 +364,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
 
                         _current.setting.data.forEach(
                             (r, i) =>
-                                (r[idCurve] = parseFloat((result[i] || {}).x))
+                                (r[idCurve] = '' + parseFloat((result[i] || {}).x))
                         );
                         addCol();
                     });
@@ -387,7 +395,10 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 self.dataSettings[self.currentIndex].curves[c]
             );
             if (curve.modified) {
-                curve.data = self.dataSettings[self.currentIndex].setting.data.map(r => r["" + curve.id]);
+                curve.data = self.dataSettings[self.currentIndex].setting.data.map(r => {
+                    let tmp = parseFloat(r["" + curve.id]);
+                    return isNaN(tmp) ? null : tmp;
+                });
                 modifiedCurves.push(curve);
             }
         }

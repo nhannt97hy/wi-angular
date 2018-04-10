@@ -127,30 +127,26 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                     case 'dataset':
                         deleteFunction = wiApiService.removeDataset;
                         cleanUpFunction = function () {
-                            selectedNode.children.forEach(function (curve) {
-                                // utils.updateWiLogplotOnModelDeleted(curve);
-                                // utils.updateWiCrossplotOnModelDeleted(curve);
-                                utils.updateWiHistogramOnModelDeleted(curve);
-                            });
                             wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'curve':
                         deleteFunction = wiApiService.removeCurve;
                         cleanUpFunction = function () {
-                            // utils.emitEvent('curve-deleted', selectedNode);
-                            // utils.updateWiCrossplotOnModelDeleted(selectedNode);
-                            utils.updateWiHistogramOnModelDeleted(selectedNode);
                             wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'zoneset':
                         deleteFunction = wiApiService.removeZoneSet;
+                        cleanUpFunction = function () {
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
+                        }
                         break;
                     case 'zone':
                         deleteFunction = wiApiService.removeZone;
                         cleanUpFunction = function () {
                             utils.emitEvent('zone-updated', selectedNode);
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'logplot':

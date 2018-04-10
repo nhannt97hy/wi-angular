@@ -73,7 +73,7 @@ function Curve(config) {
     this.rawData = config._data || [];
 
     this.data = Utils.parseData(this.rawData);
-    this.data = Utils.trimData(this.data);
+    // this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
     this.orderNum = config.orderNum;
 
@@ -190,6 +190,22 @@ Curve.prototype.setProperties = function(props) {
             lineDash: eval(props.symbolLineDash)
         }
         // if (props.displayMode == 'Symbol') this.line = null;
+    }
+
+    if(props.rawData && Array.isArray(props.rawData) && props.rawData.length){
+        this.rawData = props.rawData;
+        this.data = Utils.parseData(this.rawData);
+        this.data = this.data.map(function(d) {
+            return {
+                x: d.x,
+                y: d.y * self.yStep + self.offsetY
+            };
+        });
+        let dataMap = {};
+        this.data.forEach(function(d) {
+            dataMap[d.y] = d.x;
+        });
+        this.dataMap = dataMap;
     }
 
     // if (props.displayMode == 'None') {
@@ -392,6 +408,7 @@ Curve.prototype.updateHeader = function() {
 
     let self = this;
     this.header
+        .style('color', self.line.color)
         .style('display', this.showHeader ? 'block' : 'none')
         .select('.vi-curve-name')
         .text(this.alias);
