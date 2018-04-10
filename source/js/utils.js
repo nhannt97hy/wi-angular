@@ -84,9 +84,13 @@ exports.doLogin = function doLogin (cb) {
 
 exports.projectOpen = function (projectData) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let LProject = {id:projectData.idProject, name:projectData.name};
+    let LProject = {id:projectData.idProject, name:projectData.name, shared: projectData.shared, owner: projectData.owner};
     window.localStorage.setItem('LProject',JSON.stringify(LProject, null, 4));
-    window.history.pushState(LProject, LProject.name, '?idProject=' + LProject.id);
+    let queryString = LProject.id ? '?idProject=' + LProject.id : null;
+    queryString += LProject.name ? '&name=' + LProject.name : '';
+    queryString += LProject.shared ? '&shared=' + LProject.shared : '';
+    queryString += LProject.owner ? '&owner=' + LProject.owner : '';
+    window.history.pushState(LProject, LProject.name, queryString);
     document.title = LProject.name + " - Well Insight";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
@@ -1641,7 +1645,10 @@ let refreshProjectState = function (idProject) {
 
     return new Promise(function (resolve, reject) {
         let payload = {
-            idProject: idProject || project.idProject
+            idProject: idProject || project.idProject,
+            name: project.name,
+            owner: project.owner,
+            shared: project.shared
         };
         let wiApiService = __GLOBAL.wiApiService;
         if (dom) {
@@ -1649,6 +1656,8 @@ let refreshProjectState = function (idProject) {
             window.localStorage.setItem('scrollTmp', ScrollTmp);
         }
         wiApiService.post(wiApiService.GET_PROJECT, payload, function (projectRefresh) {
+            projectRefresh.owner = project.owner;
+            projectRefresh.shared = project.shared;
             sortProjectData(projectRefresh);
 
             wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectRefresh);

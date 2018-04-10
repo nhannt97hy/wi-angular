@@ -431,5 +431,5 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     }
 });
 app.controller('ChatController', function () {
-    
+
 })

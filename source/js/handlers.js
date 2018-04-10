@@ -3,6 +3,8 @@ exports.NewProjectButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let ModalService = this.ModalService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    if (projectLoaded && projectLoaded.shared) return toastr.error("Can't add new project in shared project. Please close this project first");
     DialogUtils.newProjectDialog(ModalService, function (data) {
         self.wiApiService.createProject(data, function (response) {
             if (!response.name) {
@@ -46,6 +48,26 @@ exports.UnitSettingsButtonClicked = function () {
     DialogUtils.unitSettingDialog(this.ModalService, function (ret) {
         console.log("User Choose: " + ret);
     })
+};
+
+exports.ShareProjectButtonClicked = function () {
+    console.log("ShareProjectButton is clicked");
+    let self = this;
+    let ModalService = this.ModalService;
+    let wiApiService = this.wiApiService;
+    let wiComponentService = this.wiComponentService;
+    let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    if(project.owner){
+        toastr.error("You can't share this project!");
+    } else {
+        wiApiService.listGroup({}, function (groups) {
+            wiApiService.listUser({}, function (users) {
+                DialogUtils.shareProjectDialog(ModalService, function () {
+                }, groups, users);
+            });
+        });
+    }
 };
 
 exports.SaveProjectButtonClicked = function () {
