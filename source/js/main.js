@@ -1,4 +1,4 @@
-String.prototype.capitalize = function() {
+String.prototype.capitalize = function () {
     if (this.length < 1) return this;
     return this.replace(this[0], this[0].toUpperCase());
 }
@@ -13,17 +13,16 @@ String.prototype.capitalize = function() {
  * @returns A number in the range [min, max]
  * @type Number
  */
-Number.prototype.clamp = function(min, max) {
+Number.prototype.clamp = function (min, max) {
     return Math.min(Math.max(this, min), max);
-  };
+};
 
 Object.defineProperty(Array.prototype, "binarySearch", {
     enumerable: false,
-    value: function(accessFunc, searchValue) {
+    value: function (accessFunc, searchValue) {
         return this.find(accessFunc, searchValue);
     }
 });
-console.log('hic hic');
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
@@ -137,6 +136,8 @@ let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
+let wiCommunication = require('./wi-communication');
+
 let app = angular.module('wiapp',
     [
         wiButton.name,
@@ -220,7 +221,9 @@ let app = angular.module('wiapp',
         wiiExplorer.name,
         wiiItems.name,
         wiiProperties.name,
-        
+
+        wiCommunication.name,
+
         ngInfiniteScroll,
 
         'angularModalService',
@@ -337,6 +340,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         }
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
+        wiComponentService.dropComponent(wiComponentService.PROJECT_LOADED);
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
         historyState.removeHistory();
     });
@@ -346,14 +350,14 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         layoutManager.updateSize();
     });
 
-    $scope.onRibbonToggle = function(isCollapsed) {
+    $scope.onRibbonToggle = function (isCollapsed) {
         if (isCollapsed) {
             $('.ribbon-wrapper').css('height', 'auto');
         }
         else {
             $('.ribbon-wrapper').css('height', '120px');
         }
-        setTimeout(function(){
+        setTimeout(function () {
             layoutManager.updateSize();
         }, 500);
     }
@@ -366,45 +370,42 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.preventDuplicates = true;
 }
 
-function restoreProject($timeout, wiApiService, ModalService){
+function restoreProject($timeout, wiApiService, ModalService) {
     let query = queryString.parse(location.search);
-        if(Object.keys(query).length && query.idProject){
+    if (Object.keys(query).length && query.idProject) {
+        $timeout(function () {
+            wiApiService.getProjectInfo(query.idProject, function (project, err) {
+                if (!err) {
+                    wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
+                            utils.projectOpen(projectData);
+                        })
+                }else {
+                    toastr.error("Project not exist!");
+                }
+            })
+        }, 100);
+    } else {
+        let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
+        if (lastProject) {
             $timeout(function () {
-                wiApiService.getProjectInfo(query.idProject, function (project) {
-                    if (project.name) {
-                        wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                            if (projectData.name) {
-                                utils.projectOpen(projectData);
-                            } else {
-                                utils.error("Project not exist!");
+                wiApiService.getProjectInfo(lastProject.id, function (project, err) {
+                    if (!err) {
+                        DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name + "</b>.</br>Do you want to open it?", function (ret) {
+                            if (ret) {
+                                wiApiService.getProject({
+                                    idProject: lastProject.id
+                                }, function (projectData) {
+                                    utils.projectOpen(projectData);
+                                });
                             }
                         })
+                    } else {
+                        window.localStorage.removeItem('LProject');
                     }
                 })
             }, 100);
-        }else{
-            let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
-            if(lastProject){
-                $timeout(function(){
-                    wiApiService.getProjectInfo(lastProject.id, function(project, err) {
-                        if(!err){
-                            DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name +"</b>.</br>Do you want to open it?", function(ret){
-                                if(ret){
-                                    wiApiService.getProject({
-                                        idProject: lastProject.id
-                                    }, function (projectData) {
-                                        // let utils = wiComponentService.getComponent('UTILS');
-                                        utils.projectOpen(projectData);
-                                    });
-                                }
-                            })
-                        }else{
-                            window.localStorage.removeItem('LProject');
-                        }
-                    })
-                },100);
-            }
         }
+    }
 }
 app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     let functionBindingProp = {
@@ -419,13 +420,16 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    if(!window.localStorage.getItem('rememberAuth')) {
+    if (!window.localStorage.getItem('rememberAuth')) {
         utils.doLogin(function (sameUser) {
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
-            if(sameUser) restoreProject($timeout, wiApiService, ModalService);
+            if (sameUser) restoreProject($timeout, wiApiService, ModalService);
         })
-    }else{
+    } else {
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
         restoreProject($timeout, wiApiService, ModalService);
     }
 });
+app.controller('ChatController', function () {
+
+})

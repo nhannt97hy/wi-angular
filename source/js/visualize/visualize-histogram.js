@@ -56,6 +56,7 @@ Histogram.prototype.setZoneSet = function(zoneSet) {
 }
 Histogram.prototype.setCurve = function(data) {
     if (data == null) {
+        delete this.idCurve;
         delete this.data;
         this.zoneData.length = 0;
         this.zoneBins.length = 0;

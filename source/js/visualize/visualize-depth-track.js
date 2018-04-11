@@ -68,7 +68,7 @@ DepthTrack.prototype.init = function(baseElement) {
 
     this.drawingHeaderContainer.append('div')
         .attr('class', 'vi-track-unit')
-        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        // .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('padding', '1.5 0')
         .style('margin-bottom', '1px');
 }
