@@ -43,6 +43,12 @@ source/app/components/wi-histogram/template/toolbar/*
 source/app/components/wi-explorer/wi-explorer.html
 source/app/components/wi-explorer/template/toolbar/*
 
+# workflow-machine-learning
+source/app/components/wi-workflow-machine-learning/wi-workflow-machine-learning.html
+
+# workflow-player
+source/app/components/wi-workflow-player/wi-workflow-player.html
+
 # VSCode
 .vscode
 .vs

@@ -211,6 +211,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             break;
 
             case 'zoneset':
+            if(self.histogramModel && self.histogramModel.properties.idZoneSet){
+                if(model.id = self.histogramModel.properties.idZoneSet){
+                    self.histogramModel.properties.idZoneSet = null;
+                    saveHistogramNow(function(){
+                        self.wiHistogramCtrl.CloseZone();
+                        self.linkModels();
+                    })
+                }
+            }
+            break;
             case 'zone':
             console.log('not now =))');
             break;

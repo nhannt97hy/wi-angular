@@ -25,6 +25,28 @@ function WiExpTreeController(
         typeItemDragable = "zoneset";
         let zonesetElement = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
         utils.setupZonesetDraggable(zonesetElement, wiComponentService, wiApiService);
+        // dataset droppable
+        const dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        $(`wi-base-treeview#${self.name} .wi-parent-node[type=dataset]`).droppable({
+            accept: '.wi-parent-node[type=curve]',
+            addClasses: false,
+            tolerance: 'pointer',
+            over: function (event, ui) {
+                if (event.ctrlKey) {
+                    ui.helper.css('cursor', 'copy');
+                }
+            },
+            out: function (event, ui) {
+                ui.helper.css('cursor', '');
+            },
+            drop: function (event, ui) {
+                if (event.ctrlKey) {
+                    // console.log('copying to', event, ui);
+                    dragMan.idDataset = +$(event.target).attr('data');
+                }
+            },
+            cursor: 'copy'
+        })
     };
 
     this.onClick = function($index, $event) {

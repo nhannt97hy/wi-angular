@@ -56,6 +56,7 @@ let wiReferenceWindow = require('./wi-reference-window');
 let wiPlot = require('./wi-plot');
 
 let wiInventory = require('./wi-inventory');
+let wiExport = require('./wi-export');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -113,6 +114,7 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
+let wiInputRangeLimit = require('./wi-input-range-limit');
 
 // models
 // let wiDepth = require('./wi-depth.model');
@@ -174,6 +176,7 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiExport.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -189,6 +192,7 @@ let app = angular.module('wiapp',
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
+        wiInputRangeLimit.name,
 
         // models
         // wiDepth.name,
@@ -338,6 +342,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         }
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
+        wiComponentService.dropComponent(wiComponentService.PROJECT_LOADED);
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
         historyState.removeHistory();
     });
@@ -371,15 +376,13 @@ function restoreProject($timeout, wiApiService, ModalService) {
     let query = queryString.parse(location.search);
     if (Object.keys(query).length && query.idProject) {
         $timeout(function () {
-            wiApiService.getProjectInfo(query.idProject, function (project) {
-                if (project.name) {
+            wiApiService.getProjectInfo(query.idProject, function (project, err) {
+                if (!err) {
                     wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                        if (projectData.name) {
                             utils.projectOpen(projectData);
-                        } else {
-                            utils.error("Project not exist!");
-                        }
-                    })
+                        })
+                }else {
+                    toastr.error("Project not exist!");
                 }
             })
         }, 100);
@@ -394,7 +397,6 @@ function restoreProject($timeout, wiApiService, ModalService) {
                                 wiApiService.getProject({
                                     idProject: lastProject.id
                                 }, function (projectData) {
-                                    // let utils = wiComponentService.getComponent('UTILS');
                                     utils.projectOpen(projectData);
                                 });
                             }
@@ -431,5 +433,5 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     }
 });
 app.controller('ChatController', function () {
-    
+
 })

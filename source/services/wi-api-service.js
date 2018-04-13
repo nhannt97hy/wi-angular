@@ -18,10 +18,10 @@ let app = angular.module(moduleName, []);
 
 //dev
 // const BASE_URL = 'http://dev.sflow.me';
+// // const BASE_URL = 'http://localhost:9000';
 // const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://13.250.197.210';
-// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 //inv server for dev
 
 //production
@@ -54,6 +54,7 @@ const GET_PROJECT = '/project/fullinfo';
 const CREATE_PROJECT = '/project/new';
 const GET_PROJECT_LIST = '/project/list';
 const GET_PROJECT_INFO = '/project/info';
+const CLOSE_PROJECT = '/project/close';
 
 const LIST_WELL = '/project/well/list';
 const CREATE_WELL = '/project/well/new';
@@ -251,6 +252,15 @@ const GET_WORKFLOW_LIST = "/workflow/list";
 
 const CREATE_WORKFLOW_SPEC = '/workflow-spec/new';
 const GET_WORKFLOW_SPEC_LIST = '/workflow-spec/list';
+
+const UG_ADD_GROUP = '/group/new';
+const UG_REMOVE_GROUP = '/group/delete';
+const UG_ADD_USER_TO_GROUP = '/group/add-user';
+const UG_LIST_GROUP = '/group/list';
+const UG_REMOVE_USER_FROM_GROUP = '/group/remove-user';
+const UG_LIST_USER = '/user/list';
+const UG_SHARE_PROJECT = '/shared-project/new';
+const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group'
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -835,6 +845,9 @@ Service.prototype.uploadFile = function (data, callback) {
         });*/
 }
 
+Service.prototype.closeProject = function(infoProject, callback){
+    this.post(CLOSE_PROJECT, infoProject, callback);
+}
 Service.prototype.createProject = function (infoProject, callback) {
     console.log('infoProject', infoProject);
     this.post(CREATE_PROJECT, infoProject, callback);
@@ -1831,3 +1844,29 @@ Service.prototype.getWorkflowSpecList = function(callback) {
 Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
     this.post(IS_EXISTED_CURVE, {name: curveName, idDataset: idDataset}, callback);
 }
+
+////manager user and user's group
+Service.prototype.addUserGroup = function (payload, callback) {
+    this.post(UG_ADD_GROUP, payload, callback, 'auth');
+};
+Service.prototype.removeGroup = function (payload, callback) {
+    this.post(UG_REMOVE_GROUP, payload, callback, 'auth');
+};
+Service.prototype.addUserToGroup = function (payload, callback){
+    this.post(UG_ADD_USER_TO_GROUP, payload, callback, 'auth');
+};
+Service.prototype.listGroup = function (payload, callback) {
+    this.post(UG_LIST_GROUP, payload, callback, 'auth');
+};
+Service.prototype.removeUserFromGroup = function (payload, callback) {
+    this.post(UG_REMOVE_USER_FROM_GROUP, payload, callback, 'auth');
+};
+Service.prototype.listUser = function (payload, callback) {
+    this.post(UG_LIST_USER, payload, callback, 'auth');
+};
+Service.prototype.addSharedProject = function (payload, callback) {
+    this.post(UG_SHARE_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.addProjectToGroup = function (payload, callback) {
+    this.post(UG_ADD_SHARED_PROJECT_TO_GROUP, payload, callback, 'auth');
+};
