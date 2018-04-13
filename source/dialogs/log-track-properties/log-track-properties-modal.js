@@ -22,7 +22,15 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
         console.log("currentTrack", currentTrack);
-        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+
+        // TO BE REMOVED
+        // this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        let wellProps = wiD3Ctrl.detectWellForTrack(currentTrack);
+        this.well = null;
+        if(wellProps) {
+            this.well = utils.findWellById(wellProps.idWell);
+        }
+
         this.tabFlags = options.tabs;
 
         const changed = {
@@ -92,9 +100,20 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         // curve tab
         this.datasets = [];
         this.curvesArr = [];
-        this.well.children.forEach(function (child) {
-            if (child.type == 'dataset') self.datasets.push(child);
-        });
+        if(this.well) {
+            this.well.children.forEach(function (child) {
+                if (child.type == 'dataset') self.datasets.push(child);
+            });
+        } else {
+            let projectModel = wiLogplotCtrl.projectModel;
+            projectModel.children.forEach(function (child) {
+                if (child.type == 'well') {
+                    child.children.forEach(function (gChild) {
+                        if(gChild.type == 'dataset') self.datasets.push(gChild);
+                    });
+                }
+            });
+        }
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {
                 if (item.type == 'curve') self.curvesArr.push(item);

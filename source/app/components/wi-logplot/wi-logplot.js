@@ -15,7 +15,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isReferenceLine = true;
         self.isTooltip = true;
         self.logplotModel = self.getLogplotModel();
-        self.wellModel = utils.getModel('well', self.logplotModel.properties.idWell);
+        
+        // TO BE REMOVED
+        // self.wellModel = utils.getModel('well', self.logplotModel.properties.idWell);
+        self.projectModel = utils.getModel('project', self.logplotModel.properties.idProject);
+
         if (self.showToolbar == undefined || self.showToolbar == null) self.showToolbar = true;
         if (self.containerName == undefined || self.containerName == null) self.containerName = '';
 

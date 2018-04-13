@@ -223,8 +223,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         let config = angular.copy(trackProperties);
         config.id = trackProperties.idZoneTrack;
         config.name = trackProperties.title;
-        config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
-        config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+        
+        // TO BE REMOVED
+        // config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
+        // config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+        
         config.width = Utils.inchToPixel(trackProperties.width);
         config.bgColor = trackProperties.color;
 
@@ -387,7 +390,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             }
         });
     }
-
 }
 
 let app = angular.module(moduleName, []);

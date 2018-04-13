@@ -241,8 +241,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         let config = angular.copy(trackConfig);
         config.id = trackConfig.idObjectTrack;
         config.name = trackConfig.title;
-        config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
-        config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+
+        // TO BE REMOVED
+        // config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
+        // config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+        
         config.width = Utils.inchToPixel(trackConfig.width);
         //config.wiComponentService = wiComponentService;
         console.log(config);

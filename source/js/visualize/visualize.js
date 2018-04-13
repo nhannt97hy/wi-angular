@@ -141,7 +141,6 @@ exports.rearrangeTracks = function(wiD3Ctrl) {
 
     // TO BE REVIEWED
     // separate between 2 track with difference well
-    /*
     let tracks = wiD3Ctrl.getTracks();
     tracks.forEach(function(track, idx) {
         let currTrackWell = wiD3Ctrl.detectWellForTrack(track);
@@ -149,13 +148,14 @@ exports.rearrangeTracks = function(wiD3Ctrl) {
         if(nextTrack) {
             let nextTrackWell = wiD3Ctrl.detectWellForTrack(nextTrack);
             if(currTrackWell != nextTrackWell) {
-                track.trackContainer.style('border-right', '2px solid black');
+                track.trackContainer.style('border-right', '1px solid black');
+                track.trackContainer.style('margin-right', '6px');
             } else {
                 track.trackContainer.style('border-right', 'none');
+                track.trackContainer.style('margin-right', '0');
             }
         }
     })
-    */
     
     // d3.select('[name=' + wiD3Name + ']').selectAll('.vi-track-container, .vi-track-vertical-resizer').sort();
 

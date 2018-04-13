@@ -348,7 +348,10 @@ function logplotToTreeConfig(plot, options = {}) {
     plotModel.type = 'logplot';
     plotModel.id = plot.idPlot;
     plotModel.properties = {
-        idWell: plot.idWell,
+        // TO BE REMOVED
+        // idWell: plot.idWell,
+        idProject: plot.idProject,
+
         idPlot: plot.idPlot,
         name: plot.name,
         referenceCurve: plot.referenceCurve
@@ -364,7 +367,7 @@ function logplotToTreeConfig(plot, options = {}) {
     }
     // TO BE REMOVED
     // plotModel.parent = 'well' + plot.idWell;
-    plotModel.parent = 'parent' + plot.idProject;
+    plotModel.parent = 'project' + plot.idProject;
 
     let projectLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS)
     if (projectLogplots) projectLogplots.push(plotModel);
@@ -1119,9 +1122,9 @@ exports.projectToTreeConfig = function (project) {
     // TO BE REMOVED
     // projectModel.children.push(projectLogplotsNode);
 
+    projectModel.children.push(multiLogplotsNode);
     projectModel.children.push(projectCrossplotsNode);
     projectModel.children.push(projectHistogramsNode);
-    projectModel.children.push(multiLogplotsNode);
     return projectModel;
 }
 
@@ -1324,6 +1327,106 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                 let idCurve = parseInt(ui.helper.attr('data'));
                 handleDrop([idCurve]);
             }
+        },
+        appendTo: 'body',
+        revert: false,
+        scroll: false,
+        containment: 'document',
+        cursor: 'move',
+        cursorAt: {
+            top: 0,
+            left: 0
+        }
+    });
+};
+
+exports.setupZonesetDraggable = function (element, wiComponentService, wiApiService) {
+    let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+    let selectedObjs;
+    element.draggable({
+        helper: function (event) {
+            selectedObjs = $(`.wi-parent-node[type='zoneset']`).filter('.item-active').clone();
+            let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            if (!selectedNodes || selectedNodes.find(n => n.type != 'zoneset')) return $(event.currentTarget).find('div:nth-child(2)').clone();
+            return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+        },
+        start: function (event, ui) {
+            dragMan.dragging = true;
+            d3.selectAll('.vi-track-plot-container').style('z-index', 1);
+        },
+        stop: function (event, ui) {
+            dragMan.dragging = false;
+            let wiD3Ctrl = dragMan.wiD3Ctrl;
+            let track = dragMan.track;
+            dragMan.wiD3Ctrl = null;
+            dragMan.track = null;
+            d3.selectAll('.vi-track-plot-container').style('z-index', 'unset');
+            
+            let idZoneSets = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
+            if (idZoneSets.length) {
+                handleDrop(idZoneSets);
+            } else {
+                let idZoneSet = parseInt(ui.helper.attr('data'));
+                handleDrop([idZoneSet]);
+            }
+            
+            function addZoneSetToTrack(trackComponent, idZoneSet, callback) {
+                if(!trackComponent || !trackComponent.viTrack.isZoneTrack()) {
+                    console.error('track component is not a zone track');
+                    callback();
+                    return;
+                } 
+                wiApiService.getZoneSet(idZoneSet, function (zoneset) {
+                    trackComponent.viTrack.setProperties(zoneset);
+                    callback();
+                })
+            }
+
+            function createDefaultZoneTrack (idZoneSet, callback) {
+                let trackOrder = wiD3Ctrl.getOrderKey();
+                let zoneTracks = wiD3Ctrl.getTracks().filter(function(viTrack) { return viTrack.isZoneTrack();})
+                const defaultZoneTrackProps = {
+                    idPlot: wiD3Ctrl.wiLogplotCtrl.id,
+                    orderNum: trackOrder,
+                    showTitle: true,
+                    title: "Zone Track " + (zoneTracks.length + 1),
+                    topJustification: "center",
+                    color: '#ffffff',
+                    width: 1,
+                    parameterSet: null,
+                    zoomFactor: 1.0,
+                    idZoneSet: idZoneSet
+                }
+                wiApiService.createZoneTrack(defaultZoneTrackProps, function(zoneTrackProps) {
+                    // synchronize with cloud database
+                    Object.keys(zoneTrackProps).forEach(function(key) {
+                        defaultZoneTrackProps[key] = zoneTrackProps[key];
+                    });
+                    wiD3Ctrl.pushZoneTrack(defaultZoneTrackProps);
+                    callback();
+                });
+            }
+
+            function handleDrop(idZoneSets) {
+                if(wiD3Ctrl && !track) {
+                    // create new zone track for each zoneset
+                    async.eachSeries(idZoneSets, function(idZoneSet, next) {
+                        createDefaultZoneTrack(idZoneSet, next)
+                    })
+                } else if (wiD3Ctrl && track) {
+                    // add first zone set to dest track and create new zone track for orther zone set
+                    async.eachOfSeries(idZoneSets, function(idZoneSet, idx, next) {
+                        if(idx == 0) {
+                            addZoneSetToTrack(wiD3Ctrl.getComponentCtrlByViTrack(track), idZoneSet, next);
+                        } else {
+                            createDefaultZoneTrack(idZoneSet, function(zoneTrackComponent) {
+                                next();
+                            })
+                        }
+                    })
+                }
+            }
+
         },
         appendTo: 'body',
         revert: false,

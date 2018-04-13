@@ -792,22 +792,6 @@ LogTrack.prototype.plotAllDrawings = function() {
 }
 
 /**
- * Register event when mouse over the plot area
- */
-LogTrack.prototype.onPlotMouseOver = function(cb){
-    this.plotContainer
-        .on('mouseover', cb);
-}
-
-/**
- * Register event when mouse leave the plot area
- */
-LogTrack.prototype.onPlotMouseLeave = function(cb) {
-    this.plotContainer
-        .on('mouseleave', cb);
-}
-
-/**
  * Register event when mouse wheel on the plot area
 LogTrack.prototype.onPlotMouseWheel = function(cb) {
     this.plotContainer

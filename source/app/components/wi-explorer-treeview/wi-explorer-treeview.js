@@ -18,8 +18,13 @@ function WiExpTreeController(
     this.onReady = function() {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let typeItemDragable = "curve";
-        let element = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
-        utils.setupCurveDraggable(element, wiComponentService, wiApiService);
+        let curveElement = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
+        utils.setupCurveDraggable(curveElement, wiComponentService, wiApiService);
+
+        // add draggable for zoneset
+        typeItemDragable = "zoneset";
+        let zonesetElement = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
+        utils.setupZonesetDraggable(zonesetElement, wiComponentService, wiApiService);
     };
 
     this.onClick = function($index, $event) {

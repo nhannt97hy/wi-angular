@@ -54,8 +54,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             idPlot: depthTrack.idPlot,
             name: depthTrack.title,
             orderNum: depthTrack.orderNum,
-            yStep: parseFloat(self.wiD3Ctrl.getWellProps().step),
-            offsetY: parseFloat(self.wiD3Ctrl.getWellProps().topDepth),
+            
+            // TO BE REMOVED
+            // yStep: parseFloat(self.wiD3Ctrl.getWellProps().step),
+            // offsetY: parseFloat(self.wiD3Ctrl.getWellProps().topDepth),
+            
             showTitle: depthTrack.showTitle,
             justification: depthTrack.justification,
             width: Utils.inchToPixel(depthTrack.width),

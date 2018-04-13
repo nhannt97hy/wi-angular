@@ -609,3 +609,19 @@ Track.prototype.updateLogplotProps = function(newLogplotProps) {
     visUtils.setIfNotNull(this, 'yStep', parseFloat(newLogplotProps.step));
     visUtils.setIfNotNull(this, 'offsetY', parseFloat(newLogplotProps.topDepth));
 }
+
+/**
+ * Register event when mouse over the plot area
+ */
+Track.prototype.onPlotMouseOver = function(cb){
+    this.plotContainer
+        .on('mouseover', cb);
+}
+
+/**
+ * Register event when mouse leave the plot area
+ */
+Track.prototype.onPlotMouseLeave = function(cb) {
+    this.plotContainer
+        .on('mouseleave', cb);
+}

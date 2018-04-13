@@ -503,7 +503,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
 
         // update multi Logplots status
-        self.wiD3Ctrl.updateTrack(track, true);
+        self.wiD3Ctrl.updateTrack(track, null, true);
     }
     this.removeMarkerFromTrack = function (track, marker) {
         if (!track || !track.removeMarker) return;
@@ -759,8 +759,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             name: logTrack.title,
 
             // TO BE REMOVED
-            yStep: parseFloat(_getWellProps().step),
-            offsetY: parseFloat(_getWellProps().topDepth),
+            // yStep: parseFloat(_getWellProps().step),
+            // offsetY: parseFloat(_getWellProps().topDepth),
 
             width: Utils.inchToPixel(logTrack.width),
             zoomFactor: logTrack.zoomFactor,
@@ -796,7 +796,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         track.onPlotMouseOver(function () {
             if (!dragMan.dragging) return;
-            dragMan.wiD3Ctrl = self;
+            dragMan.wiD3Ctrl = self.wiD3Ctrl;
             dragMan.track = track;
         });
         track.onPlotMouseLeave(function () {

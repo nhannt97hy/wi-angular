@@ -320,7 +320,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     // TO BE REMOVED
-    this.getWellProps = _getWellProps;
+    // this.getWellProps = _getWellProps;
 
     this.getLogplotHandler = function () {
         return logplotHandlers;
@@ -384,8 +384,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if(curveWell && !trackWell) return 1;
         return 0;
     }
-    // detect well for a track, if no well contain track or track has no curve then return null
-    this.detectWellForTrack = function (track) {
+    
+    /**
+     * detect well for a track,
+     * @param track a track instance
+     * @returns well properties, null if track is not belong to any well
+    */
+     this.detectWellForTrack = function (track) {
         if(track && track.isLogTrack() && track.getCurves().length) {
             let curveOnTrack = track.getCurves()[0];
             let trackWell = Utils.findWellByCurve(curveOnTrack.idCurve);
@@ -413,7 +418,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.reOrganizeTracksByWell = function () {
         reindexAllTracks(true);
     }
-
+    
     /* handle context menu */
     this.addDepthTrack = function (callback) {
         var trackOrder = getOrderKey();
@@ -738,23 +743,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return trackComponent.controller.viTrack == track;
         });
         self.listWells.forEach(function(well) {
-            console.log(component, " need to remove");
             let foundTrack = well.wellAttrs.tracks.find(function(track) {
                 return track.name == component.name;
             });
-            console.log('found track component', foundTrack);
             if(foundTrack) {
                 well.wellAttrs.tracks = well.wellAttrs.tracks.filter(function(track) {
                     return track.name != component.name;
                 });
-                console.log('track removed');
-            } else {
-                console.log('track is not removed');
             }
         })
         let name = component.controller.name;
         $(`[name=`+ component.controller.name +`]`).remove();
         self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
+        $timeout(function() {
+            wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
+        })
         // wiComponentService.putComponent(name, null);
         updateSlider();
     }
@@ -763,7 +766,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
-    this.updateTrack = function (viTrack, onlyStatus, callback) {
+    this.updateTrack = function (viTrack, callback, onlyStatus) {
         getComponentCtrlByViTrack(viTrack).update(callback, onlyStatus);
     }
     // image track
@@ -1194,10 +1197,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
     // TO BE REMOVED
-    function _getWellProps() {
-        let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-        return well.properties || {};
-    }
+    // function _getWellProps() {
+    //     let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+    //     return well.properties || {};
+    // }
 
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;
@@ -1350,31 +1353,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function reindexAllTracks(byWell) {
         let promises = [];
         let backupTracks = angular.copy(_tracks);
+
+        _tracks.forEach(function(track) {
+            track.orderNum = String.fromCharCode(76);
+        })
+        if(byWell) {
+            self.listWells.forEach(function(well, wellIdx) {
+                well.wellAttrs.tracks.forEach(function(trackCpnt){
+                    trackCpnt.viTrack.orderNum = String.fromCharCode(wellIdx + 77);
+                })
+            })
+        }
+
         for (var i = 0; i < _tracks.length; i++) {
             let viTrack = _tracks[i];
-            let orderNum;
-            if(byWell) {
-                let wellIdx = -1;    // set default
-                if(viTrack.isLogTrack()) {
-                    if(viTrack.getCurves().length) {
-                        let trackWellProps = utils.findWellByCurve(viTrack.getCurves()[0].idCurve).properties;
-                        for(let i = 0; i < self.listWells.length; ++i) {
-                            if(self.listWells[i].properties.idWell === trackWellProps.idWell) {
-                                wellIdx = i;
-                                break;
-                            }
-                        }
-                    }
-                };
-
-                orderNum = String.fromCharCode(wellIdx + 77);
-
-                if (i == 0) orderNum += 'm';
-                else orderNum += String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(1) + 1);
-            } else {
-                if (i == 0) orderNum = 'm';
-                else orderNum = String.fromCharCode(_tracks[i - 1].orderNum.charCodeAt(0) + 1);
-            }
+            let orderNum = viTrack.orderNum;
+            if(i == 0) orderNum += 'm';
+            else orderNum += String.fromCharCode(_tracks[i-1].orderNum.charCodeAt(1) + 1);
             viTrack.orderNum = orderNum;
             promises.push(new Promise((resolve, reject) => {
                 if (viTrack.isLogTrack()) {

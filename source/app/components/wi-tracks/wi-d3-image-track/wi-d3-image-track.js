@@ -224,8 +224,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let config = angular.copy(imageTrack);
         config.id = imageTrack.idImageTrack;
         config.name = imageTrack.title;
-        config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
-        config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+        
+        // TO BE REMOVED
+        // config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
+        // config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+        
         config.width = Utils.inchToPixel(imageTrack.width);
         config.wiComponentService = wiComponentService;
         config.bgColor = imageTrack.background;
