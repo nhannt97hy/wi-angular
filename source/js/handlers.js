@@ -241,8 +241,8 @@ exports.OpenModelButtonClicked = function() {
 //     })
 // };
 
-exports.ExportToolButtonClicked = function() {
-    console.log('ExportToolButton is clicked');
+exports.ExportFromInventoryButtonClicked = function() {
+    console.log('ExportFromInventorylButton is clicked');
     let self = this;
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -263,6 +263,9 @@ exports.ExportToolButtonClicked = function() {
         }
     })
 
+}
+exports.ExportFromProjectButtonClicked = function (){
+        console.log('ExportFromProjectButton is clicked');
 }
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
