@@ -1031,6 +1031,7 @@ LogTrack.prototype.addCurveHeader = function(curve) {
     let curveHeader = this.drawingHeaderContainer
         .append('div')
             .attr('class', 'vi-curve-header')
+            .style('color', curve.line.color)
             .datum(curve.orderNum + curve.name)
             .on('mousedown', function() {
                 self.drawingHeaderMouseDownCallback(curve);
@@ -1038,19 +1039,19 @@ LogTrack.prototype.addCurveHeader = function(curve) {
 
     curveHeader.append('div')
         .attr('class', 'vi-curve-name')
-        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
-        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        // .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('cursor', 'default')
         .text(name);
 
+    curveHeader.append('canvas')
+        .attr('class', 'vi-curve-header-canvas');
+
     curveHeader.append('div')
         .attr('class', 'vi-curve-data')
-        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
-        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        // .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('cursor', 'default')
         .style('position', 'relative')
-        .style('display', 'flex')
-        .style('flex-direction', 'row')
+        .style('height', '18px')
         .selectAll('div')
         .data(['min', 'unit', 'max'])
         .enter()
@@ -1067,9 +1068,8 @@ LogTrack.prototype.addCurveHeader = function(curve) {
                 }
                 return '';
             })
-            .style('flex', function(d, i) {
-                return i == 1 ? 1 : 0;
-            })
+            .style('position', 'absolute')
+            .style('width', '100%')
             .text(function(d) { return d; });
 
     this.drawingHeaderContainer.selectAll('.vi-shading-header').raise();
