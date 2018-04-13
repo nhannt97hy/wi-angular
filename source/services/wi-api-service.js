@@ -54,6 +54,7 @@ const GET_PROJECT = '/project/fullinfo';
 const CREATE_PROJECT = '/project/new';
 const GET_PROJECT_LIST = '/project/list';
 const GET_PROJECT_INFO = '/project/info';
+const CLOSE_PROJECT = '/project/close';
 
 const LIST_WELL = '/project/well/list';
 const CREATE_WELL = '/project/well/new';
@@ -844,6 +845,9 @@ Service.prototype.uploadFile = function (data, callback) {
         });*/
 }
 
+Service.prototype.closeProject = function(infoProject, callback){
+    this.post(CLOSE_PROJECT, infoProject, callback);
+}
 Service.prototype.createProject = function (infoProject, callback) {
     console.log('infoProject', infoProject);
     this.post(CREATE_PROJECT, infoProject, callback);

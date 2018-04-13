@@ -101,10 +101,13 @@ exports.projectOpen = function (projectData) {
 
 exports.projectClose = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
-    window.localStorage.removeItem('LProject');
-    wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
-    window.history.replaceState({}, 'home', '/');
-    document.title = 'Well Insight';
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.closeProject(null, function () {
+        window.localStorage.removeItem('LProject');
+        wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
+        window.history.replaceState({}, 'home', '/');
+        document.title = 'Well Insight';
+    });
 };
 
 function getCurveFromId(idCurve) {

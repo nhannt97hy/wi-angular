@@ -114,6 +114,7 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
+let wiInputRangeLimit = require('./wi-input-range-limit');
 
 // models
 // let wiDepth = require('./wi-depth.model');
@@ -191,6 +192,7 @@ let app = angular.module('wiapp',
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
+        wiInputRangeLimit.name,
 
         // models
         // wiDepth.name,

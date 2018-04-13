@@ -351,7 +351,7 @@ Service.prototype.deleteCurve = function (idCurve, callback) {
 
 Service.prototype.exportAllItems = function(idObj, callback){
     console.log('idObj', idObj);
-    this.post(EXPORT_WELL, {idObj: idObj}, callback);
+    this.post(EXPORT_WELL, {idObjs: idObj}, callback);
 }
 
 Service.prototype.getFileUrl = function(url){
