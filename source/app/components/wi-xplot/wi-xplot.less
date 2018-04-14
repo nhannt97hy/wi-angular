@@ -1,0 +1,31 @@
+.wi-xplot-main {
+    background-color: #f7f7f7;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    & > div {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+    }
+    .wi-xplot-plot-container {
+        flex: 1;
+
+        canvas, svg {
+            position: absolute;
+            left: 0;
+        }
+
+        .axis path {
+            display: true;
+        }
+
+        .axis line {
+            stroke: #888;
+            stroke-opacity: 0.5;
+        }
+        .axis--x text, .axis--y text {
+            display: none;
+        }
+    }
+}

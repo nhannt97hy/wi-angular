@@ -200,6 +200,23 @@ exports.wiPlotButtonClicked = function() {
         title: 'Title'
     });
 }
+exports.wiXplotButtonClicked = function() {
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    // console.log(layoutManager.getRoot());
+    let root = layoutManager.getRoot();
+    if (root.contentItems.length > 0)
+        root.removeChild(root.contentItems[0]);
+    root.addChild({
+        type: 'component',
+        id: 'wi-xplot',
+        componentName: 'wi-block',
+        componentState: {
+            templateId: 'wi-xplot'
+        },
+        title: 'Title'
+    });
+}
 exports.onInventoryInit = function(wiListCtrl) {
     let wiOnlineInvService = this.wiOnlineInvService;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);

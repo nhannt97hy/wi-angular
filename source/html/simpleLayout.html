@@ -120,6 +120,7 @@
                         <wi-button name="ExportTool" icon="export-well-top-32x32" label="Export Tool" container="ribbon" disable="handlers.isDisabled()" class="height65" handler="handlers.ExportToolButtonClicked"></wi-button>
                         <wi-button name="NeuralNetWorkPlayground" icon="browse-project-32x32" label="NN Playground" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.NeuralNetworkPlaygroundButtonClicked"></wi-button>
                         <wi-button name="wiPlotPlayground" icon="browse-project-32x32" label="Wi Plot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiPlotButtonClicked"></wi-button>
+                        <wi-button name="wiXplot" icon="browse-project-32x32" label="Wi Xplot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiXplotButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -143,6 +144,16 @@
                 <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.togglePoint()" ng-class="wiPlotCtrl.plotOption.showPoint ? 'active':''">Show Point</button>
             </div>
             <wi-plot style='flex:1; display: flex;' configs="wiPlotCtrl.plotConfig" options="wiPlotCtrl.plotOption"></wi-plot>
+        </div>
+    </template>
+
+    <template id="wi-xplot">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wiXplotController as wiPlotCtrl">
+            <h3 class="content-heading">Wi Xplot Sample</h3>
+            <div class="row container-fluid">
+                <div class="col-md-1"></div>
+            </div>
+            <wi-xplot style='flex:1; display: flex;' id-pointsets='wiPlotCtrl.idPointsets'></wi-xplot>
         </div>
     </template>
 

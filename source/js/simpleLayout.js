@@ -44,6 +44,7 @@ let wiReferenceWindow = require('./wi-reference-window');
 
 
 let wiPlot = require('./wi-plot');
+let wiXplot = require('./wi-xplot');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -158,6 +159,7 @@ let app = angular.module('wiapp',
         wiInventory.name,
         wiNeuralNetwork.name,
         wiPlot.name,
+        wiXplot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -703,6 +705,12 @@ app.controller('wiPlotPlaygroundController', function($scope) {
         showPoint: true,
         showLine: true
     }
+})
+
+app.controller('wiXplotController', function ($scope) {
+    // test
+    this.idPointsets = [1, 2];
+    // end test
 })
 
 app.filter('datetimeFormat', function() {
