@@ -964,8 +964,7 @@ app.component(name, {
     bindings: {
         name: "@",
         idProject: "<",
-        idWorkflow: "<",
-        workflowConfig: "<"
+        idWorkflow: "<"
     }
 });
 

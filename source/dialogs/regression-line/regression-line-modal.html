@@ -66,10 +66,10 @@
                                         </multiselect>
                                     </td>
                                     <td style="width: 7%">
-                                        <input type="number" ng-model="regLine.fitX" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)">
+                                        <input type="number" ng-model="regLine.fitX" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)" step="any">
                                     </td>
                                     <td style="width: 7%">
-                                        <input type="number" ng-model="regLine.fitY" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)">
+                                        <input type="number" ng-model="regLine.fitY" class="form-control wi-form-control" ng-change="wiModal.onChange(regLine.index)" step="any">
                                     </td>
                                     <td style="width: 7%">
                                         <button class="btn btn-default" ng-click="wiModal.removeRow(regLine.index);">
