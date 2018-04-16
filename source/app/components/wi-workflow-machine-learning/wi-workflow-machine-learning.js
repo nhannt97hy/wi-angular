@@ -173,12 +173,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'epochs',
         type: 'number',
         min: 1,
-        value: 50
+        value: 1000
     }, {
         name: 'learning_rate',
         type: 'number',
-        value: 1,
-        step: 0.1
+        value: 0.01,
+        step: 0.01
     }, {
         name: 'tol',
         type: 'number',
@@ -191,13 +191,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             nLayer: 3,
             layerConfig: [{
                 name: "layer 0",
-                value:1
+                value:10
             }, {
                 name: "layer 1",
-                value:2
+                value:10
             },{
                 name: "layer 2",
-                value:3
+                value:10
             }]
         }
     }];
@@ -220,11 +220,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'epochs',
         type: 'number',
         min: 1,
-        value: 50
+        value: 1000
     }, {
         name: 'learning_rate',
         type: 'number',
-        value: 1,
+        value: 0.01,
         step: 0.1
     }, {
         name: 'tol',
@@ -238,13 +238,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             nLayer: 3,
             layerConfig: [{
                 name: "layer 0",
-                value:1
+                value:10
             }, {
                 name: "layer 1",
-                value:2
+                value:10
             },{
                 name: "layer 2",
-                value:3
+                value:10
             }]
         }
     }];
@@ -474,9 +474,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         else {
                             let layers = [];
                             if(param[0].value.nLayer == undefined)
-                                layers = [3,3,3,3];
+                                layers = [10, 10, 10];
                             else
-                                param[0].value.layerConfig.forEach(function(layer){layers.push(layer.value?layer.value:3);});
+                                param[0].value.layerConfig.forEach(function(layer){layers.push(layer.value?layer.value:10);});
                             return layers;
                         }
                     }
@@ -1660,7 +1660,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             for (let i = 0; i < nnConfig.nLayer - oldLength; i++) {
                 nnConfig.layerConfig.push({
                     name: "layer " + (oldLength + i),
-                    value: 3
+                    value: 10
                 });
             }
         }

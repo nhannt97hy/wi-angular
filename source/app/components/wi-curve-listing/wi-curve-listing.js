@@ -122,6 +122,10 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 beforeCopy: function(data, coords){
                     console.log(data, coords);
                 },
+                copyPaste: {
+                    columnsLimit: 1000,
+                    rowsLimit: length
+                  },
                 renderAllRows: false,
                 beforeChange: function(changes, source) {
                     // console.log(changes);
