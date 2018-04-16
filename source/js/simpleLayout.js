@@ -709,7 +709,7 @@ app.controller('wiPlotPlaygroundController', function($scope) {
 
 app.controller('wiXplotController', function ($scope) {
     // test
-    this.idPointsets = [1, 2];
+    this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
     // end test
 })
 

@@ -18,50 +18,51 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.createViWiXplot = function () {
         let self = this;
         let pointSet = {};
-        async.eachSeries(this.idPointsets, function (id, next) {
-            wiApiService.getPointSet(id, function (pointSet) {
-                pointSet = {
-                    idPointSet: id,
-                    scale: {
-                        left: null,
-                        right: null,
-                        bottom: null,
-                        top: null
-                    },
-                    curveX: {
-                        idCurve: pointSet.idCurveX,
-                        data: {}
-                    },
-                    curveY: {
-                        idCurve: pointSet.idCurveY,
-                        data: {}
-                    }
-                };
-                async.parallel([
-                    function (cb) {
-                        wiApiService.infoCurve(pointSet.curveX.idCurve, function (curveInfo) {
-                            pointSet.scale.left = curveInfo.LineProperty.minScale;
-                            pointSet.scale.right = curveInfo.LineProperty.maxScale;
-                            wiApiService.dataCurve(pointSet.curveX.idCurve, function (curveData) {
-                                pointSet.curveX.data = curveData;
-                                cb();
-                            });
+        async.eachSeries(this.idCurves, function (config, next) {
+            pointSet = {
+                scale: {
+                    left: null,
+                    right: null,
+                    bottom: null,
+                    top: null
+                },
+                curveX: {
+                    idCurve: config.x,
+                    name: '',
+                    data: {}
+                },
+                curveY: {
+                    idCurve: config.y,
+                    name: '',
+                    data: {}
+                }
+            }
+            async.parallel([
+                function (cb) {
+                    wiApiService.infoCurve(config.x, function (curveInfo) {
+                        pointSet.scale.left = curveInfo.LineProperty.minScale;
+                        pointSet.scale.right = curveInfo.LineProperty.maxScale;
+                        pointSet.curveX.name = curveInfo.name;
+                        wiApiService.dataCurve(config.x, function (curveData) {
+                            pointSet.curveX.data = curveData;
+                            cb();
                         });
-                    },
-                    function (cb) {
-                        wiApiService.infoCurve(pointSet.curveY.idCurve, function (curveInfo) {
-                            pointSet.scale.bottom = curveInfo.LineProperty.minScale;
-                            pointSet.scale.top = curveInfo.LineProperty.maxScale;
-                            wiApiService.dataCurve(pointSet.curveY.idCurve, function (curveData) {
-                                pointSet.curveY.data = curveData;
-                                cb();
-                            });
+                    });
+                },
+                function (cb) {
+                    wiApiService.infoCurve(config.y, function (curveInfo) {
+                        pointSet.scale.bottom = curveInfo.LineProperty.minScale;
+                        pointSet.scale.top = curveInfo.LineProperty.maxScale;
+                        pointSet.curveY.name = curveInfo.name;
+                        wiApiService.dataCurve(config.y, function (curveData) {
+                            pointSet.curveY.data = curveData;
+                            cb();
                         });
-                    }
-                ], function (cb) {
-                    self.pointsets.push(pointSet);
-                    next();
-                });
+                    });
+                }
+            ], function (cb) {
+                self.pointsets.push(pointSet);
+                next();
             });
         }, function (err, result) {
             if (err) {
@@ -71,10 +72,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             console.log('pointsets', self.pointsets);
             // test
             let scale = self.pointsets[0].scale;
+            let config = {
+                logX: false,
+                logY: false,
+                majorX: 5,
+                majorY: 5,
+                minorX : 5,
+                minorY : 5,
+                decimalsX: 2,
+                decimalsY: 2
+            };
             // end test
             self.viWiXplot = graph.createVisualizeWiXplot({
                 pointsets: self.pointsets,
-                scale: scale
+                scale: scale,
+                config: config
             }, document.getElementById(self.plotAreaId));
         });
     }
@@ -86,7 +98,7 @@ app.component(componentName, {
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        idPointsets: '<'
+        idCurves: '<'
     }
 });
 
