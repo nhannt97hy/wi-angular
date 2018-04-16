@@ -242,6 +242,14 @@ const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
 const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
 
 const GET_INVENTORY = '/user/fullinfo';
+// TASK
+const CREATE_TASK = 'task/new';
+const GET_TASK = '/task/info';
+const EDIT_TASK = '/task/edit';
+const DELETE_TASK = '/task/delete';
+const GET_TASK_LIST = "/task/list";
+// TASK SPEC
+const GET_TASK_SPEC_LIST = '/task-spec/list';
 // WORKFLOW
 const CREATE_WORKFLOW = '/workflow/new';
 const GET_WORKFLOW = '/workflow/info';
