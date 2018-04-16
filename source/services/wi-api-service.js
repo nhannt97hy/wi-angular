@@ -21,7 +21,6 @@ const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const PROCESSING_SERVICE = 'http://54.169.13.92';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
-// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 //inv server for dev
 
 //production
@@ -31,8 +30,8 @@ const INVENTORY_SERVICE = 'http://13.250.197.210';
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
-// const BASE_URL = 'http://localhost:3000';
-// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+// const BASE_URL = 'http://127.0.0.1:3000';
+// const AUTHENTICATION_SERVICE = 'http://127.0.0.1:2999';
 // const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://13.250.197.210';
 
@@ -54,6 +53,7 @@ const GET_PROJECT = '/project/fullinfo';
 const CREATE_PROJECT = '/project/new';
 const GET_PROJECT_LIST = '/project/list';
 const GET_PROJECT_INFO = '/project/info';
+const CLOSE_PROJECT = '/project/close';
 
 const LIST_WELL = '/project/well/list';
 const CREATE_WELL = '/project/well/new';
@@ -252,6 +252,19 @@ const GET_WORKFLOW_LIST = "/workflow/list";
 const CREATE_WORKFLOW_SPEC = '/workflow-spec/new';
 const GET_WORKFLOW_SPEC_LIST = '/workflow-spec/list';
 
+const UG_ADD_GROUP = '/group/new';
+const UG_REMOVE_GROUP = '/group/delete';
+const UG_ADD_USER_TO_GROUP = '/group/add-user';
+const UG_LIST_GROUP = '/group/list';
+const UG_REMOVE_USER_FROM_GROUP = '/group/remove-user';
+const UG_LIST_USER = '/user/list';
+const UG_SHARE_PROJECT = '/shared-project/new';
+const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group';
+const GET_USER_PERMISSION_OF_PROJECT = '/user/get-permission';
+const GET_GROUP_PERMISSION_OF_PROJECT = '/group/project-permission';
+const UPDATE_GROUP_PERMISSION_OF_PROJECT = '/group/update-project-permission';
+const UPDATE_USER_PERMISSION_OF_PROJECT = '/project/share/update-permission';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -375,7 +388,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        // if (err.reason) toastr.error(err.reason);
+                        if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });
@@ -835,6 +848,9 @@ Service.prototype.uploadFile = function (data, callback) {
         });*/
 }
 
+Service.prototype.closeProject = function(infoProject, callback){
+    this.post(CLOSE_PROJECT, infoProject, callback);
+}
 Service.prototype.createProject = function (infoProject, callback) {
     console.log('infoProject', infoProject);
     this.post(CREATE_PROJECT, infoProject, callback);
@@ -1819,4 +1835,42 @@ Service.prototype.getWorkflowSpecList = function(callback) {
 }
 Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
     this.post(IS_EXISTED_CURVE, {name: curveName, idDataset: idDataset}, callback);
+}
+
+////manager user and user's group
+Service.prototype.addUserGroup = function (payload, callback) {
+    this.post(UG_ADD_GROUP, payload, callback, 'auth');
+};
+Service.prototype.removeGroup = function (payload, callback) {
+    this.post(UG_REMOVE_GROUP, payload, callback, 'auth');
+};
+Service.prototype.addUserToGroup = function (payload, callback){
+    this.post(UG_ADD_USER_TO_GROUP, payload, callback, 'auth');
+};
+Service.prototype.listGroup = function (payload, callback) {
+    this.post(UG_LIST_GROUP, payload, callback, 'auth');
+};
+Service.prototype.removeUserFromGroup = function (payload, callback) {
+    this.post(UG_REMOVE_USER_FROM_GROUP, payload, callback, 'auth');
+};
+Service.prototype.listUser = function (payload, callback) {
+    this.post(UG_LIST_USER, payload, callback, 'auth');
+};
+Service.prototype.addSharedProject = function (payload, callback) {
+    this.post(UG_SHARE_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.addProjectToGroup = function (payload, callback) {
+    this.post(UG_ADD_SHARED_PROJECT_TO_GROUP, payload, callback, 'auth');
+};
+Service.prototype.getUserPermissionOfProject = function (payload, callback) {
+    this.post(GET_USER_PERMISSION_OF_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.getGroupPermissionOfProject = function (payload, callback) {
+    this.post(GET_GROUP_PERMISSION_OF_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.updateGroupPermissionOfProject = function (payload, callback) {
+    this.post(UPDATE_GROUP_PERMISSION_OF_PROJECT, payload, callback, 'auth')
+};
+Service.prototype.updateUserPermissionOfProject = function (payload, callback) {
+    this.post(UPDATE_USER_PERMISSION_OF_PROJECT, payload, callback)
 }

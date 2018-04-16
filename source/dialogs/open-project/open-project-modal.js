@@ -6,36 +6,46 @@ module.exports = function (ModalService, callback) {
         this.error = null;
         this.projects = [];
         this.idProject = null;
+        this.name = null;
+        this.shared = null;
+        this.owner = null;
         this.disabled = false;
         this.selectedProject = {};
-
+        this.displayName = null;
         wiApiService.getProjectList(null, function (projects) {
             self.projects = projects;
-                /*$timeout(function(){
-                    $scope.$apply();
-                });*/
-            });
+            /*$timeout(function(){
+                $scope.$apply();
+            });*/
+        });
         console.log('response', this.projects);
 
         this.fillInfo = function () {
             self.projects.forEach(function (item) {
-                if (self.idProject == item.idProject) {
-                    self.selectedProject = item;
+                console.log(item);
+                console.log('====', self);
+                if (self.displayName === item.displayName) {
+                    self.selectedProject = item
                 }
             });
         };
 
+
         this.onOkButtonClicked = function () {
             self.error = '';
             self.disabled = true;
-
             let data = {
-                idProject: self.idProject
+                idProject: self.selectedProject.idProject,
+                shared: self.selectedProject.shared,
+                owner: self.selectedProject.owner,
+                name: self.selectedProject.name
             };
 
             wiApiService.getProject(data, function (response) {
+                response.owner = self.selectedProject.owner;
+                response.shared = self.selectedProject.shared;
                 close(response, 500);
-                $timeout(function(){
+                $timeout(function () {
                     $scope.$apply();
                 });
             });
