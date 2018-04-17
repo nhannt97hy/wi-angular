@@ -1720,6 +1720,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             if (step.inputData && step.inputData.length != 0) {
                 self.runStep(step, done);
             } else {
+                toastr.error('can\'t ' + step.name+ '! choose a datase for ' + step.name );
                 async.setImmediate(done);
             }
         }, function (err) {

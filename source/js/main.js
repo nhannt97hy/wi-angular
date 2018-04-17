@@ -238,8 +238,8 @@ let app = angular.module('wiapp',
         'angularjs-dropdown-multiselect',
         'mgo-angular-wizard',
 
-	// chat module
-	// 'chatModule'
+        // chat module
+        // 'chatModule'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
@@ -380,9 +380,9 @@ function restoreProject($timeout, wiApiService, ModalService) {
             wiApiService.getProjectInfo(query.idProject, function (project, err) {
                 if (!err) {
                     wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                            utils.projectOpen(projectData);
-                        })
-                }else {
+                        utils.projectOpen(projectData);
+                    })
+                } else {
                     toastr.error("Project not exist!");
                 }
             })
