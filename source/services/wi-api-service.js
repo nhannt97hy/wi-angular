@@ -1869,9 +1869,6 @@ Service.prototype.addSharedProject = function (payload, callback) {
 };
 Service.prototype.addProjectToGroup = function (payload, callback) {
     this.post(UG_ADD_SHARED_PROJECT_TO_GROUP, payload, callback, 'auth');
-<<<<<<< HEAD
-};
-=======
 };
 Service.prototype.getUserPermissionOfProject = function (payload, callback) {
     this.post(GET_USER_PERMISSION_OF_PROJECT, payload, callback, 'auth');
@@ -1885,4 +1882,3 @@ Service.prototype.updateGroupPermissionOfProject = function (payload, callback) 
 Service.prototype.updateUserPermissionOfProject = function (payload, callback) {
     this.post(UPDATE_USER_PERMISSION_OF_PROJECT, payload, callback)
 }
->>>>>>> b2f8c499c9b313eea9cda2f800f9794cce0f002e
