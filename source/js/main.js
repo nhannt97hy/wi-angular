@@ -57,6 +57,7 @@ let wiPlot = require('./wi-plot');
 
 let wiInventory = require('./wi-inventory');
 let wiExport = require('./wi-export');
+let wiTask = require('./wi-task');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -137,8 +138,6 @@ let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
-let wiCommunication = require('./wi-communication');
-
 let app = angular.module('wiapp',
     [
         wiButton.name,
@@ -177,6 +176,7 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiExport.name,
+        wiTask.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -224,8 +224,6 @@ let app = angular.module('wiapp',
         wiiItems.name,
         wiiProperties.name,
 
-        wiCommunication.name,
-
         ngInfiniteScroll,
 
         'angularModalService',
@@ -238,7 +236,10 @@ let app = angular.module('wiapp',
         'ngSanitize',
         'ui.select',
         'angularjs-dropdown-multiselect',
-        'mgo-angular-wizard'
+        'mgo-angular-wizard',
+
+	// chat module
+	// 'chatModule'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {

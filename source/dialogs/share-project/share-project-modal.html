@@ -69,26 +69,12 @@
                             <i class="plus-16x16"></i>
                             <span>Add new group</span>
                         </button>
-                        <!--<button class="btn btn-default display-block text-ellipsis float-left"-->
-                        <!--style="margin-bottom:5px;margin-right: 5px;"-->
-                        <!--ng-click="wiModal.deleteGroup()"-->
-                        <!--ng-disabled="!wiModal.isSelectedGroup">-->
-                        <!--<i class="delete-16x16"></i>-->
-                        <!--<span>Delete</span>-->
-                        <!--</button>-->
                     </div>
                     <div style="flex:1; margin: 0 5px;">
                         <h4 style="text-align: center">User in group</h4>
                         <div class="list-body">
-                            <!--<ul class="list-group">-->
-                            <!--<li ng-repeat="user in wiModal.selectedGroup.users"-->
-                            <!--ng-click="wiModal.selectedUser = user; wiModal.isSelectedUser = true"-->
-                            <!--class="list-group-item" ng-class="{active: user.idUser == wiModal.selectedUser.idUser}">-->
-                            <!--{{user.username}}-->
-                            <!--</li>-->
-                            <!--</ul>-->
                             <ul class="list-group">
-                                <li ng-repeat="user in wiModal.users" class="list-group-item" ng-click=""
+                                <li ng-repeat="user in wiModal.users" class="list-group-item" ng-click="wiModal.userClicked(user)"
                                     style="display: flex; padding: 3px 15px"><span
                                         style="flex: 1; line-height: 36px; ">{{user.username}}</span>
                                     <button class="btn btn-default pull-right"
@@ -106,39 +92,28 @@
                                 </li>
                             </ul>
                         </div>
-                        <!--<div class="list-footer">-->
-                        <!--<button class="btn btn-default display-block text-ellipsis float-left"-->
-                        <!--style="margin-bottom:5px;margin-right: 5px;"-->
-                        <!--ng-click="wiModal.addUserToGroup()"-->
-                        <!--ng-disabled="!wiModal.isSelectedGroup">-->
-                        <!--<i class="plus-16x16"></i>-->
-                        <!--<span>Add user to group</span>-->
-                        <!--</button>-->
-                        <!--<button class="btn btn-default display-block text-ellipsis float-left"-->
-                        <!--style="margin-bottom:5px;margin-right: 5px;"-->
-                        <!--ng-click="wiModal.removeUser()"-->
-                        <!--ng-disabled="!wiModal.isSelectedUser">-->
-                        <!--<i class="delete-16x16"></i>-->
-                        <!--<span>Remove this user</span>-->
-                        <!--</button>-->
-                        <!--</div>-->
-                        <!--<div>-->
-                        <!--<br>-->
-                        <!--<hr>-->
-                        <!--</div>-->
-                        <!--<ul class="list-group" ng-hide="wiModal.showUserList">-->
-                        <!--<li ng-repeat="user in wiModal.users" class="list-group-item"-->
-                        <!--ng-click="wiModal.addUser(user)">-->
-                        <!--{{user.username}}-->
-                        <!--</li>-->
-                        <!--</ul>-->
                     </div>
                 </div>
-
+                <hr/>
+                <div style="display: flex" ng-show="wiModal.objects">
+                    <div style="flex:1; margin: 0 5px;">
+                        <ul class="list-group">
+                            <li ng-repeat="object in wiModal.objects" class="list-group-item"
+                                style="display: flex; padding: 3px 15px"><span style="flex: 1; line-height: 36px; ">{{object.displayAs}}</span>
+                                <span style="padding: inherit">
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.get" ng-checked="{{object.get}}" ng-disabled="true">Get</label>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.create" ng-checked="{{object.create}}">Create</label>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.update" ng-checked="{{object.update}}">Update</label>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.delete" ng-checked="{{object.delete}}">Delete</label>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok
-                </button>
+                <button class='btn btn-default' ng-click='wiModal.onApplyButtonClicked()'><span class="apply-16x16"></span>&nbsp;Apply Permission</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="cancel-16x16"></span>&nbsp;Cancel</button>
             </div>
         </div>
     </div>
