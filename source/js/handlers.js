@@ -241,6 +241,29 @@ exports.OpenModelButtonClicked = function() {
 //     })
 // };
 
+exports.ExportToolButtonClicked = function() {
+    console.log('ExportToolButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'export-tool',
+        title: 'Export Tool',
+        tabIcon: 'export-well-top-16x16',
+        componentState: {
+            html: `
+                <div style='height:100%;display:flex;flex-direction:column;'>
+                  
+                   <wi-export style='flex:1;'></wi-export>
+                </div>
+            `,
+            name: 'wiExport'
+        }
+    })
+
+}
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
     let wiComponentService = this.wiComponentService;
@@ -1302,8 +1325,6 @@ exports.MicroAndMacroPorosityButtonClicked = function () {
 
 exports.WaterSaturationButtonClicked = function () {
     console.log('WaterSaturationButton is clicked');
-    let DialogsUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    DialogsUtils.saturationArchieDialog(this.ModalService);
 };
 
 exports.PermeabilityButtonClicked = function () {
@@ -1322,9 +1343,55 @@ exports.BasicAnalysisButtonClicked = function () {
     console.log('BasicAnalysisButton is clicked');
 };
 
-exports.ClayVolumeButtonClicked = function () {
-    console.log('ClayVolumeButton is clicked');
-};
+exports.ClayVolumeGammaRayButtonClicked = function() {
+    console.log('ClayVolumeGammaRayButton is clicked');
+    let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+        layoutManager.putTabRight({
+            id: 'wiTask',
+            title: 'Clay Volume Gamma Ray',
+            tabIcon: 'workflow-16x16',
+            componentState: {
+                html: '<wi-task></wi-task>',
+                name: 'wiTask'
+            }
+        })
+}
+
+exports.ClayVolumeNeutron_DensityButtonClicked = function() {
+    console.log('ClayVolumeNeutron-DensityButton is clicked');
+}
+
+exports.ClayVolumeNeutron_SonicButtonClicked = function() {
+    console.log('ClayVolumeNeutron-SonicButton is clicked');
+}
+
+exports.ClayVolumeDensity_SonicButtonClicked = function() {
+    console.log('ClayVolumeDensity-SonicButton is clicked');
+}
+
+exports.ClayVolumeResistivityButtonClicked = function() {
+    console.log('ClayVolumeResistivityButton is clicked');
+}
+
+exports.ClayVolumeSpontaneouspotentialButtonClicked = function() {
+    console.log('ClayVolumeSpontaneouspotentialButton is clicked');
+}
+
+exports.ClayVolumeThermalNeutronButtonClicked = function() {
+    console.log('ClayVolumeThermalNeutronButton is clicked');
+}
+
+exports.ClayVolumePotassiumButtonClicked = function() {
+    console.log('ClayVolumePotassiumButton is clicked');
+}
+
+exports.ClayVolumeThoriumButtonClicked = function() {
+    console.log('ClayVolumeThoriumButton is clicked');
+}
+
+exports.ClayVolumeFinalButtonClicked = function() {
+    console.log('ClayVolumeFinalButton is clicked');
+}
 
 exports.PorosityAndWaterSaturationButtonClicked = function () {
     console.log('Porosity&WaterSaturationButton is clicked');

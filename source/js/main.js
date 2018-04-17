@@ -56,6 +56,8 @@ let wiReferenceWindow = require('./wi-reference-window');
 let wiPlot = require('./wi-plot');
 
 let wiInventory = require('./wi-inventory');
+let wiExport = require('./wi-export');
+let wiTask = require('./wi-task');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -173,6 +175,8 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiExport.name,
+        wiTask.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
