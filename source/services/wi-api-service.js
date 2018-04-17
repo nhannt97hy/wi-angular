@@ -243,6 +243,14 @@ const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
 const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
 
 const GET_INVENTORY = '/user/fullinfo';
+// TASK
+const CREATE_TASK = 'task/new';
+const GET_TASK = '/task/info';
+const EDIT_TASK = '/task/edit';
+const DELETE_TASK = '/task/delete';
+const GET_TASK_LIST = "/task/list";
+// TASK SPEC
+const GET_TASK_SPEC_LIST = '/task-spec/list';
 // WORKFLOW
 const CREATE_WORKFLOW = '/workflow/new';
 const GET_WORKFLOW = '/workflow/info';
@@ -260,7 +268,11 @@ const UG_LIST_GROUP = '/group/list';
 const UG_REMOVE_USER_FROM_GROUP = '/group/remove-user';
 const UG_LIST_USER = '/user/list';
 const UG_SHARE_PROJECT = '/shared-project/new';
-const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group'
+const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group';
+const GET_USER_PERMISSION_OF_PROJECT = '/user/get-permission';
+const GET_GROUP_PERMISSION_OF_PROJECT = '/group/project-permission';
+const UPDATE_GROUP_PERMISSION_OF_PROJECT = '/group/update-project-permission';
+const UPDATE_USER_PERMISSION_OF_PROJECT = '/project/share/update-permission';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -385,7 +397,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        // if (err.reason) toastr.error(err.reason);
+                        if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });
@@ -1859,3 +1871,15 @@ Service.prototype.addSharedProject = function (payload, callback) {
 Service.prototype.addProjectToGroup = function (payload, callback) {
     this.post(UG_ADD_SHARED_PROJECT_TO_GROUP, payload, callback, 'auth');
 };
+Service.prototype.getUserPermissionOfProject = function (payload, callback) {
+    this.post(GET_USER_PERMISSION_OF_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.getGroupPermissionOfProject = function (payload, callback) {
+    this.post(GET_GROUP_PERMISSION_OF_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.updateGroupPermissionOfProject = function (payload, callback) {
+    this.post(UPDATE_GROUP_PERMISSION_OF_PROJECT, payload, callback, 'auth')
+};
+Service.prototype.updateUserPermissionOfProject = function (payload, callback) {
+    this.post(UPDATE_USER_PERMISSION_OF_PROJECT, payload, callback)
+}

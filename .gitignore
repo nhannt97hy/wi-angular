@@ -53,7 +53,7 @@ source/app/components/wi-workflow-player/wi-workflow-player.html
 .vscode
 .vs
 .eslintrc.json
-.vs
+.eslintrc.js
 
 # Yarn
 yarn.lock
