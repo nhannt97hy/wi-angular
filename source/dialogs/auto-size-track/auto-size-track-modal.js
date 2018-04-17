@@ -10,11 +10,11 @@ module.exports = function (ModalService, wiLogplotCtrl) {
 
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
-        let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
-        let depthTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'depth-track');
-        let imageTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'image-track');
-        let zoneTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'zone-track');
-        let objectTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'object-track');
+        let logTracks = wiD3Ctrl.getViTracks().filter(track => track.type == 'log-track');
+        let depthTracks = wiD3Ctrl.getViTracks().filter(track => track.type == 'depth-track');
+        let imageTracks = wiD3Ctrl.getViTracks().filter(track => track.type == 'image-track');
+        let zoneTracks = wiD3Ctrl.getViTracks().filter(track => track.type == 'zone-track');
+        let objectTracks = wiD3Ctrl.getViTracks().filter(track => track.type == 'object-track');
 
         this.unit = "inch";
         if (Array.isArray(logTracks) && logTracks.length) {

@@ -1401,7 +1401,7 @@ exports.setupZonesetDraggable = function (element, wiComponentService, wiApiServ
 
             function createDefaultZoneTrack (idZoneSet, callback) {
                 let trackOrder = wiD3Ctrl.getOrderKey();
-                let zoneTracks = wiD3Ctrl.getTracks().filter(function(viTrack) { return viTrack.isZoneTrack();})
+                let zoneTracks = wiD3Ctrl.getViTracks().filter(function(viTrack) { return viTrack.isZoneTrack();})
                 const defaultZoneTrackProps = {
                     idPlot: wiD3Ctrl.wiLogplotCtrl.id,
                     orderNum: trackOrder,
@@ -2840,7 +2840,7 @@ exports.renameZoneSet = function renameZoneSet (zoneSetModel, newName) {
 //                 let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
 //                 if (!wiLogplotCtrl) return;
 //                 let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-//                 let viTracks = wiD3Ctrl.getTracks();
+//                 let viTracks = wiD3Ctrl.getViTracks();
 //                 viTracks.forEach(function (viTrack) {
 //                     if (!viTrack.isLogTrack()) return;
 //                     let curves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);
@@ -2866,7 +2866,7 @@ function updateLinesOnCurveEdited(curveModel) {
         let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
         if (!wiLogplotCtrl) return;
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-        let viTracks = wiD3Ctrl.getTracks();
+        let viTracks = wiD3Ctrl.getViTracks();
         viTracks.forEach(function (viTrack) {
             if (!viTrack.isLogTrack()) return;
             let viCurves = viTrack.getCurves().filter(curve => curve.idCurve == idCurve);

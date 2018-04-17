@@ -43,10 +43,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
 
     /* Private End*/
     function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
+        if(self.viTrack)
+            return self.viTrack.getProperties();
+        return self.properties;
     }
     function createVisualizeDepthTrack(depthTrack) {
         let config = {
@@ -81,7 +80,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<'
     }
 });
 exports.name = moduleName;

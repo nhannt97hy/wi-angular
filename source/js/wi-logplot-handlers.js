@@ -67,7 +67,7 @@ exports.PrintButtonClicked = function () {
     let trackBodyHeight = trackHeight - trackHeaderHeight - trackHorizontalResizer - 10;
     wiLogplotElement.find('wi-d3').height(trackHeight + 'px');
     wiLogplotElement.find('div.vi-track-body-container').height(trackBodyHeight + 'px');
-    let tracks = wiD3Ctrl.getTracks();
+    let tracks = wiD3Ctrl.getViTracks();
     for (let track of tracks) {
         if (track.isDepthTrack()) {
             track.yTicks = 1000;
@@ -560,7 +560,7 @@ exports.TrackBulkUpdateButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
-    let allTracks = wiLogplot.getwiD3Ctrl().getTracks();
+    let allTracks = wiLogplot.getwiD3Ctrl().getViTracks();
     console.log("allTracks", wiLogplot);
     DialogUtils.trackBulkUpdateDialog(this.ModalService, allTracks, wiLogplot.id, function () {
 
@@ -573,7 +573,7 @@ exports.CurveBulkUpdateButtonClicked = function () {
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
 
-    let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    let logTracks = wiLogplot.getwiD3Ctrl().getViTracks().filter(track => track.type == 'log-track');
     DialogUtils.curveBulkUpdateDialog(this.ModalService, logTracks, function () {
 
     });

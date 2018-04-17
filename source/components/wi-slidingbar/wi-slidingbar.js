@@ -103,6 +103,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                     _viCurve.doPlot();
                 }
                 self.refCurve = _viCurve;
+                // update all tracks to current depth range
+                scroll(0);
             });
         })
     }
@@ -137,7 +139,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         let wiD3Ctrl = wiComponentService.getD3AreaForSlidingBar(self.name);
         if(!wiD3Ctrl) return;
-        let curves = wiD3Ctrl.getTracks().find(function(track) {
+        let curves = wiD3Ctrl.getViTracks().find(function(track) {
             return track.isLogTrack() && track.getCurves().length;
         }).getCurves();
         if(!curves.length) return;

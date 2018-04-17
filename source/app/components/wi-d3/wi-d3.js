@@ -66,20 +66,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }],
         trackItemsCreation: []
     }
-
     let _referenceLine = true;
     let _fitWindow = false;
     let _depthRange = [0, 100000];
-    var commonCtxMenu = null;
-    let _tracks = [];
+    let _tooltip = true;
+    let commonCtxMenu = null;
+    let _viTracks = [];
+    let _trackComponents = [];
     let _currentTrack = null;
     let _previousTrack = null;
-    let _tooltip = true;
+    let _listWells = [];
     /* public variables */
     this.compileFunc = $compile;
     this.scopeObj = $scope;
-    this.trackComponents = [];
-    this.listWells = [];
 
     /* public method */
     this.buildContextMenu = function (contextMenuItems) {
@@ -102,22 +101,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return contextMenu;
     }
     this.getCommonContextMenuItems = function () {
-        let obj = {};
+        let items = {};
         for (let attr in contextMenu_constantItems) {
-            obj[attr] = contextMenu_constantItems[attr].slice();
+            items[attr] = contextMenu_constantItems[attr].slice();
         }
-        return obj;
+        return items;
     }
     this.subscribeTrackCtrlWithD3Ctrl = function (trackComponentCtrl) {
         d3.select(trackComponentCtrl.viTrack.root.node().parentNode)
             .datum(trackComponentCtrl.viTrack.orderNum)
             .attr('class', 'wi-d3-track-component')
             .attr('data-order-num', function(d) { return d;});
-        this.trackComponents.find(function(trackComponent) {
+        _trackComponents.find(function(trackComponent) {
             return trackComponent.name == trackComponentCtrl.name;
         }).controller = trackComponentCtrl;
-        _tracks.push(trackComponentCtrl.viTrack);
-        _tracks.sort(function (track1, track2) {
+        _viTracks.push(trackComponentCtrl.viTrack);
+        _viTracks.sort(function (track1, track2) {
             return track1.orderNum.localeCompare(track2.orderNum);
         });
 
@@ -128,9 +127,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackDragCallback(trackComponentCtrl.viTrack);
         _setCurrentTrack(trackComponentCtrl.viTrack);
 
-        trackComponentCtrl.viTrack.on('keydown', function () {
-            _onTrackKeyPressCallback(trackComponentCtrl.viTrack);
-        })
         graph.rearrangeTracks(self);
         self.updateScale();
         updateSlider();
@@ -159,16 +155,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let logplotElem = $('wi-logplot#' + self.wiLogplotCtrl.id + '>.logplot-header');
         let slidingBarElem = $('wi-logplot#' + self.wiLogplotCtrl.id + '>.logplot-main-content>.slidingbar')
         let plotAreaWidth = logplotElem.width() - slidingBarElem.width()/2 - slidingBarElem.outerWidth()/2;
-        console.log("width", _tracks);
+        console.log("width", _viTracks);
         let sumOfOriWidth = 0;
         let widths = [];
-        _tracks.forEach(function(t) {
+        _viTracks.forEach(function(t) {
             widths.push(t.width);
             sumOfOriWidth += t.width;
         });
         let ratioWidth = plotAreaWidth/sumOfOriWidth;
 
-        /*_tracks.forEach(function(t, index) {
+        /*_viTracks.forEach(function(t, index) {
             if(_fitWindow) {
                 t.width = widths[index] * ratioWidth;
                 originalWidths.push(widths[index]);
@@ -222,14 +218,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);
         let trackName = getTrackName(trackProperties);
-        this.trackComponents.push({
-            name: trackName,
-            props: trackProperties,
+        _trackComponents.push({
+            name: trackName
         });
         $('#' + self.plotAreaId).append(
             self.compileFunc(html)(self.scopeObj)
         );
-        // return self.trackComponents.find(function(component) { return component.name == trackName});
     }
     this.showContextMenu = function (event) {
         console.log('contextMenu is opened');
@@ -247,12 +241,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getMaxDepth = function () {
 
         let defaultBottomDepth = 100000.;
-        /* TO BE REMOVED
-        let currentWellProps = self.getWellProps();
-        if (currentWellProps.bottomDepth)
-        // return parseFloat(wellProps.bottomDepth);
-            currentWellBottomDepth = parseFloat(currentWellProps.bottomDepth);
-        */
 
         let _maxDepth = defaultBottomDepth;
         let listWells = self.getListWells();
@@ -264,24 +252,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         return _maxDepth;
-
-        // TO BE REVIEWED
-        let maxDepth = d3.max(_tracks, function (track) {
-            if (track.getExtentY) return track.getExtentY()[1];
-            return -1;
-        });
-        // _maxDepth = (maxDepth > 0) ? maxDepth : 100000;
-        // return _maxDepth;
-        return (maxDepth > -1 && maxDepth < 100000 ? maxDepth:defaultBottomDepth);
     };
     this.getMinDepth = function () {
         let defaultTopDepth = 0.;
-        /* TO BE REMOVED
-        let currentWellProps = self.getWellProps();
-        if(currentWellProps.topDepth) {
-            currentWellTopDepth = parseFloat(currentWellProps.topDepth);
-        }
-        */
         let _minDepth = defaultTopDepth;
         let listWells = self.getListWells();
         if(listWells.length) {
@@ -292,15 +265,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         return _minDepth;
-
-        // TO BE REVIEWD
-        let minDepth = d3.min(_tracks, function (track) {
-            if (track.getExtentY && track.drawings.length) {
-                return track.getExtentY()[0];
-            }
-            return 100000;
-        });
-        return (minDepth > -1 && minDepth < 100000 ? minDepth:defaultTopDepth);
     }
     this.getDepthRange = function () {
         return _depthRange.map(function (d) {
@@ -318,10 +282,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
     }
-
-    // TO BE REMOVED
-    // this.getWellProps = _getWellProps;
-
     this.getLogplotHandler = function () {
         return logplotHandlers;
     }
@@ -332,7 +292,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         self.contextMenu = ctxMenu;
     }
-
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
     }
@@ -351,33 +310,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
-    /* TO BE REMOVED
-    this.verifyDroppedIdCurve = function (idCurve) {
-        let well1 = self.getWellProps();
-        let well2 = Utils.findWellByCurve(idCurve) || {properties: {}};
-        if (!well1.idWell || !well2.properties.idWell) return -1;
-        if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
-        return 0;
-    }
-    */
     this.verifyDroppedIdCurve = function (idCurve) {
         let curveWell = Utils.findWellByCurve(idCurve);
         if(curveWell) return 1;
         else return 0;
     }
     this.verifyDroppedIdCurveOnTrack = function (idCurve, track) {
-        /* TO BE REMOVED
-        let curveWell = Utils.findWellByCurve(idCurve) || {properties: {}};
-        let trackWell = {properties: {}};
-        if(track.isLogTrack() && track.getCurves().length) {
-            let curveOnTrack = track.getCurves()[0];
-            trackWell = Utils.findWellByCurve(curveOnTrack.idCurve);
-        }
-        if(curveWell.properties.idWell && track.isLogTrack() && !track.drawings.length) return 1;
-        if(!curveWell.properties.idWell || !trackWell.properties.idWell) return -1;
-        if(curveWell.properties.idWell && trackWell.properties.idWell && (curveWell.properties.idWell == trackWell.properties.idWell)) return 1;
-        return 0;
-        */
         let curveWell = Utils.findWellByCurve(idCurve);
         let trackWell = self.detectWellForTrack(track);
         if(curveWell && trackWell && curveWell.properties.idWell == trackWell.idWell) return 1;
@@ -385,12 +323,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return 0;
     }
     
-    /**
-     * detect well for a track,
-     * @param track a track instance
-     * @returns well properties, null if track is not belong to any well
-    */
-     this.detectWellForTrack = function (track) {
+    this.detectWellForTrack = function (track) {
         if(track && track.isLogTrack() && track.getCurves().length) {
             let curveOnTrack = track.getCurves()[0];
             let trackWell = Utils.findWellByCurve(curveOnTrack.idCurve);
@@ -409,8 +342,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         trackComponentCtrl.depthShiftDialog();
     }
 
-    this.getListWells = function() {
-        return self.listWells.filter(function(well) {
+    this.getListWells = function(options) {
+        if(options && options.reference) return _listWells;
+        return _listWells.filter(function(well) {
             return well.wellAttrs.tracks.length;
         });
     }
@@ -439,7 +373,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addLogTrack = function (trackTitle, onFinished) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
-            const logTracks = self.getTracks().filter(track => track.type == 'log-track');
+            const logTracks = self.getViTracks().filter(track => track.type == 'log-track');
             let createdLogTrack;
             let logTrack;
             async.series([
@@ -471,7 +405,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     });
                 }
             ], function (err, results) {
-                const logTrackController = self.trackComponents.find(function (component) { return component.props == logTrack; }).controller;
+                const logTrackController = _trackComponents.find(function (component) { return component.props == logTrack; }).controller;
                 if (!err && typeof onFinished === 'function') onFinished(logTrackController);
             });
         }
@@ -482,7 +416,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addZoneTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const zoneTracks = self.getTracks().filter(track => track.type == 'zone-track');
+            const zoneTracks = self.getViTracks().filter(track => track.type == 'zone-track');
             const defaultZoneTrackProp = {
                 idPlot: self.wiLogplotCtrl.id,
                 orderNum: trackOrder,
@@ -503,7 +437,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addImageTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const imageTracks = self.getTracks().filter(track => track.type == 'image-track');
+            const imageTracks = self.getViTracks().filter(track => track.type == 'image-track');
             const defaultImageTrackProp = {
                 showTitle: true,
                 title: "Image Track " + (imageTracks.length + 1),
@@ -536,7 +470,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addObjectTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
+            const objectTracks = self.getViTracks().filter(track => track.type == 'object-track');
             const defaultObjectTrackProp = {
                 showTitle: true,
                 title: "Object Track " + (objectTracks.length + 1),
@@ -589,13 +523,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.pushObjectTrack = function (objectTrackProps) {
         self.pushTrackComponent(objectTrackProps);
     }
-    this.plot = function (track) {
-        if (track && track.doPlot) track.doPlot(track == _currentTrack);
+    this.plot = function (viTrack) {
+        if (viTrack && viTrack.doPlot) viTrack.doPlot(viTrack == _currentTrack);
     };
 
     /* connect with visualize track */
+    this.openTrackPropertiesDialog = openTrackPropertiesDialog;
     this.plotAll = _.throttle(function () {
-        _tracks.forEach(function (track) {
+        _viTracks.forEach(function (track) {
             track.doPlot(track == _currentTrack);
         });
         self.updateScale();
@@ -621,17 +556,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             displayView: self.getDisplayView(),
             currentView: [depthRange[0].toFixed(2), depthRange[1].toFixed(2)]
         };
-        _tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
+        _viTracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
         });
         this.wiLogplotCtrl.updateScale(this.scale);
     }
-    this.setCurrentTrack = function (track) {
-        _setCurrentTrack(track);
-    }
+    this.setCurrentTrack = _setCurrentTrack;
     this.setDepthRange = function (depthRange, notPlot) {
         _depthRange = depthRange;
-        _tracks.forEach(function (track) {
+        _viTracks.forEach(function (track) {
             track.minY = depthRange[0];
             track.maxY = depthRange[1];
         });
@@ -695,19 +628,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _drawTooltip(_currentTrack); */
     }
     this.processZoomFactor = function () {
-        let maxZoomFactor = d3.max(_tracks, function (track) {
+        let maxZoomFactor = d3.max(_viTracks, function (track) {
             return track.zoomFactor;
         });
-
-        // TO BE REMOVED
-        // let topDepth = parseFloat(self.getWellProps().topDepth);
-        // let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
 
         let topDepth = self.getMinDepth();
         let bottomDepth = self.getMaxDepth();
 
         let shouldRescaleWindowY = !(_depthRange[0] == topDepth && _depthRange[1] == bottomDepth);
-        for (let track of _tracks) {
+        for (let track of _viTracks) {
             track._maxZoomFactor = maxZoomFactor;
             track._shouldRescaleWindowY = shouldRescaleWindowY;
         }
@@ -720,7 +649,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.removeTrack = function (track) {
         // remove visualizeTrack
-        let trackIdx = _tracks.indexOf(track);
+        let trackIdx = _viTracks.indexOf(track);
         if (trackIdx < 0) return;
         if (track == _currentTrack) {
             _currentTrack = null;
@@ -730,19 +659,19 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             track.removeAllDrawings();
         }
         graph.removeTrack(track);
-        _tracks.splice(trackIdx, 1);
-        let maxZoomFactor = d3.max(_tracks, function (track) {
+        _viTracks.splice(trackIdx, 1);
+        let maxZoomFactor = d3.max(_viTracks, function (track) {
             return track.zoomFactor;
         });
-        if (_tracks.length && maxZoomFactor != _tracks[0]._maxZoomFactor && !_tracks[0]._shouldRescaleWindowY) {
+        if (_viTracks.length && maxZoomFactor != _viTracks[0]._maxZoomFactor && !_viTracks[0]._shouldRescaleWindowY) {
             this.processZoomFactor();
             this.plotAll();
         }
         // remove track component
-        let component = self.trackComponents.find(function (trackComponent) {
+        let component = _trackComponents.find(function (trackComponent) {
             return trackComponent.controller.viTrack == track;
         });
-        self.listWells.forEach(function(well) {
+        _listWells.forEach(function(well) {
             let foundTrack = well.wellAttrs.tracks.find(function(track) {
                 return track.name == component.name;
             });
@@ -754,20 +683,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
         let name = component.controller.name;
         $(`[name=`+ component.controller.name +`]`).remove();
-        self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
+        _trackComponents.splice(_trackComponents.indexOf(component), 1);
         $timeout(function() {
             wiComponentService.getSlidingBarForD3Area(self.name).updateDepthRange();
         })
         // wiComponentService.putComponent(name, null);
         updateSlider();
     }
-    this.getTracks = function () {
-        return _tracks;
+    this.getViTracks = function () {
+        return _viTracks;
     }
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
-    this.updateTrack = function (viTrack, callback, onlyStatus) {
-        getComponentCtrlByViTrack(viTrack).update(callback, onlyStatus);
+    this.updateTrack = function (viTrack, callback, options) {
+        getComponentCtrlByViTrack(viTrack).update(callback, options);
     }
     // image track
     this.addImageZoneToTrack = function (track, config) {
@@ -858,17 +787,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             //     dragMan.wiD3Ctrl = null;
             // });
         }, 1000)
-
-        // TO BE REMOVED
-        // multiwell feature. By default, current well is the first well in the array
-        // self.listWells.push(_getWellProps().idWell);
-        // self.listWells.push({
-        //     properties: _getWellProps(),
-        //     wellAttrs: {
-        //         color: '#88CC88',
-        //         tracks: []
-        //     }
-        // });
 
         window._WiD3CTRL = self;
     }
@@ -967,7 +885,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         });
                     });
                     function buildTracks(callback) {
-                        let loadedTracks = wiD3Ctrl.getTracks();
+                        let loadedTracks = wiD3Ctrl.getViTracks();
                         async.eachOf(loadedTracks, function(aTrack, idx, _cb){
                             if (aTrack.type == "depth-track") {
                                 console.log('depth track');
@@ -980,28 +898,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 });
                             }
                             else if (aTrack.type == "zone-track") {
-                                /*
-                                if (!trackProps[idx].zoneset) {
-                                    async.setImmediate(_cb);
-                                }
-                                wiApiService.getZoneSet(trackProps[idx].zoneset.idZoneSet, function (zoneset) {
-                                    for (let zone of zoneset.zones) {
-                                        wiD3Ctrl.addZoneToTrack(aTrack, zone);
-                                    }
-                                    _cb();
-                                });
-                                */
                                 _cb();
                             }
                             else if (aTrack.type == "image-track") {
-                                /*
-                                wiApiService.getImagesOfTrack(trackProps[idx].idImageTrack, function (images) {
-                                    for (let img of images) {
-                                        wiD3Ctrl.addImageZoneToTrack(aTrack, img);
-                                    }
-                                    _cb();
-                                });
-                                */
                                 _cb();
                             }
                             else if (aTrack.type == "object-track") {
@@ -1120,32 +1019,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     /* private method*/
     function generateHtml(trackProperties) {
-        let d3Ctrl_String = ' wi-d3-ctrl="'+ componentName +'" ';
-        // let orderNum_String = ' data-order-num="'+ track.orderNum +'" ';
-        let commonStyle_String = ' style="display: flex; flex-direction: column; outline: none;" ';
-        // let classed = ' class="wi-d3-track-component" data-order-num=' + trackProperties.orderNum + ' ';
-        // commonStyle_String += classed;
+        let bindingString = ' wi-d3-ctrl="'+ componentName + '" ' +
+                            ' name="' + getTrackName(trackProperties) + '" ' +
+                            ` properties='${JSON.stringify(trackProperties)}'`;
+        let commonStyleString = ' style="display: flex; flex-direction: column; outline: none;" ';
+        
+        let DOMAttributes = bindingString + commonStyleString; 
 
         if(trackProperties.idDepthAxis) {
-            return '<wi-d3-depth-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-depth-track>';
+            return '<wi-d3-depth-track ' + DOMAttributes + '></wi-d3-depth-track>';
         } else if (trackProperties.idZoneTrack) {
-            return '<wi-d3-zone-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-zone-track>';
+            return '<wi-d3-zone-track ' + DOMAttributes + '></wi-d3-zone-track>';
         } else if (trackProperties.idImageTrack) {
-            return '<wi-d3-image-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-image-track>';
+            return '<wi-d3-image-track ' + DOMAttributes + '></wi-d3-image-track>';
         } else if (trackProperties.idObjectTrack) {
-            return '<wi-d3-object-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-object-track>';
+            return '<wi-d3-object-track ' + DOMAttributes + '></wi-d3-object-track>';
         } else if (trackProperties.idTrack) {
-            return '<wi-d3-log-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-log-track>';
+            return '<wi-d3-log-track ' + DOMAttributes + '></wi-d3-log-track>';
         }
     }
     function getTrackName(trackProperties) {
@@ -1163,7 +1053,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return self.name + 'UnknownTrack';
         }
     }
-
+    
     function updateSlider() {
         let wholeWidth = $(`wi-logplot[name=${self.wiLogplotCtrl.name}]`).width();
         let slidingBarWidth = $(`wi-slidingbar[name=${self.wiLogplotCtrl.name + "Slidingbar"}]`).width();
@@ -1180,27 +1070,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             controller.openPropertiesDialog();
         }
     }
-    this.openTrackPropertiesDialog = openTrackPropertiesDialog;
     function getOrderKey(track) {
-        if (_tracks.length <= 0) {
+        if (_viTracks.length <= 0) {
             return 'm';
         }
-        if (!track) track = _currentTrack || _tracks[_tracks.length - 1];
-        var currentIdx = _tracks.indexOf(track);
-        if (currentIdx < 0 || currentIdx == (_tracks.length - 1)) {
-            currentIdx = _tracks.length - 1;
-            let currentOrderKey = _tracks[currentIdx].orderNum;
+        if (!track) track = _currentTrack || _viTracks[_viTracks.length - 1];
+        var currentIdx = _viTracks.indexOf(track);
+        if (currentIdx < 0 || currentIdx == (_viTracks.length - 1)) {
+            currentIdx = _viTracks.length - 1;
+            let currentOrderKey = _viTracks[currentIdx].orderNum;
             var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
             console.log(key);
             return key;
         }
-        return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
+        return _viTracks[currentIdx].orderNum + _viTracks[currentIdx + 1].orderNum;
     }
-    // TO BE REMOVED
-    // function _getWellProps() {
-    //     let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-    //     return well.properties || {};
-    // }
 
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;
@@ -1248,10 +1132,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 _fitWindow = false;
             }
         });
+        track.on('keydown', function () {
+            _onTrackKeyPressCallback(track);
+        })
     }
     function _onPlotMouseWheelCallback(track) {
-        if (!_tracks || !_tracks.length) return;
-        let mouse = d3.mouse(_tracks[0].plotContainer.node());
+        if (!_viTracks || !_viTracks.length) return;
+        let mouse = d3.mouse(_viTracks[0].plotContainer.node());
         if (mouse[1] < 0) return;
 
         if (d3.event.ctrlKey) {
@@ -1265,7 +1152,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _drawTooltip(track) {
         let plotMouse, x, y, plotDim;
         if (!track) {
-            for (let tr of _tracks) {
+            for (let tr of _viTracks) {
                 plotMouse = d3.mouse(tr.plotContainer.node());
                 x = plotMouse[0];
                 y = plotMouse[1];
@@ -1282,7 +1169,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         y = d3.mouse(track.plotContainer.node())[1];
         let depth = track.getTransformY().invert(y);
 
-        _tracks.forEach(function(tr) {
+        _viTracks.forEach(function(tr) {
             if (_referenceLine && tr.drawTooltipLines) tr.drawTooltipLines(depth);
             if (_tooltip && tr.drawTooltipText) tr.drawTooltipText(depth, tr == track);
         })
@@ -1290,13 +1177,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     function _removeTooltip(track) {
         if (!_tooltip) return;
-        _tracks.forEach(function(tr) {
+        _viTracks.forEach(function(tr) {
             if (tr.removeTooltipLines) tr.removeTooltipLines();
             if (tr.removeTooltipText) tr.removeTooltipText();
         })
     }
     function _trackOnRightClick() {
-        let componentCtrl = self.trackComponents.find(function(trackComponent) {
+        let componentCtrl = _trackComponents.find(function(trackComponent) {
             return trackComponent.controller.viTrack == _currentTrack;
         }).controller;
         if(componentCtrl) {
@@ -1313,7 +1200,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function orderTrack(viTrack, orderNum) {
         viTrack.orderNum = orderNum;
         viTrack.updateOrderNum();
-        _tracks.sort(function (track1, track2) {
+        _viTracks.sort(function (track1, track2) {
             return track1.orderNum.localeCompare(track2.orderNum);
         });
         graph.rearrangeTracks(self);
@@ -1344,7 +1231,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }).then(function () {
             viTrack.orderNum = orderNum;
             viTrack.updateOrderNum();
-            _tracks.sort(function (track1, track2) {
+            _viTracks.sort(function (track1, track2) {
                 return track1.orderNum.localeCompare(track2.orderNum);
             });
             graph.rearrangeTracks(self);
@@ -1352,24 +1239,24 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     function reindexAllTracks(byWell) {
         let promises = [];
-        let backupTracks = angular.copy(_tracks);
+        let backupTracks = angular.copy(_viTracks);
 
-        _tracks.forEach(function(track) {
+        _viTracks.forEach(function(track) {
             track.orderNum = String.fromCharCode(76);
         })
         if(byWell) {
-            self.listWells.forEach(function(well, wellIdx) {
+            _listWells.forEach(function(well, wellIdx) {
                 well.wellAttrs.tracks.forEach(function(trackCpnt){
                     trackCpnt.viTrack.orderNum = String.fromCharCode(wellIdx + 77);
                 })
             })
         }
 
-        for (var i = 0; i < _tracks.length; i++) {
-            let viTrack = _tracks[i];
+        for (var i = 0; i < _viTracks.length; i++) {
+            let viTrack = _viTracks[i];
             let orderNum = viTrack.orderNum;
             if(i == 0) orderNum += 'm';
-            else orderNum += String.fromCharCode(_tracks[i-1].orderNum.charCodeAt(1) + 1);
+            else orderNum += String.fromCharCode(_viTracks[i-1].orderNum.charCodeAt(1) + 1);
             viTrack.orderNum = orderNum;
             promises.push(new Promise((resolve, reject) => {
                 if (viTrack.isLogTrack()) {
@@ -1399,21 +1286,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         Promise.all(promises)
             .then(function () {
-                _tracks.sort(function (track1, track2) {
+                _viTracks.sort(function (track1, track2) {
                     return track1.orderNum.localeCompare(track2.orderNum);
                 });
                 graph.rearrangeTracks(self);
-                console.log(_tracks.map(t => t.orderNum));
+                console.log(_viTracks.map(t => t.orderNum));
             }).catch(function (err) {
             if (err) {
-                _tracks = backupTracks;
+                _viTracks = backupTracks;
             }
         });
     }
     function _registerTrackHorizontalResizerDragCallback() {
-        _tracks.forEach(function (track) {
+        _viTracks.forEach(function (track) {
             track.onHorizontalResizerDrag(function () {
-                _tracks.forEach(function (t) {
+                _viTracks.forEach(function (t) {
                     if (track == t) return;
                     t.horizontalResizerDragCallback();
                 });
@@ -1427,17 +1314,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             function (desTrack) {
                 let orderNum = getOrderKey(desTrack);
                 if (viTrack.orderNum > desTrack.orderNum) {
-                    let desTrackIndex = _tracks.findIndex(track => track == desTrack);
+                    let desTrackIndex = _viTracks.findIndex(track => track == desTrack);
                     if (desTrackIndex == 0) {
-                        orderNum = String.fromCharCode(_tracks[0].orderNum.charCodeAt(0) - 1);
+                        orderNum = String.fromCharCode(_viTracks[0].orderNum.charCodeAt(0) - 1);
                     } else {
-                        desTrack = _tracks[desTrackIndex - 1];
+                        desTrack = _viTracks[desTrackIndex - 1];
                         orderNum = getOrderKey(desTrack);
                     }
                 }
                 editOrderNum(viTrack, orderNum).then(function () {
-                    console.log(_tracks.map(t => t.orderNum));
-                    if (orderNum.length > 50 || _tracks[0].orderNum < 'a' || _tracks[_tracks.length - 1].orderNum > 'z') {
+                    console.log(_viTracks.map(t => t.orderNum));
+                    if (orderNum.length > 50 || _viTracks[0].orderNum < 'a' || _viTracks[_viTracks.length - 1].orderNum > 'z') {
                         reindexAllTracks();
                     }
                 }).catch(function (err) {
@@ -1474,10 +1361,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 else if (drawing.isZone()) {
                     // Send api before deleting
                     wiApiService.removeZone(drawing.id, function () {
-                        /*
-                        _plotZoneSet(track);
-                        Utils.refreshProjectState();
-                        */
                         track.removeDrawing(drawing);
                         Utils.emitEvent('zone-updated', track);
                         // wiComponentService.emit(wiComponentService.DELETE_MODEL, track);
@@ -1509,11 +1392,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
     function getComponentCtrlByViTrack(viTrack) {
-        return _.get(self.trackComponents.find(component => component.controller.viTrack == viTrack), 'controller');
+        return _.get(_trackComponents.find(component => component.controller.viTrack == viTrack), 'controller');
     }
     function getComponentCtrlByProperties(props) {
         let nameOfTrack = getTrackName(props);
-        return _.get(self.trackComponents.find(component => component.name == nameOfTrack), 'controller');
+        return _.get(_trackComponents.find(component => component.name == nameOfTrack), 'controller');
     }
 }
 

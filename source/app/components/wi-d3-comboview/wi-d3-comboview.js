@@ -713,7 +713,7 @@ function Controller($scope, $controller, wiComponentService, $timeout, ModalServ
 					if (!d3Ctrl.isReady) resolve(getViLogtracks(d3Ctrl));
 					else {
 						const viLogTracks = [];
-						d3Ctrl.getTracks().filter(track => track.type == 'log-track').forEach(tr => {
+						d3Ctrl.getViTracks().filter(track => track.type == 'log-track').forEach(tr => {
 							viLogTracks.push(tr);
 						});
 						resolve(viLogTracks);

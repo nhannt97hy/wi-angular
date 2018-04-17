@@ -78,7 +78,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return _currentTrack;
     };
 
-    this.getTracks = function () {
+    this.getViTracks = function () {
         return _tracks;
     };
 
@@ -97,7 +97,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addLogTrack = function (trackTitle, callback) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
-            const logTracks = self.getTracks().filter(track => track.type == 'log-track');
+            const logTracks = self.getViTracks().filter(track => track.type == 'log-track');
             wiApiService.createLogTrack(self.logPlotCtrl.id, trackOrder, function (ret) {
                 wiApiService.infoTrack(ret.idTrack, function (logTrack) {
                     logTrack.title = trackTitle || 'Track ' + (logTracks.length + 1);
@@ -317,7 +317,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addImageTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const imageTracks = self.getTracks().filter(track => track.type == 'image-track');
+            const imageTracks = self.getViTracks().filter(track => track.type == 'image-track');
             const defaultImageTrackProp = {
                 showTitle: true,
                 title: "Image Track " + (imageTracks.length + 1),
@@ -379,7 +379,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addZoneTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const zoneTracks = self.getTracks().filter(track => track.type == 'zone-track');
+            const zoneTracks = self.getViTracks().filter(track => track.type == 'zone-track');
             const defaultZoneTrackProp = {
                 showTitle: true,
                 title: "Zone Track " + (zoneTracks.length + 1),
@@ -450,7 +450,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addObjectTrack = function () {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
+            const objectTracks = self.getViTracks().filter(track => track.type == 'object-track');
             const defaultObjectTrackProp = {
                 showTitle: true,
                 title: "Object Track " + (objectTracks.length + 1),
@@ -1264,7 +1264,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function _plotZoneSet(sourceZoneTrack) {
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         // plot this logplot
-        let viZoneTracks = self.getTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
+        let viZoneTracks = self.getViTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
         viZoneTracks.forEach(function (viZoneTrack) {
             if (viZoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
             _plotZoneTrack(sourceZoneTrack, viZoneTrack);
@@ -3469,7 +3469,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         trackProps.sort(function (track1, track2) {
                             return track1.orderNum.localeCompare(track2.orderNum);
                         });
-                        let loadedTracks = wiD3Ctrl.getTracks();
+                        let loadedTracks = wiD3Ctrl.getViTracks();
                         async.eachOf(loadedTracks, function(aTrack, idx, _cb){
                             if (aTrack.type == "depth-track") {
                                 console.log('depth track');

@@ -32,7 +32,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         }
     }
     this.openPropertiesDialog = function () {
-        const zoneTrackProps = self.viTrack.getProperties();
+        const zoneTrackProps = getProperties();
         zoneTrackProps.width = Utils.pixelToInch(zoneTrackProps.width);
         DialogUtils.zoneTrackPropertiesDialog(ModalService, this.wiD3Ctrl, zoneTrackProps);
     }
@@ -239,10 +239,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         return track;
     }
     function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
+        if(self.viTrack)
+            return self.viTrack.getProperties();
+        return self.properties;
     }
     function _splitZone(track, zone) {
         let props = Utils.objClone(zone.getProperties());
@@ -368,7 +367,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     function _plotZoneSet(sourceZoneTrack) {
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         // plot this logplot
-        let viZoneTracks = self.wiD3Ctrl.getTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
+        let viZoneTracks = self.wiD3Ctrl.getViTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
         viZoneTracks.forEach(function (viZoneTrack) {
             if (viZoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
             _plotZoneTrack(sourceZoneTrack, viZoneTrack);
@@ -400,7 +399,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<'
     }
 });
 exports.name = moduleName;

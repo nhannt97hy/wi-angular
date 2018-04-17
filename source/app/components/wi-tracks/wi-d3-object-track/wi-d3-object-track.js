@@ -180,15 +180,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
     }
     this.openPropertiesDialog = function () {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        DialogUtils.objectTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, _currentTrack.getProperties(), function (props) {
+        let viTrack = self.viTrack;
+        let trackProps = viTrack.getProperties();
+        DialogUtils.objectTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, trackProps, function (props) {
             if (props) {
-                props.idObjectTrack = _currentTrack.id;
+                props.idObjectTrack = viTrack.id;
                 console.log("Track new properties: ", props);
                 wiApiService.editObjectTrack(props, function () {
                     props.width = Utils.inchToPixel(props.width);
-                    _currentTrack.setProperties(props);
-                    _currentTrack.doPlot(true);
+                    viTrack.setProperties(props);
+                    viTrack.doPlot(true);
                 })
             }
         })
@@ -256,10 +257,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         return track;
     }
     function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
+        if(self.viTrack)
+            return self.viTrack.getProperties();
+        return self.properties;
     }
     function _objectOnRightClick() {
         let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
@@ -330,7 +330,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<'
     }
 });
 exports.name = moduleName;

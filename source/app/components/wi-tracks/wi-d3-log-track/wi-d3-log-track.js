@@ -107,8 +107,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.wiD3Ctrl.setContextMenu(ctxMenu);
     }
     this.openPropertiesDialog = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+        // _currentTrack = self.wiD3Ctrl.getCurrentTrack();
+        DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
             if (props) {
                 console.log('logTrackPropertiesData', props);
             }
@@ -116,14 +116,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             tabs: ['true', 'true', 'true']
         });
     }
-    this.update = function (callback, onlyStatus) {
+    this.update = function (callback, options) {
         let viTrack = this.viTrack;
         if (!viTrack.isLogTrack()) return;
 
-        let trackProps = viTrack.getProperties();
+        let trackProps = getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
 
-        if(!onlyStatus) {
+        if(!options || !options.statusOnly) {
             // update whole track
             wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
                 viTrack.getMarkers().forEach(viMarker => {
@@ -230,7 +230,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             })
             if(viTrack.getCurves().length) {
                 let curveWellProps = Utils.findWellByCurve(viTrack.getCurves()[0].idCurve).properties;
-                let foundWell = self.wiD3Ctrl.listWells.find(function(well) {
+                let foundWell = self.wiD3Ctrl.getListWells().find(function(well) {
                     return well.properties.idWell === curveWellProps.idWell;
                 });
                 if(foundWell) {
@@ -241,7 +241,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             // default setup
             viTrack.headerNameBlock.style('background-color', viTrack.HEADER_NAME_COLOR);
             let component = self;
-            self.wiD3Ctrl.listWells.forEach(function(well) {
+            self.wiD3Ctrl.getListWells({reference: true}).forEach(function(well) {
                 let foundTrack = well.wellAttrs.tracks.find(function(track) {
                     return track.name == component.name;
                 });
@@ -251,7 +251,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     });
                 }
             });
-
+            
             // TO BE REVIEWED
             // if (viTrack.drawings.length == 0) {
             //     // return to track's default color
@@ -395,7 +395,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let curveWellProps = Utils.findWellByCurve(config.idCurve).properties;
         let curveWellId = curveWellProps.idWell;
 
-        let listWells = self.wiD3Ctrl.listWells;
+        let listWells = self.wiD3Ctrl.getListWells({reference: true});
         let foundWell = listWells.find(function(well) {
             return well.properties.idWell == curveWellId;
         });
@@ -428,7 +428,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 wiSlidingBarCtrl.createPreview(idCurve);
             });
         }
-        self.update(null, true);
+        self.update(null, {statusOnly: true});
         return curve;
 
         function getRandomColor(wellIdx) {
@@ -503,7 +503,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
 
         // update multi Logplots status
-        self.wiD3Ctrl.updateTrack(track, null, true);
+        self.wiD3Ctrl.updateTrack(track, null, {statusOnly: true});
     }
     this.removeMarkerFromTrack = function (track, marker) {
         if (!track || !track.removeMarker) return;
@@ -784,10 +784,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         return track;
     }
     function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
+        if(self.viTrack)
+            return self.viTrack.getProperties();
+        return self.properties;
     }
     function _getWellProps() {
         return self.wiD3Ctrl.getWellProps();
@@ -1186,7 +1185,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<'
     }
 });
 exports.name = moduleName;

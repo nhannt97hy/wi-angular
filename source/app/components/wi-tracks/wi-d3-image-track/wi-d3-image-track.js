@@ -28,22 +28,22 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.openPropertiesDialog = function () {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack.getProperties();
-        track.isCreated = true;
-        DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, track, function (props) {
+        let viTrack = self.viTrack;
+        let trackProperties = getProperties();
+        trackProperties.isCreated = true;
+        DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, trackProperties, function (props) {
             if (props) {
-                _currentTrack.removeAllDrawings();
-                props.idImageTrack = _currentTrack.id;
+                viTrack.removeAllDrawings();
+                props.idImageTrack = viTrack.id;
                 console.log(props);
                 wiApiService.editImageTrack(props, function (data) {
                     $timeout(function () {
                         data.width = Utils.inchToPixel(data.width);
-                        _currentTrack.setProperties(data);
+                        viTrack.setProperties(data);
                         for (let img of data.image_of_tracks) {
-                            self.addImageZoneToTrack(_currentTrack, img);
+                            self.addImageZoneToTrack(viTrack, img);
                         }
-                        _currentTrack.doPlot(true);
+                        viTrack.doPlot(true);
                     });
                 });
             }
@@ -239,17 +239,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         return track;
     }
     function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
+        if(self.viTrack)
+            return self.viTrack.getProperties();
+        return self.properties;
     }
     function showImage() {
         let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         let track = _currentTrack;
         let imgzone = track.getCurrentImageZone();
-        DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), self.wiD3Ctrl.trackComponents, function () {
-        });
+        DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), self.wiD3Ctrl.trackComponents, function () {});
     }
     function imageProperties() {
         let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
@@ -341,7 +339,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<'
     }
 });
 exports.name = moduleName;

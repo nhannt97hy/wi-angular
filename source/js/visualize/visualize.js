@@ -141,7 +141,7 @@ exports.rearrangeTracks = function(wiD3Ctrl) {
 
     // TO BE REVIEWED
     // separate between 2 track with difference well
-    let tracks = wiD3Ctrl.getTracks();
+    let tracks = wiD3Ctrl.getViTracks();
     tracks.forEach(function(track, idx) {
         let currTrackWell = wiD3Ctrl.detectWellForTrack(track);
         let nextTrack = tracks[idx + 1];
