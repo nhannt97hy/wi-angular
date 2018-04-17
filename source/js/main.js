@@ -136,8 +136,6 @@ let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
-let wiCommunication = require('./wi-communication');
-
 let app = angular.module('wiapp',
     [
         wiButton.name,
@@ -222,8 +220,6 @@ let app = angular.module('wiapp',
         wiiItems.name,
         wiiProperties.name,
 
-        wiCommunication.name,
-
         ngInfiniteScroll,
 
         'angularModalService',
@@ -236,7 +232,10 @@ let app = angular.module('wiapp',
         'ngSanitize',
         'ui.select',
         'angularjs-dropdown-multiselect',
-        'mgo-angular-wizard'
+        'mgo-angular-wizard',
+
+	// chat module
+	// 'chatModule'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
