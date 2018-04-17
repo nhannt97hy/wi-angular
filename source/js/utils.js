@@ -1352,7 +1352,6 @@ var createPointSet = function (pointSetData, callback) {
     })
 }
 exports.createPointSet = createPointSet;
-// need fixing
 function createCrossplotToObjectOfTrack(objectOfTrack, curveX, curveY, pointSet, objectProps, wiApiService) {
     wiApiService.getWell(objectProps.idWell, function(wellProps) {
         curveX.minX = pointSet.scaleLeft;
@@ -2178,7 +2177,7 @@ exports.upperCaseFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 exports.editProperty = editProperty;
-// need fixing??
+
 exports.createCrossplot = function (idWell, crossplotName, callback, crossTemplate, fromCurves = {}) {
     let DialogUtils = __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.DIALOG_UTILS);
     let crossplotProps;

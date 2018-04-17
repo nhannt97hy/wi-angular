@@ -26,7 +26,6 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         // this.depthType = 'intervalDepth';
         this.lineMode = false;
         this.overlayLines = [];
-        this.isMultiPointset = false // change later
 
         this.well = utils.findWellByCrossplot(wiCrossplotId);
         this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
@@ -246,13 +245,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         this.onLineModeChange = function(){
             self.crossplotModelProps.pointsets[0].lineMode = self.lineMode;
         }
-        this.changeMultiPointsetStatus = function () {
-            console.log('changeMultiPointsetStatus');
-            this.isMultiPointset = !this.isMultiPointset;
-        }
-        this.openMultiWellsAndCurvesModal = function () {
-            console.log('openMultiWellsAndCurvesModal');
-        }
+
         // modal button
         this.colorSymbol = function () {
             DialogUtils.colorPickerDialog(ModalService, self.crossplotModelProps.pointsets[0].pointColor, function (colorStr) {

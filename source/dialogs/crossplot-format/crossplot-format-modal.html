@@ -223,12 +223,6 @@
                                     </label>
                                 </div>
                                 <div class="row">
-                                    <label class="col-sm-4">
-                                        <input type="checkbox" ng-model="wiModal.isMultiPointset" ng-change="wiModal.changeMultiPointsetStatus()">Multi-Well Crossplot
-                                    </label>
-                                    <button class"col-sm-4" type="button" ng-disabled="!wiModal.isMultiPointset" ng-click="wiModal.openMultiWellsAndCurvesModal()">Select Wells and Curves</button>
-                                </div>
-                                <div class="row">
                                     <div class="col-sm-2">
                                         <label for="isIntervalDepths" class="font-weight-normal">
                                             <input type="radio" id="isIntervalDepths" ng-model="wiModal.depthType" value="intervalDepth" ng-change="wiModal.onDepthTypeChanged()">
