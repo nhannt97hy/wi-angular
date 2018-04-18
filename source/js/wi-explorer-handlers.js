@@ -92,7 +92,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     if (!recyclables.includes(selectedNodes[0].type)) isPermanently = false;
     selectedNodesName = '';
     selectedNodes.forEach(function (selectedNode, index) {
-        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
+        selectedNodesName += index == selectedNodes.length - 1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     message = '';
     if (selectedNodes.length > 1) {
@@ -177,7 +177,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         return;
                 }
                 if (isPermanently && recyclables.includes(selectedNode.type)) {
-                    wiApiService.deleteObject({ idObject: selectedNode.id, type: selectedNode.type }, function () {
+                    wiApiService.deleteObject({idObject: selectedNode.id, type: selectedNode.type}, function () {
                         $timeout(function () {
                             cleanUpFunction && cleanUpFunction();
                             next();
@@ -223,7 +223,7 @@ exports.EmptyAllButtonClicked = function () {
         if (!yes) return;
         async.eachOf(selectedNode.children, function (child, index, next) {
             const type = child.type.replace('-deleted-child', '');
-            wiApiService.deleteObject({ type: type, idObject: child.id }, function (response, err) {
+            wiApiService.deleteObject({type: type, idObject: child.id}, function (response, err) {
                 if (response == "WRONG_TYPE") {
                     next(response);
                 } else if (response == "CANT_DELETE") {
@@ -333,7 +333,7 @@ exports.RestoreButtonClicked = function () {
     if (!Array.isArray(selectedNodes)) return;
     selectedNodesName = selectedNodes[0].type + '(s):<br>';
     selectedNodes.forEach(function (selectedNode, index) {
-        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
+        selectedNodesName += index == selectedNodes.length - 1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     ModalService = this.ModalService;
     dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore ${selectedNodesName}?`, function (yes) {
@@ -374,27 +374,27 @@ exports.DuplicateButtonClicked = function (type) {
     if (!Array.isArray(selectedNodes)) return;
     selectedNodesName = selectedNodes[0].type + '(s):<br>';
     selectedNodes.forEach(function (selectedNode, index) {
-        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
+        selectedNodesName += index == selectedNodes.length - 1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     ModalService = this.ModalService;
     dialogUtils.confirmDialog(ModalService, "Duplicate Confirm", `Are you sure to duplicate ${selectedNodesName}?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
-                if(type === 'plot'){
+                if (type === 'plot') {
                     wiApiService.duplicateLogplot(selectedNode.properties.idPlot, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
                             next();
                         });
                     });
-                } else if (type === 'crossplot'){
+                } else if (type === 'crossplot') {
                     wiApiService.duplicateCrossPlot(selectedNode.properties.idCrossPlot, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
                             next();
                         });
                     });
-                } else if (type === 'histogram'){
+                } else if (type === 'histogram') {
                     wiApiService.duplicateHistogram(selectedNode.properties.idHistogram, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
@@ -422,7 +422,7 @@ exports.DuplicateButtonClicked = function (type) {
                             next();
                         });
                     });
-                } else if (type === 'well'){
+                } else if (type === 'well') {
                     wiApiService.duplicateWell(selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
@@ -439,4 +439,27 @@ exports.DuplicateButtonClicked = function (type) {
         }
     });
 
-}
+};
+exports.createZoneSet = function () {
+    const wiApiService = this.wiApiService;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = utils.getSelectedNode();
+    let idWell;
+    if (selectedNode && selectedNode.type === 'zonesets') {
+        idWell = selectedNode.properties.idWell;
+    }
+    dialogUtils.newZoneSetDialog(this.ModalService, function (data) {
+        console.log(data);
+        if (data.template.idZoneTemplate) {
+            wiApiService.createZoneSet({name: data.name, template: data.template.template, idWell: idWell}, function (res) {
+                utils.refreshProjectState();
+            });
+        } else {
+            wiApiService.createZoneSet({name: data.name, idWell: idWell}, function (res) {
+                utils.refreshProjectState();
+            });
+        }
+    });
+};
