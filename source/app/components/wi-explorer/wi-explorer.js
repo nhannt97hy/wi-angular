@@ -519,7 +519,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         label: "New Zone Set",
                         icon: "mineral-zone-add-16x16",
                         handler: function () {
-                            utils.createZoneSet();
+                            self.handlers.createZoneSet();
                         }
                     }, {
                         name: "ZoneManager",

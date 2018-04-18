@@ -273,6 +273,14 @@ const GET_GROUP_PERMISSION_OF_PROJECT = '/group/project-permission';
 const UPDATE_GROUP_PERMISSION_OF_PROJECT = '/group/update-project-permission';
 const UPDATE_USER_PERMISSION_OF_PROJECT = '/project/share/update-permission';
 
+const GET_LIST_ZONE_TEMPLATE = '/zone-template/list';
+const GET_ALL_ZONE_TEMPLATE = '/zone-template/all';
+const EDIT_ZONE_TEMPLATE = '/zone-template/edit';
+const DELETE_ZONE_TEMPLATE = '/zone-template/delete';
+const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
+const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
+const NEW_ZONE_TEMPLATE = '/zone-template/new';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -1881,4 +1889,21 @@ Service.prototype.updateGroupPermissionOfProject = function (payload, callback) 
 };
 Service.prototype.updateUserPermissionOfProject = function (payload, callback) {
     this.post(UPDATE_USER_PERMISSION_OF_PROJECT, payload, callback)
-}
+};
+
+//zone template
+Service.prototype.createZoneTemplate = function (payload, callback) {
+    this.post(NEW_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.editZoneTemplate = function (payload, callback) {
+    this.post(EDIT_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.deleteZoneTemplate = function (payload, callback) {
+    this.post(DELETE_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.listZoneTemplate = function (payload, callback) {
+    this.post(GET_LIST_ZONE_TEMPLATE, payload, callback)
+};
+Service.prototype.listAllZoneTemplate = function (payload, callback) {
+    this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
+};
