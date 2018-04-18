@@ -8,13 +8,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let logplotHandlers = wiComponentService.getComponent('LOGPLOT_HANDLERS');
     this.cropDisplay = false;
 
-    this.$onInit = function () {
+    this.$onInit = async function () {
         self.slidingbarName = self.name + 'Slidingbar';
         self.wiD3AreaName = self.name + 'D3Area';
         self.isFitWindow = false;
         self.isReferenceLine = true;
         self.isTooltip = true;
-        self.logplotModel = self.getLogplotModel();
+        self.logplotModel = await self.getLogplotModelAsync();
         self.wellModel = utils.getModel('well', self.logplotModel.properties.idWell);
         if (self.showToolbar == undefined || self.showToolbar == null) self.showToolbar = true;
         if (self.containerName == undefined || self.containerName == null) self.containerName = '';
@@ -53,8 +53,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         this.getSlidingbarCtrl().updateScale(scale);
     }
 
-    this.getLogplotModel = function () {
-        return utils.findLogplotModelById(self.id);
+    this.getLogplotModelAsync = function () {
+        return utils.findLogplotModelByIdAsync(self.id);
     };
 
     this.getSlidingbarCtrl = function () {

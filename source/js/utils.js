@@ -3042,3 +3042,49 @@ exports.colorGenerator = function(){
     }
     return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
 }
+
+exports.getWellAsync = function getWellAsync (idWell) {
+    let wellModel;
+    try {
+        wellModel = getModel('well', idWell);
+    }
+    catch(err) {
+        wellModel = new Promise(function(resolve) {
+            __GLOBAL.wiApiService.getWell(idWell, function(wellProps) {
+                resolve({
+                    id: wellProps.idWell,
+                    name: wellProps.name,
+                    type: 'well',
+                    data:{
+                        label: wellProps.name
+                    },
+                    properties: wellProps
+                });
+            });
+        });
+    }
+    return wellModel;
+}
+exports.findLogplotModelByIdAsync = function(idLogplot) {
+    let logplotModel;
+    try {
+        logplotModel = getModel('logplot', idLogplot);
+    }
+    catch (err) {
+        logplotModel = new Promise(function(resolve) {
+            __GLOBAL.wiApiService.getLogplot(idLogplot, function(logplotProps) {
+                resolve({
+                    id: logplotProps.idPlot,
+                    name: logplotProps.name,
+                    type: 'logplot',
+                    data: {
+                        label: logplotProps.name
+                    },
+                    properties: logplotProps
+                })
+            })
+        });
+        console.log(logplotModel);
+    }
+    return logplotModel;
+}
