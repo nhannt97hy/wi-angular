@@ -140,3 +140,4 @@ exports.openWorkflowDialog = require('./open-workflow-modal');
 exports.shareProjectDialog = require('./share-project-modal');
 exports.newModelDialog = require('./new-model-modal');
 exports.openModelDialog = require('./open-model-modal');
+exports.newZoneSetDialog = require('./new-zone-set-modal');

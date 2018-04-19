@@ -228,9 +228,9 @@ function zoneToTreeConfig(zone, options = {}) {
         startDepth: zone.startDepth,
         endDepth: zone.endDepth,
         name: zone.name,
-        fill: JSON.parse(zone.fill),
-        background: JSON.parse(zone.fill).pattern.background,
-        foreground: JSON.parse(zone.fill).pattern.foreground,
+        fill: zone.fill,
+        background: zone.fill.pattern.background,
+        foreground: zone.fill.pattern.foreground,
     };
     zoneModel.data = {
         icon: 'zone-table-16x16',
