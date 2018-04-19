@@ -530,6 +530,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.openZonemanager(zonesetsModel);
                         }
                     }, {
+                        name: "ZoneTemplateManager",
+                        label: "Zone Template Manager",
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                            layoutManager.putTabRight({
+                                title: "Zone Template Manager",
+                                componentState: {html: '<wi-zone-template-manager></wi-zone-template-manager>'}
+                            });
+                        }
+                    },{
                         separator: '1'
                     }
                 ];
