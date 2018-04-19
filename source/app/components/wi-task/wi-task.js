@@ -91,6 +91,18 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         inputs: [
             {
                 name: "Gamma Ray"
+            },
+            {
+                name: "Gamma Ray 2"
+            },
+            {
+                name: "Gamma Ray 3"
+            },
+            {
+                name: "Gamma Ray 4"
+            },
+            {
+                name: "Gamma Ray 5"
             }
         ],
         parameters: [
@@ -130,7 +142,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }
                 ]
             }
-        ]
+        ],
+        outputs: [
+            {name: "VCL_GR", family: "Clay Volume"},
+            {name: "VCL_GR", family: "Clay Volume"},
+            {name: "VCL_GR", family: "Clay Volume"},
+            {name: "VCL_GR", family: "Clay Volume"},
+            {name: "VCL_GR", family: "Clay Volume"},
+        ],
+        function: "calVCLfromGR"
     };
 
     this.onSelectionTypeChanged = onSelectionTypeChanged;
@@ -423,8 +443,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     self.taskConfig.inputData = new Array();
                 }
                 const existDataset = self.taskConfig.inputData.find(
-                    i =>
-                        i.dataset.idDataset == datasetModel.properties.idDataset
+                    i => i.id == idDataset
                 );
                 if (existDataset) return;
 
@@ -444,34 +463,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         : null;
                     return tempItem;
                 });
-                let paramItems = self.taskConfig.parameters.map(param => {
-                    let tempItem = {
-                        data: {
-                            childExpanded: false,
-                            label: param.name,
-                            selected: false
-                        },
-                        type: 'choice'
-                    }
-                    if(param.type == 'select'){
-                        tempItem.data.choices = angular.copy(param.choices);
-                        tempItem.data.value = tempItem.data.choices.length
-                            ? tempItem.data.choices[0]
-                            : null;
-                    }else{
-                        tempItem.data.value = param.value;
-                    }
-                    return tempItem;
-                })
-                const input = {
+                let input = {
                     type: 'dataset',
+                    id: idDataset,
+                    idWell: idWell,
                     dataset: datasetModel.properties,
                     data: {
                         childExpanded: true,
                         icon: "curve-data-16x16",
-                        label: `${wellModel.properties.name} / ${
-                            datasetModel.properties.name
-                        }`,
+                        label: `${wellModel.properties.name} / ${datasetModel.properties.name}`,
                         selected: false
                     },
                     children: [
@@ -486,14 +486,64 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         {
                             data: {
                                 childExpanded: true,
-                                label: 'Parameters',
+                                label: 'Zonation',
                                 selected: false
                             },
-                            children: paramItems
+                            children: []
                         }
-                    ]
+                    ],
+                    parameters: angular.copy(self.taskConfig.parameters)
                 };
-                $timeout(() => self.taskConfig.inputData.push(input));
+                wiApiService.getWell(idWell, function(wellInfo){
+                    let zonesets = wellInfo.zone_sets;
+                    let zoneset = zonesets.find(zs => zs.zones.length);
+                    let paramItems = self.taskConfig.parameters.map(param => {
+                        let tempItem = {
+                            data: {
+                                childExpanded: false,
+                                label: param.name,
+                                selected: false
+                            },
+                            type: 'choice'
+                        }
+                        if(param.type == 'select'){
+                            tempItem.data.choices = angular.copy(param.choices);
+                            tempItem.data.value = param.value ? param.value : (tempItem.data.choices.length
+                                ? tempItem.data.choices[0]
+                                : null);
+                        }else{
+                            tempItem.data.value = param.value;
+                        }
+                        return tempItem;
+                    })
+                    if(zoneset){
+                        zoneset.zones.forEach(zone => {
+                            input.children[1].children.push({
+                                data: {
+                                    childExpanded: true,
+                                    icon: 'zone-table-16x16',
+                                    label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}`,
+                                    selected: false
+                                },
+                                type: 'zone',
+                                children: paramItems,
+                                properties: zone
+                            })
+                        })
+                    }else{
+                        input.children[1].children.push({
+                            data: {
+                                childExpanded: true,
+                                icon: 'zone-table-16x16',
+                                label: `ZONENATION_ALL: ${wellInfo.topDepth} - ${wellInfo.bottomDepth}` ,
+                                selected: false
+                            },
+                            type: 'zoneset',
+                            children: paramItems
+                        })
+                    }
+                    $timeout(() => self.taskConfig.inputData.push(input));
+                })
             }
         });
     };
@@ -570,8 +620,41 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         }
     }
 
+    const inputContextMenu = [
+        {
+            name: "Delete",
+            label: "Delete",
+            icon: "delete-16x16",
+            handler: function () {
+                let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
+                selectedNodes.forEach(node => {
+                    let idx = self.taskConfig.inputData.findIndex(ip => ip.id == node.id);
+                    if(idx > -1) self.taskConfig.inputData.splice(idx, 1);
+                })
+                self.taskConfig.inputData.__SELECTED_NODES = [];
+            }
+        },
+        {
+            name: "Interactive",
+            label: "Interactive",
+            icon: "curve-interactive-edit-16x16",
+            handler: function () {
+                let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
+                console.log(selectedNodes);
+            }
+        }
+    ]
+
+    this.taskShowContextMenu = function($event, $index, node){
+        if(node && node.type == 'dataset'){
+            wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, inputContextMenu);
+        }
+    }
+
     function clickFunction( $index, $event, node, rootNode) {
-        node.$index = $index;
+        // node.$index = $index;
         if (!node) {
             unselectAllNodes(rootNode);
             return;
