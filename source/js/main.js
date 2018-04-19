@@ -230,6 +230,7 @@ let app = angular.module('wiapp',
 
         'angularModalService',
         'angularResizable',
+        'ng-mfb',
 
         // 3rd lib
 
