@@ -358,7 +358,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     __dragging = false;
                 },
                 containment: "document",
-                appendTo: document.getElementById("testElement")
+                appendTo: document.querySelector("wi-task #dragElement")
             });
         }, 500);
     }
@@ -673,6 +673,14 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         selectHandler(node, false, rootNode, () => {
             draggableSetting();
         });
+    }
+
+    this.addToWorkflowClick = function(){
+        console.log('Add to workflow');
+    }
+
+    this.runWorkflowClick = function(){
+        console.log('run workflow');
     }
 }
 

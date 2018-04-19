@@ -37,8 +37,14 @@
             width: inherit;
         }
 
-        #testElement .wi-parent-id,
-        #testElement .icon-expanded {
+        #dragElement .wi-parent-node{
+            padding: 5px;
+            background-color: #eee;
+            border: 1px solid steelblue;
+            border-radius: 5px;
+        }
+
+        #dragElement .icon-expanded {
             display: none;
         }
         .dropLabel{
@@ -194,4 +200,13 @@
             </wi-tab>
         </wi-tabset>
     </div>
+    <div id="dragElement"></div>
+    <nav mfb-menu position='br' effect='zoomin'
+    active-icon='fa fa-cog' resting-icon='fa fa-magic'
+    toggling-method="hover">
+        <a mfb-button icon='fa fa-plus-circle' label='Add to workflow'
+        ng-click='wiTask.addToWorkflowClick()'></a>
+        <a mfb-button icon='fa fa-play-circle-o' label='Run workflow'
+        ng-click="wiTask.runWorkflowClick()"></a>
+    </nav>
 </div>
