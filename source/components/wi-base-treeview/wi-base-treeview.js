@@ -3,12 +3,16 @@ const moduleName = 'wi-base-treeview';
 
 function WiBaseTreeController(wiComponentService, $scope) {
     let self = this;
-    function filterByDefault (item) {
-        return item.data.label + "    " + item.data.tooltip;
+    function filterLabel (input) {
+        return input.data.label + "    " + (input.data.tooltip || '');
+    }
+    function filterType (input, filterBy){
+        if(input.type == 'curve' && filterBy == 'dataset') return true;
+        return filterBy.includes(input.type)
     }
     this.$onInit = function () {
         if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
-        if (!self.filterBy) self.filterBy = filterByDefault;
+        // if (!self.filterBy) self.filterBy = filterByDefault;
         $scope.$watch(() => this.filter,(value) => {
             if(value != undefined){
                 if(this.config && this.config.length){
@@ -19,30 +23,24 @@ function WiBaseTreeController(wiComponentService, $scope) {
                 }
             }
         });
-        /*
-        $scope.$watch(function() {
-            return self.filter;
-        },function(value) {
-            if(value != undefined){
-                if(self.config && self.config.length){
-                    for (let c of self.config) {
-                        let parent = new Array();
-                        filterF(c, value, parent);
-                    }
-                }
+        $scope.$watch(() => this.filterBy, (val) => {
+            if(this.config && this.config.length){
+                this.config.forEach((c, i) => {
+                    let parent = new Array();
+                    filterF(c, self.filter, parent);
+                })
             }
-        });
-        */
+        })
     };
 
     function filterF(input, strCp, parent, lastChild){
         parent.unshift(input);
         input.data.hide = true;
-        //if(input && (input.data.label).toLowerCase().includes(strCp.toLowerCase())){
-        if(input && self.filterBy(input).toLowerCase().includes(strCp.toLowerCase())){
+        let filterBy = self.filterBy ? self.filterBy : input.type;
+        if(!strCp) strCp = '';
+        if(input && filterLabel(input).toLowerCase().includes(strCp.toLowerCase()) && filterType(input, filterBy)){
             if(parent && parent.length){
                 parent.forEach(p => {
-                    //p.data.childExpanded = true;
                     p.data.hide = false;
                 })
             }
@@ -154,7 +152,7 @@ app.component(componentName, {
         showContextMenuFunction: '<',
         isShowParentName: '<',
         filter: '@',
-        filterBy: '<',
+        filterBy: '@',
         onSelectFunction: '<',
         showId: '<'
     }
