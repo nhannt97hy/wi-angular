@@ -127,7 +127,8 @@ app.component(componentName, {
         name: "@",
         config: "<",
         container: "<",
-        filter: "@"
+        filter: "@",
+        filterBy: "@"
     }
 });
 exports.name = moduleName;
