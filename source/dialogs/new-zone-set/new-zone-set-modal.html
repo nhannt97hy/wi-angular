@@ -36,7 +36,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
-                        ng-disabled="(!modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid))"
+                        ng-disabled="!name"
                         ng-click="wiModal.onOkButtonClicked()">
                     <span class="ok-16x16"></span>&nbsp;OK
                 </button>
