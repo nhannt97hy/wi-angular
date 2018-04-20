@@ -19,7 +19,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     //let _scaleView = false;
     let _viCurve = null;
     //let parentHeight = 0;
-    this.tinyWindow = {
+    let _tinyWindow = {
         top: 0,
         height: 0
     };
@@ -140,8 +140,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     function update(ui) {
         let parentHeight = actual(self.contentId, 'height');
-        let tempTinyWindowsHeight = self.tinyWindow.height;
-        let tempTinyWindowsTop = self.tinyWindow.top;
+        let tempTinyWindowsHeight = _tinyWindow.height;
+        let tempTinyWindowsTop = _tinyWindow.top;
 
         if (ui.size) {
             tempTinyWindowsHeight = (ui.size.height > parentHeight) ? parentHeight : ui.size.height;
@@ -172,19 +172,20 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         self.slidingBarState.top = top / pHeight * 100.;
         self.slidingBarState.range = height / pHeight * 100.;
 
-        self.tinyWindow.height = height;
-        self.tinyWindow.top = top;
+        _tinyWindow.height = height;
+        _tinyWindow.top = top;
     }
 
-    let saveStateToServer = _.debounce(function () {
+    let saveStateToServer = _.debounce(async function () {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         if (!wiD3Controller) return;
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
         let high = low + (max - min) * self.slidingBarState.range / 100.;
+        let logplotModel = await logPlotCtrl.getLogplotModelAsync(); 
         let newLogplot = {
-            idPlot: logPlotCtrl.getLogplotModel().properties.idPlot,
+            idPlot: logplotModel.properties.idPlot,
             cropDisplay: logPlotCtrl.cropDisplay,
             currentState: {
                 top0: self.slidingBarState.top0,
@@ -211,21 +212,17 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         logPlotCtrl = wiComponentService.getComponent(logPlotName);
         this.logPlotCtrl = logPlotCtrl;
         let parentHeight = actual(self.contentId, 'height');
-        //parentHeight = $(self.contentId).height();
-        //self.parentHeight = parentHeight;
-        let initialHeight = parentHeight * (MIN_RANGE) / 100.;
-
-        self.tinyWindow = {
+        _tinyWindow = {
             top: 0,
             height: parentHeight / 10 || 1
         };
 
         // init tiny window height
-        $(self.handleId).height(self.tinyWindow.height);
-        $(self.handleId).css('top', self.tinyWindow.top + 'px');
+        $(self.handleId).height(_tinyWindow.height);
+        $(self.handleId).css('top', _tinyWindow.top + 'px');
 
-        self.slidingBarState.top = self.tinyWindow.top / parentHeight * 100.;
-        self.slidingBarState.range = self.tinyWindow.height / parentHeight * 100.;
+        self.slidingBarState.top = _tinyWindow.top / parentHeight * 100.;
+        self.slidingBarState.range = _tinyWindow.height / parentHeight * 100.;
 
         let tungTrickHandle = null;
         function tungTrick(ui) {
@@ -290,7 +287,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 _viCurve && _viCurve.doPlot();
             });
         }
-        self.resizeHandler = function (event) {
+        self.resizeHandler = resizeHandler;
+        function resizeHandler(event) {
             let model = event.model;
             if (self.containerName) {
                 if (model.type == 'logplot') return;
@@ -327,19 +325,17 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let realDeltaY = wholeHeight * self.slidingBarState.range / 100. * SCROLL_FACTOR;
         realDeltaY = (realDeltaY > MIN_SCROLL)?realDeltaY:MIN_SCROLL;
         realDeltaY *= sign;
-        let tempTopHandler = self.tinyWindow.top - realDeltaY;
+        let tempTopHandler = _tinyWindow.top - realDeltaY;
 
         if (tempTopHandler < 0 + _offsetTop) {
             tempTopHandler = 0 + _offsetTop;
         }
-        else if (tempTopHandler + self.tinyWindow.height > viewHeight + _offsetTop ) {
-            tempTopHandler = viewHeight + _offsetTop - self.tinyWindow.height;
+        else if (tempTopHandler + _tinyWindow.height > viewHeight + _offsetTop ) {
+            tempTopHandler = viewHeight + _offsetTop - _tinyWindow.height;
         }
 
-        //let newTop = Math.round(tempTopHandler);
-        //let newHeight = Math.ceil(self.tinyWindow.height);
         let newTop = tempTopHandler;
-        let newHeight = self.tinyWindow.height;
+        let newHeight = _tinyWindow.height;
         updateSlidingHandler(newTop, newHeight);
         updateWid3();
         saveStateToServer();
@@ -429,7 +425,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.scaleView = function(top0, range0, force) {
         const CROPVIEW_FACTOR = 5;
         //if ( logPlotCtrl.cropDisplay ) return;
-        if (self.tinyWindow.height < CROPVIEW_FACTOR * getMinTinyWinHeight() && !force) {
+        if (_tinyWindow.height < CROPVIEW_FACTOR * getMinTinyWinHeight() && !force) {
             toastr.warning('Current view is too small for cropping');
             $(self.handleId + " .sliding-handle-border").addClass('too-small');
             setTimeout(function() {

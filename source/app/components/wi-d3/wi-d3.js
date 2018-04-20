@@ -9,6 +9,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let LayoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     let logplotHandlers = {};
 
+    //self.Tracks = null
+
     /* private variables */
     const contextMenu_constantItems = {
         separator: [{
@@ -112,25 +114,27 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .datum(trackComponentCtrl.viTrack.orderNum)
             .attr('class', 'wi-d3-track-component')
             .attr('data-order-num', function(d) { return d;});
-        this.trackComponents.find(function(trackComponent) {
-            return trackComponent.name == trackComponentCtrl.name;
+        this.trackComponents.find(function(track) {
+            return self.getTrackName(track) == trackComponentCtrl.name;
         }).controller = trackComponentCtrl;
         _tracks.push(trackComponentCtrl.viTrack);
-        _tracks.sort(function (track1, track2) {
+        /*_tracks.sort(function (track1, track2) {
             return track1.orderNum.localeCompare(track2.orderNum);
-        });
+        });*/
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(trackComponentCtrl.viTrack, depthRange);
         _registerTrackHorizontalResizerDragCallback();
-        _registerTrackCallback(trackComponentCtrl.viTrack);
-        _registerTrackDragCallback(trackComponentCtrl.viTrack);
-        _setCurrentTrack(trackComponentCtrl.viTrack);
+        //_registerTrackCallback(trackComponentCtrl.viTrack);
+        _registerTrackCallback(trackComponentCtrl);
+        //_registerTrackDragCallback(trackComponentCtrl.viTrack);
+        _registerTrackDragCallback(trackComponentCtrl);
+        _setCurrentTrack(trackComponentCtrl.getProperties());
 
         trackComponentCtrl.viTrack.on('keydown', function () {
             _onTrackKeyPressCallback(trackComponentCtrl.viTrack);
         })
-        graph.rearrangeTracks(self);
+        //graph.rearrangeTracks(self);
         self.updateScale();
         updateSlider();
     }
@@ -221,10 +225,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.pushTrackComponent = function(trackProperties) {
         let html = generateHtml(trackProperties);
         let trackName = getTrackName(trackProperties);
-        this.trackComponents.push({
-            name: trackName,
-            props: trackProperties,
-        });
+        
+        // TO BE REVIEWED
+        // this.trackComponents.push({
+        //    name: trackName,
+        //    props: trackProperties,
+        // });
         $('#' + self.plotAreaId).append(
             self.compileFunc(html)(self.scopeObj)
         );
@@ -332,51 +338,39 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 orderNum: trackOrder,
                 width: 0.65
             }, function (depthTrack) {
-                self.pushDepthTrack(depthTrack);
-                $timeout(callback);
+                self.trackComponents.push(depthTrack);
+                self.trackComponents.sort((track1, track2) => {
+                    return track1.orderNum.localeCompare(track2.orderNum);
+                });
+                //self.pushDepthTrack(depthTrack);
+                //$timeout(callback);
             });
         }
         else {
             Utils.error('can not create depth track');
         }
     }
-    this.addLogTrack = function (trackTitle, onFinished) {
+    this.addLogTrack = async function (trackTitle, onFinished) {
         var trackOrder = getOrderKey();
         if (trackOrder) {
-            const logTracks = self.getTracks().filter(track => track.type == 'log-track');
-            let createdLogTrack;
-            let logTrack;
-            async.series([
-                function (callback) {
-                    wiApiService.createLogTrack(self.wiLogplotCtrl.id, trackOrder, function (ret) {
-                        console.log('created log track: ', ret);
-                        createdLogTrack = ret;
-                        callback();
-                    });
-                }, function (callback) {
-                    wiApiService.infoTrack(createdLogTrack.idTrack, function(logtrack) {
-                        console.log('info track: ', logtrack);
-                        logTrack = logtrack;
-                        callback();
-                    });
-                }, function (callback) {
-                    let title = trackTitle || 'Track ' + (logTracks.length + 1);
-                    logTrack.title = title;
-                    wiApiService.editTrack(logTrack, function (logtrack) {
-                        if(!logtrack) return;
-                        console.log('track edited: ', logtrack);
-                        logTrack = logtrack;
-                        callback();
-                    });
-                }, function (callback) {
-                    self.pushLogTrack(logTrack);
-                    setTimeout(() => {
-                        callback();
-                    });
-                }
-            ], function (err, results) {
-                const logTrackController = self.trackComponents.find(function (component) { return component.props == logTrack; }).controller;
-                if (!err && typeof onFinished === 'function') onFinished(logTrackController);
+            const logTrackComps = self.trackComponents.filter(tc => tc.idTrack);
+
+            let logTrackProps = await new Promise(function(resolve) {
+                wiApiService.createLogTrack(self.wiLogplotCtrl.id, trackOrder, function(ret) {
+                    resolve(ret);
+                }, {
+                    title: trackTitle || 'Track ' + (logTrackComps.length + 1)
+                });
+            });
+            
+            logTrackProps = await new Promise(function(resolve){
+                wiApiService.infoTrack(logTrackProps.idTrack, function(logTrack) {
+                    resolve(logTrack);
+                });
+            });
+            self.trackComponents.push(logTrackProps);
+            self.trackComponents.sort(function(t1, t2) {
+                return t1.orderNum.localeCompare(t2.orderNum);
             });
         }
         else {
@@ -530,8 +524,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         this.wiLogplotCtrl.updateScale(this.scale);
     }
-    this.setCurrentTrack = function (track) {
-        _setCurrentTrack(track);
+    this.setCurrentTrack = function (trackComponent) {
+        _setCurrentTrack(trackComponent);
     }
     this.setDepthRange = function (depthRange, notPlot) {
         _depthRange = depthRange;
@@ -612,12 +606,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             track._shouldRescaleWindowY = shouldRescaleWindowY;
         }
     }
+
+    this.getTrackComponents = function() { return self.trackComponents; }
     this.getCurrentTrack = function () {
         return _currentTrack;
     }
     this.removeCurrentTrack = function () {
         self.removeTrack(_currentTrack);
     }
+    this.removeTrack = function(trackComponent) {
+        self.trackComponents = self.trackComponents.filter(function(tc) {
+            return trackComponent !== tc;
+        });
+    }
+    /*
     this.removeTrack = function (track) {
         // remove visualizeTrack
         let trackIdx = _tracks.indexOf(track);
@@ -647,15 +649,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
         // wiComponentService.putComponent(name, null);
         updateSlider();
-    }
+    }*/
     this.getTracks = function () {
         return _tracks;
     }
+
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
     this.updateTrack = function (viTrack) {
         getComponentCtrlByViTrack(viTrack).update();
     }
+
+    /***************** TO BE MOVE AWAY INTO INDIVIDUAL TRACKS ************/
     // image track
     this.addImageZoneToTrack = function (track, config) {
         return getComponentCtrlByViTrack(track).addImageZoneToTrack(track, config);
@@ -663,7 +668,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     // log track
     this.createShadingForSelectedCurve = function () {
         if(!_currentTrack || !_currentTrack.isLogTrack()) {
-            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
             toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
             return;
         }
@@ -706,6 +710,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
         trackComponentCtrl.createCrossplot();
     }
+
+    /******************** END TO BE MOVE AWAY .... ****************/
 
     /* creational methods */
     this.$onInit = function() {
@@ -799,9 +805,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         updateSlider();
     }
     this.init = _.debounce(function () {
-        Utils.getPalettes(function (paletteList) {
+        Utils.getPalettes(async function (paletteList) {
             let logplotCtrl = self.wiLogplotCtrl;
-            let logplotModel = logplotCtrl.getLogplotModel();
+            let logplotModel = await logplotCtrl.getLogplotModelAsync();
             let wiD3Ctrl = self;
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,
@@ -810,7 +816,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     if (logplotModel.properties.referenceCurve) {
                         logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
                     }
-                    const tracks = [].concat(plot.tracks || [])
+                    let tracks = [].concat(plot.tracks || [])
                         .concat(plot.depth_axes || [])
                         .concat(plot.zone_tracks || [])
                         .concat(plot.image_tracks || [])
@@ -818,6 +824,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         .sort((track1, track2) => {
                             return track1.orderNum.localeCompare(track2.orderNum);
                         });
+                    //self.Tracks = tracks;
+                    self.trackComponents = tracks;
+/*
                     async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
                         if (aTrack.idDepthAxis) {
                             wiD3Ctrl.pushDepthTrack(aTrack);
@@ -840,6 +849,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     }, function(error) {
                         buildTracks();
                     });
+*/
                     function buildTracks() {
                         let loadedTracks = wiD3Ctrl.getTracks();
                         async.eachOf(loadedTracks, function(aTrack, idx, _cb){
@@ -977,7 +987,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             updateSlider();
                         });
                     }
-                });
+                }
+            );
         });
     }, 100);
     $scope.safeApply = function (fn) {
@@ -1036,6 +1047,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return self.name + 'UnknownTrack';
         }
     }
+    self.getTrackName = getTrackName;
 
     function updateSlider() {
         let wholeWidth = $(`wi-logplot[name=${self.wiLogplotCtrl.name}]`).width();
@@ -1048,12 +1060,31 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     function openTrackPropertiesDialog() {
         console.log('open track properties');
-        let controller = getComponentCtrlByViTrack(_currentTrack);
+        //let controller = getComponentCtrlByViTrack(_currentTrack);
+        let controller = _currentTrack.controller;
         if(controller) {
             controller.openPropertiesDialog();
         }
     }
     this.openTrackPropertiesDialog = openTrackPropertiesDialog;
+
+    function getOrderKey(trackComponent) {
+        let length = self.trackComponents.length;
+        if (length <= 0) {
+            return 'm';
+        }
+        if (!trackComponent) trackComponent = _currentTrack || self.trackComponents[length - 1];
+        let currentIdx = self.trackComponents.indexOf(trackComponent);
+
+        if (currentIdx < 0 || currentIdx >= (length - 1)) {
+            currentIdx = length - 1;
+            let currentOrderKey = trackComponent.orderNum;
+            var key = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+            return key;
+        }
+        return trackComponent.orderNum + self.trackComponents[currentIdx + 1].orderNum;
+    }
+    /*
     function getOrderKey(track) {
         if (_tracks.length <= 0) {
             return 'm';
@@ -1069,53 +1100,91 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return _tracks[currentIdx].orderNum + _tracks[currentIdx + 1].orderNum;
     }
+    */
     function _getWellProps() {
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
         return well.properties || {};
     }
+    function unHightlightTrack(trackComponent) {
+        let controller = trackComponent.controller;
+        let viTrack = controller.viTrack;
+        if (viTrack.setCurrentDrawing) viTrack.setCurrentDrawing(null);
+        viTrack.doPlot(false);
+    }
     function _clearPreviousHighlight() {
         if (!_previousTrack) return;
         if (_previousTrack != _currentTrack) {
+            unHightlightTrack(_previousTrack);
+            /*
             if (_previousTrack.setCurrentDrawing)
                 _previousTrack.setCurrentDrawing(null);
             _previousTrack.doPlot(false);
+            */
         }
     }
-    function _registerTrackCallback(track) {
-        track.on('focus', function () {
-            _setCurrentTrack(track);
+    function _registerTrackCallback(trackCtrl) {
+        let trackComponent = trackCtrl.getProperties();
+        let viTrack = trackCtrl.viTrack;
+        viTrack.on('focus', function () {
+            _setCurrentTrack(trackComponent);
         });
-        track.on('mousedown', function () {
+        viTrack.on('mousedown', function () {
             d3.event.stopPropagation();
-            _setCurrentTrack(track);
+            _setCurrentTrack(trackComponent);
             // if (d3.event.button == 2) _trackOnRightClick(track);
         });
-        track.on('dblclick', function () {
-            _setCurrentTrack(track);
+        viTrack.on('dblclick', function () {
+            _setCurrentTrack(trackComponent);
             openTrackPropertiesDialog();
         });
-        track.plotContainer.on('mousemove', function() {
-            _drawTooltip(track);
+        viTrack.plotContainer.on('mousemove', function() {
+            _drawTooltip(viTrack);
         });
-        track.plotContainer.on('mouseleave', function () {
-            _removeTooltip(track);
+        viTrack.plotContainer.on('mouseleave', function () {
+            _removeTooltip(viTrack);
         })
-        track.onVerticalResizerDrag(function () {
+        viTrack.onVerticalResizerDrag(function () {
             if(_fitWindow) return ;
-            if (track.isLogTrack()) {
-                wiApiService.editTrack({ idTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+            if (trackComponent.idTrack) {
+                wiApiService.editTrack({ 
+                    idTrack: trackComponent.idTrack, 
+                    width: Utils.pixelToInch(viTrack.width) 
+                }, null, { silent: true });
                 _fitWindow = false;
-            } else if (track.isDepthTrack()) {
-                wiApiService.editDepthTrack({ idDepthAxis: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+            } 
+            else if (trackComponent.idDepthAxis) {
+                wiApiService.editDepthTrack({ 
+                    idDepthAxis: trackComponent.idDepthAxis, 
+                    width: Utils.pixelToInch(viTrack.width) 
+                }, null, { 
+                    silent: true 
+                });
                 _fitWindow = false;
-            } else if (track.isZoneTrack()) {
-                wiApiService.editZoneTrack({ idZoneTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+            } 
+            else if (trackComponent.idZoneTrack) {
+                wiApiService.editZoneTrack({ 
+                    idZoneTrack: trackComponent.idZoneTrack, 
+                    width: Utils.pixelToInch(viTrack.width) 
+                }, null, { 
+                    silent: true 
+                });
                 _fitWindow = false;
-            } else if (track.isImageTrack()) {
-                wiApiService.editImageTrack({ idImageTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true })
+            } 
+            else if (trackComponent.idImageTrack) {
+                wiApiService.editImageTrack({ 
+                    idImageTrack: trackComponent.idImageTrack, 
+                    width: Utils.pixelToInch(viTrack.width) 
+                }, null, { 
+                    silent: true 
+                });
                 _fitWindow = false;
-            } else if (track.isObjectTrack()) {
-                wiApiService.editObjectTrack({ idObjectTrack: track.id, width: Utils.pixelToInch(track.width) }, null, { silent: true})
+            } else if (trackComponent.idObjectTrack) {
+                wiApiService.editObjectTrack({ 
+                    idObjectTrack: trackComponent.idObjectTrack, 
+                    width: Utils.pixelToInch(viTrack.width) 
+                }, null, { 
+                    silent: true
+                });
                 _fitWindow = false;
             }
         });
@@ -1166,6 +1235,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (tr.removeTooltipText) tr.removeTooltipText();
         })
     }
+/* TUNG
     function _trackOnRightClick() {
         let componentCtrl = self.trackComponents.find(function(trackComponent) {
             return trackComponent.controller.viTrack == _currentTrack;
@@ -1174,11 +1244,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             // componentCtrl.buildContextMenu();
         }
     }
-    function _setCurrentTrack(track) {
-        if (_currentTrack == track) return;
+*/
+    function _setCurrentTrack(trackComponent) {
+        if (_currentTrack == trackComponent) {
+            _currentTrack.controller.viTrack.highlightCallback();
+            return;
+        }
         _previousTrack = _currentTrack;
-        _currentTrack = track;
-        _currentTrack.highlightCallback();
+        _currentTrack = trackComponent;
+        _currentTrack.controller.viTrack.highlightCallback();
         _clearPreviousHighlight();
     }
     function orderTrack(viTrack, orderNum) {
@@ -1189,6 +1263,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         graph.rearrangeTracks(self);
     }
+    /*
     function editOrderNum(viTrack, orderNum) {
         return new Promise((resolve, reject) => {
             if (viTrack.isLogTrack()) {
@@ -1220,7 +1295,87 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
             graph.rearrangeTracks(self);
         })
+    }*/
+    function editOrderNum(tc, orderNum) {
+        tc.orderNum = orderNum;
+        tc.controller.setOrderNum(orderNum);
+        return new Promise(function(resolve) {
+            let id = ( 
+                tc.idTrack || tc.idDepthAxis || 
+                tc.idZoneTrack || tc.idImageTrack || 
+                tc.idObjectTrack 
+            );
+            if (tc.idTrack) {
+                wiApiService.editTrack({idTrack: id, orderNum: tc.orderNum}, success);
+            } 
+            else if (tc.idDepthAxis) {
+                wiApiService.editDepthTrack({idDepthAxis: id, orderNum: tc.orderNum}, success)
+            } 
+            else if (tc.idZoneTrack) {
+                wiApiService.editZoneTrack({idZoneTrack: id, orderNum: tc.orderNum}, success)
+            } 
+            else if (tc.idImageTrack) {
+                wiApiService.editImageTrack({idImageTrack: id, orderNum: tc.orderNum}, success)
+            } 
+            else if (tc.idObjectTrack) {
+                wiApiService.editObjectTrack({idObjectTrack: id, orderNum: tc.orderNum}, success)
+            }
+                
+            function success(err) {
+                if(err) toastr.error(err.message);
+                resolve();
+            }
+        });
     }
+    function reindexAllTracks() {
+        let tcs = self.trackComponents;
+        for (let i = 0; i < tcs.length; i++) {
+            let orderNum;
+            if (i == 0) orderNum = 'm';
+            else orderNum = String.fromCharCode(tcs[i - 1].orderNum.charCodeAt(0) + 1);
+            tcs[i].orderNum = orderNum;
+            tcs[i].controller.setOrderNum(orderNum);
+        }
+        async.eachOf(self.trackComponents, function(tc, idx, done) {
+            let id = ( 
+                tc.idTrack || tc.idDepthAxis || 
+                tc.idZoneTrack || tc.idImageTrack || 
+                tc.idObjectTrack 
+            );
+            if (tc.idTrack) {
+                wiApiService.editTrack({idTrack: id, orderNum: tc.orderNum}, function () {
+                    done();
+                })
+            } 
+            else if (tc.idDepthAxis) {
+                wiApiService.editDepthTrack({idDepthAxis: id, orderNum: tc.orderNum}, function () {
+                    done();
+                })
+            } 
+            else if (tc.idZoneTrack) {
+                wiApiService.editZoneTrack({idZoneTrack: id, orderNum: tc.orderNum}, function () {
+                    done();
+                })
+            } 
+            else if (tc.idImageTrack) {
+                wiApiService.editImageTrack({idImageTrack: id, orderNum: tc.orderNum}, function () {
+                    done();
+                })
+            } 
+            else if (tc.idObjectTrack) {
+                wiApiService.editObjectTrack({idObjectTrack: id, orderNum: tc.orderNum}, function () {
+                    done();
+                })
+            }
+            
+        }, function(err) {
+            if(err) toastr.error(err.message);
+            self.trackComponents.sort((track1, track2) => {
+                return track1.orderNum.localeCompare(track2.orderNum);
+            });
+        });
+    }
+    /*
     function reindexAllTracks() {
         let promises = [];
         let backupTracks = angular.copy(_tracks);
@@ -1269,6 +1424,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
     }
+    */
     function _registerTrackHorizontalResizerDragCallback() {
         _tracks.forEach(function (track) {
             track.onHorizontalResizerDrag(function () {
@@ -1280,28 +1436,42 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         })
     }
-    function _registerTrackDragCallback(viTrack) {
+    function _registerTrackDragCallback(trackCtrl) {
+        let viTrack = trackCtrl.viTrack;
+        let trackComponent = trackCtrl.getProperties();
         let originalOrderNum = viTrack.orderNum;
         viTrack.onTrackDrag(
             function (desTrack) {
-                let orderNum = getOrderKey(desTrack);
-                if (viTrack.orderNum > desTrack.orderNum) {
-                    let desTrackIndex = _tracks.findIndex(track => track == desTrack);
-                    if (desTrackIndex == 0) {
-                        orderNum = String.fromCharCode(_tracks[0].orderNum.charCodeAt(0) - 1);
-                    } else {
-                        desTrack = _tracks[desTrackIndex - 1];
-                        orderNum = getOrderKey(desTrack);
-                    }
+                let orderNum;
+                let desTrackIndex = self.trackComponents.findIndex(
+                    track => track.orderNum == desTrack.orderNum
+                );
+                if (desTrackIndex == 0) {
+                    orderNum = String.fromCharCode(self.trackComponents[0].orderNum.charCodeAt(0) - 1);
+                } 
+                else {
+                    let desTc;
+                    if (self.getCurrentTrack().orderNum.localeCompare(desTrack.orderNum) < 0)
+                        desTc = self.trackComponents[desTrackIndex];
+                    else 
+                        desTc = self.trackComponents[desTrackIndex - 1];
+
+                    orderNum = getOrderKey(desTc);
                 }
-                editOrderNum(viTrack, orderNum).then(function () {
-                    console.log(_tracks.map(t => t.orderNum));
-                    if (orderNum.length > 50 || _tracks[0].orderNum < 'a' || _tracks[_tracks.length - 1].orderNum > 'z') {
-                        reindexAllTracks();
-                    }
+                if (orderNum.length > 50 || 
+                    self.trackComponents[0].orderNum[0].localeCompare('a') < 0 || 
+                    self.trackComponents[self.trackComponents.length - 1].orderNum[0].localeCompare('z') > 0) 
+                {
+                    reindexAllTracks();
+                    return;
+                }
+                if (trackComponent.orderNum === orderNum ) return;
+                editOrderNum(trackComponent, orderNum).then(function () {
+                    self.trackComponents.sort((track1, track2) => {
+                        return track1.orderNum.localeCompare(track2.orderNum);
+                    });
                 }).catch(function (err) {
                     console.log(err);
-                    orderTrack(viTrack, originalOrderNum);
                 })
             });
     }
@@ -1372,11 +1542,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
     function getComponentCtrlByViTrack(viTrack) {
-        return _.get(self.trackComponents.find(component => component.controller.viTrack == viTrack), 'controller');
+        // TUNG return _.get(self.trackComponents.find(component => component.controller.viTrack == viTrack), 'controller');
+        return _.get(self.trackComponents.find(function(component) {
+            return component.controller.viTrack == viTrack;
+        }), 'controller');
     }
     function getComponentCtrlByProperties(props) {
         let nameOfTrack = getTrackName(props);
-        return _.get(self.trackComponents.find(component => component.name == nameOfTrack), 'controller');
+        //return _.get(self.trackComponents.find(component => component.name == nameOfTrack), 'controller');
+        return _.get(self.trackComponents.find(function(component) {
+            component.controller && component.controller.name == nameOfTrack;
+        }), 'controller');
     }
 }
 

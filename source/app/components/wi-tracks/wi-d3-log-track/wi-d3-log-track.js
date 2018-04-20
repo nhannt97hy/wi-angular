@@ -2,12 +2,17 @@ const componentName = 'wiD3LogTrack';
 const moduleName = 'wi-d3-log-track';
 const componentAlias = 'wiD3Track';
 
+let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
+
+Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
+Controller.prototype.constructor = Controller;
+
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+    wiD3AbstractTrack.call(this);
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let props = null;
     let _currentTrack = {};
     let logplotHandlers = {};
 
@@ -116,8 +121,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             tabs: ['true', 'true', 'true']
         });
     }
-    this.update = function (callback) {
-        let viTrack = this.viTrack;
+    this.update = update;
+    function update(callback) {
+        let viTrack = self.viTrack;
         if (!viTrack.isLogTrack()) return;
 
         let trackProps = viTrack.getProperties();
@@ -629,13 +635,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.onReady = function () {
-        self.viTrack = createVisualizeLogTrack(getProperties());
+        self.viTrack = createVisualizeLogTrack( self.getProperties() );
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 
         // Utils.listenEvent('curve-deleted', )
         _registerLogTrackCallback(self.viTrack);
+        update(function () {
+            self.viTrack.setCurrentDrawing(null);
+        });
     }
 
     function createVisualizeLogTrack(logTrack) {
@@ -668,12 +677,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
         return track;
     }
-    function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
-    }
+    /*function getProperties() {
+        return self.properties;
+    }*/
     function _getWellProps() {
         return self.wiD3Ctrl.getWellProps();
     }
@@ -1066,7 +1072,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: "<"
     }
 });
 exports.name = moduleName;

@@ -2,6 +2,10 @@ const componentName = 'wiD3DepthTrack';
 const moduleName = 'wi-d3-depth-track';
 const componentAlias = 'wiD3Track';
 
+let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
+Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
+Controller.prototype.constructor = Controller;
+
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $element) {
     let self = this;
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
@@ -34,7 +38,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         // }
     }
     this.onReady = function () {
-        self.viTrack = createVisualizeDepthTrack(getProperties());
+        self.viTrack = createVisualizeDepthTrack(self.getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
     }
     this.$onDestroy = function () {
@@ -42,12 +46,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }
 
     /* Private End*/
+    /*
     function getProperties() {
         if(!props) {
             props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
         }
         return props;
     }
+    */
     function createVisualizeDepthTrack(depthTrack) {
         let config = {
             id: depthTrack.idDepthAxis,
@@ -78,7 +84,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: "<"
     }
 });
 exports.name = moduleName;

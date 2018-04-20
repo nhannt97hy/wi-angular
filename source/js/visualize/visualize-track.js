@@ -326,13 +326,16 @@ Track.prototype.onTrackDrag = function(callbackDrop) {
     let self = this;
     let width;
     function onTrackDropHandler(event) {
-        if (self == event.desTrack) return;
+        if (self == event.desTrack) {
+            console.log('drop into yourself');
+            return;
+        }
         callbackDrop(event.desTrack);
     }
     $(this.trackContainer.node()).draggable({
     // $(this.root.node().parentNode).draggable({
         axis: 'x',
-        containment: $(this.root.node().parentNode.parentNode),
+        containment: $(this.root.node().parentNode.parentNode.parentNode),
         helper: function () {
             return $(self.headerNameBlock.node()).clone()
                 .css({'z-index': 99, 'width': self.width, 'background-color': 'rgb(69, 129, 69)', 'box-shadow': '1px 1px 2px 2px rgba(0,0,0,0.2)', 'color': '#fff'});

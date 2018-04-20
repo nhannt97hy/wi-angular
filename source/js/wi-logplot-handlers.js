@@ -356,19 +356,18 @@ exports.DeleteTrackButtonClicked = function () {
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let wiApiService = this.wiApiService;
     const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete " + currentTrack.name + "?", function (yes) {
+    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete " + (currentTrack.title||currentTrack.name) + "?", function (yes) {
         if (!yes) return;
-        if (currentTrack.type == 'log-track') {
-            wiApiService.removeLogTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'depth-track') {
-            wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'zone-track') {
-            wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'image-track') {
-            wiApiService.removeImageTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'object-track') {
-            console.log("deleting track with id: ", currentTrack.id);
-            wiApiService.removeObjectTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+        if (currentTrack.idTrack) {
+            wiApiService.removeLogTrack(currentTrack.idTrack, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idDepthAxis) {
+            wiApiService.removeDepthTrack(currentTrack.idDepthAxis, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idZoneTrack) {
+            wiApiService.removeZoneTrack(currentTrack.idZoneTrack, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idImageTrack) {
+            wiApiService.removeImageTrack(currentTrack.idImageTrack, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idObjectTrack) {
+            wiApiService.removeObjectTrack(currentTrack.idObjectTrack, wiD3Ctrl.removeCurrentTrack);
         }
     });
 };

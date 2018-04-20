@@ -1304,7 +1304,7 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
     }
     $(this.plotContainer.node()).draggable({
         axis: 'x',
-        containment: self.root.node().parentNode.parentNode,
+        containment: self.root.node().parentNode.parentNode.parentNode,
         helper: function () {
             if (self.getCurrentCurve()) {
                 let currentCurve = self.getCurrentCurve();
