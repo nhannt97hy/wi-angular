@@ -91,18 +91,6 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         inputs: [
             {
                 name: "Gamma Ray"
-            },
-            {
-                name: "Gamma Ray 2"
-            },
-            {
-                name: "Gamma Ray 3"
-            },
-            {
-                name: "Gamma Ray 4"
-            },
-            {
-                name: "Gamma Ray 5"
             }
         ],
         parameters: [
@@ -144,11 +132,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         ],
         outputs: [
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
+            {name: "VCL_GR", family: "Clay Volume"}
         ],
         function: "calVCLfromGR"
     };
