@@ -16,23 +16,20 @@ getAuthInfo();
 
 let app = angular.module(moduleName, []);
 
+const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
 const BASE_URL = 'http://dev.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-const PROCESSING_SERVICE = 'http://54.169.13.92';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
-//inv server for dev
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
 // const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://127.0.0.1:3000';
 // const AUTHENTICATION_SERVICE = 'http://127.0.0.1:2999';
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE
@@ -272,6 +269,14 @@ const GET_USER_PERMISSION_OF_PROJECT = '/user/get-permission';
 const GET_GROUP_PERMISSION_OF_PROJECT = '/group/project-permission';
 const UPDATE_GROUP_PERMISSION_OF_PROJECT = '/group/update-project-permission';
 const UPDATE_USER_PERMISSION_OF_PROJECT = '/project/share/update-permission';
+
+const GET_LIST_ZONE_TEMPLATE = '/zone-template/list';
+const GET_ALL_ZONE_TEMPLATE = '/zone-template/all';
+const EDIT_ZONE_TEMPLATE = '/zone-template/edit';
+const DELETE_ZONE_TEMPLATE = '/zone-template/delete';
+const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
+const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
+const NEW_ZONE_TEMPLATE = '/zone-template/new';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -1881,4 +1886,21 @@ Service.prototype.updateGroupPermissionOfProject = function (payload, callback) 
 };
 Service.prototype.updateUserPermissionOfProject = function (payload, callback) {
     this.post(UPDATE_USER_PERMISSION_OF_PROJECT, payload, callback)
-}
+};
+
+//zone template
+Service.prototype.createZoneTemplate = function (payload, callback) {
+    this.post(NEW_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.editZoneTemplate = function (payload, callback) {
+    this.post(EDIT_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.deleteZoneTemplate = function (payload, callback) {
+    this.post(DELETE_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.listZoneTemplate = function (payload, callback) {
+    this.post(GET_LIST_ZONE_TEMPLATE, payload, callback)
+};
+Service.prototype.listAllZoneTemplate = function (payload, callback) {
+    this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
+};

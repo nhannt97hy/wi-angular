@@ -228,9 +228,9 @@ function zoneToTreeConfig(zone, options = {}) {
         startDepth: zone.startDepth,
         endDepth: zone.endDepth,
         name: zone.name,
-        fill: JSON.parse(zone.fill),
-        background: JSON.parse(zone.fill).pattern.background,
-        foreground: JSON.parse(zone.fill).pattern.foreground,
+        fill: zone.fill,
+        background: zone.fill.pattern.background,
+        foreground: zone.fill.pattern.foreground,
     };
     zoneModel.data = {
         icon: 'zone-table-16x16',
@@ -1210,7 +1210,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
     let selectedObjs;
     element.draggable({
         helper: function (event) {
-            selectedObjs = $(`.wi-parent-node[type='curve']`).filter('.item-active').clone();
+            selectedObjs = $(`#WiExplorertreeview .wi-parent-node[type='curve']`).filter('.item-active').clone();
             let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
             if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) {
                 return $(event.currentTarget).find('div:nth-child(2)').clone();
