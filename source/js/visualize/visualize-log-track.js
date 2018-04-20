@@ -1187,6 +1187,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     }
 }
 
+/***************** MOVE TO SUPER CLASS ****************************
 LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let svg = this.svgContainer;
@@ -1287,6 +1288,8 @@ LogTrack.prototype.drawTooltipText = function(depth, showDepth) {
 LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
+
+******************************** END MOVING TO SUPPER CLASS **************************/
 
 /**
  * Register event when drag curve

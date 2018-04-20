@@ -313,8 +313,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // slidingBar.resetView();
         slidingBar.updateSlidingHandlerByPercent(top, range);
     }
-    this._removeTooltip = _removeTooltip;
-    this._drawTooltip = _drawTooltip;
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
@@ -349,7 +347,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     return track1.orderNum.localeCompare(track2.orderNum);
                 });
                 //self.pushDepthTrack(depthTrack);
-                //$timeout(callback);
+                $timeout(callback);
             });
         }
         else {
@@ -398,7 +396,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 parameterSet: null,
                 zoomFactor: 1.0
             }
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, self, defaultZoneTrackProp);
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, self, defaultZoneTrackProp, function(zoneTrackProps) {
+				self.trackComponents.push(zoneTrackProps);
+				self.trackComponents.sort(function(t1, t2) {
+					return t1.orderNum.localeCompare(t2.orderNum);
+				});
+
+			});
         }
         else {
             toastr.error('Cannot create zone track');
@@ -559,7 +563,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
-        _drawTooltip(_currentTrack);
+        // _drawTooltip(_currentTrack);
+		_currentTrack.controller.drawTooltip();
     }
     this.zoom = function (zoomOut) {
         const fixedScales = [1, 2, 4, 5, 10, 20, 50, 100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 10000, 20000, 50000, 100000];
@@ -824,6 +829,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         });
                     //self.Tracks = tracks;
                     self.trackComponents = tracks;
+					wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
+ 		
 /*
                     async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
                         if (aTrack.idDepthAxis) {
@@ -1136,10 +1143,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             openTrackPropertiesDialog();
         });
         viTrack.plotContainer.on('mousemove', function() {
-            _drawTooltip(viTrack);
-        });
+        	trackCtrl.drawTooltip(); 
+			// _drawTooltip(viTrack);
+		});
         viTrack.plotContainer.on('mouseleave', function () {
-            _removeTooltip(viTrack);
+			if(!_tooltip) return;
+            self.trackComponents.forEach(tc => tc.controller.removeTooltip());
+			// _removeTooltip(viTrack);
         })
         viTrack.onVerticalResizerDrag(function () {
             if(_fitWindow) return ;
@@ -1187,9 +1197,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
     }
-    function _onPlotMouseWheelCallback(track) {
-        if (!_tracks || !_tracks.length) return;
-        let mouse = d3.mouse(_tracks[0].plotContainer.node());
+    function _onPlotMouseWheelCallback() {
+        if (!self.trackComponents || !self.trackComponents.length) return;
+        let mouse = d3.mouse(self.trackComponents[0].controller.viTrack.plotContainer.node());
         if (mouse[1] < 0) return;
 
         if (d3.event.ctrlKey) {
@@ -1200,6 +1210,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         else
             self.scroll();
     }
+	/**
     function _drawTooltip(track) {
         let plotMouse, x, y, plotDim;
         if (!track) {
@@ -1226,6 +1237,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         })
         // graph.createTooltipLines(svg);
     }
+	*/
+	/** THANG: TO BE REMOVED
     function _removeTooltip(track) {
         if (!_tooltip) return;
         _tracks.forEach(function(tr) {
@@ -1233,6 +1246,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (tr.removeTooltipText) tr.removeTooltipText();
         })
     }
+	*/
 /* TUNG
     function _trackOnRightClick() {
         let componentCtrl = self.trackComponents.find(function(trackComponent) {

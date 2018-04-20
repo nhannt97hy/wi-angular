@@ -2,6 +2,10 @@ const componentName = 'wiD3ZoneTrack';
 const moduleName = 'wi-d3-zone-track';
 const componentAlias = 'wiD3Track';
 
+let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
+Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
+Controller.prototype.constructor = Controller;
+
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $element) {
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -52,7 +56,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     this.addZoneToTrack = function (track, config, controller) {
         if (!track || !track.addZone) return;
         if (!config || !config.idZoneSet) {
-            config.idZoneSet = self.wiD3Ctrl.getCurrentTrack().isZoneTrack() ? self.wiD3Ctrl.getCurrentTrack().idZoneSet : undefined;
+            config.idZoneSet = self.viTrack.isZoneTrack() ? self.viTrack.idZoneSet : undefined;
         }
         if (!config.idZoneSet) return;
         let zone = track.addZone(config);
@@ -106,8 +110,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.plotAreaId = self.name + 'PlotArea';
     }
     this.onReady = function () {
-        self.viTrack = createVisualizeZoneTrack(getProperties());
+        self.viTrack = createVisualizeZoneTrack(self.getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
+        self.registerTrackHorizontalResizerDragCallback();
 
         wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
             for (let zone of zoneset.zones) {
@@ -235,13 +240,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         wiComponentService.putComponent('vi-zone-track-' + config.id, track );
         return track;
     }
-    function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
-    }
-    function _splitZone(track, zone) {
+	function _splitZone(track, zone) {
         let props = Utils.objClone(zone.getProperties());
         let zone1 = self.addZoneToTrack(track, {});
         let zone2 = self.addZoneToTrack(track, {});
@@ -282,7 +281,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         })
     }
     function _zoneOnRightClick() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
+        let _currentTrack = self.viTrack;
         let zone = self.viTrack.getCurrentZone();
         console.log(zone);
         self.wiD3Ctrl.setContextMenu([
@@ -335,7 +334,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         ]);
     }
     function zoneProperties() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
+        let _currentTrack = self.viTrack;
         let zone = _currentTrack.getCurrentZone();
         DialogUtils.zonePropertiesDialog(ModalService, zone.getProperties(), function (props) {
             wiApiService.editZone(props, function () {
@@ -398,7 +397,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+		properties: '<'
     }
 });
 exports.name = moduleName;

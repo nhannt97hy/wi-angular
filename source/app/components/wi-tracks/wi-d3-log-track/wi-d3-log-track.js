@@ -680,12 +680,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             dragMan.wiD3Ctrl = self;
             dragMan.track = track;
         });
-        track.onPlotMouseLeave(function () {
-            self.wiD3Ctrl._removeTooltip(track);
-            if (!dragMan.dragging) return;
-            dragMan.wiD3Ctrl = null;
-            dragMan.track = null;
-        });
+//        track.onPlotMouseLeave(function () {
+//            self.wiD3Ctrl._removeTooltip(track);
+//            if (!dragMan.dragging) return;
+//            dragMan.wiD3Ctrl = null;
+//            dragMan.track = null;
+//        });
         // track.onPlotMouseWheel(function () {
         //     _onPlotMouseWheelCallback();
         // });
@@ -697,9 +697,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         track.onPlotDoubleClick(function () {
             _onPlotDoubleClickCallback(track);
-        });
-        track.plotContainer.on('mousemove', function () {
-            self.wiD3Ctrl._drawTooltip(track);
         });
         track.onCurveDrag(function (desTrack) {
             let widths = [track.width, desTrack.width];

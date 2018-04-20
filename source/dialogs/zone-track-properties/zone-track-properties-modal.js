@@ -1,10 +1,11 @@
 let helper = require('./DialogHelper');
 
-module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
+module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let wiLogplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
+        // TO BE REMOVED
+		// let wiLogplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let viZoneTrack;
         let props = zoneTrackProperties || {
@@ -27,7 +28,9 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
         this.zoomFactor = props.zoomFactor;
 
         function refreshZoneSets() {
-            wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
+           	// TO BE REMOVED 
+			//  wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
+			wiApiService.listZoneSet(wiD3Ctrl.getWellProps().idWell, function (zoneSets) {
                 $timeout(function(){
                     $scope.$apply(function () {
                         self.zoneSets = zoneSets;
@@ -39,7 +42,9 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
         this.idZoneSet = props.idZoneSet;
         // Dialog buttons
         this.createZoneSet = function () {
-            utils.createZoneSet(wiLogplotModel.properties.idWell, function (zoneSetReturn) {
+           // TO BE REMOVED
+		   // utils.createZoneSet(wiLogplotModel.properties.idWell, function (zoneSetReturn) {
+           utils.createZoneSet(wiD3Ctrl.getWellProps().idWell, function (zoneSetReturn) {
                 refreshZoneSets();
                 self.idZoneSet = zoneSetReturn.idZoneSet;
             });
@@ -86,6 +91,7 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
                     setTimeout(() => {
                         viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
                     });
+					callback && callback(props);
                 })
             }
             cb && cb();

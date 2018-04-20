@@ -223,6 +223,7 @@ ObjectTrack.prototype.onObjectHeaderMouseDown = function (object, callback) {
     });
 };
 
+/********************* MOVE TO SUPPER CLASS **********************
 ObjectTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let svg = this.svgTooltipContainer;
@@ -314,3 +315,4 @@ ObjectTrack.prototype.drawTooltipText = function(depth, showDepth) {
 ObjectTrack.prototype.removeTooltipText = function() {
     this.svgTooltipContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
+****************** END MOVE TO SUPPER CLASS *************************/

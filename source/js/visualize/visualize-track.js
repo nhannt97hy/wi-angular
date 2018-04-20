@@ -606,3 +606,112 @@ Track.prototype.prepareTicks = function() {
     //     })
     // ];
 }
+
+/********************** THANG: move draw tooltip from subclass to superclass ******************/
+Track.prototype.drawTooltipLines = function(depth, drawVertical) {
+    let plotRect = visUtils.getBoundingClientDimension(this.plotContainer.node());
+    let svg = this.svgContainer;
+    let y = this.getTransformY()(depth);
+    let x = d3.mouse(this.plotContainer.node())[0];
+    let lineData = drawVertical ? [
+        {x1: x, y1: 0, x2: x, y2: plotRect.height},
+        {x1: 0, y1: y, x2: plotRect.width, y2: y}
+    ] : [
+        {x1: 0, y1: y, x2: plotRect.width, y2: y}
+    ];
+
+    let lines = svg.selectAll('line.tooltip-line')
+        .data(lineData);
+
+    lines.enter().append('line')
+        .attr('class', 'tooltip-line');
+
+    lines
+        .attr('x1', function(d) { return d.x1; })
+        .attr('x2', function(d) { return d.x2; })
+        .attr('y1', function(d) { return d.y1; })
+        .attr('y2', function(d) { return d.y2; });
+}
+
+Track.prototype.removeTooltipLines = function() {
+    this.svgContainer.selectAll('line.tooltip-line').remove();
+}
+
+Track.prototype.drawTooltipText = function(depth, showDepth) {
+    let plotMouse = d3.mouse(this.plotContainer.node());
+    let plotRect = visUtils.getBoundingClientDimension(this.plotContainer.node());
+    let y = this.getTransformY()(depth);
+    let svg = this.svgContainer;
+	let self = this;
+
+    svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
+    
+	// remove tool tip when have nothing to show (prevent showing a tiny square in top-right corner of track)
+	if((self.isLogTrack() && self.getCurves().length == 0) || (!self.isLogTrack() && !showDepth)) return;
+
+	let tooltip = svg.append('text')
+        .attr('class', 'tooltip-text')
+        .attr('y', y);
+
+	let yDecimal = this.yDecimal || 2;
+    let yFormatter = this.getDecimalFormatter(yDecimal);
+	
+    let textData = showDepth ? [{
+        text: 'Depth: ' + yFormatter(this.getTransformY().invert(y)),
+        color: 'black'
+    }] : [];
+	if (this.getCurves) {
+		this.getCurves().forEach(function(curve) {
+			let xDecimal = self.xDecimal || 2;
+			let xFormatter = self.getDecimalFormatter(xDecimal);
+			let curveY = curve.getTransformY().invert(y);
+			curveY = curve.offsetY + visUtils.round(curveY - curve.offsetY, curve.yStep);
+
+			let value = curve.dataMap[curveY];
+			value = value == null ? null : xFormatter(value);
+			textData.push({
+				text: curve.alias + ': ' + value,
+				color: curve.line ? curve.line.color : (curve.symbol ? curve.symbol.fillStyle : 'black')
+			});
+		})
+	}
+
+    tooltip.selectAll('tspan')
+        .data(textData)
+        .enter()
+        .append('tspan')
+            .style('fill', function(d) { return d.color; })
+            .attr('dy', '1.2em')
+            .text(function(d) { return d.text; });
+
+    let bbox = tooltip.node().getBBox();
+    let offset = 20;
+    let rectX = bbox.x + offset;
+    let rectY = bbox.y - offset - bbox.height;
+
+    if (rectY < 0) rectY = bbox.y + offset - 10;
+
+    tooltip.attr('y', rectY).selectAll('tspan').attr('x', rectX);
+
+    bbox = tooltip.node().getBBox();
+    let padding = 2;
+    let rect = svg.append('rect')
+        .attr('class', 'tooltip-rect')
+        .attr('y', bbox.y - padding)
+        .attr('width', bbox.width + padding*2)
+        .attr('height', bbox.height + padding*2);
+
+    visUtils.alignSvg(rect, this.plotContainer, visUtils.ALIGN.RIGHT);
+    let x = parseFloat(rect.attr('x')) + padding;
+    tooltip.selectAll('tspan')
+        .attr('x', x);
+    visUtils.alignSvg(rect, this.plotContainer, visUtils.ALIGN.TOP);
+    y = parseFloat(rect.attr('y'));
+    tooltip.attr('y', y)
+
+    tooltip.raise();
+}
+
+Track.prototype.removeTooltipText = function() {
+    this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
+}
