@@ -470,7 +470,8 @@ exports.RemoveImageButtonClicked = function () {
 }
 
 exports.AddShadingButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().createShadingForSelectedCurve();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (curTrack) curTrack.controller.createShadingForSelectedCurve();
 };
 
 exports.CrossPlotButtonClicked = function () {

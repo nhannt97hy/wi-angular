@@ -124,7 +124,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         let depthRange = self.getDepthRangeFromSlidingBar();
         self.setDepthRangeForTrack(trackComponentCtrl.viTrack, depthRange);
-        _registerTrackHorizontalResizerDragCallback();
+        //_registerTrackHorizontalResizerDragCallback();
         //_registerTrackCallback(trackComponentCtrl.viTrack);
         _registerTrackCallback(trackComponentCtrl);
         //_registerTrackDragCallback(trackComponentCtrl.viTrack);
@@ -137,6 +137,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //graph.rearrangeTracks(self);
         self.updateScale();
         updateSlider();
+    }
+    this.adjustHeaderHeight = function(curViTrack) {
+        self.trackComponents
+            .map(track => track.controller.viTrack)
+            .filter(track => track != curViTrack)
+            .forEach((track) => track.horizontalResizerDragCallback());
     }
     this.tooltip = function (on) {
         if (on === undefined) return _tooltip;
@@ -666,14 +672,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return getComponentCtrlByViTrack(track).addImageZoneToTrack(track, config);
     }
     // log track
-    this.createShadingForSelectedCurve = function () {
-        if(!_currentTrack || !_currentTrack.isLogTrack()) {
-            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
-            return;
-        }
-        let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
-        trackComponentCtrl.createShadingForSelectedCurve();
-    }
     this.addAnnotation = function () {
         if(!_currentTrack || !_currentTrack.isLogTrack()) {
             // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
@@ -1426,6 +1424,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     */
     function _registerTrackHorizontalResizerDragCallback() {
+        let _tracks = self.trackComponents.map(track => track.controller.viTrack);
         _tracks.forEach(function (track) {
             track.onHorizontalResizerDrag(function () {
                 _tracks.forEach(function (t) {
@@ -1434,7 +1433,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 });
                 self.updateScale();
             });
-        })
+        });
     }
     function _registerTrackDragCallback(trackCtrl) {
         let viTrack = trackCtrl.viTrack;

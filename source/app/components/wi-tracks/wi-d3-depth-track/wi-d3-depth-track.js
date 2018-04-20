@@ -40,6 +40,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     this.onReady = function () {
         self.viTrack = createVisualizeDepthTrack(self.getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
+        self.registerTrackHorizontalResizerDragCallback();
     }
     this.$onDestroy = function () {
         // wiComponentService.putComponent(self.name, null);

@@ -13,11 +13,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let _currentTrack = {};
     let logplotHandlers = {};
 
     this.showContextMenu = function (event) {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         if (self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
             let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
             self.setContextMenu([
@@ -68,7 +66,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         label: "Create Shading",
                         icon: 'shading-add-16x16',
                         handler: function () {
-                            DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                            DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
                                 if (props) {
                                     console.log('logTrackPropertiesData', props);
                                 }
@@ -112,8 +110,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.wiD3Ctrl.setContextMenu(ctxMenu);
     }
     this.openPropertiesDialog = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        DialogUtils.logTrackPropertiesDialog(ModalService, _currentTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+        DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
             if (props) {
                 console.log('logTrackPropertiesData', props);
             }
@@ -224,8 +221,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
     }
     this.depthShiftDialog = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let curve = _currentTrack.getCurrentCurve();
+        let curve = self.viTrack.getCurrentCurve();
         if(!curve){
             DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for depth shift!');
         }else{
@@ -235,9 +231,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
 
     this.addMarker = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        if (_currentTrack && _currentTrack.addMarker && _currentTrack.setMode) {
-            _currentTrack.setMode('AddMarker');
+        if (self.viTrack && self.viTrack.addMarker && self.viTrack.setMode) {
+            self.viTrack.setMode('AddMarker');
         }
     }
     this.addMarkerToTrack = function (track, config) {
@@ -261,14 +256,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         return marker;
     }
     this.addAnnotation = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        if (!_currentTrack.isLogTrack()) return;
+        if (!self.viTrack.isLogTrack()) return;
         let [topDepth, bottomDepth] = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
         let range = bottomDepth - topDepth;
         let top = (topDepth + bottomDepth) / 2;
         let bottom = top + (range / 10);
         let defaultAnn = {
-            idTrack: _currentTrack.id,
+            idTrack: self.viTrack.id,
             text: 'Type some text here',
             textStyle: {
                 fontSize: '12px',
@@ -288,7 +282,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             vertical: false
         }
         wiApiService.createAnnotation(defaultAnn, function (annotation) {
-            let viAnno = self.addAnnotationToTrack(_currentTrack, annotation);
+            let viAnno = self.addAnnotationToTrack(self.viTrack, annotation);
             DialogUtils.annotationPropertiesDialog(ModalService, annotation, function (annotationConfig) {
                 wiApiService.editAnnotation(annotationConfig, function (annotation) {
                     viAnno.setProperties(annotation);
@@ -387,9 +381,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         return shading;
     }
     this.removeCurrentShading = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        if (!_currentTrack.getCurrentShading) return;
-        self.removeShadingFromTrack(_currentTrack, _currentTrack.getCurrentShading());
+        if (!self.viTrack.getCurrentShading) return;
+        self.removeShadingFromTrack(self.viTrack, self.viTrack.getCurrentShading());
     }
     this.removeShadingFromTrack = function (track, shading) {
         if (!track || !track.removeShading) return;
@@ -404,15 +397,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.removeMarker(marker);
     }
     this.removeCurrentCurve = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        if (!_currentTrack.getCurrentCurve) return;
-        self.removeCurveFromTrack(_currentTrack, _currentTrack.getCurrentCurve());
+        if (!self.viTrack.getCurrentCurve) return;
+        self.removeCurveFromTrack(self.viTrack, self.viTrack.getCurrentCurve());
     }
     this.createShadingForSelectedCurve = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
 
-        let curve1 = _currentTrack.getCurrentCurve();
-        let curve2 = _currentTrack.getTmpCurve();
+        let curve1 = self.viTrack.getCurrentCurve();
+        let curve2 = self.viTrack.getTmpCurve();
         if (!curve1) return;
         var config = {
             isNegPosFill: false,
@@ -447,7 +438,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         };
 
         let shadingObj = {
-            idTrack: _currentTrack.id,
+            idTrack: self.viTrack.id,
             name: curve2 ? (curve1.name + '-' + curve2.name)
                 : (curve1.name + '-left'),
             negativeFill: config.negativeFill,
@@ -459,21 +450,21 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
             idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve,
-            orderNum: _currentTrack.getShadingOrderKey()
+            orderNum: self.viTrack.getShadingOrderKey()
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
             if (!curve2) {
-                self.addCustomShadingToTrack(_currentTrack, curve1, shadingModel.data.leftX, shadingModel.data);
+                self.addCustomShadingToTrack(self.viTrack, curve1, shadingModel.data.leftX, shadingModel.data);
             }
             else {
-                self.addPairShadingToTrack(_currentTrack, curve1, curve2, shadingModel.data);
+                self.addPairShadingToTrack(self.viTrack, curve1, curve2, shadingModel.data);
             }
             openShadingAttributeDialog();
         })
     }
     function openShadingAttributeDialog () {
-        let currentShading = _currentTrack.getCurrentShading();
+        let currentShading = self.viTrack.getCurrentShading();
         let shadingOptions = currentShading.getProperties();
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
         console.log("onWiD3", shadingOptions);
@@ -519,21 +510,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             delete options.rightCurve;
             delete options.leftCurve;
 
-            let width = _currentTrack.width;
+            let width = self.viTrack.width;
             wiApiService.editShading(request, function (shading) {
-                self.wiD3Ctrl.updateTrack(_currentTrack);
+                self.wiD3Ctrl.updateTrack(self.viTrack);
                 $timeout(function() {
-                    _currentTrack.width = width;
-                    _currentTrack.doPlot();
+                    self.viTrack.width = width;
+                    self.viTrack.doPlot();
                 }, 1000);
             });
-        }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
+        }, shadingOptions, self.viTrack, self.wiLogplotCtrl);
     };
 
     this.createCrossplot = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let curve1 = _currentTrack.getCurrentCurve();
-        let curve2 = _currentTrack.getTmpCurve();
+        let curve1 = self.viTrack.getCurrentCurve();
+        let curve2 = self.viTrack.getTmpCurve();
         if (!curve1 || !curve2) {
             DialogUtils.errorMessageDialog(ModalService, 'You must select 2 curves to create a cross plot.');
         }
@@ -565,8 +555,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.createHistogram = function () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let curve = _currentTrack.getCurrentCurve();
+        let curve = self.viTrack.getCurrentCurve();
         if (!curve) {
             DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for creating a histogram!');
         }
@@ -591,7 +580,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     this.$onInit = function () {
         this.plotAreaId = self.name + 'PlotArea';
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
         logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
     }
@@ -637,6 +625,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.onReady = function () {
         self.viTrack = createVisualizeLogTrack( self.getProperties() );
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
+        self.registerTrackHorizontalResizerDragCallback();
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 
@@ -646,6 +635,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.viTrack.setCurrentDrawing(null);
         });
     }
+    
 
     function createVisualizeLogTrack(logTrack) {
         console.log('pushLogTrack:', logTrack);
@@ -791,8 +781,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         d3.event.stopPropagation();
     }
     function _markerOnRightClick() {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let marker = _currentTrack.getCurrentMarker();
+        let marker = self.viTrack.getCurrentMarker();
         self.setContextMenu([
             {
                 name: "MarkerProperties",
@@ -808,17 +797,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 handler: function () {
                     // send api to remove marker
                     wiApiService.removeMarker(marker.id, function () {
-                        _currentTrack.removeMarker(marker);
+                        self.viTrack.removeMarker(marker);
                     })
                 }
             }
         ]);
     }
     function markerProperties(marker) {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         if (!marker) {
-            marker = _currentTrack.getCurrentMarker();
-            console.log(_currentTrack.getCurrentMarker());
+            marker = self.viTrack.getCurrentMarker();
+            console.log(self.viTrack.getCurrentMarker());
         }
         DialogUtils.markerPropertiesDialog(ModalService, marker.getProperties(), function (props) {
             wiApiService.editMarker(props, function () {
@@ -832,8 +820,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         d3.event.stopPropagation();
     }
     function _annotationOnRightClick() {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let anno = _currentTrack.getCurrentDrawing();
+        let anno = self.viTrack.getCurrentDrawing();
         self.setContextMenu([
             {
                 name: "AnnotationProperties",
@@ -848,18 +835,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 icon: "annotation-delete-16x16",
                 handler: function () {
                     wiApiService.removeAnnotation(anno.idAnnotation, function () {
-                        _currentTrack.removeDrawing(anno);
+                        self.viTrack.removeDrawing(anno);
                     })
                 }
             }
         ]);
     }
     function annotationProperties(anno) {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        if (!anno) anno = _currentTrack.getCurrentDrawing();
+        if (!anno) anno = self.viTrack.getCurrentDrawing();
         console.log(anno);
         DialogUtils.annotationPropertiesDialog(ModalService, anno.getProperties(), function (annotationConfig) {
-            annotationConfig.idTrack = _currentTrack.id;
+            annotationConfig.idTrack = self.viTrack.id;
             wiApiService.editAnnotation(annotationConfig, function () {
                 anno.setProperties(annotationConfig);
                 anno.doPlot(true);
@@ -867,15 +853,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         })
     }
     function _curveOnRightClick() {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         //console.log('-------------');
 
-        if (!_currentTrack.getCurrentCurve) {
+        if (!self.viTrack.getCurrentCurve) {
             return;
         }
 
-        let currentCurve = _currentTrack.getCurrentCurve();
+        let currentCurve = self.viTrack.getCurrentCurve();
         self.setContextMenu([{
             name: "CurveProperties",
             label: "Curve Properties",
@@ -887,15 +872,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     wiApiService,
                     DialogUtils,
                     currentCurve,
-                    _currentTrack,
+                    self.viTrack,
                     self.wiLogplotCtrl,
                     function() {
-                        _currentTrack.updateScaleInfo({
+                        self.viTrack.updateScaleInfo({
                             leftVal:currentCurve.minX,
                             rightVal:currentCurve.maxX,
                             scale: currentCurve.scale
                         });
-                        _currentTrack.updateAxis();
+                        self.viTrack.updateAxis();
                     }
                 );
             }
@@ -936,7 +921,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 label: "Remove Curve",
                 icon: "curve-hide-16x16",
                 handler: function () {
-                    let idLine = _currentTrack.getCurrentCurve().id;
+                    let idLine = self.viTrack.getCurrentCurve().id;
                     wiApiService.removeLine(idLine, function(res){
                         self.removeCurrentCurve();
                         if (Array.isArray(res.shadings) && res.shadings.length) {
@@ -979,23 +964,22 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         ]);
     }
     function _curveOnDoubleClick() {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let currentCurve = _currentTrack.getCurrentCurve();
+        let currentCurve = self.viTrack.getCurrentCurve();
         DialogUtils.curvePropertiesDialog(
             ModalService,
             wiComponentService,
             wiApiService,
             DialogUtils,
             currentCurve,
-            _currentTrack,
+            self.viTrack,
             self.wiLogplotCtrl,
             function() {
-                _currentTrack.updateScaleInfo({
+                self.viTrack.updateScaleInfo({
                     leftVal:currentCurve.minX,
                     rightVal:currentCurve.maxX,
                     scale: currentCurve.scale
                 });
-                _currentTrack.updateAxis();
+                self.viTrack.updateAxis();
             }
         );
 
@@ -1003,7 +987,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         d3.event.stopPropagation();
     }
     function _shadingOnRightClick() {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         self.setContextMenu([{
             name: "ShadingProperties",
@@ -1018,7 +1001,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 label: "Remove Shading",
                 icon: "shading-delete-16x16",
                 handler: function () {
-                    let currentShading = _currentTrack.getCurrentShading();
+                    let currentShading = self.viTrack.getCurrentShading();
                     wiApiService.removeShading(currentShading.id, self.removeCurrentShading);
                 }
             }]);
@@ -1038,7 +1021,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         d3.event.stopPropagation();
     }
     function shadingProperties () {
-        _currentTrack = self.wiD3Ctrl.getCurrentTrack();
         openShadingAttributeDialog();
     };
 
@@ -1060,7 +1042,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.$onDestroy = function(){
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
     }
-
+    
 }
 
 
