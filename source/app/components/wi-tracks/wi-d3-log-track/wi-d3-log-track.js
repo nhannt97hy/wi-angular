@@ -3,7 +3,6 @@ const moduleName = 'wi-d3-log-track';
 const componentAlias = 'wiD3Track';
 
 let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
-
 Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
@@ -577,6 +576,49 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.addViSelectionToTrack = function (track, selectionConfig) {
         track.addSelection(selectionConfig);
     }
+    
+    this.onTrackKeyPressCallback = function () {
+        if(!d3.event) return;
+        let track = self.viTrack;
+        switch(d3.event.key) {
+            case 'Backspace':
+            case 'Delete':
+                let drawing = track.getCurrentDrawing();
+                if (!drawing) return;
+
+                if (drawing.isCurve()) {
+                    let curve = drawing;
+                    let props = curve.getProperties();
+                    console.log(props);
+                    let idLine = props.idLine;
+                    wiApiService.removeLine(idLine, function (res) {
+                        track.removeCurve(curve);
+                        if (Array.isArray(res.shadings) && res.shadings.length) {
+                            res.shadings.forEach(function(s) {
+                                let shading = utils.getVisualizeShading(track, s.idShading);
+                                track.removeDrawing(shading);
+                            });
+                        }
+                    });
+                }
+                else if (drawing.isShading()) {
+                    wiApiService.removeShading(drawing.id, function() {
+                        track.removeDrawing(drawing);
+                    });
+                }
+                else if (drawing.isAnnotation()) {
+                    // Send api before deleting
+                    wiApiService.removeAnnotation(drawing.idAnnotation, function () {
+                        track.removeDrawing(drawing);
+                    })
+                }
+                return;
+            case 'Escape':
+                // Bug
+                if (track && track.setMode) track.setMode(null);
+                return;
+        }
+    }
 
     this.$onInit = function () {
         this.plotAreaId = self.name + 'PlotArea';
@@ -626,6 +668,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.viTrack = createVisualizeLogTrack( self.getProperties() );
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
+        self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 
@@ -635,7 +679,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.viTrack.setCurrentDrawing(null);
         });
     }
-    
 
     function createVisualizeLogTrack(logTrack) {
         console.log('pushLogTrack:', logTrack);
@@ -1039,7 +1082,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.$onDestroy = function(){
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
     }
-    
 }
 
 

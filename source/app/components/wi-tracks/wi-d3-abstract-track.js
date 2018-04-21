@@ -41,4 +41,9 @@ Controller.prototype.removeTooltip = function() {
 	self.viTrack.removeTooltipText();
 }
 
+Controller.prototype.onTrackKeyPressCallback = function () {
+    if (!d3.event) return;
+    console.log( ' on track key ' + d3.event.key + ' pressed');
+}
+
 module.exports = Controller;

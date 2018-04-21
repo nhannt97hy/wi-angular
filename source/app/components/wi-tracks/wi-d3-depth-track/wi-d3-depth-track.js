@@ -41,6 +41,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.viTrack = createVisualizeDepthTrack(self.getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
+        self.viTrack.on('keydown', self.onTrackKeyPressCallback);
     }
     this.$onDestroy = function () {
         // wiComponentService.putComponent(self.name, null);

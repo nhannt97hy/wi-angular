@@ -131,9 +131,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _registerTrackDragCallback(trackComponentCtrl);
         _setCurrentTrack(trackComponentCtrl.getProperties());
 
-        trackComponentCtrl.viTrack.on('keydown', function () {
-            _onTrackKeyPressCallback(trackComponentCtrl.viTrack);
-        })
+        // trackComponentCtrl.viTrack.on('keydown', function () {
+        //     _onTrackKeyPressCallback(trackComponentCtrl.viTrack);
+        // })
         //graph.rearrangeTracks(self);
         self.updateScale();
         updateSlider();
@@ -434,7 +434,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     zoomFactor: imageTrackProperties.zoomFactor
                 }
                 wiApiService.createImageTrack(dataRequest, function (returnImageTrack) {
-                    self.pushImageTrack(returnImageTrack);
+                    // self.pushImageTrack(returnImageTrack);
+                    self.trackComponents.push(returnImageTrack);
+                    self.trackComponents.sort(function(t1, t2) {
+                        return t1.orderNum.localeCompare(t2.orderNum);
+                    });
                 })
             })
         } else {
@@ -463,7 +467,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     zoomFactor: objectTrackProp.zoomFactor
                 };
                 wiApiService.createObjectTrack(dataRequest, function (returnObjectTrack) {
-                    self.pushObjectTrack(returnObjectTrack);
+                    // self.pushObjectTrack(returnObjectTrack);
+                    self.trackComponents.push(returnObjectTrack);
+                    self.trackComponents.sort(function(t1, t2) {
+                        return t1.orderNum.localeCompare(t2.orderNum);
+                    });
                 });
             })
         } else {
@@ -1488,6 +1496,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 })
             });
     }
+    /**** MOVE TO INDIVIDUAL TRACK COMPONENT *********
     function _onTrackKeyPressCallback(track) {
         if (!d3.event) return;
         console.log(d3.event.key);
@@ -1520,10 +1529,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 else if (drawing.isZone()) {
                     // Send api before deleting
                     wiApiService.removeZone(drawing.id, function () {
-                        /*
-                        _plotZoneSet(track);
-                        Utils.refreshProjectState();
-                        */
+                        // _plotZoneSet(track);
+                        // Utils.refreshProjectState();
                         track.removeDrawing(drawing);
                         Utils.emitEvent('zone-updated', track);
                         // wiComponentService.emit(wiComponentService.DELETE_MODEL, track);
@@ -1554,6 +1561,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return;
         }
     }
+    ********* END MOVE *****************/
     function getComponentCtrlByViTrack(viTrack) {
         // TUNG return _.get(self.trackComponents.find(component => component.controller.viTrack == viTrack), 'controller');
         return _.get(self.trackComponents.find(function(component) {

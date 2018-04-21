@@ -3,7 +3,6 @@ module.exports = function (ModalService, wiLogplotCtrl, objectTrackProperties, c
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let props = objectTrackProperties || {
             showTitle: true,

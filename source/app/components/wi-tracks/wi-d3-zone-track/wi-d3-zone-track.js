@@ -105,6 +105,29 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         })
         return zone;
     }
+    this.onTrackKeyPressCallback = function () {
+        if(!d3.event) return;
+        let track = self.viTrack;
+        switch(d3.event.key) {
+            case 'Backspace':
+            case 'Delete':
+                let drawing = track.getCurrentDrawing();
+                if (!drawing) return;
+                if (drawing.isZone()) {
+                    // Send api before deleting
+                    wiApiService.removeZone(drawing.id, function () {
+                        track.removeDrawing(drawing);
+                        Utils.emitEvent('zone-updated', track);
+                        Utils.refreshProjectState();
+                })
+            }
+            case 'Escape':
+                // Bug
+                if (track && track.setMode) track.setMode(null);
+                return;
+        }
+
+    }
 
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
@@ -113,7 +136,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.viTrack = createVisualizeZoneTrack(self.getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
-
+        self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        
         wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
             for (let zone of zoneset.zones) {
                 self.addZoneToTrack(self.viTrack, zone);

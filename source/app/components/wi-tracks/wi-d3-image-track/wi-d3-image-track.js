@@ -2,6 +2,10 @@ const componentName = 'wiD3ImageTrack';
 const moduleName = 'wi-d3-image-track';
 const componentAlias = 'wiD3Track';
 
+let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
+Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
+Controller.prototype.constructor = Controller;
+
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -28,22 +32,22 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.openPropertiesDialog = function () {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack.getProperties();
+        let viTrack = self.viTrack;
+        let track = viTrack.getProperties();
         track.isCreated = true;
         DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, track, function (props) {
             if (props) {
-                _currentTrack.removeAllDrawings();
-                props.idImageTrack = _currentTrack.id;
+                viTrack.removeAllDrawings();
+                props.idImageTrack = viTrack.id;
                 console.log(props);
                 wiApiService.editImageTrack(props, function (data) {
                     $timeout(function () {
                         data.width = Utils.inchToPixel(data.width);
-                        _currentTrack.setProperties(data);
+                        viTrack.setProperties(data);
                         for (let img of data.image_of_tracks) {
-                            self.addImageZoneToTrack(_currentTrack, img);
+                            self.addImageZoneToTrack(viTrack, img);
                         }
-                        _currentTrack.doPlot(true);
+                        viTrack.doPlot(true);
                     });
                 });
             }
@@ -58,14 +62,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.plotImageZone(imgzone);
         track.rearrangeHeaders();
         track.onImageZoneMouseDown(imgzone, function() {
-            self.wiD3Ctrl.setCurrentTrack(track);
             if (d3.event.button == 2) {
                 self.isImageZoneRightClicked = true;
                 // _imageZoneOnRightClick();
             }
         });
         track.onImageZoneHeaderMouseDown(imgzone, function() {
-            self.wiD3Ctrl.setCurrentTrack(track);
             let depthRange = imgzone.getDepthRange();
             let rangeValue = depthRange[1] - depthRange[0];
             depthRange[0] -= rangeValue * 0.5;
@@ -98,14 +100,35 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         return imgzone;
     }
-
+    this.onTrackKeyPressCallback = function () {
+        if(!d3.event) return;
+        let track = self.viTrack;
+        switch(d3.event.key) {
+            case 'Backspace':
+            case 'Delete':
+                let drawing = track.getCurrentDrawing();
+                if (!drawing) return;
+                if (drawing.isImageZone()) {
+                    // Send api before deleting
+                    wiApiService.removeImage(drawing.idImageOfTrack, function () {
+                        track.removeDrawing(drawing);
+                    })
+                }
+            case 'Escape':
+                // Bug
+                if (track && track.setMode) track.setMode(null);
+                return;
+        }
+    }
     this.$onInit = function () {
         self.plotAreaId = self.name + 'PlotArea';
     }
     this.onReady = function () {
-        self.viTrack = createVisualizeImageTrack(getProperties());
+        self.viTrack = createVisualizeImageTrack(self.getProperties());
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
-
+        self.registerTrackHorizontalResizerDragCallback();
+        self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        
         wiApiService.getImagesOfTrack(self.viTrack.id, function (images) {
             for (let img of images) {
                 self.addImageZoneToTrack(self.viTrack, img);
@@ -194,7 +217,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                     }
                                     self.drawImageZone(imgzone, imgProps, isNewDraw);
                                     track.onImageZoneHeaderMouseDown(imgzone, function() {
-                                        self.wiD3Ctrl.setCurrentTrack(track);
                                         let depthRange = imgzone.getDepthRange();
                                         let rangeValue = depthRange[1] - depthRange[0];
                                         depthRange[0] -= rangeValue * 0.5;
@@ -235,22 +257,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.putComponent('vi-image-track-' + config.id, track);
         return track;
     }
-    function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
-    }
     function showImage() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack;
-        let imgzone = track.getCurrentImageZone();
+        let imgzone = self.viTrack.getCurrentImageZone();
         DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), self.wiD3Ctrl.trackComponents, function () {
         });
     }
     function imageProperties() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack;
+        let viTrack = self.viTrack;
+        let track = viTrack;
         let imgzone = track.getCurrentImageZone();
         imgzone.setProperties({
             done: true
@@ -268,7 +282,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
                         track.onImageZoneHeaderMouseDown(imgzone, function() {
-                            self.wiD3Ctrl.setCurrentTrack(track);
                             let depthRange = imgzone.getDepthRange();
                             let rangeValue = depthRange[1] - depthRange[0];
                             depthRange[0] -= rangeValue * 0.5;
@@ -289,8 +302,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
     }
     function _imageZoneOnRightClick() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let imgzone = _currentTrack.getCurrentImageZone();
+        let viTrack = self.viTrack;
+        let imgzone = viTrack.getCurrentImageZone();
         self.wiD3Ctrl.setContextMenu([
             {
                 name: "ImageProperties",
@@ -308,7 +321,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 icon: "imgzone-delete-16x16",
                 handler: function () {
                     wiApiService.removeImage(imgzone.idImageOfTrack, function () {
-                        _currentTrack.removeImage(imgzone);
+                        viTrack.removeImage(imgzone);
                     });
                 }
             }
@@ -338,7 +351,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<'
     }
 });
 exports.name = moduleName;
