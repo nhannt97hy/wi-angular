@@ -707,9 +707,40 @@ app.controller('wiPlotPlaygroundController', function($scope) {
     }
 })
 
-app.controller('wiXplotController', function ($scope) {
+app.controller('wiXplotController', function ($scope, wiComponentService) {
     // test
-    this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
+    this.data = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
+    // this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
+    this.idCurves = [];
+    this.config = {
+        logX: false,
+        logY: false,
+        majorX: 5,
+        majorY: 5,
+        minorX : 1,
+        minorY : 1,
+        decimalsX: 2,
+        decimalsY: 2,
+        scale: {
+            left: null,
+            right: null,
+            bottom: null,
+            top: null
+        }
+    };
+
+    this.onChange = function (idCurves) {
+        this.idCurves = idCurves;
+    }
+
+    this.testUpdate = function () {
+        let wiXplot = wiComponentService.getComponent('wi-xplot');
+        let changes = {
+            config: this.config,
+            idCurves: this.idCurves
+        }
+        wiXplot.update(changes);
+    }
     // end test
 })
 

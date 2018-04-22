@@ -8,16 +8,61 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.$onInit = function () {
         console.log('wi xplot initialization: ', this);
         this.plotAreaId = 'wi-xplot-area';
-        this.viWiXplot = {};
-        this.pointsets = [];
+        this.viWiXplot = null;
+        wiComponentService.putComponent('wi-xplot', this);
     }
     this.onReady = function () {
         this.createViWiXplot();
     }
 
-    this.createViWiXplot = function () {
+    this.update = function (changes) {
+        if (this.viWiXplot) {
+            changes.idCurves.forEach(datum => delete datum.$$hashKey);
+            let existedIdCurves = this.viWiXplot.getProperties().pointsets.map(pointSet => {
+                return {
+                    x: pointSet.curveX.idCurve,
+                    y: pointSet.curveY.idCurve
+                };
+            });
+            let isChanged = existedIdCurves.length >= changes.idCurves.length ?
+                _.differenceWith(existedIdCurves, changes.idCurves, _.isEqual).length :
+                _.differenceWith(changes.idCurves, existedIdCurves, _.isEqual).length;
+            if (isChanged && !changes.idCurves.length) {
+                this.config = {
+                    logX: false,
+                    logY: false,
+                    majorX: 5,
+                    majorY: 5,
+                    minorX : 1,
+                    minorY : 1,
+                    decimalsX: 2,
+                    decimalsY: 2,
+                    scale: {
+                        left: null,
+                        right: null,
+                        bottom: null,
+                        top: null
+                    }
+                };
+                this.viWiXplot.pointsets = [];
+                this.viWiXplot.updatePlot(changes);
+                this.viWiXplot.plotContainer.remove();
+                delete this.viWiXplot;
+            } else if (isChanged) {
+                this.createViWiXplot(changes);
+            } else {
+                this.viWiXplot.updatePlot(changes);
+            }
+        } else {
+            this.createViWiXplot();
+        }
+    }
+
+    this.createViWiXplot = function (changes) {
         let self = this;
         let pointSet = {};
+        this.pointsets = [];
+        if (!this.idCurves.length) return;
         async.eachSeries(this.idCurves, function (config, next) {
             pointSet = {
                 scale: {
@@ -70,24 +115,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 return;
             }
             console.log('pointsets', self.pointsets);
-            // test
-            let scale = self.pointsets[0].scale;
-            let config = {
-                logX: false,
-                logY: false,
-                majorX: 5,
-                majorY: 5,
-                minorX : 5,
-                minorY : 5,
-                decimalsX: 2,
-                decimalsY: 2
-            };
-            // end test
-            self.viWiXplot = graph.createVisualizeWiXplot({
-                pointsets: self.pointsets,
-                scale: scale,
-                config: config
-            }, document.getElementById(self.plotAreaId));
+
+            if (!self.viWiXplot) {
+                // test
+                self.config.scale = (self.pointsets[0] || {}).scale;
+                // end test
+                self.viWiXplot = graph.createVisualizeWiXplot({
+                    pointsets: self.pointsets,
+                    config: self.config
+                }, document.getElementById(self.plotAreaId));
+            } else {
+                self.viWiXplot.pointsets = self.pointsets;
+                self.viWiXplot.updatePlot(changes);
+            }
         });
     }
 }
@@ -98,7 +138,8 @@ app.component(componentName, {
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        idCurves: '<'
+        idCurves: '<',
+        config: '='
     }
 });
 

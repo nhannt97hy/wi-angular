@@ -89,7 +89,8 @@
     <script type="text/javascript" src="vendor/js/bootstrap-colorpicker.min.js"></script>
     <script type="text/javascript" src="vendor/js/EventEmitter-4.0.3.min.js"></script>
     <script type="text/javascript" src="vendor/js/angularjs-dropdown-multiselect.min.js"></script>
-    <script type="text/javascript" src="vendor/js/lodash.js"></script>
+    <!-- <script type="text/javascript" src="vendor/js/lodash.js"></script> -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
     <script src="vendor/js/math.min.js"></script>
     <script src="vendor/js/select.js"></script>
     <script src="vendor/js/nouislider.min.js"></script>
@@ -152,8 +153,37 @@
             <h3 class="content-heading">Wi Xplot Sample</h3>
             <div class="row container-fluid">
                 <div class="col-md-1"></div>
+                <ui-select multiple ng-model="$item"
+                            ng-change="wiPlotCtrl.onChange($item)"
+                            close-on-select="false">
+                    <ui-select-match placeholder='Select pairs'>{{$item}}</ui-select-match>
+                    <ui-select-choices repeat='pair in wiPlotCtrl.data'>
+                        <div>{{pair}}</div>
+                    </ui-select-choices>
+                </ui-select>
+                <label class="font-weight-normal">MinorX</label>
+                    <input type="number" min="0" max="10" ng-model="wiPlotCtrl.config.minorX">
+                <label class="font-weight-normal">MinorY</label>
+                    <input type="number" min="0" max="10" ng-model="wiPlotCtrl.config.minorY">
+                <label class="font-weight-normal">LogX</label>
+                    <input type="checkbox" value="" ng-model="wiPlotCtrl.config.logX">
+                <label class="font-weight-normal">LogY</label>
+                    <input type="checkbox" value="" ng-model="wiPlotCtrl.config.logY">
+                <label class="font-weight-normal">Left</label>
+                    <input type="number" id="scaleLeft"
+                            ng-model="wiPlotCtrl.config.scale.left">
+                <label class="font-weight-normal">Right</label>
+                    <input type="number" id="scaleRight"
+                            ng-model="wiPlotCtrl.config.scale.right">
+                <label class="font-weight-normal">Bottom</label>
+                    <input type="number" id="scaleBottom"
+                            ng-model="wiPlotCtrl.config.scale.bottom">
+                <label class="font-weight-normal">Top</label>
+                    <input type="number" id="scaleTop"
+                            ng-model="wiPlotCtrl.config.scale.top">
+                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.testUpdate()">Test update</button>
             </div>
-            <wi-xplot style='flex:1; display: flex;' id-curves='wiPlotCtrl.idCurves'></wi-xplot>
+            <wi-xplot style='flex:1; display: flex;' id-curves='wiPlotCtrl.idCurves' config='wiPlotCtrl.config'></wi-xplot>
         </div>
     </template>
 

@@ -13,8 +13,17 @@ module.exports = ViWiXplot;
 
 function ViWiXplot(props) {
     this.pointsets = props.pointsets;
-    this.scale = props.scale;
     this.config = props.config;
+}
+
+ViWiXplot.prototype.setProperties = function (props) {
+    Utils.setIfNotUndefined(this, 'pointsets', props.pointsets);
+    Utils.setIfNotUndefined(this, 'config', props.config);
+    console.log(this);
+}
+
+ViWiXplot.prototype.getProperties = function () {
+    return this;
 }
 
 ViWiXplot.prototype.init = function (domElem) {
@@ -23,13 +32,12 @@ ViWiXplot.prototype.init = function (domElem) {
 
     this.root = d3.select(domElem);
 
-    this.plotContainer = self.root.append('div')
+    this.plotContainer = this.root.append('div')
         .attr('class', 'wi-xplot-plot-container');
 
     this.rect = this.plotContainer.node().getBoundingClientRect();
 
-
-    this.svgContainer = self.plotContainer.append('svg')
+    this.svgContainer = this.plotContainer.append('svg')
         .attr('class', 'wi-xplot-svg-container')
         .attr('width', self.rect.width)
         .attr('height', self.rect.height);
@@ -39,6 +47,12 @@ ViWiXplot.prototype.init = function (domElem) {
         .attr('height', self.rect.height);
 
     this.ctx = this.canvas.node().getContext('2d');
+
+    this.footerContainer = this.root.select('.vi-crossplot-footer-container');
+    this.footerLeft = this.footerContainer.append('div')
+        .attr('class', 'vi-crossplot-footer-left');
+    this.footerRight = this.footerContainer.append('div')
+        .attr('class', 'vi-crossplot-footer-right');
 
     this.calcPlotContainerSize();
     this.prepareContainer();
@@ -85,7 +99,9 @@ ViWiXplot.prototype.prepareAxesContainer = function () {
 
 ViWiXplot.prototype.prepareData = function () {
     let self = this;
+    if (!this.pointsets.length) return;
     this.data = [];
+    this.nullDatas = 0;
     this.pointsets.forEach(pointSet => {
         if (!pointSet.curveX || !pointSet.curveY || !pointSet.curveX.data || !pointSet.curveY.data)
             return;
@@ -115,6 +131,22 @@ ViWiXplot.prototype.doPlot = function () {
     this.updateAxesContainer();
 
     this.plotPoints();
+    this.plotFooter();
+}
+
+ViWiXplot.prototype.updatePlot = function (newProps) {
+    this.setProperties(newProps);
+
+    if(!newProps) {
+        this.doPlot();
+        return;
+    }
+
+    this.clearPlotContainer();
+    this.prepareContainer();
+    if (!this.pointsets.length) return;
+    this.prepareData();
+    this.doPlot();
 }
 
 ViWiXplot.prototype.adjustSize = function () {
@@ -130,6 +162,11 @@ ViWiXplot.prototype.adjustSize = function () {
     this.svgContainer
         .attr('width', self.rect.width)
         .attr('height', self.rect.height);
+}
+
+ViWiXplot.prototype.clearPlotContainer = function () {
+    this.svgContainer.selectAll('*').remove();
+    this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
 }
 
 ViWiXplot.prototype.updateAxesContainer = function () {
@@ -264,6 +301,8 @@ ViWiXplot.prototype.updateAxesLabels = function () {
 
 ViWiXplot.prototype.plotPoints = function () {
     let self = this;
+    if (!this.pointsets.length) return;
+    this.outliers = 0;
     this.pointsets.forEach(pointSet => {
         let transformX = self.getTransformX();
         let transformY = self.getTransformY();
@@ -276,7 +315,9 @@ ViWiXplot.prototype.plotPoints = function () {
 
         let ctx = self.ctx;
 
-        ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
+        // ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
+        let area = self.plotContainerSize;
+        ctx.rect(area.x, area.y, area.width, area.height);
         ctx.clip();
 
         // test
@@ -294,27 +335,46 @@ ViWiXplot.prototype.plotPoints = function () {
         if (typeof plotFunc != 'function') return;
 
         self.data[self.pointsets.indexOf(pointSet)].forEach(function (d) {
+            if(!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
+                self.outliers ++;
+            }
             plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
     });
 }
 
+ViWiXplot.prototype.plotFooter = function () {
+    let self = this;
+    let totalPoints = 0;
+    this.data.forEach(datum => {
+        totalPoints += datum.length;
+    });
+    let footerString = (totalPoints - this.outliers) +" points plotted out of "
+                        + (totalPoints + this.nullDatas) + '( '
+                        + this.outliers + ' outliers, '
+                        + this.nullDatas + ' nulls)';
+    this.footerRight
+        .text(footerString);
+}
+
 ViWiXplot.prototype.getTransformX = function () {
-    return d3.scaleLinear()
+    let scaleFunc = this.config.logX ? d3.scaleLog() : d3.scaleLinear();
+    return scaleFunc
         .domain(this.getWindowX())
         .range(this.getViewportX());
 }
 ViWiXplot.prototype.getTransformY = function () {
-    return d3.scaleLinear()
+    let scaleFunc = this.config.logY ? d3.scaleLog() : d3.scaleLinear();
+    return scaleFunc
         .domain(this.getWindowY())
         .range(this.getViewportY());
 }
 
 ViWiXplot.prototype.getWindowX = function () {
-    return [this.scale.left, this.scale.right];
+    return [this.config.scale.left, this.config.scale.right];
 }
 ViWiXplot.prototype.getWindowY = function () {
-    return [this.scale.bottom, this.scale.top];
+    return [this.config.scale.bottom, this.config.scale.top];
 }
 
 ViWiXplot.prototype.getViewportX = function () {
