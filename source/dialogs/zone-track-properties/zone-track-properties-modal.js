@@ -87,11 +87,10 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties, callback
                 wiApiService.createZoneTrack(props, function (res, err) {
                     if (err) return;
                     props.idZoneTrack = res.idZoneTrack;
-                    wiD3Ctrl.pushZoneTrack(props);
+					callback && callback(props);
                     setTimeout(() => {
                         viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
                     });
-					callback && callback(props);
                 })
             }
             cb && cb();

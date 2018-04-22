@@ -612,6 +612,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         track.removeDrawing(drawing);
                     })
                 }
+                else if (drawing.isMarker()) {
+                    wiApiService.removeMarker(drawing.id, function () {
+                        track.removeDrawing(drawing);
+                    })
+                }
                 return;
             case 'Escape':
                 // Bug
