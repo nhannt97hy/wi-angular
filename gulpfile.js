@@ -12,11 +12,10 @@ const changed = require('gulp-changed');
 const async = require('async');
 const fileInclude = require('gulp-file-include');
 const XLSX = require('xlsx');
-
 // const workbook = XLSX.readFile('Wi-UI.Tung.xlsx'); // Defalt skin
 //const workbook = XLSX.readFile('Wi-UI.skin.xlsx'); // new skin
 //    var _xlsxFile = './Wi-UI.Tung.xlsx';
-var _xlsxFile = './Wi-UI.skin.xlsx';
+// var _xlsxFile = './Wi-UI.skin.xlsx';
 
 const rsync = require('gulp-rsync');
 const fs = require('fs');
@@ -301,8 +300,8 @@ function xlsxToHTML(xlsxFile, configFile) {
 
 gulp.task('gen-template', ['gen-wi-histogram-template', 'gen-wi-crossplot-template', 'gen-wi-logplot-template', 'gen-wi-explorer-template'], function () {
     var configFile = 'config/ribbon-config.js';
-
-    xlsxToHTML(_xlsxFile, configFile);
+    var xlsxFile = './Wi-UI.Tung.xlsx';
+    xlsxToHTML(xlsxFile, configFile);
 });
 
 gulp.task('gen-wi-histogram-template', function () {

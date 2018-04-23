@@ -276,7 +276,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
             $('.ribbon-wrapper').css('height', 'auto');
         }
         else {
-            $('.ribbon-wrapper').css('height', 'auto');
+            $('.ribbon-wrapper').css('height', '120px');
         }
         setTimeout(function(){
             layoutManager.updateSize();
