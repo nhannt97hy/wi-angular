@@ -308,7 +308,7 @@ module.exports = function (ModalService, callback, groups, users) {
             });
         };
         this.deleteGroup = function (group) {
-            wiApiService.removeGroup({idGroup: group.idGroup}, function (response) {
+            wiApiService.removeUserGroup({idGroup: group.idGroup}, function (response) {
                 if (self.selectedGroup && self.selectedGroup.idGroup === group.idGroup) self.selectedGroup = null;
                 toastr.success("Successfull delete group " + group.name);
                 reload();

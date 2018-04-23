@@ -19,6 +19,7 @@ let app = angular.module(moduleName, []);
 const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
 const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
 
@@ -1854,7 +1855,7 @@ Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
 Service.prototype.addUserGroup = function (payload, callback) {
     this.post(UG_ADD_GROUP, payload, callback, 'auth');
 };
-Service.prototype.removeGroup = function (payload, callback) {
+Service.prototype.removeUserGroup = function (payload, callback) {
     this.post(UG_REMOVE_GROUP, payload, callback, 'auth');
 };
 Service.prototype.addUserToGroup = function (payload, callback){

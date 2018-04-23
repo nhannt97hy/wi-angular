@@ -36,7 +36,7 @@
                         <div ng-if="param.type=='nnconfig'" class='col-sm-12' >
                             <div class="well container-fluid">
                                 <h4>{{param.name}}</h4>
-                                <label class="control-label col-sm-4">Layers</label>
+                                <label class="control-label col-sm-4">Hidden_layer_sizes</label>
                                 <div class="col-sm-8">
                                     <input ng-model='param.value.nLayer' type="number"
                                         ng-change="wiWorkflowMachineLearning.nnConfigNLayerChanged(param.value);wiWorkflowMachineLearning.updateNNConfig();wiWorkflowMachineLearning.saveWorkflow();" 
