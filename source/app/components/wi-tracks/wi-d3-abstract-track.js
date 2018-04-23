@@ -1,4 +1,6 @@
-function Controller () { }
+function Controller (wiApiService) {
+    this.wiApiService = wiApiService;
+}
 
 Controller.prototype.getProperties = function() {
     return this.properties;
@@ -22,19 +24,8 @@ Controller.prototype.registerTrackHorizontalResizerDragCallback = function() {
 }
 Controller.prototype.drawTooltip = function(depth) {
 	let self = this;
-	/*
-    if(!depth) {
-		y = d3.mouse(self.viTrack.plotContainer.node())[1];
-		depth = self.viTrack.getTransformY().invert(y);
-		self.showDepth = true;
-		self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
-	} else {
-    */
-		if (self.wiD3Ctrl.referenceLine()) self.viTrack.drawTooltipLines(depth);
-		if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth);
-		//if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth, self.showDepth);
-	//	self.showDepth = false;
-	//}
+    if (self.wiD3Ctrl.referenceLine()) self.viTrack.drawTooltipLines(depth);
+    if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth, true);
 }
 
 Controller.prototype.removeTooltip = function() {
@@ -55,7 +46,7 @@ Controller.prototype.registerTrackTooltip = function () {
 
     self.viTrack.plotContainer.on('mouseover', function() {
         self.wiD3Ctrl.trackUnderMouse = self.getProperties();
-        console.log(self.wiD3Ctrl.trackUnderMouse);
+        //console.log(self.wiD3Ctrl.trackUnderMouse);
     });
 
     self.viTrack.plotContainer.on('mouseleave', function() {
@@ -79,6 +70,63 @@ Controller.prototype.setDepthRange = function(depthRange) {
     this.viTrack.minY = depthRange[0];
     this.viTrack.maxY = depthRange[1];
     this.viTrack.doPlot();
+}
+
+Controller.prototype.registerTrackCallback = function() {
+    let self = this;
+    let trackComponent = this.getProperties();
+    let viTrack = self.viTrack;
+    viTrack.on('focus', function () {
+        self.wiD3Ctrl.setCurrentTrack(trackComponent);
+    });
+    viTrack.on('mousedown', function () {
+        d3.event.stopPropagation();
+        self.wiD3Ctrl.setCurrentTrack(trackComponent);
+        // if (d3.event.button == 2) _trackOnRightClick(track);
+    });
+    viTrack.on('dblclick', function () {
+        self.wiD3Ctrl.setCurrentTrack(trackComponent);
+        openTrackPropertiesDialog();
+    });
+    viTrack.onVerticalResizerDrag(function () {
+        if (trackComponent.idTrack) {
+            self.wiApiService.editTrack({ 
+                idTrack: trackComponent.idTrack, 
+                width: Utils.pixelToInch(viTrack.width) 
+            }, null, { silent: true });
+        } 
+        else if (trackComponent.idDepthAxis) {
+            self.wiApiService.editDepthTrack({ 
+                idDepthAxis: trackComponent.idDepthAxis, 
+                width: Utils.pixelToInch(viTrack.width) 
+            }, null, { 
+                silent: true 
+            });
+        } 
+        else if (trackComponent.idZoneTrack) {
+            self.wiApiService.editZoneTrack({ 
+                idZoneTrack: trackComponent.idZoneTrack, 
+                width: Utils.pixelToInch(viTrack.width) 
+            }, null, { 
+                silent: true 
+            });
+        } 
+        else if (trackComponent.idImageTrack) {
+            self.wiApiService.editImageTrack({ 
+                idImageTrack: trackComponent.idImageTrack, 
+                width: Utils.pixelToInch(viTrack.width) 
+            }, null, { 
+                silent: true 
+            });
+        } else if (trackComponent.idObjectTrack) {
+            self.wiApiService.editObjectTrack({ 
+                idObjectTrack: trackComponent.idObjectTrack, 
+                width: Utils.pixelToInch(viTrack.width) 
+            }, null, { 
+                silent: true
+            });
+        }
+    });
 }
 
 Controller.prototype.$onInit = function() {

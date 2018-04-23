@@ -147,9 +147,10 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     }
     wiD3Ctrl.setDepthRange(depthRange, true);
     wiD3Ctrl.processZoomFactor();
-    wiD3Ctrl.plotAll();
+    //wiD3Ctrl.plotAll();
     wiD3Ctrl.updateScale();
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
+    wiD3Ctrl.wiLogplotCtrl.emit('depth-range-updated', depthRange);
 }
 
 exports.ScalePreviousState = function (top, bottom) {

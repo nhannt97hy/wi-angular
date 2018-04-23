@@ -7,6 +7,7 @@ Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $element) {
+    wiD3AbstractTrack.call(this, wiApiService);
     let self = this;
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -40,9 +41,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }
     this.onReady = function () {
         self.viTrack = createVisualizeDepthTrack(self.getProperties());
+        self.registerTrackCallback();
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        self.registerTrackTooltip();
     }
 
     this.$doCheck = function() {

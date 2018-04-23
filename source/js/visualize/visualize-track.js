@@ -198,7 +198,7 @@ Track.prototype.createBodyContainer = function() {
     // let existedPlot = this.rootNode
     //     .select('.vi-track-body-container');
 
-    let existedPlot = d3.select(this.root.node().parentNode.parentNode)
+    let existedPlot = d3.select(this.root.node().parentNode.parentNode.parentNode)
         .select('.vi-track-body-container');
 
     this.bodyContainer = this.trackContainer.append('div')
