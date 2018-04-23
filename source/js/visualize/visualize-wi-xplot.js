@@ -4,8 +4,8 @@ let SvgHelper = require('./visualize-svg-helper');
 
 const _MARGIN = {
     top: 20,
-    right: 20,
-    bottom: 50,
+    right: -30,
+    bottom: 30,
     left: 70
 };
 const _AREA_LINE_COLOR = 'DarkCyan';
@@ -212,8 +212,8 @@ ViWiXplot.prototype.updateClipPath = function () {
     this.svgContainer.select('clipPath')
         .attr('id', self.getSvgClipId())
         .select('rect')
-            .attr('x', d3.min(vpX) + _MARGIN.left)
-            .attr('y', d3.min(vpY) + _MARGIN.top)
+            .attr('x', d3.min(vpX))
+            .attr('y', d3.min(vpY))
             .attr('width', Math.abs(vpX[0] - vpX[1]))
             .attr('height', Math.abs(vpY[0] - vpY[1]));
 }
@@ -264,7 +264,7 @@ ViWiXplot.prototype.updateAxesTicks = function () {
         .tickFormat(Utils.getDecimalFormatter(this.config.decimalsY));
 
     this.axesContainer.select('g.vi-crossplot-axis-x-ticks')
-        .attr('transform', 'translate(' + self.plotContainerSize.x + ', ' + (self.plotContainerSize.y + self.plotContainerSize.height) + ')')
+        .attr('transform', 'translate('+ 0 +', ' + vpY[0] + ')')
         .call(axisX)
         .selectAll('.tick text')
         .style('display', function (d, i) {
@@ -272,7 +272,7 @@ ViWiXplot.prototype.updateAxesTicks = function () {
         });
 
     this.axesContainer.select('g.vi-crossplot-axis-y-ticks')
-        .attr('transform', 'translate(' + self.plotContainerSize.x + ', ' + self.plotContainerSize.y + ')')
+        .attr('transform', 'translate(' + vpX[0] + ', '+ 0 +')')
         .call(axisY)
         .selectAll('.tick text')
         .style('display', function (d, i) {
@@ -317,7 +317,7 @@ ViWiXplot.prototype.updateAxesGrids = function () {
         .tickSize(-Math.abs(vpX[1] - vpX[0]));
 
     this.axesContainer.select('g.vi-crossplot-axis-x-grids')
-        .attr('transform', 'translate(' + self.plotContainerSize.x + ', ' + (self.plotContainerSize.y + self.plotContainerSize.height) + ')')
+        .attr('transform', 'translate('+ 0 +', ' + vpY[0] + ')')
         .call(gridX)
         .selectAll('.tick line')
         .attr('class', function (d, i) {
@@ -325,7 +325,7 @@ ViWiXplot.prototype.updateAxesGrids = function () {
         });
 
     this.axesContainer.select('g.vi-crossplot-axis-y-grids')
-        .attr('transform', 'translate(' + self.plotContainerSize.x + ', ' + self.plotContainerSize.y + ')')
+        .attr('transform', 'translate(' + vpX[0] + ', '+ 0 +')')
         .call(gridY)
         .selectAll('.tick line')
         .attr('class', function (d, i) {
@@ -351,21 +351,33 @@ ViWiXplot.prototype.updateAxesLabels = function () {
     let self = this;
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
-    let _PADDING_BOTTOM = 10;
-    let _PADDING_LEFT = 10;
+    let _PADDING_BOTTOM = 20;
+    let _PADDING_LEFT = 20;
 
-    this.axesContainer.select('text.vi-crossplot-axis-x-label')
-        .attr('x', function() { return self.plotContainerSize.x + self.plotContainerSize.width/2; })
-        .attr('y', function() { return self.plotContainerSize.height + _MARGIN.bottom; })
-        .attr('text-anchor', 'middle')
+    let labelXElem = this.axesContainer.select('text.vi-crossplot-axis-x-label')
         .text(this.getLabelX());
+    let bbX = labelXElem.node().getBBox();
+    labelXElem
+        .attr('transform',
+            'translate('
+            + ((vpX[1] - vpX[0]) / 2 + vpX[0] - bbX.width / 2)
+            + ','
+            + (self.rect.height - _PADDING_BOTTOM)
+            + ')'
+        );
 
-    this.axesContainer.select('text.vi-crossplot-axis-y-label')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', _MARGIN.top )
-        .attr('x', -(self.plotContainerSize.height/2) - _MARGIN.top )
-        .attr('text-anchor', 'middle')
+    let labelYElem = this.axesContainer.select('text.vi-crossplot-axis-y-label')
         .text(this.getLabelY());
+    let bbY = labelYElem.node().getBBox();
+    labelYElem
+        .attr('text-anchor', 'middle')
+        .attr('transform',
+            'translate('
+            + (_PADDING_LEFT)
+            + ','
+            + ((vpY[1] - vpY[0]) / 2 + _PADDING_LEFT / 2 + vpY[0] - bbY.height / 2)
+            + ')rotate(-90)'
+        );
 }
 
 ViWiXplot.prototype.plotPoints = function () {
@@ -384,8 +396,7 @@ ViWiXplot.prototype.plotPoints = function () {
 
         let ctx = self.ctx;
 
-        let area =  self.plotContainerSize;
-        ctx.rect(area.x, area.y, area.width, area.height);
+        ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX)-d3.min(vpX), d3.max(vpY)-d3.min(vpY));
         ctx.clip();
 
         // test
@@ -590,10 +601,10 @@ ViWiXplot.prototype.getWindowY = function () {
 }
 
 ViWiXplot.prototype.getViewportX = function () {
-    return [0, this.plotContainerSize.width];
+    return [this.plotContainerSize.x, this.plotContainerSize.width];
 }
 ViWiXplot.prototype.getViewportY = function () {
-    return [this.plotContainerSize.height, 0];
+    return [this.plotContainerSize.height, this.plotContainerSize.y];
 }
 
 ViWiXplot.prototype.getLabelX = function () {
@@ -656,8 +667,8 @@ ViWiXplot.prototype.mouseDownCallback = function () {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
 
-    if (mouse[0] < d3.min(vpX) + _MARGIN.left || mouse[0] > d3.max(vpX) + _MARGIN.left
-        || mouse[1] < d3.min(vpY) + _MARGIN.top || mouse[1] > d3.max(vpY) + _MARGIN.top)
+    if (mouse[0] < d3.min(vpX) || mouse[0] > d3.max(vpX)
+        || mouse[1] < d3.min(vpY) || mouse[1] > d3.max(vpY))
         return;
 
     let x = this.getTransformX().invert(mouse[0]);
@@ -750,8 +761,8 @@ ViWiXplot.prototype.mouseMoveCallback = function () {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
 
-    if (mouse[0] < d3.min(vpX) + _MARGIN.left || mouse[0] > d3.max(vpX) + _MARGIN.left
-        || mouse[1] < d3.min(vpY) + _MARGIN.top || mouse[1] > d3.max(vpY) + _MARGIN.top)
+    if (mouse[0] < d3.min(vpX) || mouse[0] > d3.max(vpX)
+        || mouse[1] < d3.min(vpY) || mouse[1] > d3.max(vpY))
         return;
 
     let x = this.getTransformX().invert(mouse[0]);
