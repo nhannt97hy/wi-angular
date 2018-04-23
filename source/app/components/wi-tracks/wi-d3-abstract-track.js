@@ -20,25 +20,53 @@ Controller.prototype.registerTrackHorizontalResizerDragCallback = function() {
         self.wiD3Ctrl.updateScale();
     });
 }
-
 Controller.prototype.drawTooltip = function(depth) {
 	let self = this;
-	if(!depth) {
+	/*
+    if(!depth) {
 		y = d3.mouse(self.viTrack.plotContainer.node())[1];
 		depth = self.viTrack.getTransformY().invert(y);
 		self.showDepth = true;
 		self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
 	} else {
+    */
 		if (self.wiD3Ctrl.referenceLine()) self.viTrack.drawTooltipLines(depth);
-		if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth, self.showDepth);
-		self.showDepth = false;
-	}
+		if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth);
+		//if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth, self.showDepth);
+	//	self.showDepth = false;
+	//}
 }
 
 Controller.prototype.removeTooltip = function() {
 	let self = this;
 	self.viTrack.removeTooltipLines();
 	self.viTrack.removeTooltipText();
+}
+
+Controller.prototype.registerTrackTooltip = function () {
+    let self = this;
+    if (!self.viTrack) return;
+
+    self.viTrack.plotContainer.on('mousemove', function() {
+		let y = d3.mouse(self.viTrack.plotContainer.node())[1];
+		let depth = self.viTrack.getTransformY().invert(y);
+		self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
+    });
+
+    self.viTrack.plotContainer.on('mouseover', function() {
+        self.wiD3Ctrl.trackUnderMouse = self.getProperties();
+        console.log(self.wiD3Ctrl.trackUnderMouse);
+    });
+
+    self.viTrack.plotContainer.on('mouseleave', function() {
+        self.wiD3Ctrl.trackUnderMouse = null;
+        let debounced = _.debounce(function() {
+            if (self.wiD3Ctrl.trackUnderMouse) return;
+            self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.removeTooltip());
+        }, 500);
+        debounced();
+        //console.log(self.wiD3Ctrl.trackUnderMouse);
+    });
 }
 
 Controller.prototype.onTrackKeyPressCallback = function () {

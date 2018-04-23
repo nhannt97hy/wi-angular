@@ -612,6 +612,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         track.removeDrawing(drawing);
                     })
                 }
+                else if (drawing.isMarker()) {
+                    wiApiService.removeMarker(drawing.id, function () {
+                        track.removeDrawing(drawing);
+                    })
+                }
                 return;
             case 'Escape':
                 // Bug
@@ -670,6 +675,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        self.registerTrackTooltip();
         
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
@@ -719,17 +725,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
     function _registerLogTrackCallback(track) {
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        /*
         track.onPlotMouseOver(function () {
             if (!dragMan.dragging) return;
             dragMan.wiD3Ctrl = self;
             dragMan.track = track;
         });
-//        track.onPlotMouseLeave(function () {
-//            self.wiD3Ctrl._removeTooltip(track);
-//            if (!dragMan.dragging) return;
-//            dragMan.wiD3Ctrl = null;
-//            dragMan.track = null;
-//        });
+        track.onPlotMouseLeave(function () {
+            //self.wiD3Ctrl._removeTooltip(track);
+            self.removeTooltip();
+            if (!dragMan.dragging) return;
+            dragMan.wiD3Ctrl = null;
+            dragMan.track = null;
+        });
+        */
         // track.onPlotMouseWheel(function () {
         //     _onPlotMouseWheelCallback();
         // });

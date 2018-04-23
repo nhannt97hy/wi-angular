@@ -269,8 +269,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (wellProps.bottomDepth)
         return parseFloat(wellProps.bottomDepth);
 
-        let maxDepth = d3.max(_tracks, function (track) {
-            if (track.getExtentY) return track.getExtentY()[1];
+        // TO BE REMOVED
+        // let maxDepth = d3.max(_tracks, function (track) {
+        //     if (track.getExtentY) return track.getExtentY()[1];
+        //     return -1;
+        // });
+        let maxDepth = d3.max(self.trackComponents, function (tc) {
+            if (tc.controller.viTrack.getExtentY) return tc.controller.viTrack.getExtentY()[1];
             return -1;
         });
         maxDepth = (maxDepth > 0) ? maxDepth : 100000;
@@ -396,7 +401,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addZoneTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const zoneTracks = self.getTracks().filter(track => track.type == 'zone-track');
+            const zoneTracks = self.trackComponents.filter(tc => tc.idZoneTrack);
             const defaultZoneTrackProp = {
                 idPlot: self.wiLogplotCtrl.id,
                 orderNum: trackOrder,
@@ -413,7 +418,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 				self.trackComponents.sort(function(t1, t2) {
 					return t1.orderNum.localeCompare(t2.orderNum);
 				});
-
 			});
         }
         else {
@@ -423,7 +427,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addImageTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const imageTracks = self.getTracks().filter(track => track.type == 'image-track');
+            const imageTracks = self.trackComponents.filter(tc => tc.idImageTrack);
             const defaultImageTrackProp = {
                 showTitle: true,
                 title: "Image Track " + (imageTracks.length + 1),
@@ -460,7 +464,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.addObjectTrack = function (callback) {
         let trackOrder = getOrderKey();
         if (trackOrder) {
-            const objectTracks = self.getTracks().filter(track => track.type == 'object-track');
+            const objectTracks = self.trackComponents.filter(tc => tc.idObjectTrack);
             const defaultObjectTrackProp = {
                 showTitle: true,
                 title: "Object Track " + (objectTracks.length + 1),
@@ -1143,6 +1147,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             */
         }
     }
+
+    this.trackUnderMouse = null;
+
     function _registerTrackCallback(trackCtrl) {
         let trackComponent = trackCtrl.getProperties();
         let viTrack = trackCtrl.viTrack;
@@ -1158,6 +1165,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             _setCurrentTrack(trackComponent);
             openTrackPropertiesDialog();
         });
+        /*
         viTrack.plotContainer.on('mousemove', function() {
         	trackCtrl.drawTooltip(); 
 			// _drawTooltip(viTrack);
@@ -1167,6 +1175,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.trackComponents.forEach(tc => tc.controller.removeTooltip());
 			// _removeTooltip(viTrack);
         })
+        */
         viTrack.onVerticalResizerDrag(function () {
             if(_fitWindow) return ;
             if (trackComponent.idTrack) {
