@@ -2,6 +2,7 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
+        $scope.name = randomString();
         self.template = {template: ''};
         this.onOkButtonClicked = function () {
             let data = {
@@ -10,6 +11,16 @@ module.exports = function (ModalService, callback) {
             };
             close(data);
         };
+
+        function randomString() {
+            let text = "";
+            let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+            for (let i = 0; i < 15; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+        }
+
 
         this.onCancelButtonClicked = function () {
             close(null);
@@ -31,6 +42,8 @@ module.exports = function (ModalService, callback) {
             console.log(templateProp);
             self.template.idZoneTemplate = templateProp.idZoneTemplate;
             self.template.template = templateProp.template;
+            console.log($scope.name);
+            $scope.name = self.template.template;
         }
     }
 

@@ -1854,7 +1854,7 @@ Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
 Service.prototype.addUserGroup = function (payload, callback) {
     this.post(UG_ADD_GROUP, payload, callback, 'auth');
 };
-Service.prototype.removeGroup = function (payload, callback) {
+Service.prototype.removeUserGroup = function (payload, callback) {
     this.post(UG_REMOVE_GROUP, payload, callback, 'auth');
 };
 Service.prototype.addUserToGroup = function (payload, callback){
