@@ -16,7 +16,6 @@ getAuthInfo();
 
 function Controller(wiComponentService, wiMachineLearningApiService, wiApiService, $timeout, $scope, $http) {
     let self = this;
-    console.log(self.idWorkflow);
     window.WFML = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
