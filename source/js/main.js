@@ -265,7 +265,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
-    utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
 
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     // wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
