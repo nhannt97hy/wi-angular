@@ -1,7 +1,12 @@
 const componentName = 'wiLogplot';
 const moduleName = 'wi-logplot';
 
+let EventManager = require('./event-manager.js');
+Controller.prototype = Object.create(EventManager.prototype);
+Controller.prototype.constructor = Controller;
+
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+    EventManager.call(this);
     let self = this;
     let previousSlidingBarState = {};
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -34,19 +39,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
-    this.$doCheck = function () {
-        // if (!self.slidingBar) return;
-        // if (!utils.isEqual(previousSlidingBarState, self.slidingBar.slidingBarState)) {
-        //     utils.objcpy(previousSlidingBarState, self.slidingBar.slidingBarState);
-        //     let wiD3Controller = self.getwiD3Ctrl();
-        //     let max = wiD3Controller.getMaxDepth();
-        //     let min = wiD3Controller.getMinDepth();
-        //     let low = min + (max - min) * previousSlidingBarState.top / 100;
-        //     let high = low + (max - min) * previousSlidingBarState.range / 100;
-        //     wiD3Controller.setDepthRange([low, high]);
-        //     // wiD3Controller.plotAll();
-        // }
-    };
     this.updateScale = function (scale) {
         this.currentView = scale.currentView;
         this.displayView = scale.displayView;

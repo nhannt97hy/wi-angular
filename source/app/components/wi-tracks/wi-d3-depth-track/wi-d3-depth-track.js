@@ -29,6 +29,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
 
     /* creational method */
     this.$onInit = function () {
+        wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
 
         // subcribe with wiComponentService
@@ -42,6 +43,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+    }
+
+    this.$doCheck = function() {
+        wiD3AbstractTrack.prototype.$doCheck.call(self);
     }
     this.$onDestroy = function () {
         // wiComponentService.putComponent(self.name, null);
@@ -87,7 +92,9 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiD3Ctrl: '<',
-        properties: "<"
+        properties: "<",
+        minY: '<',
+        maxY: '<'
     }
 });
 exports.name = moduleName;

@@ -321,8 +321,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         if (!track || !track.addCurve) return;
         let curve = track.addCurve(data, config);
 
-        let depthRange = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
-        self.wiD3Ctrl.setDepthRangeForTrack(track, depthRange);
+        //let depthRange = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
+        //self.wiD3Ctrl.setDepthRangeForTrack(track, depthRange);
         track.updateScaleInfo({
             leftVal:config.minX,
             rightVal:config.maxX,
@@ -621,6 +621,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
 
     this.$onInit = function () {
+        wiD3AbstractTrack.prototype.$onInit.call(self);
         this.plotAreaId = self.name + 'PlotArea';
         this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
         logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
@@ -742,7 +743,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             _onPlotDoubleClickCallback(track);
         });
         track.onCurveDrag(function (desTrack) {
-            let widths = [track.width, desTrack.width];
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
             curve.idTrack = desTrack.id;
@@ -750,12 +750,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 self.wiD3Ctrl.updateTrack(track);
                 self.wiD3Ctrl.updateTrack(desTrack);
             });
-            $timeout(function() {
-                track.width = widths[0];
-                desTrack.width = widths[1];
-                track.doPlot();
-                desTrack.doPlot();
-            }, 1500);
         });
     }
     function _onPlotMouseDownCallback(track) {
@@ -1078,6 +1072,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             _shadingOnDoubleClick();
         });
     }
+    this.$doCheck = function() {
+        wiD3AbstractTrack.prototype.$doCheck.call(self);
+    }
 
     this.$onDestroy = function(){
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
@@ -1094,7 +1091,9 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiD3Ctrl: '<',
-        properties: "<"
+        properties: "<",
+        minY: '<',
+        maxY: '<'
     }
 });
 exports.name = moduleName;

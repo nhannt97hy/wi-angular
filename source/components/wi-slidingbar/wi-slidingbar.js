@@ -30,12 +30,11 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         top: 0,
         range: MIN_RANGE
     };
-    let logPlotCtrl = null;
     let __well = null;
 
     function getWell() {
         if (!__well) {
-            __well = utils.findWellByLogplot(logPlotCtrl.id);
+            __well = utils.findWellByLogplot(self.wiLogplotCtrl.id);
         }
         return __well;
     }
@@ -46,9 +45,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             createPreviewWithDefault();
             return;
         }
-        let logPlotName = self.name.replace('Slidingbar', '');
-        logPlotCtrl = wiComponentService.getComponent(logPlotName);
-        let logplotId = logPlotCtrl.id;
+        let logplotId = self.wiLogplotCtrl.id;
 
         let well = utils.findWellByLogplot(logplotId);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
@@ -99,7 +96,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.verifyDroppedIdCurve = function(idCurve) {
-        let well1 = utils.findWellByLogplot(logPlotCtrl.id);
+        let well1 = utils.findWellByLogplot(self.wiLogplotCtrl.id);
         let well2 = utils.findWellByCurve(idCurve) || {properties:{}};
 
         if (!well1.properties.idWell || !well2.properties.idWell) return -1;
@@ -110,10 +107,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     this.createPreview = createPreview;
 
     function createPreviewWithDefault() {
-        let logPlotName = self.name.replace('Slidingbar', '');
-        logPlotCtrl = wiComponentService.getComponent(logPlotName);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let logplotId = logPlotCtrl.id;
+        let logplotId = self.wiLogplotCtrl.id;
         let well = utils.findWellByLogplot(logplotId);
         if (!well) return;
         let firstCurve = well.children[0].children[0];
@@ -157,14 +152,15 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
-        let oldRange = wiD3Controller.getDepthRangeRaw();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
         let high = low + (max - min) * self.slidingBarState.range / 100.;
 
         wiD3Controller.setDepthRange([low, high], true);
         wiD3Controller.processZoomFactor();
-        wiD3Controller.plotAll();
+        //wiD3Controller.plotAll();
         wiD3Controller.updateScale();
+
+        self.wiLogplotCtrl.emit('depth-range-updated', [low, high]);
     }
 
     function updateState(top, height) {
@@ -183,10 +179,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
         let high = low + (max - min) * self.slidingBarState.range / 100.;
-        let logplotModel = await logPlotCtrl.getLogplotModelAsync(); 
+        let logplotModel = await self.wiLogplotCtrl.getLogplotModelAsync(); 
         let newLogplot = {
             idPlot: logplotModel.properties.idPlot,
-            cropDisplay: logPlotCtrl.cropDisplay,
+            cropDisplay: self.wiLogplotCtrl.cropDisplay,
             currentState: {
                 top0: self.slidingBarState.top0,
                 range0: self.slidingBarState.range0,
@@ -208,9 +204,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     };
 
     this.onReady = function () {
-        let logPlotName = self.name.replace('Slidingbar', '');
-        logPlotCtrl = wiComponentService.getComponent(logPlotName);
-        this.logPlotCtrl = logPlotCtrl;
         let parentHeight = actual(self.contentId, 'height');
         _tinyWindow = {
             top: 0,
@@ -250,13 +243,13 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             event.stopPropagation();
             update(ui);
             updateWid3();
-            tungTrick(ui);
+            //tungTrick(ui);
         });
         $(self.handleId).on("resizestop", function (event, ui) {
             event.stopPropagation();
             update(ui);
             updateWid3();
-            tungTrick(ui);
+            //tungTrick(ui);
             saveStateToServer();
         });
 
@@ -296,7 +289,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
                 return;
             }
-            if (model.type == 'logplot' && model.id == logPlotCtrl.id) handler();
+            if (model.type == 'logplot' && model.id == self.wiLogplotCtrl.id) handler();
         }
         document.addEventListener('resize', self.resizeHandler);
 
@@ -424,7 +417,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.scaleView = function(top0, range0, force) {
         const CROPVIEW_FACTOR = 5;
-        //if ( logPlotCtrl.cropDisplay ) return;
         if (_tinyWindow.height < CROPVIEW_FACTOR * getMinTinyWinHeight() && !force) {
             toastr.warning('Current view is too small for cropping');
             $(self.handleId + " .sliding-handle-border").addClass('too-small');
@@ -433,13 +425,18 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             }, 200);
             return;
         }
-        logPlotCtrl.cropDisplay = true;
+        self.wiLogplotCtrl.cropDisplay = true;
 
         self.slidingBarState.top0 = top0?top0:self.slidingBarState.top;
         self.slidingBarState.range0 = range0?range0:self.slidingBarState.range;
         _doScaleView(self.slidingBarState);
         saveStateToServer();
         return;
+    }
+
+    function redrawLogplot() {
+        const wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        wiD3Controller.updateScale();
     }
 
     function _doScaleView(slidingBarState) {
@@ -455,13 +452,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         // TUNG for limiting height of resizable
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
-
-        const wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
-        wiD3Controller.updateScale();
+        
+        redrawLogplot();
     }
 
     this.resetView = function() {
-        logPlotCtrl.cropDisplay = false;
+        self.wiLogplotCtrl.cropDisplay = false;
         self.slidingBarState.top0 = 0;
         self.slidingBarState.range0 = 100.;
         _doScaleView(self.slidingBarState);
@@ -525,7 +521,8 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        containerName: '@'
+        containerName: '@',
+        wiLogplotCtrl: "<"
     }
 });
 

@@ -422,7 +422,9 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiD3Ctrl: '<',
-		properties: '<'
+		properties: '<',
+        minY: '<',
+        maxY: '<'
     }
 });
 exports.name = moduleName;

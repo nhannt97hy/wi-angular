@@ -4,31 +4,41 @@
         <wi-d3-log-track ng-if="track.idTrack" 
             name='{{wiD3.getTrackName(track)}} '
             properties='track'
-            wi-d3-ctrl='wiD3' 
+            wi-d3-ctrl='wiD3'
+            min-y='wiD3._minY'
+            max-y='wiD3._maxY'
             style="display: flex; flex-direction: column; outline: none;">
         </wi-d3-log-track>
         <wi-d3-depth-track ng-if="track.idDepthAxis" 
             name='{{wiD3.getTrackName(track)}}' 
             wi-d3-ctrl='wiD3'
             properties='track'
+            min-y='wiD3._minY'
+            max-y='wiD3._maxY'
             style="display: flex; flex-direction: column; outline: none;">
         </wi-d3-depth-track>
         <wi-d3-zone-track ng-if="track.idZoneTrack" 
             name='{{wiD3.getTrackName(track)}}' 
             wi-d3-ctrl='wiD3' 
             properties='track'
+            min-y='wiD3._minY'
+            max-y='wiD3._maxY'
             style="display: flex; flex-direction: column; outline: none;">
         </wi-d3-zone-track>
         <wi-d3-image-track ng-if="track.idImageTrack" 
             name='{{wiD3.getTrackName(track)}}' 
             wi-d3-ctrl='wiD3' 
             properties='track'
+            min-y='wiD3._minY'
+            max-y='wiD3._maxY'
             style="display: flex; flex-direction: column; outline: none;">
         </wi-d3-image-track>
         <wi-d3-object-track ng-if="track.idObjectTrack" 
             name='{{wiD3.getTrackName(track)}}' 
             wi-d3-ctrl='wiD3' 
             properties='track'
+            min-y='wiD3._minY'
+            max-y='wiD3._maxY'
             style="display: flex; flex-direction: column; outline: none;">
         </wi-d3-object-track>
     </div>

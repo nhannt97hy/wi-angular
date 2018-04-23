@@ -46,4 +46,26 @@ Controller.prototype.onTrackKeyPressCallback = function () {
     console.log( ' on track key ' + d3.event.key + ' pressed');
 }
 
+Controller.prototype.setDepthRange = function(depthRange) {
+    if (!this.viTrack) return;
+    this.viTrack.minY = depthRange[0];
+    this.viTrack.maxY = depthRange[1];
+    this.viTrack.doPlot();
+}
+
+Controller.prototype.$onInit = function() {
+    let self = this;
+    this.wiD3Ctrl.wiLogplotCtrl.on('depth-range-updated', function(depthRange) {
+        self.viTrack.minY = depthRange[0];
+        self.viTrack.maxY = depthRange[1];
+        self.viTrack.doPlot();
+    });
+}
+
+Controller.prototype.$doCheck = function() {
+    if (!this.viTrack) return;
+    if (this.viTrack.minY == this.minY && this.viTrack.maxY == this.maxY) return;
+    this.setDepthRange([this.minY, this.maxY]);
+}
+
 module.exports = Controller;
