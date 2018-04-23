@@ -481,7 +481,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 params = {
                     max_iter: getValueParam('max_iter', self.currentModelType),
                     alpha: getValueParam('alpha', self.currentModelType),
-                    max_features: getValueParam('max_features', self.currentModelType),
+                    max_features: getValueParam('max_features', self.currentModelType)=="None"?null:getValueParam('max_features', self.currentModelType),
                     kernel: getValueParam('kernel', self.currentModelType),
                     gamma: getValueParam('gamma', self.currentModelType),
                     C: getValueParam('C', self.currentModelType),
