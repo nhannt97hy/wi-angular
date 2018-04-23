@@ -1,14 +1,14 @@
 @@include("./toolbar/index.html")
 
 <div class="filter-block">
-    <span>Filter: </span>
+    <!-- <span>Filter: </span> -->
     <input type="text" placeholder="Search ..." ng-model="filter" ng-init="filter=''">
 </div>
 
-<div class="label_treeview">
+<!-- <div class="label_treeview">
     <span>Name</span><span>Unit</span>
-</div>
-<div style='background-color:#fff; overflow-y: auto; height: calc(100% - 94px);'
+</div> -->
+<div style='background-color:#fff; overflow-y: auto; height: calc(100%);'
 id="treeContent">
     <wi-explorer-treeview name="{{wiExplorer.treeviewName}}" config="wiExplorer.treeConfig" container="wiExplorer" filter='{{filter}}'></wi-explorer-treeview>
 </div>

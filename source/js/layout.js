@@ -9,7 +9,7 @@ let layoutConfig = {
         showPopoutIcon: false
     },
     dimensions: {
-        borderWidth: 5
+        borderWidth: 10
     },
     content: [
         {

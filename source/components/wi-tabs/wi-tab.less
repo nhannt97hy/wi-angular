@@ -1,35 +1,44 @@
 wi-tabset {
   display: block;
   .nav-tabs{
-    background: #c8c9d0;
+    background: #1e405f;
     padding: 2px 0 0 5px;
     border-bottom: 1px solid #a8aab4;
+    height: 32px;
   }
   wi-tab {
     display: block;
     & > div{
-      border-bottom: 1px solid #a8aab4;
-      border-right: 1px solid #a8aab4;
-      border-left: 1px solid #a8aab4;
-      background: rgba(255,255,255,1);
-      background: -moz-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
-      background: -webkit-gradient(left top, left bottom, color-stop(13%, rgba(255,255,255,1)), color-stop(42%, rgba(250,250,252,1)), color-stop(100%, rgba(240,241,245,1)));
-      background: -webkit-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
-      background: -o-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
-      background: -ms-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
-      background: linear-gradient(to bottom, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f0f1f5', GradientType=0 );
+      // border-bottom: 1px solid #a8aab4;
+      // border-right: 1px solid #a8aab4;
+      // border-left: 1px solid #a8aab4;
+      // background: rgba(255,255,255,1);
+      // background: -moz-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
+      // background: -webkit-gradient(left top, left bottom, color-stop(13%, rgba(255,255,255,1)), color-stop(42%, rgba(250,250,252,1)), color-stop(100%, rgba(240,241,245,1)));
+      // background: -webkit-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
+      // background: -o-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
+      // background: -ms-linear-gradient(top, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
+      // background: linear-gradient(to bottom, rgba(255,255,255,1) 13%, rgba(250,250,252,1) 42%, rgba(240,241,245,1) 100%);
+      // filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f0f1f5', GradientType=0 );
       }
 
   }
+  .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+    color: #fff;
+    background-color: #3372a9;
+    // border: 1px solid #ddd;
+    // border-bottom-color: transparent;
+    cursor: default;
+}
 
   li.wi-tab.active {
-    border: 1px solid #a8aab4;
-    border-bottom-color: transparent;
-    background: #fff;
-    border-radius:2px;
-    box-shadow: 3px -2px 2px -2px rgba(0,0,0,0.13);
+    /* border: 1px solid #a8aab4; */
+    /* border-bottom-color: transparent; */
+    background: #3372a9;
+    /* border-radius: 2px; */
+    /* box-shadow: 3px -2px 2px -2px rgba(0, 0, 0, 0.13); */
     padding-top: 2px;
+    height: 27px;
   }
   /* khu border */
   li.wi-tab.active > a,
@@ -42,13 +51,14 @@ wi-tabset {
 
   li.wi-tab {
     cursor: pointer;
-    padding: 3px 12px;
+    padding: 3px 30px;
     & > a {
       display: inline-block;
       padding: 0;
       background: transparent;
-      color: #000;
+      color: #768fa7;
       font-size: 12px;
+      padding-top: 2;
       &:hover{
         background: none;
       }
