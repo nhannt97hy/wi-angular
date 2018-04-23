@@ -160,45 +160,42 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'activation',
         type: 'select',
         value: {
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         },
         choices: [{
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         }, {
-            name: 'Tanh',
+            name: 'tanh',
             value: 2
+        }, {
+            name: 'logistic',
+            value: 3
         }]
     }, {
-        name: 'epochs',
+        name: 'max_iter',
         type: 'number',
         min: 1,
-        value: 1000
+        value: 200
     }, {
-        name: 'learning_rate',
+        name: 'learning_rate_init',
         type: 'number',
-        value: 0.01,
-        step: 0.01
+        value: 0.001,
+        step: 0.001
     }, {
         name: 'tol',
         type: 'number',
-        value: 0.03,
-        step: 0.01
+        value: 0.0003,
+        step: 0.0001
     }, {
         name: 'Neuron Network Structure',
         type: 'nnconfig',
         value: {
-            nLayer: 3,
+            nLayer: 1,
             layerConfig: [{
                 name: "layer 0",
-                value: 10
-            }, {
-                name: "layer 1",
-                value: 10
-            }, {
-                name: "layer 2",
-                value: 10
+                value: 100
             }]
         }
     }];
@@ -207,45 +204,42 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'activation',
         type: 'select',
         value: {
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         },
         choices: [{
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         }, {
-            name: 'Tanh',
+            name: 'tanh',
             value: 2
+        }, {
+            name: 'logistic',
+            value: 3
         }]
     }, {
-        name: 'epochs',
+        name: 'max_iter',
         type: 'number',
         min: 1,
-        value: 1000
+        value: 200
     }, {
-        name: 'learning_rate',
+        name: 'learning_rate_init',
         type: 'number',
-        value: 0.01,
+        value: 0.001,
         step: 0.1
     }, {
         name: 'tol',
         type: 'number',
-        value: 0.03,
-        step: 0.01
+        value: 0.0003,
+        step: 0.0001
     }, {
         name: 'Neuron Network Structure',
         type: 'nnconfig',
         value: {
-            nLayer: 3,
+            nLayer: 1,
             layerConfig: [{
                 name: "layer 0",
-                value: 10
-            }, {
-                name: "layer 1",
-                value: 10
-            }, {
-                name: "layer 2",
-                value: 10
+                value: 100
             }]
         }
     }];
@@ -477,9 +471,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         else {
                             let layers = [];
                             if (param[0].value.nLayer == undefined)
-                                layers = [10, 10, 10];
+                                layers = [100];
                             else
-                                param[0].value.layerConfig.forEach(function (layer) { layers.push(layer.value ? layer.value : 10); });
+                                param[0].value.layerConfig.forEach(function (layer) { layers.push(layer.value ? layer.value : 100); });
                             return layers;
                         }
                     }
@@ -492,10 +486,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     gamma: getValueParam('gamma', self.currentModelType),
                     C: getValueParam('C', self.currentModelType),
                     n_estimators: getValueParam('n_estimators', self.currentModelType),
-                    epochs: getValueParam('epochs', self.currentModelType),
-                    learning_rate: getValueParam('learning_rate', self.currentModelType),
+                    // epochs: getValueParam('epochs', self.currentModelType),
+                    learning_rate_init: getValueParam('learning_rate_init', self.currentModelType),
                     tol: getValueParam('tol', self.currentModelType),
-                    layers: getValueParam('Neuron Network Structure', self.currentModelType),
+                    hidden_layer_sizes: getValueParam('Neuron Network Structure', self.currentModelType),
                     activation: getValueParam('activation', self.currentModelType)
                 }
             }
