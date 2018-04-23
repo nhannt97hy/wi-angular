@@ -11,6 +11,7 @@ module.exports = function (ModalService, callback, groups, users) {
         this.isSelectedGroup = false;
         this.isSelectedUser = false;
         this.idGroups = [];
+        this.objects = null;
 
         preGroup();
 
@@ -46,9 +47,253 @@ module.exports = function (ModalService, callback, groups, users) {
             });
         }
 
+        function unloadGroupPerm(perm, callback) {
+            let _perm = {};
+            perm.forEach(function (o) {
+                _perm[o.name + '.get'] = o.get;
+                _perm[o.name + '.create'] = o.create;
+                _perm[o.name + '.update'] = o.update;
+                _perm[o.name + '.delete'] = o.delete;
+            });
+            wiApiService.updateGroupPermissionOfProject({
+                project_name: self.project.name,
+                idGroup: self.selectedGroup.idGroup,
+                permission: _perm
+            }, function (res) {
+                toastr.success("Successfull updated new permission for group : " + self.selectedGroup.name);
+                callback();
+            });
+        }
+
+        function loadGroupPerm(group) {
+            wiApiService.getGroupPermissionOfProject({
+                project_name: self.project.name,
+                idGroup: group.idGroup
+            }, function (perm) {
+                if (!perm['well.get']) {
+                    self.objects = null;
+                } else {
+                    self.objects = [
+                        {
+                            displayAs: 'Well',
+                            name: 'well',
+                            get: perm['well.get'],
+                            create: perm['well.create'],
+                            update: perm['well.update'],
+                            delete: perm['well.delete']
+                        },
+                        {
+                            displayAs: 'Dataset',
+                            name: 'dataset',
+                            get: perm['dataset.get'],
+                            create: perm['dataset.create'],
+                            update: perm['dataset.update'],
+                            delete: perm['dataset.delete']
+                        },
+                        {
+                            displayAs: 'Curve',
+                            name: 'curve',
+                            get: perm['curve.get'],
+                            create: perm['curve.create'],
+                            update: perm['curve.update'],
+                            delete: perm['curve.delete']
+                        },
+                        {
+                            displayAs: 'Zone Set',
+                            name: 'zone-set',
+                            get: perm['zone-set.get'],
+                            create: perm['zone-set.create'],
+                            update: perm['zone-set.update'],
+                            delete: perm['zone-set.delete']
+                        },
+                        {
+                            displayAs: 'Zone',
+                            name: 'zone',
+                            get: perm['zone.get'],
+                            create: perm['zone.create'],
+                            update: perm['zone.update'],
+                            delete: perm['zone.delete']
+                        },
+                        {
+                            displayAs: 'Log Plot',
+                            name: 'plot',
+                            get: perm['plot.get'],
+                            create: perm['plot.create'],
+                            update: perm['plot.update'],
+                            delete: perm['plot.delete']
+                        },
+                        {
+                            displayAs: 'Log Track',
+                            name: 'track',
+                            get: perm['track.get'],
+                            create: perm['track.create'],
+                            update: perm['track.update'],
+                            delete: perm['track.delete']
+                        },
+                        {
+                            displayAs: 'Shading',
+                            name: 'shading',
+                            get: perm['shading.get'],
+                            create: perm['shading.create'],
+                            update: perm['shading.update'],
+                            delete: perm['shading.delete']
+                        },
+                        {
+                            displayAs: 'Line',
+                            name: 'line',
+                            get: perm['line.get'],
+                            create: perm['line.create'],
+                            update: perm['line.update'],
+                            delete: perm['line.delete']
+                        },
+                        {
+                            displayAs: 'Marker',
+                            name: 'marker',
+                            get: perm['marker.get'],
+                            create: perm['marker.create'],
+                            update: perm['marker.update'],
+                            delete: perm['marker.delete']
+                        },
+                        {
+                            displayAs: 'Annotation',
+                            name: 'annotation',
+                            get: perm['annotation.get'],
+                            create: perm['annotation.create'],
+                            update: perm['annotation.update'],
+                            delete: perm['annotation.delete']
+                        },
+                        {
+                            displayAs: 'Reference Curve',
+                            name: 'reference-curve',
+                            get: perm['reference-curve.get'],
+                            create: perm['reference-curve.create'],
+                            update: perm['reference-curve.update'],
+                            delete: perm['reference-curve.delete']
+                        },
+                        {
+                            displayAs: 'Depth Track',
+                            name: 'depth-axis',
+                            get: perm['depth-axis.get'],
+                            create: perm['depth-axis.create'],
+                            update: perm['depth-axis.update'],
+                            delete: perm['depth-axis.delete']
+                        },
+                        {
+                            displayAs: 'Image Track',
+                            name: 'image-track',
+                            get: perm['image-track.get'],
+                            create: perm['image-track.create'],
+                            update: perm['image-track.update'],
+                            delete: perm['image-track.delete']
+                        },
+                        {
+                            displayAs: 'Image Of Image Track',
+                            name: 'image-of-track',
+                            get: perm['image-of-track.get'],
+                            create: perm['image-of-track.create'],
+                            update: perm['image-of-track.update'],
+                            delete: perm['image-of-track.delete']
+                        },
+                        {
+                            displayAs: 'Object Track',
+                            name: 'object-track',
+                            get: perm['object-track.get'],
+                            create: perm['object-track.create'],
+                            update: perm['object-track.update'],
+                            delete: perm['object-track.delete']
+                        },
+                        {
+                            displayAs: 'Object of Object Track',
+                            name: 'object-of-track',
+                            get: perm['object-of-track.get'],
+                            create: perm['object-of-track.create'],
+                            update: perm['object-of-track.update'],
+                            delete: perm['object-of-track.delete']
+                        },
+                        {
+                            displayAs: 'Zone Track',
+                            name: 'zone-track',
+                            get: perm['zone-track.get'],
+                            create: perm['zone-track.create'],
+                            update: perm['zone-track.update'],
+                            delete: perm['zone-track.delete']
+                        },
+                        {
+                            displayAs: 'Histogram',
+                            name: 'histogram',
+                            get: perm['histogram.get'],
+                            create: perm['histogram.create'],
+                            update: perm['histogram.update'],
+                            delete: perm['histogram.delete']
+                        },
+                        {
+                            displayAs: 'Cross Plot',
+                            name: 'cross-plot',
+                            get: perm['cross-plot.get'],
+                            create: perm['cross-plot.create'],
+                            update: perm['cross-plot.update'],
+                            delete: perm['cross-plot.delete']
+                        },
+                        {
+                            displayAs: 'Point Set',
+                            name: 'point-set',
+                            get: perm['point-set.get'],
+                            create: perm['point-set.create'],
+                            update: perm['point-set.update'],
+                            delete: perm['point-set.delete']
+                        },
+                        {
+                            displayAs: 'Polygon',
+                            name: 'polygon',
+                            get: perm['polygon.get'],
+                            create: perm['polygon.create'],
+                            update: perm['polygon.update'],
+                            delete: perm['polygon.delete']
+                        },
+                        {
+                            displayAs: 'Regression Line',
+                            name: 'regression-line',
+                            get: perm['regression-line.get'],
+                            create: perm['regression-line.create'],
+                            update: perm['regression-line.update'],
+                            delete: perm['regression-line.delete']
+                        },
+                        {
+                            displayAs: 'Ternary',
+                            name: 'ternary',
+                            get: perm['ternary.get'],
+                            create: perm['ternary.create'],
+                            update: perm['ternary.update'],
+                            delete: perm['ternary.delete']
+                        },
+                        {
+                            displayAs: 'User Define Line',
+                            name: 'user-define-line',
+                            get: perm['user-define-line.get'],
+                            create: perm['user-define-line.create'],
+                            update: perm['user-define-line.update'],
+                            delete: perm['user-define-line.delete']
+                        },
+                        {
+                            displayAs: 'Combined Box',
+                            name: 'combined-box',
+                            get: perm['combined-box.get'],
+                            create: perm['combined-box.create'],
+                            update: perm['combined-box.update'],
+                            delete: perm['combined-box.delete']
+                        },
+                    ];
+                }
+            });
+        }
+
         this.groupClicked = function (group) {
             self.selectedGroup = group;
+            loadGroupPerm(group);
             preUser(group);
+        };
+        this.userClicked = function () {
+            self.objects = null;
         };
         this.addNewGroup = function () {
             let promptConfig = {
@@ -63,7 +308,7 @@ module.exports = function (ModalService, callback, groups, users) {
             });
         };
         this.deleteGroup = function (group) {
-            wiApiService.removeGroup({idGroup: group.idGroup}, function (response) {
+            wiApiService.removeUserGroup({idGroup: group.idGroup}, function (response) {
                 if (self.selectedGroup && self.selectedGroup.idGroup === group.idGroup) self.selectedGroup = null;
                 toastr.success("Successfull delete group " + group.name);
                 reload();
@@ -98,6 +343,7 @@ module.exports = function (ModalService, callback, groups, users) {
                     idGroup: group.idGroup,
                     idSharedProject: sharedProject.idSharedProject
                 }, function () {
+                    loadGroupPerm(group);
                     toastr.success("Successfull share " + self.project.name + " to group " + group.name);
                     reload();
                 });
@@ -109,6 +355,7 @@ module.exports = function (ModalService, callback, groups, users) {
                 idGroup: group.idGroup,
                 idSharedProject: group.idSharedProject
             }, function (response) {
+                loadGroupPerm(group);
                 toastr.success("Successfull stop sharing " + self.project.name + " from group " + group.name);
                 reload();
             });
@@ -126,6 +373,30 @@ module.exports = function (ModalService, callback, groups, users) {
         };
         this.onCancelButtonClicked = function () {
             close(null);
+        };
+        this.onApplyButtonClicked = function () {
+            if (self.selectedGroup && self.objects) {
+                unloadGroupPerm(self.objects, function () {
+                    let _u = "";
+                    let users = self.selectedGroup.users.filter(u => u.username !== localStorage.getItem("username"));
+                    console.log(users);
+                    async.eachSeries(users, function (user, nextUser) {
+                        wiApiService.updateUserPermissionOfProject({
+                            project_name: self.project.name,
+                            username: user.username
+                        }, function () {
+                            setTimeout(function () {
+                                _u += user.username + ", ";
+                                nextUser();
+                            }, 100)
+                        })
+                    }, function () {
+                        toastr.info("Reload permission for users successfull: " + _u);
+                    });
+                });
+            } else {
+                toastr.warning("No permission changed!");
+            }
         }
     }
 

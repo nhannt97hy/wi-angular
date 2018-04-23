@@ -41,6 +41,11 @@
             ng-dblclick="wiBaseTreeview.onDoubleClick($index)">
             <span class='display-inline-block' style='text-indent:10px;' title="{{item.data.unit}}">{{item.data.unit}}</span>
         </div>
+        <div class="wi-parent-choices" ng-if='item.type=="choice"'>
+            <select ng-model='item.data.value' ng-if='item.data.choices'
+            ng-options="choice as choice.name for choice in item.data.choices track by choice.value"></select>
+            <input type="number" ng-model="item.data.value" ng-if="!item.data.choices" step="any">
+        </div>
     </div>
 
     <div ng-show="item.data.childExpanded">

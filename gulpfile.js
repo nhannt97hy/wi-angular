@@ -12,7 +12,11 @@ const changed = require('gulp-changed');
 const async = require('async');
 const fileInclude = require('gulp-file-include');
 const XLSX = require('xlsx');
-// const workbook = XLSX.readFile('Wi-UI.Tung.xlsx');
+// const workbook = XLSX.readFile('Wi-UI.Tung.xlsx'); // Defalt skin
+//const workbook = XLSX.readFile('Wi-UI.skin.xlsx'); // new skin
+//    var _xlsxFile = './Wi-UI.Tung.xlsx';
+// var _xlsxFile = './Wi-UI.skin.xlsx';
+
 const rsync = require('gulp-rsync');
 const fs = require('fs');
 var browserSync = require('browser-sync');

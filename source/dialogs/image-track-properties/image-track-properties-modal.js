@@ -36,6 +36,8 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
         this.isCreated = props.isCreated;
         this.wasApplyButtonClicked = false;
 
+        this.message = '';
+
         this.trackBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.background, function (colorStr) {
                 self.background = colorStr;
@@ -113,6 +115,13 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
                 async.eachOfSeries(self.imagesOfCurrentTrack, function(image, i, callback) {
                     switch (self.imagesOfCurrentTrack[i].flag) {
                         case _NEW:
+                            self.message = isValidImageInfo(self.imagesOfCurrentTrack[i]);
+                            if (self.message !== '') {
+                                toastr.error(self.message + 'cannot be blank');
+                                self.isValid = false;
+                                break;
+                            }
+                            self.isValid = true;
                             delete self.imagesOfCurrentTrack[i].flag;
                             self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
                             wiApiService.createImage(self.imagesOfCurrentTrack[i], function(data) {
@@ -122,6 +131,13 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
                             break;
 
                         case _EDIT:
+                            self.message = isValidImageInfo(self.imagesOfCurrentTrack[i]);
+                            if (self.message !== '') {
+                                toastr.error(self.message + 'cannot be blank');
+                                self.isValid = false;
+                                break;
+                            }
+                            self.isValid = true;
                             delete self.imagesOfCurrentTrack[i].flag;
                             self.imagesOfCurrentTrack[i].idImageTrack = imageTrackProperties.idImageTrack;
                             wiApiService.editImage(self.imagesOfCurrentTrack[i], function(data) {
@@ -162,6 +178,14 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
             }
         }
 
+        function isValidImageInfo (image) {
+            let message = '';
+            if (!image.imageUrl) message += 'Image URL ';
+            if (!image.topDepth) message += 'Start depth ';
+            if (!image.bottomDepth) message += 'End depth ';
+            return message;
+        }
+
         function bindProps () {
             props.showTitle = self.showTitle;
             props.title = self.title;
@@ -180,7 +204,12 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
             } else {
                 if (self.status) {
                     doApply(function() {
-                        close(props);
+                        if (!self.isValid) {
+                            toastr.error(self.message + 'cannot be blank');
+                            callback();
+                        } else {
+                            close(props);
+                        }
                     });
                 } else {
                     close(props);
@@ -192,7 +221,12 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
             bindProps();
             if (self.status) {
                 doApply(function() {
-                    callback(props);
+                    if (!self.isValid) {
+                        toastr.error(self.message + 'cannot be blank');
+                        callback();
+                    } else {
+                        callback(props);
+                    }
                 });
             } else {
                 callback(props);
