@@ -260,8 +260,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (wellProps.bottomDepth)
         return parseFloat(wellProps.bottomDepth);
 
-        let maxDepth = d3.max(_tracks, function (track) {
-            if (track.getExtentY) return track.getExtentY()[1];
+        // TO BE REMOVED
+        // let maxDepth = d3.max(_tracks, function (track) {
+        //     if (track.getExtentY) return track.getExtentY()[1];
+        //     return -1;
+        // });
+        let maxDepth = d3.max(self.trackComponents, function (tc) {
+            if (tc.controller.viTrack.getExtentY) return tc.controller.viTrack.getExtentY()[1];
             return -1;
         });
         maxDepth = (maxDepth > 0) ? maxDepth : 100000;
@@ -1274,6 +1279,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _currentTrack.controller.viTrack.highlightCallback();
         _clearPreviousHighlight();
     }
+    /*
     function orderTrack(viTrack, orderNum) {
         viTrack.orderNum = orderNum;
         viTrack.updateOrderNum();
@@ -1282,7 +1288,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         graph.rearrangeTracks(self);
     }
-    /*
     function editOrderNum(viTrack, orderNum) {
         return new Promise((resolve, reject) => {
             if (viTrack.isLogTrack()) {
