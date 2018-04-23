@@ -8,12 +8,21 @@ const _MARGIN = {
     bottom: 50,
     left: 70
 };
+const _AREA_LINE_COLOR = 'DarkCyan';
+const _AREA_LINE_WIDTH = 4;
+const _AREA_BACKGROUND = 'rgba(255, 255, 0, 0.5)';
+const _TERNARY_VERTEX_COLOR = 'Green';
+const _TERNARY_POINT_COLOR = 'Red';
+const _TERNARY_VERTEX_SIZE = 6;
+const _TERNARY_EDGE_WIDTH = 2;
 
 module.exports = ViWiXplot;
 
 function ViWiXplot(props) {
     this.pointsets = props.pointsets;
     this.config = props.config;
+
+    this.showTooltip = true;
 }
 
 ViWiXplot.prototype.setProperties = function (props) {
@@ -58,14 +67,26 @@ ViWiXplot.prototype.init = function (domElem) {
     this.prepareContainer();
     this.prepareData();
     this.doPlot();
+
+    this.svgContainer.raise();
+
+    this.on('mousedown', function() { self.mouseDownCallback() });
+    this.on('mousemove', function() { self.mouseMoveCallback() });
+    this.on('mouseleave', function() { self.tooltip(null, null, true);})
+}
+
+ViWiXplot.prototype.setMode = function(mode) {
+    this.svgContainer.raise();
+    this.svgContainer.style('cursor', mode == null ? 'default' : 'copy');
+    this.mode = mode;
 }
 
 ViWiXplot.prototype.prepareContainer = function () {
     this.prepareAxesContainer();
-    // later
-    // this.prepareFunctionsContainer();
+    this.prepareFunctionsContainer();
 }
 
+// SVG Container
 ViWiXplot.prototype.prepareAxesContainer = function () {
     let self = this;
     let xScale = this.getTransformX();
@@ -95,6 +116,38 @@ ViWiXplot.prototype.prepareAxesContainer = function () {
         .append('text')
             .attr('class', function (d) { return 'vi-crossplot-axis-label ' + d; })
             .text('-');
+}
+ViWiXplot.prototype.prepareFunctionsContainer = function () {
+    let self = this;
+
+    this.functionsContainer = this.svgContainer.append('g')
+        .attr('class', 'wi-xplot-functions-container')
+        .attr('width', self.rect.width)
+        .attr('height', self.rect.height);
+
+    this.functionsContainer.append('clipPath')
+        .attr('id', self.getSvgClipId())
+        .append('rect');
+
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-polygons');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-regression-lines');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-user-define-lines');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-area');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-user-line');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-equations');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-ternary');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-overlay-line');
+    this.functionsContainer.append('g')
+        .attr('class', 'vi-xplot-tooltip');
+
 }
 
 ViWiXplot.prototype.prepareData = function () {
@@ -129,8 +182,11 @@ ViWiXplot.prototype.prepareData = function () {
 ViWiXplot.prototype.doPlot = function () {
     this.adjustSize();
     this.updateAxesContainer();
+    this.updateClipPath();
 
     this.plotPoints();
+    this.plotArea();
+    this.plotUserLine();
     this.plotFooter();
 }
 
@@ -147,6 +203,19 @@ ViWiXplot.prototype.updatePlot = function (newProps) {
     if (!this.pointsets.length) return;
     this.prepareData();
     this.doPlot();
+}
+ViWiXplot.prototype.updateClipPath = function () {
+    let self = this;
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    this.svgContainer.select('clipPath')
+        .attr('id', self.getSvgClipId())
+        .select('rect')
+            .attr('x', d3.min(vpX) + _MARGIN.left)
+            .attr('y', d3.min(vpY) + _MARGIN.top)
+            .attr('width', Math.abs(vpX[0] - vpX[1]))
+            .attr('height', Math.abs(vpY[0] - vpY[1]));
 }
 
 ViWiXplot.prototype.adjustSize = function () {
@@ -287,16 +356,16 @@ ViWiXplot.prototype.updateAxesLabels = function () {
 
     this.axesContainer.select('text.vi-crossplot-axis-x-label')
         .attr('x', function() { return self.plotContainerSize.x + self.plotContainerSize.width/2; })
-        .attr('y', function() { return self.plotContainerSize.y + self.plotContainerSize.height + _MARGIN.bottom; })
+        .attr('y', function() { return self.plotContainerSize.height + _MARGIN.bottom; })
         .attr('text-anchor', 'middle')
-        .text(this.pointsets[0].curveX.name);
+        .text(this.getLabelX());
 
     this.axesContainer.select('text.vi-crossplot-axis-y-label')
         .attr('transform', 'rotate(-90)')
         .attr('y', _MARGIN.top )
         .attr('x', -(self.plotContainerSize.height/2) - _MARGIN.top )
         .attr('text-anchor', 'middle')
-        .text(this.pointsets[0].curveY.name);
+        .text(this.getLabelY());
 }
 
 ViWiXplot.prototype.plotPoints = function () {
@@ -315,8 +384,7 @@ ViWiXplot.prototype.plotPoints = function () {
 
         let ctx = self.ctx;
 
-        // ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
-        let area = self.plotContainerSize;
+        let area =  self.plotContainerSize;
         ctx.rect(area.x, area.y, area.width, area.height);
         ctx.clip();
 
@@ -343,6 +411,60 @@ ViWiXplot.prototype.plotPoints = function () {
     });
 }
 
+// Plot Area
+ViWiXplot.prototype.plotArea = function () {
+    let self = this;
+    let areaContainer = this.functionsContainer.select('g.vi-xplot-area');
+    areaContainer.selectAll('.vi-xplot-area-item').remove();
+    if (!this.area || !this.area.points || this.area.points.length < 2) return;
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function (d) { return transformX(d.x); })
+        .y(function (d) { return transformY(d.y); });
+
+    let area = areaContainer.append('path')
+        .datum(this.area)
+        .attr('d', function (d) {
+            if (d === self.tmpPolygon)
+                return line(d.points);
+            else
+                return line(d.points.concat([d.points[0]]));
+        })
+        .classed('vi-xplot-area-item', true)
+        .attr('stroke', _AREA_LINE_COLOR)
+        .attr('stroke-width', _AREA_LINE_WIDTH)
+        .attr('fill-rule', 'evenodd')
+        .attr('fill', _AREA_BACKGROUND);
+}
+
+// Plot User Line
+ViWiXplot.prototype.plotUserLine = function () {
+    let userLineContainer = this.functionsContainer.select('g.vi-xplot-user-line');
+    userLineContainer.selectAll('path').remove();
+
+    if (!this.userLine || !this.userLine.points || this.userLine.points.length < 2) return;
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let line = d3.line()
+        .x(function(d) { return transformX(d.x); })
+        .y(function(d) { return transformY(d.y); });
+
+    let userLine = userLineContainer.append('path')
+        .datum(this.userLine)
+        .attr('d', function(d) { return line(d.points); })
+        .attr('stroke', _AREA_LINE_COLOR)
+        .attr('stroke-width', _AREA_LINE_WIDTH);
+
+    let equation = Utils.getLinearEquation(this.userLine.points[0], this.userLine.points[1]);
+    equation = equation.replace('x', this.getLabelX());
+    equation = equation.replace('y', this.getLabelY());
+}
+
 ViWiXplot.prototype.plotFooter = function () {
     let self = this;
     let totalPoints = 0;
@@ -355,6 +477,96 @@ ViWiXplot.prototype.plotFooter = function () {
                         + this.nullDatas + ' nulls)';
     this.footerRight
         .text(footerString);
+}
+
+// Tooltip
+ViWiXplot.prototype.tooltip = function (x, y, notShow) {
+    let self = this;
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+    let tooltipData = { x: x, y: y };
+
+    let xCoord = transformX(x) + 15;
+    let yCoord = transformY(y) + 15;
+    let container = this.functionsContainer.select('g.vi-xplot-tooltip');
+    if (notShow || isNaN(xCoord) || isNaN(yCoord) || !x || !y) {
+        container.selectAll('*').remove();
+        return;
+    }
+
+    let text = container.selectAll('text')
+        .data([x, y]);
+    text.enter()
+        .append('text')
+        .style('font-size', 12)
+        .attr('x', xCoord)
+        .attr('y', (d, i) => { return yCoord + 15 + 15 * i; })
+        .text(function (d, i) {
+            return (i == 0 ? 'X(' + self.getLabelX() : 'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
+        });
+    text.attr('x', xCoord)
+        .attr('y', (d, i) => { return yCoord + 15 + 15 * i; })
+        .text(function (d, i) {
+            return (i == 0 ? 'X(' + self.getLabelX() : 'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
+        });
+    text.exit().remove();
+
+    let maxWidth = d3.max(container.selectAll('text').nodes().map(function (node) { return node.getBBox().width; }));
+    let maxHeight = container.select('text').node().getBBox().height * 2.5;
+    let rect = container.selectAll('rect')
+        .data([{ x: xCoord, y: yCoord }]);
+    rect.enter()
+        .append('rect')
+        .attr('x', (d) => d.x - 5)
+        .attr('y', (d) => d.y - 5)
+        .attr('width', maxWidth + 10)
+        .attr('height', maxHeight + 10)
+        .attr('fill', 'lightgreen')
+        .attr('fill-opacity', 0.9)
+        .attr('stroke', '#444')
+        .attr('rx', 7)
+        .attr('ry', 7);
+    rect.attr('x', (d) => d.x - 5)
+        .attr('y', (d) => d.y - 5)
+        .attr('width', maxWidth + 10)
+        .attr('height', maxHeight + 10);
+    rect.exit().remove();
+    text.raise();
+}
+
+// Area Polygon
+ViWiXplot.prototype.startAddAreaPolygon = function () {
+    this.setMode('PlotAreaPolygon');
+}
+ViWiXplot.prototype.endAddAreaPolygon = function () {
+    this.setMode(null);
+    if (!this.tmpPolygon) return null;
+    if (this.tmpPolygonPoint) {
+        this.tmpPolygon.points.pop();
+    }
+    this.tmpPolygon = null;
+    this.plotArea();
+    return this.area;
+}
+
+// Area Rectangle
+ViWiXplot.prototype.startAddAreaRectangle = function () {
+    this.setMode('PlotAreaRectangle');
+    this.area = null;
+}
+ViWiXplot.prototype.endAddAreaRectangle = function () {
+    this.setMode(null);
+    return this.area;
+}
+
+// User Line
+ViWiXplot.prototype.startAddUserLine = function () {
+    this.setMode('PlotUserLine');
+    this.userLine = null;
+}
+ViWiXplot.prototype.endAddUserLine = function () {
+    this.setMode(null);
+    return this.userLine;
 }
 
 ViWiXplot.prototype.getTransformX = function () {
@@ -382,6 +594,17 @@ ViWiXplot.prototype.getViewportX = function () {
 }
 ViWiXplot.prototype.getViewportY = function () {
     return [this.plotContainerSize.height, 0];
+}
+
+ViWiXplot.prototype.getLabelX = function () {
+    return this.pointsets[0].curveX.name;
+}
+ViWiXplot.prototype.getLabelY = function () {
+    return this.pointsets[0].curveY.name;
+}
+
+ViWiXplot.prototype.getSvgClipId = function () {
+    return 'vi-xplot-clip-path';
 }
 
 ViWiXplot.prototype.calcPlotContainerSize = function () {
@@ -420,5 +643,175 @@ ViWiXplot.prototype.genYTickValues = function () {
     else {
         let stepY = (wdY[1] - wdY[0]) / (this.config.majorY * this.config.minorY || 1);
         return d3.range(wdY[0], wdY[1] + stepY / 2, stepY);
+    }
+}
+
+// Mouse event
+ViWiXplot.prototype.on = function(type, cb) {
+    this.svgContainer.on(type, cb);
+}
+
+ViWiXplot.prototype.mouseDownCallback = function () {
+    let mouse = d3.mouse(this.svgContainer.node());
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    if (mouse[0] < d3.min(vpX) + _MARGIN.left || mouse[0] > d3.max(vpX) + _MARGIN.left
+        || mouse[1] < d3.min(vpY) + _MARGIN.top || mouse[1] > d3.max(vpY) + _MARGIN.top)
+        return;
+
+    let x = this.getTransformX().invert(mouse[0]);
+    let y = this.getTransformY().invert(mouse[1]);
+
+    if (d3.event.button == 2) return;
+    if (this.mode == 'PlotPolygon') {
+        if (!this.tmpPolygon) {
+            this.tmpPolygon = {
+                lineStyle: this.genColor(),
+                display: true,
+                points: [{ x: x, y: y }]
+            };
+            this.polygons.push(this.tmpPolygon);
+        }
+        this.tmpPolygonPoint = null;
+        this.plotPolygons();
+    }
+    else if (this.mode == 'PlotAreaPolygon') {
+        if (!this.tmpPolygon) {
+            this.tmpPolygon = { points: [{ x: x, y: y }] };
+            this.area = this.tmpPolygon;
+        }
+        this.tmpPolygonPoint = null;
+        this.plotArea();
+    }
+    else if (this.mode == 'PlotAreaRectangle') {
+        if (!this.area) {
+            this.area = { points: [{ x: x, y: y }] };
+        }
+        else {
+            this.area = {
+                points: [
+                    this.area.points[0],
+                    { x: this.area.points[0].x, y: y },
+                    { x: x, y: y },
+                    { x: x, y: this.area.points[0].y }
+                ]
+            }
+            this.plotArea();
+        }
+    }
+    else if (this.mode == 'PlotUserLine') {
+        if (!this.userLine) {
+            this.userLine = { points: [{ x: x, y: y }] };
+        }
+        else {
+            this.userLine = {
+                points: [
+                    this.userLine.points[0],
+                    { x: x, y: y }
+                ]
+            }
+            this.plotUserLine();
+        }
+    }
+    else if (this.mode == 'PlotTernaryVertex') {
+        let vertices = this.ternary.vertices;
+        let vertex = this.tmpVertex;
+        if (vertex == null) {
+            vertex = {
+                x: x,
+                y: y,
+                name: 'Material_' + (vertices.length + 1),
+                style: 'Circle',
+                used: false,
+                showed: true
+            };
+            vertices.push(vertex);
+        }
+        else {
+            vertex.x = x;
+            vertex.y = y;
+        }
+        this.plotTernary();
+        return vertex;
+    }
+    else if (this.mode == 'PlotTernaryPoint') {
+        this.ternary.calculate.point = {
+            x: x,
+            y: y
+        }
+        this.plotTernaryPoint();
+        return this.ternary.calculate.point;
+    }
+}
+
+ViWiXplot.prototype.mouseMoveCallback = function () {
+    let mouse = d3.mouse(this.svgContainer.node());
+    let vpX = this.getViewportX();
+    let vpY = this.getViewportY();
+
+    if (mouse[0] < d3.min(vpX) + _MARGIN.left || mouse[0] > d3.max(vpX) + _MARGIN.left
+        || mouse[1] < d3.min(vpY) + _MARGIN.top || mouse[1] > d3.max(vpY) + _MARGIN.top)
+        return;
+
+    let x = this.getTransformX().invert(mouse[0]);
+    let y = this.getTransformY().invert(mouse[1]);
+
+    if (this.mode == 'PlotPolygon') {
+        if (!this.tmpPolygon) return;
+        if (!this.tmpPolygonPoint) {
+            this.tmpPolygonPoint = { x: x, y: y };
+            this.tmpPolygon.points.push(this.tmpPolygonPoint);
+        }
+        else {
+            this.tmpPolygonPoint.x = x;
+            this.tmpPolygonPoint.y = y;
+        }
+        this.plotPolygons();
+    }
+    else if (this.mode == 'PlotAreaPolygon') {
+        if (!this.tmpPolygon) return;
+        if (!this.tmpPolygonPoint) {
+            this.tmpPolygonPoint = { x: x, y: y };
+            this.tmpPolygon.points.push(this.tmpPolygonPoint);
+        }
+        else {
+            this.tmpPolygonPoint.x = x;
+            this.tmpPolygonPoint.y = y;
+        }
+        this.plotArea();
+    }
+    else if (this.mode == 'PlotAreaRectangle') {
+        if (!this.area) return;
+        else {
+            this.area = {
+                points: [
+                    this.area.points[0],
+                    { x: this.area.points[0].x, y: y },
+                    { x: x, y: y },
+                    { x: x, y: this.area.points[0].y }
+                ]
+            };
+            this.plotArea();
+        }
+    }
+    else if (this.mode == 'PlotUserLine') {
+        if (!this.userLine) return;
+        else {
+            this.userLine = {
+                points: [
+                    this.userLine.points[0],
+                    { x: x, y: y }
+                ]
+            };
+            this.plotUserLine();
+        }
+    }
+    else {
+        if (this.showTooltip) {
+            this.tooltip(x, y);
+        } else {
+            this.tooltip(null, null, true);
+        }
     }
 }

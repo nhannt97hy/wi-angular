@@ -4,6 +4,7 @@ const moduleName = 'wi-xplot';
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
     this.$onInit = function () {
         console.log('wi xplot initialization: ', this);
@@ -124,11 +125,164 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     pointsets: self.pointsets,
                     config: self.config
                 }, document.getElementById(self.plotAreaId));
+                self.setContextMenu();
             } else {
                 self.viWiXplot.pointsets = self.pointsets;
                 self.viWiXplot.updatePlot(changes);
             }
         });
+    }
+
+    this.drawAreaPolygon = function (callback) {
+        let self = this;
+        this.viWiXplot.startAddAreaPolygon();
+        this.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let area = self.viWiXplot.endAddAreaPolygon();
+                    if (callback) callback(area);
+                    self.setContextMenu();
+                }
+            }
+        ]);
+    }
+
+    this.drawAreaRectangle = function (callback) {
+        let self = this;
+        this.viWiXplot.startAddAreaRectangle();
+        this.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let area = self.viWiXplot.endAddAreaRectangle();
+                    if (callback) callback(area);
+                    self.setContextMenu();
+                }
+            }
+        ]);
+    }
+
+    this.deleteArea = function() {
+        this.viWiXplot.area = null;
+        this.viWiXplot.plotArea();
+    }
+
+    this.drawUserLine = function(callback) {
+        let self = this;
+        this.viWiXplot.startAddUserLine();
+        this.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    let userLine = self.viWiXplot.endAddUserLine();
+                    if (callback) callback(userLine);
+                    self.setContextMenu();
+                }
+            }
+        ]);
+    }
+
+    this.deleteUserLine = function() {
+        this.viWiXplot.userLine = null;
+        this.viWiXplot.plotUserLine();
+    }
+
+    this.setContextMenu = function (contextMenu) {
+        let self = this;
+        if (!contextMenu) {
+            this.contextMenu = [
+                {
+                    name: "ShowTooltip",
+                    label: "Show Tooltip",
+                    isCheckType: "true",
+                    checked: self.viWiXplot.showTooltip ? self.viWiXplot.showTooltip : true,
+                    handler: function () {
+                        self.viWiXplot.showTooltip = !self.viWiXplot.showTooltip;
+                        self.contextMenu[0].checked = self.viWiXplot.showTooltip;
+                    }
+                }, {
+                    name: "Functions",
+                    label: "Functions",
+                    class: "has-more",
+                    childContextMenu: [
+                        {
+                            name: "CreatePolygon",
+                            label: "Create Polygon",
+                            handler: function () {
+                                self.drawAreaPolygon();
+                            }
+                        },
+                        {
+                            name: "CreateRectangle",
+                            label: "Create Rectangle",
+                            handler: function () {
+                                self.drawAreaRectangle();
+                            }
+                        },
+                        {
+                            name: "DeleteArea",
+                            label: "Delete Area",
+                            handler: function () {
+                                self.deleteArea();
+                            }
+                        },
+                        {
+                            name: "CreateUserLine",
+                            label: "Create User Line",
+                            handler: function () {
+                                self.drawUserLine();
+                            }
+                        },
+                        {
+                            name: "DeleteUserLine",
+                            label: "Delete User Line",
+                            handler: function () {
+                                self.deleteUserLine();
+                            }
+                        },
+                        {
+                            name: "UserDefineLine",
+                            label: "User Define Line",
+                            handler: function () {
+                                DialogUtils.userDefineLineDialog(ModalService, self, function () {});
+                            }
+                        },
+                        {
+                            name: "PolygonManager",
+                            label: "Polygon Manager",
+                            handler: function () {
+                                DialogUtils.polygonManagerDialog(ModalService, self, function () {});
+                            }
+                        },
+                        {
+                            name: "RegessionLine",
+                            label: "Regession Line",
+                            handler: function () {
+                                DialogUtils.regressionLineDialog(ModalService, self, function () {});
+                            }
+                        }
+                    ],
+                    handler: function () {
+
+                    }
+                }
+            ];
+        } else {
+            this.contextMenu = contextMenu;
+        }
+    }
+    this.showContextMenu = function (event) {
+        if (event.button != 2) return;
+        event.stopPropagation();
+        wiComponentService.getComponent('ContextMenu')
+            .open(event.clientX, event.clientY, self.contextMenu);
     }
 }
 
