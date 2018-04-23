@@ -19,6 +19,7 @@ let app = angular.module(moduleName, []);
 const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
 const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://localhost:9000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
 
