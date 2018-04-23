@@ -16,7 +16,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             let projectModel = utils.projectToTreeConfig(projectLoaded);
             let dustbinModel = utils.dustbinToTreeConfig();
             self.treeConfig = [projectModel, dustbinModel];
-            utils.putListFamily();
         });
 
         wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
@@ -520,7 +519,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         label: "New Zone Set",
                         icon: "mineral-zone-add-16x16",
                         handler: function () {
-                            utils.createZoneSet();
+                            self.handlers.createZoneSet();
                         }
                     }, {
                         name: "ZoneManager",
@@ -531,6 +530,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.openZonemanager(zonesetsModel);
                         }
                     }, {
+                        name: "ZoneTemplateManager",
+                        label: "Zone Template Manager",
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                            layoutManager.putTabRight({
+                                title: "Zone Template Manager",
+                                componentState: {html: '<wi-zone-template-manager></wi-zone-template-manager>'}
+                            });
+                        }
+                    },{
                         separator: '1'
                     }
                 ];

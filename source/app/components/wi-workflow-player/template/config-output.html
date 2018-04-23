@@ -1,0 +1,38 @@
+<div class='wizard-step-container'>
+    <div style="display:flex;flex:1;flex-direction:column;padding:0 10px;overflow:auto;margin-bottom:10px;">
+        <div ng-repeat='wf in wiWorkflowPlayer.workflowConfig.steps' ng-hide='wf.disabled' class='bordered panel panel-default' style='display:table;min-width:100%;'>
+            <div class='panel-heading' style='background-color:#eee;'>
+                <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
+                    style='margin-right:5px;'>
+                </span>
+                <span style='font-weight:700;'>{{wf.name}}</span>
+            </div>
+            <div ng-show="wf.expanded" class='panel-body' style="border-top: 1px solid #eee;overflow:visible;">
+                <ul ng-if='wf.outputs.length' class='table-row table-head'>
+                    <li style="width:20px;">#</li>
+                    <li style="width:200px;">Name</li>
+                    <li style="width:200px;">Family</li>
+                </ul>
+                <ul class='table-row' ng-repeat="item in wf.outputs track by $index">
+                    <li style="width:20px">{{$index + 1}}</li>
+                    <li style='height:auto;overflow:visible;padding:0;width:200px;'>
+                        <div>
+                            <input style='width:100%;' type="text" ng-model="item.name" class='form-control wi-form-control'>
+                        </div>
+                    </li>
+                    <li title='{{item.family}}' style="width:200px;">{{item.family}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class='wizard-control'>
+        <button wz-previous class='btn btn-default' style="float:left;">
+            <i class='arrow-left-16x16' style='vertical-align:text-bottom;'></i>
+            <span>Back</span>
+        </button>
+        <button wz-next class='btn btn-default' style='float:right;'>
+            <span>Next</span>
+            <i class='arrow-right-16x16' style='vertical-align:text-bottom;'></i>
+        </button>
+    </div>
+</div>

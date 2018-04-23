@@ -1,4 +1,4 @@
-String.prototype.capitalize = function() {
+String.prototype.capitalize = function () {
     if (this.length < 1) return this;
     return this.replace(this[0], this[0].toUpperCase());
 }
@@ -13,17 +13,16 @@ String.prototype.capitalize = function() {
  * @returns A number in the range [min, max]
  * @type Number
  */
-Number.prototype.clamp = function(min, max) {
+Number.prototype.clamp = function (min, max) {
     return Math.min(Math.max(this, min), max);
-  };
+};
 
 Object.defineProperty(Array.prototype, "binarySearch", {
     enumerable: false,
-    value: function(accessFunc, searchValue) {
+    value: function (accessFunc, searchValue) {
         return this.find(accessFunc, searchValue);
     }
 });
-console.log('hic hic');
 let queryString = require('query-string');
 let ngInfiniteScroll = require('ng-infinite-scroll');
 let utils = require('./utils');
@@ -54,9 +53,16 @@ let wiResizableX = require('./wi-resizable-x');
 let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
+let wiPlot = require('./wi-plot');
+let wiZoneTemplateManager = require('./wi-zone-template-manager');
+
 let wiInventory = require('./wi-inventory');
+let wiExport = require('./wi-export');
+let wiTask = require('./wi-task');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
+let wiWFMachineLearning = require('./wi-workflow-machine-learning');
+let wiNeuralNetwork = require('./wi-neural-network');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
 let wiD3Crossplot = require('./wi-d3-crossplot');
@@ -82,6 +88,10 @@ let wiD3Comboview = require('./wi-d3-comboview');
 let wiScroll = require('./wi-scroll');
 let wiItemDropdown = require('./wi-item-dropdown');
 
+let wiiExplorer = require('./wii-explorer');
+let wiiItems = require('./wii-items');
+let wiiProperties = require('./wii-properties');
+
 let layoutManager = require('./layout');
 let historyState = require('./historyState');
 
@@ -106,6 +116,7 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
+let wiInputRangeLimit = require('./wi-input-range-limit');
 
 // models
 // let wiDepth = require('./wi-depth.model');
@@ -122,6 +133,8 @@ let wiZone = require('./wi-zone');
 let wiUser = require('./wi-user');
 let wiMultiselect = require('./wi-multiselect');
 let wiApiService = require('./wi-api-service');
+let wiOnlineInvService = require('./wi-online-inv-service');
+let wiMachineLearningApiService = require('./wi-machine-learning-api-service');
 let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
@@ -163,8 +176,13 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
+        wiExport.name,
+        wiTask.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
+        wiWFMachineLearning.name,
+        wiNeuralNetwork.name,
+        wiPlot.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -175,6 +193,7 @@ let app = angular.module('wiapp',
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
+        wiInputRangeLimit.name,
 
         // models
         // wiDepth.name,
@@ -189,7 +208,10 @@ let app = angular.module('wiapp',
         // wiLogplotModel.name,
 
         wiApiService.name,
+        wiMachineLearningApiService.name,
+        wiOnlineInvService.name,
         wiComponentService.name,
+        wiZoneTemplateManager.name,
 
         wiCanvasRect.name,
         wiZone.name,
@@ -199,10 +221,16 @@ let app = angular.module('wiapp',
         wiMultiselect.name,
 
         wiConditionNode.name,
+
+        wiiExplorer.name,
+        wiiItems.name,
+        wiiProperties.name,
+
         ngInfiniteScroll,
 
         'angularModalService',
         'angularResizable',
+        'ng-mfb',
 
         // 3rd lib
 
@@ -211,10 +239,13 @@ let app = angular.module('wiapp',
         'ngSanitize',
         'ui.select',
         'angularjs-dropdown-multiselect',
-        'mgo-angular-wizard'
+        'mgo-angular-wizard',
+
+        // chat module
+        // 'chatModule'
     ]);
 
-function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
     let treeHandlers = {};
@@ -224,6 +255,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         wiComponentService,
         ModalService,
         wiApiService,
+        wiOnlineInvService,
         $timeout
     };
     // Logplot Handlers
@@ -237,7 +269,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
 
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
-    wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
+    // wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
@@ -314,6 +346,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         }
     });
     wiComponentService.on(wiComponentService.PROJECT_UNLOADED_EVENT, function () {
+        wiComponentService.dropComponent(wiComponentService.PROJECT_LOADED);
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeAllRightTabs();
         historyState.removeHistory();
     });
@@ -323,14 +356,14 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         layoutManager.updateSize();
     });
 
-    $scope.onRibbonToggle = function(isCollapsed) {
+    $scope.onRibbonToggle = function (isCollapsed) {
         if (isCollapsed) {
             $('.ribbon-wrapper').css('height', 'auto');
         }
         else {
             $('.ribbon-wrapper').css('height', 'auto');
         }
-        setTimeout(function(){
+        setTimeout(function () {
             layoutManager.updateSize();
         }, 500);
     }
@@ -342,61 +375,67 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     toastr.options.extendedTimeOut = 10000;
     toastr.options.preventDuplicates = true;
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService) {
+
+function restoreProject($timeout, wiApiService, ModalService) {
+    let query = queryString.parse(location.search);
+    if (Object.keys(query).length && query.idProject) {
+        $timeout(function () {
+            wiApiService.getProjectInfo(query.idProject, function (project, err) {
+                if (!err) {
+                    wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
+                        utils.projectOpen(projectData);
+                    })
+                } else {
+                    toastr.error("Project not exist!");
+                }
+            })
+        }, 100);
+    } else {
+        let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
+        if (lastProject) {
+            $timeout(function () {
+                wiApiService.getProjectInfo(lastProject.id, function (project, err) {
+                    if (!err) {
+                        DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name + "</b>.</br>Do you want to open it?", function (ret) {
+                            if (ret) {
+                                wiApiService.getProject({
+                                    idProject: lastProject.id
+                                }, function (projectData) {
+                                    utils.projectOpen(projectData);
+                                });
+                            }
+                        })
+                    } else {
+                        window.localStorage.removeItem('LProject');
+                    }
+                })
+            }, 100);
+        }
+    }
+}
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     let functionBindingProp = {
         $scope,
         wiComponentService,
         ModalService,
         wiApiService,
+        wiOnlineInvService,
         $timeout
     };
     window.utils = utils;
     utils.setGlobalObj(functionBindingProp);
     wiComponentService.putComponent(wiComponentService.UTILS, utils);
     wiComponentService.putComponent(wiComponentService.DIALOG_UTILS, DialogUtils);
-    if(!window.localStorage.getItem('rememberAuth')) {
-        utils.doLogin(function () {
-            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
+    if (!window.localStorage.getItem('rememberAuth')) {
+        utils.doLogin(function (sameUser) {
+            appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+            if (sameUser) restoreProject($timeout, wiApiService, ModalService);
         })
-    }else{
-        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService);
-        let query = queryString.parse(location.search);
-        if(Object.keys(query).length && query.idProject){
-            $timeout(function () {
-                wiApiService.getProjectInfo(query.idProject, function (project) {
-                    if (project.name) {
-                        wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                            if (projectData.name) {
-                                utils.projectOpen(wiComponentService, projectData);
-                            } else {
-                                utils.error("Project not exist!");
-                            }
-                        })
-                    }
-                })
-            }, 100);
-        }else{
-            let lastProject = JSON.parse(window.localStorage.getItem('LProject'));
-            if(lastProject){
-                $timeout(function(){
-                    wiApiService.getProjectInfo(lastProject.id, function(project, err) {
-                        if(!err){
-                            DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name +"</b>.</br>Do you want to open it?", function(ret){
-                                if(ret){
-                                    wiApiService.getProject({
-                                        idProject: lastProject.id
-                                    }, function (projectData) {
-                                        let utils = wiComponentService.getComponent('UTILS');
-                                        utils.projectOpen(wiComponentService, projectData);
-                                    });
-                                }
-                            })
-                        }else{
-                            window.localStorage.removeItem('LProject');
-                        }
-                    })
-                },100);
-            }
-        }
+    } else {
+        appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
+        restoreProject($timeout, wiApiService, ModalService);
     }
 });
+app.controller('ChatController', function () {
+
+})

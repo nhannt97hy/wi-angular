@@ -9,15 +9,15 @@
             </div>
             <div class="modal-body">
                 <h5 class="modal-infomation-title"><span class="project-normal-16x16"></span>&nbsp;Project
-                        Information</h5>
+                    Information</h5>
                 <form class="form-horizontal" action="" name="modalOpenProject">
                     <div class="form-group">
                         <label class="control-label col-sm-3">Project name:</label>
                         <div class="col-sm-9">
-                            <select ng-model="wiModal.idProject" class="form-control" ng-change="wiModal.fillInfo();"
+                            <select ng-model="wiModal.displayName" class="form-control" ng-change="wiModal.fillInfo();"
                                     required>
-                                <option ng-repeat="project in wiModal.projects" value="{{project.idProject}}">
-                                    {{project.name}}
+                                <option ng-repeat="project in wiModal.projects" value="{{project.displayName}}">
+                                    {{project.displayName}}
                                 </option>
                             </select>
                         </div>
@@ -39,7 +39,8 @@
                     <div class="form-group">
                         <label class="control-label col-sm-3" for="createAt">Create date:</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" value='{{ wiModal.selectedProject.createdAt | date: "dd-MM-yyyy, h:mm:ss a" }}'
+                            <input type="text" class="form-control"
+                                   value='{{ wiModal.selectedProject.createdAt | date: "dd-MM-yyyy, h:mm:ss a" }}'
                                    name="createAt" disabled>
                         </div>
                     </div>
@@ -61,7 +62,7 @@
                 </button>
                 <button type="button" class="btn btn-default"
                         ng-click="wiModal.onCancelButtonClicked()">
-                        <span class="cancel-16x16"></span>&nbsp;Cancel
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
                 </button>
             </div>
         </div>

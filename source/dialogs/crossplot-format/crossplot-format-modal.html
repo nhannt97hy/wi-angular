@@ -36,20 +36,25 @@
                                         <label class="control-label col-sm-4 font-weight-normal">Left</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleLeft">
+                                                    id="scaleLeft"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleLeft"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.crossplotModelProps.pointsets[0].scaleLeft, 'scaleLeft')">
                                         </div>
                                     </div>
                                     <div class="col-sm-2">
                                         <label class="control-label col-sm-4 font-weight-normal">Right</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleRight">
+                                                    id="scaleRight"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleRight"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.crossplotModelProps.pointsets[0].scaleRight, 'scaleRight')">
                                         </div>
                                     </div>
                                     <div class="col-sm-1">
                                         <label class="font-weight-normal">
                                             <input type="checkbox" value=""
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].logX">Log
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].logX"
+                                                    ng-change="wiModal.checkLogStatus()">Log
                                         </label>
                                     </div>
                                     <div class="col-sm-2">
@@ -77,20 +82,25 @@
                                         <label class="control-label col-sm-4 font-weight-normal">Bottom</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleBottom">
+                                                    id="scaleBottom"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleBottom"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.crossplotModelProps.pointsets[0].scaleBottom, 'scaleBottom')">
                                         </div>
                                     </div>
                                     <div class="col-sm-2">
                                         <label class="control-label col-sm-4 font-weight-normal">Top</label>
                                         <div class="col-sm-8 padding-right-0">
                                             <input type="number" class="form-control wi-form-control"
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleTop">
+                                                    id="scaleTop"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleTop"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.crossplotModelProps.pointsets[0].scaleTop, 'scaleTop')">
                                         </div>
                                     </div>
                                     <div class="col-sm-1">
                                         <label class="font-weight-normal">
                                             <input type="checkbox" value=""
-                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].logY">Log
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].logY"
+                                                    ng-change="wiModal.checkLogStatus()">Log
                                         </label>
                                     </div>
                                     <div class="col-sm-2">
@@ -282,61 +292,52 @@
                     </wi-tab>
                     <wi-tab heading="Axis Colors">
                         <div class="container-fluid">
-
-                            <div class="col-sm-11 padding-right-0">
-                                <form class="form-horizontal form-condensed">
+                            <form class="form-condensed">
+                                <div class="form-group">
                                     <label class="control-label">
-                                        <input ng-model="isDefineDepthColors"
-                                            type="checkbox"
-                                            ng-change="toggleDefineDepthColors()" />
-                                        Define Depth Colors
+                                        <input ng-model="isDefineDepthColors" type="checkbox" ng-change="toggleDefineDepthColors()" /> Define Z Axis Colors
                                     </label>
-
-                                    <table class="font-size-10px table table-bordered axisColorTable">
-                                        <thead>
-                                        <tr>
-                                            <th>Min Value</th>
-                                            <th>Max Value</th>
-                                            <th>Color</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="item in axisColors track by $index"
-                                            ng-class="{selected:$index == selectedAxisColorRow}"
-                                            ng-click="setClickedAxisColorRow($index)">
-                                            <td>
-                                                <input ng-model="item.minValue"
-                                                        ng-disabled="isDefineDepthColors == false"
-                                                        type="text" class="form-control wi-form-control valign-middle pull-left" />
-                                            </td>
-                                            <td>
-                                                <input ng-model="item.maxValue"
-                                                        ng-disabled="isDefineDepthColors == false"
-                                                        type="text" class="form-control wi-form-control valign-middle pull-left" />
-                                            </td>
-                                            <td>
-                                                <button type="button" ng-click="selectAxisColor($index)"
-                                                        ng-style="{'background-color':item.color}"
-                                                        ng-disabled="isDefineDepthColors == false"
+                                </div>
+                                <div class="form-group">
+                                    <table class="font-size-10px table table-bordered">
+                                        <thead style='display:block;'>
+                                            <tr style="width: 100%;display: table;">
+                                                <th width='40%' style='text-align: center;'>Min Value</th>
+                                                <th width='40%' style='text-align: center;'>Max Value</th>
+                                                <th width='10%' style='text-align: center;'>Color</th>
+                                                <th width='10%' style='text-align: center;'>
+                                                    <button type="button" class="btn btn-default" type="button" ng-click="addAxisColorRow();">
+                                                            <span class="plus-16x16"></span>
+                                                        </button>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style='display: block;overflow-y:overlay;height:20em;'>
+                                            <tr ng-repeat="item in axisColors track by $index" ng-class="{selected:$index == selectedAxisColorRow}" ng-click="setClickedAxisColorRow($index)"
+                                            style="width: 100%;display: table;">
+                                                <td width='40%'>
+                                                    <input ng-model="item.minValue" ng-disabled="isDefineDepthColors == false" type="text" class="form-control wi-form-control valign-middle pull-left"
+                                                    />
+                                                </td>
+                                                <td width='40%'>
+                                                    <input ng-model="item.maxValue" ng-disabled="isDefineDepthColors == false" type="text" class="form-control wi-form-control valign-middle pull-left"
+                                                    />
+                                                </td>
+                                                <td width='10%' style='text-align: center;'>
+                                                    <button type="button" ng-click="selectAxisColor($index)" ng-style="{'background-color':item.color}" ng-disabled="isDefineDepthColors == false"
                                                         class="form-control wi-form-control width-80px thick-border">
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                                    </button>
+                                                </td>
+                                                <td width='10%' style='text-align: center;'>
+                                                    <button type="button" class="btn btn-default" type="button" ng-click="removeAxisColorRow($index);">
+                                                            <span class="delete-16x16"></span>
+                                                        </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
-                                </form>
-                            </div>
-
-                            <div class="col-sm-1">
-                                <br><br>
-                                <button type="button" class="btn btn-default" type="button" ng-click="removeAxisColorRow();">
-                                    <span class="delete-16x16"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" type="button" ng-click="addAxisColorRow();">
-                                    <span class="plus-16x16"></span>
-                                </button>
-                            </div>
-
+                                </div>
+                            </form>
                         </div>
                     </wi-tab>
                     <wi-tab heading="Options">

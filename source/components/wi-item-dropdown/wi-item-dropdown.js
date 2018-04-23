@@ -1,7 +1,7 @@
 const name = 'wiItemDropdown';
 const moduleName = 'wi-item-dropdown';
 
-function Controller() {
+function Controller($timeout, $scope) {
     let self = this;
     this.baseIndex = 0;
     let selectedIndex = -1;
@@ -13,7 +13,9 @@ function Controller() {
         self.filterRegExp = new RegExp(self.filter);
     }
     this.$onInit = function() {
-        self.onWiDropdownInit && self.onWiDropdownInit(self);
+        $timeout(function() {
+            self.onWiDropdownInit && self.onWiDropdownInit(self);
+        }, 500);
     }
     this.onChange = function() {
         self.onItemChanged && self.onItemChanged(self.selectedItem.properties);
@@ -30,7 +32,11 @@ app.component(name, {
         icon: "<",
         items: "<",
         onWiDropdownInit: "<",
-        onItemChanged: "<"
+        onItemChanged: "<",
+        placeHolder: "@",
+        ctrlBtnIcon: "@",
+        onCtrlBtnClick: "<",
+        choiceStyles: '@'
     }
 });
 

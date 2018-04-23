@@ -14,10 +14,9 @@ const fileInclude = require('gulp-file-include');
 const XLSX = require('xlsx');
 
 // const workbook = XLSX.readFile('Wi-UI.Tung.xlsx'); // Defalt skin
-const workbook = XLSX.readFile('Wi-UI.skin.xlsx'); // new skin
+//const workbook = XLSX.readFile('Wi-UI.skin.xlsx'); // new skin
 //    var _xlsxFile = './Wi-UI.Tung.xlsx';
 var _xlsxFile = './Wi-UI.skin.xlsx';
-
 
 const rsync = require('gulp-rsync');
 const fs = require('fs');
@@ -257,7 +256,30 @@ gulp.task('wi-explorer-include', function () {
         }))
         .pipe(gulp.dest(outputDir));
 });
+gulp.task('wi-workflow-machine-learning-include', function () {
+    var templateFile = './source/app/components/wi-workflow-machine-learning/template/wi-workflow-machine-learning.html';
+    var outputDir = './source/app/components/wi-workflow-machine-learning';
 
+    return gulp.src([templateFile])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest(outputDir));
+});
+gulp.task('wi-workflow-player-include', function () {
+    var templateFile = './source/app/components/wi-workflow-player/template/wi-workflow-player.html';
+    var outputDir = './source/app/components/wi-workflow-player';
+
+    return gulp.src([templateFile])
+        .pipe(fileInclude({
+            prefix: '@@',
+            basepath: '@file',
+            indent: true
+        }))
+        .pipe(gulp.dest(outputDir));
+});
 function to_json(workbook) {
     var text = '';
     workbook.SheetNames.forEach(function (sheetName) {
@@ -351,21 +373,21 @@ gulp.task('gen-wi-explorer-functions', function () {
     wiUI.genFunctionsFromXlsx(xlsxFile, templateFile, configFile);
 });
 
-gulp.task('config', function () {
-    var config = to_json(workbook);
+// gulp.task('config', function () {
+//     var config = to_json(workbook);
 
-    fs.writeFile('./build/js/wi-config.js', config, 'utf-8', function (er) {
-        if (er) {
-            console.log(er);
-        }
-    })
-});
+//     fs.writeFile('./build/js/wi-config.js', config, 'utf-8', function (er) {
+//         if (er) {
+//             console.log(er);
+//         }
+//     })
+// });
 
 gulp.task('pre', ['gen-template', 'gen-functions'], function () {
 });
 
 const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor',
-                    'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include'];
+                    'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include', 'wi-workflow-machine-learning-include', 'wi-workflow-player-include'];
 gulp.task('build-full', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
         files.forEach(function (f) {
@@ -382,10 +404,10 @@ gulp.task('default', ['watch']);
 /**
  * Push build to gh-pages
  */
-gulp.task('github-page', function () {
-    return gulp.src("./build/**/*")
-        .pipe(deploy());
-});
+// gulp.task('github-page', function () {
+//     return gulp.src("./build/**/*")
+//         .pipe(deploy());
+// });
 
 gulp.task('build', mainTasks, function() {
     gulp.src([

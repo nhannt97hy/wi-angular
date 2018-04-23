@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function(ModalService){
+module.exports = function(ModalService, wiComponentService){
     function ModalController(wiComponentService, wiApiService, close, $timeout){
         let self = this;
         window.filldata = this;
@@ -51,14 +51,14 @@ module.exports = function(ModalService){
         this.getCurveData = function () {
             let curveModel = self.CurvesData.find(curve => {return curve.id == self.SelectedCurve.id;});
             if(curveModel){
-                self.Nullnumber = curveModel.data.filter(d => {return isNaN(d.x);}).length;
+                self.Nullnumber = curveModel.data.filter(d => {return isNaN(parseFloat(d.x));}).length;
             }else{
                 wiApiService.dataCurve(self.SelectedCurve.id,function (data) {
                     self.CurvesData.push({
                         id: self.SelectedCurve.id,
                         data: data
                     });
-                    self.Nullnumber = data.filter(d => { return isNaN(d.x);}).length;
+                    self.Nullnumber = data.filter(d => { return isNaN(parseFloat(d.x));}).length;
                 })
             }
             self.curveName = self.SelectedCurve.properties.name;
@@ -93,7 +93,7 @@ module.exports = function(ModalService){
         }
 
         this.onWellChange();
-        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, function() {
+        this.onRefresh = function() {
             self.applyingInProgress = false;
             self.CurvesData.length = 0;
             $timeout(function(){
@@ -101,7 +101,8 @@ module.exports = function(ModalService){
                     self.onWellChange();
                 });
             }, 0);
-        });
+        }
+        wiComponentService.on(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
         this.clickDefault = function () {
             self.topDepth = self.selectedWell.topDepth;
             self.bottomDepth = self.selectedWell.bottomDepth;
@@ -173,7 +174,13 @@ module.exports = function(ModalService){
                     data: data.map(d => {return parseFloat(d.x);})
                 }
                 if(curve.overwrite) delete payload.curveName;
-                wiApiService.processingDataCurve(payload, function(){
+                wiApiService.processingDataCurve(payload, function(res){
+                    if(!res.idCurve) {
+                        wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                            idCurve: payload.idDesCurve,
+                            data: payload.data
+                        })
+                    }
                     console.log("Save curve: ", payload.curveName);
                     callback();
                 })
@@ -194,7 +201,13 @@ module.exports = function(ModalService){
                 if(self.overwriteSelCurve){
                     delete payload.curveName;
                 }
-                wiApiService.processingDataCurve(payload, function(){
+                wiApiService.processingDataCurve(payload, function(res){
+                    if(!res.idCurve) {
+                        wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                            idCurve: payload.idDesCurve,
+                            data: payload.data
+                        })
+                    }
                     console.log("Save curve: ", payload.curveName);
                     if(self.otherCurves.length){
                         async.each(self.otherCurves, function(curve, cb){
@@ -278,6 +291,7 @@ module.exports = function(ModalService){
     }).then(function (modal) {
         helper.initModal(modal);
         modal.close.then(function () {
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh)
             helper.removeBackdrop();
         });
     });

@@ -1,0 +1,212 @@
+<div style='position: relative;'>
+    <style>
+        wi-task wi-tab>div {
+            height: calc(100% - 30px);
+        }
+
+        wi-task .bordered {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        wi-task wi-tab .tree-side {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            flex: 1;
+            overflow: hidden;
+            background-color: #ffffff;
+            margin-bottom: 0;
+        }
+
+        wi-task wi-tab .panel-heading {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        wi-task .height24px span.btn.btn-default {
+            line-height: 20px;
+            height: 24px;
+        }
+
+        .ui-select-bootstrap>ul.ui-select-choices,
+        .ui-select-bootstrap>ul.ui-select-no-choice {
+            position: fixed;
+            top: auto;
+            left: auto;
+            width: inherit;
+        }
+
+        #dragElement .wi-parent-node{
+            padding: 5px;
+            background-color: #eee;
+            border: 1px solid steelblue;
+            border-radius: 5px;
+        }
+
+        #dragElement .icon-expanded {
+            display: none;
+        }
+        .dropLabel{
+            position: absolute;
+            top: 50%;
+            text-align: center;
+            width: 100%;
+            font-size: 48px;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+    </style>
+    <div class="form-group">
+        <wi-tabset>
+            <wi-tab heading="Configure Inputs & Outputs">
+                <div style='padding:10px;display:flex;flex-direction:row;height:100%;'>
+                    <div class='panel panel-default tree-side'>
+                        <div class='panel-heading' style='display: flex;'>
+                            <h5 style="flex:1;">Data type</h5>
+                            <div style='flex:2;text-align: right;'>
+                                <label class="btn btn-default" ng-click="wiTask.onSelectionTypeChanged()" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_GROUP_SELECTION}'
+                                style="margin-right: 5px;" title='Family Group'>
+                                    <input type="radio" name="filterBy" class="display-none" value='{{wiTask.FAMILY_GROUP_SELECTION}}' ng-model="wiTask.selectionType">
+                                    <span class='zone-table-16x16'></span>
+                                </label>
+                                <label class="btn btn-default  " ng-click="wiTask.onSelectionTypeChanged()" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_SELECTION}'
+                                style="margin-right: 5px;" title='Family'>
+                                    <input type="radio" name="filterBy" class="display-none" value='{{wiTask.FAMILY_SELECTION}}' ng-model="wiTask.selectionType">
+                                    <span class='user-define-16x16'></span>
+                                </label>
+                                <label class="btn btn-default  " ng-click="wiTask.onSelectionTypeChanged()" ng-class='{active: wiTask.selectionType==wiTask.CURVE_SELECTION}'
+                                title='Curve'>
+                                    <input type="radio" name="filterBy" class="display-none" value='{{wiTask.CURVE_SELECTION}}' ng-model="wiTask.selectionType">
+                                    <span class='curve-16x16'></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div style='position:relative;margin: 5px;'>
+                            <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                            <input wi-enter="wiTask.onFilterEnterKey(wiTask.filterText1);" style='text-indent:1.5em;' class='form-control' type='text'
+                                ng-model='wiTask.filterText1'>
+                        </div>
+                        <div style="flex:2;display:flex;overflow-x:hidden;overflow-y:auto;background-color:white;">
+                            <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiTask.upTrigger"
+                                down-trigger="wiTask.downTrigger">
+                                <wi-base-treeview config='wiTask.selectionList' on-click-function="wiTask.onClick" filter="{{wiTask.selectionType == wiTask.FAMILY_SELECTION?wiTask.filterText:wiTask.filterText1}}">
+                                </wi-base-treeview>
+                            </wi-scroll>
+                        </div>
+                    </div>
+                    <div style="margin-left:5px;flex:2;padding:0px 5px; display:flex; flex-direction: column;">
+                        <div style="flex:1;display:flex;overflow: hidden;flex-direction: column;" class='panel panel-default'>
+                            <div class="panel-heading">
+                                <h5>Inputs</h5>
+                            </div>
+                            <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
+                                <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.inputs">
+                                    <div style='flex:1;margin-right:5px;'>
+                                        <button style='width:100%;vertical-align:baseline;' class="btn btn-default" type="button" ng-click="wiTask.onSelectTemplate($index)">{{item.name}}
+                                            <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <div style="flex:2;position:relative;">
+                                        <span ng-class="{'zone-table-16x16': item.type==wiTask.FAMILY_GROUP_SELECTION, 'user-define-16x16': item.type==wiTask.FAMILY_SELECTION, 'curve-16x16': item.type==wiTask.CURVE_SELECTION}"
+                                            style='position:absolute;top:50%;transform:translateY(-50%);left:0.5em;'></span>
+                                        <input type="text" style='padding-left:2em;' class='form-control' ng-model='item.label' disabled>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div style="flex:1;display:flex;overflow: hidden;flex-direction: column;" class='panel panel-default'>
+                            <div class="panel-heading">
+                                <h5>Default Parameters</h5>
+                            </div>
+                            <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
+                                <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.parameters track by $index">
+                                    <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.name}}</label>
+                                    <input type="number" class="form-control" ng-model="item.value" step="any"
+                                    ng-if="item.type=='number'" style="flex:2;">
+                                    <select class='form-control' ng-model='item.value'
+                                    ng-options="choice as choice.name for choice in item.choices track by choice.value"
+                                    ng-if='item.type=="select"' style="flex:2;"></select>
+                                </li>
+                            </ul>
+                        </div>
+                        <div style="flex:1;display:flex;overflow: hidden;flex-direction: column;" class='panel panel-default'>
+                            <div class="panel-heading">
+                                <h5>Outputs</h5>
+                            </div>
+                            <ul style='padding-left: 0px;margin: 5px;border-bottom: 1px solid #ccc;'>
+                                <li style="display:flex;flex-direction:row;">
+                                    <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Family</label>
+                                    <label style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;'>Curve Name</label>
+                                </li>
+                            </ul>
+                            <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
+                                <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.outputs track by $index">
+                                    <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.family}}</label>
+                                    <input type="text" class='form-control' style='flex:2' ng-model='item.name'>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </wi-tab>
+            <wi-tab heading='Select Inputs'>
+                <div style="height:100%;display:flex;flex-direction:row;padding:10px;">
+                    <div class="panel panel-default tree-side">
+                        <div style='display:flex;' class='panel-heading'>
+                            <h5 style='margin-right:10px;'>Project</h5>
+                            <wi-item-dropdown ng-show='!wiTask.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'"
+                                on-wi-dropdown-init='wiTask.getProjectList' on-item-changed="wiTask.projectChanged">
+                            </wi-item-dropdown>
+                            <input style='flex:1;margin:5px 0; height:24px;font-size:14px;' class='form-control' ng-show='wiTask.isFrozen' ng-model='wiTask.projectName'
+                                ng-disabled='true'>
+                            <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiTask.refreshProject()">
+                                <i class="fa fa-refresh"></i>
+                            </button>
+                        </div>
+                        <div style='margin: 5px;position: relative;'>
+                            <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                            <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiTask.prjFilter' size='10'>
+                        </div>
+                        <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiTask.upTriggerPrj'
+                            , down-trigger='wiTask.downTriggerPrj'>
+                            <wi-base-treeview id='__projectWellTree' name="projectTreeview" config="wiTask.projectConfig" container="wiTask" on-click-function="wiTask.prjClickFunction"
+                                filter="{{wiTask.prjFilter}}" show-id="false">
+                            </wi-base-treeview>
+                        </wi-scroll>
+                    </div>
+                    <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiTask.droppableSetting();">
+                        <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
+                            <div class="panel-heading">
+                                <h5>Inputs</h5>
+                            </div>
+                            <div style='margin: 5px;position: relative;'>
+                                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
+                                <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiTask.inputFilter' size='10'>
+                            </div>
+                            <div style="flex: 1; position: relative; overflow-y: auto;">
+                                <wi-base-treeview id='_taskDataTree' name='taskDataTree' style="margin-left: 0px;"
+                                config='wiTask.taskConfig.inputData'
+                                on-click-function='wiTask.taskClickFuntion'
+                                show-context-menu-function='wiTask.taskShowContextMenu'
+                                filter='{{wiTask.inputFilter}}'
+                                ></wi-base-treeview>
+                                <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET HERE</div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </wi-tab>
+        </wi-tabset>
+    </div>
+    <div id="dragElement"></div>
+    <nav mfb-menu position='br' effect='zoomin'
+    active-icon='fa fa-cog' resting-icon='fa fa-magic'
+    toggling-method="click">
+        <a mfb-button icon='fa fa-plus-circle' label='Add to workflow'
+        ng-click='wiTask.addToWorkflowClick()'></a>
+        <a mfb-button icon='fa fa-play-circle-o' label='Run workflow'
+        ng-click="wiTask.runWorkflowClick()"></a>
+    </nav>
+</div>

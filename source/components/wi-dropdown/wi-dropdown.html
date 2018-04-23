@@ -1,15 +1,10 @@
 <div class="dropdown">
-    <button class="dropdown-toggle dropdown-{{wiDropdown.type || wiDropdown.config.type || wiDropdown.default.type}}"
-            type="button" data-toggle="dropdown"
-            ng-click="wiDropdown.onClick()"
-            ng-disabled='wiDropdown.isDisabled()'>
+    <button class="dropdown-toggle dropdown-{{wiDropdown.type || wiDropdown.config.type || wiDropdown.default.type}}" type="button"
+        data-toggle="dropdown" ng-click="wiDropdown.onClick()" ng-disabled='wiDropdown.isDisabled()'>
         <span ng-if="wiDropdown.icon" class="{{wiDropdown.icon || wiDropdown.config.icon || wiDropdown.default.icon}}"></span>
-        <!-- <div class="label-wrapper {{wiDropdown.layout || wiDropdown.config.layout || wiDropdown.default.layout}}"> -->
-            <p class="{{wiDropdown.layout || wiDropdown.config.layout || wiDropdown.default.layout}}"
-                  ng-show="wiDropdown.label || wiDropdown.config.label">
-                {{wiDropdown.label || wiDropdown.config.label}}</p>
-            <span class="caret"></span>
-        <!-- </div> -->
+        <p class="{{wiDropdown.layout || wiDropdown.config.layout || wiDropdown.default.layout}}" ng-show="wiDropdown.label || wiDropdown.config.label">
+            {{wiDropdown.label || wiDropdown.config.label}}</p>
+        <span class="caret" style="vertical-align:super;"></span>
     </button>
     <ul class="dropdown-menu">
         <div ng-transclude></div>

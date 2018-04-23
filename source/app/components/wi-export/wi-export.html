@@ -1,0 +1,116 @@
+<div class="export-main" style="display:flex;flex-direction:row;">
+    <div class="left-container">
+        <div class="panel panel-default export-left">
+            <div style='display:flex;' class='panel-heading'>
+                <h5 style='margin-right:10px;'>Inventory</h5>
+                <!-- <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiExport.getProjectList'
+                    on-item-changed="wiExport.projectChanged">
+                </wi-item-dropdown> -->
+                <!-- <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiExport.refreshProject()">
+                    <i class="fa fa-refresh"></i>
+                </button> -->
+                <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default pull-right' title="Reload project" ng-click="wiExport.refreshInventory()">
+                    <i class="fa fa-refresh"></i>
+                </button>
+                <button style='margin:5px 0px 5px 5px;padding:0 10px;' title="Toggle Well name/File name"
+                    class='btn btn-default'
+                    ng-click="wiExport.switchLabelTooltip(wiExport.inventoryConfig)">
+                <i class="fa fa-exchange"></i>
+            </button>
+            </div>
+            <div style='background-color:white;border:none;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
+                <form style='width:100%;display:flex;' ng-submit='wiExport.prjSearch()'>
+                    <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                    <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiExport.prjFilter'
+                        size='10'>
+                </form>
+            </div>
+            <!-- <wi-base-treeview name="exportTreeview" config="wiExport.projectConfig" container="wiExport"
+                on-select-function="wiExport.selectProjectNode" filter="{{wiExport.prjFilter}}">
+            </wi-base-treeview> -->
+            <div style="flex:1;display:flex;padding:0px;" class="panel-body">
+                <wi-scroll id-scroll="exportTreeScroll" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiExport.upTriggerPrj'
+                    down-trigger='wiExport.downTriggerPrj'>
+                    <!-- <wi-base-treeview name="exportTreeview" 
+                        config="wiExport.projectConfig" 
+                        container="wiExport" 
+                        on-click-function="wiExport.prjClickFunction"
+                        filter="{{wiExport.prjFilter}}">
+                    </wi-base-treeview> -->
+                    <wi-base-treeview name="exportTreeview" 
+                        config="wiExport.inventoryConfig" 
+                        container="wiExport" 
+                        on-click-function="wiExport.invClickFunction"
+                        filter="{{wiExport.prjFilter}}">
+                    </wi-base-treeview>
+                </wi-scroll>
+            </div>
+        </div>
+    </div>
+    <div class="export-button-container">
+        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:40%;left:50%;transform:translate(-50%, -50%);"
+            title="export" ng-click='wiExport.onSelectButtonClicked()'>
+            <span class="arrow-right-16x16"></span>
+        </button>
+        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:60%;left:50%;transform:translate(-50%, -50%);"
+            title="delete" ng-click='wiExport.onUnSelectButtonClicked()'>
+            <span class="arrow-left-16x16"></span>
+        </button>
+    </div>
+    <div class="center-container">
+        <div class='panel panel-default export-center'>
+            <div class='panel-heading' style='display:flex;'>
+                <h5 style='flex:1;'>Export Queue</h5>
+                <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExport.clearExportQueueItems()">
+                    <span class='ti-brush-alt'></span>
+                </button>
+            </div>
+            <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
+                <form style='width:100%;display:flex;'>
+                    <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                    <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiExport.queueFilter'
+                        size='10'>
+                </form>
+            </div>
+            <wi-base-treeview name="ExportQueueTreeview" 
+                style="flex:1;overflow-x:hidden;overflow-y:auto;" 
+                config="wiExport.exportQueueItems"
+                container="wiExport" 
+                on-click-function="wiExport.exportQueueClickFunction" 
+                filter="{{wiExport.queueFilter}}">
+            </wi-base-treeview>
+        </div>
+    </div>
+    <div class="export-button-container">
+        <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
+            title="export" ng-click='wiExport.exportAllItems()'>
+            <span class="arrow-right-16x16"></span>
+        </button>
+    </div>
+    <div class="right-container">
+        <div class='panel panel-default export-right'>
+            <div class='panel-heading' style='display:flex;'>
+                <h5 style='flex:1;'>Las Files</h5>
+                <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExport.lasFiles.length = 0;">
+                    <span class='ti-brush-alt'></span>
+                </button>
+            </div>
+            <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
+                <form style='width:100%;display:flex;'>
+                    <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                    <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiExport.lasFilesFilter'
+                        size='10'>
+                </form>
+            </div>
+            <ul>
+                <li ng-repeat='file in wiExport.lasFiles | filter: wiExport.lasFilesFilter'>
+                    <a href="{{file.url}}">
+                        <i style="font-size: 16px;z-index:1;color:#aaa;" class="fa fa-file"></i>
+                        <b>{{file.name}}</b>
+                    </a>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>

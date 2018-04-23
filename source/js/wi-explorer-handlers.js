@@ -92,7 +92,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
     if (!recyclables.includes(selectedNodes[0].type)) isPermanently = false;
     selectedNodesName = '';
     selectedNodes.forEach(function (selectedNode, index) {
-        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
+        selectedNodesName += index == selectedNodes.length - 1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     message = '';
     if (selectedNodes.length > 1) {
@@ -121,38 +121,32 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                             modelsWithTab.forEach(function (model) {
                                 if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
                             });
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'dataset':
                         deleteFunction = wiApiService.removeDataset;
                         cleanUpFunction = function () {
-                            selectedNode.children.forEach(function (curve) {
-                                utils.updateWiLogplotOnModelDeleted(curve);
-                                utils.updateWiCrossplotOnModelDeleted(curve);
-                                utils.updateWiHistogramOnModelDeleted(curve);
-                                utils.updateWiCurveListingOnModelDeleted(curve);
-                            });
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'curve':
                         deleteFunction = wiApiService.removeCurve;
                         cleanUpFunction = function () {
-                            /*
-                            utils.updateWiLogplotOnModelDeleted(selectedNode);
-                            */
-                            utils.emitEvent('curve-deleted', selectedNode);
-                            utils.updateWiCrossplotOnModelDeleted(selectedNode);
-                            utils.updateWiHistogramOnModelDeleted(selectedNode);
-                            utils.updateWiCurveListingOnModelDeleted(selectedNode);
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'zoneset':
                         deleteFunction = wiApiService.removeZoneSet;
+                        cleanUpFunction = function () {
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
+                        }
                         break;
                     case 'zone':
                         deleteFunction = wiApiService.removeZone;
                         cleanUpFunction = function () {
                             utils.emitEvent('zone-updated', selectedNode);
+                            wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
                     case 'logplot':
@@ -183,7 +177,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         return;
                 }
                 if (isPermanently && recyclables.includes(selectedNode.type)) {
-                    wiApiService.deleteObject({ idObject: selectedNode.id, type: selectedNode.type }, function () {
+                    wiApiService.deleteObject({idObject: selectedNode.id, type: selectedNode.type}, function () {
                         $timeout(function () {
                             cleanUpFunction && cleanUpFunction();
                             next();
@@ -211,7 +205,7 @@ exports.BrowseProjectButtonClicked = function () {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     DialogUtils.openProjectDialog(this.ModalService, function (projectData) {
         let utils = self.wiComponentService.getComponent('UTILS');
-        utils.projectOpen(self.wiComponentService, projectData);
+        utils.projectOpen(projectData);
     });
 }
 
@@ -221,18 +215,67 @@ exports.EmptyAllButtonClicked = function () {
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-    console.log("===============", selectedNodes);
+    const selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (!Array.isArray(selectedNodes) || !selectedNodes.length) return;
+    const selectedNode = selectedNodes[0];
+    const ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete all children in ${selectedNode.data.label} permanently?`, function (yes) {
+        if (!yes) return;
+        async.eachOf(selectedNode.children, function (child, index, next) {
+            const type = child.type.replace('-deleted-child', '');
+            wiApiService.deleteObject({type: type, idObject: child.id}, function (response, err) {
+                if (response == "WRONG_TYPE") {
+                    next(response);
+                } else if (response == "CANT_DELETE") {
+                    next(response);
+                } else {
+                    setTimeout(function () {
+                        child.data.deleted = true;
+                        next(err, response);
+                    });
+                }
+            });
+        }, function (err) {
+            if (err) {
+                dialogUtils.errorMessageDialog(ModalService, "Can not delete some children");
+            }
+            utils.refreshProjectState();
+        });
+    });
 }
 
 exports.RestoreAllButtonClicked = function () {
     const wiApiService = this.wiApiService;
-    const $timeout = this.$timeout;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
-
+    const selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    if (!Array.isArray(selectedNodes) || !selectedNodes.length) return;
+    const selectedNode = selectedNodes[0];
+    const ModalService = this.ModalService;
+    dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore all children in ${selectedNode.data.label}?`, function (yes) {
+        if (!yes) return;
+        async.eachOf(selectedNode.children, function (child, index, next) {
+            const type = child.type.replace('-deleted-child', '');
+            wiApiService.restoreObject({type: type, idObject: child.id}, function (response, err) {
+                if (response == "WRONG_TYPE") {
+                    next(response);
+                } else if (response == "CANT_RESTORE") {
+                    next(response);
+                } else {
+                    setTimeout(function () {
+                        child.data.deleted = true;
+                        next(err, response);
+                    });
+                }
+            });
+        }, function (err) {
+            if (err) {
+                dialogUtils.errorMessageDialog(ModalService, "Can not delete some children");
+            }
+            utils.refreshProjectState();
+        });
+    });
 }
 
 exports.EmptyButtonClicked = function () {
@@ -250,7 +293,7 @@ exports.EmptyButtonClicked = function () {
         selectedNodesName += ' ' + selectedNode.data.label;
     })
     ModalService = this.ModalService;
-    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete forever ${selectedNodesName} ?`, function (yes) {
+    dialogUtils.confirmDialog(ModalService, "Delete confirm", `Are you sure to delete ${selectedNodesName} permanently ?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
                 let type = selectedNode.type.substring(0, selectedNode.type.indexOf('-'));
@@ -290,7 +333,7 @@ exports.RestoreButtonClicked = function () {
     if (!Array.isArray(selectedNodes)) return;
     selectedNodesName = selectedNodes[0].type + '(s):<br>';
     selectedNodes.forEach(function (selectedNode, index) {
-        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
+        selectedNodesName += index == selectedNodes.length - 1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     ModalService = this.ModalService;
     dialogUtils.confirmDialog(ModalService, "Restore confirm", `Are you sure to restore ${selectedNodesName}?`, function (yes) {
@@ -331,27 +374,27 @@ exports.DuplicateButtonClicked = function (type) {
     if (!Array.isArray(selectedNodes)) return;
     selectedNodesName = selectedNodes[0].type + '(s):<br>';
     selectedNodes.forEach(function (selectedNode, index) {
-        selectedNodesName += index == selectedNodes.length-1 ? selectedNode.data.label : selectedNode.data.label + ', ';
+        selectedNodesName += index == selectedNodes.length - 1 ? selectedNode.data.label : selectedNode.data.label + ', ';
     })
     ModalService = this.ModalService;
     dialogUtils.confirmDialog(ModalService, "Duplicate Confirm", `Are you sure to duplicate ${selectedNodesName}?`, function (yes) {
         if (yes) {
             async.eachOf(selectedNodes, function (selectedNode, index, next) {
-                if(type === 'plot'){
+                if (type === 'plot') {
                     wiApiService.duplicateLogplot(selectedNode.properties.idPlot, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
                             next();
                         });
                     });
-                } else if (type === 'crossplot'){
+                } else if (type === 'crossplot') {
                     wiApiService.duplicateCrossPlot(selectedNode.properties.idCrossPlot, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
                             next();
                         });
                     });
-                } else if (type === 'histogram'){
+                } else if (type === 'histogram') {
                     wiApiService.duplicateHistogram(selectedNode.properties.idHistogram, selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
@@ -379,7 +422,7 @@ exports.DuplicateButtonClicked = function (type) {
                             next();
                         });
                     });
-                } else if (type === 'well'){
+                } else if (type === 'well') {
                     wiApiService.duplicateWell(selectedNode.properties.idWell, function (response) {
                         $timeout(function () {
                             utils.refreshProjectState();
@@ -396,4 +439,27 @@ exports.DuplicateButtonClicked = function (type) {
         }
     });
 
-}
+};
+exports.createZoneSet = function () {
+    const wiApiService = this.wiApiService;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = utils.getSelectedNode();
+    let idWell;
+    if (selectedNode && selectedNode.type === 'zonesets') {
+        idWell = selectedNode.properties.idWell;
+    }
+    dialogUtils.newZoneSetDialog(this.ModalService, function (data) {
+        console.log(data);
+        if (data.template.idZoneTemplate) {
+            wiApiService.createZoneSet({name: data.name, template: data.template.template, idWell: idWell}, function (res) {
+                utils.refreshProjectState();
+            });
+        } else {
+            wiApiService.createZoneSet({name: data.name, idWell: idWell}, function (res) {
+                utils.refreshProjectState();
+            });
+        }
+    });
+};

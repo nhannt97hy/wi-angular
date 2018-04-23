@@ -8,6 +8,8 @@ exports.warningMessageDialog = require('./warning-message-modal');
 exports.runImportDialog = require('./run-import-modal');
 exports.runImportWHDialog = require('./run-import-well-header-modal');
 exports.runImportWTDialog = require('./run-import-well-top-modal');
+//exports.trainModelDialog = require('./train-model-modal');
+//exports.predictModelDialog = require('./predict-model-modal');
 
 // WELL INSIGHT MODALS
 exports.aboutDialog = require('./about-modal');
@@ -133,3 +135,9 @@ exports.badholeCoalSaltDialog = require('./badhole-coal-salt-modal');
 
 exports.depthShiftDialog = require('./depth-shift-modal');
 exports.curveFamilyDialog = require('./curve-family-modal');
+exports.newWorkflowDialog = require('./new-workflow-modal');
+exports.openWorkflowDialog = require('./open-workflow-modal');
+exports.shareProjectDialog = require('./share-project-modal');
+exports.newModelDialog = require('./new-model-modal');
+exports.openModelDialog = require('./open-model-modal');
+exports.newZoneSetDialog = require('./new-zone-set-modal');

@@ -150,9 +150,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             tempTinyWindowsTop = ((ui.position.top > 0) ? ui.position.top : 0) + _offsetTop;
         }
 
-        $timeout(function () {
-            updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
-        });
+        updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
     }
 
     function updateWid3() {
@@ -180,6 +178,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     let saveStateToServer = _.debounce(function () {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
+        if (!wiD3Controller) return;
         let max = wiD3Controller.getMaxDepth();
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
@@ -363,11 +362,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).css('top', (top - _offsetTop) + 'px');
         $(self.handleId).css('height', height + 'px');
         $(self.handleId).resizable("option", "minHeight", getMinTinyWinHeight());
-
-        $timeout(function () {
-            //updateState(top, height, parentHeight);
-            updateState(top, height);
-        });
+        updateState(top, height);
     }
 
     this.refreshHandler = function () {
@@ -392,6 +387,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             newHeight = parentHeight;
         }
         updateSlidingHandler(newTop, newHeight);
+        saveStateToServer();
     };
 
     this.updateRangeSlidingHandler = function (rangePercent) {
@@ -487,6 +483,36 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
 
         saveStateToServer();
+    }
+
+    this.updateScale = function (scale) {
+        const handleElem = $(self.handleId);
+        const currentViewContainer = handleElem.find('.current-view-container');
+        currentViewContainer.find('.current-view-top').text(scale.currentView[0]);
+        currentViewContainer.find('.current-view-bottom').text(scale.currentView[1]);
+        const css = {
+            default: {
+                height: '100%',
+                top: 0
+            },
+            overflow: {
+                height: 'calc(100% + 40px)',
+                top: -20
+            },
+            top: {
+                height: 'calc(100% + 20px)',
+                top: 0
+            },
+            bottom: {
+                height: 'calc(100% + 20px)',
+                top: -20
+            }
+        }
+        if (handleElem.height() < 40) {
+            currentViewContainer.css(css.overflow);
+            if (handleElem.css('top').replace('px','') < 20) currentViewContainer.css(css.top)
+            else if ($(self.contentId).height() - handleElem.height() - handleElem.css('top').replace('px','') < 20) currentViewContainer.css(css.bottom);
+        } else currentViewContainer.css(css.default);
     }
 
 	this.$onDestroy = function () {

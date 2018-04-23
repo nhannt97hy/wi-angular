@@ -10,7 +10,7 @@ function Track(config) {
     this.HEADER_NAME_COLOR = '#88CC88';
     this.HEADER_ITEM_BORDER_WIDTH = 1;
     this.HEADER_ITEM_MARGIN_BOTTOM = 1;
-    this.HEADER_HIGHLIGHT_COLOR = 'rgb(255,128,128)';
+    this.HEADER_HIGHLIGHT_COLOR = 'rgb(255, 215, 215)';
     //this.BODY_CONTAINER_HEIGHT = 340;
     this.HEADER_CONTAINER_HEIGHT = 100;
     this.HORIZONTAL_RESIZER_HEIGHT = 5;
@@ -157,10 +157,9 @@ Track.prototype.createHeaderContainer = function() {
         .style('text-align', this.justification)
         .style('position', 'relative')
         .style('background-color', this.HEADER_NAME_COLOR)
-        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('border-bottom', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('z-index', 1)
-        .style('margin', '0 1px')
         .style('white-space', 'nowrap')
         .text(this.name)
         .on('mousedown', function(d) {
@@ -171,7 +170,7 @@ Track.prototype.createHeaderContainer = function() {
     this.drawingHeaderContainer = this.headerContainer.append('div')
         .attr('class', 'vi-track-drawing-header-container')
         .style('position', 'absolute')
-        .style('top', this.headerNameBlock.node().clientHeight + this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        .style('top', this.headerNameBlock.node().clientHeight + this.HEADER_ITEM_BORDER_WIDTH + this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('width', 'calc(100% - 2px)')
         .style('margin', '0 1px')
         .lower()
@@ -185,11 +184,11 @@ Track.prototype.createHeaderContainer = function() {
             d3.event.stopPropagation();
             self.trackContainer.node().focus();
         })
-        .call(d3.drag()
-            .on('drag', function() {
-                self.headerScrollCallback();
-            })
-        );
+        // .call(d3.drag()
+        //     .on('drag', function() {
+        //         self.headerScrollCallback();
+        //     })
+        // );
 }
 
 /**
@@ -229,11 +228,8 @@ Track.prototype.createVerticalResizer = function() {
     this.verticalResizer = this.root.append('div')
         .datum(this.orderNum + "*")
         .attr('class', 'vi-track-vertical-resizer')
-        .attr('data-order-num', function(d) {return d;})
-        .style('width', '5px')
-        .style('z-index', '1')
-        .style('cursor', 'col-resize')
-        //.style('margin-left', '-3px');
+        .attr('data-order-num', function (d) { return d; })
+    this.verticalResizer.append('div');
 }
 
 /**
@@ -298,14 +294,14 @@ Track.prototype.horizontalResizerDragCallback = function() {
  */
 Track.prototype.headerScrollCallback = function() {
     let rowHeight = this.headerNameBlock.node().clientHeight;
-    let extraHeight = this.HEADER_ITEM_BORDER_WIDTH*2 + this.HEADER_ITEM_MARGIN_BOTTOM;
+    let extraHeight = this.HEADER_ITEM_BORDER_WIDTH + this.HEADER_ITEM_MARGIN_BOTTOM;
 
     //let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? -(rowHeight+extraHeight)*2: (rowHeight+extraHeight)*2);
     let step = this.headerContainer.node().clientHeight/5.;
     let dy = d3.event.dy || (Math.sign(d3.event.deltaY) > 0 ? (0 - step) : step);
     let top = parseInt(this.drawingHeaderContainer.style('top').replace('px', '')) + dy;
     let maxTop = rowHeight + extraHeight;
-    let minTop = this.headerContainer.node().clientHeight - this.drawingHeaderContainer.node().clientHeight + extraHeight;
+    let minTop = this.headerContainer.node().clientHeight - this.drawingHeaderContainer.node().clientHeight + extraHeight - 3;
 
     top = minTop < maxTop ? visUtils.clip(top, [minTop, maxTop]) : maxTop;
     this.drawingHeaderContainer

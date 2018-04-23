@@ -27,7 +27,9 @@ function Crossplot(config) {
 
     this.rectZWidth = 0;
 
-    this.selector = null;
+    this.viSelection = null;
+    this.showTooltip = true;
+    this.showOverlay = true;
 }
 
 Crossplot.prototype.AREA_LINE_COLOR = 'DarkCyan';
@@ -64,7 +66,7 @@ const REGRESSION_LINE_SCHEMA = {
         exclude: { type: 'Boolean', default: false },
         polygons: {
             type: 'Array',
-            item: { type: 'Integer' },
+            item: { type: 'Object' },
             default: []
         },
         fitX: { type: 'Float' },
@@ -141,7 +143,7 @@ const POINTSET_SCHEMA = {
         standalone: { type: 'Boolean', default: false },
         overlayLine: { type: 'String' },
         activeZone: { type: 'String' },
-        overlayLine: { type: 'Object' },
+        OLLine: { type: 'Object' },
         zones: {
             type: 'Array',
             item: ZONE_SCHEMA,
@@ -318,10 +320,8 @@ Crossplot.prototype.setProperties = function(props) {
     return this;
 }
 
-Crossplot.prototype.setSelectionData = function(selectionData, selector) {
-    this.selector = selector;
-    let selection = this.selectionCanvasContainer.filter(selection => selection.id == this.selector.id)[0];
-    selection.selectionData = selectionData;
+Crossplot.prototype.setSelection = function(viSelection) {
+    this.viSelection = viSelection;
 }
 
 Crossplot.prototype.getViewportX = function() {
@@ -345,13 +345,15 @@ Crossplot.prototype.getWindowZ = function() {
 }
 
 Crossplot.prototype.getTransformX = function() {
-    return d3.scaleLinear()
+    let scaleFunc = this.pointSet.logX ? d3.scaleLog():d3.scaleLinear();
+    return scaleFunc
         .domain(this.getWindowX())
         .range(this.getViewportX());
 }
 
 Crossplot.prototype.getTransformY = function() {
-    return d3.scaleLinear()
+    let scaleFunc = this.pointSet.logY ? d3.scaleLog():d3.scaleLinear();
+    return scaleFunc
         .domain(this.getWindowY())
         .range(this.getViewportY());
 }
@@ -382,7 +384,7 @@ Crossplot.prototype.getTransformZ = function() {
     }
     else if (this.pointSet.depthType == 'zonalDepth') {
         let domain = [];
-        let range = ['transparent']
+        let range = [];
         let zones = this.pointSet.zones.sort(function(a, b) {
             return a.startDepth - b.startDepth;
         })
@@ -390,7 +392,6 @@ Crossplot.prototype.getTransformZ = function() {
             domain.push(z.startDepth);
             domain.push(z.endDepth);
             range.push(z.fill.pattern.background);
-            range.push('transparent');
         });
         return d3.scaleQuantile()
             .domain(domain)
@@ -465,13 +466,10 @@ Crossplot.prototype.init = function(domElem) {
     this.ctx = this.canvas.node().getContext('2d');
 
     this.selectionCanvasContainer = [];
-    // this.selectionCanvas = this.bodyContainer.append('canvas')
-    //     .attr('width', rect.width)
-    //     .attr('height', rect.height);
-    // this.selectionCtx = this.selectionCanvas.node().getContext('2d');
 
     this.svgContainer = this.bodyContainer.append('svg')
         .attr('class', 'vi-crossplot-svg-container')
+        // .style('pointer-events', 'none')
         .attr('width', rect.width)
         .attr('height', rect.height);
 
@@ -503,10 +501,36 @@ Crossplot.prototype.init = function(domElem) {
     this.svgContainer.append('g')
         .attr('class', 'vi-crossplot-overlay-line');
 
+    this.svgContainer.append('g')
+        .attr('class', 'vi-crossplot-tooltip');
+
     this.doPlot();
 
     this.on('mousedown', function() { self.mouseDownCallback() });
     this.on('mousemove', function() { self.mouseMoveCallback() });
+    this.on('mouseleave', function() { self.tooltip(null, null, true);})
+
+    // let zoom = d3.zoom()
+    //     .scaleExtent([1, 40])
+    //     .translateExtent([[-100, -100], [drawContainerSize.x + drawContainerSize.width + 90, drawContainerSize.y + drawContainerSize.height + 100]])
+    //     .on('zoom', zoomed);
+    // function zoomed() {
+    //     var transform = d3.event.transform;
+    //     self.ctx.save();
+    //     self.ctx.clearRect(0, 0, rect.width, rect.height);
+    //     self.ctx.translate(transform.x, transform.y);
+    //     self.ctx.scale(transform.k, transform.k);
+    //     self._doPlot();
+    //     self.ctx.restore();
+    //     self.view.attr('transform', d3.event.transform);
+    //     gX.call(xAxis.scale(d3.event.transform.rescaleX(self.getTransformX())));
+    //     gY.call(yAxis.scale(d3.event.transform.rescaleY(self.getTransformY())));
+    //     gXBottom.call(xAxisBottom.scale(d3.event.transform.rescaleX(self.getTransformX())));
+    //     gYLeft.call(yAxisLeft.scale(d3.event.transform.rescaleY(self.getTransformY())));
+    // }
+    // this.canvas.call(zoom.transform, d3.zoomIdentity);
+    // this.canvas.call(zoom);
+    // this.canvas.on('dblclick.zoom', null);
 }
 
 Crossplot.prototype.createContainer = function() {
@@ -520,6 +544,10 @@ Crossplot.prototype.createContainer = function() {
         .attr('class', 'vi-crossplot-footer-container');
     */
     this.footerContainer = this.root.select('.vi-crossplot-footer-container');
+    this.footerLeft = this.footerContainer.append('div')
+        .attr('class', 'vi-crossplot-footer-left');
+    this.footerRight = this.footerContainer.append('div')
+        .attr('class', 'vi-crossplot-footer-right');
 }
 
 Crossplot.prototype.adjustSize = function() {
@@ -582,10 +610,16 @@ Crossplot.prototype._doPlot = function() {
     this.plotArea();
     this.plotUserLine();
     this.plotOverlayLines();
-    if (this.selector) {
-        // this.prepareSelectionData();
+    // if (this.viSelection) {
         this.plotSelections();
-    }
+    // }
+
+    let footerString = (this.data.length - this.outliers) +" points plotted out of "
+                        + (this.data.length + this.nullDatas) + '( '
+                        + this.outliers + ' outliers, '
+                        + this.nullDatas + ' nulls)';
+    this.footerRight
+        .text(footerString);
 }
 
 Crossplot.prototype.updateClipPath = function() {
@@ -618,29 +652,50 @@ Crossplot.prototype.updateAxises = function() {
 }
 
 Crossplot.prototype.updateAxisTicks = function() {
+    let self = this;
     let wdX = this.getWindowX();
     let wdY = this.getWindowY();
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
+    let xTickValues = this.genXTickValues();
+    let yTickValues = this.genYTickValues();
+    let xTickType = (this.pointSet.logX) ? xLogMajorTest : xLinearMajorTest;
+    let yTickType = (this.pointSet.logY) ? yLogMajorTest : yLinearMajorTest;
 
     let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX || 1);
     let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY || 1);
 
     let axisX = d3.axisBottom(this.getTransformX())
-        .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        // .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        .tickValues(xTickValues)
         .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsX));
 
     let axisY = d3.axisLeft(this.getTransformY())
-        .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        // .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        .tickValues(yTickValues)
         .tickFormat(Utils.getDecimalFormatter(this.pointSet.decimalsY));
 
     this.axisContainer.select('g.vi-crossplot-axis-x-ticks')
         .call(axisX)
-        .style('transform', 'translateY(' + vpY[0] + 'px)');
+        .style('transform', 'translateY(' + vpY[0] + 'px)')
+        .selectAll('.tick text')
+            .style('display', function(d, i) {
+                // if (self.pointSet.logX)
+                    return xTickType(i) ? 'block' : 'none';
+                // else
+                //     return 'block';
+            });
 
     this.axisContainer.select('g.vi-crossplot-axis-y-ticks')
         .call(axisY)
-        .style('transform', 'translateX(' + vpX[0] + 'px)');
+        .style('transform', 'translateX(' + vpX[0] + 'px)')
+        .selectAll('.tick text')
+            .style('display', function(d, i) {
+                // if (self.pointSet.logY)
+                    return yTickType(i) ? 'block' : 'none';
+                // else
+                //     return 'block';
+            });
 
     if (!this.shouldPlotZAxis()) {
         this.axisContainer.select('g.vi-crossplot-axis-z-ticks')
@@ -681,6 +736,20 @@ Crossplot.prototype.updateAxisTicks = function() {
         .call(axisZ)
         .style('transform', 'translateX(' + (vpX[1] + this.rectZWidth) +  'px)')
         .style('display', 'block');
+
+    function xLinearMajorTest(i) {
+        return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? true : false;
+    }
+    function yLinearMajorTest(i) {
+        return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? true : false;
+    }
+
+    function xLogMajorTest(i) {
+        return Number.isInteger(Math.log10(xTickValues[i])) ? true : false;
+    }
+    function yLogMajorTest(i) {
+        return Number.isInteger(Math.log10(yTickValues[i])) ? true : false;
+    }
 }
 
 Crossplot.prototype.updateAxisGrids = function() {
@@ -690,17 +759,23 @@ Crossplot.prototype.updateAxisGrids = function() {
     let wdY = this.getWindowY();
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
+    let xTickValues = this.genXTickValues();
+    let yTickValues = this.genYTickValues();
+    let xTickType = (this.pointSet.logX) ? xLogMajorTest : xLinearMajorTest;
+    let yTickType = (this.pointSet.logY) ? yLogMajorTest : yLinearMajorTest;
 
     let stepX = (wdX[1]-wdX[0]) / (this.pointSet.majorX*this.pointSet.minorX || 1);
     let stepY = (wdY[1]-wdY[0]) / (this.pointSet.majorY*this.pointSet.minorY || 1);
 
     let gridX = d3.axisBottom(this.getTransformX())
-        .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        // .tickValues(d3.range(wdX[0], wdX[1] + stepX/2, stepX))
+        .tickValues(xTickValues)
         .tickFormat('')
         .tickSize(-Math.abs(vpY[1] - vpY[0]));
 
     let gridY = d3.axisLeft(this.getTransformY())
-        .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        // .tickValues(d3.range(wdY[0], wdY[1] + stepY/2, stepY))
+        .tickValues(yTickValues)
         .tickFormat('')
         .tickSize(-Math.abs(vpX[1] - vpX[0]));
 
@@ -709,7 +784,8 @@ Crossplot.prototype.updateAxisGrids = function() {
         .style('transform', 'translateY(' + vpY[0] + 'px)')
         .selectAll('.tick line')
             .attr('class', function(d, i) {
-                return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                // return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                return (xTickType(i)) ? 'vi-major-tick' : 'vi-minor-tick';
             });
 
     this.axisContainer.select('g.vi-crossplot-axis-y-grids')
@@ -717,8 +793,23 @@ Crossplot.prototype.updateAxisGrids = function() {
         .style('transform', 'translateX(' + vpX[0] + 'px)')
         .selectAll('.tick line')
             .attr('class', function(d, i) {
-                return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                // return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? 'vi-major-tick' : 'vi-minor-tick';
+                return (yTickType(i)) ? 'vi-major-tick' : 'vi-minor-tick';
             });
+
+    function xLinearMajorTest(i) {
+        return (!self.pointSet.minorX || i % self.pointSet.minorX == 0) ? true : false;
+    }
+    function yLinearMajorTest(i) {
+        return (!self.pointSet.minorY || i % self.pointSet.minorY == 0) ? true : false;
+    }
+
+    function xLogMajorTest(i) {
+        return Number.isInteger(Math.log10(xTickValues[i])) ? true : false;
+    }
+    function yLogMajorTest(i) {
+        return Number.isInteger(Math.log10(yTickValues[i])) ? true : false;
+    }
 }
 
 Crossplot.prototype.updateAxisZRects = function() {
@@ -844,15 +935,12 @@ Crossplot.prototype.isInZones = function(point, zones) {
     return false;
 }
 
-Crossplot.prototype.isInSelections = function(point, selectionData) {
-    for (let i = 0; i < selectionData.length; i++) {
-        // if (Utils.isWithinYRange(point, [selections[i][0], selections[i][selections[i].length - 1]]))
-
-        // assuming 'selections' is only 1 'selection', above is true
-        if (Utils.isWithinYRange(point, [selectionData[0], selectionData[selectionData.length - 1]]))
-            return true;
-    }
-    return false;
+Crossplot.prototype.isInSelections = function(point, dataY) {
+        // if (Utils.isWithinYRange(point, [data.startDepth, data.stopDepth]))
+    const topDepth = this.well.topDepth;
+    const step = this.well.step;
+    const y = Math.round((point.y - topDepth) / step);
+    return dataY.includes(y);
 }
 
 Crossplot.prototype.filterByPolygons = function(polygons, data, exclude) {
@@ -901,7 +989,7 @@ Crossplot.prototype.plotOverlayLines = function() {
     let transformY = this.getTransformY();
     window.tX = transformX;
     window.tY = transformY;
-    let isSwap = (this.pointSet.overlayLine || {}).isSwap;
+    let isSwap = (this.pointSet.OLLine || {}).isSwap;
 
     let line = d3.line()
         .x(function(d) { return transformX(parseFloat(isSwap ? d.x : d.y)); })
@@ -910,7 +998,12 @@ Crossplot.prototype.plotOverlayLines = function() {
             return !isNaN(d.x) && !isNaN(d.y);
         });
 
-    let data = (this.pointSet.overlayLine || {}).lines || [];
+    let data;
+    if(this.showOverlay){
+        data = (this.pointSet.OLLine || {}).lines || [];
+    }else{
+        data = [];
+    }
     for (let i = 0; i < data.length; i ++) {
         data[i].data = data[i].data.filter(function(d) {
             return !isNaN(d.x) && !isNaN(d.y);
@@ -1089,6 +1182,7 @@ Crossplot.prototype.prepareUserDefineLines = function() {
         let func = self.getUserDefineFunc(l.function);
         if (!func) {
             l.invalid = true;
+            toastr.error('Function ' + l.function + ' is invalid!');
             return;
         }
         l.invalid = false;
@@ -1113,7 +1207,10 @@ Crossplot.prototype.prepareRegressionLines = function() {
     let self = this;
     regLines.forEach(function(l) {
         let polygons = self.polygons.filter(function(p) {
-            return l.polygons.indexOf(p.idPolygon) > -1;
+            return l.polygons.findIndex(lp => {
+                return lp.idPolygon ? lp.idPolygon == p.idPolygon : lp == p.idPolygon;
+            }) > -1;
+            // return l.polygons.indexOf(p.idPolygon) > -1;
         });
         let data = self.filterByPolygons(polygons, self.data, l.exclude);
         if (data.length == 0) {
@@ -1237,7 +1334,7 @@ Crossplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY
 Crossplot.prototype.plotUserLine = function() {
     let userLineContainer = this.svgContainer.select('g.vi-crossplot-user-line');
     userLineContainer.selectAll('path').remove();
-    this.footerContainer.text('');
+    this.footerLeft.text('');
 
     if (!this.userLine || !this.userLine.points || this.userLine.points.length < 2) return;
 
@@ -1257,7 +1354,7 @@ Crossplot.prototype.plotUserLine = function() {
     let equation = Utils.getLinearEquation(this.userLine.points[0], this.userLine.points[1]);
     equation = equation.replace('x', this.getLabelX());
     equation = equation.replace('y', this.getLabelY());
-    this.footerContainer.text(equation);
+    this.footerLeft.text(equation);
 }
 
 Crossplot.prototype.plotArea = function() {
@@ -1343,6 +1440,8 @@ Crossplot.prototype.plotSymbols = function() {
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
     let rect = this.getPlotRect();
+    let windowX = this.getWindowX();
+    let windowY = this.getWindowY();
 
     let ctx = this.ctx;
     ctx.clearRect(0, 0, rect.width, rect.height);
@@ -1359,10 +1458,14 @@ Crossplot.prototype.plotSymbols = function() {
 
     let plotFunc = helper[Utils.lowercase(this.pointSet.pointSymbol)];
     if (typeof plotFunc != 'function') return;
+    this.outliers = 0;
     this.data.forEach(function(d) {
         if (shouldPlotZ) {
             helper.strokeStyle = transformZ(d.z);
             helper.fillStyle = transformZ(d.z);
+        }
+        if(!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
+            self.outliers ++;
         }
         plotFunc.call(helper, transformX(d.x), transformY(d.y));
     });
@@ -1396,17 +1499,29 @@ Crossplot.prototype.plotSelections = function() {
 
         let plotFunc = helper[Utils.lowercase(self.pointSet.pointSymbol)];
         if (typeof plotFunc != 'function') return;
-        let processedSelectionData = self.prepareSelectionData(selectionCanvas.selectionData);
-        processedSelectionData.forEach(function(data) {
-            data.forEach(function(d) {
-                plotFunc.call(helper, transformX(d.x), transformY(d.y));
-            });
+        // for the first time open crossplot
+        if (!selectionCanvas.selectionPointData.length && selectionCanvas.data.length
+            || !selectionCanvas.newSelectionData.length) {
+            selectionCanvas.selectionPointData = self.prepareSelectionData([ ...new Set(selectionCanvas.data) ]);
+        }
+        if (selectionCanvas.newSelectionData.length) {
+            selectionCanvas.selectionPointData = selectionCanvas.selectionPointData
+                .concat(self.prepareSelectionData([ ...new Set(selectionCanvas.newSelectionData) ]))
+                .sort();
+            selectionCanvas.data = selectionCanvas.data
+                .concat(selectionCanvas.newSelectionData)
+                .sort();
+            selectionCanvas.data = [ ...new Set(selectionCanvas.data) ];
+            selectionCanvas.newSelectionData = [];
+        }
+        // if (selectionCanvas.selectionPointData.length != selectionCanvas.data.length) {
+        //     selectionCanvas.selectionPointData = self.prepareSelectionData([ ...new Set(selectionCanvas.data) ]);
+        // }
+        selectionCanvas.selectionPointData.forEach(function(d) {
+            plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
         selectionCtx.restore();
     });
-
-    // let selection = this.selectionCanvasContainer.filter(selection => selection.id == this.selector.id);
-    // let canvas = selection[0].canvas.raise();
 }
 
 Crossplot.prototype.prepareData = function() {
@@ -1456,6 +1571,7 @@ Crossplot.prototype.prepareData = function() {
             });
         }
     }
+    self.nullDatas = 0;
     Utils.parseData(this.pointSet.curveY.data).forEach(function(d) {
         if (zonalOrInterval == 'zonalDepth') {
             if (!self.isInZones(d, zones)) return;
@@ -1472,7 +1588,10 @@ Crossplot.prototype.prepareData = function() {
         if (self.discriminatorData.length) {
             let well = self.well;
             let index = Math.round((d.y - well.topDepth) / well.step);
-            if (!self.discriminatorData[index]) return;
+            if (!self.discriminatorData[index]) {
+                self.nullDatas ++;
+                return;
+            }
         }
 
         if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
@@ -1482,11 +1601,13 @@ Crossplot.prototype.prepareData = function() {
                 z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
                 depth: d.y
             });
+        } else {
+            self.nullDatas ++;
         }
     });
 }
 
-Crossplot.prototype.prepareSelectionData = function(maskData) {
+Crossplot.prototype.prepareSelectionData = function(dataY) {
     if (!this.pointSet.curveX || !this.pointSet.curveY || !this.pointSet.curveX.data || !this.pointSet.curveY.data)
         return;
 
@@ -1515,31 +1636,22 @@ Crossplot.prototype.prepareSelectionData = function(maskData) {
 
     let self = this;
     let selectionData = [];
-    maskData.forEach(function(mask) {
-        let selectionDepths = [];
-        let depths = [];
-        for (let depthValue in mask) {
-            depths.push(parseInt(depthValue));
+    Utils.parseData(self.pointSet.curveY.data).forEach(function(d) {
+        if (!self.isInSelections(d, dataY)) return;
+        if (self.discriminatorData.length) {
+            let well = self.well;
+            let index = Math.round((d.y - well.topDepth) / well.step);
+            if (!self.discriminatorData[index]) return;
         }
-        Utils.parseData(self.pointSet.curveY.data).forEach(function(d) {
-            if (!self.isInSelections(d, depths)) return;
-            if (self.discriminatorData.length) {
-                let well = self.well;
-                let index = Math.round((d.y - well.topDepth) / well.step);
-                if (!self.discriminatorData[index]) return;
-            }
-
-            if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
-                selectionDepths.push({
-                    x: mapX[d.y],
-                    y: d.x,
-                    z: self.pointSet.depthType == 'intervalDepth' ? mapZ[d.y] : d.y,
-                    depth: d.y
-                });
-            }
-        });
-        selectionData.push(selectionDepths);
+        if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
+            selectionData.push({
+                x: mapX[d.y],
+                y: d.x,
+                depth: d.y
+            });
+        }
     });
+
     return selectionData;
 }
 
@@ -1802,6 +1914,13 @@ Crossplot.prototype.mouseMoveCallback = function() {
             this.plotUserLine();
         }
     }
+    else {
+        if(this.showTooltip) {
+            this.tooltip(x, y);
+        } else {
+            this.tooltip(null, null, true);
+        }
+    }
 }
 
 Crossplot.prototype.onMouseDown = function(callback) {
@@ -1998,16 +2117,115 @@ Crossplot.prototype.endEditPolygon = function() {
     return edittedPolygon;
 }
 
-Crossplot.prototype.addSelection = function(config) {
-    let selection = new Selection(config);
-
-    selection.initCanvas(this.bodyContainer, 'crossplot');
-    this.selectionCanvasContainer.push(selection);
-    return selection;
+Crossplot.prototype.addViSelectionToCrossplot = function(selectionConfig) {
+    let viSelection = new Selection(selectionConfig);
+    viSelection.initCanvas(this.bodyContainer, 'crossplot');
+    this.selectionCanvasContainer.push(viSelection);
+    return viSelection;
 }
 
-Crossplot.prototype.initSelectionArea = function(masks) {
-    masks.forEach((m) => {
-        this.addSelection(m);
-    })
+Crossplot.prototype.initSelectionArea = function(viSelections) {
+    let self = this;
+    viSelections.forEach((viSelection) => {
+        viSelection.initCanvas(self.bodyContainer, 'crossplot');
+        self.selectionCanvasContainer.push(viSelection);
+    });
+}
+
+Crossplot.prototype.getSelection = function(id) {
+    return this.selectionCanvasContainer.find(d => d.isSelection() && d.idSelectionTool == id);
+}
+
+Crossplot.prototype.tooltip = function(x, y, notShow) {
+    let self = this;
+    let transformX = self.getTransformX();
+    let transformY = self.getTransformY();
+    let tooltipData = {x: x, y: y};
+
+    let xCoord = transformX(x) + 15;
+    let yCoord = transformY(y) + 15;
+    let container = self.svgContainer.select('.vi-crossplot-tooltip');
+    if(notShow || isNaN(xCoord) || isNaN(yCoord)  || !x || !y) {
+        container.selectAll('*').remove();
+        return;
+    }
+
+    let text = container.selectAll('text')
+        .data([x, y]);
+    text.enter()
+        .append('text')
+        .style('font-size', 12)
+        .attr('x', xCoord)
+        .attr('y', (d, i) => { return yCoord + 15 + 15*i;})
+        .text(function (d, i) {
+            return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
+        });
+    text.attr('x', xCoord)
+        .attr('y', (d, i) => { return yCoord + 15 + 15*i;})
+        .text(function (d, i) {
+        return (i == 0 ? 'X(' + self.getLabelX():'Y(' + self.getLabelY()) + '): ' + d.toFixed(2);
+    });
+    text.exit().remove();
+
+    let maxWidth = d3.max(container.selectAll('text').nodes().map(function(node) { return node.getBBox().width;}));
+    let maxHeight = container.select('text').node().getBBox().height * 2.5;
+    let rect = container.selectAll('rect')
+        .data([{x: xCoord,y: yCoord}]);
+    rect.enter()
+        .append('rect')
+            .attr('x', (d)=> d.x - 5)
+            .attr('y', (d)=> d.y - 5)
+            .attr('width', maxWidth + 10)
+            .attr('height', maxHeight + 10)
+            .attr('fill', 'lightgreen')
+            .attr('fill-opacity', 0.9)
+            .attr('stroke', '#444')
+            .attr('rx', 7)
+            .attr('ry', 7);
+    rect.attr('x', (d)=> d.x - 5)
+        .attr('y', (d)=> d.y - 5)
+        .attr('width', maxWidth + 10)
+        .attr('height', maxHeight + 10);
+    rect.exit().remove();
+    text.raise();
+}
+
+Crossplot.prototype.genXTickValues =  function () {
+    let self = this;
+    let wdX = self.getWindowX();
+    if(self.pointSet.logX) {
+        if (wdX[0] < wdX[1])
+            return Utils.genLogTickValues(wdX[0], wdX[1]);
+        else {
+            return Utils.genLogTickValues(wdX[1], wdX[0]).reverse();
+        }
+    }
+    else {
+        let stepX = (wdX[1]-wdX[0]) / (self.pointSet.majorX * self.pointSet.minorX|| 1);
+        return d3.range(wdX[0], wdX[1] + stepX/2, stepX);
+    }
+}
+
+Crossplot.prototype.genYTickValues =  function () {
+    let self = this;
+    let wdY = self.getWindowY();
+    if(self.pointSet.logY) {
+        if (wdY[0] < wdY[1])
+            return Utils.genLogTickValues(wdY[0], wdY[1]);
+        else {
+            return Utils.genLogTickValues(wdY[1], wdY[0]).reverse();
+        }
+    }
+    else {
+        let stepY = (wdY[1]-wdY[0]) / (self.pointSet.majorY * self.pointSet.minorY || 1);
+        return d3.range(wdY[0], wdY[1] + stepY/2, stepY);
+    }
+}
+
+Crossplot.prototype.removeViSelection = function (viSelection) {
+    if (!viSelection) return;
+    viSelection.destroy();
+
+    let idx = this.selectionCanvasContainer.indexOf(viSelection);
+    this.selectionCanvasContainer.splice(idx, 1);
 }

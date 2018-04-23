@@ -712,8 +712,8 @@ function trimData(data) {
 function parseData(data) {
     return data.map(function(d) {
         return {
-            x: (d.x == null || isNaN(d.x)) ? null : parseFloat(d.x),
-            y: (d.y == null || isNaN(d.y)) ? null : parseFloat(d.y)
+            x: (d.x == null || isNaN(parseFloat(d.x))) ? null : parseFloat(d.x),
+            y: (d.y == null || isNaN(parseFloat(d.y))) ? null : parseFloat(d.y)
         }
     });
 }

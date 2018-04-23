@@ -12,17 +12,17 @@ app.factory(wiServiceName, function () {
         getComponent: function (componentName) {
             return __Controllers[componentName];
         },
-        getD3Area: function(wiLogplotName) {
+        getD3Area: function (wiLogplotName) {
             return __Controllers[wiLogplotName + 'D3Area'];
         },
-        getSlidingBar: function(wiLogplotName) {
+        getSlidingBar: function (wiLogplotName) {
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
-        getSlidingBarForD3Area: function(wiD3AreaName) {
+        getSlidingBarForD3Area: function (wiD3AreaName) {
             let wiLogplotName = wiD3AreaName.replace('D3Area', '');
             return __Controllers[wiLogplotName + 'Slidingbar'];
         },
-        getD3AreaForSlidingBar: function(wiSlidingbarName) {
+        getD3AreaForSlidingBar: function (wiSlidingbarName) {
             let wiLogplotName = wiSlidingbarName.replace('Slidingbar', '');
             return __Controllers[wiLogplotName + 'D3Area'];
         },
@@ -68,20 +68,19 @@ app.factory(wiServiceName, function () {
         // component
         LOGPLOT_HANDLERS: 'LOGPLOT_HANDLERS',
         HISTOGRAM_HANDLERS: 'HISTOGRAM_HANDLERS',
-        TREE_FUNCTIONS: 'tree-functions',
+        // TREE_FUNCTIONS: 'tree-functions',
         GLOBAL_HANDLERS: 'GLOBAL_HANDLERS',
         WI_EXPLORER_HANDLERS: 'wi-explorer-handlers',
         WI_EXPLORER: 'WiExplorer',
         GRAPH: 'GRAPH',
         DRAG_MAN: 'DRAG_MAN',
-        DIALOG_UTILS:'DIALOG_UTILS',
+        DIALOG_UTILS: 'DIALOG_UTILS',
         LAYOUT_MANAGER: 'LAYOUT_MANAGER',
         UTILS: 'UTILS',
         COPYING_CURVE: 'copying-curve',
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         HISTORYSTATE: 'HISTORY_STATE',
-        WI_WORKFLOW: 'WiWorkFlow',
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         PROJECT_LOADED: 'project-loaded',
@@ -104,7 +103,10 @@ app.factory(wiServiceName, function () {
         DUSTBIN_REFRESH_EVENT: 'dustbin-refresh-event',
         PALETTES: 'PALETTES',
         LOGPLOT_LOADED_EVENT: 'logplot-loaded-event',
-        UPDATE_ITEMS_EVENT: 'UPDATE_ITEMS_EVENT'
+        UPDATE_ITEMS_EVENT: 'UPDATE_ITEMS_EVENT',
+        RENAME_MODEL: 'rename-model',
+        DELETE_MODEL: 'delete-model',
+        MODIFIED_CURVE_DATA: 'modified-curve-data'
     };
 });
 

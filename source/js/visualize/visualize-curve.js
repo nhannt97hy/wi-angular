@@ -73,7 +73,7 @@ function Curve(config) {
     this.rawData = config._data || [];
 
     this.data = Utils.parseData(this.rawData);
-    this.data = Utils.trimData(this.data);
+    // this.data = Utils.trimData(this.data);
     // this.data = Utils.interpolateData(this.data);
     this.orderNum = config.orderNum;
 
@@ -190,6 +190,22 @@ Curve.prototype.setProperties = function(props) {
             lineDash: eval(props.symbolLineDash)
         }
         // if (props.displayMode == 'Symbol') this.line = null;
+    }
+
+    if(props.rawData && Array.isArray(props.rawData) && props.rawData.length){
+        this.rawData = props.rawData;
+        this.data = Utils.parseData(this.rawData);
+        this.data = this.data.map(function(d) {
+            return {
+                x: d.x,
+                y: d.y * self.yStep + self.offsetY
+            };
+        });
+        let dataMap = {};
+        this.data.forEach(function(d) {
+            dataMap[d.y] = d.x;
+        });
+        this.dataMap = dataMap;
     }
 
     // if (props.displayMode == 'None') {
@@ -367,15 +383,15 @@ Curve.prototype.doPlot = function(highlight, keepPrevious) {
     if ((this.displayAs == 'Cumulative' && this.prevProps.displayAs != 'Cumulative') ||
         (this.displayAs != 'Cumulative' && this.prevProps.displayAs == 'Cumulative') && this.track) {
         this.prevProps.displayAs = this.displayAs;
-        let cCurves = this.track.getCurves().filter(function(curve) {
+        const cCurves = this.track.getCurves().filter(function(curve) {
             return curve.displayAs == 'Cumulative';
         });
         cCurves.forEach(function(curve) {
             if (curve == self) return;
             curve.doPlot();
         });
-        cCurveIds = new Set(cCurves.map(function(c) { return c.id; }));
-        cShadings = this.track.getShadings().filter(function(sh) {
+        const cCurveIds = new Set(cCurves.map(function(c) { return c.id; }));
+        const cShadings = this.track.getShadings().filter(function(sh) {
             return (sh.leftCurve && cCurveIds.has(sh.leftCurve.id)) ||
                 (sh.rightCurve && cCurveIds.has(sh.rightCurve.id));
         });
@@ -392,6 +408,7 @@ Curve.prototype.updateHeader = function() {
 
     let self = this;
     this.header
+        .style('color', self.line.color)
         .style('display', this.showHeader ? 'block' : 'none')
         .select('.vi-curve-name')
         .text(this.alias);
@@ -405,6 +422,40 @@ Curve.prototype.updateHeader = function() {
             if (i == 1) elem.text(self.unit);
             if (i == 2) elem.text(self.maxX);
         })
+    const rect = this.header.node().getBoundingClientRect();
+    const headerBorderWidth = parseInt(this.header.style('border-width'));
+    const width = rect.width - headerBorderWidth;
+    const height = Math.max(_.get(self, 'line.width'), _.get(self, 'symbol.size'));
+    const headerCanvas = this.header.select('canvas');
+    headerCanvas.attr('width', width).attr('height', height);
+    const headerCtx = headerCanvas.node().getContext('2d');
+    if (self.line && (self.displayMode == 'Line' || self.displayMode == 'Both')) {
+        headerCtx.beginPath();
+        headerCtx.strokeStyle = self.line.color;
+        headerCtx.lineWidth = self.line.width;
+        headerCtx.setLineDash(self.line.dash);
+        headerCtx.moveTo(0, height/2);
+        headerCtx.lineTo(width, height/2);
+        headerCtx.stroke();
+    }
+    if (self.symbol && (self.displayMode == 'Symbol' || self.displayMode == 'Both')) {
+        const helper = new CanvasHelper(headerCtx, {
+            strokeStyle: self.symbol.fillStyle,
+            fillStyle: self.symbol.fillStyle,
+            lineWidth: self.symbol.lineWidth,
+            lineDash: self.symbol.lineDash,
+            size: self.symbol.size
+        });
+        const symbolPlotFunc = helper[self.symbol.style.toLowerCase()];
+        if (typeof symbolPlotFunc === 'function') {
+            const y = height / 2;
+            let x = 0;
+            do {
+                symbolPlotFunc.call(helper, x, y);
+                x += self.symbol.size * 2;
+            } while (x < width);
+        }
+    }
 }
 
 Curve.prototype.getCanvasTranslateXForWrapMode = function() {
@@ -424,8 +475,7 @@ Curve.prototype.getCanvasTranslateXForWrapMode = function() {
 
 Curve.prototype.updateOrderNum = function(orderNum) {
     this.orderNum = orderNum || this.orderNum;
-    this.header.datum(this.orderNum + this.name)
-        .attr('tabindex', isNaN(this.orderNum) ? -1 : this.orderNum)
+    this.header.datum(this.orderNum + '-' + this.name)
         .attr('data-order-num', function(d) { return d; });
 }
 

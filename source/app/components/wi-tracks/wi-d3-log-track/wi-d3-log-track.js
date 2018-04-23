@@ -13,36 +13,36 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
     this.showContextMenu = function (event) {
         _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        switch(self.currentDrawingRightClicked) {
-            case 'curve':
-                _curveOnRightClick();
-                break;
-            case 'marker':
-                _markerOnRightClick();
-                break;
-            case 'annotation':
-                _annotationOnRightClick();
-                break;
-            case 'shading':
-                _shadingOnRightClick();
-                break;
-            default:
-                let items = self.wiD3Ctrl.getCommonContextMenuItems();
-                items.trackProperties.push({
-                    name: "SwitchToLogarithmic",
-                    label: "Switch Linear/Logarithmic",
-                    icon: 'logarithmic-switch-16x16',
+        if (self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
+            let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
                     handler: function () {
-                        let scale = _currentTrack.scale;
-                        if (scale.toLowerCase() == 'linear')
-                            _currentTrack.scale = 'logarithmic';
-                        else if (scale.toLowerCase() == 'logarithmic')
-                            _currentTrack.scale = 'linear';
-                        _currentTrack.doPlot(true);
+                        combinedPlotD3Ctrl.endAllSelections();
                     }
-                });
+                }
+            ]);
+        } else {
+            switch (self.currentDrawingRightClicked) {
+                case 'curve':
+                    _curveOnRightClick();
+                    break;
+                case 'marker':
+                    _markerOnRightClick();
+                    break;
+                case 'annotation':
+                    _annotationOnRightClick();
+                    break;
+                case 'shading':
+                    _shadingOnRightClick();
+                    break;
+                default:
+                    let items = self.wiD3Ctrl.getCommonContextMenuItems();
 
-                let trackItemsCreationArray = [{
+                    let trackItemsCreationArray = [{
                         name: "AddMarker",
                         label: "Add Marker",
                         icon: 'marker-add-16x16',
@@ -68,37 +68,38 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                     console.log('logTrackPropertiesData', props);
                                 }
                             }, {
-                                tabs: ['false', 'false', 'true'],
-                                shadingOnly: true
-                            });
+                                    tabs: ['false', 'false', 'true'],
+                                    shadingOnly: true
+                                });
                         }
                     }];
-                items.trackItemsCreation = items.trackItemsCreation.concat(trackItemsCreationArray);
-                items.trackHandle.unshift({
-                    name: "DuplicateTrack",
-                    label: "Duplicate Track",
-                    icon: 'track-duplicate-16x16',
-                    handler: function () {
-                        logplotHandlers.DuplicateTrackButtonClicked();
-                    }
-                });
-                items.trackHandle = items.trackHandle.concat([{
-                    name: "ExportTrack",
-                    label: "Export Track",
-                    // icon: "track-delete-16x16",
-                    handler: function () {
-                        logplotHandlers.ExportTrackButtonClicked();
-                    }
-                }, {
-                    name: "ImportTrack",
-                    label: "Import Track",
-                    // icon: "track-delete-16x16",
-                    handler: function () {
-                        logplotHandlers.ImportTrackButtonClicked();
-                    }
-                }]);
+                    items.trackItemsCreation = items.trackItemsCreation.concat(trackItemsCreationArray);
+                    items.trackHandle.unshift({
+                        name: "DuplicateTrack",
+                        label: "Duplicate Track",
+                        icon: 'track-duplicate-16x16',
+                        handler: function () {
+                            logplotHandlers.DuplicateTrackButtonClicked();
+                        }
+                    });
+                    items.trackHandle = items.trackHandle.concat([{
+                        name: "ExportTrack",
+                        label: "Export Track",
+                        // icon: "track-delete-16x16",
+                        handler: function () {
+                            logplotHandlers.ExportTrackButtonClicked();
+                        }
+                    }, {
+                        name: "ImportTrack",
+                        label: "Import Track",
+                        // icon: "track-delete-16x16",
+                        handler: function () {
+                            logplotHandlers.ImportTrackButtonClicked();
+                        }
+                    }]);
 
-                self.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
+                    self.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
+            }
         }
         self.currentDrawingRightClicked = null;
     }
@@ -115,16 +116,26 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             tabs: ['true', 'true', 'true']
         });
     }
-    this.update = function () {
+    this.update = function (callback) {
         let viTrack = this.viTrack;
         if (!viTrack.isLogTrack()) return;
 
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+        function getDataCurve(idCurve, _cb) {
+            const line = viTrack.getCurves().find(l => l.idCurve === idCurve) || {};
+            let dataCurve = line.rawData;
+            if (Array.isArray(dataCurve)) _cb(dataCurve);
+            else wiApiService.dataCurve(idCurve, function (dataCurve, err) {
+                if (err) _cb(null, err);
+                else _cb(dataCurve);
+            });
+        }
         function _addShadingToTrack (shading) {
-            wiApiService.dataCurve(shading.idControlCurve, function(dataCurve) {
+            getDataCurve(shading.idControlCurve, function (dataCurve, err) {
+                if (err) return;
                 let shadingModel = Utils.shadingToTreeConfig(shading, palettes);
-                shadingModel.data.selectedCurve = graph.buildCurve({idCurve: shading.idControlCurve}, dataCurve, _getWellProps());
+                shadingModel.data.selectedCurve = graph.buildCurve({ idCurve: shading.idControlCurve }, dataCurve, _getWellProps());
                 if (!shadingModel.idRightLine) return;
                 if (!shadingModel.idLeftLine) {
                     let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
@@ -134,10 +145,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 else {
                     let lineObj1 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idRightLine);
                     let lineObj2 = viTrack.getCurves().find(viCurve => viCurve.id == shading.idLeftLine);
-                    if (!lineObj1 || ! lineObj2) return;
+                    if (!lineObj1 || !lineObj2) return;
                     self.addPairShadingToTrack(viTrack, lineObj2, lineObj1, shadingModel.data);
                 }
-            })
+            });
         }
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
             viTrack.getMarkers().forEach(viMarker => {
@@ -199,6 +210,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     logTrack.width = Utils.inchToPixel(logTrack.width);
                     viTrack.setProperties(logTrack);
                     viTrack.doPlot();
+                    callback && callback();
                 })
                 .catch(function (err) {
                     console.error(err);
@@ -440,7 +452,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             idRightLine: curve1.id,
             leftFixedValue: curve2 ? null : curve1.minX,
             rightFixedValue: null,
-            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve
+            idControlCurve: curve2 ? curve2.idCurve : curve1.idCurve,
+            orderNum: _currentTrack.getShadingOrderKey()
         }
         wiApiService.createShading(shadingObj, function (shading) {
             let shadingModel = Utils.shadingToTreeConfig(shading);
@@ -457,18 +470,19 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let currentShading = _currentTrack.getCurrentShading();
         let shadingOptions = currentShading.getProperties();
         let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+        console.log("onWiD3", shadingOptions);
         DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
-            let leftLineBk = options.leftLine;
-            options.leftLine = null;
-            let rightLineBk = options.rightLine;
-            options.rightLine = null;
+            let leftCurveBk = options.leftCurve;
+            options.leftCurve = null;
+            let rightCurveBk = options.rightCurve;
+            options.rightCurve = null;
 
             let request = angular.copy(options);
 
-            request.leftLine = leftLineBk;
-            request.rightLine = rightLineBk;
-            options.leftLine = leftLineBk;
-            options.rightLine = rightLineBk;
+            request.leftCurve = leftCurveBk;
+            request.rightCurve = rightCurveBk;
+            options.leftCurve = leftCurveBk;
+            options.rightCurve = rightCurveBk;
 
             if(options.idLeftLine == -3) {
                 options.type = 'custom';
@@ -482,43 +496,30 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             if(options.idLeftLine > 0) {
                 options.type = 'pair';
             }
-            delete request.leftLine;
-            delete request.rightLine;
+            delete request.leftCurve;
+            delete request.rightCurve;
 
             if (options.idLeftLine < 0) {
                 request.idLeftLine = null;
-                options.leftLine = null;
+                options.leftCurve = null;
                 options.idLeftLine = null;
             }
             else {
                 request.leftFixedValue = null;
                 request.idLeftLine = parseInt(options.idLeftLine);
             }
-            options.rightCurve = options.rightLine;
-            options.leftCurve = options.leftLine;
-            delete options.rightLine;
-            delete options.leftLine;
+            options.rightCurve = options.rightCurve;
+            options.leftCurve = options.leftCurve;
+            delete options.rightCurve;
+            delete options.leftCurve;
 
+            let width = _currentTrack.width;
             wiApiService.editShading(request, function (shading) {
-                Utils.getPalettes(function(paletteList){
-                    wiApiService.dataCurve(options.idControlCurve, function (curveData) {
-                        options.controlCurve = graph.buildCurve({ idCurve: options.idControlCurve }, curveData, well.properties);
-                        if(!options.isNegPosFill) {
-                            if(options.fill.varShading && options.fill.varShading.palName)
-                                options.fill.varShading.palette = paletteList[options.fill.varShading.palName];
-                        }
-                        else {
-                            if(options.positiveFill.varShading && options.positiveFill.varShading.palName)
-                                options.positiveFill.varShading.palette = paletteList[options.positiveFill.varShading.palName];
-                            if(options.negativeFill.varShading && options.negativeFill.varShading.palName)
-                                options.negativeFill.varShading.palette = paletteList[options.negativeFill.varShading.palName];
-                        }
-                        currentShading.setProperties(options);
-                        $timeout(function() {
-                            _currentTrack.plotAllDrawings();
-                        });
-                    });
-                });
+                self.wiD3Ctrl.updateTrack(_currentTrack);
+                $timeout(function() {
+                    _currentTrack.width = width;
+                    _currentTrack.doPlot();
+                }, 1000);
             });
         }, shadingOptions, _currentTrack, self.wiLogplotCtrl);
     };
@@ -538,6 +539,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 input: curve1.name + '_' + curve2.name
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
+                if(!crossplotName) return;
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                 Utils.createCrossplot(idWell, crossplotName, function(err, crossplotModel) {
                     if (err) {
@@ -570,10 +572,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 input: curve.name + 'histogram'
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
+                if(!histogramName) return;
                 let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
                 Utils.createHistogram(idWell, curve, histogramName);
             })
         }
+    }
+
+    this.addViSelectionToTrack = function (track, selectionConfig) {
+        track.addSelection(selectionConfig);
     }
 
     this.$onInit = function () {
@@ -582,18 +589,52 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
         logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
     }
-    this.onReady = function () {
-        self.viTrack = createVisualizeLogTrack(getProperties());
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
-
-        Utils.listenEvent('curve-deleted', function (eventData) {
-            console.log('curve deleted event: ', eventData);
-            let hasCurve = self.viTrack.getCurves().find(function(curve) { return curve.idCurve == eventData.properties.idCurve;});
+    this.onDelete = function (model) {
+        console.log('onDelete LogTrack: ', model);
+        let hasCurve;
+        switch(model.type){
+            case 'curve':
+            hasCurve = self.viTrack.getCurves().find(curve => curve.idCurve == model.id);
             if(hasCurve) {
                 console.log('updating log track', self.viTrack);
                 self.update();
             }
-        })
+            break;
+
+            case 'dataset':
+            hasCurve = self.viTrack.getCurves().find(curve => curve.idDataset == model.id);
+            if(hasCurve) {
+                console.log('updating log track', self.viTrack);
+                self.update();
+            }
+            break;
+
+            default:
+            break;
+        }
+    }
+    this.onModifiedCurve = function(curve){
+        console.log('wi-d3-log-track onModifiedCurve', curve.idCurve);
+        let hasCurve = self.viTrack.getCurves().find(c => c.idCurve == curve.idCurve);
+        if(hasCurve){
+            hasCurve.setProperties({
+                rawData: curve.data.map((r,i) => {
+                    return {
+                        y: i,
+                        x: r
+                    }
+                })
+            })
+            self.update();
+        }
+    }
+    this.onReady = function () {
+        self.viTrack = createVisualizeLogTrack(getProperties());
+        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
+        wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+
+        // Utils.listenEvent('curve-deleted', )
         _registerLogTrackCallback(self.viTrack);
     }
 
@@ -665,6 +706,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.wiD3Ctrl._drawTooltip(track);
         });
         track.onCurveDrag(function (desTrack) {
+            let widths = [track.width, desTrack.width];
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
             curve.idTrack = desTrack.id;
@@ -672,6 +714,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 self.wiD3Ctrl.updateTrack(track);
                 self.wiD3Ctrl.updateTrack(desTrack);
             });
+            $timeout(function() {
+                track.width = widths[0];
+                desTrack.width = widths[1];
+                track.doPlot();
+                desTrack.doPlot();
+            }, 1500);
         });
     }
     function _onPlotMouseDownCallback(track) {
@@ -1001,6 +1049,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             // Mousedown already set the shading to be current shading
             _shadingOnDoubleClick();
         });
+    }
+
+    this.$onDestroy = function(){
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
     }
 
 }

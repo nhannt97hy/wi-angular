@@ -1,11 +1,11 @@
 <div class="comboview-toolbar-wrapper">
-    
+
     <wi-toolbar name="ComboviewToolbar1">
     		<wi-dropdown name="SelectorsButton" icon="selector-tool-16x16" type="small" tooltip="Selectors">
-                <wi-button ng-repeat="tool in wiComboview.toolBox" 
+                <wi-button ng-repeat="tool in wiComboview.toolBox"
                     icon="rect-16x16"
-                    style="{{tool.color}}" 
-                    label="{{tool.name}}" 
+                    style="{{tool.color}}"
+                    label="{{tool.name}}"
                     layout="icon-left" class="height-auto"
                     handler="handlers.SelectorButtonClicked"
                     handler-args="tool">
@@ -17,13 +17,13 @@
             </wi-dropdown>
 
     		<wi-dropdown name="ErasersButton" icon="eraser-tool-16x16" type="small" tooltip="Erasers">
-                <wi-button ng-repeat="tool in wiComboview.toolBox" 
+                <wi-button ng-repeat="tool in wiComboview.toolBox"
                     icon="rect-16x16"
                     style="{{tool.color}}"
                     label="{{tool.name}}"
                     layout="icon-left" class="height-auto"
                     handler="handlers.EraserButtonClicked"
-                    handler-args="[tool.name]">
+                    handler-args="tool">
                 </wi-button>
 
                 <wi-button label="Edit Tool" layout="icon-left" class="height-auto" handler="handlers.EditToolComboboxButtonClicked">
@@ -38,6 +38,10 @@
     </wi-toolbar>
 
 </div>
-<div class="comboview-main-content">
-    <wi-d3-comboview name='{{wiComboview.wiD3AreaName}}' wi-comboview-ctrl='wiComboview'></wi-d3-comboview>
+<div class="comboview-main-content" id='{{wiComboview.idD3Area}}'>
+    <wi-d3-comboview
+        name="{{wiComboview.wiD3AreaName}}"
+        wi-comboview-ctrl="wiComboview"
+        wi-comboview-model="wiComboview.model">
+    </wi-d3-comboview>
 </div>

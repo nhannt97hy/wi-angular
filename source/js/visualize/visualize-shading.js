@@ -87,6 +87,7 @@ function Shading(config) {
     //     ? ( this.leftCurve && this.rightCurve ? false : true )
     //     : config.showRefLine;
     this.showRefLine = this.getType() === 'custom' ? true:false;
+    this.orderNum = config.orderNum;
 
 }
 
@@ -121,7 +122,8 @@ Shading.prototype.getProperties = function() {
         leftFixedValue: leftX == null ? null: parseFloat(formatter(leftX)),
         rightFixedValue: rightX == null ? null: parseFloat(formatter(rightX)),
         idControlCurve: (this.selectedCurve || {}).idCurve,
-        type: this.getType()
+        type: this.getType(),
+        orderNum: this.orderNum
     }
 }
 
@@ -129,6 +131,7 @@ Shading.prototype.setProperties = function(props) {
     Utils.setIfNotUndefined(this,'idTrack', props.idTrack);
     Utils.setIfNotUndefined(this, 'id', props.idShading);
     Utils.setIfNotUndefined(this, 'name', props.name);
+    Utils.setIfNotUndefined(this, 'orderNum', props.orderNum);
     Utils.setIfNotUndefined(this, 'isNegPosFill', props.isNegPosFill);
     if (props.isNegPosFill) {
         Utils.setIfNotUndefined(this, 'positiveFill', Utils.isJson(props.positiveFill) ? JSON.parse(props.positiveFill) : props.positiveFill);
@@ -184,7 +187,7 @@ Shading.prototype.init = function(plotContainer) {
 
     let self = this;
     this.canvas = plotContainer.append('canvas')
-        .attr('class', 'vi-track-drawing')
+        .attr('class', 'vi-track-drawing vi-track-shading')
         .style('cursor', 'crosshair');
 
     this.ctx = this.canvas.node().getContext('2d');
@@ -309,6 +312,8 @@ Shading.prototype.doPlot = function(highlight) {
         drawRefLine(self);
         // self.canvas.lower();
     });
+    this.updateOrderNum();
+    this.onSetCurrentShading(highlight);
     return this;
 }
 
@@ -534,14 +539,16 @@ function drawCurveLine(ctx, data, highlight) {
     data.forEach(function(item) {
         ctx.lineTo(item.x, item.y);
     });
-    // if (highlight) {
-    //     ctx.shadowColor = 'grey';
-    //     ctx.shadowOffsetX = 2;
-    //     ctx.shadowOffsetY = 2;
-    //     ctx.shadowBlur = 2;
-    //     ctx.lineWidth = 0;
-    //     ctx.stroke();
-    // }
+    if (highlight) {
+        ctx.shadowColor = 'grey';
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.shadowBlur = 2;
+        ctx.strokeStyle = ctx.fillStyle;
+        // ctx.lineWidth = 2;
+
+        ctx.stroke();
+    }
 }
 
 function drawRefLine(shading) {
@@ -635,4 +642,18 @@ Shading.prototype.getType = function() {
     else if (Math.abs(this.refX - this.rightCurve.minX) < e) type = 'left';
     else type = 'custom';
     return type;
+}
+
+Shading.prototype.updateOrderNum = function(orderNum) {
+    this.orderNum = orderNum || this.orderNum;
+    this.header.datum(this.orderNum + '-' + this.name)
+        .attr('data-order-num', function (d) { return d; });
+    this.canvas.datum(this.orderNum + '-' + this.name)
+        .attr('data-order-num', function (d) { return d; });
+}
+
+Shading.prototype.onSetCurrentShading = function (check) {
+    if(check == true)
+        this.canvas.style('opacity', '0.8');
+    else this.canvas.style('opacity', '1');
 }

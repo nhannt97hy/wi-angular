@@ -1,62 +1,88 @@
 wii-items {
-  .panel-default {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    margin-bottom: 0px;
-  }
-  .panel-body {
-    padding: 0;
-    flex: 1;
-    position: relative;
-  }
-  table {
-	background: none;
-	border: none;
-    width: 100%;
-    tbody {
-        position:absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        overflow-y: auto;
+    flex: auto;
+    width: 0;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-right: 1em;
+    .panel-heading {
+        display:flex;
+        padding: 5px 15px;
+        height: 42px;
     }
-    tr:first-child {
-        height: 1.2em;
-        th { font-size: 12px; }
+    .panel-heading > h4 {
+        line-height: 30px;
+        flex: 1;
+        margin: 0;
     }
-    tr {
-      height: 2em;
-      border-bottom: 1px solid #eeeeee;
-      cursor: pointer;
-      td {
-        padding: 0 12px;
-        border-right: 1px solid #eeeeee;
-        &.unit {
-          width: 5%;
-          input {
-            width: 100%;
-          }
+    .panel-heading button.btn {
+        margin-left: 5px;
+    }
+    .panel-default {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0px;
+        border-color: #888;
+    }
+    .panel-body {
+        padding: 0;
+        flex: 1;
+        position: relative;
+    }
+    table {
+        background: none;
+        border: none;
+        width: 100%;
+        tbody {
+            position:absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow-y: auto;
         }
-        input {
-          border: 0;
-          background-color: transparent;
-          width: 90%;
+        tr:first-child {
+            height: 1.2em;
+            th { font-size: 13px; }
         }
-      }
-      th {
-        padding: 0 30px;
-        border-right: 1px solid #eeeeee;
-      }
+        tr {
+            height: 2em;
+            border-bottom: 1px solid #eeeeee;
+            cursor: pointer;
+            td {
+                padding: 0 12px;
+                border-right: 1px solid #eeeeee;
+                font-size: 12px;
+                &.unit {
+                    width: 5%;
+                    input {
+                        width: 100%;
+                    }
+                }
+                input {
+                    border: 0;
+                    background-color: transparent;
+                    width: calc(100% - 20px);
+                }
+                * {
+                    vertical-align: middle;
+                }
+            }
+            th {
+                // padding: 0 30px;
+                text-align: center;
+                border-right: 1px solid #eeeeee;
+            }
+        }
+        tr:first-child {
+            border-top: 1px solid #eeeeee;
+            background-color: #f8f8f8;
+            cursor: default;
+        }
+        tr.active {
+            background-color: #eeeeee;
+        }
     }
-    tr:first-child {
-      border-top: 1px solid #eeeeee;
-      background-color: #f8f8f8;
-      cursor: default;
-    }
-    tr.active {
-      background-color: #eeeeee;
-    }
-  }
 }

@@ -389,26 +389,26 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             curves_bk.forEach(function(cBk) {
                                 // delete shading when select other curve
                                 if (cBk.id == c.id && cBk.idCurve != c.idCurve) {
-                                    if (s.rightLine.id == c.id || s.leftLine.id == c.id)
+                                    if (s.rightCurve.id == c.id || s.leftCurve.id == c.id)
                                         s.changed = (s.changed == changed.created) ? s.changed : changed.deleted;
                                 }
                             });
-                            if (s.rightLine.id == c.id) {
-                                s.rightLine = c;
+                            if (s.rightCurve.id == c.id) {
+                                s.rightCurve = c;
                                 s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
-                            if (s.leftLine.id == c.id) {
-                                s.leftLine = c;
+                            if (s.leftCurve.id == c.id) {
+                                s.leftCurve = c;
                                 s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
 
-                            s.idLeftLine = s.leftLine.id;
+                            s.idLeftLine = s.leftCurve.id;
                             if (s.type == 'left') {
-                                s.leftFixedValue = s.rightLine.minX;
+                                s.leftFixedValue = s.rightCurve.minX;
                                 s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                             if (s.type == 'right') {
-                                s.leftFixedValue = s.rightLine.maxX;
+                                s.leftFixedValue = s.rightCurve.maxX;
                                 s.changed = (s.changed == changed.unchanged) ? changed.updated : s.changed;
                             }
                         });
@@ -431,29 +431,29 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         this.shadings.forEach(function(s, index) {
             s.changed = changed.unchanged;
             s._index = index;
-            s.rightLine = getLine(s.idRightLine);
-            if (s.type == 'left') s.leftLine = {"id": -1, "name": "left"}
-            if (s.type == 'right') s.leftLine = {"id": -2, "name": "right"}
-            if (s.type == 'custom') s.leftLine = {"id": -3, "name": "custom"}
-            if (s.type == 'pair') s.leftLine = getLine(s.idLeftLine);
+            s.rightCurve = getLine(s.idRightLine);
+            if (s.type == 'left') s.leftCurve = {"id": -1, "name": "left"}
+            if (s.type == 'right') s.leftCurve = {"id": -2, "name": "right"}
+            if (s.type == 'custom') s.leftCurve = {"id": -3, "name": "custom"}
+            if (s.type == 'pair') s.leftCurve = getLine(s.idLeftLine);
+            s.idLeftLine = s.leftCurve.id;
             s.shadingStyle = utils.getShadingStyle(s.isNegPosFill ? s.positiveFill : s.fill);
         });
         this.typeFixedValue = function () {
-            if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightLine.minX) {
-                self.shadings[self.__idx].leftLine = {"id": -1, "name": "left"};
+            if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightCurve.minX) {
+                self.shadings[self.__idx].leftCurve = {"id": -1, "name": "left"};
                 self.shadings[self.__idx].idLeftLine = -1;
                 self.shadings[self.__idx].type = 'left';
             }
-            if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightLine.maxX) {
-                self.shadings[self.__idx].leftLine = {"id": -2, "name": "right"};
+            else if(self.shadings[self.__idx].leftFixedValue == self.shadings[self.__idx].rightCurve.maxX) {
+                self.shadings[self.__idx].leftCurve = {"id": -2, "name": "right"};
                 self.shadings[self.__idx].idLeftLine = -2;
                 self.shadings[self.__idx].type = 'right';
             }
             else  {
-                self.shadings[self.__idx].leftLine = {"id": -3, "name": "custom"};
+                self.shadings[self.__idx].leftCurve = {"id": -3, "name": "custom"};
                 self.shadings[self.__idx].idLeftLine = -3;
                 self.shadings[self.__idx].type = 'custom';
-
             }
         }
         this.getShadings = function () {
@@ -499,7 +499,8 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         this.onChangeShading = function (index) {
             if (self.shadings.find(s => s._index == self.__idx).changed == changed.unchanged) {
                 self.shadings.find(s => s._index == self.__idx).changed = changed.updated;
-                self.typeFixedValue();
+                if(self.shadings.find(s => s._index == self.__idx).idLeftLine < 0)
+                    self.typeFixedValue();
             }
         }
         this.syncShadingType = function () {
@@ -606,42 +607,49 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
 
         this.defineButtonClicked = function (index, $event) {
             self.setClickedRowShading(index);
-
+            console.log("onDefine", self.shadings[self.__idx]);
             DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options){
                 if(options) self.shadings[self.__idx] = options;
             }, self.shadings[self.__idx], currentTrack, wiLogplotCtrl);
             $event.stopPropagation();
         };
         this.onSelectRightLine = function () {
-            self.shadings[self.__idx].idRightLine = self.shadings[self.__idx].rightLine.id;
+            self.shadings[self.__idx].idRightLine = self.shadings[self.__idx].rightCurve.id;
             if (self.shadings[self.__idx].type == 'left')
-                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
+                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightCurve.minX;
             if (self.shadings[self.__idx].type == 'right')
-                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
-            if (self.shadings[self.__idx].leftLine) self.onSelectLeftLine();
+                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightCurve.maxX;
+            if (self.shadings[self.__idx].leftCurve) self.onSelectLeftLine();
         };
         this.onSelectLeftLine = function () {
-            self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftLine.id;
-            if (self.shadings[self.__idx].leftLine.id == -1) {
-                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.minX;
+            self.shadings[self.__idx].idLeftLine = self.shadings[self.__idx].leftCurve.id;
+            if (self.shadings[self.__idx].leftCurve.id == -1) {
+                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightCurve.minX;
                 self.shadings[self.__idx].type = 'left';
             }
-            if (self.shadings[self.__idx].leftLine.id == -2) {
-                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightLine.maxX;
+            if (self.shadings[self.__idx].leftCurve.id == -2) {
+                self.shadings[self.__idx].leftFixedValue = self.shadings[self.__idx].rightCurve.maxX;
                 self.shadings[self.__idx].type = 'right';
             }
-            if (self.shadings[self.__idx].leftLine.id > 0) self.shadings[self.__idx].leftFixedValue = null;
+            if (self.shadings[self.__idx].leftCurve.id > 0) self.shadings[self.__idx].leftFixedValue = null;
         };
         this.getCurveList = function () {
             self.curveList = currentTrack.getCurves();
             self.leftLimit = customLimit.concat(self.curveList);
         }
         function updateShadingsTab(updateShadingsTabCb) {
+            let currentOrderKey;
+            const lastUnchangedShadings = _.last(self.getShadings().filter(s => s.changed === changed.unchanged)) || {};
+            function getOrderKey() {
+                if (!currentOrderKey) currentOrderKey = lastUnchangedShadings.orderNum || 'h';
+                currentOrderKey = String.fromCharCode(currentOrderKey.charCodeAt(0) + 1);
+                return currentOrderKey;
+            }
             async.eachOfSeries(self.shadings, function(item, idx, callback) {
-                if (item.rightLine && item.leftLine) {
+                if (item.rightCurve && item.leftCurve) {
                     if (!item.idControlCurve) {
-                        item.idControlCurve = (item.leftLine.id > 0) ?
-                                                item.leftLine.idCurve : item.rightLine.idCurve;
+                        item.idControlCurve = (item.leftCurve.id > 0) ?
+                                                item.leftCurve.idCurve : item.rightCurve.idCurve;
                         let _lineProps = utils.getCurveFromId(item.idControlCurve).lineProperties;
                         item.fill.varShading.startX = _lineProps.minScale;
                         item.fill.varShading.endX = _lineProps.maxScale;
@@ -650,19 +658,19 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         item.negativeFill.varShading.startX = _lineProps.minScale;
                         item.negativeFill.varShading.endX = _lineProps.maxScale;
                     }
-                    const idLeftLine = item.leftLine.id
-                    let leftLineBk = item.leftLine;
-                    item.leftLine = null;
-                    let rightLineBk = item.rightLine;
-                    item.rightLine = null;
+                    const idLeftLine = item.leftCurve.id
+                    let leftCurveBk = item.leftCurve;
+                    item.leftCurve = null;
+                    let rightCurveBk = item.rightCurve;
+                    item.rightCurve = null;
 
                     let request = angular.copy(item);
 
-                    request.leftLine = leftLineBk;
-                    request.rightLine = rightLineBk;
-                    item.leftLine = leftLineBk;
-                    item.rightLine = rightLineBk;
-
+                    request.leftCurve = leftCurveBk;
+                    request.rightCurve = rightCurveBk;
+                    item.leftCurve = leftCurveBk;
+                    item.rightCurve = rightCurveBk;
+                    if (item.changed !== changed.deleted && item.changed !== changed.unchanged) request.orderNum = getOrderKey();
                     if(item.idLeftLine == -3) {
                         item.type = 'custom';
                     };
@@ -676,8 +684,8 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         item.type = 'pair';
                     }
                     delete request.changed;
-                    delete request.leftLine;
-                    delete request.rightLine;
+                    delete request.leftCurve;
+                    delete request.rightCurve;
 
                     if (item.idLeftLine < 0) {
                         request.idLeftLine = null;

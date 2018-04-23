@@ -20,26 +20,37 @@ wi-base-treeview {
             margin-left: unset;
         }
         .wi-parent-node {
+            &:hover{
+                background: #eee;
+            }
             // position: relative;
             display: flex;
             height: 26px;
             line-height: 26px;
-            cursor: pointer;
-            .wi-parent-unit {
-                overflow:hidden;
-                flex: 1;
+            // cursor: pointer;
+            & > div {
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 overflow: hidden;
             }
-
+            .wi-parent-unit {
+                overflow:hidden;
+                flex: 1;
+            }
+            .wi-parent-family {
+                overflow:hidden;
+                flex: 2;
+            }
             .wi-parent-content {
                 display: flex;
                 flex: 3;
+//<<<<<<< HEAD
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 overflow: hidden;
                 padding-top: 5;
+//=======
+//>>>>>>> b298016fc88076ceb9874ff5783bb6c5e5d6807a
                 .icon-expanded {
                     width: 25px;
                     padding-top: 6px;
@@ -72,6 +83,22 @@ wi-base-treeview {
 
                 .actions>wi-button>div>button {
                     height: 22px;
+                }
+            }
+            .wi-parent-choices{
+                flex: 3;
+                >select, >input{
+                    width: 100%;
+                    border: none;
+                    height: 100%;
+                    &:hover{
+                        border: 1px solid steelblue;
+                    }
+                }
+                >input::-webkit-outer-spin-button,
+                >input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
                 }
             }
         }

@@ -20,7 +20,7 @@ let layoutConfig = {
                     type: 'column',
                     id: 'left',
                     isClosable: false,
-                    width: 15,
+                    width: 20,
                     content: []
                 }, {
                     type: 'stack',
@@ -128,6 +128,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
+        newScope.model = componentState.model;
         container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
         if (componentState.model) tabComponents[container.parent.config.id] = container.parent;
@@ -135,12 +136,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
             delete tabComponents[component.config.id];
             if(modelRef){
                 let model = utils.getModel(modelRef.type, modelRef.id);
-                if (!model) return;
-                model.data.opened = false;
-                if (model.isReady) model.isReady = false;
-                wiComponentService.dropComponent(model.type + model.id);
-                let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
-                historyState.removePlotFromHistory(model.type, model.id);
+                if (model) {
+                    model.data.opened = false;
+                    if (model.isReady) model.isReady = false;
+                    wiComponentService.dropComponent(model.type + model.id);
+                    let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
+                    historyState.removePlotFromHistory(model.type, model.id);
+                }
             }
             if (componentState.name) wiComponentService.dropComponent(componentState.name);
             newScope.$destroy();
@@ -211,32 +213,33 @@ module.exports.putTabRight = function (config) {
 module.exports.putTabRightWithModel = function (model, isClosable = true) {
     let wiComponentService = this.wiComponentService;
     let well = wiComponentService.getComponent(wiComponentService.UTILS).findWellById(model.properties.idWell);
-    let itemType, itemId, tabIcon, name, htmlTemplate;
+    let itemId, tabIcon, htmlTemplate;
     console.log(model);
     switch (model.type) {
         case 'logplot':
-            itemId = 'logplot' + model.id;
+            itemId = 'logplot' + model.properties.idPlot;
             tabIcon = 'logplot-blank-16x16';
-            name = 'logplot' + model.properties.idPlot;
-            htmlTemplate = '<wi-logplot name="' + name + '" id="' + model.properties.idPlot + '"></wi-logplot>'
+            htmlTemplate = '<wi-logplot name="' + itemId + '" id="' + model.properties.idPlot + '"></wi-logplot>'
             break;
         case 'crossplot':
-            itemId = 'crossplot' + model.id;
+            itemId = 'crossplot' + model.properties.idCrossPlot;
             tabIcon = 'crossplot-blank-16x16';
-            name = 'crossplot' + model.properties.idCrossPlot;
-            htmlTemplate = '<wi-crossplot name="' + name + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
+            htmlTemplate = '<wi-crossplot name="' + itemId + '" id="' + model.properties.idCrossPlot + '"></wi-crossplot>'
             break;
         case 'histogram':
-            itemId = 'histogram' + model.id;
+            itemId = 'histogram' + model.properties.idHistogram;
             tabIcon = 'histogram-blank-16x16';
-            name = 'histogram' + model.properties.idHistogram;
-            htmlTemplate = '<wi-histogram name="' + name + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
+            htmlTemplate = '<wi-histogram name="' + itemId + '" id="' + model.properties.idHistogram + '"></wi-histogram>'
             break;
         case 'comboview':
-            itemId = 'comboview' + model.id;
+            itemId = 'comboview' + model.properties.idCombinedBox;
             tabIcon = 'link-view-16x16';
-            name = 'comboview' + model.id;
-            htmlTemplate = '<wi-comboview name="' + name + '" id="' + model.properties.idCombinedBox + '"></wi-comboview>'
+            htmlTemplate = `
+                <wi-comboview
+                    name="${itemId}" id="${model.properties.idCombinedBox}"
+                    model="model">
+                </wi-comboview>
+            `;
             break;
         default:
             console.error('model type is not valid');
@@ -316,3 +319,4 @@ module.exports.getItemById = function (itemId) {
 module.exports.getRoot = function() {
     return layoutManager.root;
 }
+

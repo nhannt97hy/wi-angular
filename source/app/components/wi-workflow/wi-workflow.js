@@ -1,84 +1,16 @@
 const name = "wiWorkflow";
 const moduleName = "wi-workflow";
 
-function Controller(wiComponentService) {
+function Controller(wiComponentService, wiApiService) {
     let self = this;
-    this.workflowConfig = {
-        name: "Clastic",
-        steps: [
-            {
-                name: "Shale Volume",
-                inputs: [{ name: "Gamma Ray" }],
-                parameters: [
-                    { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
-                    {
-                        name: "Method",
-                        type: "select",
-                        value: { name: "Linear", value: "Linear" },
-                        choices: [
-                            { name: "Linear", value: "Linear" },
-                            { name: "Clavier", value: "Clavier" },
-                            {
-                                name: "Larionov Tertiary rocks",
-                                value: "Tertiary"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                name: "Porosity",
-                inputs: [{ name: "Bulk Density" }, { name: "Shale Volume" }],
-                parameters: [
-                    { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
-                    {
-                        name: "Method",
-                        type: "select",
-                        value: { name: "Linear", value: "Linear" },
-                        choices: [
-                            { name: "Linear", value: "Linear" },
-                            { name: "Clavier", value: "Clavier" },
-                            {
-                                name: "Larionov Tertiary rocks",
-                                value: "Tertiary"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                name: "Saturation",
-                inputs: [
-                    { name: "Formation Resistivity" },
-                    { name: "Porosity" }
-                ],
-                parameters: [
-                    { name: "GR clean", type: "number", value: 10 },
-                    { name: "GR clay", type: "number", value: 120 },
-                    {
-                        name: "Method",
-                        type: "select",
-                        value: { name: "Linear", value: "Linear" },
-                        choices: [
-                            { name: "Linear", value: "Linear" },
-                            { name: "Clavier", value: "Clavier" },
-                            {
-                                name: "Larionov Tertiary rocks",
-                                value: "Tertiary"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    };
 
-    this.$onInit = function() {
-        wiComponentService.putComponent(wiComponentService.WI_WORKFLOW, self);
+    this.$onInit = function () {
+        self.name = 'workflow' + self.id + "Area";
+        self.WorkflowPlayerName = "workflowplayer" + self.id + "Area";
+        wiComponentService.putComponent(self.name, self);
     };
-    this.getCurrentProjectId = function() {
+    this.getCurrentProjectId = function () {
+        if (self.idProject) return self.idProject;
         let openProject = wiComponentService.getComponent(
             wiComponentService.PROJECT_LOADED
         );
@@ -92,7 +24,11 @@ app.component(name, {
     templateUrl: "wi-workflow.html",
     controller: Controller,
     controllerAs: name,
-    transclude: true
+    transclude: true,
+    bindings: {
+        idProject: "<",
+        id: "<"
+    }
 });
 
 exports.name = moduleName;

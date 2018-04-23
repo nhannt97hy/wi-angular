@@ -312,15 +312,17 @@ function Controller($scope, $timeout, wiComponentService, wiApiService, wiOnline
         selectFile(function (files) {
             console.log(files);
             if (files) {
-                wiOnlineInvService.uploadFiles(files, function (response) {
+                wiOnlineInvService.uploadFiles({ file: files, override: true }, function (response) {
                     console.log('upload files done', response);
                     if (response === 'UPLOAD FILES FAILED') {
                         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
                         DialogUtils.errorMessageDialog(ModalService, "Some errors while upload file!");
                     } else {
-                        oUtils.updateInventory();
-                        self.getWiiItems().emptyItems();
-                        self.getWiiItems().getWiiProperties().emptyList();
+                        $timeout(function() {
+                            oUtils.updateInventory();
+                            self.getWiiItems().emptyItems();
+                            self.getWiiItems().getWiiProperties().emptyList();
+                        }, 500);
                     }
                 })
             }
