@@ -74,8 +74,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'max_features',
         type: 'select', // or number
         value: {
-            name: 'log2',
-            value: 1
+            name: 'None',
+            value: 4
         },
         choices: [{
             name: 'log2',
@@ -96,8 +96,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'max_features',
         type: 'select', // or number
         value: {
-            name: 'log2',
-            value: 1
+            name: 'None',
+            value: 4
         },
         choices: [{
             name: 'log2',
@@ -117,15 +117,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         value: 10,
         min: 10,
-        max: 100
+        max: 500
     }];
 
     const SUPPORT_VECTOR_MACHINE_PARAMS = [{
         name: 'kernel',
         type: 'select',
         value: {
-            name: 'rbf',
-            value: 1
+            name: 'linear',
+            value: 2
         },
         choices: [{
             name: 'rbf',
@@ -149,7 +149,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "C",
         type: 'number',
-        value: 0.001,
+        value: 20,
         step: 0.001,
         min: 0.001,
         max: 100
