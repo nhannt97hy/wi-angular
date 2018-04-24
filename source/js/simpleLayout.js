@@ -705,7 +705,7 @@ app.controller('wiPlotPlaygroundController', function($scope) {
     }
 })
 
-app.controller('wiXplotController', function ($scope, wiComponentService) {
+app.controller('wiXplotController', function ($scope, wiComponentService, $timeout) {
     // test
     this.data = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
     // this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
@@ -731,7 +731,70 @@ app.controller('wiXplotController', function ($scope, wiComponentService) {
         this.idCurves = idCurves;
     }
 
+    this.checkLogStatus = function () {
+        if (this.config.logX) {
+            this.checkLogValueX(this.config.scale.left, 'scaleLeft');
+            this.checkLogValueX(this.config.scale.right, 'scaleRight');
+        }
+        if (this.config.logY) {
+            this.checkLogValueY(this.config.scale.bottom, 'scaleBottom');
+            this.checkLogValueY(this.config.scale.top, 'scaleTop');
+        }
+    }
+    this.checkLogValueX = function (value, label) {
+        if (this.config.logX) {
+            switch (label) {
+                case 'scaleLeft':
+                    this.config.scale.left = value < 0 ? 0.01 : value;
+                    break;
+                case 'scaleRight':
+                    this.config.scale.right = value < 0 ? 0.01 : value;
+                    break;
+            }
+            if(Math.ceil(value) <= 0) {
+                $('#' + label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                }, 255);
+            }
+        }
+    }
+    this.checkLogValueY = function (value, label) {
+        if (this.config.logY) {
+            switch (label) {
+                case 'scaleBottom':
+                    this.config.scale.bottom = value < 0 ? 0.01 : value;
+                    break;
+                case 'scaleTop':
+                    this.config.scale.top = value < 0 ? 0.01 : value;
+                    break;
+            }
+            if(Math.ceil(value) <= 0) {
+                $('#' + label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                }, 255);
+            }
+        }
+    }
+
     this.testUpdate = function () {
+        if (this.config.logX) {
+            if (this.config.scale.left == 0
+                || this.config.scale.right == 0) {
+                    this.config.logX = false;
+                    toastr.error("Scale can't be 0 in Logarithmic");
+                    return;
+                }
+        }
+        if (this.config.logY) {
+            if (this.config.scale.bottom == 0
+                || this.config.scale.top == 0) {
+                    this.config.logY = false;
+                    toastr.error("Scale can't be 0 in Logarithmic");
+                    return;
+                }
+        }
         let wiXplot = wiComponentService.getComponent('wi-xplot');
         let changes = {
             config: this.config,

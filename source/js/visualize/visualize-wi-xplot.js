@@ -662,6 +662,14 @@ ViWiXplot.prototype.on = function(type, cb) {
     this.svgContainer.on(type, cb);
 }
 
+ViWiXplot.prototype.onMouseDown = function (callback) {
+    let self = this;
+    this.on('mousedown', function() {
+        let ret = self.mouseDownCallback();
+        callback(ret);
+    });
+}
+
 ViWiXplot.prototype.mouseDownCallback = function () {
     let mouse = d3.mouse(this.svgContainer.node());
     let vpX = this.getViewportX();

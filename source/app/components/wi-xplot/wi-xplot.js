@@ -119,7 +119,26 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
             if (!self.viWiXplot) {
                 // test
-                self.config.scale = (self.pointsets[0] || {}).scale;
+                if (!self.config.scale.left && !self.config.scale.right
+                    && !self.config.scale.bottom && !self.config.scale.top) {
+                        self.config.scale = (self.pointsets[0] || {}).scale;
+                }
+                if (self.config.logX) {
+                    if (self.config.scale.left == 0
+                        || self.config.scale.right == 0) {
+                            self.config.logX = false;
+                            toastr.error("Scale can't be 0 in Logarithmic");
+                            return;
+                        }
+                }
+                if (self.config.logY) {
+                    if (self.config.scale.bottom == 0
+                        || self.config.scale.top == 0) {
+                            self.config.logY = false;
+                            toastr.error("Scale can't be 0 in Logarithmic");
+                            return;
+                        }
+                }
                 // end test
                 self.viWiXplot = graph.createVisualizeWiXplot({
                     pointsets: self.pointsets,
@@ -130,6 +149,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.viWiXplot.pointsets = self.pointsets;
                 self.viWiXplot.updatePlot(changes);
             }
+            self.viWiXplot.onMouseDown(self.mouseDownCallback);
         });
     }
 
@@ -192,6 +212,22 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.deleteUserLine = function() {
         this.viWiXplot.userLine = null;
         this.viWiXplot.plotUserLine();
+    }
+
+    this.mouseDownCallback = function() {
+        if (d3.event.button == 2) return;
+        if (self.viWiXplot.mode == 'PlotAreaRectangle') {
+            if (self.viWiXplot.area && self.viWiXplot.area.points.length > 1) {
+                self.viWiXplot.endAddAreaRectangle();
+                self.setContextMenu();
+            }
+        }
+        else if (self.viWiXplot.mode == 'PlotUserLine') {
+            if (self.viWiXplot.userLine && self.viWiXplot.userLine.points.length > 1) {
+                self.viWiXplot.endAddUserLine();
+                self.setContextMenu();
+            }
+        }
     }
 
     this.setContextMenu = function (contextMenu) {
