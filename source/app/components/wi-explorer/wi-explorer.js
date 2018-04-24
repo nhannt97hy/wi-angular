@@ -54,6 +54,22 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
+    this.scrollLeft = function(){
+        let ele = $('.filter-main');
+        let idx = ele.scrollLeft() / 42;
+        if(idx - parseInt(idx) && ele.scrollLeft() != 44) {
+            ele.scrollLeft(parseInt(idx) * 42);
+        }else{
+            ele.scrollLeft((idx - 1) * 42);
+        }
+    }
+    this.scrollRight = function(){
+        let ele = $('.filter-main');
+        let idx = ele.scrollLeft() / 42;
+        let next = Math.round(idx + 1) * 42;
+        ele.scrollLeft(next < 44 ? 44 : next);
+    }
+
     this.backupConfig = function (previousConfig, currConfig) {
         for (let preItem of previousConfig) {
             for (let item of currConfig) {

@@ -7,7 +7,6 @@ function WiBaseTreeController(wiComponentService, $scope) {
         return input.data.label + "    " + (input.data.tooltip || '');
     }
     function filterType (input, filterBy){
-        if(input.type == 'curve' && filterBy == 'dataset') return true;
         return filterBy.includes(input.type)
     }
     this.$onInit = function () {
