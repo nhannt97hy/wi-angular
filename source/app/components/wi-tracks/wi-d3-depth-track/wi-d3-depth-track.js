@@ -42,10 +42,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     this.onReady = function () {
         self.viTrack = createVisualizeDepthTrack(self.getProperties());
         self.registerTrackCallback();
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
         self.registerTrackTooltip();
+        self.getProperties().controller = self;
+        if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
     }
 
     this.$doCheck = function() {

@@ -131,14 +131,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }
 
     this.$onInit = function () {
+        wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
     }
     this.onReady = function () {
         self.viTrack = createVisualizeZoneTrack(self.getProperties());
         self.registerTrackCallback();
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        self.registerTrackTooltip();
+        self.getProperties().controller = self;
+        if (self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
         
         wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
             for (let zone of zoneset.zones) {
@@ -390,10 +393,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     function _plotZoneSet(sourceZoneTrack) {
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         // plot this logplot
-        let viZoneTracks = self.wiD3Ctrl.getTracks().filter(track => (track.isZoneTrack() && track.id != sourceZoneTrack.id));
-        viZoneTracks.forEach(function (viZoneTrack) {
-            if (viZoneTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
-            _plotZoneTrack(sourceZoneTrack, viZoneTrack);
+        
+        let tcs = self.wiD3Ctrl.trackComponents.filter(tc => (tc.idZoneTrack && tc.idZoneTrack != sourceZoneTrack.id));
+        tcs.forEach(function (tc) {
+            if (tc.controller.viTrack.idZoneSet != sourceZoneTrack.idZoneSet) return;
+            _plotZoneTrack(sourceZoneTrack, tc.controller.viTrack);
         })
         // plot others logplots
         let logplotModel = self.wiD3Ctrl.wiLogplotCtrl.getLogplotModel();

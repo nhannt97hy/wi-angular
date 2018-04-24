@@ -251,14 +251,18 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
    }
 
     this.$onInit = function () {
+        wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
     }
     this.onReady = function () {
         self.viTrack = createVisualizeObjectTrack(self.getProperties());
         self.registerTrackCallback();
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        self.registerTrackTooltip();
+        self.getProperties().controller = self;
+        if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
+        
         for (let objectOfTrack of self.getProperties().object_of_tracks) {
             let anObject = self.addObjectToTrack(self.viTrack, objectOfTrack);
             let objectProps = JSON.parse(objectOfTrack.object);

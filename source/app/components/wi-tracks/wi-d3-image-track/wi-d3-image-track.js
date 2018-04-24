@@ -122,14 +122,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.$onInit = function () {
+        wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
     }
     this.onReady = function () {
         self.viTrack = createVisualizeImageTrack(self.getProperties());
         self.registerTrackCallback();
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        self.registerTrackTooltip();
+        self.getProperties().controller = self;
+        if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
         
         wiApiService.getImagesOfTrack(self.viTrack.id, function (images) {
             for (let img of images) {

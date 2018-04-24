@@ -673,11 +673,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.onReady = function () {
         self.viTrack = createVisualizeLogTrack( self.getProperties() );
         self.registerTrackCallback();
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
         self.registerTrackTooltip();
-        
+        self.getProperties().controller = self;
+        if (self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
+
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 

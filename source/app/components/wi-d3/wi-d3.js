@@ -75,7 +75,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     self._minY = 0;
     self._maxY = 100000;
     var commonCtxMenu = null;
-    let _tracks = [];
+    // let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _tooltip = true;
@@ -112,27 +112,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return obj;
     }
     this.subscribeTrackCtrlWithD3Ctrl = function (trackComponentCtrl) {
-        d3.select(trackComponentCtrl.viTrack.root.node().parentNode)
-            .datum(trackComponentCtrl.viTrack.orderNum)
-            .attr('class', 'wi-d3-track-component')
-            .attr('data-order-num', function(d) { return d;});
-        this.trackComponents.find(function(track) {
-            return self.getTrackName(track) == trackComponentCtrl.name;
-        }).controller = trackComponentCtrl;
-        _tracks.push(trackComponentCtrl.viTrack);
+        // this.trackComponents.find(function(track) {
+        //    return self.getTrackName(track) == trackComponentCtrl.name;
+        // }).controller = trackComponentCtrl;
+        // _tracks.push(trackComponentCtrl.viTrack);
 
-        let drange = self.getDepthRangeFromSlidingBar();
-        self._minY = drange[0];
-        self._maxY = drange[1];
-
+        
         //let depthRange = self.getDepthRangeFromSlidingBar();
         //self.setDepthRangeForTrack(trackComponentCtrl.viTrack, depthRange);
         //_registerTrackHorizontalResizerDragCallback();
         ////_registerTrackCallback(trackComponentCtrl.viTrack);
         //_registerTrackCallback(trackComponentCtrl);
         //_registerTrackDragCallback(trackComponentCtrl.viTrack);
-        _registerTrackDragCallback(trackComponentCtrl);
-        _setCurrentTrack(trackComponentCtrl.getProperties());
+        // _registerTrackDragCallback(trackComponentCtrl);
+        //_setCurrentTrack(trackComponentCtrl.getProperties());
 
         // trackComponentCtrl.viTrack.on('keydown', function () {
         //     _onTrackKeyPressCallback(trackComponentCtrl.viTrack);
@@ -167,11 +160,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     let originalWidths = [];
     this.toggleFitWindow = function() {
+        /*
         _fitWindow = !_fitWindow;
         let logplotElem = $('wi-logplot#' + self.wiLogplotCtrl.id + '>.logplot-header');
         let slidingBarElem = $('wi-logplot#' + self.wiLogplotCtrl.id + '>.logplot-main-content>.slidingbar')
         let plotAreaWidth = logplotElem.width() - slidingBarElem.width()/2 - slidingBarElem.outerWidth()/2;
-        console.log("width", _tracks);
+        // console.log("width", _tracks);
         let sumOfOriWidth = 0;
         let widths = [];
         _tracks.forEach(function(t) {
@@ -179,6 +173,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             sumOfOriWidth += t.width;
         });
         let ratioWidth = plotAreaWidth/sumOfOriWidth;
+        */
 
         /*_tracks.forEach(function(t, index) {
             if(_fitWindow) {
@@ -591,7 +586,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
         // _drawTooltip(_currentTrack);
-		_currentTrack.controller.drawTooltip();
+		// _currentTrack.controller.drawTooltip();
     }
     this.zoom = function (zoomOut) {
         const fixedScales = [1, 2, 4, 5, 10, 20, 50, 100, 200, 300, 500, 1000, 2000, 2500, 3000, 5000, 10000, 20000, 50000, 100000];
@@ -607,9 +602,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (typeof handler === 'function') handler();
     }
     this.processZoomFactor = function () {
-        //return;
-        let maxZoomFactor = d3.max(_tracks, function (track) {
-            return track.zoomFactor;
+        let maxZoomFactor = d3.max(self.trackComponents, function (tc) {
+            return tc.zoomFactor;
         });
 
         let topDepth = parseFloat(self.getWellProps().topDepth);
@@ -617,9 +611,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         //let shouldRescaleWindowY = !(_depthRange[0] == topDepth && _depthRange[1] == bottomDepth);
         let shouldRescaleWindowY = !(self._minY == topDepth && self._maxY == bottomDepth);
-        for (let track of _tracks) {
-            track._maxZoomFactor = maxZoomFactor;
-            track._shouldRescaleWindowY = shouldRescaleWindowY;
+        for (let tc of self.trackComponents) {
+            tc.controller.viTrack._maxZoomFactor = maxZoomFactor;
+            tc.controller.viTrack._shouldRescaleWindowY = shouldRescaleWindowY;
         }
     }
 
@@ -666,9 +660,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // wiComponentService.putComponent(name, null);
         updateSlider();
     }*/
+    /*
     this.getTracks = function () {
         return _tracks;
     }
+    */
 
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
@@ -833,6 +829,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             return track1.orderNum.localeCompare(track2.orderNum);
                         });
                     //self.Tracks = tracks;
+
+                    let currentState = JSON.parse(plot.currentState);
+                    let drange = self.getDepthRangeFromSlidingBar();
+                    self._minY = drange[0];
+                    self._maxY = drange[1];
+
                     self.trackComponents = tracks;
 					wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
  		
@@ -1098,6 +1100,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.trackUnderMouse = null;
 
+    /*
     function _registerTrackCallback(trackCtrl) {
         let trackComponent = trackCtrl.getProperties();
         let viTrack = trackCtrl.viTrack;
@@ -1159,6 +1162,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
     }
+    */
     function _onPlotMouseWheelCallback() {
         if (!self.trackComponents || !self.trackComponents.length) return;
         let mouse = d3.mouse(self.trackComponents[0].controller.viTrack.plotContainer.node());
@@ -1271,6 +1275,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             });
         });
     }
+
+    this.registerTrackDragCallback = _registerTrackDragCallback;
     function _registerTrackDragCallback(trackCtrl) {
         let viTrack = trackCtrl.viTrack;
         let trackComponent = trackCtrl.getProperties();
@@ -1321,7 +1327,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let nameOfTrack = getTrackName(props);
         //return _.get(self.trackComponents.find(component => component.name == nameOfTrack), 'controller');
         return _.get(self.trackComponents.find(function(component) {
-            component.controller && component.controller.name == nameOfTrack;
+            return component.controller && component.controller.name == nameOfTrack;
         }), 'controller');
     }
 }

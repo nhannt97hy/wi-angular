@@ -76,6 +76,10 @@ Controller.prototype.registerTrackCallback = function() {
     let self = this;
     let trackComponent = this.getProperties();
     let viTrack = self.viTrack;
+
+    d3.select(viTrack.root.node().parentNode)
+            .attr('class', 'wi-d3-track-component')
+
     viTrack.on('focus', function () {
         self.wiD3Ctrl.setCurrentTrack(trackComponent);
     });
@@ -86,7 +90,7 @@ Controller.prototype.registerTrackCallback = function() {
     });
     viTrack.on('dblclick', function () {
         self.wiD3Ctrl.setCurrentTrack(trackComponent);
-        openTrackPropertiesDialog();
+        self.openPropertiesDialog();
     });
     viTrack.onVerticalResizerDrag(function () {
         if (trackComponent.idTrack) {
