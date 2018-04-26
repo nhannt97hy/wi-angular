@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, callback) {
+module.exports = function (ModalService, imageTrackProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         const _NEW = 'created';
         const _EDIT = 'edited';

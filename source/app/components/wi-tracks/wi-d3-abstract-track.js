@@ -85,6 +85,7 @@ Controller.prototype.registerTrackCallback = function() {
     let self = this;
     let trackComponent = this.getProperties();
     let viTrack = self.viTrack;
+    let Utils = self.wiComponentService.getComponent(self.wiComponentService.UTILS);
 
     d3.select(viTrack.root.node().parentNode)
             .attr('class', 'wi-d3-track-component')

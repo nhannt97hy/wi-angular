@@ -33,7 +33,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }
     
     this.openPropertiesDialog = function () {
-        DialogUtils.depthTrackPropertiesDialog(ModalService, self.viTrack, wiApiService, function (props) {
+        DialogUtils.depthTrackPropertiesDialog(ModalService, self.viTrack, function (props) {
             if (props) {
                 console.log('depthTrackPropertiesData', props);
             }

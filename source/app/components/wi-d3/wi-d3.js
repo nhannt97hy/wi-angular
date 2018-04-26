@@ -443,7 +443,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let trackOrder = getOrderKey();
         if (trackOrder) {
             const zoneTracks = self.trackComponents.filter(tc => tc.idZoneTrack);
-            const defaultZoneTrackProp = {
+            let zoneTrackProps = {
                 idPlot: self.wiLogplotCtrl.id,
                 orderNum: trackOrder,
                 showTitle: true,
@@ -454,7 +454,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 parameterSet: null,
                 zoomFactor: 1.0
             }
-            DialogUtils.zoneTrackPropertiesDialog(ModalService, self, defaultZoneTrackProp, function(zoneTrackProps) {
+            DialogUtils.zoneTrackPropertiesDialog(ModalService, zoneTrackProps, function(props) {
+                zoneTrackProps = props;
 				self.trackComponents.push(zoneTrackProps);
 				self.trackComponents.sort(function(t1, t2) {
 					return t1.orderNum.localeCompare(t2.orderNum);
@@ -478,7 +479,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: Utils.inchToPixel(1),
                 zoomFactor: 1.0
             }
-            DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiLogplotCtrl, defaultImageTrackProp, function (imageTrackProperties) {
+            DialogUtils.imageTrackPropertiesDialog(ModalService, defaultImageTrackProp, function (imageTrackProperties) {
                 let dataRequest = {
                     idPlot: self.wiLogplotCtrl.id,
                     title: imageTrackProperties.title,
@@ -513,7 +514,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 width: Utils.inchToPixel(2.5),
                 zoomFactor: 1.0
             }
-            DialogUtils.objectTrackPropertiesDialog(ModalService, self.wiLogplotCtrl, defaultObjectTrackProp, function (objectTrackProp) {
+            DialogUtils.objectTrackPropertiesDialog(ModalService, defaultObjectTrackProp, function (objectTrackProp) {
                 let dataRequest = {
                     idPlot: self.wiLogplotCtrl.id,
                     title: objectTrackProp.title,

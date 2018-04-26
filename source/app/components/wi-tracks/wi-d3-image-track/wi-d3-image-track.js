@@ -62,9 +62,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
     this.openPropertiesDialog = function () {
         let viTrack = self.viTrack;
-        let track = viTrack.getProperties();
-        track.isCreated = true;
-        DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, track, function (props) {
+        let trackProps = viTrack.getProperties();
+        trackProps.isCreated = true;
+        DialogUtils.imageTrackPropertiesDialog(ModalService, trackProps, function (props) {
             if (props) {
                 viTrack.removeAllDrawings();
                 props.idImageTrack = viTrack.id;
@@ -258,7 +258,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                         self.wiD3Ctrl.setDepthRange(depthRange);
                                         self.wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
                                         if (d3.event.button == 2) {
-                                            _imageZoneOnRightClick();
+                                            self.isImageZoneRightClicked = true;
+                                            // _imageZoneOnRightClick();
                                         }
                                     });
                                     imgzone.doPlot();
@@ -334,7 +335,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
         });
     }
-    function _imageZoneOnRightClick() {
+    function _getImageZoneContextMenu() {
         let viTrack = self.viTrack;
         let imgzone = viTrack.getCurrentImageZone();
         return [

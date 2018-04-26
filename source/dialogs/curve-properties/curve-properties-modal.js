@@ -1,20 +1,24 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, currentTrack, wiLogplotCtrl, callback) {
+// module.exports = function (ModalService, wiComponentService, wiApiService, DialogUtils, currentCurve, viTrack, wiLogplotCtrl, callback) {
+module.exports = function (ModalService, trackComponent, callback) {
     let thisModalController = null;
 
-    function ModalController($scope, close, $timeout) {
+    function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let error = null;
         let self = this;
-        window.cProps = this;
+        let viTrack = trackComponent.controller.viTrack;
+        let currentCurve = viTrack.getCurrentCurve();
+        // window.cProps = this;
         console.log("currentCurve", currentCurve);
-        wiApiService.curveInfo
+        // wiApiService.curveInfo
         thisModalController = this;
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let dataset = utils.getModel('dataset', currentCurve.idDataset);
+        this.well = utils.findWellByLogplot(trackComponent.idPlot);
 
-        console.log("CURRENTCURVE", currentCurve, currentTrack);
+        console.log("CURRENTCURVE", currentCurve, viTrack);
 
         let extentY = currentCurve.getExtentY();
 
@@ -68,7 +72,7 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
             name: dataset.properties.name + "." + currentCurve.name
         }
 
-        this.curveOptions = utils.curveOptions(currentTrack, currentCurve);
+        this.curveOptions = utils.curveOptions(viTrack, currentCurve);
         console.log("CURVEOPTONS", this.curveOptions);
         this.onToggleShowDataset = function () {
             self.curveOptions.alias = self.curveOptions.showDataset ? self.lineObjTemplate.name : currentCurve.name;
@@ -237,8 +241,8 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
             utils.changeLine(lineObj, wiApiService, function () {
                 console.log("lineObj", lineObj);
                 currentCurve.setProperties(lineObj);
-                currentTrack.plotCurve(currentCurve);
-                currentTrack.doPlot(true);
+                viTrack.plotCurve(currentCurve);
+                viTrack.doPlot(true);
                 if (callback) callback();
             });
         }

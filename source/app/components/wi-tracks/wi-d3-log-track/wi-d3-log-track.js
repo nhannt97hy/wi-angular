@@ -41,14 +41,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         label: "Create Shading",
         icon: 'shading-add-16x16',
         handler: function () {
-            DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+            let options = {
+                tabs: ['false', 'false', 'true'],
+                shadingOnly: true
+            };
+            DialogUtils.logTrackPropertiesDialog(ModalService, self.getProperties(), options, function (props) {
                 if (props) {
                     console.log('logTrackPropertiesData', props);
                 }
-            }, {
-                    tabs: ['false', 'false', 'true'],
-                    shadingOnly: true
-                });
+            });
         }
     }, {
         separator: '1'
@@ -157,14 +158,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         label: "Create Shading",
                         icon: 'shading-add-16x16',
                         handler: function () {
-                            DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                            let options = {
+                                tabs: ['false', 'false', 'true'],
+                                shadingOnly: true
+                            }
+                            DialogUtils.logTrackPropertiesDialog(ModalService, self.getProperties(), options, function (props) {
                                 if (props) {
                                     console.log('logTrackPropertiesData', props);
                                 }
-                            }, {
-                                    tabs: ['false', 'false', 'true'],
-                                    shadingOnly: true
-                                });
+                            });
                         }
                     }];
                     items.trackItemsCreation = items.trackItemsCreation.concat(trackItemsCreationArray);
@@ -202,12 +204,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.wiD3Ctrl.setContextMenu(ctxMenu);
     }
     this.openPropertiesDialog = function () {
-        DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+        let options = {
+            tabs: ['true', 'true', 'true']
+        };
+        DialogUtils.logTrackPropertiesDialog(ModalService, self.getProperties(), options, function (props) {
             if (props) {
                 console.log('logTrackPropertiesData', props);
             }
-        }, {
-            tabs: ['true', 'true', 'true']
         });
     }
     this.update = update;
@@ -317,7 +320,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         if(!curve){
             DialogUtils.errorMessageDialog(ModalService, 'Please select a curve for depth shift!');
         }else{
-            let well = Utils.findWellByLogplot(self.wiD3Ctrl.wiLogplotCtrl.id);
+            let well = Utils.findWellByLogplot(self.getProperties().idPlot);
             DialogUtils.depthShiftDialog(ModalService, well, curve);
         }
     }
@@ -558,9 +561,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     function openShadingAttributeDialog () {
         let currentShading = self.viTrack.getCurrentShading();
         let shadingOptions = currentShading.getProperties();
-        let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
         console.log("onWiD3", shadingOptions);
-        DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options) {
+        DialogUtils.shadingAttributeDialog(ModalService, shadingOptions, self.getProperties(), function(options) {
             let leftCurveBk = options.leftCurve;
             options.leftCurve = null;
             let rightCurveBk = options.rightCurve;
@@ -610,7 +612,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     self.viTrack.doPlot();
                 }, 1000);
             });
-        }, shadingOptions, self.viTrack, self.wiLogplotCtrl);
+        });
     };
 
     this.createCrossplot = function () {
@@ -628,8 +630,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
                 if(!crossplotName) return;
-                let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
-                Utils.createCrossplot(idWell, crossplotName, function(err, crossplotModel) {
+                let well = Utils.findWellByLogplot(self.getProperties().idPlot);
+                // let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
+                Utils.createCrossplot(well.properties.idWell, crossplotName, function(err, crossplotModel) {
                     if (err) {
                         console.error(err);
                         Utils.error(crossplotName + " existed!", function () {
@@ -660,8 +663,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             }
             DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
                 if(!histogramName) return;
-                let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
-                Utils.createHistogram(idWell, curve, histogramName);
+                let well = Utils.findWellByLogplot(self.getProperties().idPlot);
+                // let idWell = self.wiLogplotCtrl.getLogplotModel().properties.idWell;
+                Utils.createHistogram(well.properties.idWell, curve, histogramName);
             })
         }
     }
@@ -721,7 +725,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.$onInit = function () {
         wiD3AbstractTrack.prototype.$onInit.call(self);
         this.plotAreaId = self.name + 'PlotArea';
-        this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
+         // this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
         logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
     }
     this.onDelete = function (model) {
@@ -1057,12 +1061,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             handler: function () {
                 DialogUtils.curvePropertiesDialog(
                     ModalService,
-                    wiComponentService,
-                    wiApiService,
-                    DialogUtils,
-                    currentCurve,
-                    self.viTrack,
-                    self.wiLogplotCtrl,
+                    // wiComponentService,
+                    // wiApiService,
+                    // DialogUtils,
+                    // currentCurve,
+                    self.getProperties(),
+                    //self.wiLogplotCtrl,
                     function() {
                         self.viTrack.updateScaleInfo({
                             leftVal:currentCurve.minX,
@@ -1167,12 +1171,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             handler: function () {
                 DialogUtils.curvePropertiesDialog(
                     ModalService,
-                    wiComponentService,
-                    wiApiService,
-                    DialogUtils,
-                    currentCurve,
-                    self.viTrack,
-                    self.wiLogplotCtrl,
+                    // wiComponentService,
+                    // wiApiService,
+                    // DialogUtils,
+                    // currentCurve,
+                    self.getProperties(),
+                    // self.wiLogplotCtrl,
                     function() {
                         self.viTrack.updateScaleInfo({
                             leftVal:currentCurve.minX,
@@ -1267,12 +1271,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let currentCurve = self.viTrack.getCurrentCurve();
         DialogUtils.curvePropertiesDialog(
             ModalService,
-            wiComponentService,
-            wiApiService,
-            DialogUtils,
-            currentCurve,
-            self.viTrack,
-            self.wiLogplotCtrl,
+            // wiComponentService,
+            // wiApiService,
+            // DialogUtils,
+            // currentCurve,
+            self.getProperties(),
+            //self.wiLogplotCtrl,
             function() {
                 self.viTrack.updateScaleInfo({
                     leftVal:currentCurve.minX,

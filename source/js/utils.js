@@ -2080,11 +2080,13 @@ exports.changeTrack = function (trackObj, wiApiService, callback) {
         if (callback) callback(result);
     });
 }
+/*
 exports.editDepthTrack = function (depthTrackObj, wiApiService, callback) {
     wiApiService.editDepthTrack(depthTrackObj, function (result) {
         if (callback) callback(result);
     });
 }
+*/
 
 function editProperty(item, callback) {
     let wiApiService = __GLOBAL.wiApiService;

@@ -365,7 +365,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
     */
     this.openPropertiesDialog = function () {
         let viTrack = self.viTrack;
-        DialogUtils.objectTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, viTrack.getProperties(), function (props) {
+        DialogUtils.objectTrackPropertiesDialog(ModalService, viTrack.getProperties(), function (props) {
             if (props) {
                 props.idObjectTrack = viTrack.id;
                 console.log("Track new properties: ", props);

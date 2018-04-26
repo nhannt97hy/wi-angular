@@ -1,8 +1,7 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiApiService, callback, shadingOptions, currentTrack, wiLogplotCtrl){
-    // let thisModal = null;
-
-    function ModalController($scope, close, wiComponentService, $timeout) {
+// module.exports = function (ModalService, wiApiService, callback, shadingOptions, currentTrack, wiLogplotCtrl){
+module.exports = function (ModalService, shadingOptions, trackComponent, callback){
+    function ModalController($scope, wiApiService, wiComponentService, $timeout, close) {
         let self = this;
         // thisModal = this;
         window.__SA = this;
@@ -11,7 +10,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
-        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+        let viTrack = trackComponent.controller.viTrack;
 
         console.log("shadingOptions", shadingOptions);
         this.groupFn = function(item){
@@ -23,7 +22,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
 
         this.paletteList = null;
         this.paletteName = null;
-        this.curveList = currentTrack.getCurves();
+        this.curveList = viTrack.getCurves();
         let leftCurveBk = shadingOptions.leftCurve;
         shadingOptions.leftCurve = null;
         let rightCurveBk = shadingOptions.rightCurve;
@@ -52,7 +51,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
         this.leftLimit = customLimit.concat(self.curveList);
 
-        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        this.well = utils.findWellByLogplot(trackComponent.idPlot);
 
         this.fillPatternOptions = {};
         this.variableShadingOptions = {};

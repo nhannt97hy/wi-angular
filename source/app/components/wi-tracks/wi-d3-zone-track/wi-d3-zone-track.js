@@ -69,9 +69,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         }
     }
     this.openPropertiesDialog = function () {
-        const zoneTrackProps = self.viTrack.getProperties();
-        zoneTrackProps.width = Utils.pixelToInch(zoneTrackProps.width);
-        DialogUtils.zoneTrackPropertiesDialog(ModalService, this.wiD3Ctrl, zoneTrackProps);
+        // const zoneTrackProps = self.viTrack.getProperties();
+        // zoneTrackProps.width = Utils.pixelToInch(zoneTrackProps.width);
+        DialogUtils.zoneTrackPropertiesDialog(ModalService, this.getProperties());
     }
     this.update = function (baseSource) {
         if(baseSource && baseSource.idZoneSet == self.viTrack.idZoneSet) {
@@ -84,7 +84,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 }
             });
         }
-        // wiApiService.
     }
     this.addZoneToTrack = function (track, config, controller) {
         if (!track || !track.addZone) return;
