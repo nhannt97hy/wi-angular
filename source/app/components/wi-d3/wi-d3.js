@@ -11,7 +11,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     //self.Tracks = null
 
-    /* private variables */
+    /*
     const contextMenu_constantItems = {
         separator: [{
                 separator: '1'
@@ -68,23 +68,68 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }],
         trackItemsCreation: []
     }
+    */
 
     let _referenceLine = true;
     let _fitWindow = false;
     //let _depthRange = [0, 100000];
     self._minY = 0;
     self._maxY = 100000;
-    var commonCtxMenu = null;
+    self.contextMenu = [{
+                name: "AddDepthTrack",
+                label: "Add Depth Track",
+                icon: 'depth-axis-add-16x16',
+                handler: function () {
+                    self.addDepthTrack();
+                }
+            }, {
+                name: "AddLogTrack",
+                label: "Add Log Track",
+                icon: 'logplot-blank-16x16',
+                handler: function () {
+                    self.addLogTrack();
+                }
+            }, {
+                name: 'AddImageTrack',
+                label: 'Add Image Track',
+                icon: 'image-track-16x16',
+                handler: function () {
+                    self.addImageTrack();
+                }
+            }, {
+                name: "AddZonationTrack",
+                label: "Add Zonation Track",
+                icon: 'zonation-track-add-16x16',
+                handler: function () {
+                    self.addZoneTrack();
+                }
+            }, {
+                name: "AddObjectTrack",
+                label: "Add Object Track",
+                icon: '',
+                handler: function () {
+                    self.addObjectTrack();
+                }
+            }, {
+                separator: '1'
+            }, {
+                name: "DeleteTrack",
+                label: "Delete Track",
+                icon: 'track-delete-16x16',
+                handler: function () {
+                    logplotHandlers.DeleteTrackButtonClicked();
+                }
+            }]
+    // var commonCtxMenu = null;
     // let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _tooltip = true;
-    /* public variables */
     this.compileFunc = $compile;
     this.scopeObj = $scope;
     this.trackComponents = [];
 
-    /* public method */
+    /*
     this.buildContextMenu = function (contextMenuItems) {
         let contextMenu = [];
         if(contextMenuItems.trackProperties.length) {
@@ -111,6 +156,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return obj;
     }
+    */
+    /*
     this.subscribeTrackCtrlWithD3Ctrl = function (trackComponentCtrl) {
         // this.trackComponents.find(function(track) {
         //    return self.getTrackName(track) == trackComponentCtrl.name;
@@ -134,6 +181,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         //self.updateScale();
         updateSlider();
     }
+    */
     this.adjustHeaderHeight = function(curViTrack) {
         self.trackComponents.forEach((tc) => {
             if (!tc.controller || !tc.controller.viTrack || tc.controller.viTrack == curViTrack) return;
@@ -241,16 +289,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         // return self.trackComponents.find(function(component) { return component.name == trackName});
     }
     this.showContextMenu = function (event) {
-        console.log('contextMenu is opened');
+        console.log('wi-d3 contextMenu is opened');
         if (event.button != 2) return;
+        /*
         if(!self.contextMenu) {
             commonCtxMenu = commonCtxMenu || self.buildContextMenu(contextMenu_constantItems);
             self.contextMenu = commonCtxMenu;
         }
+        */
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {
-                self.contextMenu = commonCtxMenu;
+                // self.contextMenu = commonCtxMenu;
             });
     }
     this.getMaxDepth = function () {
@@ -298,12 +348,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return logplotHandlers;
     }
     this.getOrderKey = getOrderKey;
+    /*
     this.setContextMenu = function (ctxMenu) {
         if(!ctxMenu) {
             self.contextMenu = commonCtxMenu;
         }
         self.contextMenu = ctxMenu;
     }
+    */
 
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
@@ -554,7 +606,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             currentView: [depthRange[0].toFixed(2), depthRange[1].toFixed(2)]
         };
         self.trackComponents.forEach(tc => {
-            if (tc.idDepthAxis) tc.controller.viTrack.updateScale(self.scale);
+            if (tc.idDepthAxis && tc.controller.viTrack) 
+                tc.controller.viTrack.updateScale(self.scale);
         });
         /*_tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
             depthTrack.updateScale(self.scale);
@@ -831,6 +884,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     //self.Tracks = tracks;
 
                     let currentState = JSON.parse(plot.currentState);
+                    if (currentState.top && currentState.bottom){
+                        let depthRange = [currentState.top, currentState.bottom];
+                        self.adjustSlidingBarFromDepthRange(depthRange);
+                    }
+                    $timeout(function () {
+                        if(plot.cropDisplay) {
+                            logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
+                        }
+                        self.updateScale();
+                    }, 100);
+
                     let drange = self.getDepthRangeFromSlidingBar();
                     self._minY = drange[0];
                     self._maxY = drange[1];

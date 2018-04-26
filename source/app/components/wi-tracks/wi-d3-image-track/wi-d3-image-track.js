@@ -7,13 +7,32 @@ Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout) {
-    wiD3AbstractTrack.call(this, wiApiService);
+    wiD3AbstractTrack.call(this, wiApiService, wiComponentService);
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let props = null;
-
+    let contextMenu = [{
+        name: "TrackProperties",
+        label: "Track Properties",
+        icon: 'track-properties-16x16',
+        handler: function() {
+            self.openPropertiesDialog()
+        }
+    }, {
+        separator: '1'
+    }, {
+        name: "AddImage",
+        label: "Add Image",
+        icon: "image-16x16",
+        handler: function () {
+            self.viTrack.setMode('AddImageZone');
+        }
+    }, {
+        separator: '1'
+    }];
+    /*
     this.showContextMenu = function (event) {
         if(self.isImageZoneRightClicked) {
             _imageZoneOnRightClick();
@@ -30,6 +49,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 }
             });
             self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
+        }
+    }
+    */
+    this.getContextMenu = function () {
+        if (self.isImageZoneRightClicked) {
+            self.isImageZoneRightClicked = false;
+            return _getImageZoneContextMenu();
+        } else {
+            return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
         }
     }
     this.openPropertiesDialog = function () {
@@ -130,7 +158,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.registerTrackCallback();
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
-        self.registerTrackTooltip();
+        self.registerTrackMouseEventHandlers();
         self.getProperties().controller = self;
         if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
         
@@ -309,6 +337,29 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     function _imageZoneOnRightClick() {
         let viTrack = self.viTrack;
         let imgzone = viTrack.getCurrentImageZone();
+        return [
+            {
+                name: "ImageProperties",
+                label: "Image Properties",
+                icon: "imgzone-edit-16x16",
+                handler: imageProperties
+            }, {
+                name: "ShowImage",
+                label: "Show Image",
+                icon: "imgzone-show-16x16",
+                handler: showImage
+            }, {
+                name: "RemoveImage",
+                label: "Remove Image",
+                icon: "imgzone-delete-16x16",
+                handler: function () {
+                    wiApiService.removeImage(imgzone.idImageOfTrack, function () {
+                        viTrack.removeImage(imgzone);
+                    });
+                }
+            }
+        ];
+        /*
         self.wiD3Ctrl.setContextMenu([
             {
                 name: "ImageProperties",
@@ -331,6 +382,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 }
             }
         ]);
+        */
     }
     function _imageZoneOnDoubleClick() {
         imageProperties();

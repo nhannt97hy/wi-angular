@@ -153,6 +153,7 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     wiD3Ctrl.wiLogplotCtrl.emit('depth-range-updated', depthRange);
 }
 
+/*
 exports.ScalePreviousState = function (top, bottom) {
     let wiLogplot = this.wiLogplot;
     let track = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`);
@@ -166,6 +167,7 @@ exports.ScalePreviousState = function (top, bottom) {
     wiD3Ctrl.updateScale();
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 };
+*/
 
 exports.Scale1ButtonClicked = function() {
     let rangeUnit = 1;

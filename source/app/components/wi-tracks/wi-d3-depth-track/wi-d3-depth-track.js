@@ -7,19 +7,31 @@ Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $element) {
-    wiD3AbstractTrack.call(this, wiApiService);
+    wiD3AbstractTrack.call(this, wiApiService, wiComponentService);
     let self = this;
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let props = null;
     this.plotAreaId = null;
-
-    /* public method */
+    let contextMenu = [{
+        name: "TrackProperties",
+        label: "Track Properties",
+        icon: 'track-properties-16x16',
+        handler: function() {
+            self.openPropertiesDialog()
+        }
+    }]
+    /*
     this.showContextMenu = function (event) {
         let items = self.wiD3Ctrl.getCommonContextMenuItems();
         self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
     }
+    */
+    this.getContextMenu = function () {
+        return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();  
+    }
+    
     this.openPropertiesDialog = function () {
         DialogUtils.depthTrackPropertiesDialog(ModalService, self.viTrack, wiApiService, function (props) {
             if (props) {
@@ -44,7 +56,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.registerTrackCallback();
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
-        self.registerTrackTooltip();
+        self.registerTrackMouseEventHandlers();
         self.getProperties().controller = self;
         if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
     }

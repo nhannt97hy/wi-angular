@@ -7,13 +7,105 @@ Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout) {
-    wiD3AbstractTrack.call(this, wiApiService);
+    wiD3AbstractTrack.call(this, wiApiService, wiComponentService);
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let logplotHandlers = {};
-
+    let contextMenu = [{
+        name: "TrackProperties",
+        label: "Track Properties",
+        icon: 'track-properties-16x16',
+        handler: function() {
+            self.openPropertiesDialog()
+        }
+    }, {
+        separator: '1'
+    }, {
+        name: "AddMarker",
+        label: "Add Marker",
+        icon: 'marker-add-16x16',
+        handler: function () {
+            self.addMarker();
+        }
+    }, {
+        name: "Add Annotation",
+        label: "Add Annotation",
+        icon: 'annotation-16x16',
+        handler: function () {
+            self.addAnnotation();
+        }
+    }, {
+        name: "Create Shading",
+        label: "Create Shading",
+        icon: 'shading-add-16x16',
+        handler: function () {
+            DialogUtils.logTrackPropertiesDialog(ModalService, self.viTrack, self.wiLogplotCtrl, wiApiService, function (props) {
+                if (props) {
+                    console.log('logTrackPropertiesData', props);
+                }
+            }, {
+                    tabs: ['false', 'false', 'true'],
+                    shadingOnly: true
+                });
+        }
+    }, {
+        separator: '1'
+    }, {
+        name: "DuplicateTrack",
+        label: "Duplicate Track",
+        icon: 'track-duplicate-16x16',
+        handler: function () {
+            logplotHandlers.DuplicateTrackButtonClicked();
+        }
+    }, {
+        name: "ExportTrack",
+        label: "Export Track",
+        // icon: "track-delete-16x16",
+        handler: function () {
+            logplotHandlers.ExportTrackButtonClicked();
+        }
+    }, {
+        name: "ImportTrack",
+        label: "Import Track",
+        // icon: "track-delete-16x16",
+        handler: function () {
+            logplotHandlers.ImportTrackButtonClicked();
+        }
+    }, {
+        separator: '1'
+    }];
+    this.getContextMenu = function () {
+        if (self.wiD3Ctrl.componentName && self.viTrack.mode == 'UseSelector') {
+            return [
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        combinedPlotD3Ctrl.endAllSelections();
+                    }
+                }
+            ]
+        } else {
+            let currDrawing = self.currentDrawingRightClicked;
+            self.currentDrawingRightClicked = null;
+            switch (currDrawing) {
+                case 'curve':
+                    return _getCurveContextMenu();
+                case 'marker':
+                    return _getMarkerContextMenu();
+                case 'annotation':
+                    return _getAnnotationContextMenu();
+                case 'shading':
+                    return _getShadingContextMenu();
+                default:
+                    return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
+            }
+        }
+    }
+    /*
     this.showContextMenu = function (event) {
         if (self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
             let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
@@ -105,6 +197,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
         self.currentDrawingRightClicked = null;
     }
+    */
     this.setContextMenu = function (ctxMenu) {
         self.wiD3Ctrl.setContextMenu(ctxMenu);
     }
@@ -670,12 +763,26 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.update();
         }
     }
+    this.mouseOverHandler = function() {
+        wiD3AbstractTrack.prototype.mouseOverHandler.call(self);
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        if (!dragMan.dragging) return;
+        dragMan.wiD3Ctrl = self.wiD3Ctrl;
+        dragMan.track = self.viTrack;
+    }
+    this.mouseLeaveHandler = function() {
+        wiD3AbstractTrack.prototype.mouseLeaveHandler.call(self);
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        if (!dragMan.dragging) return;
+        dragMan.wiD3Ctrl = null;
+        dragMan.track = null;
+    }
     this.onReady = function () {
         self.viTrack = createVisualizeLogTrack( self.getProperties() );
         self.registerTrackCallback();
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
-        self.registerTrackTooltip();
+        self.registerTrackMouseEventHandlers();
         self.getProperties().controller = self;
         if (self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
 
@@ -725,6 +832,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     function _getWellProps() {
         return self.wiD3Ctrl.getWellProps();
     }
+
     function _registerLogTrackCallback(track) {
         let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         /*
@@ -825,7 +933,28 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         markerProperties();
         d3.event.stopPropagation();
     }
-    function _markerOnRightClick() {
+    function _getMarkerContextMenu() {
+        return [
+            {
+                name: "MarkerProperties",
+                label: "Marker Properties",
+                icon: "marker-properties-16x16",
+                handler: function () {
+                    markerProperties(marker);
+                }
+            }, {
+                name: "RemoveMarker",
+                label: "Remove Marker",
+                icon: "marker-delete-16x16",
+                handler: function () {
+                    // send api to remove marker
+                    wiApiService.removeMarker(marker.id, function () {
+                        self.viTrack.removeMarker(marker);
+                    })
+                }
+            }
+        ];
+        /*
         let marker = self.viTrack.getCurrentMarker();
         self.setContextMenu([
             {
@@ -847,6 +976,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 }
             }
         ]);
+        */
     }
     function markerProperties(marker) {
         if (!marker) {
@@ -864,7 +994,27 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         annotationProperties();
         d3.event.stopPropagation();
     }
-    function _annotationOnRightClick() {
+    function _getAnnotationContextMenu() {
+        return [
+            {
+                name: "AnnotationProperties",
+                label: "Annotation Properties",
+                icon: "annotation-16x16-edit",
+                handler: function () {
+                    annotationProperties(anno);
+                }
+            }, {
+                name: "RemoveAnnotation",
+                label: "Remove Annotation",
+                icon: "annotation-delete-16x16",
+                handler: function () {
+                    wiApiService.removeAnnotation(anno.idAnnotation, function () {
+                        self.viTrack.removeDrawing(anno);
+                    })
+                }
+            }
+        ];
+        /*
         let anno = self.viTrack.getCurrentDrawing();
         self.setContextMenu([
             {
@@ -885,6 +1035,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 }
             }
         ]);
+        */
     }
     function annotationProperties(anno) {
         if (!anno) anno = self.viTrack.getCurrentDrawing();
@@ -897,7 +1048,110 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             })
         })
     }
-    function _curveOnRightClick() {
+    function _getCurveContextMenu() {
+        let currentCurve = self.viTrack.getCurrentCurve();
+        return [{
+            name: "CurveProperties",
+            label: "Curve Properties",
+            icon: "curve-properties-16x16",
+            handler: function () {
+                DialogUtils.curvePropertiesDialog(
+                    ModalService,
+                    wiComponentService,
+                    wiApiService,
+                    DialogUtils,
+                    currentCurve,
+                    self.viTrack,
+                    self.wiLogplotCtrl,
+                    function() {
+                        self.viTrack.updateScaleInfo({
+                            leftVal:currentCurve.minX,
+                            rightVal:currentCurve.maxX,
+                            scale: currentCurve.scale
+                        });
+                        self.viTrack.updateAxis();
+                    }
+                );
+            }
+        }, {
+            name: "EditCurve",
+            label: "Edit Curve",
+            icon: "edit-curve-text-16x16",
+            handler: function () {
+                // Utils.error("Feature is not implemented");
+
+                let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+                let datasetModel = Utils.getModel('dataset', currentCurve.idDataset);
+                let wellModel = Utils.getModel('well', datasetModel.properties.idWell);
+                let request = {
+                    projectName: rootNodes.name,
+                    wellName: wellModel.properties.name,
+                    idDataset: currentCurve.idDataset,
+                    idSrcCurve: currentCurve.idCurve,
+                    // idDesCurve: idDesCurve
+                    newCurvename: "new_curve",
+                    idLine: currentCurve.id,
+                    data: currentCurve.data.map(d => d.x),
+                    isBackup: true
+                }
+                wiApiService.editDataCurve(request, function (response) {
+                    console.log('edit curve response', response);
+                });
+            }
+        }, {
+                name: "DepthShift",
+                label: "Depth Shift",
+                icon: "curve-depth-shift-16x16",
+                handler: function () {
+                    self.depthShiftDialog();
+                }
+            }, {
+                name: "RemoveCurve",
+                label: "Remove Curve",
+                icon: "curve-hide-16x16",
+                handler: function () {
+                    let idLine = self.viTrack.getCurrentCurve().id;
+                    wiApiService.removeLine(idLine, function(res){
+                        self.removeCurrentCurve();
+                        if (Array.isArray(res.shadings) && res.shadings.length) {
+                            res.shadings.forEach(function(s) {
+                                let shading = utils.getVisualizeShading(track, s.idShading);
+                                track.removeDrawing(shading);
+                            });
+                        }
+                    });
+                }
+            }, {
+                name: "BaseLineShift",
+                label: "BaseLine Shift",
+                icon: 'curve-interactive-baseline-edit-16x16',
+                handler: function () {
+
+                }
+            }, {
+                name: "ReverseDisplaay",
+                label: "Reverse Displaay",
+                handler: function () {
+
+                }
+            }, {
+                name: "CrossPlot",
+                label: "Cross plot",
+                icon: "crossplot-blank-16x16",
+                handler: self.createCrossplot
+            }, {
+                name: "Histogram",
+                label: "Histogram",
+                icon: "histogram-new-16x16",
+                handler: self.createHistogram
+            }, {
+                name: "Create Shading",
+                label: "Create Shading",
+                icon: "shading-add-16x16",
+                handler: self.createShadingForSelectedCurve
+            }
+        ]
+        /*
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         //console.log('-------------');
 
@@ -1007,6 +1261,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 handler: self.createShadingForSelectedCurve
             }
         ]);
+        */
     }
     function _curveOnDoubleClick() {
         let currentCurve = self.viTrack.getCurrentCurve();
@@ -1031,7 +1286,24 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
-    function _shadingOnRightClick() {
+    function _getShadingContextMenu() {
+        return [{
+            name: "ShadingProperties",
+            label: "Shading Properties",
+            icon: "shading-properties-16x16",
+            handler: function () {
+                shadingProperties();
+            }
+        }, {
+            name: "RemoveShading",
+            label: "Remove Shading",
+            icon: "shading-delete-16x16",
+            handler: function () {
+                let currentShading = self.viTrack.getCurrentShading();
+                wiApiService.removeShading(currentShading.id, self.removeCurrentShading);
+            }
+        }];
+        /*
         //let posX = d3.event.clientX, posY = d3.event.clientY;
         self.setContextMenu([{
             name: "ShadingProperties",
@@ -1040,25 +1312,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             handler: function () {
                 shadingProperties();
             }
-        },
-            {
-                name: "RemoveShading",
-                label: "Remove Shading",
-                icon: "shading-delete-16x16",
-                handler: function () {
-                    let currentShading = self.viTrack.getCurrentShading();
-                    wiApiService.removeShading(currentShading.id, self.removeCurrentShading);
-                }
-            }]);
-        /*$timeout(function() {
-            wiComponentService.getComponent('ContextMenu').open(posX, posY, [{
-                name: "RemoveShading",
-                label: "Remove Shading",
-                handler: function () {
-                    self.removeCurrentShading();
-                }
-            }]);
-        });*/
+        }, {
+            name: "RemoveShading",
+            label: "Remove Shading",
+            icon: "shading-delete-16x16",
+            handler: function () {
+                let currentShading = self.viTrack.getCurrentShading();
+                wiApiService.removeShading(currentShading.id, self.removeCurrentShading);
+            }
+        }]);
+        */
     }
     function _shadingOnDoubleClick() {
         shadingProperties();

@@ -1,5 +1,6 @@
-function Controller (wiApiService) {
+function Controller (wiApiService, wiComponentService) {
     this.wiApiService = wiApiService;
+    this.wiComponentService = wiComponentService;
 }
 
 Controller.prototype.getProperties = function() {
@@ -34,10 +35,25 @@ Controller.prototype.removeTooltip = function() {
 	self.viTrack.removeTooltipText();
 }
 
-Controller.prototype.registerTrackTooltip = function () {
+Controller.prototype.mouseOverHandler = function() {
+    this.wiD3Ctrl.trackUnderMouse = this.getProperties();
+}
+
+Controller.prototype.mouseLeaveHandler = function() {
+    let self = this;
+    this.wiD3Ctrl.trackUnderMouse = null;
+    let debounced = _.debounce(function() {
+        if (self.wiD3Ctrl.trackUnderMouse) return;
+        self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.removeTooltip());
+    }, 500);
+    debounced();
+    //console.log(self.wiD3Ctrl.trackUnderMouse);
+}
+
+Controller.prototype.registerTrackMouseEventHandlers = function () {
     let self = this;
     if (!self.viTrack) return;
-
+    // for Tooltips
     self.viTrack.plotContainer.on('mousemove', function() {
 		let y = d3.mouse(self.viTrack.plotContainer.node())[1];
 		let depth = self.viTrack.getTransformY().invert(y);
@@ -45,18 +61,11 @@ Controller.prototype.registerTrackTooltip = function () {
     });
 
     self.viTrack.plotContainer.on('mouseover', function() {
-        self.wiD3Ctrl.trackUnderMouse = self.getProperties();
-        //console.log(self.wiD3Ctrl.trackUnderMouse);
+        self.mouseOverHandler.call(self);
     });
 
     self.viTrack.plotContainer.on('mouseleave', function() {
-        self.wiD3Ctrl.trackUnderMouse = null;
-        let debounced = _.debounce(function() {
-            if (self.wiD3Ctrl.trackUnderMouse) return;
-            self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.removeTooltip());
-        }, 500);
-        debounced();
-        //console.log(self.wiD3Ctrl.trackUnderMouse);
+        self.mouseLeaveHandler.call(self);
     });
 }
 
@@ -131,6 +140,21 @@ Controller.prototype.registerTrackCallback = function() {
             });
         }
     });
+}
+
+Controller.prototype.getContextMenu = function () {
+    // return wi-d3 ctrl context menu by default
+    return self.wiD3Ctrl ? self.wiD3Ctrl.contextMenu : []
+}
+
+Controller.prototype.showContextMenu = function (event) {
+    console.log('showing track context menu')
+    let self = this;
+    let contextMenu = self.getContextMenu();
+    if (event.button != 2) return;
+    event.stopPropagation();
+    self.wiComponentService.getComponent('ContextMenu')
+        .open(event.clientX, event.clientY, contextMenu, function() {});
 }
 
 Controller.prototype.$onInit = function() {

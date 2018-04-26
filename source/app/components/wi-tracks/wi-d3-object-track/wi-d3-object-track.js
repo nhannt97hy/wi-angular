@@ -7,13 +7,191 @@ Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $compile) {
-    wiD3AbstractTrack.call(this, wiApiService);
+    wiD3AbstractTrack.call(this, wiApiService, wiComponentService);
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let props = null;
+    let contextMenu = [{
+        name: "TrackProperties",
+        label: "Track Properties",
+        icon: 'track-properties-16x16',
+        handler: function() {
+            self.openPropertiesDialog()
+        }
+    }, {
+        separator: '1'
+    }, {
+        name: 'AddHistogram',
+        label: 'Add Histogram',
+        icon: 'histogram-new-16x16',
+        handler: function () {
+            let windowY = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
+            let range = windowY[1] - windowY[0];
+            let newHistogramProps = {
+                divisions: 10,
+                plot: 'Bar',
+                color: 'blue',
+                showGrid: true,
+                idWell: self.wiD3Ctrl.getWellProps().idWell,
+                intervalDepthTop: windowY[0] + range/4.,
+                intervalDepthBottom: windowY[1] - range/4.,
+                name: "Histogram - " + (Math.random().toString(36).substr(2, 3))
+            };
 
+            let newHistogram;
+            let newOoT;
+            async.series([ function(callback) {
+                wiApiService.createHistogram(newHistogramProps, function(createdHistogram) {
+                    if(!createdHistogram.idHistogram) {
+                        DialogUtils.errorMessageDialog(ModalService, "Error! " + createdHistogram);
+                        callback(createdHistogram);
+                    }
+                    else {
+                        newHistogram = createdHistogram;
+                        callback();
+                    }
+                });
+            }, function(callback) {
+                Utils.refreshProjectState().then(function() {
+                    callback();
+                });
+            }, function(callback) {
+                DialogUtils.histogramFormatDialog(ModalService, newHistogram.idHistogram, function(histogramProps) {
+                    newHistogram = histogramProps
+                    callback();
+                }, function() {
+                    callback('cancel');
+                }, {
+                    hideApply: true,
+                    autoName: true
+                });
+            }, function(callback) {
+                wiApiService.createObjectOfObjectTrack({
+                    idObjectTrack: self.viTrack.id,
+                    topDepth: newHistogram.intervalDepthTop,
+                    bottomDepth: newHistogram.intervalDepthBottom,
+                    object: JSON.stringify({
+                        type: 'Histogram',
+                        idHistogram: newHistogram.idHistogram,
+                        background: 'white'
+                    })
+                }, function(returnedObject) {
+                    if (returnedObject.idObjectOfTrack) {
+                        newOoT = returnedObject;
+                        callback();
+                    }
+                    else {
+                        newOoT = null;
+                        callback(returnedObject);
+                    }
+                });
+            }, function(callback) {
+                Utils.refreshProjectState().then(function() {
+                    callback();
+                });
+            }, function(callback) {
+                if (!self.viTrack) return;
+                let transformY = self.viTrack.getTransformY();
+
+                let object = self.addObjectToTrack(self.viTrack, newOoT);
+                self.viTrack.setCurrentDrawing(object);
+                object.createHistogram(newHistogram.idHistogram, newHistogram.name, self.wiD3Ctrl.scopeObj, self.wiD3Ctrl.compileFunc, self.wiD3Ctrl.containerName);
+                callback();
+            }]);
+        }
+    }, {
+        name: 'AddCrossplot',
+        label: 'Add Crossplot',
+        icon: 'crossplot-new-16x16',
+        handler: function () {
+            let windowY = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
+            let range = windowY[1] - windowY[0];
+            let newCrossplotModel = null;
+            let newOoT;
+            async.series([ function(callback) {
+                utils.createCrossplot(self.wiD3Ctrl.getWellProps().idWell,
+                    "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
+                    function(err, crossplotModel) {
+                        if (err) {
+                            console.error(err);
+                            utils.error(err, function() {
+                                callback();
+                            });
+                        }
+                        else {
+                            newCrossplotModel = crossplotModel;
+                            callback();
+                        }
+                    }
+                );
+            }, function(callback) {
+                let pointSet = newCrossplotModel.properties.pointsets[0];
+                pointSet.intervalDepthTop = windowY[0] + range/4.;
+                pointSet.intervalDepthBottom = windowY[1] - range/4.;
+                wiApiService.editPointSet(pointSet, function(returnData) {
+                    newCrossplotModel.properties.pointsets[0] = returnData;
+                    callback();
+                });
+            }, function(callback) {
+                DialogUtils.crossplotFormatDialog(ModalService, newCrossplotModel.properties.idCrossPlot, function(crossplotProps) {
+                    newCrossplotModel.properties = crossplotProps;
+                    async.parallel([ function(cb) {
+                        wiApiService.editCrossplot(newCrossplotModel.properties, function(returnData) {
+                            cb();
+                        });
+                    }, function(cb) {
+                        wiApiService.editPointSet(newCrossplotModel.properties.pointsets[0], function(returnData) {
+                            cb();
+                        });
+                    }], function(err, result) {
+                        callback();
+                    });
+                }, function() {
+                    callback('cancel');
+                }, {
+                    hideApply: true,
+                    autoName: true
+                });
+            }, function(callback) {
+                wiApiService.createObjectOfObjectTrack({
+                    idObjectTrack: self.viTrack.id,
+                    topDepth: newCrossplotModel.properties.pointsets[0].intervalDepthTop,
+                    bottomDepth: newCrossplotModel.properties.pointsets[0].intervalDepthBottom,
+                    object: JSON.stringify({
+                        type: 'Crossplot',
+                        idCrossplot: newCrossplotModel.properties.idCrossPlot,
+                        background: 'white'
+                    })
+                }, function(returnedObject) {
+                    if (returnedObject.idObjectOfTrack) {
+                        newOoT = returnedObject;
+                        callback();
+                    }
+                    else {
+                        newOoT = null;
+                        callback(returnedObject);
+                    }
+                });
+            }, function(callback) {
+                if (!self.viTrack) return;
+                let transformY = self.viTrack.getTransformY();
+
+                let object = self.addObjectToTrack(self.viTrack, newOoT);
+                self.viTrack.setCurrentDrawing(object);
+                object.createCrossplot(newCrossplotModel.properties.idCrossPlot,
+                    newCrossplotModel.properties.name, self.wiD3Ctrl.scopeObj, self.wiD3Ctrl.compileFunc, self.wiD3Ctrl.containerName);
+                callback();
+            }]);
+        }
+    }, {
+        separator: '1'
+    }];
+    this.getContextMenu = function () {
+        return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
+    }
+    /*
     this.showContextMenu = function (event) {
         let items = self.wiD3Ctrl.getCommonContextMenuItems();
         let viTrack = self.viTrack;
@@ -184,6 +362,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         items.trackItemsCreation = items.trackItemsCreation.concat(trackItemsCreationArray);
         self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
     }
+    */
     this.openPropertiesDialog = function () {
         let viTrack = self.viTrack;
         DialogUtils.objectTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, viTrack.getProperties(), function (props) {
@@ -259,7 +438,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         self.registerTrackCallback();
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
-        self.registerTrackTooltip();
+        self.registerTrackMouseEventHandlers();
         self.getProperties().controller = self;
         if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
         
