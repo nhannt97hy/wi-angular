@@ -31,9 +31,9 @@
 			</div>
 			<div style='position:relative;'>
 				<i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
-				<input type='text' style='text-indent:1.5em;' ng-model='Filter' size='10' class="form-control">
+				<input type='text' style='text-indent:1.5em;' ng-model='Filter' class="form-control">
 			</div>
-			<div style='flex:1;display:flex;flex-direction:column;'>
+			<div style='flex:1;display:flex;flex-direction:column;overflow: auto;'>
 				<wi-base-treeview id='__listingtWellTree' name="listingTreeview" config="wiCurveListing.wellConfig" container="wiCurveListing"
 				on-ready-function='wiCurveListing.onReady'
 				filter="{{Filter}}" show-id="false">
