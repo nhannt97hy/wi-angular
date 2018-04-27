@@ -88,9 +88,9 @@ app.factory(wiServiceName, function () {
         LIST_FAMILY: 'list-family',
         SELECTED_NODES: 'selected-nodes',
 
-        PROJECT_LOGPLOTS: 'project-logplots',
-        PROJECT_CROSSPLOTS: 'project-crossplots',
-        PROJECT_HISTOGRAMS: 'project-histograms',
+        // PROJECT_LOGPLOTS: 'project-logplots',
+        // PROJECT_CROSSPLOTS: 'project-crossplots',
+        // PROJECT_HISTOGRAMS: 'project-histograms',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',
