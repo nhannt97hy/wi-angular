@@ -192,9 +192,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'Neuron Network Structure',
         type: 'nnconfig',
         value: {
-            nLayer: 1,
+            nLayer: 3,
             layerConfig: [{
                 name: "layer 0",
+                value: 100
+            }, {
+                name: "layer 1",
+                value: 100
+            }, {
+                name: "layer 2",
                 value: 100
             }]
         }
@@ -236,9 +242,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'Neuron Network Structure',
         type: 'nnconfig',
         value: {
-            nLayer: 1,
+            nLayer: 3,
             layerConfig: [{
                 name: "layer 0",
+                value: 100
+            }, {
+                name: "layer 1",
+                value: 100
+            }, {
+                name: "layer 2",
                 value: 100
             }]
         }
@@ -520,7 +532,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     else {
                         let layers = [];
                         if (param[0].value.nLayer == undefined)
-                            layers = [100];
+                            layers = [100, 100, 100];
                         else
                             param[0].value.layerConfig.forEach(function (layer) { layers.push(layer.value ? layer.value : 100); });
                         return layers;
