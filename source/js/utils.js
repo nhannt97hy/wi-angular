@@ -1065,22 +1065,23 @@ exports.createProjectModel = createProjectModel;
 
 exports.projectToTreeConfig = function (project) {
     let projectModel = createProjectModel(project);
-    let wiComponentService = __GLOBAL.wiComponentService;
-    // project logplots
-    let projectLogplots = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
-    let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
-    projectLogplotsNode.children = projectLogplots;
-    // project crossplots
-    let projectCrossplots = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
-    let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
-    projectCrossplotsNode.children = projectCrossplots;
-    // project histograms
-    let projectHistograms = [];
-    wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
-    let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
-    projectHistogramsNode.children = projectHistograms;
+    // let wiComponentService = __GLOBAL.wiComponentService;
+    // // project logplots
+    // let projectLogplots = [];
+    // wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
+    // let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
+    // projectLogplotsNode.children = projectLogplots;
+    // // project crossplots
+    // let projectCrossplots = [];
+    // wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
+    // let projectCrossplotsNode = createCrossplotsNode(null, { isCollection: true });
+    // projectCrossplotsNode.children = projectCrossplots;
+    // // project histograms
+    // let projectHistograms = [];
+    // wiComponentService.putComponent(wiComponentService.PROJECT_HISTOGRAMS, projectHistograms);
+    // let projectHistogramsNode = createHistogramsNode(null, { isCollection: true });
+    // projectHistogramsNode.children = projectHistograms;
+
     // well groups
     project.groups.forEach(function (group) {
         getGroupModel(group.idGroup, project.groups, projectModel);
@@ -1095,9 +1096,9 @@ exports.projectToTreeConfig = function (project) {
         }
     });
 
-    projectModel.children.push(projectLogplotsNode);
-    projectModel.children.push(projectCrossplotsNode);
-    projectModel.children.push(projectHistogramsNode);
+    // projectModel.children.push(projectLogplotsNode);
+    // projectModel.children.push(projectCrossplotsNode);
+    // projectModel.children.push(projectHistogramsNode);
     return projectModel;
 }
 
@@ -1204,7 +1205,7 @@ function getCurveData(apiService, idCurve, callback) {
             callback(null, curve);
         });*/
 }
-
+/* 
 exports.setupCurveDraggable = function (element, wiComponentService, apiService) {
     let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
     let selectedObjs;
@@ -1323,7 +1324,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         }
     });
 };
-
+ */
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
     let currentWell = getCurrentWell();
     let dataRequest = {

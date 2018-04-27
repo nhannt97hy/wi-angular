@@ -7,7 +7,8 @@
         data="{{wiBaseTreeview.config[$index].id}}"
         wi-right-click="wiBaseTreeview.onClick($index, $event, item); wiBaseTreeview.showContextMenuFunction($event, $index, item)"
         wi-element-ready="wiBaseTreeview.onReadyFunction();"
-        ng-hide="item.data.hide">
+        ng-hide="item.data.hide"
+        tabindex="0">
         <div class="wi-parent-content">
             <div class="icon-expanded"
                 ng-click="wiBaseTreeview.onCollapse($index)">
