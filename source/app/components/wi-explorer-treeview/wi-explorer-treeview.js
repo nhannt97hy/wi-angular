@@ -135,10 +135,26 @@ function WiExpTreeController(
         });
     };
 
-    function handleKeyCurve(event) {
+    function handleKey(event) {
         switch (event.key) {
             case 'F2':
-                utils.renameCurve(null);
+                const selectedNode = utils.getSelectedNode();
+                switch (selectedNode.type) {
+                    case 'well':
+                        utils.renameWell();
+                        break;
+                    case 'well':
+                        utils.renameDataset();
+                        break;
+                    case 'curve':
+                        utils.renameCurve();
+                        break;
+                    case 'zoneset':
+                        utils.renameZoneSet(selectedNode);
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case 'Delete':
                 const isPermanently = !!event.shiftKey;
@@ -149,20 +165,13 @@ function WiExpTreeController(
         }
     }
 
-    this.onReady = _.debounce(function() {
+    this.onReady = _.debounce(function () {
         let typeItemDragable = "curve";
-        const curveElements = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
+        const curveElements = $("wi-base-treeview#" + self.name + " .wi-parent-node" + `[type='${typeItemDragable}']`);
         setupCurveDraggable(curveElements, wiComponentService, wiApiService);
-        curveElements.click(function(event) {
+        curveElements.click(function() {
             this.focus();
         });
-        curveElements.focusin(function(event) {
-            $(this).on('keyup', handleKeyCurve);
-        });
-        curveElements.focusout(function(event) {
-            $(this).off('keyup', handleKeyCurve)
-        });
-
         // dataset droppable
         const dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         $(`wi-base-treeview#${self.name} .wi-parent-node[type=dataset]`).droppable({
@@ -185,7 +194,16 @@ function WiExpTreeController(
             },
             cursor: 'copy'
         });
-    }, 100);
+        const nodeElements = $(`wi-base-treeview#${self.name} .wi-parent-node`);
+        nodeElements.off('focusin');
+        nodeElements.off('focusout');
+        nodeElements.focusin(function() {
+            $(this).on('keyup', handleKey);
+        });
+        nodeElements.focusout(function() {
+            $(this).off('keyup', handleKey);
+        });
+    }, 100)
 
     this.onClick = function($index, $event) {
         if (!this.container && this.container.selectHandler) return;
