@@ -440,7 +440,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                             choices: matchCurves(datasetModel.children, ipt),
                             selected: false
                         },
-                        type: "choice"
+                        type: "inputchoice"
                     };
                     tempItem.data.value = tempItem.data.choices.length
                         ? tempItem.data.choices[0]
@@ -465,7 +465,8 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: 'Inputs',
                                 selected: false
                             },
-                            children: inputItems
+                            children: inputItems,
+                            type: 'input'
                         },
                         {
                             data: {
@@ -473,7 +474,8 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: 'Zonation',
                                 selected: false
                             },
-                            children: []
+                            children: [],
+                            type: 'zoneset'
                         }
                     ],
                     parameters: angular.copy(self.taskConfig.parameters)
@@ -488,7 +490,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: param.name,
                                 selected: false
                             },
-                            type: 'choice'
+                            type: 'zonechoice'
                         }
                         if(param.type == 'select'){
                             tempItem.data.choices = angular.copy(param.choices);
@@ -522,7 +524,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: `ZONENATION_ALL: ${wellInfo.topDepth} - ${wellInfo.bottomDepth}` ,
                                 selected: false
                             },
-                            type: 'zoneset',
+                            type: 'zone',
                             children: paramItems
                         })
                     }

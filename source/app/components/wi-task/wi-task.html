@@ -59,7 +59,7 @@
     </style>
     <div class="form-group">
         <wi-tabset>
-            <wi-tab heading="Configure Inputs & Outputs">
+            <wi-tab heading="Configure Inputs">
                 <div style='padding:10px;display:flex;flex-direction:row;height:100%;'>
                     <div class='panel panel-default tree-side'>
                         <div class='panel-heading' style='display: flex;'>
@@ -130,23 +130,26 @@
                                 </li>
                             </ul>
                         </div>
-                        <div style="flex:1;display:flex;overflow: hidden;flex-direction: column;" class='panel panel-default'>
-                            <div class="panel-heading">
-                                <h5>Outputs</h5>
-                            </div>
-                            <ul style='padding-left: 0px;margin: 5px;border-bottom: 1px solid #ccc;'>
-                                <li style="display:flex;flex-direction:row;">
-                                    <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Family</label>
-                                    <label style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;'>Curve Name</label>
-                                </li>
-                            </ul>
-                            <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
-                                <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.outputs track by $index">
-                                    <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.family}}</label>
-                                    <input type="text" class='form-control' style='flex:2' ng-model='item.name'>
-                                </li>
-                            </ul>
-                        </div>
+                    </div>
+                </div>
+            </wi-tab>
+            <wi-tab heading='Configure Outputs'>
+                <div style="height:100%;display:flex;overflow: hidden;flex-direction: column;padding:10px;"> <div class='panel panel-default' style='flex:1;margin-bottom: 0;'>
+                    <div class="panel-heading">
+                        <h5>Outputs</h5>
+                    </div>
+                    <ul style='padding-left: 0px;margin: 5px;border-bottom: 1px solid #ccc;'>
+                        <li style="display:flex;flex-direction:row;">
+                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Family</label>
+                            <label style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;'>Curve Name</label>
+                        </li>
+                    </ul>
+                    <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
+                        <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.outputs track by $index">
+                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.family}}</label>
+                            <input type="text" class='form-control' style='flex:2' ng-model='item.name'>
+                        </li>
+                    </ul>
                     </div>
                 </div>
             </wi-tab>
@@ -189,7 +192,7 @@
                                 config='wiTask.taskConfig.inputData'
                                 on-click-function='wiTask.taskClickFuntion'
                                 show-context-menu-function='wiTask.taskShowContextMenu'
-                                filter='{{wiTask.inputFilter}}'
+                                filter='{{wiTask.inputFilter}}' filter-by='{{wiTask.typeFilter}}'
                                 ></wi-base-treeview>
                                 <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET HERE</div>
                             </div>

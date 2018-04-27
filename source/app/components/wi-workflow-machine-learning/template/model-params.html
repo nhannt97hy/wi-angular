@@ -4,7 +4,7 @@
             <form class="form-horizontal">
                 <div class="bordered" style="padding:10px; margin-bottom: 10px" ng-show="!wiWorkflowMachineLearning.workflowConfig.steps[0].disabled">
                     <h4 style="text-align: center">Edit infomation model</h4>
-                    <div class="form-group">
+                    <div class="form-group" ng-if="wiWorkflowMachineLearning.currentModelType.name != 'CrossRecurrencePlot'">
                         <label class="control-label col-sm-3">Type</label>
                         <div class="col-sm-9">
                             <wi-item-dropdown on-wi-dropdown-init="wiWorkflowMachineLearning.onModelTypeListInit" 
