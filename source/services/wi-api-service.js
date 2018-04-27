@@ -1014,7 +1014,7 @@ Service.prototype.scaleCurvePromise = function (idCurve) {
         self.getUtils().error(err);
     }
 }
-Service.prototype.asyncScaleCurve = async function (idCurve) {
+Service.prototype.asyncScaleCurve = async function (idCurve, option) {
     const self = this;
     try {
         var scale = {};
@@ -1022,7 +1022,7 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
             self.post(SCALE_CURVE, { idCurve: idCurve }, function (response) {
                 scale = response;
                 resolve(scale);
-            });
+            }, option);
         });
         return scale;
     } catch (err) {

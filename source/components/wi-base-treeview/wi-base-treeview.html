@@ -7,7 +7,8 @@
         data="{{wiBaseTreeview.config[$index].id}}"
         wi-right-click="wiBaseTreeview.onClick($index, $event, item); wiBaseTreeview.showContextMenuFunction($event, $index, item)"
         wi-element-ready="wiBaseTreeview.onReadyFunction();"
-        ng-hide="item.data.hide">
+        ng-hide="item.data.hide"
+        tabindex="0">
         <div class="wi-parent-content">
             <div class="icon-expanded"
                 ng-click="wiBaseTreeview.onCollapse($index)">
@@ -41,7 +42,7 @@
             ng-dblclick="wiBaseTreeview.onDoubleClick($index)">
             <span class='display-inline-block' style='text-indent:10px;' title="{{item.data.unit}}">{{item.data.unit}}</span>
         </div>
-        <div class="wi-parent-choices" ng-if='item.type=="choice"'>
+        <div class="wi-parent-choices" ng-if='item.type.includes("choice")'>
             <select ng-model='item.data.value' ng-if='item.data.choices'
             ng-options="choice as choice.name for choice in item.data.choices track by choice.value"></select>
             <input type="number" ng-model="item.data.value" ng-if="!item.data.choices" step="any">

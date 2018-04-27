@@ -5,35 +5,45 @@
     <input type="text" placeholder="Search ..." ng-model="filter" ng-init="filter=''">
 </div> -->
 <div class='filter-block' ng-init="filterBy=''">
-    <div>
-        <label class="btn btn-default" ng-class='{active: filterBy==""}' title='Project'>
+    <div class="filter-control">
+        <label class="btn" ng-click="wiExplorer.scrollLeft()">
+            <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        </label>
+    </div>
+    <div class="filter-main">
+        <label class="btn" ng-class='{active: filterBy==""}' title='Project'>
             <input type="radio" name="filterBy" class="display-none" value='' ng-model="filterBy">
             <span class='project-normal-16x16'></span>
         </label>
-        <label class="btn btn-default" ng-class='{active: filterBy=="dataset"}' title='Dataset'>
-            <input type="radio" name="filterBy" class="display-none" value='dataset' ng-model="filterBy">
+        <label class="btn" ng-class='{active: filterBy=="datasetcurve"}' title='Dataset'>
+            <input type="radio" name="filterBy" class="display-none" value='datasetcurve' ng-model="filterBy">
             <span class='curve-data-16x16'></span>
         </label>
-        <label class="btn btn-default"
+        <label class="btn"
         ng-class='{active:filterBy=="zonesets"}' title='Zoneset'>
             <input type="radio" name="filterBy" class="display-none" value='zonesets' ng-model="filterBy">
             <span class='user-define-16x16'></span>
         </label>
-        <label class="btn btn-default" ng-class='{active: filterBy=="logplots"}' title='Logplot'>
+        <label class="btn" ng-class='{active: filterBy=="logplots"}' title='Logplot'>
             <input type="radio" name="filterBy" class="display-none" value='logplots' ng-model="filterBy">
             <span class='logplot-blank-16x16'></span>
         </label>
-        <label class="btn btn-default" ng-class='{active: filterBy=="crossplots"}' title='Crossplot'>
+        <label class="btn" ng-class='{active: filterBy=="crossplots"}' title='Crossplot'>
             <input type="radio" name="filterBy" class="display-none" value='crossplots' ng-model="filterBy">
             <span class='crossplot-blank-16x16'></span>
         </label>
-        <label class="btn btn-default" ng-class='{active: filterBy=="histograms"}' title='Histogram'>
+        <label class="btn" ng-class='{active: filterBy=="histograms"}' title='Histogram'>
             <input type="radio" name="filterBy" class="display-none" value='histograms' ng-model="filterBy">
             <span class='histogram-blank-16x16'></span>
         </label>
-        <label class="btn btn-default" ng-class='{active: filterBy=="comboviews"}' title='Comboview'>
+        <label class="btn" ng-class='{active: filterBy=="comboviews"}' title='Comboview'>
             <input type="radio" name="filterBy" class="display-none" value='comboviews' ng-model="filterBy">
             <span class='link-view-16x16'></span>
+        </label>
+    </div>
+    <div class="filter-control">
+        <label class="btn" ng-click="wiExplorer.scrollRight()">
+            <i class="fa fa-chevron-right" aria-hidden="true"></i>
         </label>
     </div>
 </div>
@@ -45,7 +55,7 @@
 <div class="label_treeview">
     <span>Name</span><span>Family</span><span>Unit</span>
 </div>
-<div style='background-color:#fff; overflow-y: auto; height: calc(100% - 133px);'
+<div style='background-color:#fff; overflow-y: auto; height: calc(100% - 130px);'
 id="treeContent">
     <wi-explorer-treeview name="{{wiExplorer.treeviewName}}" config="wiExplorer.treeConfig" container="wiExplorer" filter='{{filter}}' filter-by='{{filterBy}}'></wi-explorer-treeview>
 </div>

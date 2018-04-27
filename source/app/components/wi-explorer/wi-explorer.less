@@ -3,16 +3,21 @@ wi-explorer {
     width: 150px;
   }
   .filter-block {
-    overflow-x: auto;
-    height: 34px;
-    border-bottom: 1px solid #ccc;
-    //text-align: -webkit-center;
-    &>div {
-      width: max-content;
-      padding: 0px 5px;
+    overflow-x: hidden;
+    display: flex;
+    .filter-control {
+      font-size: 16px;
     }
-    &::-webkit-scrollbar{
-      height: 4px;
+    .filter-main {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      &>label:hover,&>label.active{
+        background-color:lightblue;
+      }
+      &::-webkit-scrollbar{
+        display: none;
+      }
     }
   }
 
