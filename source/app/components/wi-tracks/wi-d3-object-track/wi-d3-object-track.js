@@ -189,7 +189,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         separator: '1'
     }];
     this.getContextMenu = function () {
-        return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
+        return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
     }
     /*
     this.showContextMenu = function (event) {

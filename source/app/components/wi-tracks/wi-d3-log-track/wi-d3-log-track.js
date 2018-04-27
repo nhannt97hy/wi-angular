@@ -78,7 +78,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         separator: '1'
     }];
     this.getContextMenu = function () {
-        if (self.wiD3Ctrl.componentName && self.viTrack.mode == 'UseSelector') {
+        if (self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
+            let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
             return [
                 {
                     name: "End",
@@ -102,7 +103,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 case 'shading':
                     return _getShadingContextMenu();
                 default:
-                    return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
+                    return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
             }
         }
     }
@@ -401,8 +402,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             // Send api to update annotation
             let annoConfig = ann.getProperties();
             delete annoConfig.textStyle;
-            wiApiService.editAnnotation(annoConfig, function () {
-            });
+            wiApiService.editAnnotation(annoConfig, function () {});
         });
         ann.onLineDragEnd(function () {
             // Send api to update annotation
@@ -606,7 +606,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
             let width = self.viTrack.width;
             wiApiService.editShading(request, function (shading) {
-                self.wiD3Ctrl.updateTrack(self.viTrack);
+                self.update();
                 $timeout(function() {
                     self.viTrack.width = width;
                     self.viTrack.doPlot();
@@ -798,6 +798,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         update(function () {
             self.viTrack.setCurrentDrawing(null);
         });
+        
+        $timeout(function() {
+            if (self.wiD3Ctrl.containerName) {
+                let well = Utils.findWellByLogplot(self.getProperties().idPlot);
+                let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
+                combinedPlotD3Ctrl.selections.forEach(function(selectionConfig) {
+                    selectionConfig.wellForLogplot = well;
+                    self.addViSelectionToTrack(self.viTrack, selectionConfig);
+                })
+            }
+        });
     }
 
     function createVisualizeLogTrack(logTrack) {
@@ -865,13 +876,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.onPlotDoubleClick(function () {
             _onPlotDoubleClickCallback(track);
         });
-        track.onCurveDrag(function (desTrack) {
+        track.onCurveDrag(self.getProperties(), function (desTrackComponent) {
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
-            curve.idTrack = desTrack.id;
+            curve.idTrack = desTrackComponent.idTrack;
             wiApiService.editLine(curve, function (res) {
-                self.wiD3Ctrl.updateTrack(track);
-                self.wiD3Ctrl.updateTrack(desTrack);
+                self.update();
+                // self.wiD3Ctrl.updateTrack(desTrack);
+                desTrackComponent.controller.update();
             });
         });
     }
@@ -938,6 +950,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         d3.event.stopPropagation();
     }
     function _getMarkerContextMenu() {
+        let marker = self.viTrack.getCurrentMarker();
         return [
             {
                 name: "MarkerProperties",
@@ -999,6 +1012,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         d3.event.stopPropagation();
     }
     function _getAnnotationContextMenu() {
+        let anno = self.viTrack.getCurrentDrawing();
         return [
             {
                 name: "AnnotationProperties",

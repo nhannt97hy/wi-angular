@@ -75,7 +75,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     //let _depthRange = [0, 100000];
     self._minY = 0;
     self._maxY = 100000;
-    self.contextMenu = [{
+    let contextMenu = [{
                 name: "AddDepthTrack",
                 label: "Add Depth Track",
                 icon: 'depth-axis-add-16x16',
@@ -128,6 +128,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.compileFunc = $compile;
     this.scopeObj = $scope;
     this.trackComponents = [];
+    this.getContextMenu = function() {
+        return contextMenu;
+    }
 
     /*
     this.buildContextMenu = function (contextMenuItems) {
@@ -291,17 +294,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.showContextMenu = function (event) {
         console.log('wi-d3 contextMenu is opened');
         if (event.button != 2) return;
-        /*
-        if(!self.contextMenu) {
-            commonCtxMenu = commonCtxMenu || self.buildContextMenu(contextMenu_constantItems);
-            self.contextMenu = commonCtxMenu;
-        }
-        */
+       
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
-            .open(event.clientX, event.clientY, self.contextMenu, function () {
-                // self.contextMenu = commonCtxMenu;
-            });
+            .open(event.clientX, event.clientY, self.contextMenu, function () {});
     }
     this.getMaxDepth = function () {
         let wellProps = self.getWellProps();
@@ -537,6 +533,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
+    /*
     this.pushDepthTrack = function (depthTrackProps) {
         self.pushTrackComponent(depthTrackProps);
     }
@@ -566,6 +563,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.plot = function (track) {
         if (track && track.doPlot) track.doPlot(track == _currentTrack);
     };
+    */
 
     this.reloadTrack = function(tc) {
         let idx = self.trackComponents.findIndex((item) => item == tc);
@@ -573,18 +571,17 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.trackComponents[idx] = trackProps;
         });
     }
-    /* connect with visualize track */
+    
     this.plotAll = _.throttle(function () {
         self.trackComponents.forEach(tc => {
             tc.controller.viTrack.doPlot(tc == _currentTrack);
         });
-        /*
-        _tracks.forEach(function (track) {
-            track.doPlot(track == _currentTrack);
-        });
-        */
+        // _tracks.forEach(function (track) {
+        //     track.doPlot(track == _currentTrack);
+        // });
         self.updateScale();
     }, 50);
+
     this.getDisplayView = function () {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = this.getMaxDepth();
@@ -722,11 +719,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
+    /*
     this.updateTrack = function (viTrack) {
         getComponentCtrlByViTrack(viTrack).update();
     }
+    */
 
-    /***************** TO BE MOVE AWAY INTO INDIVIDUAL TRACKS ************/
+    /***************** TO BE MOVE AWAY INTO INDIVIDUAL TRACKS ************
     // image track
     this.addImageZoneToTrack = function (track, config) {
         return getComponentCtrlByViTrack(track).addImageZoneToTrack(track, config);
@@ -894,6 +893,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
                         }
                         self.updateScale();
+                        self.isReady = true;
                     }, 100);
 
                     let drange = self.getDepthRangeFromSlidingBar();
@@ -1120,6 +1120,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.slider.noUiSlider.updateOptions({}); // fire event 'update';
         $scope.safeApply();
     }
+    /*
     function openTrackPropertiesDialog() {
         console.log('open track properties');
         //let controller = getComponentCtrlByViTrack(_currentTrack);
@@ -1129,6 +1130,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
     this.openTrackPropertiesDialog = openTrackPropertiesDialog;
+    */
 
     function getOrderKey(trackComponent) {
         let length = self.trackComponents.length;
@@ -1406,7 +1408,7 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
-        selections: '<',
+        // selections: '<',
         containerName: '@'
     }
 });

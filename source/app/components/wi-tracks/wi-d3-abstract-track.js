@@ -145,7 +145,7 @@ Controller.prototype.registerTrackCallback = function() {
 
 Controller.prototype.getContextMenu = function () {
     // return wi-d3 ctrl context menu by default
-    return self.wiD3Ctrl ? self.wiD3Ctrl.contextMenu : []
+    return self.wiD3Ctrl ? self.wiD3Ctrl.getContextMenu() : []
 }
 
 Controller.prototype.showContextMenu = function (event) {

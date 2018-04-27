@@ -29,7 +29,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }
     */
     this.getContextMenu = function () {
-        return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();  
+        return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();  
     }
     
     this.openPropertiesDialog = function () {

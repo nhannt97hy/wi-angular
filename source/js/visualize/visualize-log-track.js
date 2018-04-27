@@ -1294,7 +1294,7 @@ LogTrack.prototype.removeTooltipText = function() {
 /**
  * Register event when drag curve
  */
-LogTrack.prototype.onCurveDrag = function (callbackDrop) {
+LogTrack.prototype.onCurveDrag = function (trackComponent, callbackDrop) {
     let self = this;
     function triggerClickPlot (event) {
         d3.event = event;
@@ -1339,7 +1339,7 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         tolerance: 'pointer',
         drop: function (event, ui) {
             let onCurveDrop = new Event('oncurvedrop');
-            onCurveDrop.desTrack = self;
+            onCurveDrop.desTrack = trackComponent;
             document.dispatchEvent(onCurveDrop);
         }
     });

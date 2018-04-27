@@ -57,7 +57,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.isImageZoneRightClicked = false;
             return _getImageZoneContextMenu();
         } else {
-            return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
+            return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
         }
     }
     this.openPropertiesDialog = function () {

@@ -10,9 +10,13 @@ function genSamples(nSamples) {
 }
 
 exports.EditFormatButtonClicked = function () {
-    const wiLogplot = this.wiLogplot;
-    // wiLogplot.getwiD3Ctrl().openPropertiesDialog();
-    wiLogplot.getwiD3Ctrl().openTrackPropertiesDialog();
+    // const wiLogplot = this.wiLogplot;
+    // // wiLogplot.getwiD3Ctrl().openPropertiesDialog();
+    // wiLogplot.getwiD3Ctrl().openTrackPropertiesDialog();
+    let curTrackComponent = wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if(curTrackComponent && curTrackComponent.controller) {
+        curTrackComponent.controller.openPropertiesDialog();
+    }
 };
 
 exports.SaveAsLogplotButtonClicked = function () {

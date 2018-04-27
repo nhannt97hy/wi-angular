@@ -65,7 +65,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             self.isZoneRightClicked = false;
             return _getZoneContextMenu();
         } else {
-            return _(contextMenu).concat(self.wiD3Ctrl.contextMenu).value();
+            return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
         }
     }
     this.openPropertiesDialog = function () {
