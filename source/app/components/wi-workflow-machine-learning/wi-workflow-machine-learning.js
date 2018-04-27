@@ -247,30 +247,37 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     const CROSS_RECURRENCE_PLOT_PARAMS = [{
         name: 'dim',
         type: 'number',
-        min: 2
+        min: 2,
+        value: 2
     }, {
         name: 'tau',
         type: 'number',
-        min: 1
+        min: 1,
+        value: 2
     }, {
         name: 'lambd',
         type: 'number',
-        min: 0
+        min: 0,
+        value: 2
     }, {
         name: 'curve_number',
         type: 'number',
-        min: 1
+        min: 1,
+        value: 2
     }, {
         name: 'facies_class_number',
         type: 'number',
-        min: 0
+        min: 0,
+        value: 93.1939
     }, {
         name: 'epsilon',
-        type: 'number'
+        type: 'number',
+        value: 2
     }, {
         name: 'percent',
         type: 'number',
-        max: 1
+        max: 1,
+        value: 2
     }]
     this.listModelType = {
         name: 'model type',
@@ -352,20 +359,23 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 break;
         };
     }
-
+    let well = [];
     function getDataCurves(step, callback) {
         let listInputCurves = [];
         let inputCurves = [];
         let inputData = step.inputData;
         if (inputData) {
+            well = [];
             console.log(inputData);
             async.forEachOfSeries(inputData, function (iptData, idx, _end) {
                 let inputSet = iptData;
                 listInputCurves[idx] = [];
+                let wellName = iptData.well.name;
                 async.forEachOfSeries(inputSet.inputs, function (curveInfo, idx1, __end) {
                     listInputCurves[idx][idx1] = [];
                     wiApiService.dataCurve(curveInfo.value.idCurve, function (curveData) {
                         listInputCurves[idx][idx1] = curveData.map(function (d) {
+                            if(idx==0) well.push(wellName);
                             return parseFloat(d.x);
                         });
                         __end();
@@ -386,15 +396,18 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let curveInputs = [];
         let inputData = step.inputData;
         if (inputData) {
+            well = [];
             console.log(inputData);
             async.forEachOfSeries(inputData, function (iptData, i, __done) {
                 let j = -1;
+                let wellName = iptData.well.name;
                 async.forEachOfSeries(iptData.inputs, function (curveInfo, idx, __end) {
                     wiApiService.dataCurve(curveInfo.value.idCurve, function (curveData) {
                         j++;
                         if (i == 0) curveInputs[j] = [];
                         curveData.forEach(function (data) {
                             curveInputs[j].push(parseFloat(data.x));
+                            if(j==0) well.push(wellName);
                         });
                         __end();
                     });
@@ -411,6 +424,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }
     }
     function filterNull(curves) {
+        let WELL = [];
         let l = curves.length;
         let filterCurves = [];
         let fillNull = [];
@@ -427,12 +441,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 }
             if (checkNull)
                 for (let j = 0; j < l; j++) {
+                    if(j==0) WELL.push(well[i]);
                     filterCurves[j].push(curves[j][i]);
                 }
         }
         return {
             filterCurves: filterCurves,
-            fillNull: fillNull
+            fillNull: fillNull,
+            well: WELL
         };
     }
     function fillNullInCurve(fillArr, curve) {
@@ -478,6 +494,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         getDataCurvesAndJoin(step, function (list_curves) {
             let curves = filterNull(list_curves).filterCurves;
             let target = curves.splice(curves.length - 1, 1)[0];
+            let WELL = filterNull(list_curves).well;
             let data = curves;
             let params;
             let payload;
@@ -580,12 +597,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     payload = {
                         model_id: genModelId(),
                         data: {
-                            well: [],//array of string
+                            well: WELL,//array of string
                             data: data,
                             target: target
                         },
                         params: params
                     }
+                    console.log(payload);
                     wiMachineLearningApiService.trainCRP(payload, function (res) {
                         if (res) {
                             toastr.success('Train model success');
@@ -639,9 +657,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 name: curveProps.name
             });
 
-            createVerifyLogplot(
+            createLogplot(
                 curveInfo.idWell,
-                step.inputData[index].well.name + '-' + curveProps.name,
+                step.inputData[index].well.name + '-' + curveProps.name + '-' + step.name,
                 inCurves, outCurves,
                 function (err, response) {
                     if (err) {
@@ -681,6 +699,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 // indicesObj.filterCurves.splice(indicesObj.filterCurves.length-1, 1);
                 let dataCurves = indicesObj.filterCurves;
                 let nullPositions = indicesObj.fillNull;
+                let WELL = indicesObj.well;
                 let payload = null;
                 console.log(self.workflowConfig.model.type);
                 switch (self.workflowConfig.model.type) {
@@ -739,12 +758,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             payload = {
                                 model_id: genModelId(),
                                 test: {
-                                    well: [],//array of string
+                                    well: WELL,//array of string
                                     data: dataCurves
                                 }
                             };
                             console.log(payload);
-                            window.verifyData = payload;
                             wiMachineLearningApiService.predictCRP(payload, function (res) {
                                 if (res) {
                                     toastr.success('Verification success');
@@ -860,6 +878,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 let indicesObj = filterNull(list_curves);
                 let dataCurves = indicesObj.filterCurves;
                 let nullPositions = indicesObj.fillNull;
+                let WELL = indicesObj.well;
                 let payload = null;
 
                 switch (self.workflowConfig.model.type) {
@@ -911,7 +930,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             payload = {
                                 model_id: genModelId(),
                                 test: {
-                                    well: [],//array of string
+                                    well: WELL,//array of string
                                     data: dataCurves
                                 }
                             };
@@ -1070,8 +1089,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 self.workflowName = workflow.name;
                 console.log(self.workflowConfig);
                 self.currentModelType = self.workflowConfig.model.currentModelType;
-                if (self.workflowName == 'CROSS_RECURRENCE_PLOT')
+                if (self.workflowConfig.model.type == CROSS_RECURRENCE_PLOT)
                     self.currentModelType = self.listModelType.choices[self.listModelType.choices.length - 1];
+                console.log(self.currentModelType);
                 self.workflowResults[1] = self.workflowConfig.steps.find(function (step) {
                     return step.name == self.workflowResults[1].name;
                 }).result || self.workflowResults[1];
@@ -1963,7 +1983,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         delete odata.value;
         self.saveWorkflow();
     }
-    function createVerifyLogplot(idWell, plotName, inCurves, outCurves, callback) {
+    function createLogplot(idWell, plotName, inCurves, outCurves, callback) {
         let payload = {
             idWell: idWell,
             name: plotName,
@@ -2023,8 +2043,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         });
 
     }
-
-
 
     function createLogplotFromResult(wfInput, wfOutput, callback) {
         let payload = {
