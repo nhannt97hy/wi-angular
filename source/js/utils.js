@@ -350,8 +350,8 @@ function logplotToTreeConfig(plot, options = {}) {
         openLogplotTab(wiComponentService, plotModel);
     }
     plotModel.parent = 'well' + plot.idWell;
-    let projectLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS)
-    if (projectLogplots) projectLogplots.push(plotModel);
+    // let projectLogplots = wiComponentService.getComponent(wiComponentService.PROJECT_LOGPLOTS)
+    // if (projectLogplots) projectLogplots.push(plotModel);
     return plotModel;
 }
 
@@ -418,8 +418,8 @@ function crossplotToTreeConfig(crossplot, options = {}) {
         openCrossplotTab(crossplotModel);
     }
     crossplotModel.parent = 'well' + crossplot.idWell;
-    let wiComponentService = __GLOBAL.wiComponentService;
-    wiComponentService.getComponent(wiComponentService.PROJECT_CROSSPLOTS).push(crossplotModel);
+    // let wiComponentService = __GLOBAL.wiComponentService;
+    // wiComponentService.getComponent(wiComponentService.PROJECT_CROSSPLOTS).push(crossplotModel);
     return crossplotModel;
 }
 
@@ -522,8 +522,8 @@ function histogramToTreeConfig(histogram, options = {}) {
         openHistogramTab(histogramModel);
     }
     histogramModel.parent = 'well' + histogram.idWell;
-    let wiComponentService = __GLOBAL.wiComponentService;
-    wiComponentService.getComponent(wiComponentService.PROJECT_HISTOGRAMS).push(histogramModel);
+    // let wiComponentService = __GLOBAL.wiComponentService;
+    // wiComponentService.getComponent(wiComponentService.PROJECT_HISTOGRAMS).push(histogramModel);
     return histogramModel;
 }
 
