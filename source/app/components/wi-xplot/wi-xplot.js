@@ -187,12 +187,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         ]);
     }
 
-    this.deleteArea = function() {
+    this.deleteArea = function () {
         this.viWiXplot.area = null;
         this.viWiXplot.plotArea();
     }
 
-    this.drawUserLine = function(callback) {
+    this.drawUserLine = function (callback) {
         let self = this;
         this.viWiXplot.startAddUserLine();
         this.setContextMenu([
@@ -209,12 +209,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         ]);
     }
 
-    this.deleteUserLine = function() {
+    this.deleteUserLine = function () {
         this.viWiXplot.userLine = null;
         this.viWiXplot.plotUserLine();
     }
 
-    this.mouseDownCallback = function() {
+    this.mouseDownCallback = function () {
         if (d3.event.button == 2) return;
         if (self.viWiXplot.mode == 'PlotAreaRectangle') {
             if (self.viWiXplot.area && self.viWiXplot.area.points.length > 1) {
@@ -227,6 +227,49 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.viWiXplot.endAddUserLine();
                 self.setContextMenu();
             }
+        }
+    }
+
+    this.getPolygons = function () {
+        if (!self.viWiXplot) return [];
+        return self.viWiXplot.polygons;
+    }
+
+    this.initPolygons = function (polygons) {
+        self.viWiXplot.polygons = [];
+        polygons.forEach(function (polygon) {
+            self.viWiXplot.polygons.push(polygon);
+        })
+        self.viWiXplot.doPlot();
+    }
+
+    this.drawPolygon = function (idPolygon, callback) {
+        if (idPolygon) {
+            self.viWiXplot.startEditPolygon(idPolygon);
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        callback(self.viWiXplot.endEditPolygon());
+                        self.setContextMenu();
+                    }
+                }
+            ])
+        } else {
+            self.viWiXplot.startAddPolygon();
+            self.setContextMenu([
+                {
+                    name: "End",
+                    label: "End",
+                    icon: "",
+                    handler: function () {
+                        callback(self.viWiXplot.endAddPolygon());
+                        self.setContextMenu();
+                    }
+                }
+            ])
         }
     }
 
