@@ -68,7 +68,7 @@ app.factory(wiServiceName, function () {
         // component
         LOGPLOT_HANDLERS: 'LOGPLOT_HANDLERS',
         HISTOGRAM_HANDLERS: 'HISTOGRAM_HANDLERS',
-        TREE_FUNCTIONS: 'tree-functions',
+        // TREE_FUNCTIONS: 'tree-functions',
         GLOBAL_HANDLERS: 'GLOBAL_HANDLERS',
         WI_EXPLORER_HANDLERS: 'wi-explorer-handlers',
         WI_EXPLORER: 'WiExplorer',
@@ -88,9 +88,9 @@ app.factory(wiServiceName, function () {
         LIST_FAMILY: 'list-family',
         SELECTED_NODES: 'selected-nodes',
 
-        PROJECT_LOGPLOTS: 'project-logplots',
-        PROJECT_CROSSPLOTS: 'project-crossplots',
-        PROJECT_HISTOGRAMS: 'project-histograms',
+        // PROJECT_LOGPLOTS: 'project-logplots',
+        // PROJECT_CROSSPLOTS: 'project-crossplots',
+        // PROJECT_HISTOGRAMS: 'project-histograms',
 
         // state name
         ITEM_ACTIVE_STATE: 'item-active-state',

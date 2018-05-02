@@ -184,26 +184,29 @@ exports.NewModelButtonClicked = function() {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     let utils = self.wiComponentService.getComponent('UTILS');
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-    DialogUtils.newModelDialog(ModalService, function (data) {
-        data.idProject = project.idProject;
-        self.wiApiService.createWorkflow(data, function (response, err) {
-            console.log(response.idWorkflow);
-            if (err) {
-                toastr.error(err);
-            } else {
-                let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-                layoutManager.putTabRight({
-                    id: 'machine-learning' + response.idWorkflow,
-                    title: response.name,
-                    tabIcon: 'caculation-multilinerregression-16x16',
-                    componentState: {
-                        html: '<wi-workflow-machine-learning  id-workflow="' + response.idWorkflow + '"></wi-workflow-machine-learning>',
-                        name: 'Machine Learning'
-                    }
-                });
-            }
+    function createWF() {
+        DialogUtils.newModelDialog(ModalService, function (data) {
+            data.idProject = project.idProject;
+            self.wiApiService.createWorkflow(data, function (response, err) {
+                if (err) {
+                    createWF();
+                    // toastr.error(err);
+                } else {
+                    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                    layoutManager.putTabRight({
+                        id: 'machine-learning' + response.idWorkflow,
+                        title: response.name,
+                        tabIcon: 'caculation-multilinerregression-16x16',
+                        componentState: {
+                            html: '<wi-workflow-machine-learning  id-workflow="' + response.idWorkflow + '"></wi-workflow-machine-learning>',
+                            name: 'Machine Learning'
+                        }
+                    });
+                }
+            });
         });
-    });
+    }
+    createWF();
 }
 
 exports.OpenModelButtonClicked = function() {

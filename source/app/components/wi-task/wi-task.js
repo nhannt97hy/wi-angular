@@ -91,18 +91,6 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         inputs: [
             {
                 name: "Gamma Ray"
-            },
-            {
-                name: "Gamma Ray 2"
-            },
-            {
-                name: "Gamma Ray 3"
-            },
-            {
-                name: "Gamma Ray 4"
-            },
-            {
-                name: "Gamma Ray 5"
             }
         ],
         parameters: [
@@ -144,11 +132,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         ],
         outputs: [
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
-            {name: "VCL_GR", family: "Clay Volume"},
+            {name: "VCL_GR", family: "Clay Volume"}
         ],
         function: "calVCLfromGR"
     };
@@ -358,7 +342,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     __dragging = false;
                 },
                 containment: "document",
-                appendTo: document.getElementById("testElement")
+                appendTo: document.querySelector("wi-task #dragElement")
             });
         }, 500);
     }
@@ -456,7 +440,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                             choices: matchCurves(datasetModel.children, ipt),
                             selected: false
                         },
-                        type: "choice"
+                        type: "inputchoice"
                     };
                     tempItem.data.value = tempItem.data.choices.length
                         ? tempItem.data.choices[0]
@@ -481,7 +465,8 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: 'Inputs',
                                 selected: false
                             },
-                            children: inputItems
+                            children: inputItems,
+                            type: 'input'
                         },
                         {
                             data: {
@@ -489,7 +474,8 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: 'Zonation',
                                 selected: false
                             },
-                            children: []
+                            children: [],
+                            type: 'zoneset'
                         }
                     ],
                     parameters: angular.copy(self.taskConfig.parameters)
@@ -504,7 +490,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: param.name,
                                 selected: false
                             },
-                            type: 'choice'
+                            type: 'zonechoice'
                         }
                         if(param.type == 'select'){
                             tempItem.data.choices = angular.copy(param.choices);
@@ -538,7 +524,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                 label: `ZONENATION_ALL: ${wellInfo.topDepth} - ${wellInfo.bottomDepth}` ,
                                 selected: false
                             },
-                            type: 'zoneset',
+                            type: 'zone',
                             children: paramItems
                         })
                     }
@@ -673,6 +659,14 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         selectHandler(node, false, rootNode, () => {
             draggableSetting();
         });
+    }
+
+    this.addToWorkflowClick = function(){
+        console.log('Add to workflow');
+    }
+
+    this.runWorkflowClick = function(){
+        console.log('run workflow');
     }
 }
 

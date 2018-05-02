@@ -3,21 +3,21 @@ wi-explorer {
     width: 150px;
   }
   .filter-block {
+    overflow-x: hidden;
     display: flex;
-    margin: 0 auto 0 auto;
-    background: #c1c1c1;
-    padding: 5px 8px;
-
-    span {
-      margin: auto;
-      font-weight: bold;
-      color: #000;
+    .filter-control {
+      font-size: 16px;
     }
-
-    input {
+    .filter-main {
       flex: 1;
-      margin-left: 5px;
-      text-indent: 5px;
+      overflow: auto;
+      display: flex;
+      &>label:hover,&>label.active{
+        background-color:lightblue;
+      }
+      &::-webkit-scrollbar{
+        display: none;
+      }
     }
   }
 

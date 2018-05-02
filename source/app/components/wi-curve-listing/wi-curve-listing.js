@@ -30,7 +30,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     __dragging = false;
                 },
                 containment: "document",
-                appendTo: document.getElementById("dragElement")
+                appendTo: document.querySelector("wi-curve-listing #dragElement")
             });
         });
     }

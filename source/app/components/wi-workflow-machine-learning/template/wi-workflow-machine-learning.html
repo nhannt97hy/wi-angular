@@ -193,7 +193,7 @@
         <wz-step wz-title="Selection curve">
             @@include('./curve-selection.html')
         </wz-step>
-        <wz-step wz-title="Model Params" wz-disabled="{{wiWorkflowMachineLearning.workflowConfig.model.type != 'curve'}}">
+        <wz-step wz-title="Model Params" wz-disabled="{{wiWorkflowMachineLearning.workflowConfig.model.type != 'curve' && wiWorkflowMachineLearning.workflowConfig.model.type != 'crp'}}">
             @@include('./model-params.html')
         </wz-step>
         <wz-step wz-title='Data Inputs'>
