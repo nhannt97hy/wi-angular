@@ -420,6 +420,11 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                 toastr.error("Curve name can not be blank");
                 return;
             }
+            let unique = [...new Set(curveNames.map(c => c.toUpperCase()))];
+            if(unique.length < 3){
+                toastr.error("Curve names can not be equal");
+                return;
+            }
             let existed = 0;
             curveNames.forEach(name => {
                 let curve = $scope.result.selectedDataset.children.find(
