@@ -23,8 +23,8 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         let graph = wiComponentService.getComponent('GRAPH');
         // let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
-        console.log("current Track", viTrack);
         this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        console.log("current Track", viTrack);
         this.tabFlags = options.tabs;
 
         const changed = {
@@ -78,7 +78,6 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                 newProps.general.width = utils.inchToPixel(self.props.general.width);
                 viTrack.setProperties(newProps.general);
 
-                viTrack.doPlot(true);
                 // if (newProps.general.zoomFactor != savedZoomFactor) {
                 //     savedZoomFactor = newProps.general.zoomFactor;
                 //     wiD3Ctrl.processZoomFactor();
@@ -87,11 +86,38 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                 // else {
                 //     viTrack.doPlot(true);
                 // }
+                viTrack.doPlot(true);
                 if (callback) callback();
             })
             return temp;
         }
-
+        let zonesets = [];
+        let lastZoneSetId = this.props.general.idZoneSet;
+        this.well.children.forEach(child => {
+            if (child.type == 'zonesets') {
+                child.children.forEach(c => {
+                    if(c.type == 'zoneset')
+                        zonesets.push(c);
+                })    
+            }
+        });
+        this.getZonesetList = function(wiItemDropdownCtrl) {
+            $timeout(function() {
+                if(!zonesets.length) return;
+                wiItemDropdownCtrl.items = zonesets.map(zoneset => {
+                    return {
+                        data: {
+                            label: zoneset.properties.name
+                        }, 
+                        properties: zoneset.properties
+                    }
+                });
+                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneSetId)
+            }, 10); 
+        }
+        this.zonesetChanged = function(selectedItem) {
+            self.props.general.idZoneSet = selectedItem.idZoneSet;
+        }
         // curve tab
         this.datasets = [];
         this.curvesArr = [];

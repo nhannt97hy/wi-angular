@@ -180,6 +180,26 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div id="zoneset">
+                                    <h5 class="normal-text">Zonation</h5>
+                                    <div class="padding-left-10-percent">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3" for="track">
+                                                Select ZoneSet
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <div class="float-left">
+                                                    <wi-item-dropdown 
+                                                     on-wi-dropdown-init="wiModal.getZonesetList"
+                                                     on-item-changed="wiModal.zonesetChanged"
+                                                     place-holder="Select zoneset"
+                                                     ctrl-btn-icon='fa fa-times-circle line-height-1_5'
+                                                    ></wi-item-dropdown> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     </wi-tab>

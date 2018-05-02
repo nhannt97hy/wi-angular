@@ -274,6 +274,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     self.addAnnotationToTrack(viTrack, anno);
                 }
             });
+
             let promises = [];
             viTrack.getCurves().forEach(viCurve => {
                 let line = logTrack.lines.find(line => line.idLine == viCurve.id);
@@ -293,6 +294,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     }))
                 }
             });
+            // TO BE REVIEWED
+            promises.push(new Promise(resolve => {
+                if(!viTrack.idZoneSet) {
+                    resolve();
+                } else {
+                    wiApiService.getZoneSet(viTrack.idZoneSet, function (zoneset) {
+                        self.addZoneSetToTrack(viTrack, zoneset);
+                        resolve();
+                    })
+                }
+            }))
             Promise.all(promises)
                 .then(function () {
                     viTrack.getShadings().forEach(viShading => {
@@ -350,6 +362,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
         });
         return marker;
+    }
+    this.addZoneSetToTrack = function (track, zonesetConfig) {
+        let self = this;
+        if(!track || !track.addZoneSet) return;
+        //remove all previous zone
+        track.removeAllZones();
+        track.addZoneSet(zonesetConfig);
     }
     this.addAnnotation = function () {
         if (!self.viTrack.isLogTrack()) return;
@@ -798,6 +817,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         update(function () {
             self.viTrack.setCurrentDrawing(null);
         });
+        
+        wiComponentService.on('zone-updated', function(eventData) {
+            if(!self.viTrack.idZoneSet) return;
+            if(eventData && eventData.idZoneSet && eventData.idZoneSet != self.viTrack.idZoneSet)
+                return;
+            self.viTrack.removeAllZones();
+            wiApiService.getZoneSet(self.viTrack.idZoneSet, function(zoneset) {
+                self.addZoneSetToTrack(self.viTrack, zoneset);
+            });
+        })
         
         $timeout(function() {
             if (self.wiD3Ctrl.containerName) {

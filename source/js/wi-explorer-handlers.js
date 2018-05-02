@@ -145,7 +145,7 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                     case 'zone':
                         deleteFunction = wiApiService.removeZone;
                         cleanUpFunction = function () {
-                            utils.emitEvent('zone-updated', selectedNode);
+                            wiComponentService.emit('zone-updated', selectedNode);
                             wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;

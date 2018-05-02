@@ -121,19 +121,29 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             let updatedZones = zones[0];
             let deletedZones = zones[1];
             updatedZones.push(zone);
+            let promises = [];
             // send api to add or delete zones
             for (let updatedZone of updatedZones) {
                 updatedZone.idZone = updatedZone.id;
-                wiApiService.editZone(updatedZone, function () {
-                });
+                promises.push(new Promise(resolve => {
+                    wiApiService.editZone(updatedZone, function () {
+                        resolve();
+                    });
+                }));
             }
             for (let deletedZone of deletedZones) {
-                wiApiService.removeZone(deletedZone.id, function () {
-                })
+                promises.push(new Promise(resolve => {
+                    wiApiService.removeZone(deletedZone.id, function () {
+                        resolve();
+                    });
+                }));
             }
-            // _plotZoneSet(track);
-            Utils.emitEvent('zone-updated', track);
-            Utils.refreshProjectState();
+            Promise.all(promises)
+                .then(() => {
+                    wiComponentService.emit('zone-updated', track)
+                    Utils.refreshProjectState();
+                })
+            // Utils.emitEvent('zone-updated', track);
         })
         return zone;
     }
@@ -149,10 +159,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                     // Send api before deleting
                     wiApiService.removeZone(drawing.id, function () {
                         track.removeDrawing(drawing);
-                        Utils.emitEvent('zone-updated', track);
+                        // Utils.emitEvent('zone-updated', track);
+                        wiComponentService.emit('zone-updated', track)
                         Utils.refreshProjectState();
-                })
-            }
+                    })
+                }
             case 'Escape':
                 // Bug
                 if (track && track.setMode) track.setMode(null);
@@ -180,7 +191,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             }
         })
 
-        Utils.listenEvent('zone-updated', function(eventData) {
+        // Utils.listenEvent('zone-updated', function(eventData) {
+        wiComponentService.on('zone-updated', function(eventData) {
             console.log('zone updated event', eventData, eventData == self.viTrack);
             if(eventData && eventData.isZoneTrack && eventData.isZoneTrack()) {
                 if(eventData.id == self.viTrack.id || eventData == self.viTrack) {
@@ -195,7 +207,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 (eventData.properties && eventData.properties.idZoneSet == self.viTrack.idZoneSet) )) {
                 self.update();
             } else {
-                return;
+                self.update();
             }
         });
 
@@ -275,7 +287,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                         });
                     }
                     // _plotZoneSet(track);
-                    Utils.emitEvent('zone-updated', track);
+                    // Utils.emitEvent('zone-updated', track);
+                    wiComponentService.emit('zone-updated', track);
                     Utils.refreshProjectState();
                     track.setMode(null);
                     track.rearrangeHeaders();
@@ -349,7 +362,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 handler: function () {
                     self.viTrack.autoName().forEach(function (zone) {
                         wiApiService.editZone(zone.getProperties(), function () {
-                            Utils.emitEvent('zone-updated', self.viTrack);
+                            // Utils.emitEvent('zone-updated', self.viTrack);
+                            wiComponentService.emit('zone-updated', self.viTrack);
                             Utils.refreshProjectState();
                         });
                     });
@@ -368,7 +382,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                     wiApiService.removeZone(zone.id, function () {
                         //_plotZoneSet(self.viTrack);
                         self.viTrack.removeZone(zone);
-                        Utils.emitEvent('zone-updated', self.viTrack);
+                        // Utils.emitEvent('zone-updated', self.viTrack);
+                        wiComponentService.emit('zone-updated', self.viTrack);
                         // wiComponentService.emit(wiComponentService.DELETE_MODEL, self.viTrack);
                         Utils.refreshProjectState();
                     });
@@ -447,7 +462,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 zone.setProperties(props);
                 // _plotZoneSet(_currentTrack);
                 zone.doPlot();
-                Utils.emitEvent('zone-updated', self.viTrack);
+                // Utils.emitEvent('zone-updated', self.viTrack);
+                wiComponentService.emit('zone-updated', self.viTrack);
                 Utils.refreshProjectState();
             })
         })
