@@ -281,6 +281,7 @@ module.exports = function(ModalService, wiComponentService){
         }
         this.onCancelButtonClicked = function(){
             close(null);
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
         }
     }
 
@@ -291,7 +292,6 @@ module.exports = function(ModalService, wiComponentService){
     }).then(function (modal) {
         helper.initModal(modal);
         modal.close.then(function () {
-            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh)
             helper.removeBackdrop();
         });
     });

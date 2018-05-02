@@ -473,6 +473,7 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
         this.onOkButtonClicked = function() {
             setVertices(function() {
                 close(null);
+                wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
             });
         };
         this.onApplyButtonClicked = function(callback) {
@@ -482,6 +483,7 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
             viCrossplot.setProperties({ ternary: savedTernary });
             viCrossplot.plotTernary();
             close(null);
+            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
         };
     }
 
@@ -493,7 +495,6 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
         helper.initModal(modal);
         modal.close.then(function(ret) {
             helper.removeBackdrop();
-            wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
             if (ret && callback) callback(ret);
         });
     });
