@@ -1,1 +1,107 @@
-hello!
+<div class="zone-template-manager">
+    <div class="left-side">
+        <div class="template-tree">
+            <div class='left-heading'>
+                <h5>Templates</h5>
+                <div class="button-area">
+                    <button class='btn' ng-click="wiZoneTemplateManager.exportTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
+                        <i class="fa fa-arrow-up"></i>
+                    </button>
+                    <button class='btn' ng-click="wiZoneTemplateManager.deleteTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    <button class='btn pull-right' ng-click="wiZoneTemplateManager.createTemplate()">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button class='btn' ng-click="wiZoneTemplateManager.refreshTemplateList()">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="scroll-container">
+                <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneTemplateManager.config" container="wiZoneTemplateManager"
+                    on-click-function="wiZoneTemplateManager.clickFunction">
+                </wi-base-treeview>
+            </div>
+        </div>
+    </div>
+    <div class="right-side" style="box-sizing:border-box">
+        <div class="right-heading">
+            <h5 style="margin-right: 15px; font-weight:bold;display:inline-block" ng-show="wiZoneTemplateManager.zones.length !== 0">
+                Order by: </h5>
+            <select ng-init="wiZoneTemplateManager.order='none'" ng-model="wiZoneTemplateManager.order" ng-show="wiZoneTemplateManager.zones.length !== 0">
+                <option value="none">None</option>
+                <option value="idTemplate" ng-show="wiZoneTemplateManager.newZoneTemplate">Template id</option>
+                <option value="background">Template name</option>
+            </select>
+            <div class="button-area">
+                <button class='btn' ng-disabled="!(wiZoneTemplateManager.editted || !(!wiZoneTemplateManager.newZoneTemplate || wiZoneTemplateManager.zones.length==0))" ng-click="wiZoneTemplateManager.editZone()">
+                    <i class="fa fa-check"></i>
+                </button>
+                <button class='btn' ng-click="wiZoneTemplateManager.deleteZone()" ng-disabled="!(wiZoneTemplateManager.newZoneTemplate || wiZoneTemplateManager.selectedZoneSets.length!=0)">
+                    <i class="fa fa-times"></i>
+                </button>
+                <button class='btn' ng-click="wiZoneTemplateManager.createZone()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
+                    <i class="fa fa-plus"></i>
+                </button>
+                <button class='btn' ng-click="wiZoneTemplateManager.refreshZoneList()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
+                    <i class="fa fa-refresh"></i>
+                </button>
+            </div>
+        </div>
+        <div class="content-area">
+            <div class="zone-area" style="padding-top: 15px">
+                <table class="text-on-table table table-bordered" ng-show="wiZoneTemplateManager.zones.length!==0">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%"></th>
+                            <th width="20">Zone name</th>
+                            <th width="20%">Sample</th>
+                            <th width="15%">Background</th>
+                            <th width="15%">Foreground</th>
+                            <th width="20%">Pattern</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="zone in wiZoneTemplateManager.zones | orderBy: wiZoneTemplateManager.order" ng-init="zone.flag = false" ng-class="{'selected': zone.flag}">
+                            <td style="width: 10%;" class="border-right-gray" ng-click="wiZoneTemplateManager.selectZoneSetToggle(zone)">
+                                <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
+                            </td>
+                            <td width="20%">
+                                <input type="text" ng-model="zone.name" class="form-control wi-form-control" ng-change="wiZoneTemplateManager.onZoneChanged($index);">
+                            </td>
+                            <td width="20%">
+                                <wi-canvas-rect name="{{zone.name}}" pattern="{{zone.pattern}}" foreground="{{zone.foreground}}" background="{{zone.background}}"
+                                    width="80" height="20">
+                                </wi-canvas-rect>
+                            </td>
+
+                            <td width="15%">
+                                <button ng-click="wiZoneTemplateManager.backgroundZone($index);" ng-style="{'background-color':zone.background}" class="form-control wi-form-control width-80px height-20px thick-border">
+                            </td>
+                            <td width="15%">
+                                <button ng-click="wiZoneTemplateManager.foregroundZone($index);" ng-style="{'background-color':zone.foreground}" class="form-control wi-form-control width-80px height-20px thick-border">
+                                </button>
+                            </td>
+                            <td width="20%">
+                                <ui-select theme="bootstrap" ng-model="zone.pattern" ng-change="wiZoneTemplateManager.onZoneChanged($index);" search-enabled="false">
+                                    <ui-select-match>
+                                        <wi-canvas-rect name="row_{{$index}}" pattern="{{zone.pattern}}" width="80" height="20">
+                                        </wi-canvas-rect>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="selectedPattern in wiZoneTemplateManager.selectPatterns">
+                                        <div>
+                                            <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
+                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" width="40" height="20" style="float: right;">
+                                            </wi-canvas-rect>
+                                        </div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

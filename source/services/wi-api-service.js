@@ -1901,6 +1901,7 @@ Service.prototype.deleteZoneTemplate = function (payload, callback) {
 Service.prototype.listZoneTemplate = function (payload, callback) {
     this.post(GET_LIST_ZONE_TEMPLATE, payload, callback)
 };
-Service.prototype.listAllZoneTemplate = function (payload, callback) {
+Service.prototype.listAllZoneByTemplate = function (payload, callback) {
     this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
 };
+
