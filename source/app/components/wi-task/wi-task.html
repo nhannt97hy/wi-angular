@@ -90,7 +90,7 @@
                         <div style="flex:2;display:flex;overflow-x:hidden;overflow-y:auto;background-color:white;">
                             <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiTask.upTrigger"
                                 down-trigger="wiTask.downTrigger">
-                                <wi-base-treeview config='wiTask.selectionList' on-click-function="wiTask.onClick" filter="{{wiTask.selectionType == wiTask.FAMILY_SELECTION?wiTask.filterText:wiTask.filterText1}}">
+                                <wi-base-treeview config='wiTask.selectionList' on-click-function="wiTask.onClick" filter="{{wiTask.selectionType == wiTask.FAMILY_SELECTION?wiTask.filterText:wiTask.filterText1}}" name='{{wiTask.name + "SelectionList"}}'>
                                 </wi-base-treeview>
                             </wi-scroll>
                         </div>

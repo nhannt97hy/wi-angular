@@ -6,8 +6,9 @@ function WiBaseTreeController(wiComponentService, $scope) {
     function filterLabel (input) {
         return input.data.label + "    " + (input.data.tooltip || '');
     }
-    function filterType (input, filterBy){
-        return filterBy.includes(input.type)
+    function filterType (input){
+        if(!self.filterBy || !input.type) return true;
+        return self.filterBy.includes(input.type)
     }
     this.$onInit = function () {
         if (self.name && self.name.length) {
@@ -35,9 +36,7 @@ function WiBaseTreeController(wiComponentService, $scope) {
     function filterF(input, strCp, parent, lastChild){
         parent.unshift(input);
         input.data.hide = true;
-        let filterBy = self.filterBy ? self.filterBy : input.type;
-        if(!strCp) strCp = '';
-        if(input && filterLabel(input).toLowerCase().includes(strCp.toLowerCase()) && filterType(input, filterBy)){
+        if(input && filterLabel(input).toLowerCase().includes(strCp.toLowerCase()) && filterType(input)){
             if(parent && parent.length){
                 parent.forEach(p => {
                     p.data.hide = false;

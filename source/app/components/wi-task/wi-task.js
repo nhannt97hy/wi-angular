@@ -290,6 +290,12 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     });
                 });
             }
+            if (well.zone_sets && well.zone_sets.length){
+                well.zone_sets.forEach(zoneset => {
+                    const zonesetModel = utils.zoneSetToTreeConfig(zoneset);
+                    wellModel.children.push(zonesetModel);
+                })
+            }
         });
     }
     this.getProjectList = function(wiItemDropdownCtrl) {
@@ -332,7 +338,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     function draggableSetting() {
         $timeout(() => {
             $(
-                'wi-task wi-base-treeview#__projectWellTree .wi-parent-node[type="dataset"]'
+                'wi-task wi-base-treeview#__projectWellTree .wi-parent-node[type="dataset"],[type="zoneset"]'
             ).draggable({
                 helper: "clone",
                 start: function(event, ui) {
@@ -388,148 +394,165 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 if (!__dragging) return;
                 // check modal draggable
                 if (ui.draggable[0].className.includes("modal-content")) return;
-                const idDataset = parseInt($(ui.draggable[0]).attr("data"));
-                const options = new Object();
-                for (const node of self.projectConfig) {
-                    utils.visit(
-                        node,
-                        (_node, _options) => {
-                            if (
-                                _node.type == "dataset" &&
-                                _node.id == idDataset
-                            ) {
-                                _options.result = _node;
-                                return true;
-                            }
-                            return false;
-                        },
-                        options
-                    );
-                    if (options.found) break;
-                }
-                // console.log(options.result);
-                // populate data into self.inputArray
-                if (!options.result) {
-                    toastr.error("Dataset doesn't not exist");
-                    return;
-                }
-                const datasetModel = options.result;
-                const datasetName = datasetModel.properties.name;
-                const idWell = datasetModel.properties.idWell;
-                const wellModel = self.projectConfig.find(
-                    well => well.id == idWell
-                );
-                const wellName = wellModel.properties.name;
-                if (
-                    !self.taskConfig.inputData ||
-                    !Array.isArray(self.taskConfig.inputData)
-                ) {
-                    self.taskConfig.inputData = new Array();
-                }
-                const existDataset = self.taskConfig.inputData.find(
-                    i => i.id == idDataset
-                );
-                if (existDataset) return;
+                const type = ($(ui.draggable[0]).attr("type"));
+                let options = new Object();
+                switch(type){
+                    case 'dataset':
+                        const idDataset = parseInt($(ui.draggable[0]).attr("data"));
+                        for (const node of self.projectConfig) {
+                            utils.visit(
+                                node,
+                                (_node, _options) => {
+                                    if (
+                                        _node.type == "dataset" &&
+                                        _node.id == idDataset
+                                    ) {
+                                        _options.result = _node;
+                                        return true;
+                                    }
+                                    return false;
+                                },
+                                options
+                            );
+                            if (options.found) break;
+                        }
+                        // populate data into self.inputArray
+                        if (!options.result) {
+                            toastr.error("Dataset doesn't exist");
+                            return;
+                        }
+                        const datasetModel = options.result;
+                        const datasetName = datasetModel.properties.name;
+                        const idWell = datasetModel.properties.idWell;
+                        const wellModel = self.projectConfig.find(
+                            well => well.id == idWell
+                        );
+                        const wellName = wellModel.properties.name;
+                        if (
+                            !self.taskConfig.inputData ||
+                            !Array.isArray(self.taskConfig.inputData)
+                        ) {
+                            self.taskConfig.inputData = new Array();
+                        }
+                        const existDataset = self.taskConfig.inputData.find(
+                            i => i.id == idDataset
+                        );
+                        if (existDataset) return;
 
-                let inputItems = self.taskConfig.inputs.map(ipt => {
-                    let tempItem = {
-                        data: {
-                            childExpanded: false,
-                            icon: "curve-16x16",
-                            label: ipt.name,
-                            choices: matchCurves(datasetModel.children, ipt),
-                            selected: false
-                        },
-                        type: "inputchoice"
-                    };
-                    tempItem.data.value = tempItem.data.choices.length
-                        ? tempItem.data.choices[0]
-                        : null;
-                    return tempItem;
-                });
-                let input = {
-                    type: 'dataset',
-                    id: idDataset,
-                    idWell: idWell,
-                    dataset: datasetModel.properties,
-                    data: {
-                        childExpanded: true,
-                        icon: "well-16x16",
-                        label: `${wellModel.properties.name} / ${datasetModel.properties.name}`,
-                        selected: false
-                    },
-                    children: [
-                        {
-                            data: {
-                                childExpanded: true,
-                                label: 'Inputs',
-                                selected: false
-                            },
-                            children: inputItems,
-                            type: 'input'
-                        },
-                        {
-                            data: {
-                                childExpanded: true,
-                                label: 'Zonation',
-                                selected: false
-                            },
-                            children: [],
-                            type: 'zoneset'
-                        }
-                    ],
-                    parameters: angular.copy(self.taskConfig.parameters)
-                };
-                wiApiService.getWell(idWell, function(wellInfo){
-                    let zonesets = wellInfo.zone_sets;
-                    let zoneset = zonesets.find(zs => zs.zones.length);
-                    let paramItems = self.taskConfig.parameters.map(param => {
-                        let tempItem = {
-                            data: {
-                                childExpanded: false,
-                                label: param.name,
-                                selected: false
-                            },
-                            type: 'zonechoice'
-                        }
-                        if(param.type == 'select'){
-                            tempItem.data.choices = angular.copy(param.choices);
-                            tempItem.data.value = param.value ? param.value : (tempItem.data.choices.length
-                                ? tempItem.data.choices[0]
-                                : null);
-                        }else{
-                            tempItem.data.value = param.value;
-                        }
-                        return tempItem;
-                    })
-                    if(zoneset){
-                        zoneset.zones.forEach(zone => {
-                            input.children[1].children.push({
+                        let inputItems = self.taskConfig.inputs.map(ipt => {
+                            let tempItem = {
                                 data: {
-                                    childExpanded: true,
-                                    icon: 'zone-table-16x16',
-                                    label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}`,
+                                    childExpanded: false,
+                                    icon: "curve-16x16",
+                                    label: ipt.name,
+                                    choices: matchCurves(datasetModel.children, ipt),
                                     selected: false
                                 },
-                                type: 'zone',
-                                children: paramItems,
-                                properties: zone
-                            })
+                                type: "inputchoice"
+                            };
+                            tempItem.data.value = tempItem.data.choices.length
+                                ? tempItem.data.choices[0]
+                                : null;
+                            return tempItem;
+                        });
+                        let paramItems = self.taskConfig.parameters.map(param => {
+                            let tempItem = {
+                                data: {
+                                    childExpanded: false,
+                                    label: param.name,
+                                    selected: false
+                                },
+                                type: 'zonechoice'
+                            }
+                            if(param.type == 'select'){
+                                tempItem.data.choices = angular.copy(param.choices);
+                                tempItem.data.value = param.value ? param.value : (tempItem.data.choices.length
+                                    ? tempItem.data.choices[0]
+                                    : null);
+                            }else{
+                                tempItem.data.value = param.value;
+                            }
+                            return tempItem;
                         })
-                    }else{
-                        input.children[1].children.push({
+                        let input = {
+                            type: 'dataset',
+                            id: idDataset,
+                            idWell: idWell,
+                            dataset: datasetModel.properties,
                             data: {
                                 childExpanded: true,
-                                icon: 'zone-table-16x16',
-                                label: `ZONENATION_ALL: ${wellInfo.topDepth} - ${wellInfo.bottomDepth}` ,
+                                icon: "well-16x16",
+                                label: `${wellModel.properties.name} / ${datasetModel.properties.name}`,
                                 selected: false
                             },
-                            type: 'zone',
-                            children: paramItems
-                        })
-                    }
-                    $timeout(() => self.taskConfig.inputData.push(input));
-                })
+                            children: [
+                                {
+                                    data: {
+                                        childExpanded: true,
+                                        label: 'Inputs',
+                                        selected: false
+                                    },
+                                    children: inputItems,
+                                    type: 'input'
+                                },
+                                {
+                                    data: {
+                                        childExpanded: true,
+                                        label: 'Zonation',
+                                        selected: false
+                                    },
+                                    children: [
+                                        {
+                                            data: {
+                                                childExpanded: true,
+                                                icon: 'zone-table-16x16',
+                                                label: `ZONENATION_ALL: ${wellModel.properties.topDepth} - ${wellModel.properties.bottomDepth}` ,
+                                                selected: false
+                                            },
+                                            type: 'zone',
+                                            children: paramItems
+                                        }
+                                    ],
+                                    type: 'zoneset'
+                                }
+                            ],
+                            parameters: angular.copy(self.taskConfig.parameters)
+                        };
+                        $timeout(() => self.taskConfig.inputData.push(input));
+                        break;
+
+                    case 'zoneset':
+                    const idZoneSet = parseInt($(ui.draggable[0]).attr("data"));
+                        for (const node of self.projectConfig) {
+                            utils.visit(
+                                node,
+                                (_node, _options) => {
+                                    if (
+                                        _node.type == "zoneset" &&
+                                        _node.id == idZoneSet
+                                    ) {
+                                        _options.result = _node;
+                                        return true;
+                                    }
+                                    return false;
+                                },
+                                options
+                            );
+                            if (options.found) break;
+                        }
+                        // populate data into self.inputArray
+                        if (!options.result) {
+                            toastr.error("Zonset doesn't exist");
+                            return;
+                        }
+                        const zonesetModel = options.result;
+                        console.log(zonesetModel);
+                        const idWell = zonesetModel.properties.idWell;
+                        const wellModel = self.projectConfig.find(
+                            well => well.id == idWell
+                        );
+                        break;
+                }
             }
         });
     };
@@ -551,6 +574,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         if (currentNode.type == "well" && !noLoadData) {
             if (Date.now() - (currentNode.ts || 0) > 20 * 1000) {
                 wiApiService.getWell(currentNode.id, wellProps => {
+                    console.log(wellProps);
                     currentNode.ts = Date.now();
                     if (wellProps.datasets && wellProps.datasets.length) {
                         currentNode.children.length = 0;
@@ -567,6 +591,12 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                     );
                                 });
                         });
+                    }
+                    if (wellProps.zone_sets && wellProps.zone_sets.length){
+                        wellProps.zone_sets.forEach(zoneset => {
+                            const zonesetModel = utils.zoneSetToTreeConfig(zoneset);
+                            currentNode.children.push(zonesetModel);
+                        })
                     }
                     bareSelectHandler();
                     callback && callback();
