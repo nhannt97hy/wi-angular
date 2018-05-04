@@ -454,7 +454,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     dataset: datasetModel.properties,
                     data: {
                         childExpanded: true,
-                        icon: "curve-data-16x16",
+                        icon: "well-16x16",
                         label: `${wellModel.properties.name} / ${datasetModel.properties.name}`,
                         selected: false
                     },

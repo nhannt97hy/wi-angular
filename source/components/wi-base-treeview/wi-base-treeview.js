@@ -10,26 +10,26 @@ function WiBaseTreeController(wiComponentService, $scope) {
         return filterBy.includes(input.type)
     }
     this.$onInit = function () {
-        if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
-        // if (!self.filterBy) self.filterBy = filterByDefault;
-        $scope.$watch(() => this.filter,(value) => {
-            if(value != undefined){
+        if (self.name && self.name.length) {
+            wiComponentService.putComponent(self.name, self);
+            $scope.$watch(() => this.config,(value) => {
                 if(this.config && this.config.length){
                     this.config.forEach((c, i) => {
                         let parent = new Array();
-                        filterF(c, value, parent);
+                        filterF(c, self.filter, parent);
                     })
                 }
-            }
-        });
-        $scope.$watch(() => this.filterBy, (val) => {
-            if(this.config && this.config.length){
-                this.config.forEach((c, i) => {
-                    let parent = new Array();
-                    filterF(c, self.filter, parent);
-                })
-            }
-        })
+            }, true);
+            let watch = [() => this.filter, () => this.filterBy];
+            $scope.$watchGroup(watch, (val) => {
+                if(this.config && this.config.length){
+                    this.config.forEach((c, i) => {
+                        let parent = new Array();
+                        filterF(c, self.filter, parent);
+                    })
+                }
+            })
+        }
     };
 
     function filterF(input, strCp, parent, lastChild){
