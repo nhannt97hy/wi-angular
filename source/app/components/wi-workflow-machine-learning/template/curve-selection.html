@@ -24,7 +24,7 @@
             </div>
             <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiWorkflowMachineLearning.upTrigger"
                 down-trigger="wiWorkflowMachineLearning.downTrigger">
-                <wi-base-treeview id='tplTree' config='wiWorkflowMachineLearning.selectionList' on-click-function="wiWorkflowMachineLearning.onClick" filter="{{wiWorkflowMachineLearning.selectionType == wiWorkflowMachineLearning.FAMILY_SELECTION?wiWorkflowMachineLearning.filterText:wiWorkflowMachineLearning.filterText1}}">
+                <wi-base-treeview id='tplTree' name='{{wiWorkflowMachineLearning.name + "tplTree"}}' config='wiWorkflowMachineLearning.selectionList' on-click-function="wiWorkflowMachineLearning.onClick" filter="{{wiWorkflowMachineLearning.selectionType == wiWorkflowMachineLearning.FAMILY_SELECTION?wiWorkflowMachineLearning.filterText:wiWorkflowMachineLearning.filterText1}}">
                 </wi-base-treeview>
             </wi-scroll>
         </div>

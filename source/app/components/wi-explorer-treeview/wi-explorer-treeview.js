@@ -143,7 +143,7 @@ function WiExpTreeController(
                     case 'well':
                         utils.renameWell();
                         break;
-                    case 'well':
+                    case 'dataset':
                         utils.renameDataset();
                         break;
                     case 'curve':

@@ -1938,8 +1938,9 @@ function pasteCurve(destModel) {
             idCurve: cuttingCurve.properties.idCurve,
             desDatasetId: selectedNode.properties.idDataset,
           };
-          wiApiService.cutCurve(curveInfo, function() {
-            next();
+            wiApiService.cutCurve(curveInfo, function () {
+              wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
+              next();
           });
           wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
         } else {
@@ -1956,6 +1957,7 @@ function pasteCurve(destModel) {
                   desDatasetId: selectedNode.properties.idDataset,
                 };
                 wiApiService.cutCurve(curveInfo, function() {
+                  wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
                   next();
                 });
                 wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);

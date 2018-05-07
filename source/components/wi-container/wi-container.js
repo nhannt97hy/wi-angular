@@ -5,7 +5,7 @@ function ContainerController(wiComponentService, $timeout) {
     let self = this;
 
     this.$onInit = function(){
-        if (self.name) wiComponentService.putComponent(self.name, self);
+        // if (self.name) wiComponentService.putComponent(self.name, self);
     }
 
     this.onCloseButtonClick = function() {

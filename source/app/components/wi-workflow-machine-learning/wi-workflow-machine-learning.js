@@ -7,13 +7,6 @@ var __USERINFO = {
     refreshToken: null
 };
 
-function getAuthInfo() {
-    __USERINFO.username = window.localStorage.getItem('username');
-    __USERINFO.token = window.localStorage.getItem('token');
-    __USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
-}
-getAuthInfo();
-
 function Controller(wiComponentService, wiMachineLearningApiService, wiApiService, $timeout, $scope, $http) {
     let self = this;
     window.WFML = this;
@@ -24,7 +17,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     this.currentModelType = null;
 
     ////////////////////////////////////////
-    const ___PERM_FAM_ID = 172;
+    const ___PERM_FAM_ID = 574;
     const ___FACIES_FAM_ID = 1198;
     const CROSS_RECURRENCE_PLOT = 'crp';
     const ML_TOOLKIT = 'curve';
@@ -116,7 +109,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "n_estimators",
         type: 'number',
-        value: 10,
+        value: 150,
         min: 10,
         max: 500
     }];
@@ -177,7 +170,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'max_iter',
         type: 'number',
         min: 1,
-        value: 200
+        value: 2000
     }, {
         name: 'learning_rate_init',
         type: 'number',
@@ -227,7 +220,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'max_iter',
         type: 'number',
         min: 1,
-        value: 200
+        value: 2000
     }, {
         name: 'learning_rate_init',
         type: 'number',
@@ -1846,6 +1839,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
 
     this.onModelTypeListInit = function (wiItemDropdownCtrl) {
+        self.listModelType.choices.pop();
         wiItemDropdownCtrl.items = self.listModelType.choices.map(function (choice) {
             return {
                 data: { label: choice.name },

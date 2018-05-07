@@ -6,38 +6,37 @@ function WiBaseTreeController(wiComponentService, $scope) {
     function filterLabel (input) {
         return input.data.label + "    " + (input.data.tooltip || '');
     }
-    function filterType (input, filterBy){
-        return filterBy.includes(input.type)
+    function filterType (input){
+        if(!self.filterBy || !input.type) return true;
+        return self.filterBy.includes(input.type)
     }
     this.$onInit = function () {
-        if (self.name && self.name.length) wiComponentService.putComponent(self.name, self);
-        // if (!self.filterBy) self.filterBy = filterByDefault;
-        $scope.$watch(() => this.filter,(value) => {
-            if(value != undefined){
+        if (self.name && self.name.length) {
+            wiComponentService.putComponent(self.name, self);
+            $scope.$watch(() => this.config,(value) => {
                 if(this.config && this.config.length){
                     this.config.forEach((c, i) => {
                         let parent = new Array();
-                        filterF(c, value, parent);
+                        filterF(c, self.filter, parent);
                     })
                 }
-            }
-        });
-        $scope.$watch(() => this.filterBy, (val) => {
-            if(this.config && this.config.length){
-                this.config.forEach((c, i) => {
-                    let parent = new Array();
-                    filterF(c, self.filter, parent);
-                })
-            }
-        })
+            }, true);
+            let watch = [() => this.filter, () => this.filterBy];
+            $scope.$watchGroup(watch, (val) => {
+                if(this.config && this.config.length){
+                    this.config.forEach((c, i) => {
+                        let parent = new Array();
+                        filterF(c, self.filter, parent);
+                    })
+                }
+            })
+        }
     };
 
     function filterF(input, strCp, parent, lastChild){
         parent.unshift(input);
         input.data.hide = true;
-        let filterBy = self.filterBy ? self.filterBy : input.type;
-        if(!strCp) strCp = '';
-        if(input && filterLabel(input).toLowerCase().includes(strCp.toLowerCase()) && filterType(input, filterBy)){
+        if(input && filterLabel(input).toLowerCase().includes(strCp.toLowerCase()) && filterType(input)){
             if(parent && parent.length){
                 parent.forEach(p => {
                     p.data.hide = false;
