@@ -39,60 +39,68 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         return __well;
     }
 
-    function createPreview(idCurve) {
+    function createPreview(idCurve, callback) {
         console.log(idCurve);
         if (!idCurve) {
-            createPreviewWithDefault();
+            createPreviewWithDefault(callback);
             return;
         }
         let logplotId = self.wiLogplotCtrl.id;
 
-        let well = utils.findWellByLogplot(logplotId);
+        let well = utils.findWellByCurve(idCurve);
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
-        let minY = well.topDepth;
-        let maxY = well.bottomDepth;
+        let minY = self.wiLogplotCtrl.getwiD3Ctrl().getMinDepth(); // well.topDepth;
+        let maxY = self.wiLogplotCtrl.getwiD3Ctrl().getMaxDepth(); // well.bottomDepth;
         let stepY = well.step;
-        wiApiService.infoCurve(idCurve, function (infoCurve) {
-            let config = {
-                minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
-                maxX: infoCurve.LineProperty ? infoCurve.LineProperty.maxScale : 200,
-                minY: minY,
-                maxY: maxY,
-                yStep: stepY,
-                offsetY: minY,
-                //scale: "Logarithmic" || "Linear",
-                scale: infoCurve.LineProperty ? infoCurve.LineProperty.displayType : "Linear",
-                line: {
-                    color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
-                }
-            };
-            utils.getCurveData(wiApiService, idCurve, function (err, dataCurve) {
-                if (err) {
-                    utils.error(err);
-                    return;
-                }
-                if (_viCurve) _viCurve.destroy();
-                console.log("slidingCurve", config);
-                config._data = dataCurve;
-                const tabElement = $(`div[style*="display: none"]`).has(self.contentId);
-                if (tabElement.length) {
-                    tabElement.css({display: 'block'});
-                    tabElement.wrap('<div style="position: absolute; z-index: -1"></div>')
-                    _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
-                    _viCurve.setProperties({displayType: config.scale});
-                    _viCurve.doPlot();
-                    setTimeout(() => {
-                        tabElement.css({display: 'none'});
-                        tabElement.unwrap();
-                    }, 1000);
-                } else {
-                    _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
-                    // _viCurve.setProperties({displayType: 'Logarithmic | Linear'})
-                    _viCurve.setProperties({displayType: config.scale});
-                    _viCurve.doPlot();
-                }
-            });
-        })
+        let offsetY = well.topDepth;
+        if(_viCurve && _viCurve.idCurve == idCurve) {
+            _viCurve.updateWindowY(minY, maxY);   
+            callback && callback();
+        } else {
+            wiApiService.infoCurve(idCurve, function (infoCurve) {
+                let config = {
+                    idCurve: idCurve,
+                    minX: infoCurve.LineProperty ? infoCurve.LineProperty.minScale : 0,
+                    maxX: infoCurve.LineProperty ? infoCurve.LineProperty.maxScale : 200,
+                    minY: minY,
+                    maxY: maxY,
+                    yStep: stepY,
+                    offsetY: offsetY,
+                    //scale: "Logarithmic" || "Linear",
+                    scale: infoCurve.LineProperty ? infoCurve.LineProperty.displayType : "Linear",
+                    line: {
+                        color: infoCurve.LineProperty ? infoCurve.LineProperty.lineColor : 'black',
+                    }
+                };
+                utils.getCurveData(wiApiService, idCurve, function (err, dataCurve) {
+                    if (err) {
+                        utils.error(err);
+                        return;
+                    }
+                    if (_viCurve) _viCurve.destroy();
+                    console.log("slidingCurve", config);
+                    config._data = dataCurve;
+                    const tabElement = $(`div[style*="display: none"]`).has(self.contentId);
+                    if (tabElement.length) {
+                        tabElement.css({display: 'block'});
+                        tabElement.wrap('<div style="position: absolute; z-index: -1"></div>')
+                            _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
+                        _viCurve.setProperties({displayType: config.scale});
+                        _viCurve.doPlot();
+                        setTimeout(() => {
+                            tabElement.css({display: 'none'});
+                            tabElement.unwrap();
+                        }, 1000);
+                    } else {
+                        _viCurve = graph.createCurve(config, dataCurve, d3.select(self.contentId));
+                        // _viCurve.setProperties({displayType: 'Logarithmic | Linear'})
+                        _viCurve.setProperties({displayType: config.scale});
+                        _viCurve.doPlot();
+                    }
+                    callback && callback();
+                });
+            })
+        }
     }
 
     this.verifyDroppedIdCurve = function(idCurve) {
@@ -106,7 +114,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
     this.createPreview = createPreview;
 
-    function createPreviewWithDefault() {
+    function createPreviewWithDefault(callback) {
+        if(_viCurve && _viCurve.idCurve) {
+            createPreview(_viCurve.idCurve, callback);
+            return;
+        }
+        /*
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let logplotId = self.wiLogplotCtrl.id;
         let well = utils.findWellByLogplot(logplotId);
@@ -114,6 +127,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let firstCurve = well.children[0].children[0];
 
         createPreview(firstCurve.properties.idCurve);
+        */
+
         /*
         utils.getCurveData(wiApiService, firstCurve.properties.idCurve, function (err, data) {
             let config = {
@@ -147,7 +162,8 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
     }
-
+    
+    this.updateWid3 = updateWid3;
     function updateWid3() {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         let max = wiD3Controller.getMaxDepth();
@@ -407,7 +423,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
             let max = wiD3Controller.getMaxDepth();
             let min = wiD3Controller.getMinDepth();
-            __minRange = MIN_STEPS_OF_VIEW * getWell().step / (max - min);
+            // __minRange = MIN_STEPS_OF_VIEW * getWell().step / (max - min);
+
+            let step = _viCurve ? viCurve.yStep:0.1;
+            __minRange = MIN_STEPS_OF_VIEW * step / (max - min);
         }
         return __minRange;
     }

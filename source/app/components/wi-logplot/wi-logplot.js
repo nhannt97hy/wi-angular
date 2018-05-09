@@ -39,6 +39,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
 
+    this.getWellColor = function(idWell) {
+        return utils.getWellColor(idWell);
+    }
+
     this.updateScale = function (scale) {
         this.currentView = scale.currentView;
         this.displayView = scale.displayView;

@@ -7,7 +7,8 @@ module.exports = Track;
  * @constructor
  */
 function Track(config) {
-    this.HEADER_NAME_COLOR = '#88CC88';
+    // this.HEADER_NAME_COLOR = '#88CC88';
+    this.HEADER_NAME_COLOR = '#ccc';
     this.HEADER_ITEM_BORDER_WIDTH = 1;
     this.HEADER_ITEM_MARGIN_BOTTOM = 1;
     this.HEADER_HIGHLIGHT_COLOR = 'rgb(255, 215, 215)';

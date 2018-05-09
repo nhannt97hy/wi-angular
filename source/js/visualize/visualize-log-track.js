@@ -384,8 +384,8 @@ LogTrack.prototype.addCurve = function(data, config) {
         };
     }
     config._data = data;
-    config.yStep = config.yStep || this.yStep;
-    config.offsetY = config.offsetY || this.offsetY;
+    config.yStep = config.yStep; // || this.yStep;
+    config.offsetY = config.offsetY; // || this.offsetY;
     config.orderNum = config.orderNum || this.getCurveOrderKey();
 
     let curve = new Curve(config);

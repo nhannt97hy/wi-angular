@@ -299,26 +299,74 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.getComponent('ContextMenu')
             .open(event.clientX, event.clientY, self.contextMenu, function () {});
     }
+    this.getListWells = function () {
+        return _.uniq(this.trackComponents
+                    .map(function(tc) {
+                        if(tc.controller && tc.controller.getWellProps) {
+                            let wellProps = tc.controller.getWellProps();
+                            if(wellProps) {
+                                return wellProps;
+                            }
+                        }
+                        return {};
+                    }).filter(function(wellProps) {
+                        return !!wellProps.idWell;
+                    }), 'idWell');
+    }
     this.getMaxDepth = function () {
-        let wellProps = self.getWellProps();
-        if (wellProps.bottomDepth)
-        return parseFloat(wellProps.bottomDepth);
 
-        // TO BE REMOVED
-        // let maxDepth = d3.max(_tracks, function (track) {
-        //     if (track.getExtentY) return track.getExtentY()[1];
+        let defaultBottomDepth = 100000.;
+
+        let _maxDepth = defaultBottomDepth;
+        let listWells = self.getListWells();
+        if(listWells.length) {
+            _maxDepth = d3.max(listWells, function (wellProps) {
+                return parseFloat(wellProps.bottomDepth);
+            })
+        }
+
+        return _maxDepth;
+        // let wellProps = self.getWellProps();
+        // if (wellProps.bottomDepth)
+        // return parseFloat(wellProps.bottomDepth);
+
+        // // TO BE REMOVED
+        // // let maxDepth = d3.max(_tracks, function (track) {
+        // //     if (track.getExtentY) return track.getExtentY()[1];
+        // //     return -1;
+        // // });
+        // let maxDepth = d3.max(self.trackComponents, function (tc) {
+        //     if (tc.controller.viTrack.getExtentY) return tc.controller.viTrack.getExtentY()[1];
         //     return -1;
         // });
-        let maxDepth = d3.max(self.trackComponents, function (tc) {
-            if (tc.controller.viTrack.getExtentY) return tc.controller.viTrack.getExtentY()[1];
-            return -1;
-        });
-        maxDepth = (maxDepth > 0) ? maxDepth : 100000;
-        return maxDepth;
+        // maxDepth = (maxDepth > 0) ? maxDepth : 100000;
+        // return maxDepth;
     };
     this.getMinDepth = function () {
-        let wellProps = self.getWellProps();
-        return parseFloat(wellProps.topDepth) || 0;
+        let defaultTopDepth = 0.;
+        let _minDepth = defaultTopDepth;
+        let listWells = self.getListWells();
+        if(listWells.length) {
+            _minDepth = d3.min(listWells, function (wellProps) {
+                return parseFloat(wellProps.topDepth);
+            })
+        }
+
+        return _minDepth;
+        // let minDepth = -1;
+        // minDepth = d3.min(self.trackComponents, function (tc) {
+        //     if(tc.controller.getWellProps) {
+        //         let wellProps = tc.controller.getWellProps();
+        //         if(wellProps)
+        //             return parseFloat(wellProps.topDepth);
+        //     }
+        //     return 100000;
+        // });
+        
+        // return (minDepth > 0 && minDepth < 100000) ? minDepth : 0;
+        // ******************** 
+        // let wellProps = self.getWellProps();
+        // return parseFloat(wellProps.topDepth) || 0;
     }
 
     this.getDepthRange = function () {
@@ -339,7 +387,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
     }
-    this.getWellProps = _getWellProps;
+    // this.getWellProps = _getWellProps;
     this.getLogplotHandler = function () {
         return logplotHandlers;
     }
@@ -369,6 +417,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
+    /*
     this.verifyDroppedIdCurve = function (idCurve) {
         let well1 = self.getWellProps();
         let well2 = Utils.findWellByCurve(idCurve) || {properties: {}};
@@ -376,6 +425,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
         return 0;
     }
+    */
     this.depthShiftDialog = function () {
         if(!_currentTrack.isLogTrack()) {
             DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
@@ -657,8 +707,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return tc.zoomFactor;
         });
 
-        let topDepth = parseFloat(self.getWellProps().topDepth);
-        let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
+        // let topDepth = parseFloat(self.getWellProps().topDepth);
+        // let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
+        let topDepth = self.getMaxDepth();
+        let bottomDepth = self.getMinDepth();
 
         //let shouldRescaleWindowY = !(_depthRange[0] == topDepth && _depthRange[1] == bottomDepth);
         let shouldRescaleWindowY = !(self._minY == topDepth && self._maxY == bottomDepth);
@@ -861,6 +913,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
         updateSlider();
     }
+    this.updateMultiWellState = function() {
+        let wiSlidingBarCtrl = self.wiLogplotCtrl.getSlidingbarCtrl();
+        wiSlidingBarCtrl.createPreview();
+        self.adjustSlidingBarFromDepthRange(self.getDepthRange());
+        wiSlidingBarCtrl.scroll(0);    
+        /*
+        if(self.wiLogplotCtrl.cropDisplay) {
+            wiSlidingBarCtrl.scaleView(wiSlidingBarCtrl.slidingBarState.top0, wiSlidingBarCtrl.slidingBarState.range0, true);
+            wiSlidingBarCtrl.updateWid3(); 
+        } else {
+            wiSlidingBarCtrl.scroll(0);    
+        }
+        */
+    }
+
     this.init = _.debounce(function () {
         Utils.getPalettes(async function (paletteList) {
             let logplotCtrl = self.wiLogplotCtrl;
@@ -870,9 +937,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             wiApiService.getLogplot(logplotModel.id,
                 function (plot, err) {
                     if (err) return;
-                    if (logplotModel.properties.referenceCurve) {
-                        logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
-                    }
                     let tracks = [].concat(plot.tracks || [])
                         .concat(plot.depth_axes || [])
                         .concat(plot.zone_tracks || [])
@@ -882,26 +946,86 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             return track1.orderNum.localeCompare(track2.orderNum);
                         });
                     //self.Tracks = tracks;
-
+                    
                     let currentState = JSON.parse(plot.currentState);
-                    if (currentState.top && currentState.bottom){
-                        let depthRange = [currentState.top, currentState.bottom];
+                    let depthRange = [currentState.top, currentState.bottom];
+                    let wiSlidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
+
+                    logplotCtrl.cropDisplay = plot.cropDisplay;
+                    wiSlidingBarCtrl.slidingBarState.top0 = currentState.top0;
+                    wiSlidingBarCtrl.slidingBarState.range0 = currentState.range0;
+
+                    self._minY = depthRange[0];
+                    self._maxY = depthRange[1];
+
+                    wiSlidingBarCtrl.createPreview(plot.referenceCurve, function() {
+                        self.trackComponents = tracks;
+
+                        let timerHandle = setInterval(function() {
+                            let isReady = !self.trackComponents.filter((tc) => {
+                                if(!tc.controller) return true;
+                                if(tc.idTrack) return !tc.controller.isFree;
+                            }).length;
+                            if(isReady) {
+                                clearInterval(timerHandle);
+                                self.adjustSlidingBarFromDepthRange(depthRange);
+                                if(plot.cropDisplay) {
+                                    wiSlidingBarCtrl.scaleView(currentState.top0, currentState.range0, true);
+                                    wiSlidingBarCtrl.updateWid3(); 
+                                } else {
+                                    wiSlidingBarCtrl.scroll(0);    
+                                }
+                                self.isReady = true;
+                            }
+                        }, 100);
+                    })
+
+                    /*
+                    let currentState = JSON.parse(plot.currentState);
+                    let depthRange = [currentState.top, currentState.bottom];
+                    self._minY =  depthRange[0];
+                    self._maxY =  depthRange[1];
+
+                    self.trackComponents = tracks;
+
+                    $timeout(function() {
+                        if (logplotModel.properties.referenceCurve) {
+                            logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
+                        }
                         self.adjustSlidingBarFromDepthRange(depthRange);
-                    }
-                    $timeout(function () {
                         if(plot.cropDisplay) {
                             logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
                         }
                         self.updateScale();
                         self.isReady = true;
-                    }, 100);
+                    }, 500)
+                    */
 
-                    let drange = self.getDepthRangeFromSlidingBar();
+                    /*
+                    let currentState = JSON.parse(plot.currentState);
+                    $timeout(function () {
+                        if (logplotModel.properties.referenceCurve) {
+                            logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
+                        }
+                        if (currentState.top && currentState.bottom){
+                            let depthRange = [currentState.top, currentState.bottom];
+                            self.adjustSlidingBarFromDepthRange(depthRange);
+                        }
+                        if(plot.cropDisplay) {
+                            logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
+                        }
+                        self.updateScale();
+                        self.isReady = true;
+                    }, 10000);
+
+                    // let drange = self.getDepthRangeFromSlidingBar();
+                    let drange = [currentState.top, currentState.bottom];
                     self._minY = drange[0];
                     self._maxY = drange[1];
 
                     self.trackComponents = tracks;
 					wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
+                    */
  		
 /*
                     async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
@@ -1148,10 +1272,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return trackComponent.orderNum + self.trackComponents[currentIdx + 1].orderNum;
     }
-    function _getWellProps() {
-        let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-        return well.properties || {};
-    }
+    // function _getWellProps() {
+    //     let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
+    //     return well.properties || {};
+    // }
     function unHightlightTrack(trackComponent) {
         let controller = trackComponent.controller;
         let viTrack = controller.viTrack;

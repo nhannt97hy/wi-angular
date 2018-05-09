@@ -572,6 +572,11 @@ Curve.prototype.addHighlightEffect = function() {
     ctx.shadowBlur = 2;
 }
 
+Curve.prototype.updateWindowY = function(minY, maxY) {
+    this.minY = minY;
+    this.maxY = maxY;
+    this.doPlot();
+}
 
 function plotLine(curve, data, highlight) {
     if (typeof curve.line != 'object') return;

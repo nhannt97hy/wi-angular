@@ -1,6 +1,7 @@
 <div ng-if="wiLogplot.showToolbar" class="logplot-toolbar-wrapper" ng-class="{'crop-display':wiLogplot.cropDisplay}">
     @@include('./toolbar/index.html')
 </div>
+<!--
 <div class="logplot-header">
     <div class="well-name-container">
         <div class="well-name" ng-bind="wiLogplot.wellModel.properties.name"></div>
@@ -11,6 +12,7 @@
         <div ng-if="wiLogplot.displayView">Display View [{{wiLogplot.displayView[0]}},{{wiLogplot.displayView[1]}}]</div>
     </div>
 </div>
+-->
 <div class="logplot-main-content">
     <div class='slidingbar'>
         <wi-slidingbar
@@ -27,5 +29,17 @@
                selections='$parent.selections'
                wi-logplot-ctrl='wiLogplot'>
         </wi-d3>
+    </div>
+</div>
+<div class="logplot-footer">
+    <div class="well-name-container" ng-if="wiLogplot.showFooter">
+        <div style="font-size:14px; font-weight: bold;">List Wells</div>
+        <div class="well-name" ng-repeat="well in wiLogplot.getwiD3Ctrl().getListWells() track by $index" ng-style="{'background-color': wiLogplot.getWellColor(well.idWell)}">
+            {{ well.name }}
+        </div>
+    </div>
+    <div class="footer-icon">
+        <span class="info-frp-32x32 font-size-16" style="display: absolute" ng-click="wiLogplot.showFooter = !wiLogplot.showFooter" ng-if="!wiLogplot.showFooter"></span>
+        <span class="close-32x32 font-size-16" style="display: absolute" ng-click="wiLogplot.showFooter = !wiLogplot.showFooter" ng-if="wiLogplot.showFooter"></span>
     </div>
 </div>

@@ -228,12 +228,12 @@ function zoneToTreeConfig(zone, options = {}) {
         startDepth: zone.startDepth,
         endDepth: zone.endDepth,
         name: zone.name,
-		// fill: JSON.parse(zone.fill),
-		// background: JSON.parse(zone.fill).pattern.background,
-        // foreground: JSON.parse(zone.fill).pattern.foreground,
-        fill: zone.fill,
-		background: zone.fill.pattern.background,
-        foreground: zone.fill.pattern.foreground,
+		fill: JSON.parse(zone.fill),
+		background: JSON.parse(zone.fill).pattern.background,
+        foreground: JSON.parse(zone.fill).pattern.foreground,
+        // fill: zone.fill,
+		// background: zone.fill.pattern ? zone.fill.pattern.background,
+        // foreground: zone.fill.pattern.foreground,
     };
     zoneModel.data = {
         icon: 'zone-table-16x16',
@@ -309,20 +309,28 @@ exports.createZoneSet = function createZoneSet (idWell, callback) {
 
 function logplotToTreeConfig(plot, options = {}) {
     let plotModel = new Object();
-    let wellModel = options.wellModel;
-    if (!wellModel)
-        wellModel = getModel('well', plot.idWell);
+    // let wellModel = options.wellModel;
+    // if (!wellModel)
+    //     wellModel = getModel('well', plot.idWell);
 
+    // setTimeout(() => {
+    //     plotModel.parentData = wellModel.data;
+    // });
+    let projectModel = options.projectModel;
+    if (!projectModel) {
+        projectModel = getModel('project', plot.idProject);
+    }
     setTimeout(() => {
-        plotModel.parentData = wellModel.data;
-    });
+        plotModel.parentData = projectModel.data;
+    })
 
     if (options.isDeleted) {
         plotModel.name = 'logplot-deleted-child';
         plotModel.type = 'logplot-deleted-child';
         plotModel.id = plot.idPlot;
         plotModel.properties = {
-            idWell: plot.idWell,
+            // idWell: plot.idWell,
+            idProject: plot.idProject,
             idPlot: plot.idPlot,
             name: plot.name
         };
@@ -331,14 +339,15 @@ function logplotToTreeConfig(plot, options = {}) {
             icon: 'logplot-blank-16x16',
             label: plot.name
         }
-        plotModel.parent = 'well' + plot.idWell;
+        plotModel.parent = 'project' + plot.idProject;
         return plotModel;
     }
     plotModel.name = 'logplot';
     plotModel.type = 'logplot';
     plotModel.id = plot.idPlot;
     plotModel.properties = {
-        idWell: plot.idWell,
+        // idWell: plot.idWell,
+        idProject: plot.idProject,
         idPlot: plot.idPlot,
         name: plot.name,
         referenceCurve: plot.referenceCurve
@@ -1002,12 +1011,12 @@ function wellToTreeConfig(well, isDeleted) {
             });
         }
         let zoneSetsNode = createZoneSetsNode(well);
-        let logplotNode = createLogplotsNode(well, {wellModel});
+        // let logplotNode = createLogplotsNode(well, {wellModel});
         let crossplotNode = createCrossplotsNode(well);
         let histogramNode = createHistogramsNode(well);
         let comboviewNode = createComboviewsNode(well);
         wellModel.children.push(zoneSetsNode);
-        wellModel.children.push(logplotNode);
+        // wellModel.children.push(logplotNode);
         wellModel.children.push(crossplotNode);
         wellModel.children.push(histogramNode);
         wellModel.children.push(comboviewNode);
@@ -1070,10 +1079,12 @@ exports.projectToTreeConfig = function (project) {
     let projectModel = createProjectModel(project);
     let wiComponentService = __GLOBAL.wiComponentService;
     // project logplots
+    /*
     let projectLogplots = [];
     wiComponentService.putComponent(wiComponentService.PROJECT_LOGPLOTS, projectLogplots);
     let projectLogplotsNode = createLogplotsNode(null, { isCollection: true });
     projectLogplotsNode.children = projectLogplots;
+    */
     // project crossplots
     let projectCrossplots = [];
     wiComponentService.putComponent(wiComponentService.PROJECT_CROSSPLOTS, projectCrossplots);
@@ -1097,8 +1108,9 @@ exports.projectToTreeConfig = function (project) {
             projectModel.children.push(wellToTreeConfig(well));
         }
     });
-
-    projectModel.children.push(projectLogplotsNode);
+    // plots
+    projectModel.children.push(createLogplotsNode(project, {projectModel}));
+    // projectModel.children.push(projectLogplotsNode);
     projectModel.children.push(projectCrossplotsNode);
     projectModel.children.push(projectHistogramsNode);
     return projectModel;
@@ -1228,7 +1240,8 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.dragging = false;
             const idDataset = dragMan.idDataset;
             let wiD3Ctrl = dragMan.wiD3Ctrl;
-            let track = dragMan.track;
+            let trackCtrl = dragMan.track;
+            trackCtrl = (trackCtrl && trackCtrl.verifyDroppedIdCurve) ? trackCtrl : null;
             let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
             dragMan.idDataset = null;
             dragMan.wiD3Ctrl = null;
@@ -1268,9 +1281,9 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     }
                     return;
                 }
-                if (wiD3Ctrl && !track) {
-                    const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
-                    if (errorCode > 0) {
+                if (wiD3Ctrl && !trackCtrl) {
+                    // const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                    // if (errorCode > 0) {
                         let logTrackProps = await wiD3Ctrl.addLogTrack();
                         async.each(idCurves, (idCurve, next) => {
                             apiService.createLine({
@@ -1283,25 +1296,29 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                         }, (err) => {
                             wiD3Ctrl.reloadTrack(logTrackProps);
                         });
-                    } else if (errorCode === 0) {
-                        toastr.error("Cannot drop curve from another well");
-                    }
+                    // } else if (errorCode === 0) {
+                    //     toastr.error("Cannot drop curve from another well");
+                    // }
                     return;
                 }
-                if (wiD3Ctrl && track) {
+                if (wiD3Ctrl && trackCtrl) {
                     async.eachSeries(idCurves, (idCurve, next) => {
-                        let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                        // let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                        let errorCode = trackCtrl.verifyDroppedIdCurve(idCurve);
                         if (errorCode > 0) {
                             apiService.createLine({
-                                idTrack: track.id,
+                                // idTrack: track.id,
+                                idTrack: trackCtrl.viTrack.id,
                                 idCurve: idCurve,
-                                orderNum: track.getCurveOrderKey()
+                                orderNum: trackCtrl.viTrack.getCurveOrderKey()
                             }, function (line) {
                                 let lineModel = lineToTreeConfig(line);
-                                getCurveData(apiService, idCurve, function (err, data) {
-                                    if (!err) wiD3Ctrl.getComponentCtrlByViTrack(track).addCurveToTrack(track, data, lineModel.data);
-                                    next(err);
-                                });
+                                trackCtrl.update();
+                                // TO BE REMOVED
+                                // getCurveData(apiService, idCurve, function (err, data) {
+                                //     trackCtrl.addCurveToTrack(trackCtrl.viTrack, data, lineModel.data);
+                                //     next(err);
+                                // });
                             });
                         }
                         else if (errorCode === 0) {
@@ -1324,9 +1341,12 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
 };
 
 exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logplotName, type) {
-    let currentWell = getCurrentWell();
+    // let currentWell = getCurrentWell();
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED)
     let dataRequest = {
-        idWell: currentWell.properties.idWell,
+        // idWell: currentWell.properties.idWell,
+        idProject: project.idProject,
+
         name: logplotName,
         option: 'blank-plot',
         plotTemplate: type ? type : null
@@ -1336,7 +1356,8 @@ exports.createNewBlankLogPlot = function (wiComponentService, wiApiService, logp
             if (err) {
                 reject();
             } else {
-                logplot.parent = angular.copy(currentWell.properties);
+                // logplot.parent = angular.copy(currentWell.properties);
+                logplot.parent = angular.copy(project);
                 resolve(logplot);
             }
 
@@ -3089,3 +3110,37 @@ exports.findLogplotModelByIdAsync = function(idLogplot) {
     }
     return logplotModel;
 }
+
+var wellColorMap = (function () {
+    let colorTable;
+    function getRandomColor() {
+        const DEFAULT_COLOR = ['#68c7ec', '#cab5d5', '#f7a897', '#f3b86d', '#80ced0', '#b0d775'];
+
+        if(Object.keys(colorTable).length < DEFAULT_COLOR.length) {
+            return DEFAULT_COLOR[Object.keys(colorTable).length];
+        }
+
+        let letters = 'BCDEF'.split('');
+        let color = '#';
+        for (let i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * letters.length)];
+        }
+        return color;
+    }
+    function init() {
+        colorTable = {};
+    }
+    let getColor = function(idWell) {
+        if(!colorTable) init();
+        if(!colorTable[idWell]) colorTable[idWell] = getRandomColor();
+        return colorTable[idWell];
+    }
+    return {
+        getColor 
+    }
+})();
+
+function getWellColor(idWell) {
+    return wellColorMap.getColor(idWell);
+}
+exports.getWellColor = getWellColor;

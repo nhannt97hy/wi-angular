@@ -34,7 +34,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
                 plot: 'Bar',
                 color: 'blue',
                 showGrid: true,
-                idWell: self.wiD3Ctrl.getWellProps().idWell,
+                
+                // TO BE REVIEWED
+                // idWell: self.wiD3Ctrl.getWellProps().idWell,
+                idWell: 1,
+
                 intervalDepthTop: windowY[0] + range/4.,
                 intervalDepthBottom: windowY[1] - range/4.,
                 name: "Histogram - " + (Math.random().toString(36).substr(2, 3))
@@ -111,7 +115,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
             let newCrossplotModel = null;
             let newOoT;
             async.series([ function(callback) {
-                utils.createCrossplot(self.wiD3Ctrl.getWellProps().idWell,
+                // TO BE REMOVED
+                // utils.createCrossplot(self.wiD3Ctrl.getWellProps().idWell,
+                utils.createCrossplot(1,
                     "Crossplot - " + (Math.random().toString(36).substr(2, 3)),
                     function(err, crossplotModel) {
                         if (err) {
@@ -520,8 +526,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         let config = angular.copy(trackConfig);
         config.id = trackConfig.idObjectTrack;
         config.name = trackConfig.title;
-        config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
-        config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+
+        // TO BE REMOVED
+        // config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
+        // config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+
         config.width = Utils.inchToPixel(trackConfig.width);
         //config.wiComponentService = wiComponentService;
         console.log(config);

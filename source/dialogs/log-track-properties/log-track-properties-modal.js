@@ -8,14 +8,6 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         let viTrack = trackComponent.controller.viTrack;
         wiModal = self;
 
-        // window.logTrack = this;
-        this.groupFnTabCurve = function(item){
-            return item.properties.dataset;
-        }
-
-        this.groupFnTabShading = function(item){
-            return item.datasetName;
-        }
 
         this.applyInProgress = false;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -23,7 +15,22 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         let graph = wiComponentService.getComponent('GRAPH');
         // let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
-        this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        // window.logTrack = this;
+        this.groupFnTabCurve = function(item){
+            let wellProps = utils.findWellByCurve(item.properties.idCurve).properties;
+            return item.properties.dataset + ' (' + wellProps.name + ') ';
+        }
+
+        this.groupFnTabShading = function(item){
+            return item.datasetName;
+        }
+
+        // this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        this.well = null;
+        let wellProps = trackComponent.controller.getWellProps();
+        if(wellProps) {
+            this.well = utils.findWellById(wellProps.idWell);
+        }
         console.log("current Track", viTrack);
         this.tabFlags = options.tabs;
 
@@ -91,16 +98,38 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             })
             return temp;
         }
+
+        this.datasets = [];
+        this.curvesArr = [];
         let zonesets = [];
+        if(this.well) {
+            this.well.children.forEach(function (child) {
+                if (child.type == 'dataset') self.datasets.push(child);
+                else if (child.type == 'zonesets') {
+                    child.children.forEach(c => {
+                        if(c.type == 'zoneset')
+                            zonesets.push(c);
+                    })    
+                }
+            });
+        } else {
+            let logplotProps = utils.findLogplotModelById(trackComponent.idPlot).properties;
+            let projectModel = utils.getModel('project', logplotProps.idProject);
+            projectModel.children.forEach((child) => {
+                if(child.type == 'well') {
+                    child.children.forEach((wellChild) => {
+                        if(wellChild.type == 'dataset') {
+                            self.datasets.push(wellChild);
+                        } else if (wellChild.type == 'zonesets') {
+                            wellChild.children.forEach(zoneset => {
+                                zonesets.push(zoneset);
+                            })
+                        }
+                    })
+                }
+            });
+        }
         let lastZoneSetId = this.props.general.idZoneSet;
-        this.well.children.forEach(child => {
-            if (child.type == 'zonesets') {
-                child.children.forEach(c => {
-                    if(c.type == 'zoneset')
-                        zonesets.push(c);
-                })    
-            }
-        });
         this.getZonesetList = function(wiItemDropdownCtrl) {
             $timeout(function() {
                 if(!zonesets.length) return;
@@ -118,12 +147,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.zonesetChanged = function(selectedItem) {
             self.props.general.idZoneSet = selectedItem.idZoneSet;
         }
-        // curve tab
-        this.datasets = [];
-        this.curvesArr = [];
-        this.well.children.forEach(function (child) {
-            if (child.type == 'dataset') self.datasets.push(child);
-        });
+
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {
                 if (item.type == 'curve') self.curvesArr.push(item);

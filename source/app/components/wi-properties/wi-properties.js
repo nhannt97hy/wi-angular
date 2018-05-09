@@ -272,7 +272,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                 listConfig.push(config);
                 break;
             case 'logplot':
-                var well = utils.findWellById(itemProperties.idWell);
+                // var well = utils.findWellById(itemProperties.idWell);
+                let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
                 config = {
                     name: currentItem.name,
                     heading: 'Informations',
@@ -286,10 +287,16 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                         label: 'Name',
                         value: itemProperties.name,
                         editable: true
+                    // TO BE REMOVED
+                    // }, {
+                    //     key: 'wellName',
+                    //     label: 'Well Name',
+                    //     value: well.properties.name,
+                    // }]
                     }, {
-                        key: 'wellName',
-                        label: 'Well Name',
-                        value: well.properties.name,
+                        key: 'projectName',
+                        label: 'Project Name',
+                        value: project.name,
                     }]
                 }
                 listConfig.push(config);
