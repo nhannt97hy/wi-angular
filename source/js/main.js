@@ -55,6 +55,8 @@ let wiReferenceWindow = require('./wi-reference-window');
 
 let wiPlot = require('./wi-plot');
 let wiZoneTemplateManager = require('./wi-zone-template-manager');
+let wiZoneManager = require('./wi-zone-manager');
+let wiZoneSetManager = require('./wi-zone-set-manager');
 
 let wiInventory = require('./wi-inventory');
 let wiExport = require('./wi-export');
@@ -210,7 +212,10 @@ let app = angular.module('wiapp',
         wiMachineLearningApiService.name,
         wiOnlineInvService.name,
         wiComponentService.name,
+        wiZoneManager.name,
         wiZoneTemplateManager.name,
+        wiZoneSetManager.name,
+        
 
         wiCanvasRect.name,
         wiZone.name,

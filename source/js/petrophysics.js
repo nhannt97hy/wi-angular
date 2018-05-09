@@ -3,61 +3,57 @@
 
 function calVCLfromGR(inputs, parameters, callback) {
     let grCurve = inputs[0];
-    let clean = parameters[0].value || 10;
-    let clay = parameters[1].value || 120;
-    let type = parameters[2].value || 1;
-    let result = new Array();
-    async.series([
-        function (cb) {
-            // cal GR index
-            for (let i = 0; i < grCurve.length; i++) {
+    let result = new Array(grCurve.length).fill(null);
+
+    // cal GR index
+    for (let i = 0; i < grCurve.length; i++) {
+        parameters.forEach(zone => {
+            let clean = zone.param[0] || 10;
+            let clay = zone.param[1] || 120;
+            let type = zone.param[2] || 1;
+            if(zone.startDepth && zone.endDepth){
+                let currentDepth = i * parameters.step + parameters.topDepth;
+                if(currentDepth >= zone.startDepth && currentDepth <= zone.endDepth){
+                    result[i] = (grCurve[i] - clean) / (clay - clean);
+                }
+            }else{
                 result[i] = (grCurve[i] - clean) / (clay - clean);
             }
-            cb();
-        },
-        function (cb) {
             // cal VCL by type
             switch (type) {
                 case 1: // Linear
-                    cb();
                     break;
 
                 case 2: // Clavier
-                    result = result.map(d => { return 1.7 - Math.sqrt(3.38 - Math.pow(d + 0.7, 2)) });
-                    cb();
+                    result[i] = 1.7 - Math.sqrt(3.38 - Math.pow(result[i] + 0.7, 2));
                     break;
 
                 case 3: // Larionov Tertiary
-                    result = result.map(d => { return 0.083 * (Math.pow(2, 3.7 * d) - 1) });
-                    cb();
+                    result[i] = 0.083 * (Math.pow(2, 3.7 * result[i]) - 1);
                     break;
 
                 case 4: // Larionov rocks
-                    result = result.map(d => { return 0.33 * (Math.pow(2, 3.7 * d) - 1) });
-                    cb();
+                    result[i] = 0.33 * (Math.pow(2, 3.7 * result[i]) - 1);
                     break;
 
                 case 5: // Stieber variation I
-                    result = result.map(d => { return d / (2 - d) });
-                    cb();
+                    result[i] = result[i] / (2 - result[i]);
                     break;
 
                 case 6: // Stieber : Miocene and Pliocene
-                    result = result.map(d => { return d / (3 - 2 * d) });
-                    cb();
+                    result[i] = result[i] / (3 - 2 * result[i]);
                     break;
 
                 case 7: // Stieber variation II
-                    result = result.map(d => { return d / (4 - 3 * d) });
-                    cb();
+                    result[i] = result[i] / (4 - 3 * result[i]);
                     break;
                 default:
                     break;
             }
-        }], function (err) {
-            result = result.map(d => parseFloat(d.clamp(0, 1).toFixed(4)));
-            callback([result]);
         })
+    }
+    result = result.map(d => d ? parseFloat(d.clamp(0, 1).toFixed(4)) : null);
+    callback([result]);
 }
 exports.calVCLfromGR = calVCLfromGR;
 
