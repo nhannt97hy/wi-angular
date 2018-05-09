@@ -180,8 +180,18 @@
                     </div>
                     <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiTask.droppableSetting();">
                         <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
-                            <div class="panel-heading">
-                                <h5>Inputs</h5>
+                            <div class="panel-heading" ng-init="wiTask.typeFilter='inputchoice'">
+                                <label class="btn btn-default"
+                                ng-class='{active: wiTask.typeFilter=="inputchoice"}'
+                                style="margin-right: 5px;">
+                                    <input type="radio" name="filterBy" class="display-none" value='inputchoice' ng-model="wiTask.typeFilter">
+                                    <span>Inputs</span>
+                                </label>
+                                <label class="btn btn-default" ng-class='{active: wiTask.typeFilter=="zonechoice"}'
+                                style="margin-right: 5px;">
+                                    <input type="radio" name="filterBy" class="display-none" value='zonechoice' ng-model="wiTask.typeFilter">
+                                    <span>Zonation</span>
+                                </label>
                             </div>
                             <div style='margin: 5px;position: relative;'>
                                 <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
@@ -194,7 +204,7 @@
                                 show-context-menu-function='wiTask.taskShowContextMenu'
                                 filter='{{wiTask.inputFilter}}' filter-by='{{wiTask.typeFilter}}'
                                 ></wi-base-treeview>
-                                <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET HERE</div>
+                                <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET OR ZONESET HERE</div>
                             </div>
                         </div>
                     </div>

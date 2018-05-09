@@ -1354,7 +1354,7 @@ exports.ClayVolumeGammaRayButtonClicked = function() {
             title: 'Clay Volume Gamma Ray',
             tabIcon: 'workflow-16x16',
             componentState: {
-                html: '<wi-task></wi-task>',
+                html: '<wi-task name="Clay Volume Gamma Ray"></wi-task>',
                 name: 'wiTask'
             }
         })
