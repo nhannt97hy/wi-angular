@@ -498,6 +498,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         handler: function () {
                             self.handlers.DuplicateButtonClicked('curve');
                         }
+                    },{
+                        name: "Convert",
+                        label: "Convert",
+                        icon: "tools-normal-16x16",
+                        handler: function () {
+                            self.handlers.ConvertButtonClicked();
+                        }
                     }, {
                         name: "Delete",
                         label: "Delete",

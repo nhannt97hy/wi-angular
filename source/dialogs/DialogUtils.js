@@ -141,4 +141,5 @@ exports.shareProjectDialog = require('./share-project-modal');
 exports.newModelDialog = require('./new-model-modal');
 exports.openModelDialog = require('./open-model-modal');
 exports.newZoneSetDialog = require('./new-zone-set-modal');
+exports.convertCurveUnit = require('./convert-curve-unit-modal');
 exports.createNewZoneDialog = require('./create-new-zone-modal');

@@ -81,6 +81,8 @@ const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
 const FAMILY_LIST = '/family/list';
+const FAMILY_UNIT_LIST = '/family/list-unit';
+const CONVERT_CURVE_UNIT = '/project/well/dataset/curve/convert-unit';
 
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
@@ -1906,3 +1908,10 @@ Service.prototype.listAllZoneByTemplate = function (payload, callback) {
     this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
 };
 
+//convert unit
+Service.prototype.getListUnit = function (payload, callback) {
+    this.post(FAMILY_UNIT_LIST, payload, callback);
+};
+Service.prototype.convertCurveUnit = function (payload, callback) {
+    this.post(CONVERT_CURVE_UNIT, payload, callback);
+};
