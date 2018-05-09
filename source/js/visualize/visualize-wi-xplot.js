@@ -23,9 +23,25 @@ function ViWiXplot(props) {
     this.config = props.config;
 
     this.showTooltip = true;
+    this.showOverlay = true;
+
     this.userDefineLines = [];
     this.regressionLines = [];
     this.polygons = [];
+    this.ternary = {
+        vertices: [],
+        calculate: {
+            type: 'All',
+            point: {
+                x: null,
+                y: null
+            },
+            area: {
+                polygons: [],
+                exclude: false
+            }
+        }
+    };
 }
 
 ViWiXplot.prototype.setProperties = function (props) {
@@ -44,8 +60,7 @@ ViWiXplot.prototype.init = function (domElem) {
 
     this.root = d3.select(domElem);
 
-    this.plotContainer = this.root.append('div')
-        .attr('class', 'wi-xplot-plot-container');
+    this.plotContainer = this.root.select('.wi-xplot-plot-container');
 
     this.rect = this.plotContainer.node().getBoundingClientRect();
 
@@ -73,9 +88,9 @@ ViWiXplot.prototype.init = function (domElem) {
 
     this.svgContainer.raise();
 
-    this.on('mousedown', function() { self.mouseDownCallback() });
-    this.on('mousemove', function() { self.mouseMoveCallback() });
-    this.on('mouseleave', function() { self.tooltip(null, null, true);});
+    this.on('mousedown', function () { self.mouseDownCallback() });
+    this.on('mousemove', function () { self.mouseMoveCallback() });
+    this.on('mouseleave', function () { self.tooltip(null, null, true); });
 
     let zoom = d3.zoom()
         .scaleExtent([1, 6])
@@ -103,7 +118,7 @@ ViWiXplot.prototype.init = function (domElem) {
     this.plotContainer.on('dblclick.zoom', null);
 }
 
-ViWiXplot.prototype.setMode = function(mode) {
+ViWiXplot.prototype.setMode = function (mode) {
     this.svgContainer.raise();
     this.svgContainer.style('cursor', mode == null ? 'default' : 'copy');
     this.mode = mode;
@@ -135,15 +150,15 @@ ViWiXplot.prototype.prepareAxesContainer = function () {
         ])
         .enter()
         .append('g')
-            .attr('class', function (d) { return 'vi-crossplot-axis-group ' + d; });
+        .attr('class', function (d) { return 'vi-crossplot-axis-group ' + d; });
 
     this.axesContainer
         .selectAll('text.vi-crossplot-axis-label')
         .data(['vi-crossplot-axis-x-label', 'vi-crossplot-axis-y-label'])
         .enter()
         .append('text')
-            .attr('class', function (d) { return 'vi-crossplot-axis-label ' + d; })
-            .text('-');
+        .attr('class', function (d) { return 'vi-crossplot-axis-label ' + d; })
+        .text('-');
 }
 ViWiXplot.prototype.prepareFunctionsContainer = function () {
     let self = this;
@@ -218,13 +233,14 @@ ViWiXplot.prototype.doPlot = function () {
     this.plotUserDefineLines();
     this.plotPolygons();
     this.plotRegressionLines();
+    this.plotTernary();
     this.plotFooter();
 }
 
 ViWiXplot.prototype.updatePlot = function (newProps) {
     this.setProperties(newProps);
 
-    if(!newProps) {
+    if (!newProps) {
         this.doPlot();
         return;
     }
@@ -243,14 +259,15 @@ ViWiXplot.prototype.updateClipPath = function () {
     this.svgContainer.select('clipPath')
         .attr('id', self.getSvgClipId())
         .select('rect')
-            .attr('x', d3.min(vpX))
-            .attr('y', d3.min(vpY))
-            .attr('width', Math.abs(vpX[0] - vpX[1]))
-            .attr('height', Math.abs(vpY[0] - vpY[1]));
+        .attr('x', d3.min(vpX))
+        .attr('y', d3.min(vpY))
+        .attr('width', Math.abs(vpX[0] - vpX[1]))
+        .attr('height', Math.abs(vpY[0] - vpY[1]));
 }
 
 ViWiXplot.prototype.adjustSize = function () {
     let self = this;
+    this.rect = this.plotContainer.node().getBoundingClientRect();
     this.canvas
         .attr('width', self.rect.width)
         .attr('height', self.rect.height);
@@ -295,7 +312,7 @@ ViWiXplot.prototype.updateAxesTicks = function () {
         .tickFormat(Utils.getDecimalFormatter(this.config.decimalsY));
 
     this.gTicksX = this.axesContainer.select('g.vi-crossplot-axis-x-ticks')
-        .attr('transform', 'translate('+ 0 +', ' + vpY[0] + ')')
+        .attr('transform', 'translate(' + 0 + ', ' + vpY[0] + ')')
         .call(this.ticksX)
         .selectAll('.tick text')
         .style('display', function (d, i) {
@@ -303,7 +320,7 @@ ViWiXplot.prototype.updateAxesTicks = function () {
         });
 
     this.gTicksY = this.axesContainer.select('g.vi-crossplot-axis-y-ticks')
-        .attr('transform', 'translate(' + vpX[0] + ', '+ 0 +')')
+        .attr('transform', 'translate(' + vpX[0] + ', ' + 0 + ')')
         .call(this.ticksY)
         .selectAll('.tick text')
         .style('display', function (d, i) {
@@ -348,7 +365,7 @@ ViWiXplot.prototype.updateAxesGrids = function () {
         .tickSize(-Math.abs(vpX[1] - vpX[0]));
 
     this.gGridsX = this.axesContainer.select('g.vi-crossplot-axis-x-grids')
-        .attr('transform', 'translate('+ 0 +', ' + vpY[0] + ')')
+        .attr('transform', 'translate(' + 0 + ', ' + vpY[0] + ')')
         .call(this.gridsX)
         .selectAll('.tick line')
         .attr('class', function (d, i) {
@@ -356,7 +373,7 @@ ViWiXplot.prototype.updateAxesGrids = function () {
         });
 
     this.gGridsY = this.axesContainer.select('g.vi-crossplot-axis-y-grids')
-        .attr('transform', 'translate(' + vpX[0] + ', '+ 0 +')')
+        .attr('transform', 'translate(' + vpX[0] + ', ' + 0 + ')')
         .call(this.gridsY)
         .selectAll('.tick line')
         .attr('class', function (d, i) {
@@ -428,11 +445,11 @@ ViWiXplot.prototype.plotPoints = function () {
     if (!this.pointsets.length) return;
     this.outliers = 0;
     this.pointsets.forEach(pointSet => {
-        ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX)-d3.min(vpX), d3.max(vpY)-d3.min(vpY));
+        ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
         ctx.clip();
 
         // test
-        self.pointsets.indexOf(pointSet) ? pointSet.pointColor = 'blue' : pointSet.pointColor = 'red';
+        pointSet.pointColor = genRandomColor();
         pointSet.pointSize = 3;
         pointSet.pointSymbol = 'circle';
         // end test
@@ -446,12 +463,18 @@ ViWiXplot.prototype.plotPoints = function () {
         if (typeof plotFunc != 'function') return;
 
         self.data[self.pointsets.indexOf(pointSet)].forEach(function (d) {
-            if(!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
-                self.outliers ++;
+            if (!(d.x >= d3.min(windowX) && d.x <= d3.max(windowX) && d.y >= d3.min(windowY) && d.y <= d3.max(windowY))) {
+                self.outliers++;
             }
             plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
     });
+    function genRandomColor() {
+        let r = Math.round(Math.random() * 150 + 50);
+        let g = Math.round(Math.random() * 150 + 50);
+        let b = Math.round(Math.random() * 150 + 50);
+        return 'rgb(' + [r, g, b].join(",") + ')';
+    }
 }
 
 // Plot Area
@@ -487,6 +510,7 @@ ViWiXplot.prototype.plotArea = function () {
 ViWiXplot.prototype.plotUserLine = function () {
     let userLineContainer = this.functionsContainer.select('g.vi-xplot-user-line');
     userLineContainer.selectAll('path').remove();
+    this.footerLeft.text('');
 
     if (!this.userLine || !this.userLine.points || this.userLine.points.length < 2) return;
 
@@ -494,18 +518,19 @@ ViWiXplot.prototype.plotUserLine = function () {
     let transformY = this.getTransformY();
 
     let line = d3.line()
-        .x(function(d) { return transformX(d.x); })
-        .y(function(d) { return transformY(d.y); });
+        .x(function (d) { return transformX(d.x); })
+        .y(function (d) { return transformY(d.y); });
 
     let userLine = userLineContainer.append('path')
         .datum(this.userLine)
-        .attr('d', function(d) { return line(d.points); })
+        .attr('d', function (d) { return line(d.points); })
         .attr('stroke', _AREA_LINE_COLOR)
         .attr('stroke-width', _AREA_LINE_WIDTH);
 
     let equation = Utils.getLinearEquation(this.userLine.points[0], this.userLine.points[1]);
     equation = equation.replace('x', this.getLabelX());
     equation = equation.replace('y', this.getLabelY());
+    this.footerLeft.text(equation);
 }
 
 ViWiXplot.prototype.plotFooter = function () {
@@ -514,16 +539,16 @@ ViWiXplot.prototype.plotFooter = function () {
     this.data.forEach(datum => {
         totalPoints += datum.length;
     });
-    let footerString = (totalPoints - this.outliers) +" points plotted out of "
-                        + (totalPoints + this.nullDatas) + '( '
-                        + this.outliers + ' outliers, '
-                        + this.nullDatas + ' nulls)';
+    let footerString = (totalPoints - this.outliers) + " points plotted out of "
+        + (totalPoints + this.nullDatas) + '( '
+        + this.outliers + ' outliers, '
+        + this.nullDatas + ' nulls)';
     this.footerRight
         .text(footerString);
 }
 
 // User Define Line
-ViWiXplot.prototype.getUserDefineFunc = function(funcStr) {
+ViWiXplot.prototype.getUserDefineFunc = function (funcStr) {
     let func = new Function('x', 'return ' + funcStr);
     try {
         let y = func(0.5);
@@ -533,11 +558,11 @@ ViWiXplot.prototype.getUserDefineFunc = function(funcStr) {
     }
     catch (e) { return null; }
 }
-ViWiXplot.prototype.prepareUserDefineLines = function() {
+ViWiXplot.prototype.prepareUserDefineLines = function () {
     let lines = this.userDefineLines;
 
     let self = this;
-    lines.forEach(function(l) {
+    lines.forEach(function (l) {
         let func = self.getUserDefineFunc(l.function);
         if (!func) {
             l.invalid = true;
@@ -551,7 +576,7 @@ ViWiXplot.prototype.prepareUserDefineLines = function() {
         let end = self.config.scale.right;
         let step = (end - start) / 1000;
 
-        l.data = Utils.range(start, end, step).map(function(d) {
+        l.data = Utils.range(start, end, step).map(function (d) {
             return {
                 x: d,
                 y: func(d)
@@ -559,16 +584,16 @@ ViWiXplot.prototype.prepareUserDefineLines = function() {
         });
     });
 }
-ViWiXplot.prototype.plotUserDefineLines = function() {
+ViWiXplot.prototype.plotUserDefineLines = function () {
     this.prepareUserDefineLines();
 
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
 
     let line = d3.line()
-        .x(function(d) { return transformX(d.x); })
-        .y(function(d) { return transformY(d.y); })
-        .defined(function(d) {
+        .x(function (d) { return transformX(d.x); })
+        .y(function (d) { return transformY(d.y); })
+        .defined(function (d) {
             return !isNaN(d.x) && !isNaN(d.y) && d.y != Infinity && d.y != -Infinity;
         });
 
@@ -576,31 +601,31 @@ ViWiXplot.prototype.plotUserDefineLines = function() {
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
 
     let userDefineLines = userDefineLineContainer.selectAll('path')
-        .data(this.userDefineLines.filter(function(r) {
+        .data(this.userDefineLines.filter(function (r) {
             return r.func != null;
         }));
     let self = this;
     userDefineLines.enter().append('path')
         .merge(userDefineLines)
-        .attr('d', function(d) {
+        .attr('d', function (d) {
             return line(d.data);
         })
-        .attr('stroke', function(d) { return d.lineStyle.lineColor; })
-        .attr('stroke-dasharray', function(d) { return d.lineStyle.lineStyle; })
-        .attr('stroke-width', function(d) { return d.lineStyle.lineWidth; })
+        .attr('stroke', function (d) { return d.lineStyle.lineColor; })
+        .attr('stroke-dasharray', function (d) { return d.lineStyle.lineStyle; })
+        .attr('stroke-width', function (d) { return d.lineStyle.lineWidth; })
         .attr('fill', 'none')
-        .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
+        .style('display', function (d) { return d.displayLine ? 'block' : 'none'; });
     userDefineLines.exit().remove();
 
     this.plotEquations();
 }
 
 // Plot Equations
-ViWiXplot.prototype.plotEquations = function() {
+ViWiXplot.prototype.plotEquations = function () {
     let self = this;
 
     let equationContainer = this.functionsContainer.select('g.vi-xplot-equations');
-    let eqData = this.regressionLines.concat(this.userDefineLines).filter(function(r) {
+    let eqData = this.regressionLines.concat(this.userDefineLines).filter(function (r) {
         return r.displayEquation && r.func != null;
     });
     let equations = equationContainer.selectAll('text').data(eqData);
@@ -609,48 +634,185 @@ ViWiXplot.prototype.plotEquations = function() {
     equations.enter().append('text')
         .merge(equations)
         .attr('x', 0)
-        .attr('y', function(d, i) { return (i+1)*HEIGHT; })
-        .attr('fill', function(d) { return d.lineStyle.lineColor; })
-        .text(function(d) { return d.func.equation; });
+        .attr('y', function (d, i) { return (i + 1) * HEIGHT; })
+        .attr('fill', function (d) { return d.lineStyle.lineColor; })
+        .text(function (d) { return d.func.equation; });
     equations.exit().remove();
 
     let gWidth = equationContainer.node().getBoundingClientRect().width;
-    equationContainer.attr('transform', 'translate(' + (this.getViewportX()[1] - gWidth) + ',' + this.getViewportY()[1] + ')' );
+    equationContainer.attr('transform', 'translate(' + (this.getViewportX()[1] - gWidth) + ',' + this.getViewportY()[1] + ')');
 }
 
 // Plot Polygon
-ViWiXplot.prototype.plotPolygons = function() {
+ViWiXplot.prototype.plotPolygons = function () {
     let transformX = this.getTransformX();
     let transformY = this.getTransformY();
 
     let line = d3.line()
-        .x(function(d) { return transformX(d.x); })
-        .y(function(d) { return transformY(d.y); });
+        .x(function (d) { return transformX(d.x); })
+        .y(function (d) { return transformY(d.y); });
 
     let polygonContainer = this.functionsContainer.select('g.vi-xplot-polygons')
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')')
 
     let polygons = polygonContainer.selectAll('path')
-        .data(this.polygons.filter(function(p) { return p.points && p.points.length; }));
+        .data(this.polygons.filter(function (p) { return p.points && p.points.length; }));
 
     let self = this;
     polygons.enter().append('path')
         .merge(polygons)
-        .attr('d', function(d) {
+        .attr('d', function (d) {
             if (d === self.tmpPolygon)
                 return line(d.points);
             else
                 return line(d.points.concat([d.points[0]]));
         })
-        .attr('stroke', function(d) { return d.lineStyle; })
+        .attr('stroke', function (d) { return d.lineStyle; })
         .attr('fill-rule', 'evenodd')
-        .attr('fill', function(d) {
+        .attr('fill', function (d) {
             let color = d3.color(d.lineStyle);
             color.opacity = 0.1;
             return color.toString();
         })
-        .style('display', function(d) { return d.display ? 'block' : 'none'; });
+        .style('display', function (d) { return d.display ? 'block' : 'none'; });
     polygons.exit().remove();
+}
+
+// Plot Ternary
+ViWiXplot.prototype.plotTernary = function () {
+    let ternaryContainer = this.functionsContainer.select('g.vi-xplot-ternary');
+    ternaryContainer.selectAll('.vi-xplot-ternary-item').remove();
+
+    let vertices = this.ternary.vertices.filter(function (v) { return v.showed; });
+
+    let self = this;
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+
+    let helper = new SvgHelper(ternaryContainer, {
+        fillStyle: _TERNARY_VERTEX_COLOR,
+        strokeStyle: _TERNARY_VERTEX_COLOR,
+        size: _TERNARY_VERTEX_SIZE,
+    });
+
+    vertices.filter(function (v) {
+        return v.x != null && v.y != null && !isNaN(v.x) && !isNaN(v.y);
+    }).forEach(function (v) {
+        // fake
+        v.style = 'Circle';
+        let x = transformX(v.x);
+        let y = transformY(v.y);
+        helper[Utils.lowercase(v.style)](x, y).classed('vi-xplot-ternary-item', true);
+        ternaryContainer.append('text')
+            .classed('vi-xplot-ternary-item', true)
+            .attr('x', x + _TERNARY_VERTEX_SIZE)
+            .attr('y', y - _TERNARY_VERTEX_SIZE)
+            .text(v.name);
+    });
+
+    vertices = this.ternary.vertices.filter(function (v) {
+        return v.used && v.x != null && v.y != null && !isNaN(v.x) && !isNaN(v.y);
+    });
+    this.plotTernaryPoint();
+
+    if (vertices.length != 3) return;
+
+    let line = d3.line()
+        .x(function (d) { return transformX(d.x); })
+        .y(function (d) { return transformY(d.y); });
+
+    ternaryContainer.append('path')
+        .classed('vi-xplot-ternary-item', true)
+        .datum(vertices.concat([vertices[0]]))
+        .attr('d', line)
+        .attr('stroke', _TERNARY_VERTEX_COLOR)
+        .attr('stroke-width', _TERNARY_EDGE_WIDTH)
+        .attr('fill', function (d) {
+            let color = d3.color(_TERNARY_VERTEX_COLOR);
+            color.opacity = 0.1;
+            return color.toString();
+        });
+
+    let v1, v2, v3;
+    for (let i = 0; i < 3; i++) {
+        v1 = vertices[(i + 2) % 3];
+        v2 = vertices[i];
+        v3 = vertices[(i + 1) % 3];
+        Utils.range(1 / 5, 4 / 5, 1 / 5).forEach(function (i) {
+            ternaryContainer.append('path')
+                .classed('vi-xplot-ternary-item', true)
+                .datum([Utils.getPointByFraction(v2, v1, i), Utils.getPointByFraction(v2, v3, i)])
+                .attr('d', line)
+                .attr('stroke', _TERNARY_VERTEX_COLOR)
+                .attr('stroke-width', _TERNARY_EDGE_WIDTH / 2)
+                .attr('fill', 'none');
+        });
+    }
+}
+ViWiXplot.prototype.plotTernaryPoint = function () {
+    let ternaryContainer = this.functionsContainer.select('g.vi-xplot-ternary');
+    ternaryContainer.selectAll('.vi-xplot-ternary-point').remove();
+    if (!this.ternary.calculate) return;
+    let point = this.ternary.calculate.point;
+    if (!point || point.x == null || point.y == null || isNaN(point.x) || isNaN(point.y)) return;
+    let self = this;
+    let helper = new SvgHelper(ternaryContainer, {
+        fillStyle: _TERNARY_POINT_COLOR,
+        strokeStyle: _TERNARY_POINT_COLOR,
+        size: _TERNARY_VERTEX_SIZE,
+    });
+    helper
+        .circle(self.getTransformX()(point.x), self.getTransformY()(point.y))
+        .classed('vi-xplot-ternary-point', true);
+}
+ViWiXplot.prototype.calculateTernary = function () {
+    let vertices = this.ternary.vertices.filter(function (d) { return d.used; });
+    if (vertices.length != 3) return { error: 'There must be three used vertices' };
+
+    let self = this;
+    let calc = this.ternary.calculate;
+    let points = [];
+
+    if (calc.type == 'Point') {
+        points = [calc.point];
+    }
+    else if (calc.type == 'Area') {
+        let idCalcPolygons = calc.area.polygons;
+        let polygons = self.polygons.filter(function (p) { return idCalcPolygons.indexOf(p.idPolygon) > -1; });
+        points = self.filterByPolygons(polygons, self.data, calc.area.exclude);
+    }
+    else if (calc.type == 'All') {
+        points = self.data;
+    }
+
+    points = this.filterByPolygons([{ points: vertices }], points);
+    if (!points.length) return { error: 'There is no point in ternary' };
+
+    let v1 = vertices[0], v2 = vertices[1], v3 = vertices[2];
+    let f1 = Utils.getLineFuncFromTwoPoints(v2, v3),
+        f2 = Utils.getLineFuncFromTwoPoints(v3, v1),
+        f3 = Utils.getLineFuncFromTwoPoints(v1, v2);
+
+    let curves = [[], [], []];
+
+    points.forEach(function (p) {
+        let parallelLine1 = Utils.getLineFunc(f1.slope, p);
+        let parallelLine2 = Utils.getLineFunc(f2.slope, p);
+        let i1 = Utils.getIntersection(parallelLine2, f3);
+        let i2 = Utils.getIntersection(parallelLine1, f3);
+        let d = Utils.getDistance(v1, v2);
+
+        curves[0].push({ x: Utils.getDistance(v1, i1) / d, y: p.depth });
+        curves[1].push({ x: Utils.getDistance(i1, i2) / d, y: p.depth });
+        curves[2].push({ x: Utils.getDistance(i2, v2) / d, y: p.depth });
+    });
+
+    return {
+        materials: curves.map(function (c) {
+            return Utils.mean(c.map(function (p) { return p.x; }))
+        }),
+        curves: curves
+    };
 }
 
 // Tooltip
@@ -744,10 +906,10 @@ ViWiXplot.prototype.endAddUserLine = function () {
 }
 
 // Overlay Polygon
-ViWiXplot.prototype.startAddPolygon = function() {
+ViWiXplot.prototype.startAddPolygon = function () {
     this.setMode('PlotPolygon');
 }
-ViWiXplot.prototype.endAddPolygon = function() {
+ViWiXplot.prototype.endAddPolygon = function () {
     this.setMode(null);
     if (!this.tmpPolygon) return null;
     if (this.tmpPolygonPoint) {
@@ -759,18 +921,18 @@ ViWiXplot.prototype.endAddPolygon = function() {
     return addedPolygon;
 }
 
-ViWiXplot.prototype.startEditPolygon = function(id) {
-    let polygon = this.polygons.filter(function(p) {
+ViWiXplot.prototype.startEditPolygon = function (id) {
+    let polygon = this.polygons.filter(function (p) {
         return p.idPolygon == id;
     })[0];
     if (!polygon) return;
 
     this.setMode('PlotPolygon');
     this.tmpPolygon = polygon;
-    this.tmpPolygonPoint = Utils.clone(polygon.points[polygon.points.length -1]);
+    this.tmpPolygonPoint = Utils.clone(polygon.points[polygon.points.length - 1]);
     this.tmpPolygon.points.push(this.tmpPolygonPoint);
 }
-ViWiXplot.prototype.endEditPolygon = function() {
+ViWiXplot.prototype.endEditPolygon = function () {
     this.setMode(null);
     if (!this.tmpPolygon) return null;
     if (this.tmpPolygonPoint) {
@@ -782,20 +944,40 @@ ViWiXplot.prototype.endEditPolygon = function() {
     return edittedPolygon;
 }
 
-// Plot Regression Line
-// problem with self.data!!!
-ViWiXplot.prototype.prepareRegressionLines = function() {
-    let regLines = this.regressionLines;
+// Ternary vertex and point
+ViWiXplot.prototype.startAddTernaryVertex = function (idx) {
+    this.setMode('PlotTernaryVertex');
+    if (idx == null) this.tmpVertex = null;
+    else this.tmpVertex = this.ternary.vertices[idx];
+}
+ViWiXplot.prototype.endAddTernaryVertex = function () {
+    this.setMode(null);
+}
 
+ViWiXplot.prototype.startAddTernaryPoint = function () {
+    this.setMode('PlotTernaryPoint');
+}
+ViWiXplot.prototype.endAddTernaryPoint = function () {
+    this.setMode(null);
+}
+
+// Plot Regression Line
+ViWiXplot.prototype.prepareRegressionLines = function () {
+    let regLines = this.regressionLines;
+    let mergedData = [];
+    this.data.forEach(datum => {
+        mergedData = mergedData.concat(datum);
+    });
     let self = this;
-    regLines.forEach(function(l) {
-        let polygons = self.polygons.filter(function(p) {
-            return l.polygons.findIndex(lp => {
-                return lp.idPolygon ? lp.idPolygon == p.idPolygon : lp == p.idPolygon;
-            }) > -1;
-            // return l.polygons.indexOf(p.idPolygon) > -1;
-        });
-        let data = self.filterByPolygons(polygons, self.data, l.exclude);
+
+    regLines.forEach(function (l) {
+        // let polygons = self.polygons.filter(function (p) {
+        //     return l.polygons.findIndex(lp => {
+        //         return lp.idPolygon ? lp.idPolygon == p.idPolygon : lp == p.idPolygon;
+        //     }) > -1;
+        // });
+        let polygons = self.polygons;
+        let data = self.filterByPolygons(polygons, mergedData, l.exclude);
         if (data.length == 0) {
             l.func = null;
             return;
@@ -806,7 +988,7 @@ ViWiXplot.prototype.prepareRegressionLines = function() {
         let end = self.config.scale.right;
         let step = (end - start) / 1000;
 
-        l.data = Utils.range(start, end, step).map(function(d) {
+        l.data = Utils.range(start, end, step).map(function (d) {
             return {
                 x: d,
                 y: func(d)
@@ -815,24 +997,24 @@ ViWiXplot.prototype.prepareRegressionLines = function() {
         l.func = func;
     });
 }
-ViWiXplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY) {
+ViWiXplot.prototype.getRegressionFunc = function (data, type, inverse, fitX, fitY) {
     if (!type) type = 'Linear';
-    let reducer = function(sum, current) { return sum + current; };
+    let reducer = function (sum, current) { return sum + current; };
     let needFit = fitX != null && fitY != null;
 
-    let aWithSign = function(a) {
+    let aWithSign = function (a) {
         return a == 0 ? '' : (a > 0 ? '+' : '') + a;
     }
 
-    let getLinearArgs = function(data) {
-        let dataX = data.map(function(d) { return d.x; });
-        let dataY = data.map(function(d) { return d.y; });
+    let getLinearArgs = function (data) {
+        let dataX = data.map(function (d) { return d.x; });
+        let dataY = data.map(function (d) { return d.y; });
 
         let meanX = dataX.reduce(reducer, 0) * 1.0 / dataX.length;
         let meanY = dataY.reduce(reducer, 0) * 1.0 / dataY.length;
 
-        let XX = dataX.map(function(d) { return Math.pow(d-meanX, 2); }).reduce(reducer, 0);
-        let XY = dataX.map(function(d, i) { return (d-meanX) * (dataY[i]-meanY); }).reduce(reducer, 0);
+        let XX = dataX.map(function (d) { return Math.pow(d - meanX, 2); }).reduce(reducer, 0);
+        let XY = dataX.map(function (d, i) { return (d - meanX) * (dataY[i] - meanY); }).reduce(reducer, 0);
 
         let slope = XY / XX;
         let intercept = meanY - meanX * slope;
@@ -842,56 +1024,56 @@ ViWiXplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY
     let args, slope, intercept, func;
 
     if (type == 'Linear') {
-        data = data.map(function(d) {
+        data = data.map(function (d) {
             return {
-                x: needFit ? (inverse ? 1/d.x - 1/fitX : d.x - fitY) : (inverse ? 1/d.x : d.x),
-                y: needFit ? d.y -fitY : d.y
+                x: needFit ? (inverse ? 1 / d.x - 1 / fitX : d.x - fitY) : (inverse ? 1 / d.x : d.x),
+                y: needFit ? d.y - fitY : d.y
             }
         });
         if (!data.length) return null;
         args = getLinearArgs(data);
         slope = args[0];
-        intercept = needFit ? (-slope * (inverse ? 1/fitX : fitX) + fitY) : args[1];
-        func = function(x) {
-            return inverse ? slope/x + intercept :  x*slope + intercept;
+        intercept = needFit ? (-slope * (inverse ? 1 / fitX : fitX) + fitY) : args[1];
+        func = function (x) {
+            return inverse ? slope / x + intercept : x * slope + intercept;
         }
         let a = +slope.toFixed(6);
         let b = +intercept.toFixed(6);
         func.equation = 'y=' + (a == 0 ? '' : (a + (inverse ? '/' : '*') + 'x')) + (a == 0 ? b : aWithSign(b));
     }
     else if (type == 'Exponent') {
-        data = data.map(function(d) {
+        data = data.map(function (d) {
             return {
-                x: needFit ? (inverse ? 1/d.x - 1/fitX : d.x - fitX) : (inverse ? 1/d.x : d.x),
+                x: needFit ? (inverse ? 1 / d.x - 1 / fitX : d.x - fitX) : (inverse ? 1 / d.x : d.x),
                 y: needFit ? Math.log(d.y) - Math.log(fitY) : Math.log(d.y)
             }
-        }).filter(function(d) { return d.y > 0; });
+        }).filter(function (d) { return d.y > 0; });
 
         if (!data.length) return null;
         args = getLinearArgs(data);
         slope = Math.exp(args[0]);
-        intercept = needFit ? fitY/Math.pow(slope, inverse ? 1/fitX : fitX) : Math.exp(args[1]);
-        func = function(x) {
-            return intercept*Math.pow(slope, inverse ? 1/x : x);
+        intercept = needFit ? fitY / Math.pow(slope, inverse ? 1 / fitX : fitX) : Math.exp(args[1]);
+        func = function (x) {
+            return intercept * Math.pow(slope, inverse ? 1 / x : x);
         }
         let a = +slope.toFixed(6);
         let b = +intercept.toFixed(6);
         func.equation = 'y=' + b + '*' + a + (inverse ? '^(1/x)' : '^x');
     }
     else if (type == 'Power') {
-        data = data.map(function(d) {
+        data = data.map(function (d) {
             return {
-                x: needFit ? Math.log(inverse ? 1/d.x : d.x) - Math.log(inverse ? 1/fitX : fitX) : Math.log(inverse ? 1/d.x : d.x),
+                x: needFit ? Math.log(inverse ? 1 / d.x : d.x) - Math.log(inverse ? 1 / fitX : fitX) : Math.log(inverse ? 1 / d.x : d.x),
                 y: needFit ? Math.log(d.y) - Math.log(fitY) : Math.log(d.y)
             }
-        }).filter(function(d) { return d.x > 0 && d.y > 0; });
+        }).filter(function (d) { return d.x > 0 && d.y > 0; });
 
         if (!data.length) return null;
         args = getLinearArgs(data);
         slope = args[0];
-        intercept = needFit ? fitY/Math.pow(inverse ? 1/fitX : fitX, slope) : Math.exp(args[1]);
-        func = function(x) {
-            return intercept*Math.pow(inverse ? 1/x : x, slope);
+        intercept = needFit ? fitY / Math.pow(inverse ? 1 / fitX : fitX, slope) : Math.exp(args[1]);
+        func = function (x) {
+            return intercept * Math.pow(inverse ? 1 / x : x, slope);
         }
         let a = +slope.toFixed(6);
         let b = +intercept.toFixed(6);
@@ -901,14 +1083,14 @@ ViWiXplot.prototype.getRegressionFunc = function(data, type, inverse, fitX, fitY
     if (func.equation.indexOf('NaN') > -1) return null;
     return func;
 }
-ViWiXplot.prototype.filterByPolygons = function(polygons, data, exclude) {
-    let ppoints = polygons.map(function(p) {
-        return p.points.map(function(point) {
+ViWiXplot.prototype.filterByPolygons = function (polygons, data, exclude) {
+    let ppoints = polygons.map(function (p) {
+        return p.points.map(function (point) {
             return [point.x, point.y];
         });
     });
 
-    return data.filter(function(d) {
+    return data.filter(function (d) {
         let pass = exclude ? false : true;
         for (let p of ppoints)
             if (d3.polygonContains(p, [d.x, d.y]))
@@ -916,7 +1098,7 @@ ViWiXplot.prototype.filterByPolygons = function(polygons, data, exclude) {
         return !pass;
     });
 }
-ViWiXplot.prototype.plotRegressionLines = function() {
+ViWiXplot.prototype.plotRegressionLines = function () {
     // if (this.data.length == 0) return;
     this.prepareRegressionLines();
 
@@ -924,36 +1106,151 @@ ViWiXplot.prototype.plotRegressionLines = function() {
     let transformY = this.getTransformY();
 
     let line = d3.line()
-        .x(function(d) { return transformX(d.x); })
-        .y(function(d) { return transformY(d.y); })
-        .defined(function(d) {
+        .x(function (d) { return transformX(d.x); })
+        .y(function (d) { return transformY(d.y); })
+        .defined(function (d) {
             return !isNaN(d.x) && !isNaN(d.y) && d.y != Infinity && d.y != -Infinity;
         });
 
-    let regLineContainer = this.svgContainer.select('g.vi-crossplot-regression-lines')
+    let regLineContainer = this.functionsContainer.select('g.vi-xplot-regression-lines')
         .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
 
     let regLines = regLineContainer.selectAll('path')
-        .data(this.regressionLines.filter(function(r) {
+        .data(this.regressionLines.filter(function (r) {
             return r.func != null;
         }));
 
     let self = this;
     regLines.enter().append('path')
         .merge(regLines)
-        .attr('d', function(d) {
+        .attr('d', function (d) {
             return line(d.data);
         })
-        .attr('stroke', function(d) { return d.lineStyle.lineColor; })
-        .attr('stroke-dasharray', function(d) { return d.lineStyle.lineStyle; })
-        .attr('stroke-width', function(d) { return d.lineStyle.lineWidth; })
+        .attr('stroke', function (d) { return d.lineStyle.lineColor; })
+        .attr('stroke-dasharray', function (d) { return d.lineStyle.lineStyle; })
+        .attr('stroke-width', function (d) { return d.lineStyle.lineWidth; })
         .attr('fill', 'none')
-        .style('display', function(d) { return d.displayLine ? 'block' : 'none'; });
+        .style('display', function (d) { return d.displayLine ? 'block' : 'none'; });
     regLines.exit().remove();
 
     this.plotEquations();
 }
 
+// Plot Overlay Line
+ViWiXplot.prototype.plotOverlayLines = function () {
+    let overlayLineContainer = this.functionsContainer.select('g.vi-xplot-overlay-line')
+        .attr('clip-path', 'url(#' + this.getSvgClipId() + ')');
+
+    let transformX = this.getTransformX();
+    let transformY = this.getTransformY();
+    window.tX = transformX;
+    window.tY = transformY;
+    let isSwap = (this.config.OLLine || {}).isSwap;
+
+    let line = d3.line()
+        .x(function (d) { return transformX(parseFloat(isSwap ? d.x : d.y)); })
+        .y(function (d) { return transformY(parseFloat(isSwap ? d.y : d.x)); })
+        .defined(function (d) {
+            return !isNaN(d.x) && !isNaN(d.y);
+        });
+
+    let data;
+    if (this.showOverlay) {
+        data = (this.config.OLLine || {}).lines || [];
+    } else {
+        data = [];
+    }
+    for (let i = 0; i < data.length; i++) {
+        data[i].data = data[i].data.filter(function (d) {
+            return !isNaN(d.x) && !isNaN(d.y);
+        });
+    }
+    let overlayLines = overlayLineContainer.selectAll('path.line')
+        .data(data);
+
+    overlayLines.enter().append('path')
+        .merge(overlayLines)
+        .attr('class', 'line')
+        .attr('d', function (d) {
+            return line(d.data);
+        })
+        .attr('stroke', function (d) {
+            let color = d.color;
+            if (d.names == 'SS') color = 'Green';
+            if (d.names == 'LS') color = 'Blue';
+            if (d.names == 'DOL') color = 'Pink';
+            return color.replace('Dk', 'Dark');
+        })
+        .attr('stroke-width', 2)
+        .attr('fill', 'none');
+
+    overlayLines.exit().remove();
+    overlayLineContainer.selectAll('path.tick').remove();
+    overlayLineContainer.selectAll('text').remove();
+
+    for (let line of data) {
+        let color = line.color;
+        let name = line.names;
+
+        if (name == 'SS') color = 'Green';
+        if (name == 'LS') color = 'Blue';
+        if (name == 'DOL') color = 'Pink';
+
+        let points = line.data.map(function (d) {
+            return {
+                x: transformX(parseFloat(isSwap ? d.x : d.y)),
+                y: transformY(parseFloat(isSwap ? d.y : d.x)),
+                type: d.type
+            };
+        });
+        if (points.length <= 1) break;
+        let sign = 1;
+        if (points[0].x < points[1].x) sign = -1;
+
+        overlayLineContainer.append('text')
+            .attr('x', points[0].x + 10 * sign)
+            .attr('y', points[0].y)
+            .text(name)
+            .attr('stroke', color.replace('Dk', 'Dark'))
+            .attr('fill', color.replace('Dk', 'Dark'));
+
+        for (let i = 0; i < points.length; i++) {
+            let a, b;
+            if (i == points.length - 1) {
+                a = points[i];
+                b = points[i - 1];
+            }
+            else {
+                a = points[i];
+                b = points[i + 1];
+            }
+            let v_x = b.y - a.y;
+            let v_y = a.x - b.x;
+            let v_length = Math.sqrt(v_x * v_x + v_y * v_y);
+            v_x /= v_length;
+            v_y /= v_length;
+            if (isNaN(v_x) || isNaN(v_y)) continue;
+
+            const _TICK_SIZE = 5;
+            overlayLineContainer.append('path')
+                .attr('class', 'tick')
+                .attr('d', 'M ' + (a.x + v_x * _TICK_SIZE) + ' ' + (a.y + v_y * _TICK_SIZE) + ' '
+                    + 'L ' + (a.x - v_x * _TICK_SIZE) + ' ' + (a.y - v_y * _TICK_SIZE))
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1);
+
+
+            if (!isNaN(points[i].type)) {
+                overlayLineContainer.append('text')
+                    .attr('x', a.x - 7)
+                    .attr('y', a.y - 7)
+                    .text(points[i].type);
+            }
+        }
+    }
+}
+
+// Calculate scale
 ViWiXplot.prototype.getTransformX = function () {
     let scaleFunc = this.config.logX ? d3.scaleLog() : d3.scaleLinear();
     return scaleFunc
@@ -1032,13 +1329,13 @@ ViWiXplot.prototype.genYTickValues = function () {
 }
 
 // Mouse event
-ViWiXplot.prototype.on = function(type, cb) {
+ViWiXplot.prototype.on = function (type, cb) {
     this.svgContainer.on(type, cb);
 }
 
 ViWiXplot.prototype.onMouseDown = function (callback) {
     let self = this;
-    this.on('mousedown', function() {
+    this.on('mousedown', function () {
         let ret = self.mouseDownCallback();
         callback(ret);
     });
@@ -1210,19 +1507,19 @@ ViWiXplot.prototype.mouseMoveCallback = function () {
 }
 
 // Utils
-ViWiXplot.prototype.genColor = function() {
+ViWiXplot.prototype.genColor = function () {
     function rand(x) {
         return Math.floor(Math.random() * x);
     }
 
     const DEFAULT_COLORS = ['Cyan', 'Brown', 'Green', 'DarkGoldenRod', 'DimGray', 'Indigo', 'Navy'];
     let usedColors = [];
-    this.polygons.forEach(function(d) {
+    this.polygons.forEach(function (d) {
         usedColors = usedColors.concat(d3.color(d.lineStyle).toString());
     });
 
     let color;
-    for (let i = 0; i <= this.polygons.length; i++)  {
+    for (let i = 0; i <= this.polygons.length; i++) {
         if (i >= DEFAULT_COLORS.length) {
             do {
                 color = d3.rgb(rand(255), rand(255), rand(255)).toString();

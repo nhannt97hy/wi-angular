@@ -26,13 +26,15 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
         polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
                 idx: index + 1,
-                value:polygonItem.idPolygon,
+                // value:polygonItem.idPolygon,
+                value:polygonItem.idPolygon || index + 1,
                 bgColor: polygonItem.lineStyle
             });
         });
         // console.log('polygonList',self.polygonList);
 
-        let viCrossplot = wiD3Crossplot.getViCrossplot();
+        // let viCrossplot = wiD3Crossplot.getViCrossplot();
+        let viCrossplot = wiD3Crossplot.viWiXplot;
         this.regressionLines = [];
         this.viCross = viCrossplot.getProperties()
         // console.log("vi111", this.viCross, this.polygonList);
@@ -113,8 +115,8 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                     lineStyle: [10, 0]
                 },
                 exclude: true,
-                polygons: [],
-                idCrossPlot: self.viCross.idCrossPlot
+                polygons: []
+                // idCrossPlot: self.viCross.idCrossPlot
             });
             console.log("addRow", self.regressionLines);
         };
@@ -141,23 +143,23 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                     // console.log("regLine", regLine, self.polygonList);
                     switch(regLine.change) {
                         case change.created:
-                        wiApiService.createRegressionLines(regLine, function(res){
-                            console.log("create", res, regLine);
-                            regLine.idRegressionLine = res.idRegressionLine;
+                        // wiApiService.createRegressionLines(regLine, function(res){
+                        //     console.log("create", res, regLine);
+                        //     regLine.idRegressionLine = res.idRegressionLine;
                             callback();
-                        });
+                        // });
                         break;
                         case change.updated:
-                        wiApiService.editRegressionLines(regLine, function(res){
-                            console.log("update", res, regLine);
+                        // wiApiService.editRegressionLines(regLine, function(res){
+                        //     console.log("update", res, regLine);
                             callback();
-                        });
+                        // });
                         break;
                         case change.deleted:
-                        wiApiService.removeRegressionLines(regLine.idRegressionLine, function(res){
-                            console.log("delete", res);
+                        // wiApiService.removeRegressionLines(regLine.idRegressionLine, function(res){
+                        //     console.log("delete", res);
                             callback();
-                        });
+                        // });
                         break;
                         default:
                         callback();
@@ -176,13 +178,13 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                         }
                     }
                     self.viCross.regressionLines = self.regressionLines;
-                    viCrossplot.setProperties({ regressionLines: self.regressionLines });
+                    // viCrossplot.setProperties({ regressionLines: self.regressionLines });
                     viCrossplot.plotRegressionLines();
                     if(callback) callback();
                 });
             } else {
                 self.viCross.regressionLines = self.regressionLines;
-                viCrossplot.setProperties(self.viCross)
+                // viCrossplot.setProperties(self.viCross)
                 viCrossplot.doPlot();
                 if(callback) callback();
             }

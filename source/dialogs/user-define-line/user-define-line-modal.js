@@ -13,7 +13,8 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             uncreated: 4
         }
 
-        let viCrossplot = wiD3Crossplot.getViCrossplot();
+        // let viCrossplot = wiD3Crossplot.getViCrossplot();
+        let viCrossplot = wiD3Crossplot.viWiXplot;
         this.userDefineLines = [];
         this.viCross = viCrossplot.getProperties()
         // console.log("vi111", this.viCross);
@@ -62,8 +63,8 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                     lineStyle: [10, 0]
                 },
                 displayLine: true,
-                displayEquation: true,
-                idCrossPlot: self.viCross.idCrossPlot
+                displayEquation: true
+                // idCrossPlot: self.viCross.idCrossPlot
             });
             console.log("addRow", self.userDefineLines);
         };
@@ -96,23 +97,23 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                 async.eachOfSeries(self.userDefineLines, function(udLine, idx, callback){
                     switch(self.userDefineLines[idx].change) {
                         case change.created:
-                        wiApiService.createUserDefineLine(self.userDefineLines[idx], function(response){
-                            self.userDefineLines[idx].idUserDefineLine = response.idUserDefineLine;
-                            console.log("create UDL", response.idUserDefineLine);
+                        // wiApiService.createUserDefineLine(self.userDefineLines[idx], function(response){
+                        //     self.userDefineLines[idx].idUserDefineLine = response.idUserDefineLine;
+                        //     console.log("create UDL", response.idUserDefineLine);
                             callback();
-                        });
+                        // });
                         break;
                         case change.updated:
-                        wiApiService.editUserDefineLine(self.userDefineLines[idx], function(){
-                            console.log("update UDL");
+                        // wiApiService.editUserDefineLine(self.userDefineLines[idx], function(){
+                        //     console.log("update UDL");
                             callback();
-                        });
+                        // });
                         break;
                         case change.deleted:
-                        wiApiService.removeUserDefineLine(self.userDefineLines[idx].idUserDefineLine, function(){
-                            console.log("delete UDL");
+                        // wiApiService.removeUserDefineLine(self.userDefineLines[idx].idUserDefineLine, function(){
+                        //     console.log("delete UDL");
                             callback();
-                        });
+                        // });
                         break;
                         default:
                         callback();
@@ -130,14 +131,17 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                             break;
                         }
                     }
-                    self.viCross.userDefineLines = self.userDefineLines;
-                    viCrossplot.setProperties({ userDefineLines: self.userDefineLines });
+                    // self.viCross.userDefineLines = self.userDefineLines;
+                    // viCrossplot.setProperties({ userDefineLines: self.userDefineLines });
+                    viCrossplot.userDefineLines = self.userDefineLines;
                     viCrossplot.plotUserDefineLines();
                     if(callback) callback();
                 });
             } else {
-                self.viCross.userDefineLines = self.userDefineLines;
-                viCrossplot.setProperties(self.viCross)
+                // self.viCross.userDefineLines = self.userDefineLines;
+                // viCrossplot.setProperties(self.viCross)
+                // viCrossplot.doPlot();
+                viCrossplot.userDefineLines = self.userDefineLines;
                 viCrossplot.doPlot();
                 if(callback) callback();
             }

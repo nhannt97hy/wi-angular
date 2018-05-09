@@ -148,45 +148,71 @@
     </template>
 
     <template id="wi-xplot">
-        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wiXplotController as wiPlotCtrl">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wiXplotController as wiXplotCtrl">
             <h3 class="content-heading">Wi Xplot Sample</h3>
             <div class="row container-fluid">
                 <div class="col-md-1"></div>
                 <ui-select multiple ng-model="$item"
-                            ng-change="wiPlotCtrl.onChange($item)"
+                            ng-change="wiXplotCtrl.onChange($item)"
                             close-on-select="false">
                     <ui-select-match placeholder='Select pairs'>{{$item}}</ui-select-match>
-                    <ui-select-choices repeat='pair in wiPlotCtrl.data'>
+                    <ui-select-choices repeat='pair in wiXplotCtrl.data'>
                         <div>{{pair}}</div>
                     </ui-select-choices>
                 </ui-select>
+                <label class="font-weight-normal">MajorX</label>
+                    <input type="number" min="0" max="10" ng-model="wiXplotCtrl.config.majorX">
+                <label class="font-weight-normal">MajorY</label>
+                    <input type="number" min="0" max="10" ng-model="wiXplotCtrl.config.majorY">
                 <label class="font-weight-normal">MinorX</label>
-                    <input type="number" min="0" max="10" ng-model="wiPlotCtrl.config.minorX">
+                    <input type="number" min="0" max="10" ng-model="wiXplotCtrl.config.minorX">
                 <label class="font-weight-normal">MinorY</label>
-                    <input type="number" min="0" max="10" ng-model="wiPlotCtrl.config.minorY">
+                    <input type="number" min="0" max="10" ng-model="wiXplotCtrl.config.minorY">
                 <label class="font-weight-normal">LogX</label>
-                    <input type="checkbox" value="" ng-model="wiPlotCtrl.config.logX" ng-change="wiPlotCtrl.checkLogStatus()">
+                    <input type="checkbox" value="" ng-model="wiXplotCtrl.config.logX" ng-change="wiXplotCtrl.checkLogStatus()">
                 <label class="font-weight-normal">LogY</label>
-                    <input type="checkbox" value="" ng-model="wiPlotCtrl.config.logY" ng-change="wiPlotCtrl.checkLogStatus()">
+                    <input type="checkbox" value="" ng-model="wiXplotCtrl.config.logY" ng-change="wiXplotCtrl.checkLogStatus()">
                 <label class="font-weight-normal">Left</label>
                     <input type="number" id="scaleLeft"
-                            ng-model="wiPlotCtrl.config.scale.left"
-                            ng-change="wiPlotCtrl.checkLogValueX(wiPlotCtrl.config.scale.left, 'scaleLeft')">
+                            ng-model="wiXplotCtrl.config.scale.left"
+                            ng-change="wiXplotCtrl.checkLogValueX(wiXplotCtrl.config.scale.left, 'scaleLeft')">
                 <label class="font-weight-normal">Right</label>
                     <input type="number" id="scaleRight"
-                            ng-model="wiPlotCtrl.config.scale.right"
-                            ng-change="wiPlotCtrl.checkLogValueX(wiPlotCtrl.config.scale.right, 'scaleRight')">
+                            ng-model="wiXplotCtrl.config.scale.right"
+                            ng-change="wiXplotCtrl.checkLogValueX(wiXplotCtrl.config.scale.right, 'scaleRight')">
                 <label class="font-weight-normal">Bottom</label>
                     <input type="number" id="scaleBottom"
-                            ng-model="wiPlotCtrl.config.scale.bottom"
-                            ng-change="wiPlotCtrl.checkLogValueY(wiPlotCtrl.config.scale.bottom, 'scaleBottom')">
+                            ng-model="wiXplotCtrl.config.scale.bottom"
+                            ng-change="wiXplotCtrl.checkLogValueY(wiXplotCtrl.config.scale.bottom, 'scaleBottom')">
                 <label class="font-weight-normal">Top</label>
                     <input type="number" id="scaleTop"
-                            ng-model="wiPlotCtrl.config.scale.top"
-                            ng-change="wiPlotCtrl.checkLogValueY(wiPlotCtrl.config.scale.top, 'scaleTop')">
-                <button class="btn btn-default col-md-2" ng-click="wiPlotCtrl.testUpdate()">Test update</button>
+                            ng-model="wiXplotCtrl.config.scale.top"
+                            ng-change="wiXplotCtrl.checkLogValueY(wiXplotCtrl.config.scale.top, 'scaleTop')">
+                <button class="btn btn-default col-md-2" ng-click="wiXplotCtrl.testUpdate()">Test update</button>
             </div>
-            <wi-xplot style='flex:1; display: flex;' id-curves='wiPlotCtrl.idCurves' config='wiPlotCtrl.config'></wi-xplot>
+            <div style="flex: 1; display: flex; flex-direction: row;">
+                <div resizable r-directions="['right']" r-flex="true" ng-show="wiXplotCtrl.config.isShowWiZone" style="min-width:10%;max-width:20%">
+                    <wi-container name='ZoneCrossplotContainer' title='Zone' close-handler='wiXplotCtrl.closeZone'>
+                        <wi-zone name=""
+                        zones=""
+                        active-zone=""
+                        on-zone-ctrl-ready="wiXplotCtrl.onZoneCtrlReady"></wi-zone>
+                    </wi-container>
+                </div>
+                <wi-xplot style='flex:1; display: flex;' id-curves='wiXplotCtrl.idCurves' config='wiXplotCtrl.config'></wi-xplot>
+                <div resizable r-directions="['left']" r-flex="true"
+                    ng-show="wiXplotCtrl.config.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
+                    <wi-container name='RefCrossplotContainer'
+                        title='Reference Curve'
+                        close-handler='wiXplotCtrl.closeReferenceWindow'>
+                        <wi-reference-window
+                            name='Reference Window'
+                            container-name="Container Name"
+                            on-ref-wind-ctrl-ready="wiXplotCtrl.onRefWindCtrlReady">
+                        </wi-reference-window>
+                    </wi-container>
+                </div>
+            </div>
         </div>
     </template>
 

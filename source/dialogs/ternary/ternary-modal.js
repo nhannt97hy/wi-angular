@@ -34,7 +34,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
         //     checkBoxes: true
         // };
         this.idPolygonTest = [];
-        let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
+        // let viCrossplot = wiD3CrossplotCtrl.getViCrossplot();
+        let viCrossplot = wiD3CrossplotCtrl.viWiXplot;
         let props = angular.copy(viCrossplot.getProperties());
         let ternary = (this.ternary = props.ternary);
         let well = wiD3CrossplotCtrl.getWell();
@@ -76,7 +77,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
         props.polygons.forEach(function(polygonItem, index) {
             self.polygonList.push({
                 idx: index + 1,
-                value: polygonItem.idPolygon,
+                // value: polygonItem.idPolygon,
+                value: polygonItem.idPolygon || 1,
                 bgColor: polygonItem.lineStyle
             });
         });
@@ -155,7 +157,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                 if(!vertex || typeof(vertex) == 'string') {
                     toastr.error(vertex || "Invalid point!");
                     viCrossplot.onMouseDown(
-                        wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                        // wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                        wiD3CrossplotCtrl.mouseDownCallback
                     );
                     return;
                 }
@@ -178,7 +181,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                 }
                 $scope.$apply();
                 viCrossplot.onMouseDown(
-                    wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    // wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    wiD3CrossplotCtrl.mouseDownCallback
                 );
             });
         };
@@ -196,7 +200,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                     $scope.$apply();
                 }
                 viCrossplot.onMouseDown(
-                    wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    // wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    wiD3CrossplotCtrl.mouseDownCallback
                 );
             });
         };
@@ -301,26 +306,26 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
 
                     switch (self.vertices[idx].change) {
                         case change.created:
-                            wiApiService.createTernary(data, function(
-                                response
-                            ) {
-                                self.vertices[idx].idVertex =
-                                    response.idTernary;
+                            // wiApiService.createTernary(data, function(
+                            //     response
+                            // ) {
+                            //     self.vertices[idx].idVertex =
+                            //         response.idTernary;
                                 cb();
-                            });
+                            // });
                             break;
                         case change.updated:
-                            wiApiService.editTernary(data, function(response) {
+                            // wiApiService.editTernary(data, function(response) {
                                 cb();
-                            });
+                            // });
                             break;
                         case change.deleted:
-                            wiApiService.removeTernary(
-                                self.vertices[idx].idVertex,
-                                function(response) {
+                            // wiApiService.removeTernary(
+                            //     self.vertices[idx].idVertex,
+                            //     function(response) {
                                     cb();
-                                }
-                            );
+                            //     }
+                            // );
                             break;
                         default:
                             cb();
@@ -340,7 +345,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                     savedTernary.calculate = calculateOptions;
                     if (usedVertices.length < 3) $scope.result = {};
                     savedTernary.result = $scope.result;
-                    viCrossplot.setProperties({ ternary: savedTernary });
+                    // viCrossplot.setProperties({ ternary: savedTernary });
+                    viCrossplot.ternary = savedTernary;
                     viCrossplot.plotTernary();
                     savedTernary = angular.copy(savedTernary);
                     if (callback) callback();
@@ -381,15 +387,15 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                             } else {
                                 payload.curveName = curveNames[i];
                             }
-                            wiApiService.processingDataCurve(payload, function( res, err ) {
-                                if(!res.idCurve) {
-                                    wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
-                                        idCurve: payload.idDesCurve,
-                                        data: payload.data
-                                    })
-                                }
+                            // wiApiService.processingDataCurve(payload, function( res, err ) {
+                            //     if(!res.idCurve) {
+                            //         wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {
+                            //             idCurve: payload.idDesCurve,
+                            //             data: payload.data
+                            //         })
+                            //     }
                                 callback();
-                            });
+                            // });
                         }
                     );
                 }, (err) => {
@@ -452,7 +458,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                 vertices: self.getVertices(),
                 calculate: calculateOptions
             };
-            viCrossplot.setProperties({ ternary: tmpTernary });
+            // viCrossplot.setProperties({ ternary: tmpTernary });
+            viCrossplot.ternary = tmpTernary;
             let result = viCrossplot.calculateTernary();
             if (result.error) utils.error(result.error);
             else {
@@ -480,7 +487,8 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
             setVertices();
         };
         this.onCancelButtonClicked = function() {
-            viCrossplot.setProperties({ ternary: savedTernary });
+            // viCrossplot.setProperties({ ternary: savedTernary });
+            viCrossplot.ternary = savedTernary;
             viCrossplot.plotTernary();
             close(null);
             wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);

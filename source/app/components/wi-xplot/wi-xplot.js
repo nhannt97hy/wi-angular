@@ -8,7 +8,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.$onInit = function () {
         console.log('wi xplot initialization: ', this);
-        this.plotAreaId = 'wi-xplot-area';
+        this.mainXplotAreaId = 'wi-xplot-main-area';
         this.viWiXplot = null;
         wiComponentService.putComponent('wi-xplot', this);
     }
@@ -34,8 +34,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     logY: false,
                     majorX: 5,
                     majorY: 5,
-                    minorX : 1,
-                    minorY : 1,
+                    minorX: 1,
+                    minorY: 1,
                     decimalsX: 2,
                     decimalsY: 2,
                     scale: {
@@ -47,7 +47,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 };
                 this.viWiXplot.pointsets = [];
                 this.viWiXplot.updatePlot(changes);
-                this.viWiXplot.plotContainer.remove();
+                this.viWiXplot.footerContainer.selectAll('*').remove();
+                this.viWiXplot.plotContainer.selectAll('*').remove();
                 delete this.viWiXplot;
             } else if (isChanged) {
                 this.createViWiXplot(changes);
@@ -121,29 +122,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 // test
                 if (!self.config.scale.left && !self.config.scale.right
                     && !self.config.scale.bottom && !self.config.scale.top) {
-                        self.config.scale = (self.pointsets[0] || {}).scale;
+                    self.config.scale = (self.pointsets[0] || {}).scale;
                 }
                 if (self.config.logX) {
                     if (self.config.scale.left == 0
                         || self.config.scale.right == 0) {
-                            self.config.logX = false;
-                            toastr.error("Scale can't be 0 in Logarithmic");
-                            return;
-                        }
+                        self.config.logX = false;
+                        toastr.error("Scale can't be 0 in Logarithmic");
+                        return;
+                    }
                 }
                 if (self.config.logY) {
                     if (self.config.scale.bottom == 0
                         || self.config.scale.top == 0) {
-                            self.config.logY = false;
-                            toastr.error("Scale can't be 0 in Logarithmic");
-                            return;
-                        }
+                        self.config.logY = false;
+                        toastr.error("Scale can't be 0 in Logarithmic");
+                        return;
+                    }
                 }
                 // end test
                 self.viWiXplot = graph.createVisualizeWiXplot({
                     pointsets: self.pointsets,
                     config: self.config
-                }, document.getElementById(self.plotAreaId));
+                }, document.getElementById(self.mainXplotAreaId));
                 self.setContextMenu();
             } else {
                 self.viWiXplot.pointsets = self.pointsets;
@@ -214,6 +215,48 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         this.viWiXplot.plotUserLine();
     }
 
+    this.pickPoint = function(callback) {
+        self.viWiXplot.startAddTernaryPoint();
+        self.setContextMenu([
+            {
+                name: "End",
+                label: "End",
+                icon: "",
+                handler: function () {
+                    self.viWiXplot.endAddTernaryPoint();
+                    self.setContextMenu();
+                    if (callback) callback(null);
+                }
+            }
+        ]);
+        self.viWiXplot.onMouseDown(function(point) {
+            self.mouseDownCallback();
+            if (d3.event.button == 2) return;
+            if (callback) callback(point);
+        })
+    }
+    this.pickVertex = function(idx, callback) {
+        self.viWiXplot.startAddTernaryVertex(idx);
+
+        self.setContextMenu([
+            {
+                name: "Cancel",
+                label: "Cancel",
+                icon: "",
+                handler: function () {
+                    self.viWiXplot.endAddTernaryVertex();
+                    self.setContextMenu();
+                    if (callback) callback('Canceled');
+                }
+            }
+        ]);
+        self.viWiXplot.onMouseDown(function(vertex) {
+            self.mouseDownCallback();
+            if (d3.event.button == 2) return;
+            if (callback) callback(vertex);
+        })
+    }
+
     this.mouseDownCallback = function () {
         if (d3.event.button == 2) return;
         if (self.viWiXplot.mode == 'PlotAreaRectangle') {
@@ -227,6 +270,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.viWiXplot.endAddUserLine();
                 self.setContextMenu();
             }
+        }
+        else if (self.viWiXplot.mode == 'PlotTernaryVertex') {
+            self.viWiXplot.endAddTernaryVertex();
+            self.setContextMenu();
+        }
+        else if (self.viWiXplot.mode == 'PlotTernaryPoint') {
+            self.viWiXplot.endAddTernaryPoint();
+            self.setContextMenu();
         }
     }
 
@@ -273,6 +324,39 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
 
+    this.switchReferenceZone = function (state) {
+        if (state != undefined || state != null) this.config.isShowWiZone = state;
+        else this.config.isShowWiZone = !this.config.isShowWiZone;
+        const menuItem = this.contextMenu.find(c => c.name == 'ShowReferenceZone');
+        if (menuItem) {
+            menuItem.checked = this.config.isShowWiZone;
+        }
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
+    }
+
+    this.switchReferenceWindow = function (state) {
+        if (state != undefined || state != null) this.config.referenceDisplay = state;
+        else this.config.referenceDisplay = !this.config.referenceDisplay;
+        const menuItem = this.contextMenu.find(c => c.name == 'ShowReferenceWindow');
+        if (menuItem) {
+            menuItem.checked = this.config.referenceDisplay;
+        }
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
+    }
+
+    this.getWell = function () {
+        return {
+            children: [{
+                id: 1,
+                type: 'dataset',
+            }],
+            properties: {
+                topDepth: 1119.8352,
+                step: 0.1524
+            }
+        };
+    }
+
     this.setContextMenu = function (contextMenu) {
         let self = this;
         if (!contextMenu) {
@@ -285,6 +369,33 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     handler: function () {
                         self.viWiXplot.showTooltip = !self.viWiXplot.showTooltip;
                         self.contextMenu[0].checked = self.viWiXplot.showTooltip;
+                    }
+                }, {
+                    name: "ShowOverlay",
+                    label: "Show Overlay",
+                    isCheckType: "true",
+                    disabled: (self.config || {}).idOverlayLine ? false : true,
+                    checked: self.viWiXplot.showOverlay ? self.viWiXplot.showOverlay : true,
+                    handler: function (index) {
+                        self.viWiXplot.showOverlay = !self.viWiXplot.showOverlay;
+                        self.viWiXplot.plotOverlayLines();
+                        self.contextMenu[index].checked = self.viWiXplot.showOverlay;
+                    }
+                }, {
+                    name: "ShowReferenceZone",
+                    label: "Show Reference Zone",
+                    isCheckType: "true",
+                    checked: self.config.isShowWiZone,
+                    handler: function (index) {
+                        self.switchReferenceZone();
+                    }
+                }, {
+                    name: "ShowReferenceWindow",
+                    label: "Show Reference Window",
+                    isCheckType: "true",
+                    checked: self.config.referenceDisplay,
+                    handler: function (index) {
+                        self.switchReferenceWindow();
                     }
                 }, {
                     name: "Functions",
@@ -313,6 +424,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             }
                         },
                         {
+                            separator: '1'
+                        },
+                        {
                             name: "CreateUserLine",
                             label: "Create User Line",
                             handler: function () {
@@ -327,24 +441,43 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             }
                         },
                         {
+                            separator: '1'
+                        },
+                        {
                             name: "UserDefineLine",
                             label: "User Define Line",
                             handler: function () {
-                                DialogUtils.userDefineLineDialog(ModalService, self, function () {});
+                                DialogUtils.userDefineLineDialog(ModalService, self, function () { });
                             }
                         },
                         {
                             name: "PolygonManager",
                             label: "Polygon Manager",
                             handler: function () {
-                                DialogUtils.polygonManagerDialog(ModalService, self, function () {});
+                                DialogUtils.polygonManagerDialog(ModalService, self, function () { });
                             }
                         },
                         {
                             name: "RegessionLine",
                             label: "Regession Line",
                             handler: function () {
-                                DialogUtils.regressionLineDialog(ModalService, self, function () {});
+                                DialogUtils.regressionLineDialog(ModalService, self, function () { });
+                            }
+                        }
+                    ],
+                    handler: function () {
+
+                    }
+                }, {
+                    name: "Ternary",
+                    label: "Ternary",
+                    class: "has-more",
+                    childContextMenu: [
+                        {
+                            name: "ConfigTernaryDiagram",
+                            label: "Config Ternary Diagram",
+                            handler: function () {
+                                DialogUtils.ternaryDialog(ModalService, wiComponentService, self, function () { });
                             }
                         }
                     ],

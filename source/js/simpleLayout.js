@@ -707,7 +707,7 @@ app.controller('wiPlotPlaygroundController', function($scope) {
 
 app.controller('wiXplotController', function ($scope, wiComponentService, $timeout) {
     // test
-    this.data = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
+    this.data = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 1 }, { 'x': 2, 'y': 2 }];
     // this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
     this.idCurves = [];
     this.config = {
@@ -724,7 +724,9 @@ app.controller('wiXplotController', function ($scope, wiComponentService, $timeo
             right: null,
             bottom: null,
             top: null
-        }
+        },
+        isShowWiZone: false,
+        referenceDisplay: false
     };
 
     this.onChange = function (idCurves) {
@@ -776,6 +778,26 @@ app.controller('wiXplotController', function ($scope, wiComponentService, $timeo
                 }, 255);
             }
         }
+    }
+
+    this.closeZone = function () {
+        let wiXplot = wiComponentService.getComponent('wi-xplot');
+        if (!wiXplot) return;
+        wiXplot.switchReferenceZone(false);
+    }
+
+    this.onZoneCtrlReady = function (zoneCtrl) {
+
+    }
+
+    this.closeReferenceWindow = function () {
+        let wiXplot = wiComponentService.getComponent('wi-xplot');
+        if (!wiXplot) return;
+        wiXplot.switchReferenceWindow(false);
+    }
+
+    this.onRefWindCtrlReady = function (refWindCtrl) {
+
     }
 
     this.testUpdate = function () {
