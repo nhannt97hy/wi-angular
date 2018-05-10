@@ -35,9 +35,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
                 color: 'blue',
                 showGrid: true,
                 
-                // TO BE REVIEWED
-                // idWell: self.wiD3Ctrl.getWellProps().idWell,
-                idWell: 1,
+                idWell: 7,
 
                 intervalDepthTop: windowY[0] + range/4.,
                 intervalDepthBottom: windowY[1] - range/4.,
@@ -448,7 +446,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $co
         self.getProperties().controller = self;
         if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
         
-        for (let objectOfTrack of self.getProperties().object_of_tracks) {
+        let objects = self.getProperties().object_of_tracks;
+        if(!Array.isArray(objects)) objects = [];
+        for (let objectOfTrack of objects) {
             let anObject = self.addObjectToTrack(self.viTrack, objectOfTrack);
             let objectProps = JSON.parse(objectOfTrack.object);
             switch(objectProps.type) {

@@ -165,7 +165,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
        
         event.stopPropagation();
         wiComponentService.getComponent('ContextMenu')
-            .open(event.clientX, event.clientY, self.contextMenu, function () {});
+            .open(event.clientX, event.clientY, self.getContextMenu(), function () {});
     }
     this.getListWells = function () {
         return _.uniq(this.trackComponents

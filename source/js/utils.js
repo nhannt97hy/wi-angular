@@ -1230,11 +1230,13 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) {
                 return $(event.currentTarget).find('div:nth-child(2)').clone();
             }
-            return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+            let newDiv = $('<div/>');
+            newDiv.css('pointer-events', 'none');
+            return newDiv.append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
         },
         start: function (event, ui) {
             dragMan.dragging = true;
-            d3.selectAll('.vi-track-plot-container').style('z-index', 1);
+            // d3.selectAll('.vi-track-container').style('z-index', 1);
         },
         stop: function (event, ui) {
             dragMan.dragging = false;
@@ -1247,7 +1249,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
             dragMan.wiD3Ctrl = null;
             dragMan.track = null;
             dragMan.wiSlidingBarCtrl = null;
-            d3.selectAll('.vi-track-plot-container').style('z-index', 'unset');
+            // d3.selectAll('.vi-track-container').style('z-index', 'unset');
             let idCurves = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
             if (idCurves.length) {
                 handleDrop(idCurves);

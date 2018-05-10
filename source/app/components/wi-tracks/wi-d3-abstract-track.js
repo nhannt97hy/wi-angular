@@ -60,11 +60,17 @@ Controller.prototype.registerTrackMouseEventHandlers = function () {
 		self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
     });
 
-    self.viTrack.plotContainer.on('mouseover', function() {
+    // self.viTrack.plotContainer.on('mouseover', function() {
+    //     self.mouseOverHandler.call(self);
+    // });
+    self.viTrack.trackContainer.on('mouseover', function() {
         self.mouseOverHandler.call(self);
     });
 
-    self.viTrack.plotContainer.on('mouseleave', function() {
+    // self.viTrack.plotContainer.on('mouseleave', function() {
+    //     self.mouseLeaveHandler.call(self);
+    // });
+    self.viTrack.trackContainer.on('mouseleave', function() {
         self.mouseLeaveHandler.call(self);
     });
 }
