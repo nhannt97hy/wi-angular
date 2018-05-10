@@ -1,13 +1,13 @@
-<div>
-    <ul class="nav nav-tabs">
+<div ng-class="{bottom: wiTabset.position=='bottom'}">
+    <ul class="nav nav-tabs" ng-class="{'nav-center': wiTabset.navAlign=='center'}">
         <li class="wi-tab" ng-repeat="tab in wiTabset.tabs track by $index"
             ng-class="{'active': tab.active}"
             ng-click="wiTabset.selectTab($index)"
             ng-show="tab.enabled == 'true'">
             <a>{{tab.heading}}</a>
             <i class="ti-close"
-               ng-show="tab.closable == 'true'"
-               ng-click="wiTabset.closeTab($index)"></i>
+            ng-show="tab.closable == 'true'"
+            ng-click="wiTabset.closeTab($index)"></i>
         </li>
         <li ng-show='wiTabset.toggle' class="toggle">
             <wi-button name='ribbonToggle' tooltip='{{wiTabset.isExpand ? "Minimize Ribbon" : "Expand Ribbon"}}' icon='{{wiTabset.icon}}' type='small' handler='wiTabset.toggleRibbon'></wi-button>

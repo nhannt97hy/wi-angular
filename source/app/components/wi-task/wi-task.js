@@ -34,6 +34,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         self.idProject = self.getCurrentProjectId();
         self.isFrozen = !!self.idProject;
         self.projectConfig = new Array();
+        self.zone_set_list = new Array();
     };
     this.getCurrentProjectId = function() {
         if (self.idProject) return self.idProject;
@@ -198,7 +199,6 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         switch (self.selectionType) {
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
-                // console.log('temp: ', temp);
                 if (!temp) temp = list;
                 const groups = new Set();
                 temp.forEach(t => {
@@ -224,13 +224,14 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 });
                 break;
             case CURVE_SELECTION:
-                const hash = new Object();
-                const root = wiComponentService.getComponent(
-                    wiComponentService.WI_EXPLORER
-                ).treeConfig[0];
+            let hash = new Object();
+            let wiExplr = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+            let root = null;
+            if (wiExplr) root = wiExplr.treeConfig[0];
+            if (root) {
                 utils.visit(
                     root,
-                    (node, _hash) => {
+                    function (node, _hash) {
                         if (node.type == "curve") {
                             _hash[node.data.label] = 1;
                         }
@@ -238,23 +239,70 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     },
                     hash
                 );
-                console.log("hash: ", hash);
-                self.selectionList = Object.keys(hash).map(key => ({
-                    id: -1,
-                    data: {
-                        label: key,
-                        icon: "curve-16x16",
-                        selected: false
-                    },
-                    children: [],
-                    properties: {}
+                $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
+                    return {
+                        id: -1,
+                        data: {
+                            label: key,
+                            icon: "curve-16x16",
+                            selected: false
+                        },
+                        children: [],
+                        properties: {}
+                    };
                 }));
+            }
+            else {
+                buildCurveListFromServer(function (curve) {
+                    hash[curve.name] = 1;
+                }, function () {
+                    $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
+                        return {
+                            id: -1,
+                            data: {
+                                label: key,
+                                icon: "curve-16x16",
+                                selected: false
+                            },
+                            children: [],
+                            properties: {}
+                        };
+                    }));
+                });
+            }
                 break;
             default:
                 break;
         }
     }
-
+    function buildCurveListFromServer(cb, done) {
+        if (!self.idProject) {
+            toastr.error("No project exists");
+            return;
+        }
+        wiApiService.listWells({
+            idProject: self.idProject,
+            limit: 100000
+        }, function (wells) {
+            if (!Array.isArray(wells)) {
+                toastr.error('Error in listing wells');
+                console.error(wells);
+                return;
+            }
+            async.each(wells, function (well, __end) {
+                wiApiService.getWell(well.idWell, function (wellProps) {
+                    for (let dataset of wellProps.datasets) {
+                        for (let curve of dataset.curves) {
+                            cb(curve);
+                        }
+                    }
+                    __end();
+                })
+            }, function (err) {
+                done();
+            });
+        });
+    }
     this.onSelectTemplate = function(idx) {
         const __SELECTED_NODE = self.selectionList.find(d => d.data.selected);
         if (__SELECTED_NODE) {
@@ -337,29 +385,37 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     };
 
     // SELECT INPUT TAB
-    function modelFrom(rootConfig, wells) {
+    function buildWellList(wells) {
         wells.forEach(well => {
             const wellModel = utils.createWellModel(well);
-            rootConfig.push(wellModel);
-            if (well.datasets && well.datasets.length) {
-                well.datasets.forEach(dataset => {
-                    const datasetModel = utils.createDatasetModel(dataset);
-                    wellModel.children.push(datasetModel);
-                    dataset.curves.forEach(curve => {
-                        datasetModel.children.push(
-                            utils.createCurveModel(curve)
-                        );
-                    });
-                });
-            }
-            if (well.zone_sets && well.zone_sets.length){
-                well.zone_sets.forEach(zoneset => {
-                    const zonesetModel = utils.zoneSetToTreeConfig(zoneset);
-                    wellModel.children.push(zonesetModel);
-                })
-            }
+            self.projectConfig.push(wellModel);
         });
     }
+    function buildZoneSetListFromServer(wells) {
+        async.each(wells, function (well, __end) {
+            wiApiService.getWell(well.idWell, function (wellProps) {
+                for (let zoneset of wellProps.zone_sets) {
+                    self.zone_set_list.push(zoneset);
+                }
+                __end();
+            })
+        }, function (err) {
+            let hash = new Object();
+            self.zone_set_list.forEach(zone => hash[zone.name] = 1);
+            self.zonesetConfig = Object.keys(hash).map(key => {
+                return {
+                    id: -1,
+                    data: {
+                        label: key,
+                        selected: false,
+                        icon: 'project-16x16-edit'
+                    },
+                    children: []
+                }
+            })
+        });
+    }
+
     this.refreshProject = function () {
         if (!isNaN(self.idProject) && self.idProject > 0) {
             self.projectChanged({ idProject: self.idProject });
@@ -397,7 +453,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 },
                 wells => {
                     self.projectConfig.length = 0;
-                    modelFrom(self.projectConfig, wells);
+                    self.zone_set_list.length = 0;
+                    buildWellList(wells);
+                    buildZoneSetListFromServer(wells);
                 }
             );
         }
@@ -695,12 +753,6 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                     );
                                 });
                         });
-                    }
-                    if (wellProps.zone_sets && wellProps.zone_sets.length){
-                        wellProps.zone_sets.forEach(zoneset => {
-                            const zonesetModel = utils.zoneSetToTreeConfig(zoneset);
-                            currentNode.children.push(zonesetModel);
-                        })
                     }
                     bareSelectHandler();
                     callback && callback();
