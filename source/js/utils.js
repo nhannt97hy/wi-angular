@@ -1728,8 +1728,10 @@ exports.renameWell = function renameWell(newName) {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let wellInfo = angular.copy(selectedNode.properties);
-        wellInfo.name = ret;
+        let wellInfo = Object.assign({}, selectedNode.properties, {name: ret});
+        for (const key in wellInfo) {
+            if (typeof wellInfo[key] === 'object') delete wellInfo[key];
+        }
         wiApiService.editWell(wellInfo, function (res, err) {
             if (err) {
                 renameWell(ret);
@@ -1758,8 +1760,10 @@ exports.renameDataset = function renameDataset(newName) {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let datasetInfo = angular.copy(selectedNode.properties);
-        datasetInfo.name = ret;
+        let datasetInfo = Object.assign({}, selectedNode.properties, {name: ret});
+        for (const key in datasetInfo) {
+            if (typeof datasetInfo[key] === 'object') delete datasetInfo[key];
+        }
         wiApiService.editDataset(datasetInfo, function (res, err) {
             if (err) {
                 renameDataset(ret);
@@ -1838,12 +1842,9 @@ exports.renameCurve = function renameCurve(newName) {
     DialogUtils.promptDialog(__GLOBAL.ModalService, promptConfig, function (ret) {
         if (!ret) return;
         let wiApiService = __GLOBAL.wiApiService;
-        let curveInfo = {
-            idCurve: selectedNode.properties.idCurve,
-            name: ret,
-            idDataset: selectedNode.properties.idDataset,
-            dataset: selectedNode.properties.dataset,
-            unit: selectedNode.properties.unit
+        let curveInfo = Object.assign({}, selectedNode.properties, {name: ret});
+        for (const key in curveInfo) {
+            if (typeof curveInfo[key] === 'object') delete curveInfo[key];
         }
         wiApiService.editCurve(curveInfo, function (res, err) {
             if (err) {
@@ -2130,7 +2131,10 @@ function editProperty(item, callback) {
     let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
     let selectedNode = selectedNodes[0];
     let properties = selectedNode.properties;
-    let newProperties = angular.copy(properties);
+    let newProperties = Object.assign({}, properties);
+    for (const key in newProperties) {
+        if (typeof newProperties[key] === 'object') delete newProperties[key];
+    }
     newProperties[item.key] = item.value;
     if (JSON.stringify(newProperties) === JSON.stringify(properties)) return;
     switch (selectedNode.type) {
