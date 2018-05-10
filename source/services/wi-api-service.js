@@ -1915,3 +1915,11 @@ Service.prototype.getListUnit = function (payload, callback) {
 Service.prototype.convertCurveUnit = function (payload, callback) {
     this.post(CONVERT_CURVE_UNIT, payload, callback);
 };
+Service.prototype.asyncGetListUnit = function (payload) {
+    let self = this;
+    return new Promise(function (resolve) {
+         self.post(FAMILY_UNIT_LIST, payload, function (response) {
+             resolve(response);
+         });
+    });
+};

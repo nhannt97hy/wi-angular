@@ -2158,26 +2158,6 @@ function editProperty(item, callback) {
                 properties = selectedNode.properties;
                 newProperties = angular.copy(properties);
                 newProperties[item.key] = item.value;
-                if (item.key === 'compatiable-list') {
-                    let payload = {};
-                    payload.srcUnit = newProperties.units.find(u => u.name === newProperties.unit);
-                    payload.desUnit = newProperties.units.find(u => u.idUnit === item.value);
-                    payload.idCurve = newProperties.idCurve;
-                    if(payload.srcUnit && payload.desUnit){
-                        wiApiService.convertCurveUnit(payload, function (response) {
-                            refreshProjectState().then(function () {
-                                wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {idCurve: newProperties.idCurve});
-                                callback && callback();
-                            });
-                        });
-                    } else {
-                        toastr.error("Can't convert " + newProperties.unit + " to " + payload.desUnit.name);
-                        refreshProjectState().then(()=>{
-                            callback && callback();
-                        });
-                    }
-                    return;
-                }
                 // if (item.key === 'unit') {
                 //     wiApiService.familyUpdate({
                 //         idFamily: properties.idFamily,

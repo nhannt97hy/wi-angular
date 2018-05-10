@@ -84,7 +84,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
             case 'curve':
                 var dataset = utils.findDatasetById(itemProperties.idDataset);
                 var well = utils.findWellById(dataset.properties.idWell);
-                currentItem.currentUnit = currentItem.properties.units.find(u => u.name === currentItem.properties.unit);
+                const curveUnits = await wiApiService.asyncGetListUnit({idCurve: itemProperties.idCurve});
+                currentItem.currentUnit = curveUnits.find(u => u.name === currentItem.properties.unit);
                 config = {
                     name: currentItem.name,
                     heading: 'Depths',
@@ -138,12 +139,25 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                         key: 'compatiable-list',
                         label: 'Compatiable List',
                         type: type.select,
-                        options: currentItem.properties.units.map(unit => {
+                        options: curveUnits.map(unit => {
                             return {
                                 value: unit.idUnit,
                                 label: unit.name
                             }
                         }),
+                        onChange: function (item) {
+                            let payload = {};
+                            payload.srcUnit = currentItem.currentUnit;
+                            payload.desUnit = curveUnits.find(u => u.idUnit === item.value);
+                            payload.idCurve = itemProperties.idCurve;
+                            wiApiService.convertCurveUnit(payload, function (response) {
+                                utils.refreshProjectState().then(() => {
+                                    $timeout(function () {
+                                        wiComponentService.emit('update-properties', utils.getSelectedNode());
+                                    })
+                                });
+                            });
+                        },
                         value: currentItem.currentUnit ? currentItem.currentUnit.idUnit : null,
                         editable: true
                     }, {
