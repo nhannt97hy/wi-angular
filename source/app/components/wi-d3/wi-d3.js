@@ -641,7 +641,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         let timerHandle = setInterval(function() {
                             let isReady = !self.trackComponents.filter((tc) => {
                                 if(!tc.controller) return true;
-                                if(tc.idTrack) return !tc.controller.isFree;
+                                if(tc.idTrack) return !tc.controller.isIdle;
                             }).length;
                             if(isReady) {
                                 clearInterval(timerHandle);

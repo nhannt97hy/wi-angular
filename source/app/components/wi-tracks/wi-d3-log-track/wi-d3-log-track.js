@@ -234,9 +234,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
     }
     this.update = update;
-    this.isFree = false;
+    this.isIdle = false;
     function update(callback) {
-        isFree = false;
+        isIdle = false;
         let viTrack = self.viTrack;
         if (!viTrack.isLogTrack()) return;
 
@@ -317,7 +317,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     viTrack.setProperties(logTrack);
                     viTrack.doPlot();
                     callback && callback();
-                    self.isFree = true; 
+                    self.isIdle = true; 
                 })
                 .catch(function (err) {
                     console.error(err);

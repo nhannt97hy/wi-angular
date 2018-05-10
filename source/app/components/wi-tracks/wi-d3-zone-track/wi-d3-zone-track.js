@@ -80,9 +80,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         else return Utils.findWellByZoneSet(self.viTrack.idZoneSet).properties;
     }
 
-    this.isFree = false;
+    this.isIdle = false;
     this.update = function (baseSource) {
-        self.isFree = false;
+        self.isIdle = false;
         if(baseSource && baseSource.idZoneSet == self.viTrack.idZoneSet) {
             _plotZoneTrack(baseSource, self.viTrack);
             updateTrackWellStatus();
@@ -93,7 +93,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                     self.addZoneToTrack(self.viTrack, zone);
                 }
                 updateTrackWellStatus();
-                self.isFree = true;
+                self.isIdle = true;
             });
         }
 
