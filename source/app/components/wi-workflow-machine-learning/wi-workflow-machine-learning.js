@@ -283,11 +283,202 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         max: 1,
         value: 2
-    }]
+    }];
+
+    const DECISION_TREE_CLASSIFIER = [{
+        name : 'criterion',
+        type : 'select',
+        choices: [{
+            name: 'entropy',
+            value: 'entropy'
+        }, {
+            name: 'gini',
+            value: 'gini'
+        }]
+    }, {
+        name: 'min_samples_split',
+        type: 'number',
+        min: 1,
+        value: 5
+    },{
+        name: "min_impurity_decrease",
+        type: 'number',
+        min: 0.0001,
+        max: 0.9999,
+        value: 0.01
+    }];
+
+    const KNN = [{
+        name: "num_neighbors",
+        type: 'number',
+        min : 1,
+        value: 100
+    },{
+        name: 'p',
+        type: 'number',
+        min: 1,
+        value: 1
+    }];
+
+    const LOGISTIC_REGRESSION = [{
+        name: 'C',
+        type: 'number',
+        min: 1,
+        value: 20
+    },{
+        name: 'max_iter',
+        type: 'number',
+        min: 1,
+        value: 10000
+    },{
+        name: 'solver',
+        type: 'select',
+        choices: [{
+            name: 'liblinear',
+            value: 'liblinear'
+        },{
+            name: 'newton-cg',
+            value: 'newton-cg'
+        },{
+            name: 'lbfgs',
+            value: 'lbfgs'
+        },{
+            name: 'sag',
+            value: 'sag'
+        },{
+            name: 'saga',
+            value: 'saga'
+        }]
+    }];
+
+    const RANDOM_FOREST_CLASSIFIER = [{
+        name: 'num_trees',
+        type: 'number',
+        min: 1,
+        value: 150
+    },{
+        name: 'criterion',
+        type: 'select',
+        choices: [{
+            name: 'entropy',
+            value: 'entropy'
+        },{
+            name: 'gini',
+            value: 'gini'
+        }],
+        value: {
+            name: 'entropy',
+            value: 'entropy'
+        }
+    },{
+        name: 'min_samples_split',
+        type: 'number',
+        min: 1,
+        value: 5
+    },{
+        name: 'min_impurity_decrease',
+        type: 'number',
+        min: 0.0000001,
+        max: 0.9999999,
+        value: 0.0003,
+        step: 0.0001 
+    }];
+
+    const NEURAL_NET_CLASSIFIER = [{
+        name: 'algorithmn',
+        type: 'select',
+        choices: [{
+            name: 'backprop',
+            value: 'backprop'
+        },{
+            name: 'evolution',
+            value: 'evolution'
+        }],
+        value: {
+            name: 'backprop',
+            value: 'backprop'
+        }
+    },{
+        name: 'batch_size',
+        type: 'number',
+        min: -1,
+        value: -1
+    },{
+        name: 'learning_rate',
+        type: 'number',
+        min: 0.001,
+        value: 0.001
+    },{
+        name: 'num_epochs',
+        type: 'number',
+        min: 1,
+        value: 10000
+    },{
+        name: 'optimizer',
+        type: 'select',
+        choices: [{
+            name: 'adamax',
+            value: 'adamax'
+        },{
+            name: 'sgd',
+            value: 'sgd'
+        },{
+            name: 'rmsprop',
+            value: 'rmsprop'
+        },{
+            name: 'adagrad',
+            value: 'adagrad'
+        },{
+            name: 'adadelta',
+            value: 'adadelta'
+        },{
+            name: 'adam',
+            value: 'adam'
+        },{
+            name: 'nadam',
+            value: 'nadam'
+        }],
+        value: {
+            name: 'adamax',
+            value: 'adamax'
+        }
+    },{
+        name: 'warm_up',
+        type: 'select',
+        choices: [{
+            name: 'true',
+            value: true
+        },{
+            name: 'false',
+            value: false
+        }],
+        value: {
+            name: 'true',  
+            value: true
+        } 
+    },{
+        name: 'boosting_ops',
+        type: 'number',
+        min: 0,
+        value: 0
+    }, {
+        name: 'sigma',
+        type: 'number',
+        min: 0.01,
+        value: 0.01,
+        step: 0.01
+    },{
+        name: 'population',
+        type: 'number',
+        min: 1,
+        value: 100
+    }];
+
+
     this.listModelType = {
         name: 'model type',
         type: 'select',
-        value: 1,
+        //value: 1,
         choices: [{
             name: "LinearRegression",
             value: 1,
@@ -296,7 +487,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: "HuberRegressor",
             value: 2,
             parameters: HUBER_REGRESSOR_PARAMS
-        }, {
+        },{
+            name: "NeuralNetClassifier",
+            value: 14,
+            parameters: NEURAL_NET_CLASSIFIER
+        }
+        /* {
             name: "Lasso",
             value: 3,
             parameters: LASSO_PARAMS
@@ -324,7 +520,24 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: "CrossRecurrencePlot",
             value: 9,
             parameters: CROSS_RECURRENCE_PLOT_PARAMS
-        }]
+        }, {
+            name: "DecisionTreeClassifier",
+            value: 10,
+            parameters: DECISION_TREE_CLASSIFIER
+        },{
+            name: "KNN",
+            value: 11,
+            parameters: KNN
+        },{
+            name: "LogisticRegression",
+            value: 12,
+            parameters: LOGISTIC_REGRESSION
+        },{
+            name: "RandomForestClassifier",
+            value: 13,
+            parameters: RANDOM_FOREST_CLASSIFIER
+        }*/
+        ]
     };
 
     this.workflowResults = [{
