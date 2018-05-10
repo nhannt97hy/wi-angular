@@ -30,6 +30,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.treeConfig[0] = utils.projectToTreeConfig(projectRefresh);
             $timeout(function() {
                 self.backupConfig(backupConfig, [self.treeConfig[0]]);
+                wiComponentService.getComponent(self.treeviewName).filterFn();
             });
             $timeout(function(){
                 document.getElementById('treeContent').scrollTo(0,ScrollTmp);
