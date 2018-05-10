@@ -1269,7 +1269,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     console.log('drop curve into slidingBar', errorCode);
                     if (errorCode > 0) {
                         wiSlidingBarCtrl.createPreview(idCurve);
-                        let logplotModel = wiSlidingBarCtrl.logPlotCtrl.getLogplotModel();
+                        let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
                         let logplotRequest = angular.copy(logplotModel.properties);
                         logplotRequest.referenceCurve = idCurve;
                         apiService.editLogplot(logplotRequest, function () {
@@ -1572,6 +1572,14 @@ function findWellByCurve(idCurve) {
     return path.find(p => p.type == 'well');
 }
 
+exports.findWellByZoneSet = findWellByZoneSet;
+
+function findWellByZoneSet(idZoneSet) {
+    var path = getSelectedPath(function (node) {
+        return node.type == 'zoneset' && node.id == idZoneSet;
+    }) || [];
+    return path.find(p => p.type == 'well');
+}
 
 function restrictedVisit(node, depth, callback) {
     if (!depth) return;

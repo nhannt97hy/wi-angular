@@ -13,6 +13,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let props = null;
+    let lastWell = null;
     let contextMenu = [{
         name: "TrackProperties",
         label: "Track Properties",
@@ -73,16 +74,46 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         // zoneTrackProps.width = Utils.pixelToInch(zoneTrackProps.width);
         DialogUtils.zoneTrackPropertiesDialog(ModalService, this.getProperties());
     }
+
+    this.getWellProps = function() {
+        if(!self.viTrack.idZoneSet) return null;
+        else return Utils.findWellByZoneSet(self.viTrack.idZoneSet).properties;
+    }
+
+    this.isFree = false;
     this.update = function (baseSource) {
+        self.isFree = false;
         if(baseSource && baseSource.idZoneSet == self.viTrack.idZoneSet) {
             _plotZoneTrack(baseSource, self.viTrack);
+            updateTrackWellStatus();
         } else {
             self.viTrack.removeAllZones();
             wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
                 for (let zone of zoneset.zones) {
                     self.addZoneToTrack(self.viTrack, zone);
                 }
+                updateTrackWellStatus();
+                self.isFree = true;
             });
+        }
+
+        function updateTrackWellStatus() {
+            let wellProps = self.getWellProps();
+            if(wellProps) {
+                if(self.wiD3Ctrl && (lastWell && lastWell.idWell != wellProps.idWell || !lastWell)) {
+                    self.wiD3Ctrl.updateMultiWellState();
+                }
+                let wellColor = Utils.getWellColor(wellProps.idWell);
+                self.viTrack.headerNameBlock.style('background-color', wellColor);
+                lastWell = wellProps;
+                return;
+            }
+            // default
+            if(lastWell && self.wiD3Ctrl) {
+                self.wiD3Ctrl.updateMultiWellState();
+            }
+            self.viTrack.headerNameBlock.style('background-color', self.viTrack.HEADER_NAME_COLOR);
+            lastWell = null;
         }
     }
     this.addZoneToTrack = function (track, config, controller) {
@@ -185,11 +216,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.getProperties().controller = self;
         if (self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
         
+        self.update();
+        /*
         wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
             for (let zone of zoneset.zones) {
                 self.addZoneToTrack(self.viTrack, zone);
             }
         })
+        */
 
         // Utils.listenEvent('zone-updated', function(eventData) {
         wiComponentService.on('zone-updated', function(eventData) {

@@ -120,11 +120,11 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                     child.children.forEach((wellChild) => {
                         if(wellChild.type == 'dataset') {
                             self.datasets.push(wellChild);
-                        } else if (wellChild.type == 'zonesets') {
+                        }/* else if (wellChild.type == 'zonesets') {
                             wellChild.children.forEach(zoneset => {
                                 zonesets.push(zoneset);
                             })
-                        }
+                        }*/
                     })
                 }
             });

@@ -7,7 +7,20 @@ module.exports = function (ModalService, trackComponent, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let viZoneTrack = trackComponent.controller ? trackComponent.controller.viTrack : null;
-        let well = utils.findWellByLogplot(trackComponent.idPlot);
+        this.wellProps = trackComponent.controller ? trackComponent.controller.getWellProps() : null;
+
+        this.getAllWells = function() {
+            let logplotProps = utils.findLogplotModelById(trackComponent.idPlot).properties;
+            let projectModel = utils.getModel('project', logplotProps.idProject);
+            return projectModel.children.filter((child) => {
+                return child.type == 'well'
+            }).map(well => well.properties);
+        }
+
+        this.onWellChanged = function() {
+            refreshZoneSets();
+        }
+
         // let props = zoneTrackProperties || {
         //     showTitle: true,
         //     title: "New Zone",
@@ -30,19 +43,21 @@ module.exports = function (ModalService, trackComponent, callback) {
         this.zoomFactor = props.zoomFactor;
 
         function refreshZoneSets() {
-			wiApiService.listZoneSet(well.properties.idWell, function (zoneSets) {
-                $timeout(function(){
-                    $scope.$apply(function () {
-                        self.zoneSets = zoneSets;
+            if(self.wellProps) {
+                wiApiService.listZoneSet(self.wellProps.idWell, function (zoneSets) {
+                    $timeout(function(){
+                        $scope.$apply(function () {
+                            self.zoneSets = zoneSets;
+                        });
                     });
                 });
-            });
+            }
         }
         refreshZoneSets();
         this.idZoneSet = props.idZoneSet;
         // Dialog buttons
         this.createZoneSet = function () {
-           utils.createZoneSet(well.properties.idWell, function (zoneSetReturn) {
+            utils.createZoneSet(self.wellProps.idWell, function (zoneSetReturn) {
                 refreshZoneSets();
                 self.idZoneSet = zoneSetReturn.idZoneSet;
             });
@@ -83,15 +98,18 @@ module.exports = function (ModalService, trackComponent, callback) {
                         width: utils.inchToPixel(props.width)
                     })
                     viZoneTrack.setProperties(viZoneTrackProps);
-                    if (zoneSetChanged) {
-                        wiApiService.getZoneSet(viZoneTrack.idZoneSet, function (zoneset) {
-                            viZoneTrack.removeAllZones();
-                            for (let zone of zoneset.zones) {
-                                trackComponent.controller.addZoneToTrack(viZoneTrack, zone);
-                            }
-                        })
-                    }
-                    viZoneTrack.doPlot(true);
+                    
+                    trackComponent.controller.update();
+
+                    // if (zoneSetChanged) {
+                    //     wiApiService.getZoneSet(viZoneTrack.idZoneSet, function (zoneset) {
+                    //         viZoneTrack.removeAllZones();
+                    //         for (let zone of zoneset.zones) {
+                    //             trackComponent.controller.addZoneToTrack(viZoneTrack, zone);
+                    //         }
+                    //     })
+                    // }
+                    // viZoneTrack.doPlot(true);
                 });
             } else {
                 wiApiService.createZoneTrack(props, function (res, err) {

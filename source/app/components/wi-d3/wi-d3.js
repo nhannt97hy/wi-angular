@@ -9,70 +9,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let LayoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     let logplotHandlers = {};
 
-    //self.Tracks = null
-
-    /*
-    const contextMenu_constantItems = {
-        separator: [{
-                separator: '1'
-            }],
-        trackProperties: [{
-                name: "TrackProperties",
-                label: "Track Properties",
-                icon: 'track-properties-16x16',
-                handler: openTrackPropertiesDialog
-            }],
-        trackCreation : [{
-                name: "AddDepthTrack",
-                label: "Add Depth Track",
-                icon: 'depth-axis-add-16x16',
-                handler: function () {
-                    self.addDepthTrack();
-                }
-            }, {
-                name: "AddLogTrack",
-                label: "Add Log Track",
-                icon: 'logplot-blank-16x16',
-                handler: function () {
-                    self.addLogTrack();
-                }
-            }, {
-                name: 'AddImageTrack',
-                label: 'Add Image Track',
-                icon: 'image-track-16x16',
-                handler: function () {
-                    self.addImageTrack();
-                }
-            }, {
-                name: "AddZonationTrack",
-                label: "Add Zonation Track",
-                icon: 'zonation-track-add-16x16',
-                handler: function () {
-                    self.addZoneTrack();
-                }
-            }, {
-                name: "AddObjectTrack",
-                label: "Add Object Track",
-                icon: '',
-                handler: function () {
-                    self.addObjectTrack();
-                }
-            }],
-        trackHandle : [{
-                name: "DeleteTrack",
-                label: "Delete Track",
-                icon: 'track-delete-16x16',
-                handler: function () {
-                    logplotHandlers.DeleteTrackButtonClicked();
-                }
-            }],
-        trackItemsCreation: []
-    }
-    */
-
     let _referenceLine = true;
     let _fitWindow = false;
-    //let _depthRange = [0, 100000];
     self._minY = 0;
     self._maxY = 100000;
     let contextMenu = [{
@@ -120,8 +58,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     logplotHandlers.DeleteTrackButtonClicked();
                 }
             }]
-    // var commonCtxMenu = null;
-    // let _tracks = [];
     let _currentTrack = null;
     let _previousTrack = null;
     let _tooltip = true;
@@ -131,60 +67,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.getContextMenu = function() {
         return contextMenu;
     }
-
-    /*
-    this.buildContextMenu = function (contextMenuItems) {
-        let contextMenu = [];
-        if(contextMenuItems.trackProperties.length) {
-            contextMenu = contextMenu.concat(contextMenuItems.trackProperties);
-        }
-        if(contextMenuItems.trackCreation.length) {
-            contextMenu = contextMenu.concat(contextMenuItems.separator);
-            contextMenu = contextMenu.concat(contextMenuItems.trackCreation);
-        }
-        if(contextMenuItems.trackItemsCreation.length) {
-            contextMenu = contextMenu.concat(contextMenuItems.separator);
-            contextMenu = contextMenu.concat(contextMenuItems.trackItemsCreation);
-        }
-        if(contextMenuItems.trackHandle.length) {
-            contextMenu = contextMenu.concat(contextMenuItems.separator);
-            contextMenu = contextMenu.concat(contextMenuItems.trackHandle);
-        }
-        return contextMenu;
-    }
-    this.getCommonContextMenuItems = function () {
-        let obj = {};
-        for (let attr in contextMenu_constantItems) {
-            obj[attr] = contextMenu_constantItems[attr].slice();
-        }
-        return obj;
-    }
-    */
-    /*
-    this.subscribeTrackCtrlWithD3Ctrl = function (trackComponentCtrl) {
-        // this.trackComponents.find(function(track) {
-        //    return self.getTrackName(track) == trackComponentCtrl.name;
-        // }).controller = trackComponentCtrl;
-        // _tracks.push(trackComponentCtrl.viTrack);
-
-        
-        //let depthRange = self.getDepthRangeFromSlidingBar();
-        //self.setDepthRangeForTrack(trackComponentCtrl.viTrack, depthRange);
-        //_registerTrackHorizontalResizerDragCallback();
-        ////_registerTrackCallback(trackComponentCtrl.viTrack);
-        //_registerTrackCallback(trackComponentCtrl);
-        //_registerTrackDragCallback(trackComponentCtrl.viTrack);
-        // _registerTrackDragCallback(trackComponentCtrl);
-        //_setCurrentTrack(trackComponentCtrl.getProperties());
-
-        // trackComponentCtrl.viTrack.on('keydown', function () {
-        //     _onTrackKeyPressCallback(trackComponentCtrl.viTrack);
-        // })
-        //graph.rearrangeTracks(self);
-        //self.updateScale();
-        updateSlider();
-    }
-    */
     this.adjustHeaderHeight = function(curViTrack) {
         self.trackComponents.forEach((tc) => {
             if (!tc.controller || !tc.controller.viTrack || tc.controller.viTrack == curViTrack) return;
@@ -277,20 +159,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             t.doPlot();
         })*/
     }
-    this.pushTrackComponent = function(trackProperties) {
-        let html = generateHtml(trackProperties);
-        let trackName = getTrackName(trackProperties);
-        
-        // TO BE REVIEWED
-        // this.trackComponents.push({
-        //    name: trackName,
-        //    props: trackProperties,
-        // });
-        $('#' + self.plotAreaId).append(
-            self.compileFunc(html)(self.scopeObj)
-        );
-        // return self.trackComponents.find(function(component) { return component.name == trackName});
-    }
     this.showContextMenu = function (event) {
         console.log('wi-d3 contextMenu is opened');
         if (event.button != 2) return;
@@ -326,21 +194,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         return _maxDepth;
-        // let wellProps = self.getWellProps();
-        // if (wellProps.bottomDepth)
-        // return parseFloat(wellProps.bottomDepth);
-
-        // // TO BE REMOVED
-        // // let maxDepth = d3.max(_tracks, function (track) {
-        // //     if (track.getExtentY) return track.getExtentY()[1];
-        // //     return -1;
-        // // });
-        // let maxDepth = d3.max(self.trackComponents, function (tc) {
-        //     if (tc.controller.viTrack.getExtentY) return tc.controller.viTrack.getExtentY()[1];
-        //     return -1;
-        // });
-        // maxDepth = (maxDepth > 0) ? maxDepth : 100000;
-        // return maxDepth;
     };
     this.getMinDepth = function () {
         let defaultTopDepth = 0.;
@@ -353,20 +206,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
 
         return _minDepth;
-        // let minDepth = -1;
-        // minDepth = d3.min(self.trackComponents, function (tc) {
-        //     if(tc.controller.getWellProps) {
-        //         let wellProps = tc.controller.getWellProps();
-        //         if(wellProps)
-        //             return parseFloat(wellProps.topDepth);
-        //     }
-        //     return 100000;
-        // });
-        
-        // return (minDepth > 0 && minDepth < 100000) ? minDepth : 0;
-        // ******************** 
-        // let wellProps = self.getWellProps();
-        // return parseFloat(wellProps.topDepth) || 0;
     }
 
     this.getDepthRange = function () {
@@ -376,7 +215,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         });
     }
     this.getDepthRangeRaw = function () {
-        //return _depthRange;
         return [self._minY, self._maxY];
     }
     this.getDepthRangeFromSlidingBar = function () {
@@ -387,19 +225,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let high = low + (slidingBar.slidingBarState.range) * (maxDepth - minDepth) / 100;
         return [low, high];
     }
-    // this.getWellProps = _getWellProps;
     this.getLogplotHandler = function () {
         return logplotHandlers;
     }
     this.getOrderKey = getOrderKey;
-    /*
-    this.setContextMenu = function (ctxMenu) {
-        if(!ctxMenu) {
-            self.contextMenu = commonCtxMenu;
-        }
-        self.contextMenu = ctxMenu;
-    }
-    */
 
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
@@ -417,15 +246,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.toggleTooltip = function() {
         _tooltip = !_tooltip;
     }
-    /*
-    this.verifyDroppedIdCurve = function (idCurve) {
-        let well1 = self.getWellProps();
-        let well2 = Utils.findWellByCurve(idCurve) || {properties: {}};
-        if (!well1.idWell || !well2.properties.idWell) return -1;
-        if (well1.idWell && well2.properties.idWell && (well1.idWell == well2.properties.idWell)) return 1;
-        return 0;
-    }
-    */
     this.depthShiftDialog = function () {
         if(!_currentTrack.isLogTrack()) {
             DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
@@ -583,38 +403,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-    /*
-    this.pushDepthTrack = function (depthTrackProps) {
-        self.pushTrackComponent(depthTrackProps);
-    }
-    this.pushLogTrack = function (logTrackProps) {
-        self.pushTrackComponent(logTrackProps);
-        $timeout(function() {
-            let trackD3Ctrl = getComponentCtrlByProperties(logTrackProps);
-            let viTrack = trackD3Ctrl.viTrack;
-            if (self.containerName) {
-                let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id);
-                self.selections.forEach(function(selectionConfig) {
-                    selectionConfig.wellForLogplot = well;
-                    trackD3Ctrl.addViSelectionToTrack(viTrack, selectionConfig);
-                })
-            }
-        });
-    }
-    this.pushZoneTrack = function (zoneTrackProps) {
-        self.pushTrackComponent(zoneTrackProps);
-    }
-    this.pushImageTrack = function (imageTrackProps) {
-        self.pushTrackComponent(imageTrackProps);
-    }
-    this.pushObjectTrack = function (objectTrackProps) {
-        self.pushTrackComponent(objectTrackProps);
-    }
-    this.plot = function (track) {
-        if (track && track.doPlot) track.doPlot(track == _currentTrack);
-    };
-    */
-
     this.reloadTrack = function(tc) {
         let idx = self.trackComponents.findIndex((item) => item == tc);
         wiApiService.infoTrack(tc.idTrack, function(trackProps) {
@@ -626,9 +414,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.trackComponents.forEach(tc => {
             tc.controller.viTrack.doPlot(tc == _currentTrack);
         });
-        // _tracks.forEach(function (track) {
-        //     track.doPlot(track == _currentTrack);
-        // });
         self.updateScale();
     }, 50);
 
@@ -657,9 +442,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             if (tc.idDepthAxis && tc.controller.viTrack) 
                 tc.controller.viTrack.updateScale(self.scale);
         });
-        /*_tracks.filter(track => track.isDepthTrack()).forEach(function (depthTrack) {
-            depthTrack.updateScale(self.scale);
-        });*/
         this.wiLogplotCtrl.updateScale(this.scale);
     }
     this.setCurrentTrack = function (trackComponent) {
@@ -669,19 +451,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self._minY = depthRange[0];
         self._maxY = depthRange[1];
     };
-    /*
-    this.setDepthRangeForTrack = function (track, depthRange) {
-        if (_depthRange[0] != depthRange[0] || _depthRange[1] != depthRange[1]) {
-            self.setDepthRange(depthRange);
-        }
-        else {
-            track.minY = depthRange[0];
-            track.maxY = depthRange[1];
-            self.plot(track);
-            _depthRange = depthRange;
-        }
-    }
-    */
     this.scroll = function () {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let value = (d3.event.deltaY<0)? 1 : -1;
@@ -707,12 +476,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             return tc.zoomFactor;
         });
 
-        // let topDepth = parseFloat(self.getWellProps().topDepth);
-        // let bottomDepth = parseFloat(self.getWellProps().bottomDepth);
         let topDepth = self.getMaxDepth();
         let bottomDepth = self.getMinDepth();
 
-        //let shouldRescaleWindowY = !(_depthRange[0] == topDepth && _depthRange[1] == bottomDepth);
         let shouldRescaleWindowY = !(self._minY == topDepth && self._maxY == bottomDepth);
         for (let tc of self.trackComponents) {
             tc.controller.viTrack._maxZoomFactor = maxZoomFactor;
@@ -731,98 +497,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.trackComponents = self.trackComponents.filter(function(tc) {
             return trackComponent !== tc;
         });
+        self.updateMultiWellState();
     }
-    /*
-    this.removeTrack = function (track) {
-        // remove visualizeTrack
-        let trackIdx = _tracks.indexOf(track);
-        if (trackIdx < 0) return;
-        if (track == _currentTrack) {
-            _currentTrack = null;
-        }
-        _previousTrack = null;
-        if (track.removeAllDrawings) {
-            track.removeAllDrawings();
-        }
-        graph.removeTrack(track);
-        _tracks.splice(trackIdx, 1);
-        let maxZoomFactor = d3.max(_tracks, function (track) {
-            return track.zoomFactor;
-        });
-        if (_tracks.length && maxZoomFactor != _tracks[0]._maxZoomFactor && !_tracks[0]._shouldRescaleWindowY) {
-            this.processZoomFactor();
-            this.plotAll();
-        }
-        // remove track component
-        let component = self.trackComponents.find(function (trackComponent) {
-            return trackComponent.controller.viTrack == track;
-        });
-        let name = component.controller.name;
-        $(`[name=`+ component.controller.name +`]`).remove();
-        self.trackComponents.splice(self.trackComponents.indexOf(component), 1);
-        // wiComponentService.putComponent(name, null);
-        updateSlider();
-    }*/
-    /*
-    this.getTracks = function () {
-        return _tracks;
-    }
-    */
 
     this.getComponentCtrlByViTrack = getComponentCtrlByViTrack;
     this.getComponentCtrlByProperties = getComponentCtrlByProperties;
-    /*
-    this.updateTrack = function (viTrack) {
-        getComponentCtrlByViTrack(viTrack).update();
-    }
-    */
 
-    /***************** TO BE MOVE AWAY INTO INDIVIDUAL TRACKS ************
-    // image track
-    this.addImageZoneToTrack = function (track, config) {
-        return getComponentCtrlByViTrack(track).addImageZoneToTrack(track, config);
-    }
-    // log track
-    this.addAnnotation = function () {
-        if(!_currentTrack || !_currentTrack.isLogTrack()) {
-            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
-            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error');
-            return;
-        }
-        let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
-        trackComponentCtrl.addAnnotation();
-    }
-    this.addMarker = function () {
-        if(!_currentTrack || !_currentTrack.isLogTrack()) {
-            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
-            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error');
-            return;
-        }
-        let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
-        trackComponentCtrl.addMarker();
-    }
-    this.createHistogram = function () {
-        if(!_currentTrack || !_currentTrack.isLogTrack()) {
-            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
-            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
-            return;
-        }
-        let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
-        trackComponentCtrl.createHistogram();
-    }
-    this.createCrossplot = function () {
-        if(!_currentTrack || !_currentTrack.isLogTrack()) {
-            // DialogUtils.errorMessageDialog(ModalService, 'This track is not a Log track. Please select a log track and try again.');
-            toastr.error('This track is not a log track. Please select a log track and try again.', 'Error')
-            return;
-        }
-        let trackComponentCtrl = getComponentCtrlByViTrack(_currentTrack);
-        trackComponentCtrl.createCrossplot();
-    }
-
-    /******************** END TO BE MOVE AWAY .... ****************/
-
-    /* creational methods */
     this.$onInit = function() {
         self.plotAreaId = self.name + 'PlotArea';
         if (self.containerName == undefined || self.containerName == null) self.containerName = '';
@@ -918,14 +598,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiSlidingBarCtrl.createPreview();
         self.adjustSlidingBarFromDepthRange(self.getDepthRange());
         wiSlidingBarCtrl.scroll(0);    
-        /*
-        if(self.wiLogplotCtrl.cropDisplay) {
-            wiSlidingBarCtrl.scaleView(wiSlidingBarCtrl.slidingBarState.top0, wiSlidingBarCtrl.slidingBarState.range0, true);
-            wiSlidingBarCtrl.updateWid3(); 
-        } else {
-            wiSlidingBarCtrl.scroll(0);    
-        }
-        */
     }
 
     this.init = _.debounce(function () {
@@ -948,7 +620,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     //self.Tracks = tracks;
                     
                     let currentState = JSON.parse(plot.currentState);
-                    let depthRange = [currentState.top, currentState.bottom];
+                    let depthRange = [];
+                    if(currentState.top && currentState.bottom) {
+                        depthRange = [currentState.top, currentState.bottom];
+                    } else {
+                        depthRange = [self.getMinDepth(), self.getMaxDepth() / 10];
+                    }
                     let wiSlidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
 
                     logplotCtrl.cropDisplay = plot.cropDisplay;
@@ -975,202 +652,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                 } else {
                                     wiSlidingBarCtrl.scroll(0);    
                                 }
+                                wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT); 
                                 self.isReady = true;
                             }
                         }, 100);
                     })
-
-                    /*
-                    let currentState = JSON.parse(plot.currentState);
-                    let depthRange = [currentState.top, currentState.bottom];
-                    self._minY =  depthRange[0];
-                    self._maxY =  depthRange[1];
-
-                    self.trackComponents = tracks;
-
-                    $timeout(function() {
-                        if (logplotModel.properties.referenceCurve) {
-                            logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
-                        }
-                        self.adjustSlidingBarFromDepthRange(depthRange);
-                        if(plot.cropDisplay) {
-                            logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
-                        }
-                        self.updateScale();
-                        self.isReady = true;
-                    }, 500)
-                    */
-
-                    /*
-                    let currentState = JSON.parse(plot.currentState);
-                    $timeout(function () {
-                        if (logplotModel.properties.referenceCurve) {
-                            logplotCtrl.getSlidingbarCtrl().createPreview(plot.referenceCurve);
-                        }
-                        if (currentState.top && currentState.bottom){
-                            let depthRange = [currentState.top, currentState.bottom];
-                            self.adjustSlidingBarFromDepthRange(depthRange);
-                        }
-                        if(plot.cropDisplay) {
-                            logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
-                        }
-                        self.updateScale();
-                        self.isReady = true;
-                    }, 10000);
-
-                    // let drange = self.getDepthRangeFromSlidingBar();
-                    let drange = [currentState.top, currentState.bottom];
-                    self._minY = drange[0];
-                    self._maxY = drange[1];
-
-                    self.trackComponents = tracks;
-					wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
-                    */
- 		
-/*
-                    async.eachOfSeries(tracks, function(aTrack, idx, _callback) {
-                        if (aTrack.idDepthAxis) {
-                            wiD3Ctrl.pushDepthTrack(aTrack);
-                            async.setImmediate(_callback);
-                        } else if (aTrack.idTrack) {
-                            wiD3Ctrl.pushLogTrack(aTrack);
-                            async.setImmediate(_callback);
-                        } else if (aTrack.idZoneTrack) {
-                            wiD3Ctrl.pushZoneTrack(aTrack);
-                            async.setImmediate(_callback);
-                        } else if(aTrack.idImageTrack) {
-                            wiD3Ctrl.pushImageTrack(aTrack);
-                            async.setImmediate(_callback);
-                        } else if(aTrack.idObjectTrack) {
-                            wiD3Ctrl.pushObjectTrack(aTrack);
-                            async.setImmediate(_callback);
-                        } else {
-                            async.setImmediate(_callback);
-                        }
-                    }, function(error) {
-                        buildTracks();
-                    });
-*/
-/*
-                    function buildTracks() {
-                        let loadedTracks = wiD3Ctrl.getTracks();
-                        async.eachOf(loadedTracks, function(aTrack, idx, _cb){
-                            if (aTrack.type == "depth-track") {
-                                console.log('depth track');
-                                async.setImmediate(_cb);
-                            }
-                            else if (aTrack.type == "log-track") {
-                                wiD3Ctrl.getComponentCtrlByViTrack(aTrack).update(function () {
-                                    aTrack.setCurrentDrawing(null);
-                                    _cb();
-                                });
-                            }
-                            else if (aTrack.type == "zone-track") {
-                                _cb();
-                            }
-                            else if (aTrack.type == "image-track") {
-                                _cb();
-                            }
-                            else if (aTrack.type == "object-track") {
-                                if(!tracks[idx].object_of_tracks || !tracks[idx].object_of_tracks.length) {
-                                    async.setImmediate(_cb);
-                                } else {
-                                    for (let objectOfTrack of tracks[idx].object_of_tracks) {
-                                        let anObject = wiD3Ctrl.getComponentCtrlByViTrack(aTrack).addObjectToTrack(aTrack, objectOfTrack);
-                                        let objectProps = JSON.parse(objectOfTrack.object);
-                                        switch(objectProps.type) {
-                                            case 'Histogram' :
-                                                if (objectProps.idHistogram) {
-                                                    let histogramModel = Utils.findHistogramModelById(objectProps.idHistogram);
-                                                    if (histogramModel && histogramModel.properties) {
-                                                        anObject.createHistogram(
-                                                            histogramModel.properties.idHistogram,
-                                                            histogramModel.properties.name,
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
-                                                        );
-                                                    }
-                                                    else {
-                                                       // TODO
-                                                    }
-                                                }
-                                                else {
-                                                    // TODO
-                                                }
-                                                break;
-                                            case 'Crossplot':
-                                                if (objectProps.idCrossplot) {
-                                                    let crossplotModel = Utils.getModel('crossplot', objectProps.idCrossplot);
-                                                    if (crossplotModel && crossplotModel.properties) {
-                                                        anObject.createCrossplot(
-                                                            crossplotModel.properties.idCrossPlot,
-                                                            crossplotModel.properties.name,
-                                                            wiD3Ctrl.scopeObj, wiD3Ctrl.compileFunc, wiD3Ctrl.containerName
-                                                        );
-                                                    }
-                                                    else {
-                                                       // TODO
-                                                    }
-                                                }
-                                                else {
-                                                    // TODO
-                                                }
-                                                break;
-                                                objectProps.intervalDepthTop = objectOfTrack.topDepth;
-                                                objectProps.intervalDepthBottom = objectOfTrack.bottomDepth;
-                                                wiApiService.getCrossplot(objectProps.idCrossPlot, function(crossplot) {
-                                                    if(crossplot.idCrossPlot) {
-                                                        wiApiService.getPointSet(objectProps.idPointSet, function(pointSet) {
-                                                            wiApiService.infoCurve(pointSet.idCurveX, function(curveX) {
-                                                                wiApiService.dataCurve(pointSet.idCurveX, function(dataCurveX) {
-                                                                    curveX.rawData = dataCurveX;
-                                                                    if(pointSet.idCurveX == pointSet.idCurveY) {
-                                                                        let curveY = curveX;
-                                                                        Utils.createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
-                                                                    } else {
-                                                                        wiApiService.infoCurve(pointSet.idCurveY, function(curveY) {
-                                                                            wiApiService.dataCurve(pointSet.idCurveY, function(dataCurveY) {
-                                                                                curveY.rawData = dataCurveY;
-                                                                                Utils.createCrossplotToObjectOfTrack(anObject, curveX, curveY, pointSet, objectProps, wiApiService);
-                                                                            })
-                                                                        })
-                                                                    }
-                                                                })
-                                                            })
-                                                        });
-                                                    } else {
-                                                        wiD3Ctrl.getComponentCtrlByViTrack(aTrack).removeAnObjectOfObjectTrack(anObject);
-                                                    }
-                                                });
-                                                break;
-                                            default:
-                                                break;
-                                        }
-                                    }
-                                    async.setImmediate(_cb);
-                                }
-                            }
-                        }, function(err) {
-                            let currentState = JSON.parse(plot.currentState);
-                            if (currentState.top && currentState.bottom){
-                                logplotCtrl.handlers.ScalePreviousState(currentState.top, currentState.bottom);
-                            } else {
-                                // logplotCtrl.handlers.Scale100ButtonClicked();
-                                // commented to keep default scale
-                            }
-                            setTimeout(function () {
-                                if(plot.cropDisplay) {
-                                    logplotCtrl.getSlidingbarCtrl().scaleView(currentState.top0, currentState.range0, true);
-                                } else {
-                                    // logplotCtrl.handlers.ViewWholeWellButtonClicked();
-                                }
-                            });
-                            self.isReady = true;
-                            wiComponentService.emit(wiComponentService.LOGPLOT_LOADED_EVENT, logplotModel);
-                            self.plotAll();
-                            updateSlider();
-                        });
-                    }
-*/
                 }
             );
         });
@@ -1186,38 +672,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     };
 
-    /* private method*/
-    /*
-    function generateHtml(trackProperties) {
-        let d3Ctrl_String = ' wi-d3-ctrl="'+ componentName +'" ';
-        // let orderNum_String = ' data-order-num="'+ track.orderNum +'" ';
-        let commonStyle_String = ' style="display: flex; flex-direction: column; outline: none;" ';
-        // let classed = ' class="wi-d3-track-component" data-order-num=' + trackProperties.orderNum + ' ';
-        // commonStyle_String += classed;
-
-        if(trackProperties.idDepthAxis) {
-            return '<wi-d3-depth-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-depth-track>';
-        } else if (trackProperties.idZoneTrack) {
-            return '<wi-d3-zone-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-zone-track>';
-        } else if (trackProperties.idImageTrack) {
-            return '<wi-d3-image-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-image-track>';
-        } else if (trackProperties.idObjectTrack) {
-            return '<wi-d3-object-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-object-track>';
-        } else if (trackProperties.idTrack) {
-            return '<wi-d3-log-track name="'
-                    + getTrackName(trackProperties) + '" '
-                    + d3Ctrl_String + commonStyle_String + '></wi-d3-log-track>';
-        }
-    }
-    */
     function getTrackName(trackProperties) {
         if(trackProperties.idDepthAxis) {
             return self.name + 'DepthTrack' + trackProperties.idDepthAxis;
@@ -1244,17 +698,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.slider.noUiSlider.updateOptions({}); // fire event 'update';
         $scope.safeApply();
     }
-    /*
-    function openTrackPropertiesDialog() {
-        console.log('open track properties');
-        //let controller = getComponentCtrlByViTrack(_currentTrack);
-        let controller = _currentTrack.controller;
-        if(controller) {
-            controller.openPropertiesDialog();
-        }
-    }
-    this.openTrackPropertiesDialog = openTrackPropertiesDialog;
-    */
 
     function getOrderKey(trackComponent) {
         let length = self.trackComponents.length;
@@ -1272,10 +715,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
         return trackComponent.orderNum + self.trackComponents[currentIdx + 1].orderNum;
     }
-    // function _getWellProps() {
-    //     let well = Utils.findWellByLogplot(self.wiLogplotCtrl.id) || {};
-    //     return well.properties || {};
-    // }
     function unHightlightTrack(trackComponent) {
         let controller = trackComponent.controller;
         let viTrack = controller.viTrack;
@@ -1291,69 +730,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.trackUnderMouse = null;
 
-    /*
-    function _registerTrackCallback(trackCtrl) {
-        let trackComponent = trackCtrl.getProperties();
-        let viTrack = trackCtrl.viTrack;
-        viTrack.on('focus', function () {
-            _setCurrentTrack(trackComponent);
-        });
-        viTrack.on('mousedown', function () {
-            d3.event.stopPropagation();
-            _setCurrentTrack(trackComponent);
-            // if (d3.event.button == 2) _trackOnRightClick(track);
-        });
-        viTrack.on('dblclick', function () {
-            _setCurrentTrack(trackComponent);
-            openTrackPropertiesDialog();
-        });
-        viTrack.onVerticalResizerDrag(function () {
-            if(_fitWindow) return ;
-            if (trackComponent.idTrack) {
-                wiApiService.editTrack({ 
-                    idTrack: trackComponent.idTrack, 
-                    width: Utils.pixelToInch(viTrack.width) 
-                }, null, { silent: true });
-                _fitWindow = false;
-            } 
-            else if (trackComponent.idDepthAxis) {
-                wiApiService.editDepthTrack({ 
-                    idDepthAxis: trackComponent.idDepthAxis, 
-                    width: Utils.pixelToInch(viTrack.width) 
-                }, null, { 
-                    silent: true 
-                });
-                _fitWindow = false;
-            } 
-            else if (trackComponent.idZoneTrack) {
-                wiApiService.editZoneTrack({ 
-                    idZoneTrack: trackComponent.idZoneTrack, 
-                    width: Utils.pixelToInch(viTrack.width) 
-                }, null, { 
-                    silent: true 
-                });
-                _fitWindow = false;
-            } 
-            else if (trackComponent.idImageTrack) {
-                wiApiService.editImageTrack({ 
-                    idImageTrack: trackComponent.idImageTrack, 
-                    width: Utils.pixelToInch(viTrack.width) 
-                }, null, { 
-                    silent: true 
-                });
-                _fitWindow = false;
-            } else if (trackComponent.idObjectTrack) {
-                wiApiService.editObjectTrack({ 
-                    idObjectTrack: trackComponent.idObjectTrack, 
-                    width: Utils.pixelToInch(viTrack.width) 
-                }, null, { 
-                    silent: true
-                });
-                _fitWindow = false;
-            }
-        });
-    }
-    */
     function _onPlotMouseWheelCallback() {
         if (!self.trackComponents || !self.trackComponents.length) return;
         let mouse = d3.mouse(self.trackComponents[0].controller.viTrack.plotContainer.node());
@@ -1367,16 +743,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         else
             self.scroll();
     }
-/* TUNG
-    function _trackOnRightClick() {
-        let componentCtrl = self.trackComponents.find(function(trackComponent) {
-            return trackComponent.controller.viTrack == _currentTrack;
-        }).controller;
-        if(componentCtrl) {
-            // componentCtrl.buildContextMenu();
-        }
-    }
-*/
     function _setCurrentTrack(trackComponent) {
         if (_currentTrack == trackComponent) {
             _currentTrack.controller.viTrack.highlightCallback();
@@ -1532,7 +898,6 @@ app.component(componentName, {
     bindings: {
         name: '@',
         wiLogplotCtrl: '<',
-        // selections: '<',
         containerName: '@'
     }
 });

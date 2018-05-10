@@ -104,12 +104,13 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     this.verifyDroppedIdCurve = function(idCurve) {
-        let well1 = utils.findWellByLogplot(self.wiLogplotCtrl.id);
-        let well2 = utils.findWellByCurve(idCurve) || {properties:{}};
+        return 1;
+        // let well1 = utils.findWellByLogplot(self.wiLogplotCtrl.id);
+        // let well2 = utils.findWellByCurve(idCurve) || {properties:{}};
 
-        if (!well1.properties.idWell || !well2.properties.idWell) return -1;
-        if (well1.properties.idWell && well2.properties.idWell && (well1.properties.idWell == well2.properties.idWell)) return 1;
-        return 0;
+        // if (!well1.properties.idWell || !well2.properties.idWell) return -1;
+        // if (well1.properties.idWell && well2.properties.idWell && (well1.properties.idWell == well2.properties.idWell)) return 1;
+        // return 0;
     }
 
     this.createPreview = createPreview;
@@ -119,6 +120,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             createPreview(_viCurve.idCurve, callback);
             return;
         }
+        callback && callback();
         /*
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let logplotId = self.wiLogplotCtrl.id;

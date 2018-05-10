@@ -289,7 +289,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
             // TO BE REVIEWED
             promises.push(new Promise(resolve => {
-                if(!viTrack.idZoneSet) {
+                if(!viTrack.idZoneSet || !viTrack.showZoneSet) {
+                    viTrack.removeAllZones();
                     resolve();
                 } else {
                     wiApiService.getZoneSet(viTrack.idZoneSet, function (zoneset) {
