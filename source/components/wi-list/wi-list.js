@@ -11,6 +11,10 @@ function Controller(wiComponentService) {
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     this.onChange = function(item) {
+        if (typeof item.onChange === 'function') {
+            item.onChange(item);
+            return;
+        }
         if (self.onChangeFunc) {
             self.onChangeFunc(item).then(function() {
 
