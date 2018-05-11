@@ -15,6 +15,8 @@ function Controller($timeout, $scope) {
     this.$onInit = function() {
         $timeout(function() {
             self.onWiDropdownInit && self.onWiDropdownInit(self);
+            if (self.items && self.items.length)
+                self.selectedItem = self.items[0];
         }, 500);
     }
     this.onChange = function() {

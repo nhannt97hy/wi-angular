@@ -43,7 +43,7 @@
                         <li style="display:flex;flex-direction:row; margin-bottom:5px;" 
                             ng-style="wiWorkflowMachineLearning.outputCurveStyle($index)"
                             ng-repeat="item in wiWorkflowMachineLearning.workflowConfig.model.inputs track by $index">
-                            <div style='flex-basis:20em;text-align:right;margin-right:5px;'>
+                            <div style='flex-basis:13em;text-align:right;margin-right:5px;'>
                                 <button style='width:100%;vertical-align:baseline;' class="btn btn-default" type="button"
                                     ng-click="wiWorkflowMachineLearning.onSelectTemplate($index);"
                                     ng-disabled='wf.disabled'>{{item.class}}
@@ -54,6 +54,23 @@
                                 <span ng-class="{'zone-table-16x16': item.type==wiWorkflowMachineLearning.FAMILY_GROUP_SELECTION, 'user-define-16x16': item.type==wiWorkflowMachineLearning.FAMILY_SELECTION, 'curve-16x16': item.type==wiWorkflowMachineLearning.CURVE_SELECTION}"
                                     style='position:absolute;top:50%;transform:translateY(-50%);left:0.5em;'></span>
                                 <input type="text" style='padding-left:2em;' class='form-control' ng-model='item.label' disabled>
+                                <div style='display:inline-block;position:absolute;top:50%;transform:translateY(-50%);right:0.5em;'>
+                                    <span ng-click='item.transform="linear";' 
+                                        class='badge' 
+                                        ng-class="{'transform-badge': item.transform != 'linear'}">
+                                        <input style="display:none" type='radio' ng-model="item.transform" value="linear">Ln
+                                    </span>
+                                    <span ng-click='item.transform="logarithmic";'
+                                        class='badge' 
+                                        ng-class="{'transform-badge': item.transform != 'logarithmic'}">
+                                        <input style="display:none" type='radio' ng-model="item.transform" value="logarithmic">Lg
+                                    </span>
+                                    <span ng-click='item.transform="exponential";'
+                                        class='badge' 
+                                        ng-class="{'transform-badge': item.transform != 'exponential'}">
+                                        <input style="display:none" type='radio' ng-model="item.transform" value="exponential">Ex
+                                    </span>
+                                </div>
                             </div>
                             <span ng-if="$index < (wiWorkflowMachineLearning.workflowConfig.model.inputs.length - 1) && wiWorkflowMachineLearning.workflowConfig.model.type=='curve'" ng-click="wiWorkflowMachineLearning.removeCurveInput($index)" style="padding-top: 10px; padding-left: 10px; cursor: pointer"><i class="ti-close"></i></span>
                         </li>
