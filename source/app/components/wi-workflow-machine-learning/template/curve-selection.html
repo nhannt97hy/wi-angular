@@ -57,17 +57,17 @@
                                 <div style='display:inline-block;position:absolute;top:50%;transform:translateY(-50%);right:0.5em;'>
                                     <span ng-click='item.transform="linear";' 
                                         class='badge' 
-                                        ng-class="{'transform-badge': item.transform != 'linear'}">
+                                        ng-class="{'transform-badge': !item.transform || item.transform == 'linear' }">
                                         <input style="display:none" type='radio' ng-model="item.transform" value="linear">Ln
                                     </span>
                                     <span ng-click='item.transform="logarithmic";'
                                         class='badge' 
-                                        ng-class="{'transform-badge': item.transform != 'logarithmic'}">
+                                        ng-class="{'transform-badge': item.transform == 'logarithmic'}">
                                         <input style="display:none" type='radio' ng-model="item.transform" value="logarithmic">Lg
                                     </span>
                                     <span ng-click='item.transform="exponential";'
                                         class='badge' 
-                                        ng-class="{'transform-badge': item.transform != 'exponential'}">
+                                        ng-class="{'transform-badge': item.transform == 'exponential'}">
                                         <input style="display:none" type='radio' ng-model="item.transform" value="exponential">Ex
                                     </span>
                                 </div>
