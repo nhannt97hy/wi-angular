@@ -890,6 +890,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     function train(cb) {
         let step = self.workflowConfig.steps.filter(function (step) { return step.name == TRAIN_STEP_NAME; })[0];
         getDataCurvesAndJoin(step, function (list_curves) {
+            if (!list_curves || !list_curves.length) {
+                toastr.error('No dataset');
+                cb('No dataset');
+                return;
+            }
             for (let i in list_curves) {
                 transformCurve(list_curves[i], i);
             }
@@ -1150,6 +1155,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         wfResult.outputData.length = 0;
         getDataCurves(_stepVerify, function (list_input) {
             async.forEachOfSeries(list_input, function (list_curves, index, __done) {
+                if (!list_curves || !list_curves.length) {
+                    toastr.error('No dataset');
+                    async.setImmediate(function() {__done('No dataset')});
+                    return;
+                }
                 for (let i in list_curves) {
                     transformCurve(list_curves[i], i);
                 }
@@ -1388,6 +1398,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         wfResult.outputData.length = 0;
         getDataCurves(_stepPredict, function (list_input) {
             async.forEachOfSeries(list_input, function (list_curves, index, __done) {
+                if (!list_curves || !list_curves.length) {
+                    toastr.error('No dataset');
+                    async.setImmediate(function() {__done('No dataset')});
+                    return;
+                }
                 for (let i in list_curves) {
                     transformCurve(list_curves[i], i);
                 }
