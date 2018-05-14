@@ -110,9 +110,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         if(node.type == 'well'){
             self.zones = [];
+            self.lastSelectedWell = node;
+            self.lastSelectedZoneSet = false;
         }
         if (node.type == 'well' && node.children.length == 0) {
-            self.lastSelectedWell = node;
             wiApiService.listZoneSet(node.id, function (zoneSets) {
                 for (zoneSet of zoneSets) {
                     node.children.push(createZoneSetModel(zoneSet));
