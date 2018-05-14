@@ -30,6 +30,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.treeConfig[0] = utils.projectToTreeConfig(projectRefresh);
             $timeout(function() {
                 self.backupConfig(backupConfig, [self.treeConfig[0]]);
+                wiComponentService.getComponent(self.treeviewName).filterFn();
             });
             $timeout(function(){
                 document.getElementById('treeContent').scrollTo(0,ScrollTmp);
@@ -497,6 +498,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "copy-16x16",
                         handler: function () {
                             self.handlers.DuplicateButtonClicked('curve');
+                        }
+                    },{
+                        name: "Convert",
+                        label: "Convert",
+                        icon: "tools-normal-16x16",
+                        handler: function () {
+                            self.handlers.ConvertButtonClicked();
                         }
                     }, {
                         name: "Delete",
