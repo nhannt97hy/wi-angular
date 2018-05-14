@@ -24,40 +24,28 @@
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Zone Set name:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" ng-model="wiModal.zone.name" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-3" for="name">Top depth:</label>
-                            <div class="col-sm-9">
-                                <input type="number" class="form-control" ng-model="wiModal.zone.startDepth" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-3" for="name">Bottom depth:</label>
-                            <div class="col-sm-9">
-                                <input type="number" class="form-control" ng-model="wiModal.zone.endDepth" required>
+                                <input type="text" class="form-control" ng-model="wiModal.zoneSet.name" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Foreground:</label>
                             <div class="col-sm-9">
-                                <button ng-click="wiModal.foregroundZone($index);" ng-style="{background: wiModal.zone.fill.pattern.foreground}" class="form-control wi-form-control width-80px height-20px thick-border">
+                                <button ng-click="wiModal.foregroundZone($index);" ng-style="{background: wiModal.zoneSet.foreground}" class="form-control wi-form-control width-80px height-20px thick-border">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Background:</label>
                             <div class="col-sm-9">
-                                <button ng-click="wiModal.backgroundZone($index);" ng-style="{background: wiModal.zone.fill.pattern.background}" class="form-control wi-form-control width-80px height-20px thick-border">
+                                <button ng-click="wiModal.backgroundZone($index);" ng-style="{background: wiModal.zoneSet.background}" class="form-control wi-form-control width-80px height-20px thick-border">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="control-label col-sm-3">Pattern</label>
                             <div class="col-sm-9">
-                                <ui-select theme="bootstrap" ng-model="wiModal.zone.fill.pattern.name">
+                                <ui-select theme="bootstrap" ng-model="wiModal.zoneSet.pattern">
                                     <ui-select-match>
-                                        <wi-canvas-rect name="row_{{$index}}" pattern="{{wiModal.zone.fill.pattern.name}}" width="250" height="20">
+                                        <wi-canvas-rect name="row_{{$index}}" pattern="{{wiModal.zoneSet.pattern}}" width="250" height="20">
                                         </wi-canvas-rect>
                                     </ui-select-match>
                                     <ui-select-choices repeat="selectedPattern in wiModal.selectPatterns">
