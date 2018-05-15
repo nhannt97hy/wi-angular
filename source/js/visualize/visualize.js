@@ -15,6 +15,7 @@ let Histogram = require('./visualize-histogram');
 let neuralNetworkPlayground = require('./neural-network/visualize-neural-network-playground');
 let visualizeWiPlot = require('./visualize-wi-plot');
 let ViWiXplot = require('./visualize-wi-xplot');
+let ViWiHis = require('./visualize-wi-his');
 
 let Selection = require('./visualize-selection');
 
@@ -276,4 +277,10 @@ exports.createVisualizeWiXplot = function (config, domElem) {
     let viWiXplot = new ViWiXplot(config);
     viWiXplot.init(domElem);
     return viWiXplot;
+}
+
+exports.createVisualizeWiHis = function (config, domElem) {
+    let viWiHis = new ViWiHis(config);
+    viWiHis.init(domElem);
+    return viWiHis;
 }

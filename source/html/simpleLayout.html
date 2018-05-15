@@ -121,6 +121,7 @@
                         <wi-button name="NeuralNetWorkPlayground" icon="browse-project-32x32" label="NN Playground" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.NeuralNetworkPlaygroundButtonClicked"></wi-button>
                         <wi-button name="wiPlotPlayground" icon="browse-project-32x32" label="Wi Plot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiPlotButtonClicked"></wi-button>
                         <wi-button name="wiXplot" icon="browse-project-32x32" label="Wi Xplot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiXplotButtonClicked"></wi-button>
+                        <wi-button name="wiHis" icon="browse-project-32x32" label="Wi His" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiHisButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -209,6 +210,71 @@
                             name='Reference Window'
                             container-name="Container Name"
                             on-ref-wind-ctrl-ready="wiXplotCtrl.onRefWindCtrlReady">
+                        </wi-reference-window>
+                    </wi-container>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="wi-his">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;' ng-controller="wiHistogramController as wiHisCtrl">
+            <h3 class="content-heading">Wi Histogram Sample</h3>
+            <div class="row container-fluid">
+                <div class="col-md-1"></div>
+                <ui-select multiple ng-model="$item"
+                            ng-change="wiHisCtrl.onChange($item)"
+                            close-on-select="false">
+                    <ui-select-match placeholder='Select curves'>{{$item}}</ui-select-match>
+                    <ui-select-choices repeat='curve in wiHisCtrl.data'>
+                        <div>{{curve}}</div>
+                    </ui-select-choices>
+                </ui-select>
+                <input type="checkbox" value="" ng-model="wiHisCtrl.config.showGaussian">
+                    <label class="font-weight-normal">Show Gaussian</label>
+                <input type="checkbox" value="" ng-model="wiHisCtrl.config.loga" ng-change="wiHisCtrl.checkLogStatus()">
+                    <label class="font-weight-normal">Loga</label>
+                <input type="checkbox" value="" ng-model="wiHisCtrl.config.showGrid">
+                    <label class="font-weight-normal">Show Grid</label>
+                <input type="checkbox" value="" ng-model="wiHisCtrl.config.flipHorizontal">
+                    <label class="font-weight-normal">Flip Horizontal</label>
+                <input type="radio" ng-model="wiHisCtrl.config.plotType" value="Frequency">
+                    <label class="font-weight-normal">Frequency count</label>
+                <input type="radio" ng-model="wiHisCtrl.config.plotType" value="Percent">
+                    <label class="font-weight-normal">Percentile</label>
+                <label class="font-weight-normal">Number of Divisions</label>
+                    <input type="number" id="divisions"
+                            ng-model="wiHisCtrl.config.numOfDivisions">
+                <label class="font-weight-normal">Left</label>
+                    <input type="number" id="scaleLeft"
+                            ng-model="wiHisCtrl.config.scale.left"
+                            ng-change="wiHisCtrl.checkLogValueX(wiHisCtrl.config.scale.left, 'scaleLeft')">
+                <label class="font-weight-normal">Right</label>
+                    <input type="number" id="scaleRight"
+                            ng-model="wiHisCtrl.config.scale.right"
+                            ng-change="wiHisCtrl.checkLogValueX(wiHisCtrl.config.scale.right, 'scaleRight')">
+                <button class="btn btn-default col-md-2" ng-click="wiHisCtrl.testUpdate()">Test update</button>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: row;">
+                <div resizable r-directions="['right']" r-flex="true" ng-show="wiHisCtrl.config.isShowWiZone" style="min-width:10%;max-width:20%">
+                    <wi-container name='ZoneHistogramContainer' title='Zone' close-handler='wiHisCtrl.closeZone'>
+                        <wi-zone name=""
+                        zones=""
+                        active-zone=""
+                        on-zone-ctrl-ready="wiHisCtrl.onZoneCtrlReady"></wi-zone>
+                    </wi-container>
+                </div>
+                <wi-his style='flex:1; display: flex;' curves-properties='wiHisCtrl.curvesProperties' config='wiHisCtrl.config'></wi-his>
+            </div>
+                <div resizable r-directions="['left']" r-flex="true"
+                    ng-show="wiHisCtrl.config.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
+                    <wi-container name='RefHistogramContainer'
+                        title='Reference Curve'
+                        close-handler='wiHisCtrl.closeReferenceWindow'>
+                        <wi-reference-window
+                            name='Reference Window'
+                            container-name="Container Name"
+                            on-ref-wind-ctrl-ready="wiHisCtrl.onRefWindCtrlReady">
                         </wi-reference-window>
                     </wi-container>
                 </div>

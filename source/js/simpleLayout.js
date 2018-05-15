@@ -45,6 +45,7 @@ let wiReferenceWindow = require('./wi-reference-window');
 
 let wiPlot = require('./wi-plot');
 let wiXplot = require('./wi-xplot');
+let wiHis = require('./wi-his');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -159,6 +160,7 @@ let app = angular.module('wiapp',
         wiNeuralNetwork.name,
         wiPlot.name,
         wiXplot.name,
+        wiHis.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -826,6 +828,93 @@ app.controller('wiXplotController', function ($scope, wiComponentService, $timeo
     }
     // end test
 })
+
+app.controller('wiHistogramController', function ($scope, wiComponentService, $timeout) {
+    // test
+    this.data = [{ idCurve: 1, options: {} }, { idCurve: 2, options: {} }];
+    this.curvesProperties = [];
+    this.config = {
+        showGaussian: false,
+        loga: false,
+        showGrid: false,
+        flipHorizontal: false,
+        plotType: null,
+        numOfDivisions: null,
+        scale: {
+            left: null,
+            right: null,
+        },
+        isShowWiZone: false,
+        referenceDisplay: false
+    };
+
+    this.onChange = function (curvesProperties) {
+        this.curvesProperties = curvesProperties;
+    }
+
+    this.closeZone = function () {
+        let wiHis = wiComponentService.getComponent('wi-his');
+        if (!wiHis) return;
+        wiHis.switchReferenceZone(false);
+    }
+
+    this.onZoneCtrlReady = function (zoneCtrl) {
+
+    }
+
+    this.closeReferenceWindow = function () {
+        let wiHis = wiComponentService.getComponent('wi-his');
+        if (!wiHis) return;
+        wiHis.switchReferenceWindow(false);
+    }
+
+    this.onRefWindCtrlReady = function (refWindCtrl) {
+
+    }
+
+    this.checkLogStatus = function () {
+        if (this.config.loga) {
+            this.checkLogValueX(this.config.scale.left, 'scaleLeft');
+            this.checkLogValueX(this.config.scale.right, 'scaleRight');
+        }
+    }
+    this.checkLogValueX = function (value, label) {
+        if (this.config.loga) {
+            switch (label) {
+                case 'scaleLeft':
+                    this.config.scale.left = value < 0 ? 0.01 : value;
+                    break;
+                case 'scaleRight':
+                    this.config.scale.right = value < 0 ? 0.01 : value;
+                    break;
+            }
+            if (Math.ceil(value) <= 0) {
+                $('#' + label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                }, 255);
+            }
+        }
+    }
+
+    this.testUpdate = function () {
+        if (this.config.loga) {
+            if (this.config.scale.left == 0
+                || this.config.scale.right == 0) {
+                this.config.loga = false;
+                toastr.error("Scale can't be 0 in Logarithmic");
+                return;
+            }
+        }
+        let wiHis = wiComponentService.getComponent('wi-his');
+        let changes = {
+            config: this.config,
+            curvesProperties: this.curvesProperties
+        }
+        wiHis.update(changes);
+    }
+    // end test
+});
 
 app.filter('datetimeFormat', function() {
     return function(timestamp) {
