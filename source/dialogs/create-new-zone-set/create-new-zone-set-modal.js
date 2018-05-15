@@ -3,36 +3,30 @@ module.exports = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService, ModalService, $timeout) {
         let self = this;
         self.template = {template: ''};
-        this.zone = {
+        this.zoneSet = {
             name: "",
-            startDepth: "",
-            endDepth: "",
-            fill: {
-                pattern: {
-                    name: "",
-                    background: "",
-                    foreground: ""
-                }
-            }
+            background: "",
+            foreground: "",
+            pattern: ""
         }
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);        
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         
         this.backgroundZone = function (index) {
-            DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.background, function (colorStr) {
-                self.zone.fill.pattern.background = colorStr;
-                console.log('bg', self.zone.background);
+            DialogUtils.colorPickerDialog(ModalService, self.zoneSet.background, function (colorStr) {
+                self.zoneSet.background = colorStr;
+                console.log('bg', self.zoneSet.background);
             });
         };
 
         this.foregroundZone = function (index) {
-            DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.foreground, function (colorStr) {
-                self.zone.fill.pattern.foreground = colorStr;
+            DialogUtils.colorPickerDialog(ModalService, self.zoneSet.foreground, function (colorStr) {
+                self.zoneSet.foreground = colorStr;
             });
         };
 
         this.onOkButtonClicked = function () {
-           close(self.zone);
+           close(self.zoneSet);
         };
 
         this.onCancelButtonClicked = function () {
@@ -41,7 +35,7 @@ module.exports = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: 'create-new-zone-modal.html',
+        templateUrl: 'create-new-zone-set-modal.html',
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

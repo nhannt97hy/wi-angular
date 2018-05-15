@@ -4,10 +4,26 @@
             <form class="form-horizontal">
                 <div class="bordered" style="padding:10px; margin-bottom: 10px" ng-show="!wiWorkflowMachineLearning.workflowConfig.steps[0].disabled">
                     <h4 style="text-align: center">Edit infomation model</h4>
-                    <div class="form-group" ng-if="wiWorkflowMachineLearning.currentModelType.name != 'CrossRecurrencePlot'">
+                    <div class="form-group">
                         <label class="control-label col-sm-3">Type</label>
                         <div class="col-sm-9">
-                            <wi-item-dropdown on-wi-dropdown-init="wiWorkflowMachineLearning.onModelTypeListInit" 
+                            <wi-item-dropdown 
+                                ng-if="wiWorkflowMachineLearning.workflowConfig.model.type == 'curve'"
+                                on-wi-dropdown-init="wiWorkflowMachineLearning.onRegressionModelTypeListInit" 
+                                style='width:100%;' place-holder="model type"
+                                choice-styles="width:100%;"
+                                on-item-changed="wiWorkflowMachineLearning.onModelTypeChanged">
+                            </wi-item-dropdown>
+                            <wi-item-dropdown 
+                                ng-if="wiWorkflowMachineLearning.workflowConfig.model.type == 'crp'"
+                                on-wi-dropdown-init="wiWorkflowMachineLearning.onCRPModelTypeListInit" 
+                                style='width:100%;' place-holder="model type"
+                                choice-styles="width:100%;"
+                                on-item-changed="wiWorkflowMachineLearning.onModelTypeChanged">
+                            </wi-item-dropdown>
+                            <wi-item-dropdown 
+                                ng-if="wiWorkflowMachineLearning.workflowConfig.model.type == 'classification'"
+                                on-wi-dropdown-init="wiWorkflowMachineLearning.onClassificationModelTypeListInit" 
                                 style='width:100%;' place-holder="model type"
                                 choice-styles="width:100%;"
                                 on-item-changed="wiWorkflowMachineLearning.onModelTypeChanged">
@@ -55,14 +71,15 @@
                 </div>
             </form>
         </div>
-        <div class="bordered" style="display:flex;flex:0.7;flex-direction:column;padding:10px;overflow:auto;"  ng-if="wiWorkflowMachineLearning.currentModelType.name === 'MultiPerceptron' || wiWorkflowMachineLearning.currentModelType.name === 'ConjugateGradient'" style="display:flex;flex:9;flex-direction:column;padding:10px;overflow:auto;">
+        <div class="bordered" style="display:flex;flex:0.7;flex-direction:column;padding:10px;overflow:auto;"
+            ng-if="wiWorkflowMachineLearning.currentModelType.name === 'MultiPerceptron' || wiWorkflowMachineLearning.currentModelType.name === 'ConjugateGradient' || wiWorkflowMachineLearning.currentModelType.name === 'NeuralNetClassifier'" style="display:flex;flex:9;flex-direction:column;padding:10px;overflow:auto;">
             <wi-neural-network style='flex:1;' 
                 container='wiWorkflowMachineLearning'
                 input-curves="wiWorkflowMachineLearning.nnConfig.inputs" 
                 output-curves="wiWorkflowMachineLearning.nnConfig.outputs" 
                 hidden-layer="wiWorkflowMachineLearning.nnConfig.layers"></wi-neural-network>
         </div>
-        <div class="hidden-nn" style="display:flex;flex:0.7;flex-direction:column;padding:10px;overflow:auto;padding-top: 100px;"  ng-if="wiWorkflowMachineLearning.currentModelType.name !== 'MultiPerceptron' && wiWorkflowMachineLearning.currentModelType.name !== 'ConjugateGradient'">
+        <div class="hidden-nn" style="display:flex;flex:0.7;flex-direction:column;padding:10px;overflow:auto;padding-top: 100px;"  ng-if="wiWorkflowMachineLearning.currentModelType.name !== 'MultiPerceptron' && wiWorkflowMachineLearning.currentModelType.name !== 'ConjugateGradient' && wiWorkflowMachineLearning.currentModelType.name !== 'NeuralNetClassifier'">
             Neural Network is disabled
         </div>
     </div>

@@ -1,5 +1,13 @@
 wi-tabset {
   display: block;
+  & > div {
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-center {
+    display: flex;
+    justify-content: center;
+  }
   .nav-tabs{
     background: #c8c9d0;
     padding: 2px 0 0 5px;
@@ -65,5 +73,22 @@ wi-tabset {
 
   .toggle button {
     padding: 3px;
+  }
+  .bottom {
+    flex-direction: column-reverse;
+    .nav-tabs {
+      padding: 0 0 2px 5px;
+    }
+    li.wi-tab.active {
+      border-top-color: transparent;
+      border-bottom-color: none;
+      box-shadow: none;
+    }
+    wi-tab {
+      & > div {
+        border-bottom: none;
+        border-top: 1px solid #a8aab4;
+      }
+    }
   }
 }

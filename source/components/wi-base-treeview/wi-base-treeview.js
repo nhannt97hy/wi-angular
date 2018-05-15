@@ -13,14 +13,6 @@ function WiBaseTreeController(wiComponentService, $scope) {
     this.$onInit = function () {
         if (self.name && self.name.length) {
             wiComponentService.putComponent(self.name, self);
-            $scope.$watch(() => this.config,(value) => {
-                if(this.config && this.config.length){
-                    this.config.forEach((c, i) => {
-                        let parent = new Array();
-                        filterF(c, self.filter, parent);
-                    })
-                }
-            }, true);
             let watch = [() => this.filter, () => this.filterBy];
             $scope.$watchGroup(watch, (val) => {
                 if(this.config && this.config.length){
@@ -56,7 +48,14 @@ function WiBaseTreeController(wiComponentService, $scope) {
             });
         }
     }
-
+    this.filterFn = function () {
+        if(this.config && this.config.length){
+            this.config.forEach((c, i) => {
+                let parent = new Array();
+                filterF(c, self.filter, parent);
+            })
+        }
+    };
 
     this.onCollapse = function ($index) {
         if (this.config[$index].children) {
