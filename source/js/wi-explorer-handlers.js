@@ -453,7 +453,11 @@ exports.createZoneSet = function () {
     dialogUtils.newZoneSetDialog(this.ModalService, function (data) {
         console.log(data);
         if (data.template.idZoneTemplate) {
-            wiApiService.createZoneSet({name: data.name, template: data.template.template, idWell: idWell}, function (res) {
+            wiApiService.createZoneSet({
+                name: data.name,
+                template: data.template.template,
+                idWell: idWell
+            }, function (res) {
                 utils.refreshProjectState();
             });
         } else {
@@ -461,5 +465,36 @@ exports.createZoneSet = function () {
                 utils.refreshProjectState();
             });
         }
+    });
+};
+exports.ConvertButtonClicked = function () {
+    let self = this;
+    const wiApiService = this.wiApiService;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let curves = angular.copy(selectedNodes);
+    async.each(curves, function (curve, next) {
+        if (!curve.lineProperties) {
+            curve.units = [];
+            next();
+        } else {
+            wiApiService.getListUnit({idFamily: curve.properties.idFamily}, function (res) {
+                curve.convertUnit = res.find(u => u.name === curve.properties.unit);
+                curve.units = res;
+                next();
+            });
+        }
+    }, function () {
+        dialogUtils.convertCurveUnit(self.ModalService, curves, function (_curves) {
+            utils.refreshProjectState().then(() => {
+                wiComponentService.emit('update-properties', utils.getSelectedNode());
+                _curves.forEach((curve) => {
+                    wiComponentService.emit(wiComponentService.MODIFIED_CURVE_DATA, {idCurve: curve.id});
+                })
+
+            });
+        });
     });
 };

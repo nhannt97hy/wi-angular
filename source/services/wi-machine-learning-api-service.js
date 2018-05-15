@@ -25,7 +25,9 @@ const ML_TOOL_KIT = {
     PREDICT_ANFIS: mlToolkitUrl + '/regression/anfis/predict',
     PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict',
     TRAIN_CRP: mlToolkitUrl + '/classification/crp/train',
-    PREDICT_CRP: mlToolkitUrl + '/classification/crp/predict'
+    PREDICT_CRP: mlToolkitUrl + '/classification/crp/predict',
+    TRAIN_CLASSIFICATION: mlToolkitUrl + '/classification/curve/model',
+    PREDICT_CLASSIFICATION: mlToolkitUrl + '/classification/curve/predict'
 }
 
 const URL = ML_TOOL_KIT;
@@ -93,6 +95,12 @@ WiMachineLearningApi.prototype.trainCRP = function(payload, callback) {
 }
 WiMachineLearningApi.prototype.predictCRP = function(payload, callback) {
     this.doPost(URL.PREDICT_CRP, payload, callback);
+}
+WiMachineLearningApi.prototype.trainClassification = function(payload, callback) {
+    this.doPost(URL.TRAIN_CLASSIFICATION, payload, callback);
+}
+WiMachineLearningApi.prototype.predictClassification = function(payload, callback) {
+    this.doPost(URL.PREDICT_CLASSIFICATION, payload, callback);
 }
 
 WiMachineLearningApi.prototype.getwiMachineLeaningUrl = function() { return wiMachineLeaningURL; }

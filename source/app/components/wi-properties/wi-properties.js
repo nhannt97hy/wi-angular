@@ -84,6 +84,8 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
             case 'curve':
                 var dataset = utils.findDatasetById(itemProperties.idDataset);
                 var well = utils.findWellById(dataset.properties.idWell);
+                const curveUnits = await wiApiService.asyncGetListUnit({idCurve: itemProperties.idCurve});
+                currentItem.currentUnit = curveUnits.find(u => u.name === currentItem.properties.unit);
                 config = {
                     name: currentItem.name,
                     heading: 'Depths',
@@ -99,9 +101,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                 }
                 listConfig.push(config);
                 let listFamily = utils.getListFamily();
-                let curveFamily = listFamily.find(f => f.idFamily == itemProperties.idFamily) || {};
+                let curveFamily = listFamily.find(f => f.idFamily === itemProperties.idFamily) || {};
                 let listUnit = curveFamily.family_spec || [];
-                let curveUnit = listUnit.find(u => u.isDefault == true) || {};
+                let curveUnit = listUnit.find(u => u.isDefault === true) || {};
                 config = {
                     name: currentItem.name,
                     heading: 'Informations',
@@ -124,13 +126,57 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                         value: itemProperties.name,
                         editable: false
                     }, {
+                        key: 'name',
+                        label: 'Name',
+                        value: itemProperties.name,
+                        editable: true
+                    }, {
+                        key: 'unit',
+                        label: 'Unit',
+                        editable: true,
+                        value: currentItem.properties.unit
+                    }, {
+                        key: 'compatiable-list',
+                        label: 'Compatiable List',
+                        type: type.select,
+                        options: curveUnits.map(unit => {
+                            return {
+                                value: unit.idUnit,
+                                label: unit.name
+                            }
+                        }),
+                        onChange: function (item) {
+                            let payload = {};
+                            payload.srcUnit = currentItem.currentUnit;
+                            payload.desUnit = curveUnits.find(u => u.idUnit === item.value);
+                            payload.idCurve = itemProperties.idCurve;
+                            wiApiService.convertCurveUnit(payload, function (response) {
+                                utils.refreshProjectState().then(() => {
+                                    $timeout(function () {
+                                        wiComponentService.emit('update-properties', utils.getSelectedNode());
+                                    })
+                                });
+                            });
+                        },
+                        value: currentItem.currentUnit ? currentItem.currentUnit.idUnit : null,
+                        editable: true
+                    }, {
+                        key: 'unknown',
+                        label: 'Unknown',
+                        value: currentItem.currentUnit ? null : currentItem.properties.unit,
+                        color: 'red'
+                    }, {
+                        key: 'long-list',
+                        label: 'Long List',
+                        value: 'Long'
+                    }, {
                         key: 'idFamily',
                         label: 'Family',
                         type: type.action,
                         handle: () => {
                             dialogUtils.curveFamilyDialog(ModalService, currentItem, listFamily, function (newFamily) {
                                 if (!newFamily) return;
-                                utils.editProperty({ key: 'idFamily', value: newFamily.idFamily }, async function () {
+                                utils.editProperty({key: 'idFamily', value: newFamily.idFamily}, async function () {
                                     itemProperties.idFamily = newFamily.idFamily;
                                     self.listConfig = await toListConfig(currentItem);
                                     $scope.$apply();
@@ -142,28 +188,29 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                         icon: 'family-edit-16x16',
                         editable: true
                     }, {
-                        key: 'name',
-                        label: 'Name',
-                        value: itemProperties.name,
-                        editable: true
-                    }, {
-                        key: 'unit',
-                        label: 'Unit',
-                        type: type.select,
-                        options: listUnit.map(unit => {
-                            return {
-                                value: unit.idFamilySpec,
-                                label: unit.unit
-                            }
-                        }),
-                        value: curveUnit.idFamilySpec,
-                        editable: true
-                    }, {
-                        key: 'wellName',
-                        label: 'Well Name',
-                        value: well.properties.name,
-                    }]
-                }
+                        key: 'family-unit',
+                        label: 'Family Unit',
+                        value: curveUnit.unit
+                    },
+                        // {
+                        // key: 'unit',
+                        // label: 'Unit',
+                        // type: type.select,
+                        // options: listUnit.map(unit => {
+                        //     return {
+                        //         value: unit.idFamilySpec,
+                        //         label: unit.unit
+                        //     }
+                        // }),
+                        // value: curveUnit.idFamilySpec,
+                        // editable: true
+                        // }
+                        {
+                            key: 'wellName',
+                            label: 'Well Name',
+                            value: well.properties.name,
+                        }]
+                };
                 listConfig.push(config);
                 const scale = await wiApiService.asyncScaleCurve(itemProperties.idCurve, {silent: true});
                 config = {

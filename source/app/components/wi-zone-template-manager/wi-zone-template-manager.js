@@ -29,7 +29,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         },
                         children: []
                     })
-                    console.log('11', self.templateConfig);
                 }            
             }
         })
@@ -70,7 +69,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.templateConfig.splice(self.templateConfig.indexOf(self.newTemplate), 1);
             self.newTemplate = false;
         }
-        console.log('selectedTemplate', self.selectedTemplate);
         refreshZoneTemplateList();
         clickFunction($index, $event, node, self.templateConfig, true);
     }
@@ -190,8 +188,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
     this.createZoneTemplate = function () {
-        console.log('createZoneSet', self.selectedTemplate);
-        DialogUtils.createNewZoneDialog(ModalService, function (data) {
+        DialogUtils.createNewZoneSetDialog(ModalService, function (data) {
             if(data){
                 data.template = self.selectedTemplate.name;
                 if(self.zoneTemplates.length!==0){
@@ -213,7 +210,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.newTemplate = false;
         } else {
             for(z in self.zoneTemplates) {
-                console.log(z);
                 if(self.zoneTemplates[z].flag) {
                     let idZoneTemplate = self.zoneTemplates[z].idZoneTemplate;
                     self.zoneTemplates.splice(z,1);
@@ -232,16 +228,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             zone.flag = false;
             let index = self.selectedZoneTemplates.indexOf(zone);
             self.selectedZoneTemplates.splice(index, 1);
-            console.log('===', self.selectedZoneTemplates);
         }
     }
     this.editZoneTemplate = function () {
-        console.log('edit zone set');
         if(self.newTemplate){
             for(zone of self.zoneTemplates){
                 zone.template = self.selectedTemplate.name;
                 wiApiService.createZoneTemplate(zone, function(){
-                    console.log('create zone template success');
                     self.newTemplate = false;
                 })
             }
@@ -256,7 +249,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         pattern: zone.pattern
                     }, function(){
                         wiApiService.listAllZoneByTemplate({template: self.selectedTemplate.name}, function(zones){
-                            console.log('zones', zones);
                             self.zoneTemplates = zones;
                         })
                     })
@@ -275,7 +267,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     function selectHandler(currentNode, rootNode, callback) {
-        console.log('handler', currentNode);
         if (currentNode.data) {
             $timeout(function () { currentNode.data.selected = true; });
             let selectedNodes = rootNode.__SELECTED_NODES;
