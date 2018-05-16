@@ -784,12 +784,28 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         });
     }
-    function reindexAllTracks() {
+    this.autoOrganizeTrackByWell = function() {
+        reindexAllTracks({byWell: true});
+    }
+    function reindexAllTracks(options) {
         let tcs = self.trackComponents;
+        let listWells = self.getListWells();
         for (let i = 0; i < tcs.length; i++) {
             let orderNum;
-            if (i == 0) orderNum = 'm';
-            else orderNum = String.fromCharCode(tcs[i - 1].orderNum.charCodeAt(0) + 1);
+            if(options.byWell) {
+                if(tcs[i].controller.getWellProps) {
+                    let wellProps = tcs[i].controller.getWellProps();
+                    idxWell = listWells.indexOf(wellProps);   
+                    orderNum = String.fromCharCode(77 + idxWell);
+                } else {
+                    orderNum = 'L';
+                }
+                if (i == 0) orderNum += 'm';
+                else orderNum += String.fromCharCode(tcs[i - 1].orderNum.charCodeAt(1) + 1);
+            } else {
+                if (i == 0) orderNum = 'm';
+                else orderNum = String.fromCharCode(tcs[i - 1].orderNum.charCodeAt(0) + 1);
+            }
             tcs[i].orderNum = orderNum;
             tcs[i].controller.setOrderNum(orderNum);
         }

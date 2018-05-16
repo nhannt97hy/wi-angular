@@ -9,12 +9,13 @@ module.exports = function (ModalService, wiLogplotCtrl) {
         let wiExplorer = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
 
         let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+        let tracks = wiD3Ctrl.getTrackComponents().map(tc => tc.controller.viTrack);
 
-        let logTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'log-track');
-        let depthTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'depth-track');
-        let imageTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'image-track');
-        let zoneTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'zone-track');
-        let objectTracks = wiD3Ctrl.getTracks().filter(track => track.type == 'object-track');
+        let logTracks = tracks.filter(track => track.type == 'log-track');
+        let depthTracks = tracks.filter(track => track.type == 'depth-track');
+        let imageTracks = tracks.filter(track => track.type == 'image-track');
+        let zoneTracks = tracks.filter(track => track.type == 'zone-track');
+        let objectTracks = tracks.filter(track => track.type == 'object-track');
 
         this.unit = "inch";
         if (Array.isArray(logTracks) && logTracks.length) {

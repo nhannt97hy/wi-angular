@@ -561,6 +561,11 @@ exports.ImportTrackButtonClicked = function () {
         });
     }, true);
 }
+exports.AutoOrganizeTrackButtonClicked = function() {
+    let self = this;
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
+    wiD3Ctrl.autoOrganizeTrackByWell();
+}
 exports.AutoSizeTrackButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
@@ -575,7 +580,7 @@ exports.TrackBulkUpdateButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
-    let allTracks = wiLogplot.getwiD3Ctrl().getTracks();
+    let allTracks = wiLogplot.getwiD3Ctrl().getTrackComponents().map(tc => tc.controller.viTrack);
     console.log("allTracks", wiLogplot);
     DialogUtils.trackBulkUpdateDialog(this.ModalService, allTracks, wiLogplot.id, function () {
 

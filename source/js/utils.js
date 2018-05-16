@@ -1227,12 +1227,16 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
         helper: function (event) {
             selectedObjs = $(`.wi-parent-node[type='curve']`).filter('.item-active').clone();
             let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+            let dom = null;
             if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) {
-                return $(event.currentTarget).find('div:nth-child(2)').clone();
+                dom = $(event.currentTarget).find('div:nth-child(2)').clone();
+                dom.css('pointer-events', 'none');
+            } else {
+                dom = $('<div/>');
+                dom.css('pointer-events', 'none');
+                dom.append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
             }
-            let newDiv = $('<div/>');
-            newDiv.css('pointer-events', 'none');
-            return newDiv.append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+            return dom;
         },
         start: function (event, ui) {
             dragMan.dragging = true;
@@ -1316,6 +1320,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                             }, function (line) {
                                 let lineModel = lineToTreeConfig(line);
                                 trackCtrl.update();
+                                next();
                                 // TO BE REMOVED
                                 // getCurveData(apiService, idCurve, function (err, data) {
                                 //     trackCtrl.addCurveToTrack(trackCtrl.viTrack, data, lineModel.data);

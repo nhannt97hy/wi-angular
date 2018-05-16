@@ -16,7 +16,8 @@ module.exports = function (ModalService, trackComponent, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let dataset = utils.getModel('dataset', currentCurve.idDataset);
-        this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        // this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        this.well = utils.findWellByCurve(currentCurve.idCurve);
 
         console.log("CURRENTCURVE", currentCurve, viTrack);
 
