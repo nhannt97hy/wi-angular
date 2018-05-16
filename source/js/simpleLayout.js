@@ -835,10 +835,12 @@ app.controller('wiHistogramController', function ($scope, wiComponentService, $t
     this.curvesProperties = [];
     this.config = {
         showGaussian: false,
+        showCumulative: true,
         loga: false,
         showGrid: false,
         flipHorizontal: false,
         plotType: null,
+        plot: null,
         numOfDivisions: null,
         scale: {
             left: null,

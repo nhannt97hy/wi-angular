@@ -19,7 +19,42 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.update = function (changes) {
         if (this.viWiHis) {
-            console.log('viWiHis', this.viWiHis);
+            changes.curvesProperties.forEach(datum => delete datum.$$hashKey);
+            let existedCurves = this.viWiHis.curves.map(curve => {
+                return {
+                    idCurve: curve.idCurve,
+                    options: curve.options
+                };
+            });
+            let isChanged = existedCurves.length >= changes.curvesProperties.length ?
+                _.differenceWith(existedCurves, changes.curvesProperties, _.isEqual).length :
+                _.differenceWith(changes.curvesProperties, existedCurves, _.isEqual).length;
+            if (isChanged && !changes.curvesProperties.length) {
+                this.config = {
+                    showGaussian: false,
+                    showCumulative: true,
+                    loga: false,
+                    showGrid: false,
+                    flipHorizontal: false,
+                    plotType: null,
+                    plot: null,
+                    numOfDivisions: null,
+                    scale: {
+                        left: null,
+                        right: null,
+                    },
+                    isShowWiZone: false,
+                    referenceDisplay: false
+                };
+                this.viWiHis.curves = [];
+                this.viWiHis.updatePlot(changes);
+                this.viWiHis.plotContainer.selectAll('*').remove();
+                delete this.viWiHis;
+            } else if (isChanged) {
+                this.createViWiHis(changes);
+            } else {
+                this.viWiHis.updatePlot(changes);
+            }
         } else {
             this.createViWiHis();
         }
@@ -82,10 +117,101 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     curves: self.curves,
                     config: self.config
                 }, document.getElementById(self.mainHisAreaId));
+                self.setContextMenu();
                 // debug
                 window.__ViWiHis = self.viWiHis;
+            } else {
+                self.viWiHis.curves = self.curves;
+                self.viWiHis.updatePlot(changes);
             }
         });
+    }
+
+    this.showContextMenu = function (event) {
+        if (event.button != 2) return;
+        event.stopPropagation();
+        wiComponentService.getComponent('ContextMenu')
+            .open(event.clientX, event.clientY, self.contextMenu);
+    }
+
+    this.setContextMenu = function (contextMenu) {
+        let self = this;
+        if (!contextMenu) {
+            this.contextMenu = [
+                {
+                    name: "ShowTooltip",
+                    label: "Show Tooltip",
+                    isCheckType: "true",
+                    checked: self.viWiHis.showTooltip,
+                    handler: function () {
+                        self.viWiHis.showTooltip = !self.viWiHis.showTooltip;
+                    }
+                }, {
+                    name: "ShowGaussian",
+                    label: "Show Gaussian",
+                    "isCheckType": "true",
+                    checked: self.config.showGaussian,
+                    handler: function (index) {
+                        self.config.showGaussian = !self.config.showGaussian;
+                        self.contextMenu[index].checked = self.config.showGaussian;
+                        self.viWiHis.doPlot();
+                    }
+                }, {
+                    name: "ShowCumulative",
+                    label: "Show Cumulative",
+                    "isCheckType": "true",
+                    checked: self.config.showCumulative,
+                    handler: function (index) {
+                        self.config.showCumulative = !self.config.showCumulative;
+                        self.contextMenu[index].checked = self.config.showCumulative;
+                        self.viWiHis.doPlot();
+                    }
+                }, {
+                    name: "FlipHorizontalAxis",
+                    label: "Flip Horizontal Axis",
+                    "isCheckType": "true",
+                    checked: self.config.flipHorizontal,
+                    handler: function (index) {
+                        self.config.flipHorizontal = !self.config.flipHorizontal;
+                        self.contextMenu[index].checked = self.config.flipHorizontal;
+                        self.viWiHis.doPlot();
+                    }
+                }, {
+                    name: "ShowGrid",
+                    label: "Show Grid",
+                    "isCheckType": "true",
+                    checked: self.config.showGrid,
+                    handler: function (index) {
+                        self.config.showGrid = !self.config.showGrid;
+                        self.contextMenu[index].checked = self.config.showGrid;
+                        self.viWiHis.doPlot();
+                    }
+                }, {
+                    name: "ShowAxisYAsPercent",
+                    label: "Show Axis Y as Percent",
+                    "isCheckType": "true",
+                    checked: self.config.plotType == "Percent",
+                    handler: function (index) {
+                        if (self.config.plotType == "Frequency")
+                            self.config.plotType = "Percent";
+                        else self.config.plotType = "Frequency";
+                        self.contextMenu[index].checked = self.config.plotType == "Percent";
+                        self.viWiHis.doPlot();
+                    }
+                }, {
+                    name: "ShowReferenceWindow",
+                    label: "Show Reference Window",
+                    "isCheckType": "true",
+                    checked: self.config.referenceDisplay,
+                    handler: function (index) {
+                        self.switchReferenceWindow();
+                        self.contextMenu[index].checked = self.config.referenceDisplay;
+                    }
+                }
+            ];
+        } else {
+            this.contextMenu = contextMenu;
+        }
     }
 }
 

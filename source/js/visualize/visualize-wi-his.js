@@ -12,6 +12,8 @@ function ViWiHis(props) {
 
     this.discriminatorData = [];
     this.rawData = [];
+
+    this.showTooltip = false;
 }
 
 ViWiHis.prototype.init = function (domElem) {
@@ -37,6 +39,11 @@ ViWiHis.prototype.init = function (domElem) {
     this.prepareAxesContainer();
     this.prepareDrawContainer();
     this.doPlot();
+}
+
+ViWiHis.prototype.setProperties = function (props) {
+    Utils.setIfNotUndefined(this, 'curves', props.curves);
+    Utils.setIfNotUndefined(this, 'config', props.config);
 }
 
 ViWiHis.prototype.setConfig = function (props) {
@@ -297,6 +304,16 @@ ViWiHis.prototype.plotAxesContainer = function () {
         .attr('text-anchor', 'start')
         .attr('fill', '#000')
         .style('transform', 'translate(' + (vpX[1] - 45) + 'px, 2px)');
+
+    if (this.config.showGrid) {
+        this.plotContainer
+            .classed('show-grid', true)
+            .classed('hide-grid', false);
+    } else {
+        this.plotContainer
+            .classed('hide-grid', true)
+            .classed('show-grid', false);
+    }
 }
 
 // Plot draw container
@@ -308,8 +325,10 @@ ViWiHis.prototype.plotDrawContainer = function () {
             .attr('id', 'curve-' + curve.idCurve + '-draw-container');
         self.drawBarHistogram(curveDrawContainer, idx);
         self.drawCurveHistogram(curveDrawContainer, idx);
-        self.drawGaussianCurve(curveDrawContainer, idx);
-        self.drawCumulativeCurve(curveDrawContainer, idx);
+        if (self.config.showGaussian)
+            self.drawGaussianCurve(curveDrawContainer, idx);
+        if (self.config.showCumulative)
+            self.drawCumulativeCurve(curveDrawContainer, idx);
     });
 }
 
@@ -606,6 +625,22 @@ ViWiHis.prototype.adjustSize = function () {
         .attr('height', self.rect.height);
 }
 
+// Update on changes
+ViWiHis.prototype.updatePlot = function (newProps) {
+    this.setProperties(newProps);
+
+    if (!newProps) {
+        this.doPlot();
+        return;
+    }
+
+    this.svgContainer.selectAll('*').remove();
+    this.prepareAxesContainer();
+    this.prepareDrawContainer();
+    if (!this.curves.length) return;
+    this.doPlot();
+}
+
 // Clear
 ViWiHis.prototype.clearPlot = function () {
     this.drawContainer.selectAll('*').remove();
@@ -673,8 +708,9 @@ ViWiHis.prototype.getWindowY = function () {
         let tmpMax;
         if (self.config.plotType != 'Frequency') {
             tmpMax = d3.max(bin, function (d) { return d.length * 100 / total; });
+        } else {
+            tmpMax = d3.max(bin, function (d) { return d.length; });
         }
-        tmpMax = d3.max(bin, function (d) { return d.length; });
         if (tmpMax > max) max = tmpMax;
     });
     return [0, max];
