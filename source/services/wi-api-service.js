@@ -36,7 +36,7 @@ const PROCESSING_SERVICE = 'http://13.251.24.65';
 
 // local
 const BASE_URL = 'http://multi-plot.sflow.me';
-const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+const AUTHENTICATION_SERVICE = 'http://login.multi-plot.sflow.me';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE

@@ -74,7 +74,7 @@ function WiExpTreeController(
                             let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
                             let logplotRequest = angular.copy(logplotModel.properties);
                             logplotRequest.referenceCurve = idCurve;
-                            apiService.editLogplot(logplotRequest, function () {
+                            wiApiService.editLogplot(logplotRequest, function () {
                                 logplotModel.properties.referenceCurve = idCurve;
                             });
                         }
@@ -88,7 +88,7 @@ function WiExpTreeController(
                         // if (errorCode > 0) {
                         let logTrackProps = await wiD3Ctrl.addLogTrack();
                         async.each(idCurves, (idCurve, next) => {
-                            apiService.createLine({
+                            wiApiService.createLine({
                                 idTrack: logTrackProps.idTrack,
                                 idCurve: idCurve,
                                 orderNum: 'm'
@@ -108,17 +108,17 @@ function WiExpTreeController(
                             // let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
                             let errorCode = trackCtrl.verifyDroppedIdCurve(idCurve);
                             if (errorCode > 0) {
-                                apiService.createLine({
+                                wiApiService.createLine({
                                     // idTrack: track.id,
                                     idTrack: trackCtrl.viTrack.id,
                                     idCurve: idCurve,
                                     orderNum: trackCtrl.viTrack.getCurveOrderKey()
                                 }, function (line) {
-                                    let lineModel = lineToTreeConfig(line);
+                                    let lineModel = utils.lineToTreeConfig(line);
                                     trackCtrl.update();
                                     next();
                                     // TO BE REMOVED
-                                    // getCurveData(apiService, idCurve, function (err, data) {
+                                    // getCurveData(wiApiService, idCurve, function (err, data) {
                                     //     trackCtrl.addCurveToTrack(trackCtrl.viTrack, data, lineModel.data);
                                     //     next(err);
                                     // });
