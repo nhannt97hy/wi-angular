@@ -707,9 +707,9 @@ app.controller('wiPlotPlaygroundController', function($scope) {
 
 app.controller('wiXplotController', function ($scope, wiComponentService, $timeout) {
     // test
-    this.data = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 1 }, { 'x': 2, 'y': 2 }];
+    this.data = [{ 'x': 1, 'y': 2, options: {} }, { 'x': 2, 'y': 1, options: {} }, { 'x': 1, 'y': 1, options: {} }, { 'x': 2, 'y': 2, options: {} }];
     // this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
-    this.idCurves = [];
+    this.curvesProperties = [];
     this.config = {
         logX: false,
         logY: false,
@@ -729,8 +729,8 @@ app.controller('wiXplotController', function ($scope, wiComponentService, $timeo
         referenceDisplay: false
     };
 
-    this.onChange = function (idCurves) {
-        this.idCurves = idCurves;
+    this.onChange = function (curvesProperties) {
+        this.curvesProperties = curvesProperties;
     }
 
     this.checkLogStatus = function () {
@@ -820,7 +820,7 @@ app.controller('wiXplotController', function ($scope, wiComponentService, $timeo
         let wiXplot = wiComponentService.getComponent('wi-xplot');
         let changes = {
             config: this.config,
-            idCurves: this.idCurves
+            curvesProperties: this.curvesProperties
         }
         wiXplot.update(changes);
     }

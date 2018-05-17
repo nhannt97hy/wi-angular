@@ -18,17 +18,18 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.update = function (changes) {
         if (this.viWiXplot) {
-            changes.idCurves.forEach(datum => delete datum.$$hashKey);
-            let existedIdCurves = this.viWiXplot.getProperties().pointsets.map(pointSet => {
+            changes.curvesProperties.forEach(datum => delete datum.$$hashKey);
+            let existedCurves = this.viWiXplot.getProperties().pointsets.map(pointSet => {
                 return {
                     x: pointSet.curveX.idCurve,
-                    y: pointSet.curveY.idCurve
+                    y: pointSet.curveY.idCurve,
+                    options: pointSet.options
                 };
             });
-            let isChanged = existedIdCurves.length >= changes.idCurves.length ?
-                _.differenceWith(existedIdCurves, changes.idCurves, _.isEqual).length :
-                _.differenceWith(changes.idCurves, existedIdCurves, _.isEqual).length;
-            if (isChanged && !changes.idCurves.length) {
+            let isChanged = existedCurves.length >= changes.curvesProperties.length ?
+                _.differenceWith(existedCurves, changes.curvesProperties, _.isEqual).length :
+                _.differenceWith(changes.curvesProperties, existedCurves, _.isEqual).length;
+            if (isChanged && !changes.curvesProperties.length) {
                 this.config = {
                     logX: false,
                     logY: false,
@@ -64,8 +65,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let self = this;
         let pointSet = {};
         this.pointsets = [];
-        if (!this.idCurves.length) return;
-        async.eachSeries(this.idCurves, function (config, next) {
+        if (!this.curvesProperties.length) return;
+        async.eachSeries(this.curvesProperties, function (curveProps, next) {
             pointSet = {
                 scale: {
                     left: null,
@@ -74,40 +75,43 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     top: null
                 },
                 curveX: {
-                    idCurve: config.x,
+                    idCurve: curveProps.x,
                     name: '',
                     data: {}
                 },
                 curveY: {
-                    idCurve: config.y,
+                    idCurve: curveProps.y,
                     name: '',
                     data: {}
-                }
+                },
+                options: {}
             }
             async.parallel([
                 function (cb) {
-                    wiApiService.infoCurve(config.x, function (curveInfo) {
+                    wiApiService.infoCurve(curveProps.x, function (curveInfo) {
                         pointSet.scale.left = curveInfo.LineProperty.minScale;
                         pointSet.scale.right = curveInfo.LineProperty.maxScale;
                         pointSet.curveX.name = curveInfo.name;
-                        wiApiService.dataCurve(config.x, function (curveData) {
+                        wiApiService.dataCurve(curveProps.x, function (curveData) {
                             pointSet.curveX.data = curveData;
                             cb();
                         });
                     });
                 },
                 function (cb) {
-                    wiApiService.infoCurve(config.y, function (curveInfo) {
+                    wiApiService.infoCurve(curveProps.y, function (curveInfo) {
                         pointSet.scale.bottom = curveInfo.LineProperty.minScale;
                         pointSet.scale.top = curveInfo.LineProperty.maxScale;
                         pointSet.curveY.name = curveInfo.name;
-                        wiApiService.dataCurve(config.y, function (curveData) {
+                        wiApiService.dataCurve(curveProps.y, function (curveData) {
                             pointSet.curveY.data = curveData;
                             cb();
                         });
                     });
                 }
             ], function (cb) {
+                if (!curveProps.options.pointColor) curveProps.options.pointColor = genRandomColor();
+                pointSet.options = curveProps.options;
                 self.pointsets.push(pointSet);
                 next();
             });
@@ -152,6 +156,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
             self.viWiXplot.onMouseDown(self.mouseDownCallback);
         });
+        function genRandomColor() {
+            let r = Math.round(Math.random() * 256);
+            let g = Math.round(Math.random() * 256);
+            let b = Math.round(Math.random() * 256);
+            return 'rgb(' + [r, g, b].join(",") + ')';
+        }
     }
 
     this.drawAreaPolygon = function (callback) {
@@ -504,7 +514,7 @@ app.component(componentName, {
     controller: Controller,
     controllerAs: componentName,
     bindings: {
-        idCurves: '<',
+        curvesProperties: '<',
         config: '='
     }
 });

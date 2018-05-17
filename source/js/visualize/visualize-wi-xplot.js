@@ -449,13 +449,12 @@ ViWiXplot.prototype.plotPoints = function () {
         ctx.clip();
 
         // test
-        pointSet.pointColor = genRandomColor();
         pointSet.pointSize = 3;
         pointSet.pointSymbol = 'circle';
         // end test
         let helper = new CanvasHelper(ctx, {
-            strokeStyle: pointSet.pointColor,
-            fillStyle: pointSet.pointColor,
+            strokeStyle: pointSet.options.pointColor,
+            fillStyle: pointSet.options.pointColor,
             size: pointSet.pointSize
         });
 
@@ -469,12 +468,6 @@ ViWiXplot.prototype.plotPoints = function () {
             plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
     });
-    function genRandomColor() {
-        let r = Math.round(Math.random() * 150 + 50);
-        let g = Math.round(Math.random() * 150 + 50);
-        let b = Math.round(Math.random() * 150 + 50);
-        return 'rgb(' + [r, g, b].join(",") + ')';
-    }
 }
 
 // Plot Area
