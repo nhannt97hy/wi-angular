@@ -27,7 +27,7 @@
                             <h5>Fill</h5>
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Fill pattern</label>
-                                <div class="col-sm-8" ng-click="wiModal.choosePattern(wiModal.fill.pattern.name)">
+                                <div class="col-sm-8">
                                     <!-- <ui-select theme="bootstrap" ng-model="wiModal.fill.pattern.name"
                                                 search-enabled="false">
                                         <ui-select-match>
@@ -49,17 +49,15 @@
                                             </div>
                                         </ui-select-choices>
                                     </ui-select> -->
-                                    <div style='background-color:white;border: 1px solid #ccc;display: flex;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
-                                        <div style='flex:1; margin-left: -22px; padding-left: 12px;'>
-                                            <wi-canvas-rect name="_selectedPatternCanvas" 
-                                                        pattern="{{wiModal.fill.pattern.name}}" 
-                                                        width="150" height="20" 
-                                                        foreground="{{wiModal.fill.pattern.foreground}}"
-                                                        background='{{wiModal.fill.pattern.background}}'>
-                                            </wi-canvas-rect>
-                                        </div>
-                                        <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;flex: 2" class="fa fa-pen-square"></i>
-                                    </div>
+                                    <button ng-click="wiModal.choosePattern(wiModal.fill.pattern.name)"
+                                            class="btn btn-default padding-0">
+                                        <wi-canvas-rect name="_selectedPatternCanvas" 
+                                                    pattern="{{wiModal.fill.pattern.name}}" 
+                                                    width="150" height="26" 
+                                                    foreground="{{wiModal.fill.pattern.foreground}}"
+                                                    background='{{wiModal.fill.pattern.background}}'>
+                                        </wi-canvas-rect>
+                                    </button>
                                 </div>
                             </div>
                             <div class="form-group">

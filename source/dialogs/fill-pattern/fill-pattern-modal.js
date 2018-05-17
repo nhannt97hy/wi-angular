@@ -10,17 +10,17 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.background = background;
         $('[data-toggle="tooltip"]').tooltip(); 
         this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
-        console.log("pp", this.selectPatterns);
+        this.filter = '';
         this.config = [];
         for (let p in this.selectPatterns){
-            console.log("in");
             let node = {
                 name: p,
                 type: "pattern",
                 data: {
                     childExpanded: true,
                     label: this.selectPatterns[p].full_name,
-                    selected : (this.name == p) ? true : false
+                    selected : (this.name == p) ? true : false,
+                    imageBg : 'url(' + this.selectPatterns[p].src + ')'
                 }, 
                 properties: this.selectPatterns[p]
             }
