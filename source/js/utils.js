@@ -102,7 +102,9 @@ exports.projectOpen = function (projectData) {
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     putListFamily(function () {
-        wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+        putPattern(function () {
+            wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+        })
     })
 };
 
@@ -2588,7 +2590,11 @@ exports.pixelToCm = pixelToCm;
 
 function hexToRgbA(hex) {
     var c;
-    var hexStr = hex;
+    var colors = [{name: "blue", hex: "#0000FF"}, {name: "white", hex: "#fff"}, {name: "black", hex: "#000"}];
+    var fdColor = colors.find(color => hex == color.name);
+    var hexStr;
+    if(fdColor) hexStr = fdColor.hex;
+        else hexStr = hex;
     if (!hex || hex.length == 0) {
         hexStr = '#FFFFFE';
     }
@@ -2614,6 +2620,20 @@ exports.hexToRgbA = hexToRgbA;
 
 exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
+}
+exports.rgbaStringToObj = function(rgbaString) {
+    if (rgbaString.substring(0, 4) == 'rgb(') {
+        rgbaString = rgbaString.replace('rgb(', 'rgba(').replace(')', ', 1)');
+    }
+    let rgbaArr = rgbaString.substring(5, rgbaString.length-1)
+            .replace(/ /g, '')
+            .split(',');
+    return {
+        r: parseInt(rgbaArr[0]),
+        g: parseInt(rgbaArr[1]),
+        b: parseInt(rgbaArr[2]),
+        a: parseInt(rgbaArr[3])
+    }
 }
 
 function getValPalette(palName, paletteList) {
@@ -2651,6 +2671,43 @@ function getListFamily() {
 }
 
 exports.getListFamily = getListFamily;
+
+function putPattern(callback) {
+    __GLOBAL.wiApiService.listPattern({}, function (pts) {
+        let baseUrl = __GLOBAL.wiApiService.BASE_URL;
+        let patterns = sortObject(pts);
+        for (var pat in patterns) {
+            patterns[pat].src = 'img' + patterns[pat].src;
+        };
+        __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.PATTERN, patterns);
+        callback && callback();
+    })
+}
+exports.putPattern = putPattern;
+
+function getListPattern() {
+    return __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.PATTERN);
+}
+
+exports.getListPattern = getListPattern;
+
+function sortObject(o) {
+    var sorted = {},
+    key, a = [];
+
+    for (key in o) {
+        if (o.hasOwnProperty(key)) {
+            a.push(key);
+        }
+    }
+
+    a.sort();
+
+    for (key = 0; key < a.length; key++) {
+        sorted[a[key]] = o[a[key]];
+    }
+    return sorted;
+}
 
 exports.openZonemanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -3111,3 +3168,24 @@ exports.colorGenerator = function () {
     }
     return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
 }
+exports.getPatternService = function() {
+    return __GLOBAL.wiPatternService;
+}
+function getPattern(callback) {
+    let wiApiService = __GLOBAL.wiApiService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let patterns = wiComponentService.getComponent(wiComponentService.PATTERN);
+    if (patterns) {
+        if (callback) callback(patterns);
+        return;
+    }
+    else {
+        wiApiService.listPattern(function (patternList) {
+            wiComponentService.putComponent(wiComponentService.PATTERN, patternList);
+            if (callback) callback(patternList);
+        });
+        return;
+    }
+}
+
+exports.getPattern = getPattern;

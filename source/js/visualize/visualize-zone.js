@@ -1,6 +1,7 @@
 let Utils = require('./visualize-utils');
 let Drawing = require('./visualize-drawing');
 let CanvasHelper = require('./visualize-canvas-helper');
+let gUtils = require('./../utils');
 
 module.exports = Zone;
 
@@ -63,8 +64,8 @@ Zone.prototype.init = function(plotContainer) {
     this.patternDefs = this.svgGroup.append('defs')
         .append('pattern')
         .attr('patternUnits', 'userSpaceOnUse')
-        .attr('width', 16)
-        .attr('height', 16);
+        .attr('width', 128)
+        .attr('height', 128);
 
     this.patternGroup = this.patternDefs.append('g');
     this.rect = this.svgGroup.append('rect');
@@ -86,7 +87,7 @@ Zone.prototype.init = function(plotContainer) {
         .attr('font-size', 10);
 }
 
-Zone.prototype.doPlot = function(highlight) {
+Zone.prototype.doPlot = async function(highlight) {
     if (this.startDepth == null || this.endDepth == null) return;
 
     let transformY = this.getTransformY();
@@ -115,7 +116,7 @@ Zone.prototype.doPlot = function(highlight) {
         .attr('y', minY)
         .attr('width', maxX - minX)
         .attr('height', maxY - minY)
-        .attr('fill', this.createFillStyle());
+        .attr('fill', await this.createFillStyle());
     this.updateHeader();
     this.updateText();
 }
@@ -147,10 +148,9 @@ Zone.prototype.updateText = function() {
         .attr('y', y)
         .attr('width', textRect.width)
         .attr('height', textRect.height + paddingBottom)
-        .attr('fill', 'white');
+        .attr('fill', '#fff');
 }
-
-Zone.prototype.createFillStyle = function() {
+/*Zone.prototype.createFillStyle = function() {
     if (!this.fill || !this.fill.pattern) return null;
     let pattern = this.fill.pattern;
     if (pattern.name == 'none') return pattern.background;
@@ -176,6 +176,42 @@ Zone.prototype.createFillStyle = function() {
         .attr('height', 16);
 
     return patUrl;
+}*/
+Zone.prototype.createFillStyle = async function() {
+    let wiPatternService = gUtils.getPatternService();
+    let patternList = gUtils.getListPattern();
+    if (!this.fill || !this.fill.pattern) return null;
+    let pattern = this.fill.pattern;
+    if (pattern.name == 'none') return pattern.background;
+
+    let src = patternList[pattern.name].src;
+    if (!src) return null;
+
+    let patId = this.createPatternId(pattern);
+    let patUrl = 'url(#' + patId + ')';
+    if (patId == this.patternDefs.attr('id')) {
+        return patUrl;
+    }
+    let canvas = document.createElement('canvas');
+    
+    canvas.width = 128;
+    canvas.height = 128;
+
+    let context = canvas.getContext('2d'); 
+    let _pattern = await wiPatternService.createPatternSync(context, pattern.name, pattern.foreground, pattern.background);
+    context.fillStyle = _pattern;
+    context.fillRect(0, 0, 128, 128);
+
+    let dataUrl = canvas.toDataURL();
+
+    this.patternDefs.selectAll('image').remove();
+    this.patternDefs.attr('id', patId)
+        .append('image')
+        .attr('xlink:href', dataUrl)
+        .attr('width', 128)
+        .attr('height', 128);
+
+    return patUrl;
 }
 
 Zone.prototype.on = function(type, cb) {
@@ -191,7 +227,7 @@ Zone.prototype.createPatternId = function(pattern) {
     return 'vi-zone-pattern-' + this.id + '-' + btoa(pattern.name + '-' + pattern.background + '-' + pattern.foreground);
 }
 
-Zone.prototype.updateHeader = function() {
+Zone.prototype.updateHeader = async function() {
     Drawing.prototype.updateHeader.call(this);
     if (!this.header) return;
     let rect = this.header.node().getBoundingClientRect();
@@ -211,7 +247,7 @@ Zone.prototype.updateHeader = function() {
         .attr('height', height);
 
     fillArea.selectAll('rect').remove();
-    let fill = this.createFillStyle();
+    let fill = await this.createFillStyle();
     fillArea
         .append('rect')
         .attr('x', 0)

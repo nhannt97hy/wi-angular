@@ -106,7 +106,8 @@ app.factory(wiServiceName, function () {
         UPDATE_ITEMS_EVENT: 'UPDATE_ITEMS_EVENT',
         RENAME_MODEL: 'rename-model',
         DELETE_MODEL: 'delete-model',
-        MODIFIED_CURVE_DATA: 'modified-curve-data'
+        MODIFIED_CURVE_DATA: 'modified-curve-data',
+        PATTERN: 'PATTERN'
     };
 });
 
