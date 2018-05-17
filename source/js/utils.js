@@ -1597,7 +1597,7 @@ function findWells() {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let prjNode = rootNodes[0];
-    restrictedVisit(prjNode, 3, function (node) {
+    visit(prjNode, function (node) {
         if (node.type == 'well') {
             wells.push(node);
         }
