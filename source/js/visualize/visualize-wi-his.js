@@ -31,7 +31,7 @@ ViWiHis.prototype.init = function (domElem) {
         .attr('width', self.rect.width)
         .attr('height', self.rect.height);
 
-    this.tooltip = this.plotContainer.append('div')
+    this.tooltipContainer = this.plotContainer.append('div')
         .attr('class', 'vi-histogram-tooltip')
         .style('opacity', 0);
 
@@ -121,7 +121,7 @@ ViWiHis.prototype.updateConfig = function () {
         });
     }
     let step = (wdX[1] - wdX[0]) / nBins;
-    let jumpFactorSeed = vpX[1] <= 200 ? 20 : 5;
+    let jumpFactorSeed = vpX[1] <= 200 ? 5 : 20;
     let realStep = step;
     let jumpFactor = Math.ceil(nBins / jumpFactorSeed);
     if (jumpFactor > 1) realStep = jumpFactor * step;
@@ -376,6 +376,35 @@ ViWiHis.prototype.drawBarHistogram = function (curveDrawContainer, idx) {
             .attr('fill', () => {
                 return self.curves[idx].options.lineColor;
             })
+            .on('mousemove', (d, i) => {
+                if (self.showTooltip)
+                    showTooltip(intervalBins[i], idx);
+            })
+            .on('mouseout', hideTooltip);
+    }
+
+    // Tooltip
+    function showTooltip(data, idx) {
+        let content = null;
+        if (self.config.plotType != 'Frequency') {
+            content = '<span>' + (data.length * 100 / self.getLength(idx)).toFixed(2) + '%</span>';
+        }
+        else {
+            content = '<div>' + data.length + '</div>';
+        }
+        let pos = d3.mouse(self.plotContainer.node());
+        self.tooltipContainer
+            .style('opacity', 0.9)
+            .html(content)
+            .style("left", pos[0] + "px")
+            .style("top", (pos[1] - 30 + 175) + "px");
+    }
+
+    function hideTooltip() {
+        self.tooltipContainer
+            .style('opacity', 0)
+            .style("left", 0)
+            .style("top", 0);
     }
 }
 
@@ -768,4 +797,8 @@ ViWiHis.prototype.reverseBins = function (bins) {
         bins[halfLen].x0 = bins[halfLen].x1;
         bins[halfLen].x1 = temp;
     }
+}
+
+ViWiHis.prototype.getLength = function (idx) {
+    return this.intervalData[idx] ? this.intervalData[idx].length : null;
 }

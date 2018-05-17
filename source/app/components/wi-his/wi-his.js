@@ -141,15 +141,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 {
                     name: "ShowTooltip",
                     label: "Show Tooltip",
-                    isCheckType: "true",
+                    isCheckType: true,
                     checked: self.viWiHis.showTooltip,
                     handler: function () {
                         self.viWiHis.showTooltip = !self.viWiHis.showTooltip;
+                        self.contextMenu[0].checked = self.viWiHis.showTooltip;
                     }
                 }, {
                     name: "ShowGaussian",
                     label: "Show Gaussian",
-                    "isCheckType": "true",
+                    isCheckType: true,
                     checked: self.config.showGaussian,
                     handler: function (index) {
                         self.config.showGaussian = !self.config.showGaussian;
@@ -159,7 +160,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }, {
                     name: "ShowCumulative",
                     label: "Show Cumulative",
-                    "isCheckType": "true",
+                    isCheckType: true,
                     checked: self.config.showCumulative,
                     handler: function (index) {
                         self.config.showCumulative = !self.config.showCumulative;
@@ -169,7 +170,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }, {
                     name: "FlipHorizontalAxis",
                     label: "Flip Horizontal Axis",
-                    "isCheckType": "true",
+                    isCheckType: true,
                     checked: self.config.flipHorizontal,
                     handler: function (index) {
                         self.config.flipHorizontal = !self.config.flipHorizontal;
@@ -179,7 +180,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }, {
                     name: "ShowGrid",
                     label: "Show Grid",
-                    "isCheckType": "true",
+                    isCheckType: true,
                     checked: self.config.showGrid,
                     handler: function (index) {
                         self.config.showGrid = !self.config.showGrid;
@@ -189,7 +190,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }, {
                     name: "ShowAxisYAsPercent",
                     label: "Show Axis Y as Percent",
-                    "isCheckType": "true",
+                    isCheckType: true,
                     checked: self.config.plotType == "Percent",
                     handler: function (index) {
                         if (self.config.plotType == "Frequency")
@@ -201,7 +202,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }, {
                     name: "ShowReferenceWindow",
                     label: "Show Reference Window",
-                    "isCheckType": "true",
+                    isCheckType: true,
                     checked: self.config.referenceDisplay,
                     handler: function (index) {
                         self.switchReferenceWindow();
