@@ -1,0 +1,45 @@
+<div class='modal fade' data-backdrop="static" data-keyboard="false">
+    <div class='modal-dialog'>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">&times;</button>
+                <h4><span class="curve-average-16x16"></span>&nbsp;Choose Pattern</h4>
+            </div>
+            <div class="modal-body dialog-style">
+                <div class="col-sm-7">
+                    <div class="wrapper-style">
+                        <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' 
+                            class="panel-heading">
+                            <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                            <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' size='10' ng-model="filter" ng-init="filter=''">
+                        </div>
+                        <div style="height: 400px;overflow-y: auto;">
+                            <wi-base-treeview
+                                container="wiModal"
+                                config="wiModal.config"
+                                on-click-function='wiModal.onClickFunction'
+                                filter="{{filter}}">
+                            </wi-base-treeview>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">...</div>
+                <div class="col-sm-3" style="position: fixed; top: 70px; right: 20px">
+                    <wi-canvas-rect name="{{wiModal.name}}" 
+                                    pattern="{{wiModal.name}}" 
+                                    width="128" height="128" 
+                                    foreground="{{wiModal.foreground}}"
+                                    background='{{wiModal.background}}'>
+                    </wi-canvas-rect>
+                    <p>{{wiModal.selectPatterns[wiModal.name].full_name}}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'
+                        ng-disabled=""><span class="ok-16x16"></span>Ok</button>
+                <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'>
+                    <span class="close-16x16"></span>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

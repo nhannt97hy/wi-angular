@@ -280,6 +280,7 @@ const DELETE_ZONE_TEMPLATE = '/zone-template/delete';
 const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
 const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
 const NEW_ZONE_TEMPLATE = '/zone-template/new';
+const GET_LIST_PATTERN = '/pattern/list';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -1907,7 +1908,9 @@ Service.prototype.listZoneTemplate = function (payload, callback) {
 Service.prototype.listAllZoneByTemplate = function (payload, callback) {
     this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
 };
-
+Service.prototype.listPattern = function (payload, callback) {
+    this.post(GET_LIST_PATTERN, payload, callback)
+};
 //convert unit
 Service.prototype.getListUnit = function (payload, callback) {
     this.post(FAMILY_UNIT_LIST, payload, callback);
