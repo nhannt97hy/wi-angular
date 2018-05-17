@@ -10,16 +10,176 @@ function WiExpTreeController(
     $scope
 ) {
     let self = this;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
     this.$onInit = function() {
         window.__WIEXPTREE = self;
     };
 
-    this.onReady = function() {
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    function setupCurveDraggable (element) {
+        let dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
+        let selectedObjs;
+        element.draggable({
+            helper: function (event) {
+                selectedObjs = $(`#WiExplorertreeview .wi-parent-node[type='curve']`).filter('.item-active').clone();
+                let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                let dom = null;
+                if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) {
+                    dom = $(event.currentTarget).find('div:nth-child(2)').clone();
+                    dom.css('pointer-events', 'none');
+                } else {
+                    dom = $('<div/>');
+                    dom.css('pointer-events', 'none');
+                    dom.append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+                }
+                return dom;
+            },
+            start: function (event, ui) {
+                dragMan.dragging = true;
+                // d3.selectAll('.vi-track-container').style('z-index', 1);
+            },
+            stop: function (event, ui) {
+                dragMan.dragging = false;
+                const idDataset = dragMan.idDataset;
+                let wiD3Ctrl = dragMan.wiD3Ctrl;
+                let trackCtrl = dragMan.track;
+                trackCtrl = (trackCtrl && trackCtrl.verifyDroppedIdCurve) ? trackCtrl : null;
+                let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
+                dragMan.idDataset = null;
+                dragMan.wiD3Ctrl = null;
+                dragMan.track = null;
+                dragMan.wiSlidingBarCtrl = null;
+                // d3.selectAll('.vi-track-container').style('z-index', 'unset');
+                let idCurves = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
+                if (idCurves.length) {
+                    handleDrop(idCurves);
+                } else {
+                    let idCurve = parseInt($(event.target).attr('data'));
+                    handleDrop([idCurve]);
+                }
+                async function handleDrop(idCurves) {
+                    if (idDataset) {
+                        const curveModels = idCurves.map(idCurve => getModel('curve', idCurve));
+                        copyCurve(curveModels);
+                        const datasetModel = getModel('dataset', idDataset)
+                            pasteCurve(datasetModel);
+                        return;
+                    }
+                    if (wiSlidingBarCtrl) {
+                        let idCurve = idCurves[0];
+                        let errorCode = wiSlidingBarCtrl.verifyDroppedIdCurve(idCurve);
+                        console.log('drop curve into slidingBar', errorCode);
+                        if (errorCode > 0) {
+                            wiSlidingBarCtrl.createPreview(idCurve);
+                            let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
+                            let logplotRequest = angular.copy(logplotModel.properties);
+                            logplotRequest.referenceCurve = idCurve;
+                            apiService.editLogplot(logplotRequest, function () {
+                                logplotModel.properties.referenceCurve = idCurve;
+                            });
+                        }
+                        else if (errorCode === 0) {
+                            toastr.error("Cannot drop curve from another well");
+                        }
+                        return;
+                    }
+                    if (wiD3Ctrl && !trackCtrl) {
+                        // const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                        // if (errorCode > 0) {
+                        let logTrackProps = await wiD3Ctrl.addLogTrack();
+                        async.each(idCurves, (idCurve, next) => {
+                            apiService.createLine({
+                                idTrack: logTrackProps.idTrack,
+                                idCurve: idCurve,
+                                orderNum: 'm'
+                            }, function (line) {
+                                next();
+                            });
+                        }, (err) => {
+                            wiD3Ctrl.reloadTrack(logTrackProps);
+                        });
+                        // } else if (errorCode === 0) {
+                        //     toastr.error("Cannot drop curve from another well");
+                        // }
+                        return;
+                    }
+                    if (wiD3Ctrl && trackCtrl) {
+                        async.eachSeries(idCurves, (idCurve, next) => {
+                            // let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                            let errorCode = trackCtrl.verifyDroppedIdCurve(idCurve);
+                            if (errorCode > 0) {
+                                apiService.createLine({
+                                    // idTrack: track.id,
+                                    idTrack: trackCtrl.viTrack.id,
+                                    idCurve: idCurve,
+                                    orderNum: trackCtrl.viTrack.getCurveOrderKey()
+                                }, function (line) {
+                                    let lineModel = lineToTreeConfig(line);
+                                    trackCtrl.update();
+                                    next();
+                                    // TO BE REMOVED
+                                    // getCurveData(apiService, idCurve, function (err, data) {
+                                    //     trackCtrl.addCurveToTrack(trackCtrl.viTrack, data, lineModel.data);
+                                    //     next(err);
+                                    // });
+                                });
+                            }
+                            else if (errorCode === 0) {
+                                toastr.error("Cannot drop curve from another well");
+                            }
+                            return;
+                        })
+                    }
+                }
+            },
+            appendTo: 'body',
+            revert: false,
+            scroll: false,
+            containment: 'document',
+            cursorAt: {
+                top: 5,
+                left: 10
+            }
+        });
+    };
+
+    function handleKey(event) {
+        switch (event.key) {
+            case 'F2':
+                const selectedNode = utils.getSelectedNode();
+                switch (selectedNode.type) {
+                    case 'well':
+                        utils.renameWell();
+                        break;
+                    case 'dataset':
+                        utils.renameDataset();
+                        break;
+                    case 'curve':
+                        utils.renameCurve();
+                        break;
+                    case 'zoneset':
+                        utils.renameZoneSet(selectedNode);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 'Delete':
+                const isPermanently = !!event.shiftKey;
+                self.container.handlers.DeleteItemButtonClicked(isPermanently);
+                break;
+            default:
+                break;
+        }
+    }
+
+    this.onReady = _.debounce(function () {
         let typeItemDragable = "curve";
-        let curveElement = $("wi-base-treeview#"+ self.name +" .wi-parent-node" + `[type='${typeItemDragable}']`);
-        utils.setupCurveDraggable(curveElement, wiComponentService, wiApiService);
+        const curveElements = $("wi-base-treeview#" + self.name + " .wi-parent-node" + `[type='${typeItemDragable}']`);
+        setupCurveDraggable(curveElements, wiComponentService, wiApiService);
+        curveElements.click(function() {
+            this.focus();
+        });
         // dataset droppable
         const dragMan = wiComponentService.getComponent(wiComponentService.DRAG_MAN);
         $(`wi-base-treeview#${self.name} .wi-parent-node[type=dataset]`).droppable({
@@ -41,8 +201,17 @@ function WiExpTreeController(
                 }
             },
             cursor: 'copy'
-        })
-    };
+        });
+        const nodeElements = $(`wi-base-treeview#${self.name} .wi-parent-node`);
+        nodeElements.off('focusin');
+        nodeElements.off('focusout');
+        nodeElements.focusin(function() {
+            $(this).on('keyup', handleKey);
+        });
+        nodeElements.focusout(function() {
+            $(this).off('keyup', handleKey);
+        });
+    }, 100)
 
     this.onClick = function($index, $event) {
         if (!this.container && this.container.selectHandler) return;
@@ -127,7 +296,8 @@ app.component(componentName, {
         name: "@",
         config: "<",
         container: "<",
-        filter: "@"
+        filter: "@",
+        filterBy: "@"
     }
 });
 exports.name = moduleName;

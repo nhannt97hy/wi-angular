@@ -16,30 +16,27 @@ getAuthInfo();
 
 let app = angular.module(moduleName, []);
 
+const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
 // const BASE_URL = 'http://dev.sflow.me';
 // // const BASE_URL = 'http://localhost:9000';
 // const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://13.250.197.210';
 // //inv server for dev
 
 //production
 // const BASE_URL = 'http://wi.i2g.cloud';
 // const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://127.0.0.1:3000';
 // const AUTHENTICATION_SERVICE = 'http://127.0.0.1:2999';
-// const PROCESSING_SERVICE = 'http://54.169.13.92';
 // const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 // local
 const BASE_URL = 'http://multi-plot.sflow.me';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-const PROCESSING_SERVICE = 'http://54.169.13.92';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 // route: GET, CREATE, UPDATE, DELETE
@@ -92,6 +89,8 @@ const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
 const FAMILY_LIST = '/family/list';
+const FAMILY_UNIT_LIST = '/family/list-unit';
+const CONVERT_CURVE_UNIT = '/project/well/dataset/curve/convert-unit';
 
 // const CREATE_PLOT = '/project/well/plot/new';
 // const EDIT_PLOT = '/project/well/plot/edit';
@@ -317,6 +316,14 @@ const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
 const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
 
 const GET_INVENTORY = '/user/fullinfo';
+// TASK
+const CREATE_TASK = 'task/new';
+const GET_TASK = '/task/info';
+const EDIT_TASK = '/task/edit';
+const DELETE_TASK = '/task/delete';
+const GET_TASK_LIST = "/task/list";
+// TASK SPEC
+const GET_TASK_SPEC_LIST = '/task-spec/list';
 // WORKFLOW
 const CREATE_WORKFLOW = '/workflow/new';
 const GET_WORKFLOW = '/workflow/info';
@@ -334,7 +341,19 @@ const UG_LIST_GROUP = '/group/list';
 const UG_REMOVE_USER_FROM_GROUP = '/group/remove-user';
 const UG_LIST_USER = '/user/list';
 const UG_SHARE_PROJECT = '/shared-project/new';
-const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group'
+const UG_ADD_SHARED_PROJECT_TO_GROUP = '/shared-project/add-to-group';
+const GET_USER_PERMISSION_OF_PROJECT = '/user/get-permission';
+const GET_GROUP_PERMISSION_OF_PROJECT = '/group/project-permission';
+const UPDATE_GROUP_PERMISSION_OF_PROJECT = '/group/update-project-permission';
+const UPDATE_USER_PERMISSION_OF_PROJECT = '/project/share/update-permission';
+
+const GET_LIST_ZONE_TEMPLATE = '/zone-template/list';
+const GET_ALL_ZONE_TEMPLATE = '/zone-template/all';
+const EDIT_ZONE_TEMPLATE = '/zone-template/edit';
+const DELETE_ZONE_TEMPLATE = '/zone-template/delete';
+const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
+const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
+const NEW_ZONE_TEMPLATE = '/zone-template/new';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -459,7 +478,7 @@ var wiApiWorker = function ($http, wiComponentService) {
                     } else {
                         console.error(err);
                         self.stopWorking();
-                        // if (err.reason) toastr.error(err.reason);
+                        if (err.reason) toastr.error(err.reason);
                         job.callback && job.callback(null, err)
                     }
                 });
@@ -1071,7 +1090,7 @@ Service.prototype.scaleCurvePromise = function (idCurve) {
         self.getUtils().error(err);
     }
 }
-Service.prototype.asyncScaleCurve = async function (idCurve) {
+Service.prototype.asyncScaleCurve = async function (idCurve, option) {
     const self = this;
     try {
         var scale = {};
@@ -1079,7 +1098,7 @@ Service.prototype.asyncScaleCurve = async function (idCurve) {
             self.post(SCALE_CURVE, { idCurve: idCurve }, function (response) {
                 scale = response;
                 resolve(scale);
-            });
+            }, option);
         });
         return scale;
     } catch (err) {
@@ -1912,7 +1931,7 @@ Service.prototype.checkCurveExisted = function(curveName, idDataset, callback){
 Service.prototype.addUserGroup = function (payload, callback) {
     this.post(UG_ADD_GROUP, payload, callback, 'auth');
 };
-Service.prototype.removeGroup = function (payload, callback) {
+Service.prototype.removeUserGroup = function (payload, callback) {
     this.post(UG_REMOVE_GROUP, payload, callback, 'auth');
 };
 Service.prototype.addUserToGroup = function (payload, callback){
@@ -1932,4 +1951,49 @@ Service.prototype.addSharedProject = function (payload, callback) {
 };
 Service.prototype.addProjectToGroup = function (payload, callback) {
     this.post(UG_ADD_SHARED_PROJECT_TO_GROUP, payload, callback, 'auth');
+};
+Service.prototype.getUserPermissionOfProject = function (payload, callback) {
+    this.post(GET_USER_PERMISSION_OF_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.getGroupPermissionOfProject = function (payload, callback) {
+    this.post(GET_GROUP_PERMISSION_OF_PROJECT, payload, callback, 'auth');
+};
+Service.prototype.updateGroupPermissionOfProject = function (payload, callback) {
+    this.post(UPDATE_GROUP_PERMISSION_OF_PROJECT, payload, callback, 'auth')
+};
+Service.prototype.updateUserPermissionOfProject = function (payload, callback) {
+    this.post(UPDATE_USER_PERMISSION_OF_PROJECT, payload, callback)
+};
+
+//zone template
+Service.prototype.createZoneTemplate = function (payload, callback) {
+    this.post(NEW_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.editZoneTemplate = function (payload, callback) {
+    this.post(EDIT_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.deleteZoneTemplate = function (payload, callback) {
+    this.post(DELETE_ZONE_TEMPLATE, payload, callback);
+};
+Service.prototype.listZoneTemplate = function (payload, callback) {
+    this.post(GET_LIST_ZONE_TEMPLATE, payload, callback)
+};
+Service.prototype.listAllZoneByTemplate = function (payload, callback) {
+    this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
+};
+
+//convert unit
+Service.prototype.getListUnit = function (payload, callback) {
+    this.post(FAMILY_UNIT_LIST, payload, callback);
+};
+Service.prototype.convertCurveUnit = function (payload, callback) {
+    this.post(CONVERT_CURVE_UNIT, payload, callback);
+};
+Service.prototype.asyncGetListUnit = function (payload) {
+    let self = this;
+    return new Promise(function (resolve) {
+         self.post(FAMILY_UNIT_LIST, payload, function (response) {
+             resolve(response);
+         });
+    });
 };

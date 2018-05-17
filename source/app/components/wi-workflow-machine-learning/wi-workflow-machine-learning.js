@@ -7,14 +7,7 @@ var __USERINFO = {
     refreshToken: null
 };
 
-function getAuthInfo() {
-    __USERINFO.username = window.localStorage.getItem('username');
-    __USERINFO.token = window.localStorage.getItem('token');
-    __USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
-}
-getAuthInfo();
-
-function Controller(wiComponentService, wiMachineLearningApiService, wiApiService, $timeout, $scope, $http) {
+function Controller(wiComponentService, wiMachineLearningApiService, wiApiService, $timeout, $scope, $element, $http) {
     let self = this;
     window.WFML = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -22,11 +15,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         wiComponentService.DIALOG_UTILS
     );
     this.currentModelType = null;
-    
+
     ////////////////////////////////////////
-    const ___PERM_FAM_ID = 172;
+    const ___PERM_FAM_ID = 574;
     const ___FACIES_FAM_ID = 1198;
+    const CROSS_RECURRENCE_PLOT = 'crp';
     const ML_TOOLKIT = 'curve';
+    const ML_TOOLKIT_CLASSIFICATION = 'classification';
     const PERMEABILITY_AI = 'anfis';
     const FACIES_AI = 'facies';
     const PERM_CURVE_NAME = 'PERM_CORE';
@@ -39,8 +34,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     const LINEAR_REGRESSION_PARAMS = [];
 
     const HUBER_REGRESSOR_PARAMS = [{
-        name: 'max_iter', 
-        type: 'number', 
+        name: 'max_iter',
+        type: 'number',
         value: 100,
         min: 100,
         max: 1000
@@ -54,8 +49,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }];
 
     const LASSO_PARAMS = [{
-        name: 'max_iter', 
-        type: 'number', 
+        name: 'max_iter',
+        type: 'number',
         value: 1000,
         min: 100,
         max: 1000
@@ -71,11 +66,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }];
 
     const DECISION_TREE_PARAMS = [{
-        name: 'max_features', 
+        name: 'max_features',
         type: 'select', // or number
         value: {
-            name: 'log2',
-            value: 1
+            name: 'None',
+            value: 4
         },
         choices: [{
             name: 'log2',
@@ -93,11 +88,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }];
 
     const RANDOM_FOREST_REGRESSOR_PARAMS = [{
-        name: 'max_features', 
+        name: 'max_features',
         type: 'select', // or number
         value: {
-            name: 'log2',
-            value: 1
+            name: 'None',
+            value: 4
         },
         choices: [{
             name: 'log2',
@@ -115,17 +110,17 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "n_estimators",
         type: 'number',
-        value: 10,
+        value: 150,
         min: 10,
-        max: 100
+        max: 500
     }];
 
     const SUPPORT_VECTOR_MACHINE_PARAMS = [{
-        name: 'kernel', 
-        type: 'select', 
+        name: 'kernel',
+        type: 'select',
         value: {
-            name: 'rbf',
-            value: 1
+            name: 'linear',
+            value: 2
         },
         choices: [{
             name: 'rbf',
@@ -149,7 +144,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "C",
         type: 'number',
-        value: 0.001,
+        value: 20,
         step: 0.001,
         min: 0.001,
         max: 100
@@ -159,31 +154,34 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'activation',
         type: 'select',
         value: {
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         },
         choices: [{
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         }, {
-            name: 'Tanh',
+            name: 'tanh',
             value: 2
+        }, {
+            name: 'logistic',
+            value: 3
         }]
     }, {
-        name: 'epochs',
+        name: 'max_iter',
         type: 'number',
         min: 1,
-        value: 1000
+        value: 2000
     }, {
-        name: 'learning_rate',
+        name: 'learning_rate_init',
         type: 'number',
-        value: 0.01,
-        step: 0.01
+        value: 0.001,
+        step: 0.001
     }, {
         name: 'tol',
         type: 'number',
-        value: 0.03,
-        step: 0.01
+        value: 0.0003,
+        step: 0.0001
     }, {
         name: 'Neuron Network Structure',
         type: 'nnconfig',
@@ -191,13 +189,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             nLayer: 3,
             layerConfig: [{
                 name: "layer 0",
-                value:10
+                value: 100
             }, {
                 name: "layer 1",
-                value:10
-            },{
+                value: 100
+            }, {
                 name: "layer 2",
-                value:10
+                value: 100
             }]
         }
     }];
@@ -206,31 +204,34 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'activation',
         type: 'select',
         value: {
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         },
         choices: [{
-            name: 'Sigmoid',
+            name: 'relu',
             value: 1
         }, {
-            name: 'Tanh',
+            name: 'tanh',
             value: 2
+        }, {
+            name: 'logistic',
+            value: 3
         }]
     }, {
-        name: 'epochs',
+        name: 'max_iter',
         type: 'number',
         min: 1,
-        value: 1000
+        value: 2000
     }, {
-        name: 'learning_rate',
+        name: 'learning_rate_init',
         type: 'number',
-        value: 0.01,
+        value: 0.001,
         step: 0.1
     }, {
         name: 'tol',
         type: 'number',
-        value: 0.03,
-        step: 0.01
+        value: 0.0003,
+        step: 0.0001
     }, {
         name: 'Neuron Network Structure',
         type: 'nnconfig',
@@ -238,17 +239,359 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             nLayer: 3,
             layerConfig: [{
                 name: "layer 0",
-                value:10
+                value: 100
             }, {
                 name: "layer 1",
-                value:10
-            },{
+                value: 100
+            }, {
                 name: "layer 2",
-                value:10
+                value: 100
             }]
         }
     }];
-        
+
+    const CROSS_RECURRENCE_PLOT_PARAMS = [{
+        name: 'dim',
+        type: 'number',
+        min: 2,
+        value: 2
+    }, {
+        name: 'tau',
+        type: 'number',
+        min: 1,
+        value: 2
+    }, {
+        name: 'lambd',
+        type: 'number',
+        min: 0,
+        value: 2
+    }, {
+        name: 'curve_number',
+        type: 'number',
+        min: 1,
+        value: 2
+    }, {
+        name: 'facies_class_number',
+        type: 'number',
+        min: 0,
+        value: 93.1939
+    }, {
+        name: 'epsilon',
+        type: 'number',
+        value: 2
+    }, {
+        name: 'percent',
+        type: 'number',
+        max: 1,
+        value: 2
+    }];
+
+    const DECISION_TREE_CLASSIFIER = [{
+        name : 'criterion',
+        type : 'select',
+        value: {
+            name: 'entropy',
+            value: 1
+        },
+        choices: [{
+            name: 'entropy',
+            value: 1
+        }, {
+            name: 'gini',
+            value: 1
+        }]
+    }, {
+        name: 'min_samples_split',
+        type: 'number',
+        min: 1,
+        value: 5
+    },{
+        name: "min_impurity_decrease",
+        type: 'number',
+        min: 0.0001,
+        max: 0.9999,
+        value: 0.01
+    }];
+
+    const KNN = [{
+        name: "num_neighbors",
+        type: 'number',
+        min : 1,
+        value: 100
+    },{
+        name: 'p',
+        type: 'number',
+        min: 1,
+        value: 1
+    }];
+
+    const LOGISTIC_REGRESSION = [{
+        name: 'C',
+        type: 'number',
+        min: 1,
+        value: 20
+    },{
+        name: 'max_iter',
+        type: 'number',
+        min: 1,
+        value: 10000
+    },{
+        name: 'solver',
+        type: 'select',
+        value: {
+            name: 'liblinear',
+            value: 1
+        },
+        choices: [{
+            name: 'liblinear',
+            value: 1
+        },{
+            name: 'newton-cg',
+            value: 1
+        },{
+            name: 'lbfgs',
+            value: 1
+        },{
+            name: 'sag',
+            value: 1
+        },{
+            name: 'saga',
+            value: 1
+        }]
+    }];
+
+    const RANDOM_FOREST_CLASSIFIER = [{
+        name: 'num_trees',
+        type: 'number',
+        min: 1,
+        value: 150
+    },{
+        name: 'criterion',
+        type: 'select',
+        choices: [{
+            name: 'entropy',
+            value: 'entropy'
+        },{
+            name: 'gini',
+            value: 'gini'
+        }],
+        value: {
+            name: 'entropy',
+            value: 'entropy'
+        }
+    },{
+        name: 'min_samples_split',
+        type: 'number',
+        min: 1,
+        value: 5
+    },{
+        name: 'min_impurity_decrease',
+        type: 'number',
+        min: 0.0001,
+        max: 0.9999,
+        value: 0.0003,
+        step: 0.0001
+        /*min: 0.001,
+        value: 0.001,
+        step: 0.001*/
+    }];
+
+    const NEURAL_NET_CLASSIFIER = [{
+        name: 'activation',
+        type: 'select',
+        value: {
+            name: "sigmoid",
+            value: 1
+        },
+        choices: [{
+            name: "sigmoid",
+            value: 1
+        },{
+            name: "tanh",
+            value: 2
+        },{
+            name: "relu",
+            value: 3
+        }]
+    },{
+        name: 'algorithmn',
+        type: 'select',
+        choices: [{
+            name: 'backprop',
+            value: 'backprop'
+        },{
+            name: 'evolution',
+            value: 'evolution'
+        }],
+        value: {
+            name: 'backprop',
+            value: 'backprop'
+        }
+    },{
+        name: 'batch_size',
+        type: 'number',
+        min: 0,
+        value: 0
+    },{
+        name: 'learning_rate',
+        type: 'number',
+        min: 0.001,
+        value: 0.001,
+        step: 0.001
+    },{
+        name: 'num_epochs',
+        type: 'number',
+        min: 1,
+        value: 10000
+    },{
+        name: 'optimizer',
+        type: 'select',
+        choices: [{
+            name: 'adamax',
+            value: 'adamax'
+        },{
+            name: 'sgd',
+            value: 'sgd'
+        },{
+            name: 'rmsprop',
+            value: 'rmsprop'
+        },{
+            name: 'adagrad',
+            value: 'adagrad'
+        },{
+            name: 'adadelta',
+            value: 'adadelta'
+        },{
+            name: 'adam',
+            value: 'adam'
+        },{
+            name: 'nadam',
+            value: 'nadam'
+        }],
+        value: {
+            name: 'adamax',
+            value: 'adamax'
+        }
+    },{
+        name: 'warm_up',
+        type: 'select',
+        choices: [{
+            name: 'true',
+            value: true
+        },{
+            name: 'false',
+            value: false
+        }],
+        value: {
+            name: 'true',  
+            value: true
+        } 
+    },{
+        name: 'boosting_ops',
+        type: 'number',
+        min: 0,
+        value: 0
+    }, {
+        name: 'sigma',
+        type: 'number',
+        min: 0.01,
+        value: 0.01,
+        step: 0.01
+    },{
+        name: 'population',
+        type: 'number',
+        min: 1,
+        value: 100
+    }, {
+        name: 'Neuron Network Structure',
+        type: 'nnconfig',
+        value: {
+            nLayer: 2,
+            layerConfig: [{
+                name: "layer 0",
+                value: 30
+            }, {
+                name: "layer 1",
+                value: 30
+            }]
+        }
+    }];
+
+    this.regressionModelTypes = {
+        name: 'model type',
+        type: 'select',
+        value: 1,
+        choices: [{
+            name: "LinearRegression",
+            value: 1,
+            parameters: LINEAR_REGRESSION_PARAMS
+        }, {
+            name: "HuberRegressor",
+            value: 2,
+            parameters: HUBER_REGRESSOR_PARAMS
+        },{
+            name: "Lasso",
+            value: 3,
+            parameters: LASSO_PARAMS
+        },{
+            name: "DecisionTreeRegressor",
+            value: 4,
+            parameters: DECISION_TREE_PARAMS
+        },{
+            name: "RandomForestRegressor",
+            value: 5,
+            parameters: RANDOM_FOREST_REGRESSOR_PARAMS
+        },{
+            name: "SupportVectorMachine",
+            value: 6,
+            parameters: SUPPORT_VECTOR_MACHINE_PARAMS
+        },{
+            name: "MultiPerceptron",
+            value: 7,
+            parameters: MULTIPERCEPTRON_PARAMS
+        },{
+            name: "ConjugateGradient",
+            value: 8,
+            parameters: CONJUGATE_GRADIENT_PARAMS
+        }]
+    }
+    this.crpModelTypes = {
+        name: 'model type',
+        type: 'select',
+        value: 1,
+        choices: [{
+            name: "CrossRecurrencePlot",
+            value: 9,
+            parameters: CROSS_RECURRENCE_PLOT_PARAMS
+        }]
+    }
+
+    this.classificationModelTypes = {
+        name: 'model type',
+        type: 'select',
+        value: 1,
+        choices: [{
+            name: "DecisionTreeClassifier",
+            value: 1,
+            parameters: DECISION_TREE_CLASSIFIER
+        },{
+            name: "KNN",
+            value: 2,
+            parameters: KNN
+        },{
+            name: "LogisticRegression",
+            value: 3,
+            parameters: LOGISTIC_REGRESSION
+        },{
+            name: "RandomForestClassifier",
+            value: 4,
+            parameters: RANDOM_FOREST_CLASSIFIER
+        },{
+            name: "NeuralNetClassifier",
+            value: 5,
+            parameters: NEURAL_NET_CLASSIFIER
+        }]
+    }
     this.listModelType = {
         name: 'model type',
         type: 'select',
@@ -261,34 +604,58 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: "HuberRegressor",
             value: 2,
             parameters: HUBER_REGRESSOR_PARAMS
-        }, {
+        },{
             name: "Lasso",
             value: 3,
             parameters: LASSO_PARAMS
-        }, {
+        },{
             name: "DecisionTreeRegressor",
             value: 4,
             parameters: DECISION_TREE_PARAMS
-        }, {
+        },{
             name: "RandomForestRegressor",
             value: 5,
             parameters: RANDOM_FOREST_REGRESSOR_PARAMS
-        }, {
+        },{
             name: "SupportVectorMachine",
             value: 6,
             parameters: SUPPORT_VECTOR_MACHINE_PARAMS
-        }, {
+        },{
             name: "MultiPerceptron",
             value: 7,
             parameters: MULTIPERCEPTRON_PARAMS
-        }, {
+        },{
             name: "ConjugateGradient",
             value: 8,
             parameters: CONJUGATE_GRADIENT_PARAMS
-        }] 
+        },{
+            name: "CrossRecurrencePlot",
+            value: 9,
+            parameters: CROSS_RECURRENCE_PLOT_PARAMS
+        },{
+            name: "DecisionTreeClassifier",
+            value: 10,
+            parameters: DECISION_TREE_CLASSIFIER
+        },{
+            name: "KNN",
+            value: 11,
+            parameters: KNN
+        },{
+            name: "LogisticRegression",
+            value: 12,
+            parameters: LOGISTIC_REGRESSION
+        },{
+            name: "RandomForestClassifier",
+            value: 13,
+            parameters: RANDOM_FOREST_CLASSIFIER
+        },{
+            name: "NeuralNetClassifier",
+            value: 14,
+            parameters: NEURAL_NET_CLASSIFIER
+        }]
     };
 
-    this.workflowResults = [ {
+    this.workflowResults = [{
         name: TRAIN_STEP_NAME,
         outputData: []
     }, {
@@ -299,9 +666,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         outputData: []
     }];
 
-    this.safeRunStep = function(wf, cb) {
+    this.safeRunStep = function (wf, cb) {
         __running_wf = true;
-        runStep(wf, function() {
+        runStep(wf, function () {
             __running_wf = false;
             utils.refreshProjectState();
             self.saveWorkflow();
@@ -310,8 +677,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
     this.runStep = runStep;
     function runStep(wf, cb) {
-        switch(wf.name) {
-            case TRAIN_STEP_NAME: 
+        switch (wf.name) {
+            case TRAIN_STEP_NAME:
                 console.log('runstep train');
                 train(cb);
                 break;
@@ -325,27 +692,31 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 break;
         };
     }
-
+    let well = [];
     function getDataCurves(step, callback) {
         let listInputCurves = [];
         let inputCurves = [];
         let inputData = step.inputData;
-        if(inputData){
-            async.forEachOfSeries(inputData, function(iptData, idx, _end){
+        if (inputData) {
+            well = [];
+            console.log(inputData);
+            async.forEachOfSeries(inputData, function (iptData, idx, _end) {
                 let inputSet = iptData;
                 listInputCurves[idx] = [];
-                async.forEachOfSeries(inputSet.inputs, function(curveInfo, idx1, __end){
+                let wellName = iptData.well.name;
+                async.forEachOfSeries(inputSet.inputs, function (curveInfo, idx1, __end) {
                     listInputCurves[idx][idx1] = [];
-                    wiApiService.dataCurve(curveInfo.value.idCurve, function(curveData){
-                        listInputCurves[idx][idx1] = curveData.map(function(d) {
+                    wiApiService.dataCurve(curveInfo.value.idCurve, function (curveData) {
+                        listInputCurves[idx][idx1] = curveData.map(function (d) {
+                            if(idx==0) well.push(wellName);
                             return parseFloat(d.x);
                         });
                         __end();
                     });
-                }, function(err){
+                }, function (err) {
                     _end();
                 });
-            }, function(err) {
+            }, function (err) {
                 callback(listInputCurves);
             })
 
@@ -354,60 +725,67 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             toastr.error('Choose dataset');
         }
     }
-    function getDataCurvesAndJoin(step, callback){
+    function getDataCurvesAndJoin(step, callback) {
         let curveInputs = [];
         let inputData = step.inputData;
-        if(inputData){
-            async.forEachOfSeries(inputData, function(iptData, i, __done){
-                let j=-1;
-                async.forEachOfSeries(iptData.inputs, function(curveInfo, idx, __end){
-                    wiApiService.dataCurve(curveInfo.value.idCurve, function(curveData){
+        if (inputData) {
+            well = [];
+            console.log(inputData);
+            async.forEachOfSeries(inputData, function (iptData, i, __done) {
+                let j = -1;
+                let wellName = iptData.well.name;
+                async.forEachOfSeries(iptData.inputs, function (curveInfo, idx, __end) {
+                    wiApiService.dataCurve(curveInfo.value.idCurve, function (curveData) {
                         j++;
-                        if(i==0) curveInputs[j] = [];
-                        curveData.forEach(function(data){
+                        if (i == 0) curveInputs[j] = [];
+                        curveData.forEach(function (data) {
                             curveInputs[j].push(parseFloat(data.x));
+                            if(j==0) well.push(wellName);
                         });
                         __end();
                     });
-                }, function(err){
-                    if(err)
+                }, function (err) {
+                    if (err)
                         __done(err);
                     __done();
                 });
-            }, function(err) {
+            }, function (err) {
                 callback(curveInputs);
             });
-        }else {
+        } else {
             toastr.error('Choose a dataset', '');
         }
     }
-    function filterNull(curves){
+    function filterNull(curves) {
+        let WELL = [];
         let l = curves.length;
         let filterCurves = [];
         let fillNull = [];
-        for(let j = 0; j<l; j++){
+        for (let j = 0; j < l; j++) {
             filterCurves[j] = [];
         }
-        for(let i = 0; i<curves[0].length; i++){
-            let checkNull = true;
-            for(let j=0; j<l; j++)
-                if(isNaN(curves[j][i])){
+        for (let i = 0; i < curves[0].length; i++) {
+            let notNull = true;
+            for (let j = 0; j < l; j++)
+                if (isNaN(curves[j][i])) {
                     fillNull.push(i);
-                    checkNull = false;
+                    notNull = false;
                     break;
                 }
-            if(checkNull)
-                for(let j = 0; j<l; j++){
+            if (notNull)
+                for (let j = 0; j < l; j++) {
+                    if(j==0) WELL.push(well[i]);
                     filterCurves[j].push(curves[j][i]);
                 }
         }
         return {
             filterCurves: filterCurves,
-            fillNull: fillNull
+            fillNull: fillNull,
+            well: WELL
         };
     }
     function fillNullInCurve(fillArr, curve) {
-        for(let i in fillArr)
+        for (let i in fillArr)
             curve.splice(fillArr[i], 0, NaN);
     }
     function shortName(name) {
@@ -419,7 +797,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             RandomForestRegressor: "RF",
             MultiPerceptron: "MP",
             ConjugateGradient: "CG",
-            SupportVectorMachine: "SVM"
+            SupportVectorMachine: "SVM",
+            DecisionTreeClassifier: "DTC",
+            KNN: "KNN",
+            LogisticRegression: "LoR",
+            RandomForestClassifier: "RFC",
+            NeuralNetClassifier: "NNC"
         };
         return __names[name];
     }
@@ -428,147 +811,332 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
     function outputCurveName() {
         let modelType = self.workflowConfig.model.type;
-        switch(modelType){
+        switch (modelType) {
             case ML_TOOLKIT:
+            case ML_TOOLKIT_CLASSIFICATION:
                 let steps = self.workflowConfig.steps;
                 let trainingStep = steps[0];
-                let trainingCurves = trainingStep.inputData[0].inputs;
+                let trainingCurves = trainingStep.inputData.length ? trainingStep.inputData[0].inputs : '';
+                if (trainingCurves == '')
+                    return false;
                 let lastTrainingInputCurve = trainingCurves[trainingCurves.length - 1];
                 return lastTrainingInputCurve.name + "-WF" + self.idWorkflow + '-' + shortName(self.currentModelType.name);
+                
             case PERMEABILITY_AI:
                 return 'PERM_CORE-WF' + self.idWorkflow;
             case FACIES_AI:
                 return 'DELTAIC_FACIES-WF' + self.idWorkflow;
+            case CROSS_RECURRENCE_PLOT:
+                return 'CRP_FACIES-WF' + self.idWorkflow;
         }
-        return 
+        return
     }
-    function train(cb){
-        let step = self.workflowConfig.steps.filter(function(step){return step.name==TRAIN_STEP_NAME;})[0];
-        getDataCurvesAndJoin(step, function(list_curves){
-            let curves = filterNull(list_curves).filterCurves;
-            let target = curves.splice(curves.length-1, 1)[0];
-            let data = curves;
-            let params;
-            if(self.currentModelType.name == 'LinearRegression')
-                params = {};
-            else{
-                function getValueParam(name, modelType){
-                    let parameters = modelType.parameters;
-                    let param = parameters.filter(function(param){return param.name==name;});
-                    if(param.length){
-                        if(param[0].type=='number'){
-                            console.log(param[0].name,param[0].value);
-                            let value = param[0].value;
-                            if(value == undefined){
-                                value = param[0].max;
-                            }
-                            console.log(value);
-                            return value;
-                        }
-                        else if(param[0].type=='select'){
-                            if(Number.isInteger(param[0].value))
-                                return param[0].choices[0].name;
-                            else
-                                return param[0].value.name;
-                        }
-                        else {
-                            let layers = [];
-                            if(param[0].value.nLayer == undefined)
-                                layers = [10, 10, 10];
-                            else
-                                param[0].value.layerConfig.forEach(function(layer){layers.push(layer.value?layer.value:10);});
-                            return layers;
-                        }
-                    }
+    function transformCurve(curve, idx) {
+        let transform = self.workflowConfig.model.inputs[idx].transform;
+        switch (transform) {
+        case 'logarithmic':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.log10(curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
                 }
-                params = {
-                    max_iter: getValueParam('max_iter', self.currentModelType),
-                    alpha: getValueParam('alpha', self.currentModelType),
-                    max_features: getValueParam('max_features', self.currentModelType),
-                    kernel: getValueParam('kernel', self.currentModelType),
-                    gamma: getValueParam('gamma', self.currentModelType),
-                    C: getValueParam('C', self.currentModelType),
-                    n_estimators: getValueParam('n_estimators', self.currentModelType),
-                    epochs: getValueParam('epochs', self.currentModelType),
-                    learning_rate: getValueParam('learning_rate', self.currentModelType),
-                    tol: getValueParam('tol', self.currentModelType),
-                    layers: getValueParam('Neuron Network Structure', self.currentModelType),
-                    activation: getValueParam('activation', self.currentModelType)
+                catch(err) {
+                    curve[i] = NaN;
                 }
             }
-            let payload = {
-                model_id: genModelId(),
-                model_type: self.currentModelType.name,
-                params: params,
-                train: {
-                    target: target,
-                    data: data
+            break;
+        case 'exponential':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.exp(curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
                 }
-            };
-            console.log(payload);
-            window.trainData = payload;
-            wiMachineLearningApiService.trainModel(payload, function(res){
-                if(res){
-                    toastr.success('Train model success');
-                    console.log('train model success', res);
-
-                    self.workflowResults[0].outputData.length = 0;
-                    if (res.error_path && res.error_path.training_errors)
-                        self.workflowResults[0].outputData.push({
-                            idErrorPlot: 1,
-                            name: "Training Errors",
-                            value: res.error_path.training_errors
-                        });
-                    if (res.error_path && res.error_path.validation_errors)
-                        self.workflowResults[0].outputData.push({
-                            idErrorPlot: 2,
-                            name: "Validation Errors",
-                            value: res.error_path.validation_errors
-                        });
-
-                    if (cb) cb();
-                }else{
-                    console.log('train model fail');
-                    if (cb) cb('train model fail');
+                catch(err) {
+                    curve[i] = NaN;
                 }
-            });
+            }
+        }
+    }
+    function invTransformCurve(curve, idx) {
+        let transform = self.workflowConfig.model.inputs[idx].transform;
+        switch (transform) {
+        case 'logarithmic':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.pow(10, curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
+                }
+                catch(err) {
+                    curve[i] = 0;
+                }
+            }
+            break;
+        case 'exponential':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.log(curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
+                }
+                catch(err) {
+                    curve[i] = 0;
+                }
+            }
+        }
+    }
+    function train(cb) {
+        let step = self.workflowConfig.steps.filter(function (step) { return step.name == TRAIN_STEP_NAME; })[0];
+        getDataCurvesAndJoin(step, function (list_curves) {
+            if (!list_curves || !list_curves.length) {
+                toastr.error('No dataset');
+                cb('No dataset');
+                return;
+            }
+            for (let i in list_curves) {
+                transformCurve(list_curves[i], i);
+            }
+            let indicesObj = filterNull(list_curves);
+            let curves = indicesObj.filterCurves;
+            let target = curves.splice(curves.length - 1, 1)[0];
+            let WELL = indicesObj.well;
+            let data = curves;
+            let params;
+            let payload;
+            function getValueParam(name, modelType) {
+                let parameters = modelType.parameters;
+                let param = parameters.filter(function (param) { return param.name == name; });
+                if (param.length) {
+                    if (param[0].type == 'number') {
+                        console.log(param[0].name, param[0].value);
+                        let value = param[0].value;
+                        if (value == undefined) {
+                            value = param[0].max;
+                        }
+                        console.log(value);
+                        return value;
+                    }
+                    else if (param[0].type == 'select') {
+                        if (Number.isInteger(param[0].value))
+                            return param[0].choices[0].name;
+                        else
+                            return param[0].value.name;
+                    }
+                    else {
+                        let layers = [];
+                        if (param[0].value.nLayer == undefined)
+                            layers = [100, 100, 100];
+                        else
+                            param[0].value.layerConfig.forEach(function (layer) { layers.push(layer.value ? layer.value : 100); });
+                        return layers;
+                    }
+                }
+            }
+            switch (self.workflowConfig.model.type) {
+                case ML_TOOLKIT:
+                    if (self.currentModelType.name == 'LinearRegression')
+                        params = {};
+                    else {
+                        params = {
+                            max_iter: getValueParam('max_iter', self.currentModelType),
+                            alpha: getValueParam('alpha', self.currentModelType),
+                            max_features: getValueParam('max_features', self.currentModelType) == "None" ? null : getValueParam('max_features', self.currentModelType),
+                            kernel: getValueParam('kernel', self.currentModelType),
+                            gamma: getValueParam('gamma', self.currentModelType),
+                            C: getValueParam('C', self.currentModelType),
+                            n_estimators: getValueParam('n_estimators', self.currentModelType),
+                            // epochs: getValueParam('epochs', self.currentModelType),
+                            learning_rate_init: getValueParam('learning_rate_init', self.currentModelType),
+                            tol: getValueParam('tol', self.currentModelType),
+                            hidden_layer_sizes: getValueParam('Neuron Network Structure', self.currentModelType),
+                            activation: getValueParam('activation', self.currentModelType)
+                        }
+                    }
+                    payload = {
+                        model_id: genModelId(),
+                        model_type: self.currentModelType.name,
+                        params: params,
+                        train: {
+                            target: target,
+                            data: data
+                        }
+                    };
+                    console.log(payload);
+                    window.trainData = payload;
+                    wiMachineLearningApiService.trainModel(payload, function (res) {
+                        if (res) {
+                            toastr.success('Train model success');
+                            console.log('train model success', res);
+
+                            self.workflowResults[0].outputData.length = 0;
+                            if (res.error_path && res.error_path.training_errors)
+                                self.workflowResults[0].outputData.push({
+                                    idErrorPlot: 1,
+                                    name: "Training Errors",
+                                    value: res.error_path.training_errors
+                                });
+                            if (res.error_path && res.error_path.validation_errors)
+                                self.workflowResults[0].outputData.push({
+                                    idErrorPlot: 2,
+                                    name: "Validation Errors",
+                                    value: res.error_path.validation_errors
+                                });
+
+                            if (cb) cb();
+                        } else {
+                            console.log('train model fail');
+                            if (cb) cb('train model fail');
+                        }
+                    });
+                    break;
+                case ML_TOOLKIT_CLASSIFICATION: 
+                    params = {
+                        criterion: getValueParam('criterion', self.currentModelType),
+                        min_samples_split: getValueParam('min_samples_split', self.currentModelType),
+                        min_impurity_decrease: getValueParam('min_impurity_decrease', self.currentModelType),
+                        num_neighbors: getValueParam('num_neighbors', self.currentModelType),
+                        p: getValueParam('p', self.currentModelType),
+                        C: getValueParam('C', self.currentModelType),
+                        max_iter: getValueParam('max_iter', self.currentModelType),
+                        solver: getValueParam('solver', self.currentModelType),
+                        num_trees: getValueParam('num_trees', self.currentModelType),
+                        algorithm: getValueParam('algorithm', self.currentModelType),
+                        batch_size: getValueParam('batch_size', self.currentModelType),
+                        learning_rate: getValueParam('learning_rate', self.currentModelType),
+                        num_epochs: getValueParam('num_epochs', self.currentModelType),
+                        optimizer: getValueParam('optimizer', self.currentModelType),
+                        warm_up: getValueParam('warm_up', self.currentModelType),
+                        boosting_ops: getValueParam('boosting_ops', self.currentModelType),
+                        sigma: getValueParam('sigma', self.currentModelType),
+                        population: getValueParam('population', self.currentModelType),
+                        hidden_layer_sizes: getValueParam('Neuron Network Structure', self.currentModelType),
+                        activation: getValueParam('activation', self.currentModelType)
+                    }
+                    payload = {
+                        model_id: genModelId(),
+                        model_type: self.currentModelType.name,
+                        params: params,
+                        train: {
+                            target: target,
+                            data: data
+                        }
+                    };
+                    console.log(payload);
+                    window.trainData = payload;
+                    wiMachineLearningApiService.trainClassification(payload, function (res) {
+                        if (res) {
+                            toastr.success('Train model success');
+                            console.log('train model success', res);
+
+                            self.workflowResults[0].outputData.length = 0;
+                            if (res.error_path && res.error_path.training_errors)
+                                self.workflowResults[0].outputData.push({
+                                    idErrorPlot: 1,
+                                    name: "Training Errors",
+                                    value: res.error_path.training_errors
+                                });
+                            if (res.error_path && res.error_path.validation_errors)
+                                self.workflowResults[0].outputData.push({
+                                    idErrorPlot: 2,
+                                    name: "Validation Errors",
+                                    value: res.error_path.validation_errors
+                                });
+
+                            if (cb) cb();
+                        } else {
+                            console.log('train model fail');
+                            if (cb) cb('train model fail');
+                        }
+                    });
+                    break;
+
+                case CROSS_RECURRENCE_PLOT:
+                    params = {
+                        dim: getValueParam('dim', self.currentModelType),
+                        tau: getValueParam('tau', self.currentModelType),
+                        epsilon: getValueParam('epsilon', self.currentModelType),
+                        lambd: getValueParam('lambd', self.currentModelType),
+                        percent: getValueParam('percent', self.currentModelType),
+                        curve_number: getValueParam('curve_number', self.currentModelType),
+                        facies_class_number: getValueParam('facies_class_number', self.currentModelType)
+                    }
+                    payload = {
+                        model_id: genModelId(),
+                        data: {
+                            well: WELL,//array of string
+                            data: data,
+                            target: target
+                        },
+                        params: params
+                    }
+                    console.log(payload);
+                    wiMachineLearningApiService.trainCRP(payload, function (res) {
+                        if (res) {
+                            toastr.success('Train model success');
+                            console.log('train model success', res);
+
+                            self.workflowResults[0].outputData.length = 0;
+                            if (res.error_path && res.error_path.training_errors)
+                                self.workflowResults[0].outputData.push({
+                                    idErrorPlot: 1,
+                                    name: "Training Errors",
+                                    value: res.error_path.training_errors
+                                });
+                            if (res.error_path && res.error_path.validation_errors)
+                                self.workflowResults[0].outputData.push({
+                                    idErrorPlot: 2,
+                                    name: "Validation Errors",
+                                    value: res.error_path.validation_errors
+                                });
+
+                            if (cb) cb();
+                        } else {
+                            console.log('train model fail');
+                            if (cb) cb('train model fail');
+                        }
+                    });
+                    break;
+            }
+
         });
     }
-    
+
     // }
     function saveCurveAndCreatePlot(curveInfo, step, index, cb) {
         /*let _stepVerify = self.workflowConfig.steps.filter(function(step){
             return step.name==VERIFY_STEP_NAME;
         })[0];*/
-        saveCurve(curveInfo, function(curveProps) {
+        saveCurve(curveInfo, function (curveProps) {
             delete curveInfo.data;
 
-            let inCurves = step.inputData[index].inputs.map(function(ipt) {
+            let inCurves = step.inputData[index].inputs.map(function (ipt) {
                 return ipt.value;
             });
             let outCurves = [];
-            
+
             if (step.name == VERIFY_STEP_NAME) {
                 outCurves = inCurves.splice(inCurves.length - 1, 1);
             }
 
             outCurves.push({
-                idCurve:curveProps.idCurve,
+                idCurve: curveProps.idCurve,
                 name: curveProps.name
             });
-            
-            createVerifyLogplot(
-                curveInfo.idWell, 
-                step.inputData[index].well.name + '-' + curveProps.name, 
+
+            createLogplot(
+                curveInfo.idWell,
+                step.inputData[index].well.name + '-' + curveProps.name + '-' + step.name,
                 inCurves, outCurves,
-                function(err, response) {
+                function (err, response) {
                     if (err) {
                         console.error(err);
                         toastr.error(err.message);
                         if (cb) cb(err);
                         return;
                     }
-                    let wfResult = self.workflowResults.find(function(wfr) {
+                    let wfResult = self.workflowResults.find(function (wfr) {
                         return wfr.name == step.name;
                     });
                     // wfResult.outputData.length = 0;
@@ -579,17 +1147,25 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             );
         });
     }
-    function verify(cb){
-        let _stepVerify = self.workflowConfig.steps.filter(function(step){return step.name==VERIFY_STEP_NAME;})[0];
-        let wfResult = self.workflowResults.find(function(wfr) {
+    function verify(cb) {
+        let _stepVerify = self.workflowConfig.steps.filter(function (step) { return step.name == VERIFY_STEP_NAME; })[0];
+        let wfResult = self.workflowResults.find(function (wfr) {
             return wfr.name == VERIFY_STEP_NAME;
         });
         wfResult.outputData.length = 0;
-        getDataCurves(_stepVerify, function(list_input){
-            async.forEachOfSeries(list_input, function(list_curves, index, __done){
-                let length  = list_curves.length;
+        getDataCurves(_stepVerify, function (list_input) {
+            async.forEachOfSeries(list_input, function (list_curves, index, __done) {
+                if (!list_curves || !list_curves.length) {
+                    toastr.error('No dataset');
+                    async.setImmediate(function() {__done('No dataset')});
+                    return;
+                }
+                for (let i in list_curves) {
+                    transformCurve(list_curves[i], i);
+                }
+                let length = list_curves.length;
                 let verifyCurve = [];
-                list_curves[length-1].forEach(function(x){
+                list_curves[length - 1].forEach(function (x) {
                     verifyCurve.push(x);
                 })
                 // verifyCurve  = list_curves.splice(list_curves.length-1, 1)[0];
@@ -599,57 +1175,161 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 // indicesObj.filterCurves.splice(indicesObj.filterCurves.length-1, 1);
                 let dataCurves = indicesObj.filterCurves;
                 let nullPositions = indicesObj.fillNull;
+                let WELL = indicesObj.well;
                 let payload = null;
                 console.log(self.workflowConfig.model.type);
-                switch(self.workflowConfig.model.type) {
+                switch (self.workflowConfig.model.type) {
                     case ML_TOOLKIT:
-                        payload = {
-                            model_id: genModelId(),
-                            data: dataCurves
-                        };
-                        console.log(payload);
-                        window.verifyData = payload;
-                        wiMachineLearningApiService.predictCurve(payload, function(res){
-                            if (res){
-                                toastr.success('Verification success');
-                                console.log('verify success', res);
+                        if (!outputCurveName()) {
+                            toastr.error('Choose a dataset to train before verify');
+                            __done('fail');
+                        } else {
+                            payload = {
+                                model_id: genModelId(),
+                                data: dataCurves
+                            };
+                            console.log(payload);
+                            window.verifyData = payload;
+                            wiMachineLearningApiService.predictCurve(payload, function (res) {
+                                if (res) {
+                                    toastr.success('Verification success');
+                                    console.log('verify success', res);
 
-                                window.tar = [];
-                                res.target.forEach(function(x){
-                                    window.tar.push(x);
-                                });
-                                fillNullInCurve(nullPositions, res.target);
-                                // for(let i =0; i<res.target.length; i++)
-                                // console.log(verifyCurve[i],' - ', res.target[i]);
-                                let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
-                                let curveInfo = {
-                                    idDataset: _stepVerify.inputData[index].dataset.idDataset,
-                                    idFamily: _stepVerify.inputData[index].inputs[lastIdx].value.idFamily,
-                                    idWell: _stepVerify.inputData[index].well.idWell,
-                                    name: outputCurveName(),
-                                    data: res.target
-                                }
-                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function(err) {
-                                    if (err) {
-                                        toastr.error(err.message);
-                                        __done(err);
+                                    window.tar = [];
+                                    res.target.forEach(function (x) {
+                                        window.tar.push(x);
+                                    });
+                                    fillNullInCurve(nullPositions, res.target);
+                                    // for(let i =0; i<res.target.length; i++)
+                                    // console.log(verifyCurve[i],' - ', res.target[i]);
+
+                                    let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                    let curveInfo = {
+                                        idDataset: _stepVerify.inputData[index].dataset.idDataset,
+                                        idFamily: _stepVerify.inputData[index].inputs[lastIdx].value.idFamily,
+                                        idWell: _stepVerify.inputData[index].well.idWell,
+                                        name: outputCurveName(),
+                                        data: res.target
                                     }
-                                    __done();
-                                    // if (cb) cb(err);
-                                });
-                            } else{
-                                __done('fail');
-                                // if (cb) cb('verify fail');
-                            }
-                        });
+                                    saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function (err) {
+                                        if (err) {
+                                            toastr.error(err.message);
+                                            __done(err);
+                                        }
+                                        __done();
+                                        // if (cb) cb(err);
+                                    });
+                                } else {
+                                    __done('fail');
+                                    // if (cb) cb('verify fail');
+                                }
+                            });
+                        }
+                        break;
+                    case ML_TOOLKIT_CLASSIFICATION:
+                        if (!outputCurveName()) {
+                            toastr.error('Choose a dataset to train before verify');
+                            __done('fail');
+                        } else {
+                            payload = {
+                                model_id: genModelId(),
+                                data: dataCurves
+                            };
+                            console.log(payload);
+                            window.verifyData = payload;
+                            wiMachineLearningApiService.predictClassification(payload, function (res) {
+                                if (res) {
+                                    toastr.success('Verification success');
+                                    console.log('verify success', res);
+
+                                    window.tar = [];
+                                    res.target.forEach(function (x) {
+                                        window.tar.push(x);
+                                    });
+                                    let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                    invTransformCurve(res.target, lastIdx);
+                                    fillNullInCurve(nullPositions, res.target);
+                                    // for(let i =0; i<res.target.length; i++)
+                                    // console.log(verifyCurve[i],' - ', res.target[i]);
+
+                                    let curveInfo = {
+                                        idDataset: _stepVerify.inputData[index].dataset.idDataset,
+                                        idFamily: _stepVerify.inputData[index].inputs[lastIdx].value.idFamily,
+                                        idWell: _stepVerify.inputData[index].well.idWell,
+                                        name: outputCurveName(),
+                                        data: res.target
+                                    }
+                                    saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function (err) {
+                                        if (err) {
+                                            toastr.error(err.message);
+                                            __done(err);
+                                        }
+                                        __done();
+                                        // if (cb) cb(err);
+                                    });
+                                } else {
+                                    __done('fail');
+                                    // if (cb) cb('verify fail');
+                                }
+                            });
+                        }
+                        break;
+                    case CROSS_RECURRENCE_PLOT:
+                        if (!outputCurveName()) {
+                            toastr.error('Choose a dataset to train before verify');
+                            __done('fail');
+                        } else {
+                            payload = {
+                                model_id: genModelId(),
+                                data: {
+                                    well: WELL,//array of string
+                                    data: dataCurves
+                                }
+                            };
+                            console.log(payload);
+                            wiMachineLearningApiService.predictCRP(payload, function (res) {
+                                if (res) {
+                                    toastr.success('Verification success');
+                                    console.log('verify success', res);
+
+                                    window.tar = [];
+                                    res.target.forEach(function (x) {
+                                        window.tar.push(x);
+                                    });
+                                    fillNullInCurve(nullPositions, res.target);
+                                    // for(let i =0; i<res.target.length; i++)
+                                    // console.log(verifyCurve[i],' - ', res.target[i]);
+
+                                    let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                    let curveInfo = {
+                                        idDataset: _stepVerify.inputData[index].dataset.idDataset,
+                                        idFamily: _stepVerify.inputData[index].inputs[lastIdx].value.idFamily,
+                                        idWell: _stepVerify.inputData[index].well.idWell,
+                                        name: outputCurveName(),
+                                        data: res.target
+                                    }
+                                    saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function (err) {
+                                        if (err) {
+                                            toastr.error(err.message);
+                                            __done(err);
+                                        }
+                                        __done();
+                                        // if (cb) cb(err);
+                                    });
+                                } else {
+                                    __done('fail');
+                                    // if (cb) cb('verify fail');
+                                }
+                            });
+                        }
                         break;
                     case PERMEABILITY_AI:
                         payload = {
                             data: dataCurves
                         };
                         console.log(payload);
-                        wiMachineLearningApiService.predictAnfis(payload, function(res){
-                            if (res){
+                        wiMachineLearningApiService.predictAnfis(payload, function (res) {
+                            if (res) {
                                 toastr.success('Verification curve success');
                                 console.log('Prediction success', res);
                                 fillNullInCurve(nullPositions, res.target)
@@ -661,14 +1341,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     name: outputCurveName(),
                                     data: res.target
                                 }
-                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function(err) {
+                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function (err) {
                                     if (err) {
                                         toastr.error(err.message);
                                         __done(err);
                                     }
                                     __done();
                                 });
-                            } else{
+                            } else {
                                 __done('fail');
                             }
                         });
@@ -678,8 +1358,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             data: dataCurves
                         };
                         window.face = payload;
-                        wiMachineLearningApiService.predictFacies(payload, function(res){
-                            if (res){
+                        wiMachineLearningApiService.predictFacies(payload, function (res) {
+                            if (res) {
                                 toastr.success('Verification curve success');
                                 console.log('verify success', res);
                                 fillNullInCurve(nullPositions, res.target)
@@ -691,81 +1371,181 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     name: outputCurveName(),
                                     data: res.target
                                 }
-                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function(err) {
+                                saveCurveAndCreatePlot(curveInfo, _stepVerify, index, function (err) {
                                     if (err) {
                                         toastr.error(err.message);
                                         __done(err);
                                     }
                                     __done();
                                 });
-                            } else{
+                            } else {
                                 __done('fail');
                             }
                         });
                         break;
                 };
-            }, function(err){
+            }, function (err) {
                 if (cb) cb();
             });
         });
     };
-    
-    function predict(cb){
-        let _stepPredict = self.workflowConfig.steps.filter(function(step){return step.name==PREDICT_STEP_NAME;})[0];
-        let _stepTrain = self.workflowConfig.steps.filter(function(step){return step.name==TRAIN_STEP_NAME;})[0];
-        let wfResult = self.workflowResults.find(function(wfr) {
+
+    function predict(cb) {
+        let _stepPredict = self.workflowConfig.steps.filter(function (step) { return step.name == PREDICT_STEP_NAME; })[0];
+        let _stepTrain = self.workflowConfig.steps.filter(function (step) { return step.name == TRAIN_STEP_NAME; })[0];
+        let wfResult = self.workflowResults.find(function (wfr) {
             return wfr.name == PREDICT_STEP_NAME;
         });
         wfResult.outputData.length = 0;
-        getDataCurves(_stepPredict, function(list_input){
-            async.forEachOfSeries(list_input, function(list_curves, index, __done) {
+        getDataCurves(_stepPredict, function (list_input) {
+            async.forEachOfSeries(list_input, function (list_curves, index, __done) {
+                if (!list_curves || !list_curves.length) {
+                    toastr.error('No dataset');
+                    async.setImmediate(function() {__done('No dataset')});
+                    return;
+                }
+                for (let i in list_curves) {
+                    transformCurve(list_curves[i], i);
+                }
                 let indicesObj = filterNull(list_curves);
                 let dataCurves = indicesObj.filterCurves;
+
                 let nullPositions = indicesObj.fillNull;
+                let WELL = indicesObj.well;
                 let payload = null;
-    
-                switch(self.workflowConfig.model.type){
+
+                switch (self.workflowConfig.model.type) {
                     case ML_TOOLKIT:
-                        payload = {
-                            model_id: genModelId(),
-                            data: dataCurves
-                        };
-                        console.log(payload);
-                        wiMachineLearningApiService.predictCurve(payload, function(res){
-                            if(res){
-                                toastr.success('Predict curve success');
-                                console.log('predict success', res);
-                                fillNullInCurve(nullPositions, res.target);
-                                if(!_stepTrain.inputData.length){
-                                    toastr.error('Need train model before predict');
-                                    return;
-                                }
-                                let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
-                                let curveInfo = {
-                                    idDataset: _stepPredict.inputData[index].dataset.idDataset,
-                                    idFamily: _stepTrain.inputData[0].inputs[lastIdx].value.idFamily,
-                                    idWell: _stepPredict.inputData[index].well.idWell,
-                                    name: outputCurveName(),
-                                    data: res.target
-                                }
-                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function(err) {
-                                    if (err) {
-                                        toastr.error(err.message);
-                                        __done(err);
+                        if (!outputCurveName()) {
+                            toastr.error('choose a dataset to train before predict');
+                            __done('fail');
+                        } else {
+                            payload = {
+                                model_id: genModelId(),
+                                data: dataCurves
+                            };
+                            console.log(payload);
+                            wiMachineLearningApiService.predictCurve(payload, function (res) {
+                                if (res) {
+                                    toastr.success('Predict curve success');
+                                    console.log('predict success', res);
+                                    let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
+                                    invTransformCurve(res.target, lastIdx);
+                                    fillNullInCurve(nullPositions, res.target);
+                                    if (!_stepTrain.inputData.length) {
+                                        toastr.error('Need train model before predict');
+                                        return;
                                     }
-                                    __done();
-                                });
-                            }else{
-                                __done('fail');
-                            }
-                        });
+                                    let curveInfo = {
+                                        idDataset: _stepPredict.inputData[index].dataset.idDataset,
+                                        idFamily: _stepTrain.inputData[0].inputs[lastIdx].value.idFamily,
+                                        idWell: _stepPredict.inputData[index].well.idWell,
+                                        name: outputCurveName(),
+                                        data: res.target
+                                    }
+                                    saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function (err) {
+                                        if (err) {
+                                            toastr.error(err.message);
+                                            __done(err);
+                                        }
+                                        __done();
+                                    });
+                                } else {
+                                    __done('fail');
+                                }
+                            });
+                        }
+                        break;
+                    case ML_TOOLKIT_CLASSIFICATION:
+                        if (!outputCurveName()) {
+                            toastr.error('choose a dataset to train before predict');
+                            __done('fail');
+                        } else {
+                            payload = {
+                                model_id: genModelId(),
+                                data: dataCurves
+                            };
+                            console.log(payload);
+                            wiMachineLearningApiService.predictClassification(payload, function (res) {
+                                if (res) {
+                                    toastr.success('Predict curve success');
+                                    console.log('predict success', res);
+                                    let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
+                                    invTransformCurve(res.target, lastIdx);
+                                    fillNullInCurve(nullPositions, res.target);
+                                    if (!_stepTrain.inputData.length) {
+                                        toastr.error('Need train model before predict');
+                                        return;
+                                    }
+                                    let curveInfo = {
+                                        idDataset: _stepPredict.inputData[index].dataset.idDataset,
+                                        idFamily: _stepTrain.inputData[0].inputs[lastIdx].value.idFamily,
+                                        idWell: _stepPredict.inputData[index].well.idWell,
+                                        name: outputCurveName(),
+                                        data: res.target
+                                    }
+                                    saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function (err) {
+                                        if (err) {
+                                            toastr.error(err.message);
+                                            __done(err);
+                                        }
+                                        __done();
+                                    });
+                                } else {
+                                    __done('fail');
+                                }
+                            });
+                        }
+                        break;
+                    case CROSS_RECURRENCE_PLOT:
+                        if (!outputCurveName()) {
+                            toastr.error('choose a dataset to train before predict');
+                            __done('fail');
+                        } else {
+                            payload = {
+                                model_id: genModelId(),
+                                data: {
+                                    well: WELL,//array of string
+                                    data: dataCurves
+                                }
+                            };
+                            console.log(payload);
+                            wiMachineLearningApiService.predictCRP(payload, function (res) {
+                                if (res) {
+                                    toastr.success('Predict curve success');
+                                    console.log('predict success', res);
+                                    fillNullInCurve(nullPositions, res.target);
+                                    if (!_stepTrain.inputData.length) {
+                                        toastr.error('Need train model before predict');
+                                        return;
+                                    }
+                                    let lastIdx = _stepTrain.inputData[0].inputs.length - 1;
+                                    let curveInfo = {
+                                        idDataset: _stepPredict.inputData[index].dataset.idDataset,
+                                        idFamily: _stepTrain.inputData[0].inputs[lastIdx].value.idFamily,
+                                        idWell: _stepPredict.inputData[index].well.idWell,
+                                        name: outputCurveName(),
+                                        data: res.target
+                                    }
+                                    saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function (err) {
+                                        if (err) {
+                                            toastr.error(err.message);
+                                            __done(err);
+                                        }
+                                        __done();
+                                    });
+                                } else {
+                                    __done('fail');
+                                }
+                            });
+                        }
                         break;
                     case PERMEABILITY_AI:
                         payload = {
                             data: dataCurves
                         };
-                        wiMachineLearningApiService.predictAnfis(payload, function(res){
-                            if(res){
+                        wiMachineLearningApiService.predictAnfis(payload, function (res) {
+                            if (res) {
                                 toastr.success('Predict curve success');
                                 console.log('predict success', res);
                                 fillNullInCurve(nullPositions, res.target);
@@ -776,14 +1556,14 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     name: outputCurveName(),
                                     data: res.target
                                 }
-                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function(err) {
+                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function (err) {
                                     if (err) {
                                         toastr.error(err.message);
                                         __done(err);
                                     }
                                     __done();
                                 });
-                            }else{
+                            } else {
                                 __done('fail');
                             }
                         });
@@ -792,8 +1572,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         payload = {
                             data: dataCurves
                         };
-                        wiMachineLearningApiService.predictFacies(payload, function(res){
-                            if(res){
+                        wiMachineLearningApiService.predictFacies(payload, function (res) {
+                            if (res) {
                                 toastr.success('Predict curve success');
                                 console.log('predict success', res);
                                 fillNullInCurve(nullPositions, res.target);
@@ -804,20 +1584,20 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     name: outputCurveName(),
                                     data: res.target
                                 }
-                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function(err) {
+                                saveCurveAndCreatePlot(curveInfo, _stepPredict, index, function (err) {
                                     if (err) {
                                         toastr.error(err.message);
                                         __done(err);
                                     }
                                     __done();
                                 });
-                            }else{
+                            } else {
                                 __done('fail');
                             }
                         });
                         break;
                 }
-            }, function(err) {
+            }, function (err) {
                 if (cb) cb();
             });
         });
@@ -840,7 +1620,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     };
     let __inputDataLen = 0;
 
-    this.nnConfig = {inputs: [], outputs:[], layers: []};
+    this.nnConfig = { inputs: [], outputs: [], layers: [] };
 
     function updateNNConfig() {
         if (!self.currentModelType) {
@@ -849,24 +1629,24 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (!self.currentModelType.parameters.length) {
             return;
         }
-        let config = self.currentModelType.parameters[self.currentModelType.parameters.length -1];
+        let config = self.currentModelType.parameters[self.currentModelType.parameters.length - 1];
         if (config.type != 'nnconfig') {
             return;
         }
-        self.nnConfig = {inputs: [], outputs:[], layers: []};
-        
-        self.nnConfig.inputs = self.workflowConfig.model.inputs.filter(function(input){return input.class == 'curve input'});
-        self.nnConfig.outputs = self.workflowConfig.model.inputs.filter(function(input){return input.class == 'curve output'});
-        self.nnConfig.layers = config.value.layerConfig.map(function(item){
+        self.nnConfig = { inputs: [], outputs: [], layers: [] };
+
+        self.nnConfig.inputs = self.workflowConfig.model.inputs.filter(function (input) { return input.class == 'curve input' });
+        self.nnConfig.outputs = self.workflowConfig.model.inputs.filter(function (input) { return input.class == 'curve output' });
+        self.nnConfig.layers = config.value.layerConfig.map(function (item) {
             return item.value;
         });
         self.saveWorkflow();
-        $timeout( function() {
+        $timeout(function () {
             self.wiNNCtrl.update(self.nnConfig);
         });
     }
-    
-    this.updateNNConfig = _.debounce(updateNNConfig);    
+
+    this.updateNNConfig = _.debounce(updateNNConfig);
     setInterval(self.updateNNConfig(), 1000);
     function getCurrentProjectId() {
         let openProject = wiComponentService.getComponent(
@@ -879,16 +1659,34 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (self.name) wiComponentService.putComponent(self.name, self);
         console.log(self.idWorkflow);
         if (self.idWorkflow) {
-            wiApiService.getWorkflow(self.idWorkflow, function(workflow) {
+            wiApiService.getWorkflow(self.idWorkflow, function (workflow) {
                 self.workflowConfig = workflow.content;
                 self.workflowName = workflow.name;
+                console.log(self.workflowConfig);
                 self.currentModelType = self.workflowConfig.model.currentModelType;
-                self.workflowResults[1] = self.workflowConfig.steps.find(function(step) {
+
+                if (self.workflowConfig.model.type == CROSS_RECURRENCE_PLOT) {
+                    //self.currentModelType = self.listModelType.choices[self.listModelType.choices.length - 1];
+                    self.currentModelType = self.listModelType.choices.find(function(modelType) {
+                        return modelType.name == 'CrossRecurrencePlot';
+                    });
+                }
+                
+                console.log(self.currentModelType);
+                self.workflowResults[1] = self.workflowConfig.steps.find(function (step) {
                     return step.name == self.workflowResults[1].name;
                 }).result || self.workflowResults[1];
-                self.workflowResults[2] = self.workflowConfig.steps.find(function(step) {
+                self.workflowResults[2] = self.workflowConfig.steps.find(function (step) {
                     return step.name == self.workflowResults[2].name;
                 }).result || self.workflowResults[2];
+                let modelTypeDropdown = $element.find('wi-item-dropdown .ui-select-container');
+                console.log(modelTypeDropdown.scope().controller);
+                let wiItemDropdown = modelTypeDropdown.scope().wiItemDropdown;
+                if (wiItemDropdown && wiItemDropdown.items) {
+                    wiItemDropdown.selectedItem = wiItemDropdown.items.find(function (item) {
+                        return item.properties.name == self.currentModelType.name;
+                    });
+                }
             });
         }
 
@@ -1146,7 +1944,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         if (__SELECTED_NODE) {
             let inputs = self.workflowConfig.model.inputs;
             let item = inputs[itemIdx];
-            if(item.label != __SELECTED_NODE.data.label)
+            if (item.label != __SELECTED_NODE.data.label)
                 self.changeCurveSelection = true;
             item.label = __SELECTED_NODE.data.label;
             item.value = __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
@@ -1154,19 +1952,19 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             item.type = self.selectionType;
             __inputChanged.status = true;
             let tmp = new Set(__inputChanged.index);
-            tmp.add(0,1,2);
+            tmp.add(0, 1, 2);
             __inputChanged.index = Array.from(tmp);
             self.saveWorkflow();
         } else {
             toastr.error("please select data type!");
         }
     };
-    this.updateCurveSelection = function() {
-        if(self.changeCurveSelection) {
-            self.workflowConfig.steps.forEach(function(step){
+    this.updateCurveSelection = function () {
+        if (self.changeCurveSelection) {
+            self.workflowConfig.steps.forEach(function (step) {
                 console.log(step.inputData);
                 step.inputData = [];
-                
+
             });
             self.saveWorkflow();
             self.changeCurveSelection = false;
@@ -1232,16 +2030,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             });
         } else cb([]);
     };
-    this.downTriggerPrj = function(cb) {
+    this.downTriggerPrj = function (cb) {
         let wells = self.projectConfig;
         if (wells.length && !isNaN(__idProject) && __idProject > 0) {
             wiApiService.listWells({
                 idProject: __idProject,
-                start: wells[wells.length - 1].properties.idWell, 
-                limit: 10, 
+                start: wells[wells.length - 1].properties.idWell,
+                limit: 10,
                 match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
                 forward: true
-            }, function(listOfWells) {
+            }, function (listOfWells) {
                 let lowm = new Array();
                 modelFrom(lowm, listOfWells);
                 if (cb) cb(lowm, wells);
@@ -1249,16 +2047,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }
         else if (cb) cb([]);
     }
-    this.upTriggerPrj = function(cb) {
+    this.upTriggerPrj = function (cb) {
         let wells = self.projectConfig;
         if (wells.length && !isNaN(__idProject) && __idProject > 0) {
             wiApiService.listWells({
                 idProject: __idProject,
-                start: wells[0].properties.idWell, 
+                start: wells[0].properties.idWell,
                 limit: 10,
                 match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
                 forward: false
-            }, function(listOfWells) {
+            }, function (listOfWells) {
                 let lowm = new Array();
                 modelFrom(lowm, listOfWells);
                 if (cb) cb(lowm, wells);
@@ -1302,7 +2100,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         }
     }
     this.refreshProject = refreshProject;
-    
+
     this.getProjectList = function (wiItemDropdownCtrl) {
         if (!self.idProject) {
             wiApiService.getProjectList(null, function (projectList) {
@@ -1419,31 +2217,31 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 );
                 let wellName = wellModel.properties.name;
                 if (!wf.inputData || !Array.isArray(wf.inputData))
-                wf.inputData = new Array();
+                    wf.inputData = new Array();
                 let existDataset = wf.inputData.find(i => i.dataset.idDataset == datasetModel.properties.idDataset);
                 if (existDataset) return;
-                
+
                 let inputs = [];
-                
-                if(wf.name == PREDICT_STEP_NAME)
-                    self.workflowConfig.model.inputs.forEach(function(ipt, idx){
-                        if(idx<self.workflowConfig.model.inputs.length-1)
+
+                if (wf.name == PREDICT_STEP_NAME)
+                    self.workflowConfig.model.inputs.forEach(function (ipt, idx) {
+                        if (idx < self.workflowConfig.model.inputs.length - 1)
                             inputs.push(ipt);
                     });
                 else inputs = self.workflowConfig.model.inputs;
-                    
+
 
                 let inputItems = inputs.map(function (ipt) {
                     let tempItem = {
                         name: ipt.name,
-                        choices: matchCurves(datasetModel.children.map(function(curve, idx){return {idCurve: curve.id, name: curve.name, idFamily: curve.properties.idFamily};}), ipt)
+                        choices: matchCurves(datasetModel.children.map(function (curve, idx) { return { idCurve: curve.id, name: curve.name, idFamily: curve.properties.idFamily }; }), ipt)
                     };
                     tempItem.value = tempItem.choices.length ? tempItem.choices[0] : null;
                     return tempItem;
                 });
-                
-                let inputsNull = inputItems.filter(function(ipt){return ipt.value == null;});
-                if (inputsNull.length>0) {
+
+                let inputsNull = inputItems.filter(function (ipt) { return ipt.value == null; });
+                if (inputsNull.length > 0) {
                     for (let missingInput of inputsNull) {
                         toastr.error(missingInput.name + " is missing");
                     }
@@ -1558,7 +2356,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
 
     this.validate = function () {
-        if(!self.workflowConfig)
+        if (!self.workflowConfig)
             return false;
         for (let input of self.workflowConfig.model.inputs) {
             if (!input.value) return false;
@@ -1583,11 +2381,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     payload.curveName = curveInfo.name
                 }
                 wiApiService.processingDataCurve(payload, function (ret) {
-                    if(!curve.idCurve) curveInfo.idCurve = ret.idCurve;
+                    if (!curve.idCurve) curveInfo.idCurve = ret.idCurve;
                     let _ret = null;
-                    if(!curve.idCurve) {
+                    if (!curve.idCurve) {
                         _ret = ret;
-                    }else{
+                    } else {
                         _ret = curveInfo;
                         _ret.idFamily = payload.idFamily;
                     }
@@ -1598,36 +2396,81 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         });
     }
 
-    this.removeWell = function(wf, i){
+    this.removeWell = function (wf, i) {
         wf.inputData.splice(i, 1);
         self.saveWorkflow();
     }
-    this.addCurveInput = function(){
-        self.workflowConfig.model.inputs.unshift({class: "curve input"});
+    this.addCurveInput = function () {
+        self.workflowConfig.model.inputs.unshift({ class: "curve input" });
         self.changeCurveSelection = true;
     }
-    this.removeCurveInput = function(index){
+    this.removeCurveInput = function (index) {
         let i = self.workflowConfig.model.inputs.length;
-        if(i==2)
+        if (i == 2)
             toastr.error('Need least at 1 curve input', '');
-        else{
+        else {
             self.workflowConfig.model.inputs.splice(index, 1);
             self.changeCurveSelection = true;
             self.saveWorkflow();
         }
     }
-    this.outputCurveStyle = function(idx){
-        if(idx == self.workflowConfig.model.inputs.length -1)
+    this.outputCurveStyle = function (idx) {
+        if (idx == self.workflowConfig.model.inputs.length - 1)
             return {
                 "margin-top": "30px"
             }
         return {};
     }
-    
-    this.onModelTypeListInit = function(wiItemDropdownCtrl) {
-        wiItemDropdownCtrl.items = self.listModelType.choices.map(function(choice) {
+
+    function setSelectedModelType(wiItemDropdownCtrl) {
+        if (!self.currentModelType) {
+            if (wiItemDropdownCtrl.items.length) {
+                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
+                self.currentModelType = wiItemDropdownCtrl.selectedItem.properties;
+                if (self.workflowConfig && self.workflowConfig.model)
+                    self.workflowConfig.model.currentModelType = self.currentModelType;
+            }
+        }
+        else {
+            $timeout(function() {
+                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(function (item) {
+                    return item.properties.name == self.currentModelType.name;
+                });
+            });
+        }
+    }
+    this.onRegressionModelTypeListInit = function (wiItemDropdownCtrl) {
+        wiItemDropdownCtrl.items = self.regressionModelTypes.choices.map(function (choice) {
             return {
-                data: {label: choice.name},
+                data: { label: choice.name },
+                properties: choice
+            }
+        });
+        setSelectedModelType(wiItemDropdownCtrl);
+    }
+    this.onCRPModelTypeListInit = function (wiItemDropdownCtrl) {
+        wiItemDropdownCtrl.items = self.crpModelTypes.choices.map(function (choice) {
+            return {
+                data: { label: choice.name },
+                properties: choice
+            }
+        });
+        setSelectedModelType(wiItemDropdownCtrl);
+    }
+    this.onClassificationModelTypeListInit = function (wiItemDropdownCtrl) {
+        wiItemDropdownCtrl.items = self.classificationModelTypes.choices.map(function (choice) {
+            return {
+                data: { label: choice.name },
+                properties: choice
+            }
+        });
+        setSelectedModelType(wiItemDropdownCtrl);
+    }
+    this.onModelTypeListInit = function (wiItemDropdownCtrl) {
+        //self.listModelType.choices.pop();
+        wiItemDropdownCtrl.items = self.listModelType.choices.map(function (choice) {
+            return {
+                data: { label: choice.name },
                 properties: choice
             }
         });
@@ -1635,23 +2478,25 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             if (wiItemDropdownCtrl.items.length) {
                 wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items[0];
                 self.currentModelType = wiItemDropdownCtrl.selectedItem.properties;
-                if (self.workflowConfig && self.workflowConfig.model) 
+                if (self.workflowConfig && self.workflowConfig.model)
                     self.workflowConfig.model.currentModelType = self.currentModelType;
             }
         }
         else {
-            wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(function(item) {
-                return item.properties.name == self.currentModelType.name;
+            $timeout(function() {
+                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(function (item) {
+                    return item.properties.name == self.currentModelType.name;
+                });
             });
         }
     }
-    this.onModelTypeChanged = function(type) {
+    this.onModelTypeChanged = function (type) {
         self.workflowConfig.model.currentModelType = type;
         self.currentModelType = self.workflowConfig.model.currentModelType;
         self.updateNNConfig();
         self.saveWorkflow();
     }
-    this.nnConfigNLayerChanged = function(nnConfig) {
+    this.nnConfigNLayerChanged = function (nnConfig) {
         if (nnConfig.nLayer < nnConfig.layerConfig.length) {
             nnConfig.layerConfig.splice(nnConfig.nLayer, nnConfig.layerConfig.length - nnConfig.nLayer);
         }
@@ -1665,7 +2510,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             }
         }
     }
-    
+
     let __running_wf = false;
     function saveWorkflow() {
         if (!self.idWorkflow || __running_wf) return;
@@ -1681,7 +2526,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 predictStepIdx = idx;
             }
         };
-        
+
         if (verifyStepIdx >= 0) {
             self.workflowConfig.steps[verifyStepIdx].result = verifyResult;
         }
@@ -1691,24 +2536,25 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         self.workflowConfig.model.currentModelType = self.currentModelType;
         wiApiService.editWorkflow({
             idWorkflow: self.idWorkflow,
-            content:self.workflowConfig
-        }, function(workflow) {
+            content: self.workflowConfig
+        }, function (workflow) {
             console.log('save workflow', workflow);
         });
     }
-    this.saveWorkflow = _.debounce(saveWorkflow, 3000);    
-    this.finishWizard = function() {
+    this.saveWorkflow = _.debounce(saveWorkflow, 3000);
+    this.finishWizard = function () {
         __running_wf = true;
-        self.workflowResults.forEach(function(step) {
+        self.workflowResults.forEach(function (step) {
             step.outputData.length = 0;
         })
-        async.forEachOfSeries(self.workflowConfig.steps, function(step, idx, done){
-            if( step.inputData && step.inputData.length != 0) {
+        async.forEachOfSeries(self.workflowConfig.steps, function (step, idx, done) {
+            if (step.inputData && step.inputData.length != 0) {
                 self.runStep(step, done);
-            }else {
+            } else {
+                toastr.error('can\'t ' + step.name + '! choose a datase for ' + step.name);
                 async.setImmediate(done);
             }
-        }, function(err) {
+        }, function (err) {
             if (err) toastr.error(err);
             __running_wf = false;
             console.log('finish');
@@ -1716,16 +2562,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             saveWorkflow();
         });
     }
-    this.running = function() {
+    this.running = function () {
         return __running_wf;
     }
-    this.createSpinner = function() {
+    this.createSpinner = function () {
         // $timeout( () => {
         //     document.getElementById("workflow-" + self.idWorkflow + "-spinner").appendChild((new Spinner()).spin().el);
         // }, 700);
     }
 
-    this.openPlot = function(plot){
+    this.openPlot = function (plot) {
         console.log('openPlot');
         let layout = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         layout.putTabRightWithModel({
@@ -1738,12 +2584,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             }
         });
     }
-    this.removePlot = function(odata) {
+    this.removePlot = function (odata) {
         delete odata.idPlot;
         delete odata.plotName;
         self.saveWorkflow();
     }
-    this.openErrorPlot = function(odata) {
+    this.openErrorPlot = function (odata) {
         console.log('openErrorPlot');
         let layout = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         let tabId = self.workflowName + '-' + self.idWorkflow + '-' + odata.idErrorPlot;
@@ -1767,39 +2613,39 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             title: `${self.workflowName} - ${odata.name}`
         });
     }
-    this.removeErrorPlot = function(odata) {
+    this.removeErrorPlot = function (odata) {
         delete odata.idErrorPlot;
         delete odata.name;
         delete odata.value;
         self.saveWorkflow();
     }
-    function createVerifyLogplot(idWell, plotName, inCurves, outCurves, callback) {
+    function createLogplot(idWell, plotName, inCurves, outCurves, callback) {
         let payload = {
             idWell: idWell,
             name: plotName,
             override: true
         };
-        wiApiService.post(wiApiService.CREATE_PLOT, payload, function(response, err) {
+        wiApiService.post(wiApiService.CREATE_PLOT, payload, function (response, err) {
             if (err) return;
 
             let currentOrderNum = 'm';
             async.series([function plotInCurves(done) {
-                async.eachSeries(inCurves, function(curve, done1) {
+                async.eachSeries(inCurves, function (curve, done1) {
                     wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                         //create line
                         wiApiService.createLine({
                             idTrack: trackData.idTrack,
                             idCurve: curve.idCurve,
                             orderNum: currentOrderNum
-                        }, function(line){
+                        }, function (line) {
                             currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                             done1();
                         })
                     }, {
                             title: curve.name
-                    });
-                    
-                }, function(err) {
+                        });
+
+                }, function (err) {
                     if (err) {
                         done(err);
                     }
@@ -1807,34 +2653,32 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 });
             }, function plotOutCurves(done) {
                 wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                    async.each(outCurves, function(curve, done1) {
+                    async.each(outCurves, function (curve, done1) {
                         //create line
                         wiApiService.createLine({
                             idTrack: trackData.idTrack,
                             idCurve: curve.idCurve,
                             orderNum: currentOrderNum
-                        }, function(line){
+                        }, function (line) {
                             currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                             done1();
                         })
-                    }, function(err) {
+                    }, function (err) {
                         if (err) {
                             done(err);
                         }
                         else done();
                     });
-                },{
-                    title: outCurves[0].name
-                });
-            }], function(err) {
+                }, {
+                        title: outCurves[0].name
+                    });
+            }], function (err) {
                 if (err) callback(err);
                 else callback(null, response);
             });
         });
-        
-    } 
 
-
+    }
 
     function createLogplotFromResult(wfInput, wfOutput, callback) {
         let payload = {
@@ -1846,20 +2690,20 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
             wfOutput.idPlot = response.idPlot;
             let currentOrderNum = 'm';
-            async.eachSeries(wfInput.inputs, function(ipt, done1) {
+            async.eachSeries(wfInput.inputs, function (ipt, done1) {
                 wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
                     //create line
                     wiApiService.createLine({
                         idTrack: trackData.idTrack,
                         idCurve: ipt.value.properties ? ipt.value.properties.idCurve : ipt.value.idCurve,
                         orderNum: currentOrderNum
-                    }, function(line){
+                    }, function (line) {
                         currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
                         done1();
                     })
                 }, {
                         title: ipt.name
-                });
+                    });
             }, function (err) {
                 if (err) toastr.error(err);
                 async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
@@ -1870,7 +2714,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             idTrack: trackData.idTrack,
                             idCurve: opt.idCurve,
                             orderNum: 'm'
-                        }, function(line){
+                        }, function (line) {
                             let bgColor = null;
                             switch (opt.family) {
                                 case "Net Reservoir Flag":
@@ -1885,42 +2729,42 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                 return;
                             }
                             wiApiService.createShading({
-                                idTrack:trackData.idTrack,
-                                name:opt.name + "-left",
+                                idTrack: trackData.idTrack,
+                                name: opt.name + "-left",
                                 orderNum: 'm',
-                                negativeFill : {
+                                negativeFill: {
                                     display: false,
                                     sadingType: "pattern",
                                     pattern: {
-                                        background : "blue",
-                                        foreground : "black",
-                                        name : "none"
+                                        background: "blue",
+                                        foreground: "black",
+                                        name: "none"
                                     }
                                 },
                                 positiveFill: {
                                     display: false,
                                     sadingType: "pattern",
                                     pattern: {
-                                        background : "blue",
-                                        foreground : "black",
-                                        name : "none"
+                                        background: "blue",
+                                        foreground: "black",
+                                        name: "none"
                                     }
                                 },
-                                fill:{
-                                    display:true,
-                                    shadingType:"pattern",
-                                    pattern:{
+                                fill: {
+                                    display: true,
+                                    shadingType: "pattern",
+                                    pattern: {
                                         name: "none",
-                                        foreground:"black",
-                                        background:bgColor
+                                        foreground: "black",
+                                        background: bgColor
                                     }
                                 },
-                                isNegPosFill:false,
-                                idLeftLine:null,
-                                idRightLine:line.idLine,
-                                leftFixedValue:0,
-                                idControlCurve:opt.idCurve
-                            }, function(shadingProps) {
+                                isNegPosFill: false,
+                                idLeftLine: null,
+                                idRightLine: line.idLine,
+                                leftFixedValue: 0,
+                                idControlCurve: opt.idCurve
+                            }, function (shadingProps) {
                                 done2();
                             });
                         })
@@ -1938,7 +2782,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let extent = d3.extent(odata.value);
         return JSON.stringify({
             y: {
-                label: odata.name + ' (%)',
+                label: odata.name,
                 min: extent[0],
                 max: extent[1],
                 data: odata.value
@@ -1947,7 +2791,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 label: 'Iterations',
                 min: 0,
                 max: odata.value.length,
-                data: odata.value.map(function(d,i) {return i + 1;})
+                data: odata.value.map(function (d, i) { return i + 1; })
             }
         });
     }

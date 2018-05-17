@@ -200,19 +200,36 @@ exports.wiPlotButtonClicked = function() {
         title: 'Title'
     });
 }
-exports.wiLogplotButtonClicked = function() {
+exports.wiXplotButtonClicked = function() {
     let wiComponentService = this.wiComponentService;
     let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     // console.log(layoutManager.getRoot());
     let root = layoutManager.getRoot();
-    if (root.contentItems.length >0)
+    if (root.contentItems.length > 0)
         root.removeChild(root.contentItems[0]);
     root.addChild({
         type: 'component',
-        id: 'wi-logplot',
+        id: 'wi-xplot',
         componentName: 'wi-block',
         componentState: {
-            templateId: 'wi-logplot-playground'
+            templateId: 'wi-xplot'
+        },
+        title: 'Title'
+    });
+}
+exports.wiHisButtonClicked = function() {
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    // console.log(layoutManager.getRoot());
+    let root = layoutManager.getRoot();
+    if (root.contentItems.length > 0)
+        root.removeChild(root.contentItems[0]);
+    root.addChild({
+        type: 'component',
+        id: 'wi-his',
+        componentName: 'wi-block',
+        componentState: {
+            templateId: 'wi-his'
         },
         title: 'Title'
     });

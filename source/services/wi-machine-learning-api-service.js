@@ -23,7 +23,11 @@ const ML_TOOL_KIT = {
     TRAIN: mlToolkitUrl + '/regression/curve/model',
     PREDICT_CURVE: mlToolkitUrl + '/regression/curve/predict',
     PREDICT_ANFIS: mlToolkitUrl + '/regression/anfis/predict',
-    PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict'
+    PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict',
+    TRAIN_CRP: mlToolkitUrl + '/classification/crp/train',
+    PREDICT_CRP: mlToolkitUrl + '/classification/crp/predict',
+    TRAIN_CLASSIFICATION: mlToolkitUrl + '/classification/curve/model',
+    PREDICT_CLASSIFICATION: mlToolkitUrl + '/classification/curve/predict'
 }
 
 const URL = ML_TOOL_KIT;
@@ -85,6 +89,18 @@ WiMachineLearningApi.prototype.predictAnfis = function(payload, callback) {
 
 WiMachineLearningApi.prototype.predictFacies = function(payload, callback) {
     this.doPost(URL.PREDICT_FACIES, payload, callback);
+}
+WiMachineLearningApi.prototype.trainCRP = function(payload, callback) {
+    this.doPost(URL.TRAIN_CRP, payload, callback);
+}
+WiMachineLearningApi.prototype.predictCRP = function(payload, callback) {
+    this.doPost(URL.PREDICT_CRP, payload, callback);
+}
+WiMachineLearningApi.prototype.trainClassification = function(payload, callback) {
+    this.doPost(URL.TRAIN_CLASSIFICATION, payload, callback);
+}
+WiMachineLearningApi.prototype.predictClassification = function(payload, callback) {
+    this.doPost(URL.PREDICT_CLASSIFICATION, payload, callback);
 }
 
 WiMachineLearningApi.prototype.getwiMachineLeaningUrl = function() { return wiMachineLeaningURL; }

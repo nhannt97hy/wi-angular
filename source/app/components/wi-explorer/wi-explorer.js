@@ -30,6 +30,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.treeConfig[0] = utils.projectToTreeConfig(projectRefresh);
             $timeout(function() {
                 self.backupConfig(backupConfig, [self.treeConfig[0]]);
+                wiComponentService.getComponent(self.treeviewName).filterFn();
             });
             $timeout(function(){
                 document.getElementById('treeContent').scrollTo(0,ScrollTmp);
@@ -53,6 +54,22 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         WIEXPLORER = self;
         if (self.name) wiComponentService.putComponent(self.name, self);
     };
+
+    this.scrollLeft = function(){
+        let ele = $('.filter-main');
+        let idx = ele.scrollLeft() / 42;
+        if(idx - parseInt(idx) && ele.scrollLeft() != 44) {
+            ele.scrollLeft(parseInt(idx) * 42);
+        }else{
+            ele.scrollLeft((idx - 1) * 42);
+        }
+    }
+    this.scrollRight = function(){
+        let ele = $('.filter-main');
+        let idx = ele.scrollLeft() / 42;
+        let next = Math.round(idx + 1) * 42;
+        ele.scrollLeft(next < 44 ? 44 : next);
+    }
 
     this.backupConfig = function (previousConfig, currConfig) {
         for (let preItem of previousConfig) {
@@ -482,6 +499,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         handler: function () {
                             self.handlers.DuplicateButtonClicked('curve');
                         }
+                    },{
+                        name: "Convert",
+                        label: "Convert",
+                        icon: "tools-normal-16x16",
+                        handler: function () {
+                            self.handlers.ConvertButtonClicked();
+                        }
                     }, {
                         name: "Delete",
                         label: "Delete",
@@ -519,7 +543,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         label: "New Zone Set",
                         icon: "mineral-zone-add-16x16",
                         handler: function () {
-                            utils.createZoneSet();
+                            self.handlers.createZoneSet();
                         }
                     }, {
                         name: "ZoneManager",
@@ -530,6 +554,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.openZonemanager(zonesetsModel);
                         }
                     }, {
+                        name: "Zone-Manager",
+                        label: "Zone - Manager",
+                        icon: "zone-management-16x16",
+                        handler: function () {
+                            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                            layoutManager.putTabRight({
+                                title: "Zone Template Manager",
+                                componentState: {html: '<wi-zone-manager></wi-zone-manager>'}
+                            });
+                        }
+                    },{
                         separator: '1'
                     }
                 ];

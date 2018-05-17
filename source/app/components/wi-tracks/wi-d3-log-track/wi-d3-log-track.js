@@ -271,9 +271,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             let promises = [];
             viTrack.getCurves().forEach(viCurve => {
                 let line = logTrack.lines.find(line => line.idLine == viCurve.id);
-                let curveData = viCurve.rawData;
                 viTrack.removeDrawing(viCurve);
-                if (line) {
+                let curveData = viCurve.rawData;
+                if (line && curveData && curveData.length) {
                     self.addCurveToTrack(viTrack, curveData, Utils.lineToTreeConfig(line).data);
                 }
             });
@@ -827,15 +827,19 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.onModifiedCurve = function(curve){
         console.log('wi-d3-log-track onModifiedCurve', curve.idCurve);
         let hasCurve = self.viTrack.getCurves().find(c => c.idCurve == curve.idCurve);
-        if(hasCurve){
-            hasCurve.setProperties({
-                rawData: curve.data.map((r,i) => {
-                    return {
-                        y: i,
-                        x: r
-                    }
+        if (hasCurve) {
+            if (curve.data) {
+                hasCurve.setProperties({
+                    rawData: curve.data.map((r, i) => {
+                        return {
+                            y: i,
+                            x: r
+                        }
+                    })
                 })
-            })
+            } else {
+                delete hasCurve.rawData;
+            }
             self.update();
         }
     }

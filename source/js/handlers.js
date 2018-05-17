@@ -184,26 +184,29 @@ exports.NewModelButtonClicked = function() {
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     let utils = self.wiComponentService.getComponent('UTILS');
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-    DialogUtils.newModelDialog(ModalService, function (data) {
-        data.idProject = project.idProject;
-        self.wiApiService.createWorkflow(data, function (response, err) {
-            console.log(response.idWorkflow);
-            if (err) {
-                toastr.error(err);
-            } else {
-                let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-                layoutManager.putTabRight({
-                    id: 'machine-learning' + response.idWorkflow,
-                    title: response.name,
-                    tabIcon: 'caculation-multilinerregression-16x16',
-                    componentState: {
-                        html: '<wi-workflow-machine-learning  id-workflow="' + response.idWorkflow + '"></wi-workflow-machine-learning>',
-                        name: 'Machine Learning'
-                    }
-                });
-            }
+    function createWF() {
+        DialogUtils.newModelDialog(ModalService, function (data) {
+            data.idProject = project.idProject;
+            self.wiApiService.createWorkflow(data, function (response, err) {
+                if (err) {
+                    createWF();
+                    // toastr.error(err);
+                } else {
+                    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                    layoutManager.putTabRight({
+                        id: 'machine-learning' + response.idWorkflow,
+                        title: response.name,
+                        tabIcon: 'caculation-multilinerregression-16x16',
+                        componentState: {
+                            html: '<wi-workflow-machine-learning  id-workflow="' + response.idWorkflow + '"></wi-workflow-machine-learning>',
+                            name: 'Machine Learning'
+                        }
+                    });
+                }
+            });
         });
-    });
+    }
+    createWF();
 }
 
 exports.OpenModelButtonClicked = function() {
@@ -1335,8 +1338,6 @@ exports.MicroAndMacroPorosityButtonClicked = function () {
 
 exports.WaterSaturationButtonClicked = function () {
     console.log('WaterSaturationButton is clicked');
-    let DialogsUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    DialogsUtils.saturationArchieDialog(this.ModalService);
 };
 
 exports.PermeabilityButtonClicked = function () {
@@ -1355,9 +1356,55 @@ exports.BasicAnalysisButtonClicked = function () {
     console.log('BasicAnalysisButton is clicked');
 };
 
-exports.ClayVolumeButtonClicked = function () {
-    console.log('ClayVolumeButton is clicked');
-};
+exports.ClayVolumeGammaRayButtonClicked = function() {
+    console.log('ClayVolumeGammaRayButton is clicked');
+    let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+        layoutManager.putTabRight({
+            id: 'wiTask',
+            title: 'Clay Volume Gamma Ray',
+            tabIcon: 'workflow-16x16',
+            componentState: {
+                html: '<wi-task name="Clay Volume Gamma Ray"></wi-task>',
+                name: 'wiTask'
+            }
+        })
+}
+
+exports.ClayVolumeNeutron_DensityButtonClicked = function() {
+    console.log('ClayVolumeNeutron-DensityButton is clicked');
+}
+
+exports.ClayVolumeNeutron_SonicButtonClicked = function() {
+    console.log('ClayVolumeNeutron-SonicButton is clicked');
+}
+
+exports.ClayVolumeDensity_SonicButtonClicked = function() {
+    console.log('ClayVolumeDensity-SonicButton is clicked');
+}
+
+exports.ClayVolumeResistivityButtonClicked = function() {
+    console.log('ClayVolumeResistivityButton is clicked');
+}
+
+exports.ClayVolumeSpontaneouspotentialButtonClicked = function() {
+    console.log('ClayVolumeSpontaneouspotentialButton is clicked');
+}
+
+exports.ClayVolumeThermalNeutronButtonClicked = function() {
+    console.log('ClayVolumeThermalNeutronButton is clicked');
+}
+
+exports.ClayVolumePotassiumButtonClicked = function() {
+    console.log('ClayVolumePotassiumButton is clicked');
+}
+
+exports.ClayVolumeThoriumButtonClicked = function() {
+    console.log('ClayVolumeThoriumButton is clicked');
+}
+
+exports.ClayVolumeFinalButtonClicked = function() {
+    console.log('ClayVolumeFinalButton is clicked');
+}
 
 exports.PorosityAndWaterSaturationButtonClicked = function () {
     console.log('Porosity&WaterSaturationButton is clicked');

@@ -51,7 +51,12 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
         let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
         this.leftLimit = customLimit.concat(self.curveList);
 
+// <<<<<<< HEAD
         this.well = utils.findWellByLogplot(trackComponent.idPlot);
+// =======
+//         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        this.curves = utils.getAllCurvesOfWell(this.well);
+// >>>>>>> multi-histograms
 
         this.fillPatternOptions = {};
         this.variableShadingOptions = {};

@@ -232,14 +232,21 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.onModifiedCurve = function(curve){
         if(self.hasThisCurve(curve.idCurve)) {
             console.log('wi-d3-histogram reload curve on changed', curve.idCurve);
-            let data = curve.data.map((r,i) => {
-                return {
-                    y: i,
-                    x: r
+            if (curve.data) {
+                let data = curve.data.map((r,i) => {
+                    return {
+                        y: i,
+                        x: r
+                        }
                     }
-                }
-            );
-            loadCurve(curve.idCurve, data);
+                );
+                loadCurve(curve.idCurve, data);
+            } else {
+                wiApiService.dataCurve(curve.idCurve, function (data) {
+                    loadCurve(curve.idCurve, data);
+                })
+            }
+
         }
     }
     this.$onInit = function() {

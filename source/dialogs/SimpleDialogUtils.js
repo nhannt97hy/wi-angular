@@ -9,3 +9,11 @@ exports.runImportDialog = require('./run-import-modal');
 exports.runImportWHDialog = require('./run-import-well-header-modal');
 exports.runImportWTDialog = require('./run-import-well-top-modal');
 exports.neuralNetWorkPropertiesDialog = require('./neural-network-playground-modal');
+
+exports.userDefineLineDialog = require('./user-define-line-modal');
+exports.polygonManagerDialog = require('./polygon-manager-modal');
+exports.regressionLineDialog = require('./regression-line-modal');
+exports.lineStyleDialog = require('./line-style-modal');
+exports.colorPickerDialog = require('./color-picker-modal');
+exports.regressionLineDialog = require('./regression-line-modal');
+exports.ternaryDialog = require('./ternary-modal');

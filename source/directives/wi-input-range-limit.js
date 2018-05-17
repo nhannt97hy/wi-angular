@@ -19,9 +19,11 @@ app.directive(wiDirectiveName, function($timeout) {
                         element.val(Number(attributes.max));
                         element.trigger('input');
                     } else if(Number(val) < Number(attributes.min)) {
-                        e.preventDefault();
-                        element.val(Number(attributes.min));
-                        element.trigger('input');
+                        if(Number(element.val() + String.fromCharCode(e.keyCode)) < Number(attributes.min)) {
+                            e.preventDefault();
+                            element.val(Number(attributes.min));
+                            element.trigger('input');
+                        }
                     }
                 }
             });

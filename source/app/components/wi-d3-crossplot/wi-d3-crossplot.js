@@ -107,14 +107,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let wellModel = utils.findWellByCurve(idCurve);
         if(wellModel.id == self.crossplotModel.properties.idWell){
             let pointSet = self.getPointSet(self.crossplotModel.properties);
-            function updateData(type){
+            async function updateData(type){
                 let curveProps = utils.getModel('curve', idCurve);
-                let data = curve.data.map((r,i) => {
-                    return {
-                        y: i,
-                        x: r
-                    }
-                });
+                let data;
+                if(curve.data) {
+                    data = curve.data.map((r,i) => {
+                        return {
+                            y: i,
+                            x: r
+                        }
+                    });
+                }else {
+                    data = await new Promise ((resolve) => {
+                        wiApiService.dataCurve(idCurve, function (dataCurve) {
+                            resolve(dataCurve);
+                        })
+                    })
+                }
                 let viCurve = graph.buildCurve(curveProps, data, wellModel.properties);
                 let crossProp = {
                     pointSet : {}

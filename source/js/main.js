@@ -54,9 +54,13 @@ let wiContainer = require('./wi-container');
 let wiReferenceWindow = require('./wi-reference-window');
 
 let wiPlot = require('./wi-plot');
+let wiZoneTemplateManager = require('./wi-zone-template-manager');
+let wiZoneManager = require('./wi-zone-manager');
+let wiZoneSetManager = require('./wi-zone-set-manager');
 
 let wiInventory = require('./wi-inventory');
 let wiExport = require('./wi-export');
+let wiTask = require('./wi-task');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -96,7 +100,6 @@ let historyState = require('./historyState');
 let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
-let treeviewHandlers = require('./wi-treeview-handlers');
 let crossplotHanders = require('./wi-crossplot-handlers');
 let histogramHandlers = require('./wi-histogram-handlers');
 
@@ -137,8 +140,6 @@ let wiComponentService = require('./wi-component-service');
 
 let wiConditionNode = require('./wi-condition-node');
 
-let wiCommunication = require('./wi-communication');
-
 let app = angular.module('wiapp',
     [
         wiButton.name,
@@ -177,6 +178,7 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiExport.name,
+        wiTask.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -210,6 +212,10 @@ let app = angular.module('wiapp',
         wiMachineLearningApiService.name,
         wiOnlineInvService.name,
         wiComponentService.name,
+        wiZoneManager.name,
+        wiZoneTemplateManager.name,
+        wiZoneSetManager.name,
+        
 
         wiCanvasRect.name,
         wiZone.name,
@@ -224,12 +230,11 @@ let app = angular.module('wiapp',
         wiiItems.name,
         wiiProperties.name,
 
-        wiCommunication.name,
-
         ngInfiniteScroll,
 
         'angularModalService',
         'angularResizable',
+        'ng-mfb',
 
         // 3rd lib
 
@@ -238,7 +243,10 @@ let app = angular.module('wiapp',
         'ngSanitize',
         'ui.select',
         'angularjs-dropdown-multiselect',
-        'mgo-angular-wizard'
+        'mgo-angular-wizard',
+
+        // chat module
+        // 'chatModule'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
@@ -262,10 +270,9 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
-    utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
 
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
-    wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
+    // wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
     wiComponentService.putComponent(wiComponentService.WI_EXPLORER_HANDLERS, wiExplorerHandlers);
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
@@ -376,14 +383,13 @@ function restoreProject($timeout, wiApiService, ModalService) {
     let query = queryString.parse(location.search);
     if (Object.keys(query).length && query.idProject) {
         $timeout(function () {
-            wiApiService.getProjectInfo(query.idProject, function (project, err) {
-                if (!err) {
-                    wiApiService.getProject({ idProject: query.idProject }, function (projectData) {
-                            utils.projectOpen(projectData);
-                        })
-                }else {
-                    toastr.error("Project not exist!");
-                }
+            wiApiService.getProject({
+                idProject: query.idProject,
+                name: query.name,
+                owner: query.owner,
+                shared: query.shared
+            }, function (projectData) {
+                utils.projectOpen(projectData);
             })
         }, 100);
     } else {
@@ -432,6 +438,6 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         restoreProject($timeout, wiApiService, ModalService);
     }
 });
-app.controller('ChatController', function () {
 
-})
+
+

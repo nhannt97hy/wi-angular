@@ -66,14 +66,16 @@ app.component(tabsetComponentName, {
     transclude: true,
     bindings: {
         toggle: "<",
-        onToggle: "<"
+        onToggle: "<",
+        position: "@",
+        navAlign: "@"
     }
 });
 
 
 function TabController() {
     let self = this;
-        
+
     this.$onInit = function () {
         if (!self.enabled) self.enabled = 'true';
         self.wiTabsetCtrl.addTab(self);

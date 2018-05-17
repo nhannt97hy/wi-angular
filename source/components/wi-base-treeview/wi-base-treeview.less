@@ -20,6 +20,9 @@ wi-base-treeview {
             margin-left: unset;
         }
         .wi-parent-node {
+            &:hover{
+                background: #eee;
+            }
             // position: relative;
             display: flex;
             height: 26px;
@@ -73,6 +76,22 @@ wi-base-treeview {
 
                 .actions>wi-button>div>button {
                     height: 22px;
+                }
+            }
+            .wi-parent-choices{
+                flex: 3;
+                >select, >input{
+                    width: 100%;
+                    border: none;
+                    height: 100%;
+                    &:hover{
+                        border: 1px solid steelblue;
+                    }
+                }
+                >input::-webkit-outer-spin-button,
+                >input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
                 }
             }
         }
