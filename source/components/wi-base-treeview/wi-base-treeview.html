@@ -19,7 +19,8 @@
                         'wi-hidden': item.children == null || item.children.length == 0}"></i>
             </div>
             <div class="item-content" ng-click="wiBaseTreeview.onClick($index, $event, item)"
-                ng-dblclick="wiBaseTreeview.onDoubleClick($index);">
+                ng-dblclick="wiBaseTreeview.onDoubleClick($index);"
+                ng-style="{'background-image': item.data.imageBg}">
                 <div class="display-inline-block margin-right-0_5em">
                     <span class="{{item.data.icon}}"></span>
                     <div ng-show="wiBaseTreeview.showId && item.id" class='wi-parent-id'>{{item.id}}</div>
