@@ -13,11 +13,50 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
         let dataset = utils.getModel('dataset', currentCurve.idDataset);
-
+        self.lineUnit = currentCurve.unit;
+        self.units = [];
+        self.longList = [];
+        self.compatiableUnit = null;
+        self.longListSelected = null;
+        self.isUnKnown = !self.units.find(u => u.name === self.lineUnit);
         console.log("CURRENTCURVE", currentCurve, currentTrack);
-
+        $timeout(function () {
+            wiApiService.asyncGetListUnit({idCurve: currentCurve.idCurve}).then(r => {
+                self.units = r;
+                self.compatiableUnit = self.units.find(u=>u.name === self.lineUnit);
+            });
+        });
+        $timeout(function () {
+            wiApiService.asyncGetAllUnit({}).then(r=>{
+                self.longList = r;
+            });
+        });
+        self.onChangeCompatiableUnit = function () {
+            let currentUnit = self.lineUnit;
+            let currentUnitObj = self.units.find(u=>u.name === currentUnit);
+            let newUnitObj = self.compatiableUnit;
+            self.lineUnit = self.compatiableUnit.name;
+            self.longListSelected = null;
+            self.curveOptions.unit = self.lineUnit;
+            if(currentUnitObj && newUnitObj){
+                let ratio = newUnitObj.rate / currentUnitObj.rate;
+                self.curveOptions.minValue = self.curveOptions.minValue * ratio;
+                self.curveOptions.maxValue = self.curveOptions.maxValue * ratio;
+            }
+            console.log(self.curveOptions.minValue, self.curveOptions.maxValue);
+        };
+        self.onChangeLineUnit = function () {
+            console.log("bbb");
+            self.compatiableUnit = self.units.find(u=>u.name === self.lineUnit);
+            self.curveOptions.unit = self.lineUnit;
+            console.log(self.compatiableUnit);
+        };
+        self.onChangeLongList = function () {
+            self.lineUnit = self.longListSelected.name;
+            self.compatiableUnit = null;
+            self.curveOptions.unit = self.lineUnit;
+        };
         let extentY = currentCurve.getExtentY();
-
         if (currentCurve.line && (currentCurve.displayMode == 'Line' || currentCurve.displayMode == 'Both')) {
             this.lineOptions = {
                 display: true,
@@ -86,6 +125,7 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
             displayAs: ["Normal", "Cumulative", "Mirror", "Pid"]
         };
         this.displayLine = displayLine;
+
         function displayLine(lineOptions, symbolOptions) {
 
             let sample = $('#sample')[0];
@@ -109,35 +149,36 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
 
             function drawSymbol(context, x, y, style) {
                 let helper = new graph.CanvasHelper(context, {
-                                strokeStyle: style.symbolStyle.symbolFillStyle,
-                                fillStyle: style.symbolStyle.symbolFillStyle,
-                                lineWidth: style.symbolStyle.symbolLineWidth,
-                                lineDash: style.symbolStyle.symbolLineDash,
-                                size: style.symbolStyle.symbolSize
+                    strokeStyle: style.symbolStyle.symbolFillStyle,
+                    fillStyle: style.symbolStyle.symbolFillStyle,
+                    lineWidth: style.symbolStyle.symbolLineWidth,
+                    lineDash: style.symbolStyle.symbolLineDash,
+                    size: style.symbolStyle.symbolSize
                 });
                 switch (style.symbolStyle.symbolName) {
-                    case 'circle': 
+                    case 'circle':
                         helper.circle(x, y);
                         break;
-                    case 'cross': 
+                    case 'cross':
                         helper.cross(x, y);
                         break;
-                    case 'diamond': 
+                    case 'diamond':
                         helper.diamond(x, y);
                         break;
-                    case 'plus': 
+                    case 'plus':
                         helper.plus(x, y);
                         break;
-                    case 'square': 
+                    case 'square':
                         helper.square(x, y);
                         break;
-                    case 'star': 
+                    case 'star':
                         helper.star(x, y);
                         break;
                     default:
                         break;
                 }
             }
+
             for (let i = 0; i < x.length - 1; i++) {
                 if (lineOptions && lineOptions.display)
                     drawSegment(context, x[i], y[i], x[i + 1], y[i + 1]);
@@ -149,6 +190,7 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
             }
 
         }
+
         this.disabledByLine = function () {
             $('#wrapMode').prop("disabled", false);
             $('#symbolType').prop("disabled", true);
@@ -196,25 +238,25 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
         this.changeOther = function () {
             switch (self.curveOptions.displayMode.toLowerCase()) {
                 case "line":
-                self.disabledByLine();
-                break;
+                    self.disabledByLine();
+                    break;
                 case "symbol":
-                self.disabledBySymbol();
-                break;
+                    self.disabledBySymbol();
+                    break;
                 case "both":
-                self.disabledByBoth();
-                break;
+                    self.disabledByBoth();
+                    break;
                 case "none":
-                self.disabledByNone();
-                break;
+                    self.disabledByNone();
+                    break;
                 default:
-                console.log("Error: NULL");
-                break;
+                    console.log("Error: NULL");
+                    break;
             }
             self.drawSample();
         };
-        this.setValueScale = function() {
-            if(!self.curveOptions.autoValueScale) return;
+        this.setValueScale = function () {
+            if (!self.curveOptions.autoValueScale) return;
             else {
                 let curveInTree = utils.getCurveFromId(currentCurve.idCurve);
                 console.log('curveInTree', curveInTree);
@@ -231,6 +273,7 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
                 }
             }
         }
+
         function updateLine(callback) {
             let lineObj = utils.mergeLineObj(self.curveOptions, self.lineOptions.lineStyle, self.symbolOptions.symbolStyle);
             console.log(self.curveOptions, self.lineOptions);
@@ -242,6 +285,7 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
                 if (callback) callback();
             });
         }
+
         this.onEditLineStyleButtonClicked = function () {
             DialogUtils.lineStyleDialog(ModalService, wiComponentService, function (options) {
                 console.log("options", options);
@@ -261,17 +305,17 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
             let symbolOptions = null;
             switch (self.curveOptions.displayMode) {
                 case "Line":
-                lineOptions = self.lineOptions;
-                break;
+                    lineOptions = self.lineOptions;
+                    break;
                 case "Symbol":
-                symbolOptions = self.symbolOptions;
-                break;
+                    symbolOptions = self.symbolOptions;
+                    break;
                 case "Both":
-                lineOptions = self.lineOptions;
-                symbolOptions = self.symbolOptions;
-                break;
+                    lineOptions = self.lineOptions;
+                    symbolOptions = self.symbolOptions;
+                    break;
                 default:
-                break;
+                    break;
             }
             DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService, self.lineOptions, self.symbolOptions, function (lineOptions, symbolOptions) {
                 if (lineOptions) self.lineOptions = lineOptions;
