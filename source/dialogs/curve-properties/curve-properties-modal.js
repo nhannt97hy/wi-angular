@@ -259,18 +259,15 @@ module.exports = function (ModalService, wiComponentService, wiApiService, Dialo
             if (!self.curveOptions.autoValueScale) return;
             else {
                 let curveInTree = utils.getCurveFromId(currentCurve.idCurve);
-                console.log('curveInTree', curveInTree);
-                if (curveInTree.properties.idFamily == null) {
-                    wiApiService.scaleCurve(curveInTree.id, function (scaleObj) {
-                        $timeout(function () {
-                            self.curveOptions.minValue = scaleObj.minScale;
-                            self.curveOptions.maxValue = scaleObj.maxScale;
-                        })
-                    });
+                wiApiService.scaleCurve(curveInTree.id, function (scaleObj) {
+                    self.curveOptions.minValue = scaleObj.minScale;
+                    self.curveOptions.maxValue = scaleObj.maxScale;
+                });
+                /*if (curveInTree.properties.idFamily == null) {
                 } else {
                     self.curveOptions.minValue = curveInTree.lineProperties.minScale;
                     self.curveOptions.maxValue = curveInTree.lineProperties.maxScale;
-                }
+                }*/
             }
         }
 
