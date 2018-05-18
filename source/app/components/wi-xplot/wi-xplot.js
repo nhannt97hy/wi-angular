@@ -112,6 +112,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             ], function (cb) {
                 if (!curveProps.options.pointColor) curveProps.options.pointColor = genRandomColor();
                 pointSet.options = curveProps.options;
+                pointSet.pointSize = 3;
                 self.pointsets.push(pointSet);
                 next();
             });
@@ -155,6 +156,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.viWiXplot.updatePlot(changes);
             }
             self.viWiXplot.onMouseDown(self.mouseDownCallback);
+            self.viWiXplot.plotContainer.on('mousewheel', function () {
+                self.mouseWheelCallback();
+            });
+            // debug
+            window.__ViWiXplot = self.viWiXplot;
         });
         function genRandomColor() {
             let r = Math.round(Math.random() * 256);
@@ -288,6 +294,44 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         else if (self.viWiXplot.mode == 'PlotTernaryPoint') {
             self.viWiXplot.endAddTernaryPoint();
             self.setContextMenu();
+        }
+    }
+
+    this.mouseWheelCallback = function () {
+        let mouse = d3.mouse(this.viWiXplot.plotContainer.node());
+        let transformX = this.viWiXplot.getTransformX();
+        let transformY = this.viWiXplot.getTransformY();
+        let posX = transformX.invert(mouse[0]);
+        let posY = transformY.invert(mouse[1]);
+        let newScale = {};
+
+        if (d3.event.ctrlKey) {
+            const zoomFactor = 0.1;
+            if (d3.event.deltaY < 0) {
+                newScale = {
+                    left: this.config.scale.left - Math.abs(this.config.scale.left - posX) * zoomFactor,
+                    right: this.config.scale.right + Math.abs(this.config.scale.right - posX) * zoomFactor,
+                    bottom: this.config.scale.bottom + Math.abs(this.config.scale.bottom - posY) * zoomFactor,
+                    top: this.config.scale.top - Math.abs(this.config.scale.top - posY) * zoomFactor
+                };
+                this.viWiXplot.pointsets.forEach(pointSet => {
+                    pointSet.pointSize *= (1 + zoomFactor);
+                });
+            } else {
+                newScale = {
+                    left: this.config.scale.left + Math.abs(this.config.scale.left - posX) * zoomFactor,
+                    right: this.config.scale.right - Math.abs(this.config.scale.right - posX) * zoomFactor,
+                    bottom: this.config.scale.bottom - Math.abs(this.config.scale.bottom - posY) * zoomFactor,
+                    top: this.config.scale.top + Math.abs(this.config.scale.top - posY) * zoomFactor
+                };
+                this.viWiXplot.pointsets.forEach(pointSet => {
+                    pointSet.pointSize /= (1 + zoomFactor);
+                });
+            }
+            this.config.scale = newScale;
+            this.viWiXplot.doPlot();
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
         }
     }
 

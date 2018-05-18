@@ -2,6 +2,12 @@ module.exports = ViWiHis;
 
 let Utils = require('./visualize-utils');
 
+const _MARGIN = {
+    left: 50,
+    right: 0,
+    bottom: 15,
+    top: 15
+};
 const _MINOR_TICKS = 5;
 
 function ViWiHis(props) {
@@ -39,6 +45,27 @@ ViWiHis.prototype.init = function (domElem) {
     this.prepareAxesContainer();
     this.prepareDrawContainer();
     this.doPlot();
+
+    let zoom = d3.zoom()
+        .scaleExtent([1, 10])
+        .translateExtent([[-500, 0], [this.plotContainerSize.width + 500, this.plotContainerSize.height]])
+        .extent([[0, 0], [this.plotContainerSize.width, this.plotContainerSize.height]])
+        .on('zoom', zooming);
+    zoom.filter(function () {
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        return d3.event.ctrlKey;
+    });
+    function zooming() {
+        let transform = d3.event.transform;
+        self.drawContainer.attr('transform', transform);
+        self.axisXGroup.call(self.axisX.scale(transform.rescaleX(self.getTransformX())));
+        self.axisYLeftGroup.call(self.axisYLeft.scale(transform.rescaleY(self.getTransformY())));
+        self.axisYRightGroup.call(self.axisYRight.scale(transform.rescaleY(self.getTransformY())));
+    }
+    this.svgContainer.call(zoom.transform, d3.zoomIdentity);
+    this.svgContainer.call(zoom);
+    this.svgContainer.on('dblclick.zoom', null);
 }
 
 ViWiHis.prototype.setProperties = function (props) {
@@ -191,10 +218,21 @@ ViWiHis.prototype.prepareAxesContainer = function () {
 ViWiHis.prototype.prepareDrawContainer = function () {
     let self = this;
 
+    this.svgContainer.append('defs')
+        .append('clipPath')
+            .attr('id', 'myClip')
+            .append('rect')
+                .attr("x", self.plotContainerSize.x)
+                .attr("y", self.plotContainerSize.y)
+                .attr('width', self.plotContainerSize.width - _MARGIN.left)
+                .attr('height', self.plotContainerSize.height - _MARGIN.bottom);
+
     this.drawContainer = this.svgContainer.append('g')
         .attr('class', 'wi-his-draw-container')
-        .attr('width', self.rect.width)
-        .attr('height', self.rect.height);
+        .attr('clip-path', 'url(#myClip)')
+            .append('g')
+                .attr('width', self.plotContainerSize.width)
+                .attr('height', self.plotContainerSize.height);
 }
 
 // Do plot
@@ -261,15 +299,22 @@ ViWiHis.prototype.plotAxesContainer = function () {
         .tickFormat(Utils.getDecimalFormatter(self.config.nDecimal))
         .tickPadding(10);
     let yTicks = (Math.floor(vpY[1] / 40) - 1) * _MINOR_TICKS + 1;
-    this.axisY = d3.axisLeft(transformY)
+    this.axisYLeft = d3.axisLeft(transformY)
         .ticks(yTicks, ',.0f')
         .tickFormat((d, i) => {
             return (i % _MINOR_TICKS) ? '' : d;
         })
         .tickPadding(10);
+    this.axisYRight = d3.axisRight(transformY)
+        .ticks(yTicks, ',.0f')
+        .tickFormat((d, i) => {
+            return (i % _MINOR_TICKS) ? '' : transformCumulativeY.invert(transformY(d)).toFixed(0);
+        })
+        .tickPadding(10);
 
-    this.axisX = this.axisX.tickSize(-this.plotContainerSize.height + 15);
-    this.axisY = this.axisY.tickSize(-this.plotContainerSize.width + 50);
+    this.axisX = this.axisX.tickSize(-this.plotContainerSize.height + _MARGIN.bottom);
+    this.axisYLeft = this.axisYLeft.tickSize(-this.plotContainerSize.width + _MARGIN.left);
+    this.axisYRight = this.axisYRight.tickSize(0);
 
     this.axisXGroup = this.axesContainer.select('g.vi-histogram-axis-x-ticks')
         .attr('transform', 'translate(' + 0 + ', ' + vpY[1] + ')')
@@ -281,9 +326,12 @@ ViWiHis.prototype.plotAxesContainer = function () {
             return Utils.logMajorTest(xTickValues[i]);
         });
     }
-    this.axisYGroup = this.axesContainer.select('g.vi-histogram-axis-y-ticks')
+    this.axisYLeftGroup = this.axesContainer.select('g.vi-histogram-axis-y-ticks')
         .attr('transform', 'translate(' + vpX[0] + ', ' + 0 + ')')
-        .call(self.axisY);
+        .call(self.axisYLeft);
+    this.axisYRightGroup = this.axesContainer.select('g.vi-histogram-axis-cumulative-y-ticks')
+        .attr('transform', 'translate(' + (vpX[0] + self.plotContainerSize.width - _MARGIN.left) + ', ' + 0 + ')')
+        .call(self.axisYRight);
 
     this.axesContainer.selectAll('g.vi-histogram-axis-y-ticks .tick.major')
         .classed('major', false)
@@ -294,16 +342,8 @@ ViWiHis.prototype.plotAxesContainer = function () {
             return (i % _MINOR_TICKS) == 0;
         })
         .classed('major', true);
-    this.axesContainer.selectAll('g.vi-histogram-axis-y-ticks .tick.major')
-        .append('text')
-        .attr('class', 'second-label')
-        .text(d => {
-            let newLabel = transformCumulativeY.invert(transformY(d)).toFixed(0);
-            return newLabel;
-        })
-        .attr('text-anchor', 'start')
-        .attr('fill', '#000')
-        .style('transform', 'translate(' + (vpX[1] - 45) + 'px, 2px)');
+    this.axesContainer.select('g.vi-histogram-axis-cumulative-y-ticks path')
+        .style('opacity', 0);
 
     if (this.config.showGrid) {
         this.plotContainer
@@ -757,12 +797,6 @@ ViWiHis.prototype.getTransformCumulativeY = function () {
 }
 
 ViWiHis.prototype.calcPlotContainerSize = function () {
-    const _MARGIN = {
-        left: 50,
-        right: 0,
-        bottom: 15,
-        top: 15
-    };
     let svgSize = this.svgContainer.node().getBoundingClientRect();
     this.plotContainerSize = {
         x: _MARGIN.left,

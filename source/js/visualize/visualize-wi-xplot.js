@@ -91,31 +91,6 @@ ViWiXplot.prototype.init = function (domElem) {
     this.on('mousedown', function () { self.mouseDownCallback() });
     this.on('mousemove', function () { self.mouseMoveCallback() });
     this.on('mouseleave', function () { self.tooltip(null, null, true); });
-
-    let zoom = d3.zoom()
-        .scaleExtent([1, 6])
-        .on('zoom', zooming);
-    zoom.filter(function () {
-        d3.event.preventDefault();
-        d3.event.stopPropagation();
-        return d3.event.ctrlKey;
-    });
-    function zooming() {
-        let transform = d3.event.transform;
-        // console.log(transform);
-        self.ctx.save();
-        self.ctx.clearRect(0, 0, self.rect.width, self.rect.height);
-        self.ctx.translate(transform.x, transform.y);
-        self.ctx.scale(transform.k, transform.k);
-        self.plotPoints();
-        self.ctx.restore();
-        // self.gTicksX.call(self.ticksX.scale(transform.rescaleX(self.getTransformX())));
-        // self.gTicksY.call(self.ticksY.scale(transform.rescaleY(self.getTransformY())));
-        // self.gGridsX.call(self.gridsX.scale(transform.rescaleX(self.getTransformX())));
-        // self.gGridsY.call(self.gridsY.scale(transform.rescaleY(self.getTransformY())));
-    }
-    this.plotContainer.call(zoom);
-    this.plotContainer.on('dblclick.zoom', null);
 }
 
 ViWiXplot.prototype.setMode = function (mode) {
@@ -449,7 +424,6 @@ ViWiXplot.prototype.plotPoints = function () {
         ctx.clip();
 
         // test
-        pointSet.pointSize = 3;
         pointSet.pointSymbol = 'circle';
         // end test
         let helper = new CanvasHelper(ctx, {
