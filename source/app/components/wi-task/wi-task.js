@@ -193,9 +193,10 @@ function Controller(wiComponentService, wiApiService, $timeout) {
 
     this.onSelectionTypeChanged = onSelectionTypeChanged;
 
-    function onSelectionTypeChanged() {
+    function onSelectionTypeChanged(selType) {
         self.filterText1 = "";
         self.filterText = "";
+        self.selectionType = selType || self.selectionType;
         switch (self.selectionType) {
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();

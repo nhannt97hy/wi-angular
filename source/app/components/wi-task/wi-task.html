@@ -71,19 +71,16 @@
                         <div class='panel-heading' style='display: flex;'>
                             <h5 style="flex:1;">Data type</h5>
                             <div style='flex:2;text-align: right;'>
-                                <label class="btn btn-default" ng-click="wiTask.onSelectionTypeChanged()" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_GROUP_SELECTION}'
+                                <label class="btn btn-default" ng-click="wiTask.onSelectionTypeChanged(wiTask.FAMILY_GROUP_SELECTION)" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_GROUP_SELECTION}'
                                 style="margin-right: 5px;" title='Family Group'>
-                                    <input type="radio" name="filterBy" class="display-none" value='{{wiTask.FAMILY_GROUP_SELECTION}}' ng-model="wiTask.selectionType">
                                     <span class='zone-table-16x16'></span>
                                 </label>
-                                <label class="btn btn-default  " ng-click="wiTask.onSelectionTypeChanged()" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_SELECTION}'
+                                <label class="btn btn-default  " ng-click="wiTask.onSelectionTypeChanged(wiTask.FAMILY_SELECTION)" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_SELECTION}'
                                 style="margin-right: 5px;" title='Family'>
-                                    <input type="radio" name="filterBy" class="display-none" value='{{wiTask.FAMILY_SELECTION}}' ng-model="wiTask.selectionType">
                                     <span class='user-define-16x16'></span>
                                 </label>
-                                <label class="btn btn-default  " ng-click="wiTask.onSelectionTypeChanged()" ng-class='{active: wiTask.selectionType==wiTask.CURVE_SELECTION}'
+                                <label class="btn btn-default  " ng-click="wiTask.onSelectionTypeChanged(wiTask.CURVE_SELECTION)" ng-class='{active: wiTask.selectionType==wiTask.CURVE_SELECTION}'
                                 title='Curve'>
-                                    <input type="radio" name="filterBy" class="display-none" value='{{wiTask.CURVE_SELECTION}}' ng-model="wiTask.selectionType">
                                     <span class='curve-16x16'></span>
                                 </label>
                             </div>
