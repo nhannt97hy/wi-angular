@@ -21,7 +21,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
 
     this.$onInit = function() {
-        wiComponentService.putComponent("wiTask", self);
+        wiComponentService.putComponent("wiTask" + self.id, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
         wiApiService.listFamily(listF => {
@@ -29,6 +29,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             list = listF;
             onSelectionTypeChanged();
         });
+
+        //TreeName
+        let name = 'wiTask' + self.id;
+        self.SelectionTreeName = name + 'SelectionTree';
+        self.projectTreeName = name + 'projectTree';
+        self.zonationTreeName = name + 'zonationTree';
+        self.taskDataTreeName = name + 'taskDataTree';
+
+        self.idxTab = 0;
 
         // SELECT INPUT TAB
         self.idProject = self.getCurrentProjectId();
@@ -43,6 +52,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         );
         return (openProject || {}).idProject;
     };
+    this.onShowTab = function(idx){
+        self.idxTab = idx;
+    }
 
     this.onClick = function($index, $event, node) {
         self.selectionList.forEach(item => {
@@ -403,7 +415,22 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         }, function (err) {
             let hash = new Object();
             self.zone_set_list.forEach(zone => hash[zone.name] = 1);
-            self.zonesetConfig = Object.keys(hash).map(key => {
+            let zoneChild = function(zonesets){
+                let zoneArr = zonesets.reduce((total, curVal) => total.concat(curVal.zones.map(z => z.name)), []);
+                return Array.from(new Set(zoneArr)).map(item => {
+                    return {
+                        id: -1,
+                        data: {
+                            label: item,
+                            icon: "zone-table-16x16",
+                            selected: false,
+                        },
+                        type: 'zone'
+                    }
+                })
+            }
+            self.zonationConfig = Object.keys(hash).map(key => {
+                let zonesetArr = self.zone_set_list.filter(zs => zs.name == key);
                 return {
                     id: -1,
                     data: {
@@ -411,7 +438,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         selected: false,
                         icon: 'project-16x16-edit'
                     },
-                    children: []
+                    children: zoneChild(zonesetArr),
+                    type: 'zoneset',
+                    zonesets: zonesetArr
                 }
             })
         });
@@ -461,11 +490,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             );
         }
     };
-    function draggableSetting() {
+    function draggableSetting(domEle) {
         $timeout(() => {
-            $(
-                'wi-task wi-base-treeview#__projectWellTree .wi-parent-node[type="dataset"],[type="zoneset"]'
-            ).draggable({
+            domEle.draggable({
                 helper: "clone",
                 start: function(event, ui) {
                     __dragging = true;
@@ -477,6 +504,14 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 appendTo: document.querySelector("wi-task #dragElement")
             });
         }, 500);
+    }
+    this.onPrjReady = function(){
+        let domEle = $( '#' + self.projectTreeName + ' .wi-parent-node[type="dataset"]');
+        draggableSetting(domEle);
+    }
+    this.onZoneReady = function(){
+        let domEle = $('#' + self.zonationTreeName + ' .wi-parent-node[type="zoneset"]');
+        draggableSetting(domEle);
     }
     function matchCurves(curves, matchCriterion) {
         switch (matchCriterion.type) {
@@ -779,6 +814,11 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     this.prjClickFunction = function($index, $event, node) {
         clickFunction($index, $event, node, self.projectConfig);
     };
+    this.zoneClickFunction = function($index, $event, node){
+        if(node && node.type == 'zone'){
+            node.data.unused = !node.data.unused;
+        }
+    }
 
     this.taskClickFuntion = function($index, $event, node){
         if(node && node.type == 'dataset'){
@@ -844,7 +884,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         }
         selectHandler(node, false, rootNode, () => {
-            draggableSetting();
+            // draggableSetting();
         });
     }
 
@@ -1071,7 +1111,7 @@ app.component(name, {
     transclude: true,
     bindings: {
         name: "@",
-        idTask: "<"
+        id: "<"
     }
 });
 
