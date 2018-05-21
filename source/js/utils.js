@@ -1629,7 +1629,7 @@ function findWells() {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let prjNode = rootNodes[0];
-    restrictedVisit(prjNode, 3, function (node) {
+    visit(prjNode, function (node) {
         if (node.type == 'well') {
             wells.push(node);
         }
@@ -2124,6 +2124,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.fill.shadingType = 'pattern';
         shadingObj.positiveFill.shadingType = 'pattern';
         shadingObj.negativeFill.shadingType = 'pattern';
+        shadingObj.isNegPosFill = !fillPatternStyles.fill.pattern.displayType;
 
     }
     else if (shadingObj.shadingStyle == 'varShading') {
@@ -2135,6 +2136,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.fill.shadingType = 'varShading';
         shadingObj.positiveFill.shadingType = 'varShading';
         shadingObj.negativeFill.shadingType = 'varShading';
+        shadingObj.isNegPosFill = !variableShadingStyle.fill.varShading.displayType;
 
     } else {
         error("shadingObj has undefined shadingStyle");

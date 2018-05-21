@@ -91,6 +91,7 @@ const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 const FAMILY_LIST = '/family/list';
 const FAMILY_UNIT_LIST = '/family/list-unit';
 const CONVERT_CURVE_UNIT = '/project/well/dataset/curve/convert-unit';
+const ALL_SYSTEM_UNIT = '/family/all-unit';
 
 // const CREATE_PLOT = '/project/well/plot/new';
 // const EDIT_PLOT = '/project/well/plot/edit';
@@ -1995,5 +1996,13 @@ Service.prototype.asyncGetListUnit = function (payload) {
          self.post(FAMILY_UNIT_LIST, payload, function (response) {
              resolve(response);
          });
+    });
+};
+Service.prototype.asyncGetAllUnit = function (payload) {
+    let self = this;
+    return new Promise(function (resole) {
+        self.post(ALL_SYSTEM_UNIT, payload, function (response) {
+            resole(response);
+        });
     });
 };

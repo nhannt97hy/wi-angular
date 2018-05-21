@@ -15,44 +15,39 @@ function WiBaseTreeController(wiComponentService, $scope) {
             wiComponentService.putComponent(self.name, self);
             let watch = [() => this.filter, () => this.filterBy];
             $scope.$watchGroup(watch, (val) => {
-                if(this.config && this.config.length){
-                    this.config.forEach((c, i) => {
-                        let parent = new Array();
-                        filterF(c, self.filter, parent);
-                    })
-                }
+                self.filterFn();
             })
         }
     };
 
-    function filterF(input, strCp, parent, lastChild){
-        parent.unshift(input);
-        input.data.hide = true;
-        if(input && filterLabel(input).toLowerCase().includes(strCp.toLowerCase()) && filterType(input)){
-            if(parent && parent.length){
-                parent.forEach(p => {
-                    p.data.hide = false;
-                })
-            }
-        } else {
-            if(!input.children || !input.children.length){
-                parent.shift();
-                if(lastChild){
-                    parent.shift();
+    function filterF(input){
+        let strCp = self.filter || '';
+        let options = new Array();
+        utils.visit(input, function(_node, _options){
+            if(_node && filterLabel(_node).toLowerCase().includes(strCp.toLowerCase()) && filterType(_node)){
+                _node.data.hide = false;
+                _options.push(_node);
+            }else _node.data.hide = true;
+            return false;
+        }, options)
+        options.forEach(item => {
+            let Xpath = [];
+            utils.visit(input, function(_node, _opt){
+                if(_node.id == item.id && _node.type == item.type) {
+                    Xpath = _opt.path.slice();
+                    return true
                 }
-            }
-        }
-        if(input.children && input.children.length){
-            input.children.forEach((child, i) => {
-                filterF(child, strCp, parent, i == input.children.length - 1);
-            });
-        }
+                return false;
+            }, {
+                path: []
+            })
+            Xpath.forEach(c => c.data.hide = false)
+        })
     }
     this.filterFn = function () {
         if(this.config && this.config.length){
             this.config.forEach((c, i) => {
-                let parent = new Array();
-                filterF(c, self.filter, parent);
+                filterF(c);
             })
         }
     };
