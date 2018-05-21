@@ -18,6 +18,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.update = function (changes) {
         if (this.viWiXplot) {
+            this.changed = true;
             changes.curvesProperties.forEach(datum => delete datum.$$hashKey);
             let existedCurves = this.viWiXplot.getProperties().pointsets.map(pointSet => {
                 return {
@@ -150,6 +151,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     pointsets: self.pointsets,
                     config: self.config
                 }, document.getElementById(self.mainXplotAreaId));
+                self.changed = false;
                 self.setContextMenu();
             } else {
                 self.viWiXplot.pointsets = self.pointsets;
@@ -159,6 +161,67 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.viWiXplot.plotContainer.on('mousewheel', function () {
                 self.mouseWheelCallback();
             });
+            let rootPos = null;
+            let currPos = null;
+            let rootDis = {
+                x: null,
+                y: null
+            };
+            let transformX = self.viWiXplot.getTransformX();
+            let transformY = self.viWiXplot.getTransformY();
+            self.viWiXplot.plotContainer.call(d3.drag()
+                .filter(function () {
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
+                    return d3.event.ctrlKey;
+                })
+                .on('drag', function () {
+                    let mouse = d3.mouse(self.viWiXplot.plotContainer.node());
+                    currPos = {
+                        x: transformX.invert(mouse[0]),
+                        y: transformY.invert(mouse[1])
+                    };
+                    if (!rootPos || self.changed) rootPos = currPos;
+                    if (!rootDis.x || self.changed) {
+                        rootDis.x = Math.abs(self.config.scale.left - self.config.scale.right);
+                    }
+                    if (!rootDis.y || self.changed) {
+                        rootDis.y = Math.abs(self.config.scale.bottom - self.config.scale.top);
+                    }
+                    if (self.changed) self.changed = false;
+                })
+                .on('end', function () {
+                    let currDis = {
+                        x: Math.abs(self.config.scale.left - self.config.scale.right),
+                        y: Math.abs(self.config.scale.bottom - self.config.scale.top)
+                    };
+                    let ratio = {
+                        x: currDis.x / rootDis.x,
+                        y: currDis.y / rootDis.y
+                    };
+                    let dragFactor = {
+                        x: Math.round((Math.abs(currPos.x - rootPos.x)) * ratio.x),
+                        y: Math.round((Math.abs(currPos.y - rootPos.y)) * ratio.y)
+                    };
+                    if (currPos.x > rootPos.x) {
+                        self.config.scale.left -= dragFactor.x;
+                        self.config.scale.right -= dragFactor.x;
+                    } else {
+                        self.config.scale.left += dragFactor.x;
+                        self.config.scale.right += dragFactor.x;
+                    }
+                    if (currPos.y > rootPos.y) {
+                        self.config.scale.bottom -= dragFactor.y;
+                        self.config.scale.top -= dragFactor.y;
+                    } else {
+                        self.config.scale.bottom += dragFactor.y;
+                        self.config.scale.top += dragFactor.y;
+                    }
+                    rootPos = currPos;
+                    rootDis = currDis;
+                    self.viWiXplot.doPlot();
+                })
+            );
             // debug
             window.__ViWiXplot = self.viWiXplot;
         });
@@ -231,7 +294,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         this.viWiXplot.plotUserLine();
     }
 
-    this.pickPoint = function(callback) {
+    this.pickPoint = function (callback) {
         self.viWiXplot.startAddTernaryPoint();
         self.setContextMenu([
             {
@@ -245,13 +308,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }
             }
         ]);
-        self.viWiXplot.onMouseDown(function(point) {
+        self.viWiXplot.onMouseDown(function (point) {
             self.mouseDownCallback();
             if (d3.event.button == 2) return;
             if (callback) callback(point);
         })
     }
-    this.pickVertex = function(idx, callback) {
+    this.pickVertex = function (idx, callback) {
         self.viWiXplot.startAddTernaryVertex(idx);
 
         self.setContextMenu([
@@ -266,7 +329,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }
             }
         ]);
-        self.viWiXplot.onMouseDown(function(vertex) {
+        self.viWiXplot.onMouseDown(function (vertex) {
             self.mouseDownCallback();
             if (d3.event.button == 2) return;
             if (callback) callback(vertex);
@@ -298,6 +361,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.mouseWheelCallback = function () {
+        if (!this.viWiXplot || !this.viWiXplot.plotContainer) return;
         let mouse = d3.mouse(this.viWiXplot.plotContainer.node());
         let transformX = this.viWiXplot.getTransformX();
         let transformY = this.viWiXplot.getTransformY();
@@ -314,9 +378,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     bottom: this.config.scale.bottom + Math.abs(this.config.scale.bottom - posY) * zoomFactor,
                     top: this.config.scale.top - Math.abs(this.config.scale.top - posY) * zoomFactor
                 };
-                this.viWiXplot.pointsets.forEach(pointSet => {
-                    pointSet.pointSize *= (1 + zoomFactor);
-                });
+                // this.viWiXplot.pointsets.forEach(pointSet => {
+                //     pointSet.pointSize *= (1 + zoomFactor);
+                // });
             } else {
                 newScale = {
                     left: this.config.scale.left + Math.abs(this.config.scale.left - posX) * zoomFactor,
@@ -324,9 +388,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     bottom: this.config.scale.bottom - Math.abs(this.config.scale.bottom - posY) * zoomFactor,
                     top: this.config.scale.top + Math.abs(this.config.scale.top - posY) * zoomFactor
                 };
-                this.viWiXplot.pointsets.forEach(pointSet => {
-                    pointSet.pointSize /= (1 + zoomFactor);
-                });
+                // this.viWiXplot.pointsets.forEach(pointSet => {
+                //     pointSet.pointSize /= (1 + zoomFactor);
+                // });
             }
             this.config.scale = newScale;
             this.viWiXplot.doPlot();
