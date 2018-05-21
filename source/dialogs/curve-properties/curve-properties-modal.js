@@ -16,20 +16,13 @@ module.exports = function (ModalService, trackComponent, callback) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let dataset = utils.getModel('dataset', currentCurve.idDataset);
-//<<<<<<< HEAD
-        // this.well = utils.findWellByLogplot(trackComponent.idPlot);
-        this.well = utils.findWellByCurve(currentCurve.idCurve);
-
-        console.log("CURRENTCURVE", currentCurve, viTrack);
-
-//=======
         self.lineUnit = currentCurve.unit;
         self.units = [];
         self.longList = [];
         self.compatiableUnit = null;
         self.longListSelected = null;
         self.isUnKnown = !self.units.find(u => u.name === self.lineUnit);
-        console.log("CURRENTCURVE", currentCurve, currentTrack);
+        // console.log("CURRENTCURVE", currentCurve, currentTrack);
         $timeout(function () {
             wiApiService.asyncGetListUnit({idCurve: currentCurve.idCurve}).then(r => {
                 self.units = r;
@@ -66,7 +59,6 @@ module.exports = function (ModalService, trackComponent, callback) {
             self.compatiableUnit = null;
             self.curveOptions.unit = self.lineUnit;
         };
-//>>>>>>> master
         let extentY = currentCurve.getExtentY();
         if (currentCurve.line && (currentCurve.displayMode == 'Line' || currentCurve.displayMode == 'Both')) {
             this.lineOptions = {

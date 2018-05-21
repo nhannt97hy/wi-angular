@@ -760,7 +760,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
     this.getZones().forEach(zone => zone.lower());
-    // this.svgContainer.raise();
+    this.svgContainer.raise();
     this.axisContainer.lower();
 }
 
