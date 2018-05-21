@@ -2092,6 +2092,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.fill.shadingType = 'pattern';
         shadingObj.positiveFill.shadingType = 'pattern';
         shadingObj.negativeFill.shadingType = 'pattern';
+        shadingObj.isNegPosFill = !fillPatternStyles.fill.pattern.displayType;
 
     }
     else if (shadingObj.shadingStyle == 'varShading') {
@@ -2103,6 +2104,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.fill.shadingType = 'varShading';
         shadingObj.positiveFill.shadingType = 'varShading';
         shadingObj.negativeFill.shadingType = 'varShading';
+        shadingObj.isNegPosFill = !variableShadingStyle.fill.varShading.displayType;
 
     } else {
         error("shadingObj has undefined shadingStyle");
