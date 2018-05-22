@@ -150,6 +150,7 @@ module.exports = function (ModalService, imageTrackProperties, callback) {
                             break;
 
                         default:
+                            self.isValid = true;
                             callback();
                             break;
                     }
