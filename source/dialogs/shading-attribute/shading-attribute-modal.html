@@ -259,7 +259,7 @@
                             <label class="control-label col-sm-4 text-center">Low</label>
                             <label class="control-label col-sm-4 text-center">High</label>
                         </div>
-                        <div class="form-group" ng-if="!wiModal.displayType">
+                        <div class="form-group" ng-if="!wiModal.varShadingDisplayType">
                             <label class="control-label col-sm-4">Fill: Curve Value</label>
                             <div class="col-sm-4 padding-bottom-0_5em">
                                 <input type="number" step="any"
@@ -274,7 +274,7 @@
                                         ng-blur="wiModal.onRoundValue();">
                             </div>
                         </div>
-                        <div ng-if="wiModal.displayType">
+                        <div ng-if="wiModal.varShadingDisplayType">
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Positive Fill: Curve Value</label>
                                 <div class="col-sm-4 padding-bottom-0_5em">

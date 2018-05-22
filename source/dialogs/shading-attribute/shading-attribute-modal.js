@@ -235,9 +235,9 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
                 self.variableShadingOptions.fill.varShading.startX = props.minScale;
                 self.variableShadingOptions.fill.varShading.endX = props.maxScale;
                 self.variableShadingOptions.positiveFill.varShading.startX = props.minScale;
-                self.variableShadingOptions.positiveFill.varShading.end = props.maxScale;
+                self.variableShadingOptions.positiveFill.varShading.endX = props.maxScale;
                 self.variableShadingOptions.negativeFill.varShading.startX = props.minScale;
-                self.variableShadingOptions.negativeFill.varShading.end = props.maxScale;
+                self.variableShadingOptions.negativeFill.varShading.endX = props.maxScale;
             }
 
         };
