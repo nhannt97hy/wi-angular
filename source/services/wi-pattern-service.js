@@ -76,9 +76,9 @@ Service.prototype.blendColor = function(image, foreground, background) {
 	
 	if (!image) return null;
 	let fgColor = null, bgColor = null;
-	if(foreground.charAt(0) === '#') fgColor = utils.hexToRgbA(foreground)
+	if(foreground.slice(0, 3) !== 'rgb') fgColor = utils.hexToRgbA(foreground)
 		else fgColor = utils.rgbaStringToObj(foreground);
-	if(background.charAt(0) === '#') bgColor = utils.hexToRgbA(background)
+	if(background.slice(0, 3) !== 'rgb') bgColor = utils.hexToRgbA(background)
 		else bgColor = utils.rgbaStringToObj(background);
 
 	let canvas = document.createElement('canvas');
