@@ -573,9 +573,18 @@ input[type=checkbox].input-check {
 .ui-select-search {
 	height: 24px;
 }
+.ui-select-bootstrap > .ui-select-choices, .ui-select-bootstrap > .ui-select-no-choice {
+	width: fit-content;
+	min-width: 100%;
+}
 .ui-select-bootstrap > .ui-select-no-choice{
 	padding-left: 20px;
 	color: red;
+}
+.ui-select-bootstrap .ui-select-match-text{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 #spinner-holder {
 	position: absolute;
