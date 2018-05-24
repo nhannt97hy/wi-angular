@@ -62,6 +62,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             fill : {
                 display : !this.shadingOptions.isNegPosFill,
                 pattern : this.shadingOptions.fill.pattern ? this.shadingOptions.fill.pattern : {
+                    displayType : (!this.shadingOptions.isNegPosFill),
                     name : 'none',
                     foreground : 'black',
                     background : 'blue'
@@ -95,7 +96,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             self.paletteList = pals;
             self.paletteName = Object.keys(self.paletteList);
         });
-        this.checkboxVal = !this.fillPatternOptions.fill.display;
+        this.patternDisplayType = !this.fillPatternOptions.fill.display;
 
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
@@ -152,14 +153,15 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             };
             return line;
         }
+        this.patternDisplayType = !this.fillPatternOptions.fill.pattern.displayType;
         this.switchShadingType = function () {
             if (self.shadingOptions.shadingStyle == 'pattern') {
-                self.checkboxVal = self.displayType;
-                self.fillPatternOptions.fill.display = !self.checkboxVal;
+                // self.checkboxVal = self.displayType;
+                // self.fillPatternOptions.fill.display = !self.checkboxVal;
                 self.correctFillingStyle();
             }
             if (self.shadingOptions.shadingStyle == 'varShading') {
-                self.displayType = self.checkboxVal;
+                // self.displayType = self.checkboxVal;
                 if (self.displayType == true 
                     && self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') {
                     self.varShadingType = 'gradient';
@@ -211,9 +213,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             });
         }
         this.correctFillingStyle = function() {
-            self.shadingOptions.isNegPosFill = !self.fillPatternOptions.fill.display;
-            self.fillPatternOptions.positiveFill.display = !self.fillPatternOptions.fill.display;
-            self.fillPatternOptions.negativeFill.display = self.fillPatternOptions.positiveFill.display;
+            self.fillPatternOptions.fill.pattern.displayType = !self.patternDisplayType;
+            self.fillPatternOptions.fill.display = !self.patternDisplayType;
+            self.fillPatternOptions.positiveFill.display = self.patternDisplayType;
+            self.fillPatternOptions.negativeFill.display = self.patternDisplayType;
         }
         // TO REVIEW
         this.selectedControlCurve = function(curve){
@@ -229,9 +232,9 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 self.variableShadingOptions.fill.varShading.startX = props.minScale;
                 self.variableShadingOptions.fill.varShading.endX = props.maxScale;
                 self.variableShadingOptions.positiveFill.varShading.startX = props.minScale;
-                self.variableShadingOptions.positiveFill.varShading.end = props.maxScale;
+                self.variableShadingOptions.positiveFill.varShading.endX = props.maxScale;
                 self.variableShadingOptions.negativeFill.varShading.startX = props.minScale;
-                self.variableShadingOptions.negativeFill.varShading.end = props.maxScale;
+                self.variableShadingOptions.negativeFill.varShading.endX = props.maxScale;
             }
 
         };
@@ -267,12 +270,11 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             });
         }
         this.correctFillingStyleVarShading = function() {
-            self.shadingOptions.isNegPosFill = self.displayType;
-            self.variableShadingOptions.fill.display = !self.displayType;
-            self.variableShadingOptions.positiveFill.display = self.displayType;
-            self.variableShadingOptions.negativeFill.display = self.displayType;
+            self.variableShadingOptions.fill.varShading.displayType = !self.varShadingDisplayType;
+            self.variableShadingOptions.fill.display = !self.varShadingDisplayType;
+            self.variableShadingOptions.positiveFill.display = self.varShadingDisplayType;
+            self.variableShadingOptions.negativeFill.display = self.varShadingDisplayType;
         }
-
         this.arrayPaletteToString = function(palette){
             return JSON.stringify(palette);
         }
@@ -336,6 +338,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 fill : {
                     display : !self.shadingOptions.isNegPosFill,
                     varShading : self.shadingOptions.fill.varShading ? self.shadingOptions.fill.varShading : {
+                        displayType : (!self.shadingOptions.isNegPosFill),
                         startX : controlCurve.lineProperties.minScale,
                         endX : controlCurve.lineProperties.maxScale,
                         varShadingType: 'gradient',
@@ -418,7 +421,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
 
         }
 
-        this.displayType = this.shadingOptions.isNegPosFill;
+        this.varShadingDisplayType = !this.variableShadingOptions.fill.varShading.displayType;
 
         this.foregroundCustomFills = function(index){
             $timeout(function() {
@@ -489,9 +492,8 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
         };
         this.setVarShadingType = function() {
             if(self.varShadingType == 'customFills') {
-                self.displayType = false;
-                self.shadingOptions.isNegPosFill = false;
-                self.variableShadingOptions.fill.display = true;
+                self.varShadingDisplayType = false;
+                self.correctFillingStyleVarShading();
             }
         }
         this.setCustomFillsIfNull = function() {
@@ -532,8 +534,8 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
 
                 if (utils.isEmpty(c.lowVal) 
                     || utils.isEmpty(c.highVal)) checkErr = "invalid";
-                if(!checkErr && (c.lowVal < XValue[0] || c.highVal < XValue[0] 
-                                || c.lowVal > XValue[1] || c.highVal > XValue[1])) checkErr = "outRange";
+                if(!checkErr && (c.lowVal < XValue[0] || c.highVal < XValue[0])) checkErr = "outBelowRange";
+                if(!checkErr && (c.lowVal > XValue[1] || c.highVal > XValue[1])) checkErr = "outAboveRange";
                 if(!checkErr) {
                     let contentClone = angular.copy(content);
                     contentClone.splice(index, 1);
@@ -548,9 +550,10 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 }
             });
             if (checkErr == "invalid") message = 'CustomFills: Low value or High value is invalid!';
-            if (checkErr == "outRange") message = 'CustomFills: Please enter a value not above ' 
-                                                    + self.variableShadingOptions.fill.varShading.startX + '-' 
-                                                    + self.variableShadingOptions.fill.varShading.endX+ '!';
+            if (checkErr == "outBelowRange") message = 'CustomFills: Please enter a value not below ' 
+                                                        + XValue[0] + '!';
+            if (checkErr == "outAboveRange") message = 'CustomFills: Please enter a value not above ' 
+                                                        + XValue[1] + '!';
             if (checkErr == "overlap") message = 'CustomFills: Values overlap!';
             return message;
         }
@@ -569,7 +572,6 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 return false;
             }
             return true;
-
         }
         
         this._options = {};
@@ -578,13 +580,13 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
             self.variableShadingOptions.positiveFill.varShading.varShadingType = self.varShadingType;
             self.variableShadingOptions.negativeFill.varShading.varShadingType = self.varShadingType;
 
-            let message = null;
+            self.message = null;
             if (self.shadingOptions.shadingStyle == 'varShading' 
                 && self.variableShadingOptions.fill.varShading.varShadingType == 'customFills') 
             {
-                message = validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
+                self.message = validateCustomFills(self.variableShadingOptions.fill.varShading.customFills.content);
             }
-            if(!message) {
+            if(!self.message) {
                 let temp = utils.mergeShadingObj(self.shadingOptions, self.fillPatternOptions, self.variableShadingOptions);
                 self._options = {
                     _index : shadingOptions._index,
@@ -597,7 +599,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                     rightCurve : self.shadingOptions.rightCurve,
                     idShading : shadingOptions.idShading,
                     idTrack : shadingOptions.idTrack,
-                    isNegPosFill : self.shadingOptions.isNegPosFill,
+                    isNegPosFill : temp.isNegPosFill,
                     leftFixedValue : self.shadingOptions.leftFixedValue,
                     name : self.shadingOptions.name,
                     shadingStyle : self.shadingOptions.shadingStyle,
@@ -608,7 +610,7 @@ module.exports = function (ModalService, wiApiService, callback, shadingOptions,
                 console.log("_options", self._options);
                 _callback();
             } else {
-                DialogUtils.warningMessageDialog(ModalService, message);
+                DialogUtils.warningMessageDialog(ModalService, self.message);
             };
         }
         this.onCancelButtonClicked = function () {

@@ -153,6 +153,7 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
                             break;
 
                         default:
+                            self.isValid = true;
                             callback();
                             break;
                     }

@@ -43,7 +43,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             regLineItem.change = change.unchanged;
             regLineItem.index = index;
             regLineItem.polygons = item.polygons.map(p => {
-                return p.idPolygon;
+                return p;
             })
             self.regressionLines.push(regLineItem);
         });

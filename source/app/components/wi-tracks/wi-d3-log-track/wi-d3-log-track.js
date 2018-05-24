@@ -414,6 +414,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 display: true,
                 shadingType: 'pattern',
                 pattern: {
+                    displayType : true,
                     name: "none",
                     foreground: "black",
                     background: "blue"
@@ -423,6 +424,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 display: false,
                 shadingType: 'pattern',
                 pattern: {
+                    displayType : false,
                     name: "none",
                     foreground: "black",
                     background: "blue"
@@ -432,6 +434,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 display: false,
                 shadingType: 'pattern',
                 pattern: {
+                    displayType : false,
                     name: "none",
                     foreground: "black",
                     background: "blue"

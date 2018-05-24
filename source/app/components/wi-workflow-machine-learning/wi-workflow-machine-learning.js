@@ -1199,11 +1199,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     res.target.forEach(function (x) {
                                         window.tar.push(x);
                                     });
+                                    let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
+                                    invTransformCurve(res.target, lastIdx);
                                     fillNullInCurve(nullPositions, res.target);
                                     // for(let i =0; i<res.target.length; i++)
                                     // console.log(verifyCurve[i],' - ', res.target[i]);
 
-                                    let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
                                     let curveInfo = {
                                         idDataset: _stepVerify.inputData[index].dataset.idDataset,
                                         idFamily: _stepVerify.inputData[index].inputs[lastIdx].value.idFamily,

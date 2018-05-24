@@ -91,7 +91,7 @@
                                 <label class="control-label col-sm-3 text-center">Foreground</label>
                                 <label class="control-label col-sm-3 text-center">Background</label>
                             </div>
-                            <div class="form-group" ng-style="wiModal.disablePointer(!wiModal.fillPatternOptions.fill.display)">
+                            <div class="form-group" ng-style="wiModal.disablePointer(!wiModal.fillPatternOptions.fill.pattern.displayType)">
                                 <div class="col-sm-6">
                                     <ui-select theme="bootstrap" ng-model="wiModal.fillPatternOptions.fill.pattern.name"
                                                 ng-disabled="!wiModal.fillPatternOptions.fill.display"
@@ -120,13 +120,13 @@
                                     <button ng-click="wiModal.foreground()"
                                             ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.foreground}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
+                                            ng-disabled="!wiModal.fillPatternOptions.fill.pattern.displayType"></button>
                                 </div>
                                 <div class="col-sm-3 text-center">
                                     <button ng-style="{'background-color':wiModal.fillPatternOptions.fill.pattern.background}"
                                             ng-click="wiModal.background()"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="!wiModal.fillPatternOptions.fill.display"></button>
+                                            ng-disabled="!wiModal.fillPatternOptions.fill.pattern.displayType"></button>
                                 </div>
                             </div>
                             <hr>
@@ -134,9 +134,8 @@
                                 <div class="col-sm-7" style="padding: 1em 0">
                                     <label>
                                         <input type="checkbox" id="displayFill"
-                                               value="" name=""
-                                               ng-model="wiModal.checkboxVal"
-                                               ng-change="wiModal.fillPatternOptions.fill.display = !wiModal.checkboxVal; wiModal.correctFillingStyle()"
+                                               ng-model="wiModal.patternDisplayType"
+                                               ng-change="wiModal.correctFillingStyle()"
                                                >
                                             Positive/Negative Fill
                                     </label>
@@ -148,7 +147,7 @@
                                 <label class="control-label col-sm-3 text-center">&nbsp;</label>
                                 <label class="control-label col-sm-3 text-center">&nbsp;</label>
                             </div>
-                            <div class="form-group" ng-style="wiModal.disablePointer(wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display)">
+                            <div class="form-group" ng-style="wiModal.disablePointer(wiModal.fillPatternOptions.fill.pattern.displayType)">
                                 <div class="col-sm-6">
                                     <ui-select theme="bootstrap" ng-model="wiModal.fillPatternOptions.positiveFill.pattern.name" 
                                                 ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display"
@@ -177,13 +176,13 @@
                                     <button ng-click="wiModal.posPositiveForeground()" 
                                             ng-style="{'background-color':wiModal.fillPatternOptions.positiveFill.pattern.foreground}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display"></button>
+                                            ng-disabled="wiModal.fillPatternOptions.fill.pattern.displayType"></button>
                                 </div>
                                 <div class="col-sm-3 text-center">
                                     <button ng-click="wiModal.posPositiveBackground()" 
                                             ng-style="{'background-color':wiModal.fillPatternOptions.positiveFill.pattern.background}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.positiveFill.display"></button>
+                                            ng-disabled="wiModal.fillPatternOptions.fill.pattern.displayType"></button>
                                 </div>
                             </div>
                             <!-- negative fill -->
@@ -192,10 +191,9 @@
                                 <label class="control-label col-sm-3 text-center">&nbsp;</label>
                                 <label class="control-label col-sm-3 text-center">&nbsp;</label>
                             </div>
-                            <div class="form-group" ng-style="wiModal.disablePointer(wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display)">
+                            <div class="form-group" ng-style="wiModal.disablePointer(wiModal.fillPatternOptions.fill.pattern.displayType)">
                                 <div class="col-sm-6">
                                     <ui-select theme="bootstrap" ng-model="wiModal.fillPatternOptions.negativeFill.pattern.name" 
-                                                ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display"
                                                 search-enabled="false">
                                         <ui-select-match>
                                             <wi-canvas-rect name="_selectedPatternCanvasNegative"
@@ -221,14 +219,14 @@
                                     <button ng-click="wiModal.negPositiveForeground()" 
                                             ng-style="{'background-color':wiModal.fillPatternOptions.negativeFill.pattern.foreground}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display">
+                                            ng-disabled="wiModal.fillPatternOptions.fill.pattern.displayType">
                                     </button>
                                 </div>
                                 <div class="col-sm-3 text-center">
                                     <button ng-click="wiModal.negPositiveBackground()" 
                                             ng-style="{'background-color':wiModal.fillPatternOptions.negativeFill.pattern.background}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.fillPatternOptions.fill.display || !wiModal.fillPatternOptions.negativeFill.display">
+                                            ng-disabled="wiModal.fillPatternOptions.fill.pattern.displayType">
                                     </button>
                                 </div>
                             </div>
@@ -250,7 +248,7 @@
                             </div>
                             <label class="control-label col-sm-4 padding-bottom-1em">
                                 <input type="checkbox"
-                                       ng-model="wiModal.displayType"
+                                       ng-model="wiModal.varShadingDisplayType"
                                        ng-change="wiModal.correctFillingStyleVarShading()"
                                        ng-disabled="wiModal.varShadingType == 'customFills'">
                                     Positive/Negative Fill
@@ -261,7 +259,7 @@
                             <label class="control-label col-sm-4 text-center">Low</label>
                             <label class="control-label col-sm-4 text-center">High</label>
                         </div>
-                        <div class="form-group" ng-if="!wiModal.displayType">
+                        <div class="form-group" ng-if="!wiModal.varShadingDisplayType">
                             <label class="control-label col-sm-4">Fill: Curve Value</label>
                             <div class="col-sm-4 padding-bottom-0_5em">
                                 <input type="number" step="any"
@@ -276,7 +274,7 @@
                                         ng-blur="wiModal.onRoundValue();">
                             </div>
                         </div>
-                        <div ng-if="wiModal.displayType">
+                        <div ng-if="wiModal.varShadingDisplayType">
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Positive Fill: Curve Value</label>
                                 <div class="col-sm-4 padding-bottom-0_5em">
@@ -317,59 +315,59 @@
                             </label>
                         </div>
                         <div ng-if="wiModal.varShadingType == 'gradient'">
-                            <div class="form-group padding-left-1_5em" ng-style="wiModal.disablePointer(!wiModal.variableShadingOptions.fill.display)">
+                            <div class="form-group padding-left-1_5em" ng-style="wiModal.disablePointer(!wiModal.variableShadingOptions.fill.varShading.displayType)">
                                 <label class="control-label col-sm-4 padding-left-3em">Fill color</label>
                                 <div class="col-sm-4 text-center padding-bottom-0_5em">
                                     <button ng-click="wiModal.fillStartColor()"
                                             ng-style="{'background-color':wiModal.variableShadingOptions.fill.varShading.gradient.startColor}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="!wiModal.variableShadingOptions.fill.display"></button>
+                                            ng-disabled="!wiModal.variableShadingOptions.fill.varShading.displayType"></button>
                                 </div>
                                 <div class="col-sm-4 text-center padding-bottom-0_5em">
                                     <button ng-click="wiModal.fillEndColor()"
                                             ng-style="{'background-color':wiModal.variableShadingOptions.fill.varShading.gradient.endColor}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="!wiModal.variableShadingOptions.fill.display"></button>
+                                            ng-disabled="!wiModal.variableShadingOptions.fill.varShading.displayType"></button>
                                 </div>
                             </div>
                             <div class="form-group padding-left-1_5em">
                                 <label class="control-label col-sm-4">
                                 <input type="checkbox"
                                            ng-model="wiModal.variableShadingOptions.positiveFill.display"
-                                           ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                           ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType">
                                     Positive side color
                                 </label>
-                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.display || !wiModal.variableShadingOptions.positiveFill.display)">
+                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.varShading.displayType)">
                                     <button ng-click="wiModal.positiveFillStartColor()"
                                             ng-style="{'background-color':wiModal.variableShadingOptions.positiveFill.varShading.gradient.startColor}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.variableShadingOptions.fill.display"></button>
+                                            ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType"></button>
                                 </div>
-                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.display || !wiModal.variableShadingOptions.positiveFill.display)">
+                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.varShading.displayType)">
                                     <button ng-click="wiModal.positiveFillEndColor()"
                                             ng-style="{'background-color':wiModal.variableShadingOptions.positiveFill.varShading.gradient.endColor}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.variableShadingOptions.fill.display"></button>
+                                            ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType"></button>
                                 </div>
                             </div>
                             <div class="form-group padding-left-1_5em">
                                 <label class="control-label col-sm-4">
                                     <input type="checkbox"
                                            ng-model="wiModal.variableShadingOptions.negativeFill.display"
-                                           ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                           ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType">
                                     Negative side color
                                 </label>
-                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.display || !wiModal.variableShadingOptions.negativeFill.display)">
+                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.varShading.displayType)">
                                     <button ng-click="wiModal.negativeFillStartColor()"
                                             ng-style="{'background-color':wiModal.variableShadingOptions.negativeFill.varShading.gradient.startColor}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.variableShadingOptions.fill.display"></button>
+                                            ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType"></button>
                                 </div>
-                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.display || !wiModal.variableShadingOptions.negativeFill.display)">
+                                <div class="col-sm-4 text-center padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.varShading.displayType)">
                                     <button ng-click="wiModal.negativeFillEndColor()"
                                             ng-style="{'background-color':wiModal.variableShadingOptions.negativeFill.varShading.gradient.endColor}"
                                             class="form-control wi-form-control width-80px thick-border"
-                                            ng-disabled="wiModal.variableShadingOptions.fill.display"></button>
+                                            ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType"></button>
                                 </div>
                             </div>
                         </div>
@@ -382,13 +380,13 @@
                             </label>
                         </div>
                         <div ng-if="wiModal.varShadingType == 'palette'">
-                            <div class="form-group" ng-style="wiModal.disablePointer(!wiModal.variableShadingOptions.fill.display)">
+                            <div class="form-group" ng-style="wiModal.disablePointer(!wiModal.variableShadingOptions.fill.varShading.displayType)">
                                 <label class="control-label col-sm-4 padding-left-4_5em">Fill Palette</label>
                                 <div class="col-sm-8 padding-bottom-0_5em">
                                     <select ng-model="wiModal.variableShadingOptions.fill.varShading.palName"
                                             ng-options="item for item in wiModal.paletteName"
                                             class="form-control wi-form-control"
-                                            ng-disabled="!wiModal.variableShadingOptions.fill.display">
+                                            ng-disabled="!wiModal.variableShadingOptions.fill.varShading.displayType">
                                     </select>
                                 </div>
                             </div>
@@ -396,14 +394,14 @@
                                 <label class="control-label col-sm-4 padding-left-2_5em">
                                     <input type="checkbox"
                                                ng-model="wiModal.variableShadingOptions.positiveFill.display"
-                                               ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                               ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType">
                                     Positive side palette
                                 </label>
                                 <div class="col-sm-8 padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.display || !wiModal.variableShadingOptions.positiveFill.display)">
                                     <select ng-model="wiModal.variableShadingOptions.positiveFill.varShading.palName"
                                             ng-options="item for item in wiModal.paletteName"
                                             class="form-control wi-form-control"
-                                            ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                            ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType">
                                     </select>
                                 </div>
                             </div>
@@ -411,14 +409,14 @@
                                 <label class="control-label col-sm-4 padding-left-2_5em">
                                     <input type="checkbox"
                                                ng-model="wiModal.variableShadingOptions.negativeFill.display"
-                                               ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                               ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType">
                                     Negative side palette
                                 </label>
                                 <div class="col-sm-8 padding-bottom-0_5em" ng-style="wiModal.disablePointer(wiModal.variableShadingOptions.fill.display || !wiModal.variableShadingOptions.negativeFill.display)">
                                     <select ng-model="wiModal.variableShadingOptions.negativeFill.varShading.palName"
                                             ng-options="item for item in wiModal.paletteName"
                                             class="form-control wi-form-control"
-                                            ng-disabled="wiModal.variableShadingOptions.fill.display">
+                                            ng-disabled="wiModal.variableShadingOptions.fill.varShading.displayType">
                                     </select>
                                 </div>
                             </div>
@@ -453,12 +451,14 @@
                                                 <td width="12%">
                                                     <input type="number" step="any"
                                                             ng-model="fill.lowVal"
-                                                            class="form-control wi-form-control">
+                                                            class="form-control wi-form-control"
+                                                            ng-change="wiModal.message = null">
                                                 </td>
                                                 <td width="12%">
                                                     <input type="number" step="any"
                                                             ng-model="fill.highVal"
-                                                            class="form-control wi-form-control">
+                                                            class="form-control wi-form-control"
+                                                            ng-change="wiModal.message = null">
                                                 </td>
                                                 <td width="20%">
                                                     <ui-select theme="bootstrap" ng-model="fill.pattern"
@@ -552,7 +552,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
+                <button ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"
+                        ng-disabled="wiModal.message">
                     <span class="apply-16x16"></span>&nbsp;Apply
                 </button>
                 <button ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
