@@ -13,7 +13,7 @@ exports.EditFormatButtonClicked = function () {
     // const wiLogplot = this.wiLogplot;
     // // wiLogplot.getwiD3Ctrl().openPropertiesDialog();
     // wiLogplot.getwiD3Ctrl().openTrackPropertiesDialog();
-    let curTrackComponent = wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    let curTrackComponent = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
     if(curTrackComponent && curTrackComponent.controller) {
         curTrackComponent.controller.openPropertiesDialog();
     }
@@ -29,7 +29,7 @@ exports.SaveAsLogplotButtonClicked = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = wiLogplot.getLogplotModel().properties.name + '.plot';
+        let fileName = wiLogplot.getLogplotModelAsync().properties.name + '.plot';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';
@@ -593,7 +593,8 @@ exports.CurveBulkUpdateButtonClicked = function () {
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
 
-    let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    // let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    let logTracks = wiLogplot.getwiD3Ctrl().trackComponents.filter(tc => !!tc.idTrack).map(tc => tc.controller.viTrack);
     DialogUtils.curveBulkUpdateDialog(this.ModalService, logTracks, function () {
 
     });
@@ -615,9 +616,10 @@ exports.SaveAsLogplotNameButtonClicked = function () {
     };
     DialogUtils.promptDialog(mds, promptConfig, function (logplotName) {
         if(!logplotName) return;
-        let idWell = wiLogplot.logplotModel.properties.idWell;
+        //let idWell = wiLogplot.logplotModel.properties.idWell;
         let idPlot = wiLogplot.logplotModel.properties.idPlot;
-        let plots = wics.getComponent(wics.PROJECT_LOADED).wells.find(w => w.idWell == idWell).plots;
+        let project = wics.getComponent(wics.PROJECT_LOADED);
+        let plots = project.plots;
         let isExisted = false;
         plots.forEach(function (plot, index) {
             if(plot.name == logplotName){
@@ -628,7 +630,7 @@ exports.SaveAsLogplotNameButtonClicked = function () {
         if(isExisted){
             DialogUtils.confirmDialog(mds, 'Existed!', 'Logplot '+ logplotName +' is existed! OVERWRITE IT?', function (yes) {
                 if(yes){
-                    wiApiService.savePlotAs({name: logplotName, idWell : idWell, idPlot: idPlot}, function (response) {
+                    wiApiService.savePlotAs({name: logplotName, idProject : project.idProject, idPlot: idPlot}, function (response) {
                         console.log("==============", response);
                         Utils.refreshProjectState();
                         // Utils.openLogplotTab(wics, Utils.getModel('logplot', response.idPlot));
@@ -636,7 +638,7 @@ exports.SaveAsLogplotNameButtonClicked = function () {
                 }
             });
         } else {
-            wiApiService.savePlotAs({name: logplotName, idWell : idWell, idPlot: idPlot}, function (response) {
+            wiApiService.savePlotAs({name: logplotName, idProject : project.idProject, idPlot: idPlot}, function (response) {
                 console.log("=============", response);
                 Utils.refreshProjectState();
                 // Utils.openLogplotTab(wics, Utils.getModel('logplot', response.idPlot));

@@ -410,8 +410,9 @@ exports.OpenTemplateButtonClicked = function () {
     let self = this;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    let currentWell = utils.getCurrentWell();
-    DialogUtils.openTemplateDialog(this.ModalService, currentWell, function (plot) {
+    // let currentWell = utils.getCurrentWell();
+    let projectLoaded = this.wiComponentService.getComponent(this.wiComponentService.PROJECT_LOADED);
+    DialogUtils.openTemplateDialog(this.ModalService, projectLoaded, function (plot) {
         utils.openLogplotTab(self.wiComponentService, utils.getModel('logplot', plot.idPlot));
     });
 };
@@ -508,8 +509,8 @@ exports.TrippleComboButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -549,8 +550,8 @@ exports.DensityNeutronButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -590,8 +591,8 @@ exports.ResistivitySonicButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
