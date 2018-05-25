@@ -366,6 +366,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 */
     function updateSlidingHandler(top, height) {
+        if(!_.isNumber(_offsetTop)) _offsetTop = 0;
         $(self.handleId).css('top', (top - _offsetTop) + 'px');
         $(self.handleId).css('height', height + 'px');
         $(self.handleId).resizable("option", "minHeight", getMinTinyWinHeight());

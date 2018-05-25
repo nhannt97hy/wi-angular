@@ -52,7 +52,7 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
         this.leftLimit = customLimit.concat(self.curveList);
 
 // <<<<<<< HEAD
-        this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        this.well = utils.findWellById(trackComponent.controller.getWellProps().idWell);
 // =======
 //         this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
         this.curves = utils.getAllCurvesOfWell(this.well);
