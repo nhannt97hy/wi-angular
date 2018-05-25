@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiD3Crossplot, callback){
+module.exports = function (ModalService, wiD3Crossplot, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -25,8 +25,8 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
         init();
         this.getPolygons = function () {
             return self.polygons.filter(function (item, index) {
-               return (item.change != change.deleted && item.change != change.uncreated);
-           });
+                return (item.change != change.deleted && item.change != change.uncreated);
+            });
         }
         this.__idx = 0;
         $scope.selectedRow = 0;
@@ -34,13 +34,13 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             $scope.selectedRow = indexRow;
             self.__idx = self.getPolygons()[indexRow].index;
         }
-        this.onChange = function(index) {
-            if(self.polygons[index].change == change.unchanged) self.polygons[index].change = change.updated;
+        this.onChange = function (index) {
+            if (self.polygons[index].change == change.unchanged) self.polygons[index].change = change.updated;
         }
         // modal buttons
         this.removeRow = function () {
             if (!self.polygons[self.__idx]) return;
-            if(self.polygons[self.__idx].change == change.created) {
+            if (self.polygons[self.__idx].change == change.created) {
                 self.polygons[self.__idx].change = change.uncreated;
             } else {
                 self.polygons[self.__idx].change = change.deleted;
@@ -76,27 +76,27 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             });
         }
         function sendPolygonsAPIs() {
-            // const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
-            async.eachOf(self.polygons, function(polygon, idx, callback) {
+            const idCrossPlot = wiD3Crossplot.wiCrossplotCtrl.id;
+            async.eachOf(self.polygons, function (polygon, idx, callback) {
                 if (polygon.change == change.created && polygon.points) {
                     polygon.points = JSON.parse(polygon.points);
-                    // polygon.idCrossPlot = idCrossPlot;
+                    polygon.idCrossPlot = idCrossPlot;
                     polygon.change = change.unchanged;
-                    // wiApiService.createPolygon(polygon, function(ret) {
-                    //     polygon.idPolygon = ret.idPolygon;
+                    wiApiService.createPolygon(polygon, function (ret) {
+                        polygon.idPolygon = ret.idPolygon;
                         callback();
-                    // });
+                    });
                 }
                 else if (polygon.change == change.updated && polygon.points) {
                     polygon.points = JSON.parse(polygon.points);
-                    // polygon.idCrossPlot = idCrossPlot;
+                    polygon.idCrossPlot = idCrossPlot;
                     polygon.change = change.unchanged;
-                    // wiApiService.editPolygon(polygon, callback);
+                    wiApiService.editPolygon(polygon, callback);
                 }
                 else if (polygon.change == change.deleted) {
-                    // polygon.idCrossPlot = idCrossPlot;
+                    polygon.idCrossPlot = idCrossPlot;
                     polygon.change = change.deleted;
-                    // wiApiService.removePolygon(polygon.idPolygon, callback);
+                    wiApiService.removePolygon(polygon.idPolygon, callback);
                 }
                 else if (polygon.change == change.unchanged && polygon.points) {
                     polygon.points = JSON.parse(polygon.points);
@@ -106,8 +106,8 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
                     async.setImmediate(callback);
                 }
 
-            }, function(err){
-                wiD3Crossplot.initPolygons(self.polygons.filter(p => {return p.change == change.unchanged && p.points}));
+            }, function (err) {
+                wiD3Crossplot.initPolygons(self.polygons.filter(p => { return p.change == change.unchanged && p.points }));
                 init();
             });
 
@@ -116,7 +116,7 @@ module.exports = function (ModalService, wiD3Crossplot, callback){
             sendPolygonsAPIs();
             close(null);
         };
-        this.onApplyButtonClicked = function() {
+        this.onApplyButtonClicked = function () {
             sendPolygonsAPIs();
         };
         this.onCancelButtonClicked = function () {
