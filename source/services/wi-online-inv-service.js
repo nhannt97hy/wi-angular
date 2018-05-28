@@ -18,7 +18,8 @@ const EXPORT_WELL = '/export/well';
 
 const UPLOAD_FILES = '/upload/lases';
 
-// const LIST_FILES = '/user/files';
+// const LIST_FILES = '/user/files';w
+
 // const FILE_INFO = '/user/file/info';
 // const EDIT_FILE = '/user/file/edit';
 // const DELETE_FILE = '/user/file/delete';

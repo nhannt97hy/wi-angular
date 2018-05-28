@@ -229,6 +229,7 @@ function zoneToTreeConfig(zone, options = {}) {
         zoneModel.type = 'zone';
     }
     zoneModel.id = zone.idZone;
+    zone.fill = typeof(zone.fill) === "string" ? JSON.parse(zone.fill) : zone.fill;
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
         idZone: zone.idZone,
