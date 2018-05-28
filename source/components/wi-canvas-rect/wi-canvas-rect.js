@@ -28,7 +28,9 @@ function Controller(wiComponentService, wiPatternService, $timeout) {
     }
     this.$onChanges = function(changesObj) {
         if(changesObj) {
-            self.paint();
+            $timeout(function() {
+                self.paint();
+            })
         }
     }
 

@@ -737,14 +737,25 @@ input[type=checkbox].input-check {
     border: 1px solid #ccc;
     border-radius: 10px;
 }
-.list-pattern-style>wi-base-treeview {
+.list-pattern-style>wi-scroll>div>.scroll-container>wi-base-treeview {
 	.wi-treeview-container{
 		padding: 5px;
     	border: 1px solid #ccc;
     	padding-right: 5px;
-    	.wi-parent-node>.wi-parent-content>.item-content>span {
+    	.wi-parent-node>.wi-parent-content {
+    		.item-content>span {
     		background: #fff;
     		color: blue;
+    		}
+    	}
+    	.item-active>.wi-parent-content {
+    		.icon-expanded {
+    			background: blue;
+    		}
+    		.item-content>span  {
+    		background: blue;
+    		color: #fff;
+    		}
     	}
 	}
 }
