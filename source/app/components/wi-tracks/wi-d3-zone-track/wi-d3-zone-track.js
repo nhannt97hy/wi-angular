@@ -105,6 +105,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 }
                 let wellColor = Utils.getWellColor(wellProps.idWell);
                 self.viTrack.headerNameBlock.style('background-color', wellColor);
+                self.viTrack.wellName = wellProps.name;
                 lastWell = wellProps;
                 return;
             }
@@ -113,6 +114,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 self.wiD3Ctrl.updateMultiWellState();
             }
             self.viTrack.headerNameBlock.style('background-color', self.viTrack.HEADER_NAME_COLOR);
+            self.viTrack.wellName = null;
             lastWell = null;
         }
     }
