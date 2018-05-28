@@ -6,7 +6,7 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">Crossplot Format</h4>
             </div>
-            <div class="modal-body padding-0 dialog-style">
+            <div class="modal-body padding-0 dialog-style" style='overflow: unset;'>
                 <wi-tabset>
                     <wi-tab heading="Scales">
                         <div class="container-fluid">
@@ -169,7 +169,7 @@
                                                         </div>
                                                     </ui-select-match>
                                                     <ui-select-choices repeat="type in wiModal.selectPointSymbol" position="down">
-                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>{{type}}
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>&nbsp;{{type}}
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>

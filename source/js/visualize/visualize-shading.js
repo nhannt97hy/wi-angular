@@ -557,11 +557,11 @@ function drawRefLine(shading) {
 
     if (shading.vpX.ref < viewportX[0]) {
         shading.vpX.ref = viewportX[0];
-        shading.refX = tranformX.invert(shading.vpX.ref);
+        // shading.refX = tranformX.invert(shading.vpX.ref);
     }
     else if (shading.vpX.ref > viewportX[1]) {
         shading.vpX.ref = viewportX[1];
-        shading.refX = tranformX.invert(shading.vpX.ref);
+        // shading.refX = tranformX.invert(shading.vpX.ref);
     }
 
     shading.refLine
