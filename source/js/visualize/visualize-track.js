@@ -162,7 +162,7 @@ Track.prototype.createHeaderContainer = function() {
         .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
         .style('z-index', 1)
         .style('white-space', 'nowrap')
-        .text(this.name)
+        .html(this.name)
         .on('mousedown', function(d) {
         })
         .on('mouseup', function(d) {
@@ -413,12 +413,14 @@ Track.prototype.on = function(type, cb) {
  * Update header container
  */
 Track.prototype.updateHeader = function() {
-    let name = this.name + (this.zoomFactor == 1 ? '' : (' (' + this.zoomFactor + 'x)'));
+    let name = this.name 
+        + (this.zoomFactor == 1 ? '' : (' (' + this.zoomFactor + 'x)'))
+        + (this.wellName ? (' <strong> /' + this.wellName) + '</strong>':'');       
 
     this.headerNameBlock
         .style('display', this.showTitle ? 'block': 'none')
         .style('text-align', this.justification)
-        .text(name);
+        .html(name);
 }
 
 Track.prototype.shouldRescaleWindowY = function() {
