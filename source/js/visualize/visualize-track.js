@@ -415,7 +415,7 @@ Track.prototype.on = function(type, cb) {
 Track.prototype.updateHeader = function() {
     let name = this.name 
         + (this.zoomFactor == 1 ? '' : (' (' + this.zoomFactor + 'x)'))
-        + (this.wellName ? (' <strong> /' + this.wellName) + '</strong>':'');       
+        + (this.wellName ? ('<strong>/' + this.wellName) + '</strong>':'');       
 
     this.headerNameBlock
         .style('display', this.showTitle ? 'block': 'none')

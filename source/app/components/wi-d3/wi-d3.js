@@ -455,6 +455,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
+        wiComponentService.emit(self.name + 'onScroll');
         // _drawTooltip(_currentTrack);
 		// _currentTrack.controller.drawTooltip();
     }

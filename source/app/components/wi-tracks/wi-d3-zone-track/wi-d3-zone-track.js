@@ -107,15 +107,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 self.viTrack.headerNameBlock.style('background-color', wellColor);
                 self.viTrack.wellName = wellProps.name;
                 lastWell = wellProps;
-                return;
+            } else {
+                // default
+                if (lastWell && self.wiD3Ctrl) {
+                    self.wiD3Ctrl.updateMultiWellState();
+                }
+                self.viTrack.headerNameBlock.style('background-color', self.viTrack.HEADER_NAME_COLOR);
+                self.viTrack.wellName = null;
+                lastWell = null;
             }
-            // default
-            if(lastWell && self.wiD3Ctrl) {
-                self.wiD3Ctrl.updateMultiWellState();
-            }
-            self.viTrack.headerNameBlock.style('background-color', self.viTrack.HEADER_NAME_COLOR);
-            self.viTrack.wellName = null;
-            lastWell = null;
+            self.viTrack.updateHeader();
         }
     }
     this.addZoneToTrack = function (track, config, controller) {
@@ -134,7 +135,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             }
             if (d3.event.button == 2) {
                 self.isZoneRightClicked = true;
-                if(controller)
+                if (controller)
                     controller.isZoneRightClicked = true;
                 // _zoneOnRightClick();
             }
@@ -142,7 +143,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         track.onZoneHeaderMouseDown(zone, function () {
             if (d3.event.button == 2) {
                 self.isZoneRightClicked = true;
-                if(controller)
+                if (controller)
                     controller.isZoneRightClicked = true;
                 // _zoneOnRightClick();
             }
@@ -181,9 +182,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         return zone;
     }
     this.onTrackKeyPressCallback = function () {
-        if(!d3.event) return;
+        if (!d3.event) return;
         let track = self.viTrack;
-        switch(d3.event.key) {
+        switch (d3.event.key) {
             case 'Backspace':
             case 'Delete':
                 let drawing = track.getCurrentDrawing();

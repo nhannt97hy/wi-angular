@@ -54,12 +54,17 @@ Controller.prototype.registerTrackMouseEventHandlers = function () {
     let self = this;
     if (!self.viTrack) return;
     // for Tooltips
-    self.viTrack.plotContainer.on('mousemove', function() {
-		let y = d3.mouse(self.viTrack.plotContainer.node())[1];
+    self.viTrack.plotContainer.on('mousemove', handleMouseMove);
+    self.wiComponentService.on(self.wiD3Ctrl.name + 'onScroll', handleMouseMove);
+
+    function handleMouseMove() {
+        let mouse = d3.mouse(self.viTrack.plotContainer.node());
+        if(!mouse || !Array.isArray(mouse)) return;
+        let y = mouse[1];
 		let depth = self.viTrack.getTransformY().invert(y);
 		self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
-    });
-
+    }
+    
     // self.viTrack.plotContainer.on('mouseover', function() {
     //     self.mouseOverHandler.call(self);
     // });
