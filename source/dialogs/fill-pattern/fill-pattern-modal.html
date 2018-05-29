@@ -14,9 +14,9 @@
                             <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;'ng-model="wiModal.filter">
                         </div>
                         <div style="height: 400px;overflow-y: auto;" class="list-pattern-style">
-                            <wi-scroll style="height:60vh;overflow-y:auto;" 
-                                        up-trigger="wiModal.upTrigger" down-trigger='wiModal.downTrigger'>
+                            <wi-scroll up-trigger="wiModal.upTrigger" down-trigger='wiModal.downTrigger'>
                                 <wi-base-treeview
+                                    name="__pattern"
                                     container="wiModal"
                                     config="wiModal.config"
                                     on-click-function='wiModal.onClickFunction'

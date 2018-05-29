@@ -8,9 +8,13 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.name = name;
         this.foreground = foreground;
         this.background = background;
-        $('[data-toggle="tooltip"]').tooltip(); 
         this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
         this.filter = '';
+        // $('.list-pattern-style').scrollTop(1000);
+        $('.list-pattern-style').scroll(function() {
+            console.log("scroll");
+        });
+
         this.config = [];
         for (let p in this.selectPatterns){
             let node = {
@@ -19,6 +23,7 @@ module.exports = function (ModalService, name, foreground, background, callback)
                 data: {
                     childExpanded: true,
                     label: this.selectPatterns[p].full_name,
+                    tooltip: this.selectPatterns[p].full_name,
                     selected : (this.name == p) ? true : false,
                     imageBg : 'url(' + this.selectPatterns[p].src + ')'
                 }, 
