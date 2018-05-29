@@ -55,7 +55,7 @@ Controller.prototype.registerTrackMouseEventHandlers = function () {
     if (!self.viTrack) return;
     // for Tooltips
     self.viTrack.plotContainer.on('mousemove', handleMouseMove);
-    self.wiComponentService.on(self.wiD3Ctrl.name + 'onScroll', handleMouseMove);
+    // self.wiComponentService.on(self.wiD3Ctrl.name + 'onScroll', handleMouseMove);
 
     function handleMouseMove() {
         let mouse = d3.mouse(self.viTrack.plotContainer.node());

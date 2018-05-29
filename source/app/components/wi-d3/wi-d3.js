@@ -455,7 +455,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let value = (d3.event.deltaY<0)? 1 : -1;
         slidingBar.scroll(value);
-        wiComponentService.emit(self.name + 'onScroll');
+
+        if(!self.trackUnderMouse) return;
+        let trackController = self.trackUnderMouse.controller;
+        let mouse = d3.mouse(trackController.viTrack.plotContainer.node());
+		let depth = trackController.viTrack.getTransformY().invert(mouse[1]);
+		self.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
+        // wiComponentService.emit(self.name + 'onScroll');
         // _drawTooltip(_currentTrack);
 		// _currentTrack.controller.drawTooltip();
     }
