@@ -48,6 +48,18 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let logplotId = self.wiLogplotCtrl.id;
 
         let well = utils.findWellByCurve(idCurve);
+        // handle error when curve has no longer existed
+        if(!well) {
+            let request = {
+                idPlot: self.wiLogplotCtrl.id,
+                referenceCurve: null
+            }
+            wiApiService.editLogplot(request, function(res) {
+                console.log(`response from server ${JSON.stringify(res)}`);
+                callback && callback();
+            })
+            return;
+        }
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let minY = self.wiLogplotCtrl.getwiD3Ctrl().getMinDepth(); // well.topDepth;
         let maxY = self.wiLogplotCtrl.getwiD3Ctrl().getMaxDepth(); // well.bottomDepth;
@@ -322,7 +334,29 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             dragMan.wiSlidingBarCtrl = null;
             dragMan.wiD3Ctrl = null;
         });
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
     };
+    this.onDelete = function(model) {
+        console.log('onDelete Sliding bar: ', model);
+        switch(model.type){
+            case 'curve':
+            if(_viCurve && _viCurve.idCurve == model.id) {
+                console.log('removing curve from sliding bar', _viCurve);
+                let request = {
+                    idPlot: self.wiLogplotCtrl.id,
+                    referenceCurve: null 
+                }
+                wiApiService.editLogplot(request, function(res) {
+                    console.log('response from server', res);
+                    _viCurve.destroy();
+                    _viCurve = null;
+                })
+            }
+            break;
+            default:
+            break;
+        }
+    }
 
     this.scroll = scroll;
 
