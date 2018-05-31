@@ -6,7 +6,6 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
     let dataContainer;
     let dataCtrl;
     let __dragging = false;
-    let dialogOpened = false;
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
@@ -125,7 +124,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 copyPaste: {
                     columnsLimit: 1000,
                     rowsLimit: length
-                  },
+                },
                 renderAllRows: false,
                 beforeChange: function(changes, source) {
                     // console.log(changes);
@@ -143,7 +142,8 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         });
                         dataCtrl.render();
                     }
-                }
+                },
+                search: true
             };
 
             _current.length = length;
@@ -243,10 +243,65 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             }
         }
     }
+    this.keyEventandler = function(event) {
+        if (event.ctrlKey && event.keyCode == 71) {//Ctrl + g
+            event.preventDefault();
+            if(self.goToWidgetOpened) return;
+            $timeout(()=> {
+                self.findWidgetOpened = false;
+                self.goToWidgetOpened = true;
+            })
+        }else if(event.ctrlKey && event.keyCode == 70){//Ctrl + f
+            event.preventDefault();
+            if(self.findWidgetOpened) return;
+            $timeout(() => {
+                self.goToWidgetOpened = false;
+                self.findWidgetOpened = true;
+            })
+        }else if(event.keyCode == 27){//ESC
+            $timeout(() => {
+                self.goToWidgetOpened = false;
+                self.findWidgetOpened = false;
+            })
+        }
+    }
+    this.goToRowEnter = function(){
+        if(!self.goToRowInput) return;
+        let ret = self.goToRowInput;
+        if (ret < 0) {
+            ret = Math.abs(ret);
+        } else if (ret >=self.dataSettings[self.currentIndex].length) {
+            ret = self.dataSettings[self.currentIndex].length - 1;
+        }
+        dataCtrl.selectRows(ret);
+        dataCtrl.scrollViewportTo(ret);
+        $timeout(() => {
+            self.goToWidgetOpened = false;
+        })
+    }
+    this.focusInput = function(dom){
+        let searchFiled = $(dom)[0];
+        searchFiled.focus();
+        if(dom == '#find-widget-input'){
+            Handsontable.dom.addEvent(searchFiled, 'keyup', function (event) {
+                self.findResultCount = 0;
+                var search = dataCtrl.getPlugin('search');
+                var queryResult = search.query(this.value);
+
+                console.log(queryResult);
+                $timeout(()=> {
+                    self.findResultCount = queryResult.length;
+                })
+                dataCtrl.render();
+            });
+        }
+    }
 
     this.$onInit = function() {
         wiComponentService.putComponent("WCL", self);
-        self.isShowRefWin = false;
+        self.isShowPropPanel = false;
+        self.goToWidgetOpened = false;
+        self.findWidgetOpened = false;
         self.wells = utils.findWells();
         self.dataSettings = new Object();
         if (selectedNodes && selectedNodes.length) {
@@ -280,45 +335,11 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         document.addEventListener('resize', self.resizeHandler);
+        document.addEventListener("keydown", self.keyEventandler);
 
         angular.element(document).ready(function() {
             dataContainer = document.getElementById("dataContainer");
             self.onChangeWell();
-            document.addEventListener("keydown", function(event) {
-                if (event.ctrlKey && event.keyCode == 71) {
-                    event.preventDefault();
-                    if(dialogOpened) return;
-                    dialogOpened = true;
-                    // open go to dialog
-                    let promptConfig = {
-                        title:
-                            "Type index number between 0 and " +
-                            (self.dataSettings[self.currentIndex].length - 1) +
-                            " to navigate to",
-                        inputName: "Go to Index",
-                        type: "number"
-                    };
-                    DialogUtils.promptDialog(
-                        ModalService,
-                        promptConfig,
-                        function(ret) {
-                            dialogOpened = false;
-                            if(!ret) return;
-                            if (ret < 0) {
-                                ret = Math.abs(ret);
-                            } else if (
-                                ret >=
-                                self.dataSettings[self.currentIndex].length
-                            ) {
-                                ret =
-                                    self.dataSettings[self.currentIndex].length - 1;
-                            }
-                            dataCtrl.selectRows(ret);
-                            dataCtrl.scrollViewportTo(ret);
-                        }
-                    );
-                }
-            });
         });
     };
     this.droppableSetting = function() {
@@ -383,8 +404,8 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         draggableSetting();
     };
 
-    this.toggleRefWin = function() {
-        self.isShowRefWin = !self.isShowRefWin;
+    this.togglePropPanel = function() {
+        self.isShowPropPanel = !self.isShowPropPanel;
     };
 
     this.onAddCurveButtonClicked = function() {
@@ -482,9 +503,6 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 break;
         }
     };
-    this.onRefWinBtnClicked = function() {
-        console.log("onRefWinBtnClicked");
-    };
 
     this.$onDestroy = function(){
         wiComponentService.removeEvent(wiComponentService.PROJECT_REFRESH_EVENT, self.onRefresh);
@@ -492,6 +510,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
         document.removeEventListener('resize', self.resizeHandler);
+        document.removeEventListener("keydown", self.keyEventandler);
     }
 }
 
