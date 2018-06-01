@@ -1934,114 +1934,127 @@ function pasteCurve(destModel) {
         // selectedNode is Dataset
         currentDataset = selectedNode;
     }
-    // if copying
-    let copyingCurves = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
-    if (Array.isArray(copyingCurves)) {
-        async.eachOf(
-            copyingCurves,
-            function (copyingCurve, index, next) {
+    function paste(curveModels, apiFunction, callbackEach) {
+        if (Array.isArray(curveModels)) {
+            const existedCurves = [];
+            curveModels.forEach((curveModel) => {
                 let isCurveExist = false;
                 currentDataset.children.forEach(function (curve) {
-                    if (copyingCurve.properties.name == curve.properties.name) {
-                        isCurveExist = true;
-                    }
+                    if (curveModel.properties.name == curve.properties.name) return isCurveExist = true;
                 });
-                if (!isCurveExist) {
-                    if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                    let curveInfo = {
-                        idCurve: copyingCurve.properties.idCurve,
-                        desDatasetId: selectedNode.properties.idDataset,
-                    };
-                    wiApiService.copyCurve(curveInfo, function (curve) {
-                        next();
-                    });
-                    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
-                } else {
-                    // curve existed
-                    DialogUtils.confirmDialog(
-                        __GLOBAL.ModalService,
-                        'WARNING!',
-                        copyingCurve.properties.name + ' existed! Override it ?',
-                        function (yes) {
-                            if (yes) {
-                                if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                                let curveInfo = {
-                                    idCurve: copyingCurve.properties.idCurve,
-                                    desDatasetId: selectedNode.properties.idDataset,
-                                };
-                                wiApiService.copyCurve(curveInfo, function (curve) {
-                                    next();
-                                });
-                                wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
-                            } else {
-                                next();
-                                return;
-                            }
-                        },
-                    );
+                if (isCurveExist) {
+                    curveModel.isCurveExist = true;
+                    existedCurves.push(curveModel);
                 }
-            },
-            function (err) {
-                refreshProjectState();
-            },
-        );
-        return;
+            })
+            function pasteCurves (curveModels) {
+                async.eachOfSeries(
+                    curveModels,
+                    function (curveModel, index, next) {
+                        if (!curveModel.isCurveExist) {
+                            if (curveModel.properties.idDataset == currentDataset.properties.idDataset) return;
+                            let curveInfo = {
+                                idCurve: curveModel.properties.idCurve,
+                                desDatasetId: currentDataset.properties.idDataset,
+                            };
+                            apiFunction(curveInfo, function () {
+                                callbackEach && callbackEach(curveModel);
+                                next();
+                            });
+                        } else {
+                            // curve existed
+                            DialogUtils.confirmDialog(
+                                __GLOBAL.ModalService,
+                                'Override confirmation',
+                                curveModel.properties.name + ' existed! Override it ?',
+                                function (yes) {
+                                    if (yes) {
+                                        if (curveModel.properties.idDataset == currentDataset.properties.idDataset) return;
+                                        let curveInfo = {
+                                            idCurve: curveModel.properties.idCurve,
+                                            desDatasetId: currentDataset.properties.idDataset,
+                                        };
+                                        apiFunction(curveInfo, function () {
+                                            callbackEach && callbackEach(curveModel);
+                                            next();
+                                        });
+                                    } else {
+                                        next();
+                                        return;
+                                    }
+                                },
+                            );
+                            delete curveModel.isCurveExist;
+                        }
+                    },
+                    function (err) {
+                        wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+                        wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+                        refreshProjectState();
+                    }
+                );
+            }
+            if (existedCurves.length > 1) {
+                let message = 'These curves existed! Override all?<br><b>' + existedCurves.map(c => c.properties.name).join('</b><br><b>') + '</b>';
+                DialogUtils.confirmDialog(
+                    __GLOBAL.ModalService, 'Override confirmation', message, function (res) {
+                        if (res === 'all') {
+                            curveModels.forEach((curveModel) => {
+                                const curveInfo = {
+                                    idCurve: curveModel.properties.idCurve,
+                                    desDatasetId: currentDataset.properties.idDataset,
+                                };
+                                apiFunction(curveInfo, function () {
+                                    callbackEach && callbackEach(curveModel);
+                                });
+                            })
+                            return;
+                        }
+                        if (res === 'pick') {
+                            pasteCurves(curveModels);
+                            return;
+                        }
+                        if (res === 'no') {
+                            let notExistedCurves = []
+                            curveModels.forEach(c => {
+                                if (!existedCurves.find(c1 => c === c1)) notExistedCurves.push(c);
+                            })
+                            pasteCurves(notExistedCurves);
+                            return;
+                        }
+                    },
+                    [
+                        {
+                            title: 'Override all',
+                            onClick: function (modalCtrl) {
+                                modalCtrl.close('all');
+                            }
+                        }, {
+                            title: 'Pick curves',
+                            onClick: function (modalCtrl) {
+                                modalCtrl.close('pick');
+                            }
+                        }, {
+                            title: 'Dont override',
+                            onClick: function (modalCtrl) {
+                                modalCtrl.close('no');
+                            }
+                        }
+                    ]
+                )
+            } else {
+                pasteCurves(curveModels);
+            }
+        }
     }
+    // if copying
+    const copyingCurves = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
+    if (copyingCurves) paste(copyingCurves, wiApiService.copyCurve.bind(wiApiService));
     // if cutting
     let cuttingCurves = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
-    if (Array.isArray(cuttingCurves)) {
-        async.eachOf(
-            cuttingCurves,
-            function (cuttingCurve, index, next) {
-                let isCurveExist = false;
-                currentDataset.children.forEach(function (curve) {
-                    if (cuttingCurve.properties.name == curve.properties.name) {
-                        isCurveExist = true;
-                    }
-                });
-                if (!isCurveExist) {
-                    if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                    let curveInfo = {
-                        idCurve: cuttingCurve.properties.idCurve,
-                        desDatasetId: selectedNode.properties.idDataset,
-                    };
-                    wiApiService.cutCurve(curveInfo, function () {
-                        wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
-                        next();
-                    });
-                    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
-                } else {
-                    // curve existed
-                    DialogUtils.confirmDialog(
-                        __GLOBAL.ModalService,
-                        'WARNING!',
-                        cuttingCurve.properties.name + ' existed! Override it ?',
-                        function (yes) {
-                            if (yes) {
-                                if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                                let curveInfo = {
-                                    idCurve: cuttingCurve.properties.idCurve,
-                                    desDatasetId: selectedNode.properties.idDataset,
-                                };
-                                wiApiService.cutCurve(curveInfo, function () {
-                                    wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
-                                    next();
-                                });
-                                wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
-                            } else {
-                                next();
-                                return;
-                            }
-                        },
-                    );
-                }
-            },
-            function (err) {
-                refreshProjectState();
-            },
-        );
-        return;
-    }
+    if (cuttingCurves) paste(cuttingCurves, wiApiService.cutCurve.bind(wiApiService), function (cuttingCurve) {
+        wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
+    })
 }
 
 

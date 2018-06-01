@@ -188,15 +188,17 @@ function WiExpTreeController(
             tolerance: 'pointer',
             over: function (event, ui) {
                 if (event.ctrlKey) {
-                    ui.helper.css('cursor', 'copy');
+                    ui.helper.css({'cursor': 'copy'});
+                    $(event.target).css('border', '1px dashed #0088ff');
                 }
             },
             out: function (event, ui) {
                 ui.helper.css('cursor', '');
+                $(event.target).css('border', '');
             },
             drop: function (event, ui) {
                 if (event.ctrlKey) {
-                    // console.log('copying to', event, ui);
+                    $(event.target).css('border', '');
                     dragMan.idDataset = +$(event.target).attr('data');
                 }
             },

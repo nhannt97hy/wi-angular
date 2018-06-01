@@ -1,9 +1,10 @@
 let helper = require('./DialogHelper');
 
-module.exports = function (ModalService, titleMessage, confirmMessage, callback) {
+module.exports = function (ModalService, titleMessage, confirmMessage, callback, actions) {
     function ModalController($scope, close) {
         this.title = titleMessage;
         this.confirmMsg = confirmMessage;
+        this.actions = actions;
         this.close = function (ret) {
             close(ret);
         }
@@ -17,7 +18,7 @@ module.exports = function (ModalService, titleMessage, confirmMessage, callback)
         helper.initModal(modal);
         modal.close.then(function (ret) {
             helper.removeBackdrop();
-            callback(ret);
+            callback && callback(ret);
         });
     });
 }
