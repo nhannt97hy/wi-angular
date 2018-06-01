@@ -8,6 +8,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     this.crossplotModel = null;
     this.viCrossplot = {};
+    // let _well = null;
 
     var saveCrossplot= _.debounce(function() {
         saveCrossplotNow(function() {console.log('Updated');});
@@ -164,14 +165,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.onReady = function () {
-        wiApiService.getCrossplot(this.idCrossplot || this.wiCrossplotCtrl.id, function (xplotProps) {
+        wiApiService.getCrossplot(self.idCrossplot || self.wiCrossplotCtrl.id, function(xplotProps) {
+            self.crossplotModel.properties = xplotProps;
+            // self.linkModels();
             let crossplotProps = angular.copy(self.crossplotModel.properties);
-            self.createVisualizeCrossplot(xplotProps);
+
+            if (crossplotProps.pointsets && crossplotProps.pointsets.length)
+                crossplotProps.pointSet = crossplotProps.pointsets[0];
+            self.createVisualizeCrossplot(null, null, crossplotProps);
             self.switchReferenceZone(crossplotProps.pointSet.depthType == 'zonalDepth');
             self.switchOverLay(crossplotProps.pointSet.idOverlayLine ? false : true);
             let refWindCtrl = self.getWiRefWindCtrl();
-            if (refWindCtrl)
-                refWindCtrl.update(getWell(),
+            if (refWindCtrl) refWindCtrl.update(getWell(),
                     xplotProps.reference_curves,
                     xplotProps.referenceScale,
                     xplotProps.referenceVertLineNumber,
@@ -306,7 +311,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     this.getWell = getWell;
     function getWell() {
+        // if (!_well) {
         let _well = utils.findWellByCrossplot(self.idCrossplot || self.wiCrossplotCtrl.id);
+        // }
         return _well;
     }
 
@@ -706,9 +713,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             }
                         },
                         {
-                            separator: '1'
-                        },
-                        {
                             name: "CreateUserLine",
                             label: "Create User Line",
                             handler: function () {
@@ -721,9 +725,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             handler: function () {
                                 self.deleteUserLine();
                             }
-                        },
-                        {
-                            separator: '1'
                         },
                         {
                             name: "UserDefineLine",
@@ -880,173 +881,118 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-    this.createVisualizeCrossplot = function (props) {
-        let self = this;
-        let pointSet = {};
-        this.pointsets = [];
-        if (!this.curvesProperties.length) return;
-        async.eachSeries(this.curvesProperties, function (curveProps, next) {
-            pointSet = {
-                scale: {
-                    left: null,
-                    right: null,
-                    bottom: null,
-                    top: null
-                },
-                curveX: {
-                    idCurve: curveProps.x,
-                    name: '',
-                    data: {}
-                },
-                curveY: {
-                    idCurve: curveProps.y,
-                    name: '',
-                    data: {}
-                },
-                options: {}
-            }
-            async.parallel([
-                function (cb) {
-                    wiApiService.infoCurve(curveProps.x, function (curveInfo) {
-                        pointSet.scale.left = curveInfo.LineProperty.minScale;
-                        pointSet.scale.right = curveInfo.LineProperty.maxScale;
-                        pointSet.curveX.name = curveInfo.name;
-                        wiApiService.dataCurve(curveProps.x, function (curveData) {
-                            pointSet.curveX.data = curveData;
-                            cb();
-                        });
-                    });
-                },
-                function (cb) {
-                    wiApiService.infoCurve(curveProps.y, function (curveInfo) {
-                        pointSet.scale.bottom = curveInfo.LineProperty.minScale;
-                        pointSet.scale.top = curveInfo.LineProperty.maxScale;
-                        pointSet.curveY.name = curveInfo.name;
-                        wiApiService.dataCurve(curveProps.y, function (curveData) {
-                            pointSet.curveY.data = curveData;
-                            cb();
-                        });
-                    });
-                }
-            ], function (cb) {
-                if (!curveProps.options.pointColor) curveProps.options.pointColor = genRandomColor();
-                pointSet.options = curveProps.options;
-                pointSet.pointSize = 3;
-                self.pointsets.push(pointSet);
-                next();
-            });
-        }, function (err, result) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-
-            // if (!self.viCrossplot) {
-                // test
-                if (!self.config.scale.left && !self.config.scale.right
-                    && !self.config.scale.bottom && !self.config.scale.top) {
-                    self.config.scale = (self.pointsets[0] || {}).scale;
-                }
-                if (self.config.logX) {
-                    if (self.config.scale.left == 0
-                        || self.config.scale.right == 0) {
-                        self.config.logX = false;
-                        toastr.error("Scale can't be 0 in Logarithmic");
-                        return;
-                    }
-                }
-                if (self.config.logY) {
-                    if (self.config.scale.bottom == 0
-                        || self.config.scale.top == 0) {
-                        self.config.logY = false;
-                        toastr.error("Scale can't be 0 in Logarithmic");
-                        return;
-                    }
-                }
-                // end test
-                props.pointsets = self.pointsets;
-                props.config = self.config;
-                props.userDefineLines = props.user_define_lines;
-                delete props.user_define_lines;
-                self.viCrossplot = graph.createCrossplot(props, document.getElementById(self.crossplotAreaId));
-                self.changed = false;
-                self.setContextMenu();
-            // } else {
-            //     self.viCrossplot.pointsets = self.pointsets;
-            //     self.viCrossplot.updatePlot(changes);
-            // }
-            self.viCrossplot.onMouseDown(self.mouseDownCallback);
-            self.viCrossplot.bodyContainer.on('mousewheel', function () {
-                self.mouseWheelCallback();
-            });
-            let rootPos = null;
-            let currPos = null;
-            let rootDis = {
-                x: null,
-                y: null
-            };
-            let transformX = self.viCrossplot.getTransformX();
-            let transformY = self.viCrossplot.getTransformY();
-            self.viCrossplot.bodyContainer.call(d3.drag()
-                .filter(function () {
-                    d3.event.preventDefault();
-                    d3.event.stopPropagation();
-                    return d3.event.ctrlKey;
-                })
-                .on('drag', function () {
-                    let mouse = d3.mouse(self.viCrossplot.bodyContainer.node());
-                    currPos = {
-                        x: transformX.invert(mouse[0]),
-                        y: transformY.invert(mouse[1])
-                    };
-                    if (!rootPos || self.changed) rootPos = currPos;
-                    if (!rootDis.x || self.changed) {
-                        rootDis.x = Math.abs(self.config.scale.left - self.config.scale.right);
-                    }
-                    if (!rootDis.y || self.changed) {
-                        rootDis.y = Math.abs(self.config.scale.bottom - self.config.scale.top);
-                    }
-                    if (self.changed) self.changed = false;
-                })
-                .on('end', function () {
-                    let currDis = {
-                        x: Math.abs(self.config.scale.left - self.config.scale.right),
-                        y: Math.abs(self.config.scale.bottom - self.config.scale.top)
-                    };
-                    let ratio = {
-                        x: currDis.x / rootDis.x,
-                        y: currDis.y / rootDis.y
-                    };
-                    let dragFactor = {
-                        x: Math.round((Math.abs(currPos.x - rootPos.x)) * ratio.x),
-                        y: Math.round((Math.abs(currPos.y - rootPos.y)) * ratio.y)
-                    };
-                    if (currPos.x > rootPos.x) {
-                        self.config.scale.left -= dragFactor.x;
-                        self.config.scale.right -= dragFactor.x;
-                    } else {
-                        self.config.scale.left += dragFactor.x;
-                        self.config.scale.right += dragFactor.x;
-                    }
-                    if (currPos.y > rootPos.y) {
-                        self.config.scale.bottom -= dragFactor.y;
-                        self.config.scale.top -= dragFactor.y;
-                    } else {
-                        self.config.scale.bottom += dragFactor.y;
-                        self.config.scale.top += dragFactor.y;
-                    }
-                    rootPos = currPos;
-                    rootDis = currDis;
-                    self.viCrossplot.doPlot();
-                })
-            );
-        });
-        function genRandomColor() {
-            let r = Math.round(Math.random() * 256);
-            let g = Math.round(Math.random() * 256);
-            let b = Math.round(Math.random() * 256);
-            return 'rgb(' + [r, g, b].join(",") + ')';
+    this.createVisualizeCrossplot = function (curveX, curveY, config) {
+        if (self.viCrossplot && self.viCrossplot.pointSet) return;
+        if (!config) {
+            console.error('createVisualizeCrossplot: config is null');
+            return;
         }
+
+        let domElem = document.getElementById(self.crossplotAreaId);
+        config.well = getWell().properties;
+
+        let viCurveX = curveX, viCurveY = curveY, viCurveZ;
+
+        if (config.pointsets && config.pointsets.length)
+            config.pointSet = config.pointsets[0];
+
+        if (config.pointSet) {
+
+            self.loading = true;
+            async.parallel([function(callback) {
+                if (!viCurveX && config.pointSet.idCurveX) {
+                    let curveModel = utils.getModel('curve', config.pointSet.idCurveX);
+                    wiApiService.dataCurve(config.pointSet.idCurveX, function(dataX) {
+                        viCurveX = graph.buildCurve(curveModel, dataX, config.well);
+                        callback();
+                    });
+                }
+                else {
+                    callback();
+                }
+            }, function(callback) {
+                if (!viCurveY && config.pointSet.idCurveY) {
+                    let curveModel = utils.getModel('curve', config.pointSet.idCurveY);
+                    wiApiService.dataCurve(config.pointSet.idCurveY, function(dataY) {
+                        viCurveY = graph.buildCurve(curveModel, dataY, config.well);
+                        callback();
+                    });
+                }
+                else {
+                    callback();
+                }
+
+            }, function(callback) {
+                if (!viCurveZ && config.pointSet.idCurveZ) {
+                    let curveModel = utils.getModel('curve', config.pointSet.idCurveZ);
+                    wiApiService.dataCurve(config.pointSet.idCurveZ, function(dataZ) {
+                        viCurveZ = graph.buildCurve(curveModel, dataZ, config.well);
+                        config.pointSet.curveZ = viCurveZ;
+                        callback();
+                    });
+                }
+                else {
+                    callback();
+                }
+            },
+            function(callback) {
+                if (config.pointSet.idOverlayLine) {
+                    wiApiService.getOverlayLine(config.pointSet.idOverlayLine, config.pointSet.idCurveX, config.pointSet.idCurveY, function(ret) {
+                        config.pointSet.OLLine = (ret || {}).data;
+                        callback();
+                    });
+                }
+                else {
+                    callback();
+                }
+            }], function(err, result) {
+                config = angular.copy(config);
+                if (config.ternaries) {
+                    let vertices = config.ternaries.map(function(d) {
+                        return {
+                            x: d.xValue,
+                            y: d.yValue,
+                            name: d.name,
+                            style: d.style,
+                            used: d.usedIn,
+                            showed: d.show,
+                            idVertex: d.idTernary
+                        };
+                    });
+                    config.ternary = { vertices: vertices };
+                }
+                self.linkModels();
+                if (config.pointSet) {
+                    if (config.pointSet.idZoneSet) {
+                        config.pointSet.zones = self.zoneArr.map(function(zone) {
+                            return zone.properties;
+                        });
+                    }
+                }
+                self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
+                self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
+                if (self.containerName) {
+                    self.selections.forEach(function(selectionConfig) {
+                        self.viCrossplot.addViSelectionToCrossplot(selectionConfig);
+                    });
+                }
+                if(config.pointSet.idCurveX && config.pointSet.idCurveY && self.crossplotModel.properties.showHistogram) {
+                    self.histogramXReady();
+                    self.histogramYReady();
+                }
+                $timeout(function() {
+                    let container = self.viCrossplot.container;
+                    container.on('mousewheel', function() {
+                        _onPlotMouseWheelCallback(container);
+                    });
+                }, 1000);
+                self.loading = false;
+            });
+        }
+        else {
+            console.error('createVisualizeCrossplot: config has no pointsets');
+        }
+        //return self.viCrossplot;
     }
     this.initPolygons = function (polygons) {
         self.viCrossplot.polygons = [];
@@ -1063,7 +1009,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         self.viCrossplot.doPlot();
     }
     this.getPolygons = function () {
+        // let polygons = new Array();
         if (!self.viCrossplot) return [];
+        // console.log("getP", self.viCrossplot);
+        // wiApiService.getCrossplot(self.viCrossplot.idCrossPlot, function(crossplot) {
+
+        // })
         return self.viCrossplot.polygons;
     }
     this.getRegressionLines = function () {
@@ -1169,7 +1120,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         ]);
         self.viCrossplot.onMouseDown(function(point) {
-            self.mouseDownCallback();
+            self.viCrossplotMouseDownCallback();
             if (d3.event.button == 2) return;
             if (callback) callback(point);
         })
@@ -1191,7 +1142,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             }
         ]);
         self.viCrossplot.onMouseDown(function(vertex) {
-            self.mouseDownCallback();
+            self.viCrossplotMouseDownCallback();
             if (d3.event.button == 2) return;
             if (callback) callback(vertex);
         })
@@ -1233,7 +1184,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         refWindCtrl.updateCanvas();
     }
 
-    this.mouseDownCallback = function() {
+    this.viCrossplotMouseDownCallback = function() {
         if (d3.event.button == 2) return;
         if (self.viCrossplot.mode == 'PlotAreaRectangle') {
             if (self.viCrossplot.area && self.viCrossplot.area.points.length > 1) {
@@ -1258,52 +1209,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         }
     }
 
-    this.mouseWheelCallback = function () {
-        if (!this.viCrossplot || !this.viCrossplot.bodyContainer) return;
-        let mouse = d3.mouse(this.viCrossplot.bodyContainer.node());
-        let transformX = this.viCrossplot.getTransformX();
-        let transformY = this.viCrossplot.getTransformY();
-        let posX = transformX.invert(mouse[0]);
-        let posY = transformY.invert(mouse[1]);
-        let newScale = {};
-
-        if (d3.event.ctrlKey) {
-            const zoomFactor = 0.1;
-            if (d3.event.deltaY < 0) {
-                newScale = {
-                    left: this.config.scale.left - Math.abs(this.config.scale.left - posX) * zoomFactor,
-                    right: this.config.scale.right + Math.abs(this.config.scale.right - posX) * zoomFactor,
-                    bottom: this.config.scale.bottom + Math.abs(this.config.scale.bottom - posY) * zoomFactor,
-                    top: this.config.scale.top - Math.abs(this.config.scale.top - posY) * zoomFactor
-                };
-                // this.viCrossplot.pointsets.forEach(pointSet => {
-                //     pointSet.pointSize *= (1 + zoomFactor);
-                // });
-            } else {
-                newScale = {
-                    left: this.config.scale.left + Math.abs(this.config.scale.left - posX) * zoomFactor,
-                    right: this.config.scale.right - Math.abs(this.config.scale.right - posX) * zoomFactor,
-                    bottom: this.config.scale.bottom - Math.abs(this.config.scale.bottom - posY) * zoomFactor,
-                    top: this.config.scale.top + Math.abs(this.config.scale.top - posY) * zoomFactor
-                };
-                // this.viCrossplot.pointsets.forEach(pointSet => {
-                //     pointSet.pointSize /= (1 + zoomFactor);
-                // });
-            }
-            this.config.scale = newScale;
-            this.viCrossplot.config = this.config;
-            this.viCrossplot.doPlot();
-            d3.event.preventDefault();
-            d3.event.stopPropagation();
-        }
-    }
-
 	this.$onDestroy = function () {
         wiComponentService.dropComponent(self.name);
         document.removeEventListener('resize', self.resizeHandlerCross);
         document.removeEventListener('resize', self.resizeHandlerHis);
         wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.removeEvent(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
+    }
+
+    function _onPlotMouseWheelCallback (container) {
+        let mouse = d3.mouse(container.node());
+        if (d3.event.ctrlKey) {
+            zoom(d3.event.deltaY > 0);
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+        }
+    }
+
+    function zoom (zoomOut) {
+        console.log('zooming');
     }
 }
 
@@ -1318,9 +1242,7 @@ app.component(componentName, {
         wiCrossplotCtrl: '<',
         idCrossplot: '<',
         selections: '<',
-        containerName: '@',
-        curvesProperties: '<',
-        config: '<'
+        containerName: '@'
     }
 });
 app.filter('toFixed2', function() {

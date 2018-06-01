@@ -24,9 +24,9 @@ const INVENTORY_SERVICE = 'http://13.250.197.210';
 // //inv server for dev
 
 //production
-const BASE_URL = 'http://wi.i2g.cloud';
-const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
+// const BASE_URL = 'http://wi.i2g.cloud';
+// const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://127.0.0.1:3000';

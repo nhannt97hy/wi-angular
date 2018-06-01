@@ -221,11 +221,18 @@ exports.sheetDraggable = function(domElem) {
  * @param {Object} domElem - The DOM element to contain the crossplot
  * @returns {Object} The created crossplot
  */
+/*
 exports.createCrossplot = function(curveX, curveY, config, domElem) {
     let pointSet = (config || {}).pointSet || {};
     pointSet.curveX = curveX;
     pointSet.curveY = curveY;
     config.pointSet = pointSet;
+    let crossplot = new Crossplot(config);
+    crossplot.init(domElem);
+    return crossplot;
+}
+*/
+exports.createCrossplot = function (config, domElem) {
     let crossplot = new Crossplot(config);
     crossplot.init(domElem);
     return crossplot;
@@ -238,12 +245,19 @@ exports.createCrossplot = function(curveX, curveY, config, domElem) {
  * @param {HtmlDomElem} domElem - The DOM element that contains the Histogram
  * @returns {Object} The newly created histogram
  */
+/*
 exports.createHistogram = function(config, depthStep, startDepth, endDepth, domElem) {
     let histogram = new Histogram(config);
     histogram.depthStep = depthStep;
     histogram.startDepth = startDepth;
     histogram.endDepth = endDepth;
     console.log('---', config, domElem);
+    histogram.init(domElem);
+    return histogram;
+}
+*/
+exports.createHistogram = function (config, domElem) {
+    let histogram = new Histogram(config);
     histogram.init(domElem);
     return histogram;
 }

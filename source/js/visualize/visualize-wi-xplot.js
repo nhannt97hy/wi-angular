@@ -446,7 +446,6 @@ ViWiXplot.prototype.plotPoints = function () {
 
 // Plot Area
 ViWiXplot.prototype.plotArea = function () {
-    let self = this;
     let areaContainer = this.functionsContainer.select('g.vi-xplot-area');
     areaContainer.selectAll('.vi-xplot-area-item').remove();
     if (!this.area || !this.area.points || this.area.points.length < 2) return;

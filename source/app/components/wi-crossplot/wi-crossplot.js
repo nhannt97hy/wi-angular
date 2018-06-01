@@ -22,6 +22,25 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             wiCrossplot: self
         });
         self.handlers = $scope.handlers;
+        self.curvesProperties = [{ 'x': 1, 'y': 2, options: {} }, { 'x': 2, 'y': 1, options: {} }];
+        self.config = {
+            logX: false,
+            logY: false,
+            majorX: 5,
+            majorY: 5,
+            minorX : 1,
+            minorY : 1,
+            decimalsX: 2,
+            decimalsY: 2,
+            scale: {
+                left: null,
+                right: null,
+                bottom: null,
+                top: null
+            },
+            isShowWiZone: false,
+            referenceDisplay: false
+        };
         //self.crossplotModel = utils.getModel('crossplot', self.id);
     };
     this.CloseZone = function () {

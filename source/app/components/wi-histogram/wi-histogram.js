@@ -20,6 +20,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         p50: null,
         p90: null
     }
+    this.curvesProperties = [{ idCurve: 1, options: {} }, { idCurve: 2, options: {} }];
+    this.config = {
+        showGaussian: false,
+        showCumulative: true,
+        loga: false,
+        showGrid: false,
+        flipHorizontal: false,
+        plotType: 'Frequency',
+        plot: 'Bar',
+        numOfDivisions: null,
+        scale: {
+            left: null,
+            right: null,
+        },
+        isShowWiZone: false,
+        referenceDisplay: false
+    };
 
     this.toggleShowWiZone = function () {
         self.isShowWiZone = !self.isShowWiZone;

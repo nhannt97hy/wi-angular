@@ -7,11 +7,19 @@
           <wi-zone name="{{wiCrossplot.getWiZoneCtrlName();}}" zones="wiCrossplot.zoneArr" active-zone="wiCrossplot.getWiD3CrossplotCtrl().crossplotModel.properties.pointsets[0].activeZone" on-zone-ctrl-ready="wiCrossplot.onZoneCtrlReady"></wi-zone>
         </wi-container>
     </div>
-    <wi-d3-crossplot style="width: 100%; flex: 1; display: flex;margin-left:14px;"
+    <!-- <wi-d3-crossplot style="width: 100%; flex: 1; display: flex;margin-left:14px;"
         name='{{wiCrossplot.wiD3CrossplotName}}'
         container-name="{{wiCrossplot.containerName}}"
         selections='$parent.selections'
         wi-crossplot-ctrl='wiCrossplot'>
+    </wi-d3-crossplot> -->
+    <wi-d3-crossplot style="width: 100%; flex: 1; display: flex;margin-left:14px;"
+        name='{{wiCrossplot.wiD3CrossplotName}}'
+        container-name="{{wiCrossplot.containerName}}"
+        selections='$parent.selections'
+        wi-crossplot-ctrl='wiCrossplot'
+        curves-properties='wiCrossplot.curvesProperties'
+        config='wiCrossplot.config'>
     </wi-d3-crossplot>
     <div resizable r-directions="['left']" r-flex="true" 
         ng-show="wiCrossplot.getWiD3CrossplotCtrl().crossplotModel.properties.referenceDisplay" style="width:20%;min-width:10%;max-width:30%">
