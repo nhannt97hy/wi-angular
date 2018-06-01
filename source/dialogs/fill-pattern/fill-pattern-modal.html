@@ -6,34 +6,35 @@
                 <h4><span class="curve-average-16x16"></span>&nbsp;Choose Pattern</h4>
             </div>
             <div class="modal-body dialog-style">
-                <div class="col-sm-9">
-                    <div class="wrapper-style">
-                        <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' 
-                            class="panel-heading">
-                            <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
-                            <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;'ng-model="wiModal.filter">
-                        </div>
-                        <div style="height: 400px;overflow-y: auto;" class="list-pattern-style">
-                            <wi-scroll up-trigger="wiModal.upTrigger" down-trigger='wiModal.downTrigger'>
-                                <wi-base-treeview
-                                    name="__pattern"
-                                    container="wiModal"
-                                    config="wiModal.config"
-                                    on-click-function='wiModal.onClickFunction'
-                                    filter="{{wiModal.filter}}">
-                                </wi-base-treeview>
-                            </wi-scroll>
+                <div class="row" style="padding-top: 5px;">
+                    <div class="col-sm-9">
+                        <div class="wrapper-style">
+                            <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px; padding-left: 8px;'>
+                                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                                <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;'ng-model="wiModal.filter">
+                            </div>
+                            <div style="height: 400px;overflow-y: overlay;display:flex;" class="list-pattern-style">
+                                <wi-scroll id-scroll='"__patternScroll"' style='flex:1;display:flex;flex-direction:column;' up-trigger="wiModal.upTrigger" down-trigger='wiModal.downTrigger'>
+                                    <wi-base-treeview
+                                        name="__pattern"
+                                        container="wiModal"
+                                        config="wiModal.config"
+                                        on-click-function='wiModal.onClickFunction'
+                                        filter="{{wiModal.filter}}">
+                                    </wi-base-treeview>
+                                </wi-scroll>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-sm-3">
-                    <wi-canvas-rect name="{{wiModal.name}}" 
-                                    pattern="{{wiModal.name}}" 
-                                    width="128" height="128" 
-                                    foreground="{{wiModal.foreground}}"
-                                    background='{{wiModal.background}}'>
-                    </wi-canvas-rect>
-                    <p>{{wiModal.selectPatterns[wiModal.name].full_name}}</p>
+                    <div class="col-sm-3" style="padding-left: 0;">
+                        <wi-canvas-rect name="{{wiModal.name}}" 
+                                        pattern="{{wiModal.name}}" 
+                                        width="128" height="128" 
+                                        foreground="{{wiModal.foreground}}"
+                                        background='{{wiModal.background}}'>
+                        </wi-canvas-rect>
+                        <p>{{wiModal.selectPatterns[wiModal.name].full_name}}</p>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

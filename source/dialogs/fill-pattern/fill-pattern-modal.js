@@ -10,30 +10,42 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.background = background;
         this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
         this.filter = '';
-        // $('.list-pattern-style').scrollTop(1000);
-        $('.list-pattern-style').scroll(function() {
-            console.log("scroll");
-        });
+        
+        let topIdx = 0;
+        let selectionLength = 30;
+        let delta = 10;
 
-        this.config = [];
-        for (let p in this.selectPatterns){
+        function addNode(p) {
             let node = {
                 name: p,
                 type: "pattern",
                 data: {
                     childExpanded: true,
-                    label: this.selectPatterns[p].full_name,
-                    tooltip: this.selectPatterns[p].full_name,
-                    selected : (this.name == p) ? true : false,
-                    imageBg : 'url(' + this.selectPatterns[p].src + ')'
+                    label: self.selectPatterns[p].full_name,
+                    tooltip: self.selectPatterns[p].full_name,
+                    selected : (self.name == p) ? true : false,
+                    imageBg : 'url(' + self.selectPatterns[p].src + ')'
                 }, 
-                properties: this.selectPatterns[p]
+                properties: self.selectPatterns[p]
             }
-            this.config.push(node);
-        };
+            return node;
+        }
+        this.config = [];
+        function initConfig (treeConfig, sourceData) {
+            let idx = 0;
+            for (let p in sourceData){
+                treeConfig.push(addNode(p));
+                idx += 1;
+                if(idx >= selectionLength) break;
+            };
+            console.log("initConfig", treeConfig);
+        }
+        initConfig(this.config, this.selectPatterns);
+        let selectedNode = null;
         this.onClickFunction = function($event, $index, node) {
             setSelectedNode(node);
             self.name = node.name;
+            selectedNode = node;
         }
         function setSelectedNode(node) {
             self.config.forEach(function (item) {
@@ -43,6 +55,66 @@ module.exports = function (ModalService, name, foreground, background, callback)
                 });
             });
         }
+        this.upTrigger = function(cb) {
+            let patternList = self.config;
+            let newList = [];
+            if(patternList.length) {
+                if(topIdx > 0) {
+                    if(topIdx > delta) {
+                        let idx = 0;
+                        for(let p in self.selectPatterns) {
+                            if(Object.keys(self.selectPatterns).indexOf(p) > (topIdx - delta)) {
+                                newList.push(addNode(p));
+                                idx += 1;
+                                if(idx >= delta) break;
+                            }
+                        }
+                        newList.reverse();
+                        topIdx = topIdx - delta;
+                        if(cb) cb(newList, patternList);
+                    } else {
+                        for(let p in self.selectPatterns) {
+                            newList.push(addNode(p));
+                            if(Object.keys(self.selectPatterns).indexOf(p) == topIdx) break;
+                        }
+                        newList.reverse();
+                        topIdx = 0;
+                        if(cb) cb(newList, patternList);
+                    }
+                } else if (cb) cb([]);
+            }
+            else if (cb) cb([]);
+        }
+        this.downTrigger = function(cb) {
+            let patternList = self.config;
+            let newList = [];
+            if(patternList.length) {
+                let bottomIdx = topIdx + selectionLength;
+                let objectLen = Object.keys(self.selectPatterns).length;
+                if(bottomIdx < objectLen) {
+                    if(objectLen - bottomIdx > delta) {
+                        let idx = 0;
+                        for(let p in self.selectPatterns) {
+                            if(Object.keys(self.selectPatterns).indexOf(p) >= bottomIdx) {
+                                newList.push(addNode(p));
+                                idx += 1;
+                                if(idx >= delta) break;
+                            }
+                        }
+                        topIdx = topIdx + delta;
+                        if(cb) cb(newList, patternList);
+                    } else {
+                        for(let p in self.selectPatterns) {
+                            if(Object.keys(self.selectPatterns).indexOf(p) >= bottomIdx) newList.push(addNode(p));
+                        }
+                        topIdx = topIdx + objectLen - bottomIdx;
+                        if(cb) cb(newList, patternList);
+                    }
+                } else if (cb) cb([]);
+            }
+            else if (cb) cb([]);
+        }
+        
         this.onOkButtonClicked = function() {
             close(self.name);
         }

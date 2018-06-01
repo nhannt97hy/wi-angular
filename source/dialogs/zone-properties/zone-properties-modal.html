@@ -50,10 +50,10 @@
                                         </ui-select-choices>
                                     </ui-select> -->
                                     <button ng-click="wiModal.choosePattern(wiModal.fill.pattern.name)"
-                                            class="btn btn-default padding-0">
+                                            class="btn btn-default padding-0 thick-border">
                                         <wi-canvas-rect name="_selectedPatternCanvas" 
                                                     pattern="{{wiModal.fill.pattern.name}}" 
-                                                    width="150" height="26" 
+                                                    width="100" height="26" 
                                                     foreground="{{wiModal.fill.pattern.foreground}}"
                                                     background='{{wiModal.fill.pattern.background}}'>
                                         </wi-canvas-rect>
@@ -63,13 +63,13 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-4 normal-text">Foreground</label>
                                 <div class="col-sm-8 text-left">
-                                    <button ng-click="wiModal.foreground()" ng-style="{'background-color':wiModal.fill.pattern.foreground}" class="form-control wi-form-control width-80px thick-border"></button>
+                                    <button ng-click="wiModal.foreground()" ng-style="{'background-color':wiModal.fill.pattern.foreground}" class="form-control wi-form-control thick-border" style="width: 103px; height: 26px"></button>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-sm-4 normal-text">Background</label>
                                 <div class="col-sm-8 text-left">
-                                    <button ng-click="wiModal.background()" ng-style="{'background-color':wiModal.fill.pattern.background}" class="form-control wi-form-control width-80px thick-border"></button>
+                                    <button ng-click="wiModal.background()" ng-style="{'background-color':wiModal.fill.pattern.background}" class="form-control wi-form-control thick-border" style="width: 103px; height: 26px"></button>
                                 </div>
                             </div>
                         </div>

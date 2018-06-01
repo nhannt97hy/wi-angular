@@ -732,30 +732,49 @@ input[type=checkbox].input-check {
     visibility: visible;
 }
 
-.wrapper-style {
-	padding: 1em 0;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-}
 .list-pattern-style>wi-scroll>div>.scroll-container>wi-base-treeview {
 	.wi-treeview-container{
-		padding: 5px;
-    	border: 1px solid #ccc;
-    	padding-right: 5px;
     	.wi-parent-node>.wi-parent-content {
-    		.item-content>span {
-    		background: #fff;
-    		color: blue;
-    		}
-    	}
-    	.item-active>.wi-parent-content {
     		.icon-expanded {
-    			background: blue;
+    			display: none;
     		}
-    		.item-content>span  {
-    		background: blue;
-    		color: #fff;
+    		.item-content {
+    			span {
+				    color: #ffa;
+				    font-weight: bold;
+				    text-shadow: 1px 1px #000;
+				    background: rgba(0, 0, 255, 0.2);
+				}
+				border: 1px solid #888;
     		}
+
     	}
+    	
 	}
+}
+.list-pattern-style>wi-scroll>div>.scroll-container>wi-base-treeview {
+    .wi-treeview-container {
+    	.wi-parent-node:hover>.wi-parent-content {
+    		.item-content>span {
+    		    color: yellow;
+    		    font-weight: bold;
+    		    background: none;
+    		}
+    	} 
+        .wi-parent-node:hover {
+            background: rgba(0, 0, 255, 0.7);
+        }
+        .wi-parent-node.item-active > .wi-parent-content{
+        	.item-content>span {
+    		    color: yellow;
+    		    font-weight: bold;
+    		    text-shadow: 1px 1px #000;
+    		    background: none;
+    		}
+        	background: rgba(0, 0, 255, 0.7);
+        }
+    }
+    .rootview {
+        padding-left: 0;
+    }
 }

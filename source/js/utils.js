@@ -2675,7 +2675,7 @@ exports.getListFamily = getListFamily;
 function putPattern(callback) {
     __GLOBAL.wiApiService.listPattern({}, function (pts) {
         let baseUrl = __GLOBAL.wiApiService.BASE_URL;
-        let patterns = sortObject(pts);
+        let patterns = sortProperties(pts, 'full_name', false, false);
         for (var pat in patterns) {
             patterns[pat].src = 'img' + patterns[pat].src;
         };
@@ -2691,6 +2691,35 @@ function getListPattern() {
 
 exports.getListPattern = getListPattern;
 
+function sortProperties(obj, sortedBy, isNumericSort, reverse) {
+    sortedBy = sortedBy || 1; // by default first key
+    isNumericSort = isNumericSort || false; // by default text sort
+    reverse = reverse || false; // by default no reverse
+
+    var reversed = (reverse) ? -1 : 1;
+
+    var sortable = [];
+    var sorted = {};
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            sortable.push([key, obj[key]]);
+        }
+    }
+    if (isNumericSort)
+        sortable.sort(function (a, b) {
+            return reversed * (a[1][sortedBy] - b[1][sortedBy]);
+        });
+    else
+        sortable.sort(function (a, b) {
+            var x = a[1][sortedBy].toLowerCase(),
+                y = b[1][sortedBy].toLowerCase();
+            return x < y ? reversed * -1 : x > y ? reversed : 0;
+        });
+    for(var i = 0; i < sortable.length; i++) {
+        sorted[sortable[i][0]] = sortable[i][1];
+    }
+    return sorted; // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+}
 function sortObject(o) {
     var sorted = {},
     key, a = [];
