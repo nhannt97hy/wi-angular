@@ -3,7 +3,7 @@
      ng-repeat="item in wiBaseTreeview.config track by $index"
      ng-if='!item.data.deleted'>
     <div class="wi-parent-node" type="{{item.type}}"
-        ng-class='{"item-active": item.data.selected}'
+        ng-class='{"item-active": item.data.selected, "item-unused": item.data.unused}'
         data="{{item.id}}"
         wi-right-click="wiBaseTreeview.onClick($index, $event, item); wiBaseTreeview.showContextMenuFunction($event, $index, item)"
         wi-element-ready="wiBaseTreeview.onReadyFunction();"
@@ -21,7 +21,7 @@
             <div class="item-content" ng-click="wiBaseTreeview.onClick($index, $event, item)"
                 ng-dblclick="wiBaseTreeview.onDoubleClick($index);">
                 <div class="display-inline-block margin-right-0_5em">
-                    <span class="{{item.data.icon}}"></span>
+                    <span class="{{item.data.icon}}" style="vertical-align: text-bottom;"></span>
                     <div ng-show="wiBaseTreeview.showId && item.id" class='wi-parent-id'>{{item.id}}</div>
                 </div>
                 <span ng-if="wiBaseTreeview.isShowParentName && item.parentData">{{item.parentData.label}} /</span>

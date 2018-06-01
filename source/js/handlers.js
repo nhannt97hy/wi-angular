@@ -1361,12 +1361,12 @@ exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
         layoutManager.putTabRight({
-            id: 'wiTask',
+            id: 'wiTask1',
             title: 'Clay Volume Gamma Ray',
             tabIcon: 'workflow-16x16',
             componentState: {
-                html: '<wi-task name="Clay Volume Gamma Ray"></wi-task>',
-                name: 'wiTask'
+                html: '<wi-task name="Clay Volume Gamma Ray" id="1"></wi-task>',
+                name: 'wiTask1'
             }
         })
 }

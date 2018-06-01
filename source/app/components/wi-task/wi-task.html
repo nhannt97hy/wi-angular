@@ -93,7 +93,7 @@
                         <div style="flex:2;display:flex;overflow-x:hidden;overflow-y:auto;background-color:white;">
                             <wi-scroll id-scroll='"selectionScroll"' style='flex:1;display:flex;flex-direction:column' up-trigger="wiTask.upTrigger"
                                 down-trigger="wiTask.downTrigger">
-                                <wi-base-treeview config='wiTask.selectionList' on-click-function="wiTask.onClick" filter="{{wiTask.selectionType == wiTask.FAMILY_SELECTION?wiTask.filterText:wiTask.filterText1}}" name='{{wiTask.name + "SelectionList"}}'>
+                                <wi-base-treeview config='wiTask.selectionList' on-click-function="wiTask.onClick" filter="{{wiTask.selectionType == wiTask.FAMILY_SELECTION?wiTask.filterText:wiTask.filterText1}}" name='{{wiTask.SelectionTreeName}}'>
                                 </wi-base-treeview>
                             </wi-scroll>
                         </div>
@@ -172,22 +172,29 @@
                         </div>
                         <div style='margin: 5px;position: relative;'>
                             <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
-                            <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiTask.prjFilter' size='10'>
+                            <input type='text' class='form-control' style='text-indent:1.5em;' ng-if='wiTask.idxTab==0' ng-model='wiTask.prjFilter' size='20'>
+                            <input type='text' class='form-control' style='text-indent:1.5em;' ng-if='wiTask.idxTab==1' ng-model='wiTask.zoneFilter' size='20'>
                         </div>
                         <div style='flex:1;display:flex;flex-direction:column;'>
                             <wi-tabset position='bottom' nav-align='center' id='dragTab'>
-                                <wi-tab heading='Datasets'>
-                                    <wi-base-treeview id='__projectWellTree' name="projectTreeview" config="wiTask.projectConfig" container="wiTask" on-click-function="wiTask.prjClickFunction"
-                                        filter="{{wiTask.prjFilter}}" show-id="false">
+                                <wi-tab heading='Datasets' on-show='wiTask.onShowTab'>
+                                    <wi-base-treeview id='{{wiTask.projectTreeName}}' name="{{wiTask.projectTreeName}}" config="wiTask.projectConfig" container="wiTask" on-click-function="wiTask.prjClickFunction" on-ready-function='wiTask.onPrjReady'
+                                        filter="{{wiTask.prjFilter}}">
                                     </wi-base-treeview>
                                 </wi-tab>
-                                <wi-tab heading='Zonation'></wi-tab>
+                                <wi-tab heading='Zonation' on-show='wiTask.onShowTab'>
+                                    <wi-base-treeview id='{{wiTask.zonationTreeName}}' name="{{wiTask.zonationTreeName}}" config="wiTask.zonationConfig" container="wiTask"
+                                    on-click-function="wiTask.zoneClickFunction"
+                                    on-ready-function='wiTask.onZoneReady'
+                                        filter="{{wiTask.zoneFilter}}">
+                                    </wi-base-treeview>
+                                </wi-tab>
                             </wi-tabset>
                         </div>
                     </div>
                     <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiTask.droppableSetting();">
                         <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
-                            <div class="panel-heading" ng-init="wiTask.typeFilter='inputchoice'">
+                            <div class="panel-heading">
                                 <label class="btn btn-default"
                                 ng-class='{active: wiTask.typeFilter=="inputchoice"}'
                                 style="margin-right: 5px;">
@@ -205,7 +212,7 @@
                                 <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiTask.inputFilter' size='10'>
                             </div>
                             <div style="flex: 1; position: relative; overflow-y: auto;">
-                                <wi-base-treeview id='_taskDataTree' name='taskDataTree' style="margin-left: 0px;"
+                                <wi-base-treeview id='{{wiTask.taskDataTreeName}}' name='{{wiTask.taskDataTreeName}}' style="margin-left: 0px;"
                                 config='wiTask.taskConfig.inputData'
                                 on-click-function='wiTask.taskClickFuntion'
                                 show-context-menu-function='wiTask.taskShowContextMenu'
