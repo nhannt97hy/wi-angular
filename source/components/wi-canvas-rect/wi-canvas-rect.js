@@ -30,7 +30,7 @@ function Controller(wiComponentService, wiPatternService, $timeout) {
         if(changesObj) {
             $timeout(function() {
                 self.paint();
-            })
+            },50)
         }
     }
 

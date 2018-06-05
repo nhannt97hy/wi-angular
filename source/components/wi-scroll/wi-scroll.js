@@ -3,6 +3,7 @@ const moduleName = 'wi-scroll';
 
 function Controller($scope, $timeout, $http) {
     let self = this;
+    this.animationTimeout = 100;
     this.$onInit = function() {
         $timeout(function() {
             $('#' + self.idScroll).scroll(function() {
@@ -17,7 +18,7 @@ function Controller($scope, $timeout, $http) {
                                     existingList.push(item);
                                     existingList.shift();
                                     done();
-                                }, 100);
+                                }, self.animationTimeout);
                             }, function() {
                                 $(_self).scrollTop(scrollTop - 3);
                                 $timeout(() => existingList.forEach(item => delete item.data.bgColor), 1000);;
@@ -34,7 +35,7 @@ function Controller($scope, $timeout, $http) {
                                     existingList.unshift(item);
                                     existingList.pop();
                                     done();
-                                }, 100);
+                                }, self.animationTimeout);
                             }, function() {
                                 $(_self).scrollTop(3);
                                 //existingList.forEach(item => delete item.data.bgColor);
@@ -56,7 +57,8 @@ angular.module(moduleName, []).component(wiScrollName, {
     bindings: {
         idScroll: "<",
         upTrigger: "<",
-        downTrigger: "<"
+        downTrigger: "<",
+        animationTimeout: "<"
     }
 });
 
