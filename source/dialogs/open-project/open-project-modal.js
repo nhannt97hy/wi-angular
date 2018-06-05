@@ -14,9 +14,9 @@ module.exports = function (ModalService, callback) {
         this.displayName = null;
         wiApiService.getProjectList(null, function (projects) {
             self.projects = projects;
-            $timeout(function(){
+            /*$timeout(function(){
                 $scope.$apply();
-            });
+            });*/
         });
         console.log('response', this.projects);
 

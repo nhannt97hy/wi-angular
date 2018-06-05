@@ -16,8 +16,8 @@
                         <div class="col-sm-9">
                             <select ng-model="wiModal.displayName" class="form-control" ng-change="wiModal.fillInfo();"
                                     required>
-                                <option ng-repeat="project in wiModal.projects" value="{{project.name}}">
-                                    {{project.name}}
+                                <option ng-repeat="project in wiModal.projects" value="{{project.displayName}}">
+                                    {{project.displayName}}
                                 </option>
                             </select>
                         </div>
