@@ -244,8 +244,8 @@ exports.OpenModelButtonClicked = function() {
 //     })
 // };
 
-exports.ExportToolButtonClicked = function() {
-    console.log('ExportToolButton is clicked');
+exports.ExportFromInventoryButtonClicked = function() {
+    console.log('ExportFromInventorylButton is clicked');
     let self = this;
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -259,13 +259,35 @@ exports.ExportToolButtonClicked = function() {
             html: `
                 <div style='height:100%;display:flex;flex-direction:column;'>
                   
-                   <wi-export style='flex:1;'></wi-export>
+                   <wi-export style='flex:1;' from="inventory"></wi-export>
                 </div>
             `,
             name: 'wiExport'
         }
     })
 
+}
+exports.ExportFromProjectButtonClicked = function (){
+    console.log('ExportFromProjectButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'export-tool',
+        title: 'Export Tool',
+        tabIcon: 'export-well-top-16x16',
+        componentState: {
+            html: `
+                <div style='height:100%;display:flex;flex-direction:column;'>
+                  
+                   <wi-export style='flex:1;' from="project"></wi-export>
+                </div>
+            `,
+            name: 'wiExport'
+        }
+    })
 }
 exports.PropertyGridButtonClicked = function () {
     console.log('PropertyGridButton is clicked');
