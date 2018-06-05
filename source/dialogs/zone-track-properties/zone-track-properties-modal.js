@@ -6,7 +6,7 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let wiLogplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let viZoneTrack;
+        let viZoneTrack, wiD3ZoneTrack;
         let props = zoneTrackProperties || {
             showTitle: true,
             title: "New Zone",
@@ -16,7 +16,10 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
             parameterSet: null
         }
         console.log(props);
-        if (props.idZoneTrack) viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
+        if (props.idZoneTrack) {
+            wiD3ZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props);
+            viZoneTrack = wiD3ZoneTrack.viTrack
+        }
         this.showTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
@@ -72,7 +75,7 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
                         wiApiService.getZoneSet(viZoneTrack.idZoneSet, function (zoneset) {
                             viZoneTrack.removeAllZones();
                             for (let zone of zoneset.zones) {
-                                self.addZoneToTrack(viZoneTrack, zone);
+                                wiD3ZoneTrack.addZoneToTrack(viZoneTrack, zone);
                             }
                         })
                     }

@@ -1,3 +1,4 @@
+const d3plus = require('d3plus');
 let Utils = require('./visualize-utils');
 let Drawing = require('./visualize-drawing');
 let CanvasHelper = require('./visualize-canvas-helper');
@@ -18,7 +19,7 @@ Annotation.prototype.PROPERTIES = {
     textStyle: {
         type: 'Object',
         properties: {
-            fontSize: { type: 'String', default: '12px' },
+            fontSize: { type: 'Integer', default: 12 },
             fill: { type: 'String', default: 'Black'},
             lineColor: { type: 'String', default: 'Black' },
             lineWidth: { type: 'Integer', default: 0 },
@@ -36,7 +37,7 @@ Annotation.prototype.PROPERTIES = {
     width: { type: 'Float', default: 1 },
     vAlign: {
         type: 'Enum',
-        values: ['Top', 'Center', 'Bottom'],
+        values: ['Top', 'Middle', 'Bottom'],
         default: 'Top'
     },
     hAlign: {
@@ -59,12 +60,13 @@ Annotation.prototype.init = function(plotContainer) {
 
     this.svgGroup = this.svgContainer.append('g')
         .attr('class', 'vi-annotation-svg-group')
+        .attr('id', 'vi-annotation-svg-group-' + this.idAnnotation);
 
     this.svgGroup.append('rect')
         .attr('class', 'vi-annotation-bounding-rect');
 
-    this.svgGroup.append('text')
-        .attr('class', 'vi-annotation-text');
+    // this.svgGroup.append('text')
+    //     .attr('class', 'vi-annotation-text');
 
     this.draglineGroups = Utils.range(1,4).map(function(d) {
         let dragline = new DragLine({
@@ -118,6 +120,36 @@ Annotation.prototype.updateBoundingRect = function(x, y, width, height) {
 
 Annotation.prototype.updateText = function() {
     let rect = this.svgGroup.select('rect.vi-annotation-bounding-rect').node().getBBox();
+    const PADDING = 5;
+    const text = new d3plus.TextBox()
+        .select(this.svgGroup.node())
+        .data([{
+            text: this.text,
+            height: rect.height,
+            width: rect.width,
+            x: rect.x,
+            y: rect.y
+        }])
+        .fontMin(1)
+        .fontSize(this.textStyle.fontSize)
+        .fontResize(this.fitBounds)
+        .padding(PADDING)
+        .verticalAlign(this.vAlign.toLowerCase());
+    switch (this.hAlign) {
+        case 'Left':
+            text.textAnchor('start');
+            break;
+        case 'Center':
+            text.textAnchor('middle');
+            break;
+        case 'Right':
+            text.textAnchor('end');
+            break;
+        default:
+            break;
+    }
+    text.render();
+    /*
     let text = this.svgGroup.select('text.vi-annotation-text')
         .attr('fill', this.textStyle.fill)
         .attr('stroke', this.textStyle.lineColor)
@@ -128,9 +160,6 @@ Annotation.prototype.updateText = function() {
         .attr('alignment-baseline', 'middle')
         .text(this.text)
     let textRect = text.node().getBBox();
-
-    let PADDING = 5;
-    let x, y;
     if (this.fitBounds) {
         text.attr('font-size', Math.min(rect.width / textRect.width, rect.height / textRect.height) * 10 + 'px');
         textRect = text.node().getBBox();
@@ -142,7 +171,7 @@ Annotation.prototype.updateText = function() {
             case 'Top':
                 y = rect.y + textRect.height / 2 + PADDING;
                 break;
-            case 'Center':
+            case 'Middle':
                 y = rect.y + rect.height / 2;
                 break;
             case 'Bottom':
@@ -163,6 +192,7 @@ Annotation.prototype.updateText = function() {
         }
     }
     text.attr('x', x).attr('y', y);
+    */
 }
 
 Annotation.prototype.updateDraglineGroups = function(left, top, right, bottom, only) {

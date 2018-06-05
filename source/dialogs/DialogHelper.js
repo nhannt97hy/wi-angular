@@ -12,6 +12,7 @@ function initModal(modal) {
         });
     }, 700);
     $(modal.element).keydown(function (e) {
+        if (e.ctrlKey || e.shiftKey || e.altKey) return;
         if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.ESCAPE) {
             let okButton, cancelButton;
             let buttonElems = $(modal.element).find('.modal-footer > button');
