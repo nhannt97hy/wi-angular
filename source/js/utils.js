@@ -2677,7 +2677,8 @@ function putPattern(callback) {
         let baseUrl = __GLOBAL.wiApiService.BASE_URL;
         let patterns = sortProperties(pts, 'full_name', false, false);
         for (var pat in patterns) {
-            patterns[pat].src = 'img' + patterns[pat].src;
+            patterns[pat].src = baseUrl + patterns[pat].src;
+            console.log("src", patterns[pat].src)
         };
         __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.PATTERN, patterns);
         callback && callback();
