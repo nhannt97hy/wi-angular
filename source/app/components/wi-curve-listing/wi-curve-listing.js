@@ -38,15 +38,23 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             .filter(c => c.type == "dataset")
             .map(d => {
                 let tmp = angular.copy(d);
-                tmp.data.childExpanded = true;
-                delete tmp.data.selected;
+                tmp.data = Object.assign({}, {
+                    childExpanded: true,
+                    icon: d.data.icon,
+                    label: d.data.label
+                })
+                tmp.children.forEach(curve => {
+                    curve.data = Object.assign({}, {
+                        icon: curve.data.icon,
+                        label: curve.data.label,
+                        familyName: curve.data.familyName,
+                        unit: curve.data.unit
+                    });
+                })
                 return tmp;
             });
     }
-    this.onChangeWell = function() {
-        $scope.Filter = null;
-        self.currentIndex = self.SelectedWell.id;
-        getWellConfig();
+    function initData(){
         if (!self.dataSettings[self.currentIndex]) {
             self.dataSettings[self.currentIndex] = new Object();
             let _current = self.dataSettings[self.currentIndex];
@@ -81,6 +89,10 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         return _header;
                     }
                 },
+                rowHeaders: function(row) {
+                    return '<div class="zone-square" style="background-color:'+ utils.colorGenerator()+'"></div>' + row;
+                },
+                rowHeaderWidth: 70,
                 manualColumnResize: true,
                 fixedColumnsLeft: 1,
                 contextMenu: {
@@ -99,7 +111,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                             },
                             disabled: function() {
                                 let selected = dataCtrl.getSelected();
-                                return (selected[0][1] == 0 ||selected[0][3] == 0);
+                                return !selected || (selected[0][1] == 0 ||selected[0][3] == 0);
                             }
                         },
                         hsep1: "---------",
@@ -143,7 +155,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         dataCtrl.render();
                     }
                 },
-                search: true
+                search: true,
             };
 
             _current.length = length;
@@ -157,7 +169,6 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 ).toFixed(4);
             }
             _current.setting.data[length - 1]["depth"] = bottomDepth;
-            _current.setting.rowHeaders = _current.setting.data.map((r,i) => i);
         }
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
@@ -169,6 +180,44 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 self.dataSettings[self.currentIndex].setting
             );
         }
+    }
+    function initStatistic(){
+        if (!self.statisticSettings[self.currentIndex]) {
+            self.statisticSettings[self.currentIndex] = new Object();
+            let _current = self.statisticSettings[self.currentIndex];
+            _current.setting = {
+                data: Handsontable.helper.createSpreadsheetData(20,20),
+                colHeaders: ["Name", "Family", "Unit", "Min value", "Max value", "Mean value", "Standard deviation", "Top", "Bottom", "Step", "Fraction of missing value", "Last modification date", "Description", "Quantile 5", "Quantile 10", "Quantile 25", "Quantile 50", "Quantile 75", "Quantile 90", "Quantile 95"],
+                rowHeaders: true,
+                manualColumnResize: true,
+                fixedColumnsLeft: 1,
+                renderAllRows: false,
+                headerTooltips: true
+            };
+        }
+        if (!dataCtrl) {
+            dataCtrl = new Handsontable(
+                dataContainer,
+                self.statisticSettings[self.currentIndex].setting
+            );
+        } else {
+            dataCtrl.updateSettings(
+                self.statisticSettings[self.currentIndex].setting
+            );
+        }
+    }
+    function switchSetting(){
+        if(self.visualizationMode == 'Data'){
+            initData();
+        }else{
+            initStatistic();
+        }
+    }
+    this.onChangeWell = function() {
+        $scope.Filter = null;
+        self.currentIndex = self.SelectedWell.id;
+        getWellConfig();
+        switchSetting();
         dataCtrl.render();
     }
     this.onRefresh = function() {
@@ -302,8 +351,10 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         self.isShowPropPanel = false;
         self.goToWidgetOpened = false;
         self.findWidgetOpened = false;
+        self.visualizationMode = "Data";
         self.wells = utils.findWells();
         self.dataSettings = new Object();
+        self.statisticSettings = new Object();
         if (selectedNodes && selectedNodes.length) {
             switch (selectedNodes[0].type) {
                 case "well":
@@ -407,6 +458,16 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
     this.togglePropPanel = function() {
         self.isShowPropPanel = !self.isShowPropPanel;
     };
+    this.toggleVisualizationMode = function(){
+        if(self.visualizationMode == "Data"){
+            self.visualizationMode = "Statistic";
+        }else{
+            self.visualizationMode = "Data";
+        }
+        dataCtrl.destroy();
+        dataCtrl = undefined;
+        switchSetting();
+    }
 
     this.onAddCurveButtonClicked = function() {
         console.log("onAddCurveButtonClicked");

@@ -7,6 +7,14 @@
 		<wi-button layout="icon-left" type="small" label='Show Properties Panel' is-check-type="1" checked='wiCurveListing.isShowPropPanel'
 		 tooltip="Show/Hide Properties" handler="wiCurveListing.togglePropPanel"></wi-button>
 	</wi-toolbar>
+	<wi-toolbar>
+		<wi-dropdown type='small' label='visualization Mode'>
+			<wi-button layout="icon-left" type="small" class="height-auto" label='Data' is-check-type="1" checked="wiCurveListing.visualizationMode=='Data'" handler="wiCurveListing.toggleVisualizationMode">
+			</wi-button>
+			<wi-button layout="icon-left" type="small" class="height-auto" label='Statistic' is-check-type="1" checked="wiCurveListing.visualizationMode=='Statistic'" handler="wiCurveListing.toggleVisualizationMode">
+			</wi-button>
+		</wi-dropdown>
+	</wi-toolbar>
 </div>
 <div class="curve-listing-main-content">
 	<div resizable r-directions="['right']" r-flex="true" class="listing">
