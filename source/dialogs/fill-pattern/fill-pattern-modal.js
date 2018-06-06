@@ -130,6 +130,9 @@ module.exports = function (ModalService, name, foreground, background, callback)
         controllerAs: 'wiModal'
     }).then(function (modal) {
         helper.initModal(modal);
+        setTimeout(function() {
+            $('#focus').focus();
+        }, 1000);
         modal.close.then(function (ret) {
             helper.removeBackdrop();
             callback(ret);
