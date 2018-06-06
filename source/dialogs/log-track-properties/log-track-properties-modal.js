@@ -101,6 +101,8 @@ module.exports = function (ModalService, trackComponent, options, callback) {
 
         this.datasets = [];
         this.curvesArr = [];
+
+        /*
         let zonesets = [];
         if(this.well) {
             this.well.children.forEach(function (child) {
@@ -120,11 +122,12 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                     child.children.forEach((wellChild) => {
                         if(wellChild.type == 'dataset') {
                             self.datasets.push(wellChild);
-                        }/* else if (wellChild.type == 'zonesets') {
-                            wellChild.children.forEach(zoneset => {
-                                zonesets.push(zoneset);
-                            })
-                        }*/
+                        }
+                        // else if (wellChild.type == 'zonesets') {
+                        //     wellChild.children.forEach(zoneset => {
+                        //         zonesets.push(zoneset);
+                        //     })
+                        // }
                     })
                 }
             });
@@ -147,6 +150,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.zonesetChanged = function(selectedItem) {
             self.props.general.idZoneSet = selectedItem.idZoneSet;
         }
+        */
 
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {

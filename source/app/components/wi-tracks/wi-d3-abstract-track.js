@@ -19,12 +19,17 @@ Controller.prototype.openPropertiesDialog = function() {
 Controller.prototype.registerTrackHorizontalResizerDragCallback = function() {
     let self = this;
     this.viTrack.onHorizontalResizerDrag(function () {
-        self.wiD3Ctrl.adjustHeaderHeight(self.viTrack);
-        self.wiD3Ctrl.updateScale();
+        self.wiD3Ctrl && self.wiD3Ctrl.adjustHeaderHeight(self.viTrack);
+        self.wiD3Ctrl && self.wiD3Ctrl.updateScale();
     });
 }
 Controller.prototype.drawTooltip = function(depth) {
 	let self = this;
+    if (!self.wiD3Ctrl) {
+        self.viTrack.drawTooltipLines(depth);
+        self.viTrack.drawTooltipText(depth, true);
+        return;
+    }
     if (self.wiD3Ctrl.referenceLine()) self.viTrack.drawTooltipLines(depth);
     if (self.wiD3Ctrl.tooltip()) self.viTrack.drawTooltipText(depth, true);
 }
@@ -36,11 +41,16 @@ Controller.prototype.removeTooltip = function() {
 }
 
 Controller.prototype.mouseOverHandler = function() {
+    if (!this.wiD3Ctrl) return;
     this.wiD3Ctrl.trackUnderMouse = this.getProperties();
 }
 
 Controller.prototype.mouseLeaveHandler = function() {
     let self = this;
+    if(!self.wiD3Ctrl) {
+        self.removeTooltip();
+        return;
+    }
     this.wiD3Ctrl.trackUnderMouse = null;
     let debounced = _.debounce(function() {
         if (self.wiD3Ctrl.trackUnderMouse) return;
@@ -62,19 +72,21 @@ Controller.prototype.registerTrackMouseEventHandlers = function () {
         if(!mouse || !Array.isArray(mouse)) return;
         let y = mouse[1];
 		let depth = self.viTrack.getTransformY().invert(y);
-		self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
+        if (!self.wiD3Ctrl) self.drawTooltip(depth);
+		else self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
     }
     
-    // self.viTrack.plotContainer.on('mouseover', function() {
-    //     self.mouseOverHandler.call(self);
-    // });
     self.viTrack.trackContainer.on('mouseover', function() {
         self.mouseOverHandler.call(self);
     });
 
-    // self.viTrack.plotContainer.on('mouseleave', function() {
-    //     self.mouseLeaveHandler.call(self);
-    // });
+    self.viTrack.plotContainer.on('mouseleave', function() {
+        if(self.wiD3Ctrl) {
+            self.wiD3Ctrl.trackComponents.forEach(tc => tc.controller.removeTooltip());    
+        } else {
+            self.removeTooltip();
+        }
+    })
     self.viTrack.trackContainer.on('mouseleave', function() {
         self.mouseLeaveHandler.call(self);
     });
@@ -102,15 +114,15 @@ Controller.prototype.registerTrackCallback = function() {
             .attr('class', 'wi-d3-track-component')
 
     viTrack.on('focus', function () {
-        self.wiD3Ctrl.setCurrentTrack(trackComponent);
+        self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
     });
     viTrack.on('mousedown', function () {
         d3.event.stopPropagation();
-        self.wiD3Ctrl.setCurrentTrack(trackComponent);
+        self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
         // if (d3.event.button == 2) _trackOnRightClick(track);
     });
     viTrack.on('dblclick', function () {
-        self.wiD3Ctrl.setCurrentTrack(trackComponent);
+        self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
         self.openPropertiesDialog();
     });
     viTrack.onVerticalResizerDrag(function () {
@@ -171,7 +183,7 @@ Controller.prototype.showContextMenu = function (event) {
 
 Controller.prototype.$onInit = function() {
     let self = this;
-    this.wiD3Ctrl.wiLogplotCtrl.on('depth-range-updated', function(depthRange) {
+    this.wiD3Ctrl && this.wiD3Ctrl.wiLogplotCtrl.on('depth-range-updated', function(depthRange) {
         self.viTrack.minY = depthRange[0];
         self.viTrack.maxY = depthRange[1];
         self.viTrack.doPlot();

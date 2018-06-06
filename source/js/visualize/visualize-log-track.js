@@ -382,7 +382,7 @@ LogTrack.prototype.addCurve = function(data, config) {
         config.line = {
             color: this.genColor(),
             width: 1,
-            dash: null
+            dash: [0]
         };
     }
     config._data = data;

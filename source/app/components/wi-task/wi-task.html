@@ -206,6 +206,12 @@
                                     <input type="radio" name="filterBy" class="display-none" value='zonechoice' ng-model="wiTask.typeFilter">
                                     <span>Zonation</span>
                                 </label>
+                                <label class='btn btn-default' 
+                                    ng-class='{active: wiTask.showWFControlLine}'
+                                    style='margin-right: 5px;'
+                                    ng-click="wiTask.onShowTrackButtonClicked()">
+                                    <span>Show Track</span>
+                                </label>
                             </div>
                             <div style='margin: 5px;position: relative;'>
                                 <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
@@ -221,6 +227,16 @@
                                 <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET OR ZONESET HERE</div>
                             </div>
                         </div>
+                    </div>
+                    <div ng-if='wiTask.showWFControlLine' class='panel panel-default' style='margin-left: 5px; display: flex; height: 100%'>
+                        <wi-d3-log-track
+                            name='logTrackControlLine'
+                            properties='wiTask.logTrackProps'
+                            zoneset='wiTask.currentInput.zoneset'
+                            min-y='wiTask.currentInput.well.topDepth'
+                            max-y='wiTask.currentInput.well.bottomDepth'
+                            style='display: flex; flex-direction: column; outline: none;'
+                        ></wi-d3-log-track>
                     </div>
                     </div>
                 </div>

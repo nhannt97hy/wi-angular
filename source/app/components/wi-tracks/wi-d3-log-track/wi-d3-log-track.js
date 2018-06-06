@@ -12,7 +12,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    let logplotHandlers = {};
+    let logplotHandlers = null;
     let lastWell = null;
     let contextMenu = [{
         name: "TrackProperties",
@@ -54,7 +54,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }, {
         separator: '1'
-    }, {
+    }];
+
+    let extraContextMenu = [{
         name: "DuplicateTrack",
         label: "Duplicate Track",
         icon: 'track-duplicate-16x16',
@@ -78,8 +80,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }, {
         separator: '1'
     }];
+
     this.getContextMenu = function () {
-        if (self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
+        if (self.wiD3Ctrl && self.wiD3Ctrl.containerName && self.viTrack.mode == 'UseSelector') {
             let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
             return [
                 {
@@ -104,7 +107,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 case 'shading':
                     return _getShadingContextMenu();
                 default:
-                    return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
+                    return _(contextMenu)
+                        .concat(logplotHandlers ? extraContextMenu:[])
+                        .concat(self.wiD3Ctrl ? self.wiD3Ctrl.getContextMenu():[]).value();
             }
         }
     }
@@ -219,10 +224,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
         self.currentDrawingRightClicked = null;
     }
-    */
     this.setContextMenu = function (ctxMenu) {
         self.wiD3Ctrl.setContextMenu(ctxMenu);
     }
+    */
     this.openPropertiesDialog = function () {
         let options = {
             tabs: ['true', 'true', 'true']
@@ -242,6 +247,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+        if(!trackProps.idTrack) {
+            // TO DO something without track id (anonymous track - for preview purpose)
+            return;
+        }
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
             viTrack.getMarkers().forEach(viMarker => {
                 let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
@@ -289,15 +298,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
             // TO BE REVIEWED
             promises.push(new Promise(resolve => {
-                if(!viTrack.idZoneSet || !viTrack.showZoneSet) {
-                    viTrack.removeAllZones();
-                    resolve();
-                } else {
-                    wiApiService.getZoneSet(viTrack.idZoneSet, function (zoneset) {
-                        self.addZoneSetToTrack(viTrack, zoneset);
-                        resolve();
-                    })
+                if(self.zoneset) {
+                    self.addZoneSetToTrack(self.zoneset); 
                 }
+                resolve();
+
+                // if(!viTrack.idZoneSet || !viTrack.showZoneSet) {
+                //     viTrack.removeAllZones();
+                //     resolve();
+                // } else {
+                //     wiApiService.getZoneSet(viTrack.idZoneSet, function (zoneset) {
+                //         self.addZoneSetToTrack(viTrack, zoneset);
+                //         resolve();
+                //     })
+                // }
             }))
             Promise.all(promises)
                 .then(function () {
@@ -409,16 +423,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         return marker;
     }
-    this.addZoneSetToTrack = function (track, zonesetConfig) {
-        let self = this;
-        if(!track || !track.addZoneSet) return;
+    this.addZoneSetToTrack = function (zonesetConfig) {
         //remove all previous zone
-        track.removeAllZones();
-        track.addZoneSet(zonesetConfig);
+        self.viTrack.removeAllZones();
+        self.viTrack.addZoneSet(zonesetConfig);
     }
     this.addAnnotation = function () {
         if (!self.viTrack.isLogTrack()) return;
-        let [topDepth, bottomDepth] = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
+        // let [topDepth, bottomDepth] = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
+        let [topDepth, bottomDepth] = [self.minY, self.maxY];
         let range = bottomDepth - topDepth;
         let top = (topDepth + bottomDepth) / 2;
         let bottom = top + (range / 10);
@@ -803,30 +816,30 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         wiD3AbstractTrack.prototype.$onInit.call(self);
         this.plotAreaId = self.name + 'PlotArea';
          // this.wiLogplotCtrl = self.wiD3Ctrl.wiLogplotCtrl;
-        logplotHandlers = self.wiD3Ctrl.getLogplotHandler();
+        logplotHandlers = self.wiD3Ctrl ? self.wiD3Ctrl.getLogplotHandler() : null;
     }
     this.onDelete = function (model) {
         console.log('onDelete LogTrack: ', model);
         let hasCurve;
         switch(model.type){
             case 'curve':
-            hasCurve = self.viTrack.getCurves().find(curve => curve.idCurve == model.id);
-            if(hasCurve) {
-                console.log('updating log track', self.viTrack);
-                self.update();
-            }
-            break;
+                hasCurve = self.viTrack.getCurves().find(curve => curve.idCurve == model.id);
+                if(hasCurve) {
+                    console.log('updating log track', self.viTrack);
+                    self.update();
+                }
+                break;
 
-            case 'dataset':
-            hasCurve = self.viTrack.getCurves().find(curve => curve.idDataset == model.id);
-            if(hasCurve) {
-                console.log('updating log track', self.viTrack);
-                self.update();
-            }
-            break;
+            case 'well': case 'dataset':
+                hasCurve = self.viTrack.getCurves().find(curve => curve.idDataset == model.id);
+                if(hasCurve) {
+                    console.log('updating log track', self.viTrack);
+                    self.update();
+                }
+                break;
 
             default:
-            break;
+                break;
         }
     }
     this.onModifiedCurve = function(curve){
@@ -892,7 +905,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         })
         
         $timeout(function() {
-            if (self.wiD3Ctrl.containerName) {
+            if (self.wiD3Ctrl && self.wiD3Ctrl.containerName) {
                 let well = Utils.findWellByLogplot(self.getProperties().idPlot);
                 let combinedPlotD3Ctrl = wiComponentService.getComponent(self.wiD3Ctrl.containerName + 'D3Area');
                 combinedPlotD3Ctrl.selections.forEach(function(selectionConfig) {
@@ -938,8 +951,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
     /*function getProperties() {
         return self.properties;
-    }*/
-    /*
+    }
+
     function _getWellProps() {
         return self.wiD3Ctrl.getWellProps();
     }
@@ -1486,7 +1499,8 @@ app.component(componentName, {
         wiD3Ctrl: '<',
         properties: "<",
         minY: '<',
-        maxY: '<'
+        maxY: '<',
+        zoneset: '<'      
     }
 });
 exports.name = moduleName;

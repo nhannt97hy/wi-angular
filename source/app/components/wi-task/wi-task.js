@@ -1086,6 +1086,92 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         })
     }
+    this.logTrackProps = {
+        width: 2.5,
+        title: 'Track',
+        showTitle: true,
+        showDepthGrid: true,
+        showEndLabels: true,
+        showValueGrid:true,
+        topJustification: 'center',
+        bottomJustification: 'center',
+        majorTicks: 1,
+        minorTicks: 5
+    }
+
+    this.currentInput = {
+        zoneset: null,
+        curves: [],
+        well: {
+            topDepth: 0,
+            bottomDepth: 10000,
+        }
+    }
+    function updateTrack(config) {
+        let timerHandler = null;
+        if(!self.logTrackProps.controller) {
+            timerHandler = setInterval(function() {
+                if(self.logTrackProps.controller) {
+                    clearInterval(timerHandler);
+                    updateTrack();
+                } else {
+                    console.log('not ready yet');
+                }
+            }, 100);
+        } else {
+            // Ready for update track
+            console.log('ready for update track');
+            updateFunction(config);
+        }
+
+        function updateFunction(config) {
+            if(config.curves) {
+                self.currentInput.well = utils.findWellByCurve(config.curves[0].idCurve);
+                async.eachSeries(config.curves, function(curveProps) {
+                    wiApiService.dataCurve(curveProps.idCurve, function(dataCurve) {
+                        let controller = self.logTrackProps.controller;
+                        controller.addCurveToTrack(controller.viTrack, dataCurve, curveProps);
+                    })
+                })
+            } 
+        }
+    }
+    this.onShowTrackButtonClicked = function() {
+        self.showWFControlLine = !self.showWFControlLine;
+        console.log('task config: ', self.taskConfig);
+        // get input map for hard code data
+        let inputMap = self.taskConfig.inputData.map(d => {
+            let tmp =  {
+                inputs: d.children[0].children.map(c => c.data.value),
+                parameters: d.children[1].children.map(c => {
+                    return {
+                        endDepth: c.endDepth,
+                        startDepth: c.startDepth,
+                        param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                    }
+                }),
+                idDataset: d.idDataset,
+                idWell: d.wellProps.idWell,
+                dataset: d.dataset
+            };
+
+            tmp.parameters.step = parseFloat(d.wellProps.step);
+            tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
+            tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
+            return tmp;
+        });
+        console.log('input map: ', inputMap);
+        let config = {};
+        let promises = [];
+        promises.push(new Promise(function(resolve) {
+            config.curves = inputMap[0].inputs.map(node => node.properties);
+            resolve();
+        }))
+        Promise.all(promises)
+            .then(function() {
+                updateTrack(config);
+            });
+    }
 }
 
 const app = angular.module(moduleName, []);
