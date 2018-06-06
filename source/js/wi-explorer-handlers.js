@@ -114,13 +114,13 @@ exports.DeleteItemButtonClicked = function (isPermanently = false) {
                         deleteFunction = wiApiService.removeWell;
                         cleanUpFunction = function () {
                             let modelsWithTab = [];
-                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'logplots').children);
-                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'crossplots').children);
-                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'histograms').children);
-                            modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'comboviews').children);
-                            modelsWithTab.forEach(function (model) {
-                                if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
-                            });
+                            // modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'logplots').children);
+                            // modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'crossplots').children);
+                            // modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'histograms').children);
+                            // modelsWithTab = modelsWithTab.concat(selectedNode.children.find(child => child.type == 'comboviews').children);
+                            // modelsWithTab.forEach(function (model) {
+                            //     if (model) wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).removeTabWithModel(model);
+                            // });
                             wiComponentService.emit(wiComponentService.DELETE_MODEL, selectedNode);
                         }
                         break;
