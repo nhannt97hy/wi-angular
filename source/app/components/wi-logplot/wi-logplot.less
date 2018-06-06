@@ -62,3 +62,38 @@ wi-logplot {
         }
     }
 }
+
+.logplot-footer {
+    right: 10px;
+    bottom: 10px;
+    opacity: 0.9;
+    pointer-events: auto;
+    .well-name-container {
+        width: 100px;
+        position: absolute;
+        right: 30px;
+        bottom: 30px;
+        padding: 4px;
+        border: 1px solid #003;
+        border-radius: 2px;
+        background-color: #ffffe0;
+        text-align: center;
+        filter: drop-shadow(2px 2px 5px gray);
+    }
+    .well-name {
+        padding: 5px;
+        margin-bottom: 3px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .footer-icon {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        filter: drop-shadow(2px 2px 5px gray);
+        opacity: 0.4;
+        &:hover{
+            opacity: 0.9;
+        }
+    }
+}

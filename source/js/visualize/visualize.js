@@ -14,6 +14,8 @@ let CanvasHelper = require('./visualize-canvas-helper');
 let Histogram = require('./visualize-histogram');
 let neuralNetworkPlayground = require('./neural-network/visualize-neural-network-playground');
 let visualizeWiPlot = require('./visualize-wi-plot');
+let ViWiXplot = require('./visualize-wi-xplot');
+let ViWiHis = require('./visualize-wi-his');
 
 let Selection = require('./visualize-selection');
 
@@ -219,11 +221,18 @@ exports.sheetDraggable = function(domElem) {
  * @param {Object} domElem - The DOM element to contain the crossplot
  * @returns {Object} The created crossplot
  */
+/*
 exports.createCrossplot = function(curveX, curveY, config, domElem) {
     let pointSet = (config || {}).pointSet || {};
     pointSet.curveX = curveX;
     pointSet.curveY = curveY;
     config.pointSet = pointSet;
+    let crossplot = new Crossplot(config);
+    crossplot.init(domElem);
+    return crossplot;
+}
+*/
+exports.createCrossplot = function (config, domElem) {
     let crossplot = new Crossplot(config);
     crossplot.init(domElem);
     return crossplot;
@@ -236,12 +245,19 @@ exports.createCrossplot = function(curveX, curveY, config, domElem) {
  * @param {HtmlDomElem} domElem - The DOM element that contains the Histogram
  * @returns {Object} The newly created histogram
  */
+/*
 exports.createHistogram = function(config, depthStep, startDepth, endDepth, domElem) {
     let histogram = new Histogram(config);
     histogram.depthStep = depthStep;
     histogram.startDepth = startDepth;
     histogram.endDepth = endDepth;
     console.log('---', config, domElem);
+    histogram.init(domElem);
+    return histogram;
+}
+*/
+exports.createHistogram = function (config, domElem) {
+    let histogram = new Histogram(config);
     histogram.init(domElem);
     return histogram;
 }
@@ -269,4 +285,16 @@ exports.createVisualizeWiPlot = function (config, domElem) {
     let viWiPlot = new visualizeWiPlot(config);
     viWiPlot.init(domElem);
     return viWiPlot;
+}
+
+exports.createVisualizeWiXplot = function (config, domElem) {
+    let viWiXplot = new ViWiXplot(config);
+    viWiXplot.init(domElem);
+    return viWiXplot;
+}
+
+exports.createVisualizeWiHis = function (config, domElem) {
+    let viWiHis = new ViWiHis(config);
+    viWiHis.init(domElem);
+    return viWiHis;
 }

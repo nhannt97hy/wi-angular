@@ -66,6 +66,17 @@
                         <div id="parameters">
                             <h5 class="normal-text">Parameters</h5>
                             <div class="form-group">
+                                <label class="control-label col-sm-5 padding-left-3em" for="well">
+                                  Well </label>
+                                <div class="col-sm-7">
+                                    <select id="well" class="form-control wi-form-control" 
+                                        ng-options="well as well.name for well in wiModal.getAllWells()" 
+                                        ng-model="wiModal.wellProps"
+                                        ng-change="wiModal.onWellChanged()" required>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-show="wiModal.wellProps">
                                 <label class="control-label col-sm-5 padding-left-3em" for="parameters-set">Parameter Set</label>
                                 <div class="col-sm-7">
                                     <select id="parameters-set" class="form-control wi-form-control">
@@ -73,11 +84,14 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-show="wiModal.wellProps">
                                 <label class="control-label col-sm-5 padding-left-3em" for="zone-set">
                                   Zone Set</label>
                                 <div class="col-sm-6">
-                                    <select id="zone-set" class="form-control wi-form-control" ng-options="zoneSet.idZoneSet as zoneSet.name for zoneSet in wiModal.zoneSets" ng-model="wiModal.idZoneSet" ng-change="wiModal.checkZoneSet()" required>
+                                    <select id="zone-set" class="form-control wi-form-control" 
+                                        ng-options="zoneSet.idZoneSet as zoneSet.name for zoneSet in wiModal.zoneSets" 
+                                        ng-model="wiModal.idZoneSet" 
+                                        ng-change="wiModal.checkZoneSet()" required>
                                     </select>
                                 </div>
                                 <div class="col-sm-1">

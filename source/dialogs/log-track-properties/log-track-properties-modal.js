@@ -1,28 +1,37 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
+// module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
+module.exports = function (ModalService, trackComponent, options, callback) {
     let wiModal = null;
-    function ModalController($scope, wiComponentService, $timeout, close, $compile, $http) {
+    function ModalController($scope, wiComponentService, wiApiService, $timeout, close) {
         let error = null;
         let self = this;
+        let viTrack = trackComponent.controller.viTrack;
         wiModal = self;
 
-        window.logTrack = this;
+
+        this.applyInProgress = false;
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        let graph = wiComponentService.getComponent('GRAPH');
+        // let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
+
+        // window.logTrack = this;
         this.groupFnTabCurve = function(item){
-            return item.properties.dataset;
+            let wellProps = utils.findWellByCurve(item.properties.idCurve).properties;
+            return item.properties.dataset + ' (' + wellProps.name + ') ';
         }
 
         this.groupFnTabShading = function(item){
             return item.datasetName;
         }
 
-        this.applyInProgress = false;
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let graph = wiComponentService.getComponent('GRAPH');
-        let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
-
-        console.log("currentTrack", currentTrack);
-        this.well = utils.findWellByLogplot(wiLogplotCtrl.id);
+        // this.well = utils.findWellByLogplot(trackComponent.idPlot);
+        this.well = null;
+        let wellProps = trackComponent.controller.getWellProps();
+        if(wellProps) {
+            this.well = utils.findWellById(wellProps.idWell);
+        }
+        console.log("current Track", viTrack);
         this.tabFlags = options.tabs;
 
         const changed = {
@@ -42,7 +51,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         this.shadings = new Array();
         // general tab
         this.props = {
-            general: currentTrack.getProperties()
+            general: viTrack.getProperties()
         }
 
         let savedZoomFactor = this.props.general.zoomFactor;
@@ -74,33 +83,81 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 if (!res) return;
                 let newProps = angular.copy(self.props);
                 newProps.general.width = utils.inchToPixel(self.props.general.width);
-                currentTrack.setProperties(newProps.general);
+                viTrack.setProperties(newProps.general);
 
-                if (newProps.general.zoomFactor != savedZoomFactor) {
-                    savedZoomFactor = newProps.general.zoomFactor;
-                    wiD3Ctrl.processZoomFactor();
-                    wiD3Ctrl.plotAll();
-                }
-                else {
-                    currentTrack.doPlot(true);
-                }
+                // if (newProps.general.zoomFactor != savedZoomFactor) {
+                //     savedZoomFactor = newProps.general.zoomFactor;
+                //     wiD3Ctrl.processZoomFactor();
+                //     wiD3Ctrl.plotAll();
+                // }
+                // else {
+                //     viTrack.doPlot(true);
+                // }
+                viTrack.doPlot(true);
                 if (callback) callback();
             })
             return temp;
         }
 
-        // curve tab
         this.datasets = [];
         this.curvesArr = [];
-        this.well.children.forEach(function (child) {
-            if (child.type == 'dataset') self.datasets.push(child);
-        });
+
+        /*
+        let zonesets = [];
+        if(this.well) {
+            this.well.children.forEach(function (child) {
+                if (child.type == 'dataset') self.datasets.push(child);
+                else if (child.type == 'zonesets') {
+                    child.children.forEach(c => {
+                        if(c.type == 'zoneset')
+                            zonesets.push(c);
+                    })    
+                }
+            });
+        } else {
+            let logplotProps = utils.findLogplotModelById(trackComponent.idPlot).properties;
+            let projectModel = utils.getModel('project', logplotProps.idProject);
+            projectModel.children.forEach((child) => {
+                if(child.type == 'well') {
+                    child.children.forEach((wellChild) => {
+                        if(wellChild.type == 'dataset') {
+                            self.datasets.push(wellChild);
+                        }
+                        // else if (wellChild.type == 'zonesets') {
+                        //     wellChild.children.forEach(zoneset => {
+                        //         zonesets.push(zoneset);
+                        //     })
+                        // }
+                    })
+                }
+            });
+        }
+        let lastZoneSetId = this.props.general.idZoneSet;
+        this.getZonesetList = function(wiItemDropdownCtrl) {
+            $timeout(function() {
+                if(!zonesets.length) return;
+                wiItemDropdownCtrl.items = zonesets.map(zoneset => {
+                    return {
+                        data: {
+                            label: zoneset.properties.name
+                        }, 
+                        properties: zoneset.properties
+                    }
+                });
+                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneSetId)
+            }, 10); 
+        }
+        this.zonesetChanged = function(selectedItem) {
+            self.props.general.idZoneSet = selectedItem.idZoneSet;
+        }
+        */
+
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {
                 if (item.type == 'curve') self.curvesArr.push(item);
             })
         });
-        this.curveList = currentTrack.getCurves();
+        this.curveList = viTrack.getCurves();
         let curves_bk = [];
         this.curveList.forEach(function (c) {
             self.curves.push(c.getProperties());
@@ -157,7 +214,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             displayMode: lineProps.displayMode,
                             displayType: lineProps.displayType,
                             idLine: curveUnchanged ? curve.idLine : null,
-                            idTrack: currentTrack.id,
+                            idTrack: viTrack.id,
                             idCurve: curveInfo.idCurve,
                             ignoreMissingValues: curveUnchanged ? curve.ignoreMissingValues : true,
                             maxValue: lineProps.maxScale,
@@ -328,7 +385,8 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
-                                    wiD3Ctrl.getComponentCtrlByViTrack(currentTrack).addCurveToTrack(currentTrack, data, lineModel.data);
+                                    // wiD3Ctrl.getComponentCtrlByViTrack(viTrack).addCurveToTrack(viTrack, data, lineModel.data);
+                                    trackComponent.controller.addCurveToTrack(viTrack, data, lineModel.data);
                                     self.getCurveList();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;
@@ -346,12 +404,12 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         item = preUpdate(item);
                         console.log("updateLine", item);
                         wiApiService.editLine(item, function (res) {
-                            let _currentCurve = currentTrack.drawings.find(d => (d.isCurve() && d.id == res.idLine));
+                            let _currentCurve = viTrack.drawings.find(d => (d.isCurve() && d.id == res.idLine));
 
                             self.curveUpdated.push(_currentCurve);
                             _currentCurve.setProperties(item);
 
-                            currentTrack.plotCurve(_currentCurve);
+                            viTrack.plotCurve(_currentCurve);
                             if (callback) callback();
                         });
                         item.changed = changed.unchanged;
@@ -359,11 +417,11 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                     }
                     case changed.deleted:
                         wiApiService.removeLine(item.idLine, function (res) {
-                            currentTrack.removeCurveById(item.idLine);
+                            viTrack.removeCurveById(item.idLine);
                             if (Array.isArray(res.shadings) && res.shadings.length) {
                                 res.shadings.forEach(function(s) {
-                                    let shading = utils.getVisualizeShading(currentTrack, s.idShading);
-                                    currentTrack.removeDrawing(shading);
+                                    let shading = utils.getVisualizeShading(viTrack, s.idShading);
+                                    viTrack.removeDrawing(shading);
                                     self.shadings.find(shading => shading.idShading == s.idShading).changed = changed.deleted;
                                 });
                             }
@@ -414,7 +472,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                         });
                     });
 
-                    currentTrack.doPlot(true);
+                    viTrack.doPlot(true);
                     if (updateCurvesTabCb) updateCurvesTabCb(err);
             });
         }
@@ -423,7 +481,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
 
         let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
         this.leftLimit = customLimit.concat(self.curveList);
-        this.shadingList = currentTrack.getShadings();
+        this.shadingList = viTrack.getShadings();
         this.shadingList.forEach(function(s) {
             self.shadings.push(s.getProperties());
         });
@@ -516,7 +574,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                 _index: self.shadings.length,
                 changed: changed.created,
                 setName: false,
-                idTrack: currentTrack.id,
+                idTrack: viTrack.id,
                 idControlCurve: null,
                 name: 'xx_yy',
                 shadingStyle: "pattern",
@@ -608,9 +666,9 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         this.defineButtonClicked = function (index, $event) {
             self.setClickedRowShading(index);
             console.log("onDefine", self.shadings[self.__idx]);
-            DialogUtils.shadingAttributeDialog(ModalService, wiApiService, function(options){
+            DialogUtils.shadingAttributeDialog(ModalService, self.shadings[self.__idx], trackComponent, function(options){
                 if(options) self.shadings[self.__idx] = options;
-            }, self.shadings[self.__idx], currentTrack, wiLogplotCtrl);
+            });
             $event.stopPropagation();
         };
         this.onSelectRightLine = function () {
@@ -634,7 +692,7 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
             if (self.shadings[self.__idx].leftCurve.id > 0) self.shadings[self.__idx].leftFixedValue = null;
         };
         this.getCurveList = function () {
-            self.curveList = currentTrack.getCurves();
+            self.curveList = viTrack.getCurves();
             self.leftLimit = customLimit.concat(self.curveList);
         }
         function updateShadingsTab(updateShadingsTabCb) {
@@ -734,10 +792,11 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
                             DialogUtils.errorMessageDialog(ModalService, err);
                         });
                     }
-                    wiD3Ctrl.updateTrack(currentTrack);
+                    // wiD3Ctrl.updateTrack(viTrack);
+                    trackComponent.controller.update();
 
                     self.shadings = self.shadings.filter(c => { return c.changed != changed.deleted });
-                    self.shadingList = currentTrack.getShadings();
+                    self.shadingList = viTrack.getShadings();
                     if (updateShadingsTabCb) updateShadingsTabCb(err);
             });
         }
@@ -773,7 +832,8 @@ module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiServi
         };
         this.onCancelButtonClicked = function () {
             close(null, 100);
-            wiD3Ctrl.updateTrack(currentTrack);
+            // wiD3Ctrl.updateTrack(viTrack);
+            trackComponent.controller.update();
         };
     }
 

@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, callback) {
+module.exports = function (ModalService, imageTrackProperties, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         const _NEW = 'created';
         const _EDIT = 'edited';
@@ -7,7 +7,6 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
 
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let wiLogplotModel = wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let props = imageTrackProperties || {
             showTitle: true,
@@ -18,8 +17,6 @@ module.exports = function (ModalService, wiLogplotCtrl, imageTrackProperties, ca
             // parameterSet: null
         }
         props.width = utils.pixelToInch(props.width);
-
-        this.tabName = wiLogplotModel.properties.name;
 
         this.showTitle = props.showTitle;
         this.title = props.title;

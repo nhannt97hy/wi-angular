@@ -74,3 +74,76 @@ div.panel-default, div.panel-default>div.panel-heading {
         }
     }
 }
+
+// Wi Xplot stylesheet
+.wi-xplot-main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+
+    .wi-xplot-plot-container {
+        flex: 1;
+
+        canvas, svg {
+            position: absolute;
+            left: 0;
+        }
+
+        .axis path {
+            display: true;
+        }
+
+        .axis line {
+            stroke: #888;
+            stroke-opacity: 0.5;
+        }
+        .axis--x text, .axis--y text {
+            display: none;
+        }
+        .tick {
+            line {
+                stroke: gray;
+                stroke-width: 1;
+            }
+            .major { stroke-opacity: 0.8; }
+            .minor { stroke-opacity: 0.3; }
+        }
+    }
+}
+
+// Wi His stylesheet
+.wi-his-main {
+    background-color: #f7f7f7;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+
+    .wi-his-plot-container {
+        flex: 1;
+
+        svg {
+            position: absolute;
+            left: 0;
+        }
+
+        .axis path {
+            display: true;
+        }
+
+        .axis line {
+            stroke: #888;
+            stroke-opacity: 0.5;
+        }
+        .axis--x text, .axis--y text {
+            display: none;
+        }
+        .tick {
+            line {
+                stroke: gray;
+                stroke-width: 1;
+            }
+            .major { stroke-opacity: 0.8; }
+            .minor { stroke-opacity: 0.3; }
+        }
+    }
+}

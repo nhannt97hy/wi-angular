@@ -56,7 +56,8 @@ exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian;
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Gaussian');
+    wiHistogramCtrl.getwiD3Ctrl().config.showGaussian = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
@@ -64,7 +65,8 @@ exports.CumulativeButtonClicked = function() {
     console.log('CumulativeButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
     wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative;
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'show/hide Cumulative');
+    wiHistogramCtrl.getwiD3Ctrl().config.showCumulative = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
@@ -81,7 +83,8 @@ function PlotBarsButtonClicked() {
             wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
     }
     // wiHistogramCtrl.histogramModel.properties.plot = "Bar";
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
+    wiHistogramCtrl.getwiD3Ctrl().config.plot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
@@ -98,7 +101,8 @@ exports.PlotCurvesButtonClicked = function() {
             wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
     }
     //wiHistogramCtrl.histogramModel.properties.plot = "Curve";
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', 'plot curve/bar');
+    wiHistogramCtrl.getwiD3Ctrl().config.plot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
@@ -114,7 +118,8 @@ function FrequencyButtonClicked() {
     default:
         wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType = "Percent";
     }
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.signal('histogram-update', "update frequency/percentile");
+    wiHistogramCtrl.getwiD3Ctrl().config.plotType = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plotType;
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 

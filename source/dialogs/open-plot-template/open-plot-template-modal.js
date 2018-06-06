@@ -1,11 +1,11 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wellModel, callback) {
+module.exports = function (ModalService, projectLoaded, callback) {
     function ModalController($scope, close, wiComponentService, wiApiService) {
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         const utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let payloadParams = new Object();
         this.plotName = "PlotTemplate";
-        payloadParams.idWell = wellModel.properties.idWell;
+        payloadParams.idProject = projectLoaded.idProject;
         this.error = null;
         this.tplFile = null;
         let self = this;

@@ -429,8 +429,9 @@ exports.OpenTemplateButtonClicked = function () {
     let self = this;
     let utils = this.wiComponentService.getComponent(this.wiComponentService.UTILS);
     let DialogUtils = this.wiComponentService.getComponent('DIALOG_UTILS');
-    let currentWell = utils.getCurrentWell();
-    DialogUtils.openTemplateDialog(this.ModalService, currentWell, function (plot) {
+    // let currentWell = utils.getCurrentWell();
+    let projectLoaded = this.wiComponentService.getComponent(this.wiComponentService.PROJECT_LOADED);
+    DialogUtils.openTemplateDialog(this.ModalService, projectLoaded, function (plot) {
         utils.openLogplotTab(self.wiComponentService, utils.getModel('logplot', plot.idPlot));
     });
 };
@@ -488,8 +489,10 @@ exports.BlankLogplotButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
+
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -525,8 +528,8 @@ exports.TrippleComboButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -566,8 +569,8 @@ exports.DensityNeutronButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -607,8 +610,8 @@ exports.ResistivitySonicButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -648,8 +651,8 @@ exports.TriTracksBlankButtonClicked = function () {
     const self = this;
     const wiComponentService = this.wiComponentService;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    // let currentWell = utils.getCurrentWell();
+    // if (!currentWell) return;
     const ModalService = this.ModalService;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const wiApiService = this.wiApiService;
@@ -671,11 +674,16 @@ exports.TriTracksBlankButtonClicked = function () {
                     let logplotName = 'logplot' + logplotModel.properties.idPlot;
                     let wiD3Ctrl = wiComponentService.getComponent(logplotName).getwiD3Ctrl();
                     wiD3Ctrl.addDepthTrack(function () {
+                        wiD3Ctrl.addLogTrack('Track 1')
+                            .then(() => { wiD3Ctrl.addLogTrack('Track 2')})
+                            .then(() => { wiD3Ctrl.addLogTrack('Track 3')});
+                        /*
                         wiD3Ctrl.addLogTrack('Track 1', function () {
                             wiD3Ctrl.addLogTrack('Track 2', function () {
                                 wiD3Ctrl.addLogTrack('Track 3');
                             });
                         });
+                        */
                     });
                 });
             })
@@ -1372,12 +1380,12 @@ exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
         layoutManager.putTabRight({
-            id: 'wiTask',
+            id: 'wiTask1',
             title: 'Clay Volume Gamma Ray',
             tabIcon: 'workflow-16x16',
             componentState: {
-                html: '<wi-task name="Clay Volume Gamma Ray"></wi-task>',
-                name: 'wiTask'
+                html: '<wi-task name="Clay Volume Gamma Ray" id="1"></wi-task>',
+                name: 'wiTask1'
             }
         })
 }

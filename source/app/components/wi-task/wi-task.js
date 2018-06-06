@@ -21,7 +21,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
 
     this.$onInit = function() {
-        wiComponentService.putComponent("wiTask", self);
+        wiComponentService.putComponent("wiTask" + self.id, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
         wiApiService.listFamily(listF => {
@@ -29,6 +29,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             list = listF;
             onSelectionTypeChanged();
         });
+
+        //TreeName
+        let name = 'wiTask' + self.id;
+        self.SelectionTreeName = name + 'SelectionTree';
+        self.projectTreeName = name + 'projectTree';
+        self.zonationTreeName = name + 'zonationTree';
+        self.taskDataTreeName = name + 'taskDataTree';
+
+        self.idxTab = 0;
 
         // SELECT INPUT TAB
         self.idProject = self.getCurrentProjectId();
@@ -43,6 +52,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         );
         return (openProject || {}).idProject;
     };
+    this.onShowTab = function(idx){
+        self.idxTab = idx;
+    }
 
     this.onClick = function($index, $event, node) {
         self.selectionList.forEach(item => {
@@ -403,15 +415,31 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         }, function (err) {
             let hash = new Object();
             self.zone_set_list.forEach(zone => hash[zone.name] = 1);
-            self.zonesetConfig = Object.keys(hash).map(key => {
+            let zoneChild = function(zonesets){
+                let zoneArr = zonesets.reduce((total, curVal) => total.concat(curVal.zones.map(z => z.name)), []);
+                return Array.from(new Set(zoneArr)).map((item, idx) => {
+                    return {
+                        id: idx,
+                        data: {
+                            label: item,
+                            icon: "zone-table-16x16",
+                            selected: false,
+                        },
+                        type: 'zone'
+                    }
+                })
+            }
+            self.zonationConfig = Object.keys(hash).map((key, idx) => {
+                let zonesetArr = self.zone_set_list.filter(zs => zs.name == key);
                 return {
-                    id: -1,
+                    id: idx,
                     data: {
                         label: key,
                         selected: false,
                         icon: 'project-16x16-edit'
                     },
-                    children: []
+                    children: zoneChild(zonesetArr),
+                    type: 'zoneset'
                 }
             })
         });
@@ -461,11 +489,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             );
         }
     };
-    function draggableSetting() {
+    function draggableSetting(domEle) {
         $timeout(() => {
-            $(
-                'wi-task wi-base-treeview#__projectWellTree .wi-parent-node[type="dataset"],[type="zoneset"]'
-            ).draggable({
+            domEle.draggable({
                 helper: "clone",
                 start: function(event, ui) {
                     __dragging = true;
@@ -477,6 +503,14 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 appendTo: document.querySelector("wi-task #dragElement")
             });
         }, 500);
+    }
+    this.onPrjReady = function(){
+        let domEle = $( '#' + self.projectTreeName + ' .wi-parent-node[type="dataset"]');
+        draggableSetting(domEle);
+    }
+    this.onZoneReady = function(){
+        let domEle = $('#' + self.zonationTreeName + ' .wi-parent-node[type="zoneset"]');
+        draggableSetting(domEle);
     }
     function matchCurves(curves, matchCriterion) {
         switch (matchCriterion.type) {
@@ -542,6 +576,45 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }
                     return tempItem;
                 })
+                let zoneItems = function(wellProps){
+                    if(self.taskConfig.zonation){
+                        let zoneset = self.zone_set_list.find(zs => {
+                            return zs.name == self.taskConfig.zonation.name && zs.idWell == wellProps.idWell;
+                        });
+                        if(zoneset && zoneset.zones.length){
+                            let ret = zoneset.zones.reduce((total, zone) => {
+                                if(self.taskConfig.zonation.children.findIndex(c => c == zone.name) >= 0){
+                                    total.push({
+                                            data: {
+                                                childExpanded: true,
+                                                icon: 'zone-table-16x16',
+                                                label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}` ,
+                                                selected: false
+                                            },
+                                            type: 'zone',
+                                            children: angular.copy(paramItems),
+                                            startDepth: zone.startDepth,
+                                            endDepth: zone.endDepth
+                                        })
+                                }
+                                return total;
+                            }, [])
+                            if(ret.length) return ret;
+                        }
+                    }
+                    return [
+                        {
+                            data: {
+                                childExpanded: true,
+                                icon: 'zone-table-16x16',
+                                label: `ZONENATION_ALL: ${wellProps.topDepth} - ${wellProps.bottomDepth}` ,
+                                selected: false
+                            },
+                            type: 'zone',
+                            children: paramItems
+                        }
+                    ]
+                }
                 switch(type){
                     case 'dataset':
                         const idDataset = parseInt($(ui.draggable[0]).attr("data"));
@@ -573,7 +646,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         wellModel = self.projectConfig.find(
                             well => well.id == idWell
                         );
-                        const wellName = wellModel.properties.name;
+                        const wellProps = wellModel.properties;
                         if (
                             !self.taskConfig.inputData ||
                             !Array.isArray(self.taskConfig.inputData)
@@ -605,15 +678,12 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         let input = {
                             type: 'dataset',
                             idDataset: idDataset,
-                            idWell: idWell,
+                            wellProps: wellProps,
                             dataset: datasetName,
-                            topDepth: parseFloat(wellModel.properties.topDepth),
-                            bottomDepth: parseFloat(wellModel.properties.bottomDepth),
-                            step: parseFloat(wellModel.properties.step),
                             data: {
                                 childExpanded: true,
                                 icon: "well-16x16",
-                                label: `${wellModel.properties.name} / ${datasetModel.properties.name}`,
+                                label: `${wellProps.name} / ${datasetModel.properties.name}`,
                                 selected: false
                             },
                             children: [
@@ -632,18 +702,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                         label: 'Zonation',
                                         selected: false
                                     },
-                                    children: [
-                                        {
-                                            data: {
-                                                childExpanded: true,
-                                                icon: 'zone-table-16x16',
-                                                label: `ZONENATION_ALL: ${wellModel.properties.topDepth} - ${wellModel.properties.bottomDepth}` ,
-                                                selected: false
-                                            },
-                                            type: 'zone',
-                                            children: paramItems
-                                        }
-                                    ],
+                                    children: zoneItems(wellProps),
                                     type: 'zoneset'
                                 }
                             ]
@@ -654,66 +713,28 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         }
                         $timeout(() => {
                             self.taskConfig.inputData.push(input);
-                            self.typeFilter = 'inputchoice';
+                            // self.typeFilter = 'inputchoice';
                         })
                         break;
 
                     case 'zoneset':
-                    const idZoneSet = parseInt($(ui.draggable[0]).attr("data"));
-                        for (const node of self.projectConfig) {
-                            utils.visit(
-                                node,
-                                (_node, _options) => {
-                                    if (
-                                        _node.type == "zoneset" &&
-                                        _node.id == idZoneSet
-                                    ) {
-                                        _options.result = _node;
-                                        return true;
-                                    }
-                                    return false;
-                                },
-                                options
-                            );
-                            if (options.found) break;
-                        }
-                        // populate data into self.inputArray
-                        if (!options.result) {
-                            toastr.error("Zonset doesn't exist");
+                        const idZoneSet = parseInt($(ui.draggable[0]).attr("data"));
+                        let zoneset = self.zonationConfig.find(zs => zs.id == idZoneSet);
+                        let child = zoneset.children.filter(z => !z.data.unused).map(z => z.data.label);
+                        if(!child.length) {
+                            toastr.error("Zoneset must contains at least 1 used zone!");
                             return;
                         }
-                        const zonesetModel = options.result;
-                        // console.log(zonesetModel);
-                        idWell = zonesetModel.properties.idWell;
-                        wellModel = self.projectConfig.find(
-                            well => well.id == idWell
-                        );
-                        self.taskConfig.inputData.forEach(input => {
-                            if(input.idWell == idWell && zonesetModel.children.length){
-                                $timeout(() => {
-                                    input.idZoneSet = idZoneSet;
-                                    input.children[1].data.label = 'Zonation - ' + zonesetModel.name;
-                                    input.children[1].children = [];
-                                    zonesetModel.children.forEach(zone => {
-                                        input.children[1].children.push(
-                                            {
-                                                data: {
-                                                    childExpanded: true,
-                                                    icon: 'zone-table-16x16',
-                                                    label: `${zone.name}: ${zone.properties.startDepth} - ${zone.properties.endDepth}` ,
-                                                    selected: false
-                                                },
-                                                type: 'zone',
-                                                children: angular.copy(paramItems),
-                                                startDepth: zone.properties.startDepth,
-                                                endDepth: zone.properties.endDepth
-                                            }
-                                        )
-                                    })
-                                    self.typeFilter = 'zonechoice';
-                                })
-                            }
+                        self.taskConfig.zonation = {
+                            name: zoneset.data.label,
+                            children: child
+                        }
+                        self.taskConfig.inputData && self.taskConfig.inputData.forEach(input => {
+                            $timeout(() => {
+                                input.children[1].children = zoneItems(input.wellProps);
+                            })
                         })
+                        // self.typeFilter = 'zonechoice';
                         break;
                 }
             }
@@ -779,6 +800,11 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     this.prjClickFunction = function($index, $event, node) {
         clickFunction($index, $event, node, self.projectConfig);
     };
+    this.zoneClickFunction = function($index, $event, node){
+        if(node && node.type == 'zone'){
+            node.data.unused = !node.data.unused;
+        }
+    }
 
     this.taskClickFuntion = function($index, $event, node){
         if(node && node.type == 'dataset'){
@@ -844,7 +870,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         }
         selectHandler(node, false, rootNode, () => {
-            draggableSetting();
+            // draggableSetting();
         });
     }
 
@@ -1011,13 +1037,13 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }
                 }),
                 idDataset: d.idDataset,
-                idWell: d.idWell,
+                idWell: d.wellProps.idWell,
                 dataset: d.dataset
             };
 
-            tmp.parameters.step = d.step;
-            tmp.parameters.topDepth = d.topDepth;
-            tmp.parameters.bottomDepth = d.bottomDepth;
+            tmp.parameters.step = parseFloat(d.wellProps.step);
+            tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
+            tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
             return tmp;
         })
 
@@ -1060,6 +1086,92 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         })
     }
+    this.logTrackProps = {
+        width: 2.5,
+        title: 'Track',
+        showTitle: true,
+        showDepthGrid: true,
+        showEndLabels: true,
+        showValueGrid:true,
+        topJustification: 'center',
+        bottomJustification: 'center',
+        majorTicks: 1,
+        minorTicks: 5
+    }
+
+    this.currentInput = {
+        zoneset: null,
+        curves: [],
+        well: {
+            topDepth: 0,
+            bottomDepth: 10000,
+        }
+    }
+    function updateTrack(config) {
+        let timerHandler = null;
+        if(!self.logTrackProps.controller) {
+            timerHandler = setInterval(function() {
+                if(self.logTrackProps.controller) {
+                    clearInterval(timerHandler);
+                    updateTrack();
+                } else {
+                    console.log('not ready yet');
+                }
+            }, 100);
+        } else {
+            // Ready for update track
+            console.log('ready for update track');
+            updateFunction(config);
+        }
+
+        function updateFunction(config) {
+            if(config.curves) {
+                self.currentInput.well = utils.findWellByCurve(config.curves[0].idCurve);
+                async.eachSeries(config.curves, function(curveProps) {
+                    wiApiService.dataCurve(curveProps.idCurve, function(dataCurve) {
+                        let controller = self.logTrackProps.controller;
+                        controller.addCurveToTrack(controller.viTrack, dataCurve, curveProps);
+                    })
+                })
+            } 
+        }
+    }
+    this.onShowTrackButtonClicked = function() {
+        self.showWFControlLine = !self.showWFControlLine;
+        console.log('task config: ', self.taskConfig);
+        // get input map for hard code data
+        let inputMap = self.taskConfig.inputData.map(d => {
+            let tmp =  {
+                inputs: d.children[0].children.map(c => c.data.value),
+                parameters: d.children[1].children.map(c => {
+                    return {
+                        endDepth: c.endDepth,
+                        startDepth: c.startDepth,
+                        param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                    }
+                }),
+                idDataset: d.idDataset,
+                idWell: d.wellProps.idWell,
+                dataset: d.dataset
+            };
+
+            tmp.parameters.step = parseFloat(d.wellProps.step);
+            tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
+            tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
+            return tmp;
+        });
+        console.log('input map: ', inputMap);
+        let config = {};
+        let promises = [];
+        promises.push(new Promise(function(resolve) {
+            config.curves = inputMap[0].inputs.map(node => node.properties);
+            resolve();
+        }))
+        Promise.all(promises)
+            .then(function() {
+                updateTrack(config);
+            });
+    }
 }
 
 const app = angular.module(moduleName, []);
@@ -1071,7 +1183,7 @@ app.component(name, {
     transclude: true,
     bindings: {
         name: "@",
-        idTask: "<"
+        id: "<"
     }
 });
 

@@ -261,7 +261,7 @@ module.exports.putTabRightWithModel = function (model, isClosable = true) {
             html: htmlTemplate,
             model: model
         },
-        title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name} - (${well.properties.name})</span>`
+        title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name}${well ? ' - ( ' + well.properties.name + ')':''}</span>`
     });
     let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
     historyState.putPlotToHistory(model.type, model.id);

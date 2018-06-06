@@ -1,11 +1,11 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, currentTrack, wiApiService, callback) {
-    function ModalController($scope, wiComponentService, close) {
+module.exports = function (ModalService, viTrack, callback) {
+    function ModalController($scope, wiComponentService, wiApiService, close) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        console.log("Depth track", currentTrack);
-        this.props = currentTrack.getProperties();
+        console.log("Depth track", viTrack);
+        this.props = viTrack.getProperties();
         console.log('props1', this.props.width, this.props);
 
         this.props.width = utils.pixelToInch(this.props.width);
@@ -18,11 +18,14 @@ module.exports = function (ModalService, currentTrack, wiApiService, callback) {
         }
 
         function updateDepthTrack() {
-            utils.editDepthTrack(self.props, wiApiService);
-            let newProps = angular.copy(self.props);
-            newProps.width = utils.inchToPixel(self.props.width);
-            currentTrack.setProperties(newProps);
-            currentTrack.doPlot(true);
+            // utils.editDepthTrack(self.props, wiApiService);
+            wiApiService.editDepthTrack(self.props, function(res) {
+                self.props = res;
+                let newProps = angular.copy(self.props);
+                newProps.width = utils.inchToPixel(self.props.width);
+                viTrack.setProperties(newProps);
+                viTrack.doPlot(true);
+            })
         };
         this.onApplyButtonClicked = function () {
             updateDepthTrack();

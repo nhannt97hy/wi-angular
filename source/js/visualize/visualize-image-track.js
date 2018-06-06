@@ -255,6 +255,7 @@ ImageTrack.prototype.highlightHeader = function(drawing) {
         .style('background-color', drawing == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'white');
 }
 
+/****************** MOVE TO SUPPER CLASS ************************
 ImageTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let svg = this.svgContainer;
@@ -346,3 +347,4 @@ ImageTrack.prototype.drawTooltipText = function(depth, showDepth) {
 ImageTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
+****************** END MOVE TO SUPPER CLASS *********************/

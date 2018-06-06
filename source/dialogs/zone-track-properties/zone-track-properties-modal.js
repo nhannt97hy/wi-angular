@@ -1,25 +1,38 @@
 let helper = require('./DialogHelper');
 
-module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
+// module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties, callback) {
+module.exports = function (ModalService, trackComponent, callback) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let wiLogplotModel = wiD3Ctrl.wiLogplotCtrl.getLogplotModel();
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        let viZoneTrack, wiD3ZoneTrack;
-        let props = zoneTrackProperties || {
-            showTitle: true,
-            title: "New Zone",
-            topJustification: "center",
-            color: '#ffffff',
-            width: 1,
-            parameterSet: null
+        let viZoneTrack = trackComponent.controller ? trackComponent.controller.viTrack : null;
+        this.wellProps = trackComponent.controller ? trackComponent.controller.getWellProps() : null;
+
+        this.getAllWells = function() {
+            let logplotProps = utils.findLogplotModelById(trackComponent.idPlot).properties;
+            let projectModel = utils.getModel('project', logplotProps.idProject);
+            return projectModel.children.filter((child) => {
+                return child.type == 'well'
+            }).map(well => well.properties);
         }
+
+        this.onWellChanged = function() {
+            refreshZoneSets();
+        }
+
+        // let props = zoneTrackProperties || {
+        //     showTitle: true,
+        //     title: "New Zone",
+        //     topJustification: "center",
+        //     color: '#ffffff',
+        //     width: 1,
+        //     parameterSet: null
+        // }
+        let props = viZoneTrack ? viZoneTrack.getProperties() : trackComponent;
+        props.width = viZoneTrack ? utils.pixelToInch(props.width) : props.width;
         console.log(props);
-        if (props.idZoneTrack) {
-            wiD3ZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props);
-            viZoneTrack = wiD3ZoneTrack.viTrack
-        }
+        // if (props.idZoneTrack) viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
         this.showTitle = props.showTitle;
         this.title = props.title;
         this.topJustification = props.topJustification.toLowerCase();
@@ -30,19 +43,21 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
         this.zoomFactor = props.zoomFactor;
 
         function refreshZoneSets() {
-            wiApiService.listZoneSet(wiLogplotModel.properties.idWell, function (zoneSets) {
-                $timeout(function(){
-                    $scope.$apply(function () {
-                        self.zoneSets = zoneSets;
+            if(self.wellProps) {
+                wiApiService.listZoneSet(self.wellProps.idWell, function (zoneSets) {
+                    $timeout(function(){
+                        $scope.$apply(function () {
+                            self.zoneSets = zoneSets;
+                        });
                     });
                 });
-            });
+            }
         }
         refreshZoneSets();
         this.idZoneSet = props.idZoneSet;
         // Dialog buttons
         this.createZoneSet = function () {
-            utils.createZoneSet(wiLogplotModel.properties.idWell, function (zoneSetReturn) {
+            utils.createZoneSet(self.wellProps.idWell, function (zoneSetReturn) {
                 refreshZoneSets();
                 self.idZoneSet = zoneSetReturn.idZoneSet;
             });
@@ -65,30 +80,46 @@ module.exports = function (ModalService, wiD3Ctrl, zoneTrackProperties) {
                 parameterSet: self.parameterSet,
                 idZoneSet: self.idZoneSet,
             })
-            if (props.idZoneTrack) {
-                wiApiService.editZoneTrack(props, function () {
+            if (viZoneTrack) {
+                const request = {
+                    idPlot: props.idPlot,
+                    idZoneTrack: props.idZoneTrack,
+                    showTitle: props.showTitle,
+                    title: props.title,
+                    topJustification: props.topJustification,
+                    color: props.color,
+                    width: props.width,
+                    zoomFactor: props.zoomFactor,
+                    parameterSet: props.parameterSet,
+                    idZoneSet: props.idZoneSet,
+                }
+                wiApiService.editZoneTrack(request, function () {
                     const viZoneTrackProps = Object.assign({}, props, {
                         width: utils.inchToPixel(props.width)
                     })
                     viZoneTrack.setProperties(viZoneTrackProps);
-                    if (zoneSetChanged) {
-                        wiApiService.getZoneSet(viZoneTrack.idZoneSet, function (zoneset) {
-                            viZoneTrack.removeAllZones();
-                            for (let zone of zoneset.zones) {
-                                wiD3ZoneTrack.addZoneToTrack(viZoneTrack, zone);
-                            }
-                        })
-                    }
-                    viZoneTrack.doPlot(true);
+                    
+                    trackComponent.controller.update();
+
+                    // if (zoneSetChanged) {
+                    //     wiApiService.getZoneSet(viZoneTrack.idZoneSet, function (zoneset) {
+                    //         viZoneTrack.removeAllZones();
+                    //         for (let zone of zoneset.zones) {
+                    //             trackComponent.controller.addZoneToTrack(viZoneTrack, zone);
+                    //         }
+                    //     })
+                    // }
+                    // viZoneTrack.doPlot(true);
                 });
             } else {
                 wiApiService.createZoneTrack(props, function (res, err) {
                     if (err) return;
                     props.idZoneTrack = res.idZoneTrack;
-                    wiD3Ctrl.pushZoneTrack(props);
+					callback && callback(props);
                     setTimeout(() => {
-                        viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
-                    });
+                        // viZoneTrack = wiD3Ctrl.getComponentCtrlByProperties(props).viTrack;
+                        viZoneTrack = trackComponent.controller.viTrack;
+                    }, 100);
                 })
             }
             cb && cb();

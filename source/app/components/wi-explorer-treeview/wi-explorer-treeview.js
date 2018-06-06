@@ -23,32 +23,46 @@ function WiExpTreeController(
             helper: function (event) {
                 selectedObjs = $(`#WiExplorertreeview .wi-parent-node[type='curve']`).filter('.item-active').clone();
                 let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
+                let dom = null;
                 if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) {
-                    return $(event.currentTarget).find('div:nth-child(2)').clone();
+                    dom = $(event.currentTarget).find('div:nth-child(2)').clone();
+                    dom.css('pointer-events', 'none');
+                } else {
+                    dom = $('<div/>');
+                    dom.css('pointer-events', 'none');
+                    dom.append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
                 }
-                return $('<div/>').append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+                return dom;
             },
             start: function (event, ui) {
                 dragMan.dragging = true;
-                d3.selectAll('.vi-track-plot-container').style('z-index', 1);
+                // d3.selectAll('.vi-track-container').style('z-index', 1);
             },
             stop: function (event, ui) {
                 dragMan.dragging = false;
                 const idDataset = dragMan.idDataset;
                 let wiD3Ctrl = dragMan.wiD3Ctrl;
-                let track = dragMan.track;
+                let trackCtrl = dragMan.track;
+                trackCtrl = (trackCtrl && trackCtrl.verifyDroppedIdCurve) ? trackCtrl : null;
                 let wiSlidingBarCtrl = dragMan.wiSlidingBarCtrl;
                 dragMan.idDataset = null;
                 dragMan.wiD3Ctrl = null;
                 dragMan.track = null;
                 dragMan.wiSlidingBarCtrl = null;
-                d3.selectAll('.vi-track-plot-container').style('z-index', 'unset');
-                function handleDrop(idCurves) {
+                // d3.selectAll('.vi-track-container').style('z-index', 'unset');
+                let idCurves = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
+                if (idCurves.length) {
+                    handleDrop(idCurves);
+                } else {
+                    let idCurve = parseInt($(event.target).attr('data'));
+                    handleDrop([idCurve]);
+                }
+                async function handleDrop(idCurves) {
                     if (idDataset) {
-                        const curveModels = idCurves.map(idCurve => utils.getModel('curve', idCurve));
-                        utils.copyCurve(curveModels);
-                        const datasetModel = utils.getModel('dataset', idDataset)
-                        utils.pasteCurve(datasetModel);
+                        const curveModels = idCurves.map(idCurve => getModel('curve', idCurve));
+                        copyCurve(curveModels);
+                        const datasetModel = getModel('dataset', idDataset)
+                            pasteCurve(datasetModel);
                         return;
                     }
                     if (wiSlidingBarCtrl) {
@@ -57,7 +71,7 @@ function WiExpTreeController(
                         console.log('drop curve into slidingBar', errorCode);
                         if (errorCode > 0) {
                             wiSlidingBarCtrl.createPreview(idCurve);
-                            let logplotModel = wiSlidingBarCtrl.logPlotCtrl.getLogplotModel();
+                            let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
                             let logplotRequest = angular.copy(logplotModel.properties);
                             logplotRequest.referenceCurve = idCurve;
                             wiApiService.editLogplot(logplotRequest, function () {
@@ -69,44 +83,45 @@ function WiExpTreeController(
                         }
                         return;
                     }
-                    if (wiD3Ctrl && !track) {
-                        const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
-                        if (errorCode > 0) {
-                            wiD3Ctrl.addLogTrack(null, function (logTrackController) {
-                                async.eachSeries(idCurves, (idCurve, next) => {
-                                    const viTrack = logTrackController.viTrack;
-                                    wiApiService.createLine({
-                                        idTrack: viTrack.id,
-                                        idCurve: idCurve,
-                                        orderNum: viTrack.getCurveOrderKey()
-                                    }, function (line) {
-                                        let lineModel = utils.lineToTreeConfig(line);
-                                        utils.getCurveData(wiApiService, idCurve, function (err, data) {
-                                            if (!err) logTrackController.addCurveToTrack(viTrack, data, lineModel.data);
-                                            next(err);
-                                        });
-                                    });
-                                });
+                    if (wiD3Ctrl && !trackCtrl) {
+                        // const errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurves[0]);
+                        // if (errorCode > 0) {
+                        let logTrackProps = await wiD3Ctrl.addLogTrack();
+                        async.each(idCurves, (idCurve, next) => {
+                            wiApiService.createLine({
+                                idTrack: logTrackProps.idTrack,
+                                idCurve: idCurve,
+                                orderNum: 'm'
+                            }, function (line) {
+                                next();
                             });
-                        } else if (errorCode === 0) {
-                            toastr.error("Cannot drop curve from another well");
-                        }
+                        }, (err) => {
+                            wiD3Ctrl.reloadTrack(logTrackProps);
+                        });
+                        // } else if (errorCode === 0) {
+                        //     toastr.error("Cannot drop curve from another well");
+                        // }
                         return;
                     }
-                    if (wiD3Ctrl && track) {
+                    if (wiD3Ctrl && trackCtrl) {
                         async.eachSeries(idCurves, (idCurve, next) => {
-                            let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                            // let errorCode = wiD3Ctrl.verifyDroppedIdCurve(idCurve);
+                            let errorCode = trackCtrl.verifyDroppedIdCurve(idCurve);
                             if (errorCode > 0) {
                                 wiApiService.createLine({
-                                    idTrack: track.id,
+                                    // idTrack: track.id,
+                                    idTrack: trackCtrl.viTrack.id,
                                     idCurve: idCurve,
-                                    orderNum: track.getCurveOrderKey()
+                                    orderNum: trackCtrl.viTrack.getCurveOrderKey()
                                 }, function (line) {
                                     let lineModel = utils.lineToTreeConfig(line);
-                                    utils.getCurveData(wiApiService, idCurve, function (err, data) {
-                                        if (!err) wiD3Ctrl.getComponentCtrlByViTrack(track).addCurveToTrack(track, data, lineModel.data);
-                                        next(err);
-                                    });
+                                    trackCtrl.update();
+                                    next();
+                                    // TO BE REMOVED
+                                    // getCurveData(wiApiService, idCurve, function (err, data) {
+                                    //     trackCtrl.addCurveToTrack(trackCtrl.viTrack, data, lineModel.data);
+                                    //     next(err);
+                                    // });
                                 });
                             }
                             else if (errorCode === 0) {
@@ -115,13 +130,6 @@ function WiExpTreeController(
                             return;
                         })
                     }
-                }
-                let idCurves = selectedObjs.map(function () { return parseInt($(this).attr('data')) }).get();
-                if (idCurves.length) {
-                    handleDrop(idCurves);
-                } else {
-                    let idCurve = parseInt($(event.target).attr('data'));
-                    handleDrop([idCurve]);
                 }
             },
             appendTo: 'body',

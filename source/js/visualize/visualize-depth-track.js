@@ -196,6 +196,7 @@ DepthTrack.prototype.updateScale = function (scale) {
     this.updateHeader();
 }
 
+/******************** MOVE TO SUPER CLASS **********************
 DepthTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let svg = this.svgContainer;
@@ -224,7 +225,11 @@ DepthTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
 DepthTrack.prototype.removeTooltipLines = function() {
     this.svgContainer.selectAll('line.tooltip-line').remove();
 }
-
+DepthTrack.prototype.removeTooltipText = function() {
+    this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
+}
+******************** END OF MOVE TO SUPPER CLASS *****************/
+/******************* OVERRIDE SUPER CLASS ********************/
 DepthTrack.prototype.drawTooltipText = function(depth, showDepth) {
     let plotMouse = d3.mouse(this.plotContainer.node());
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
@@ -276,6 +281,3 @@ DepthTrack.prototype.drawTooltipText = function(depth, showDepth) {
     tooltip.raise();
 }
 
-DepthTrack.prototype.removeTooltipText = function() {
-    this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
-}

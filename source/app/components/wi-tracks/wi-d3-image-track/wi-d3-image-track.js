@@ -2,13 +2,37 @@ const componentName = 'wiD3ImageTrack';
 const moduleName = 'wi-d3-image-track';
 const componentAlias = 'wiD3Track';
 
+let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
+Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
+Controller.prototype.constructor = Controller;
+
 function Controller ($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+    wiD3AbstractTrack.call(this, wiApiService, wiComponentService);
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let props = null;
-
+    let contextMenu = [{
+        name: "TrackProperties",
+        label: "Track Properties",
+        icon: 'track-properties-16x16',
+        handler: function() {
+            self.openPropertiesDialog()
+        }
+    }, {
+        separator: '1'
+    }, {
+        name: "AddImage",
+        label: "Add Image",
+        icon: "image-16x16",
+        handler: function () {
+            self.viTrack.setMode('AddImageZone');
+        }
+    }, {
+        separator: '1'
+    }];
+    /*
     this.showContextMenu = function (event) {
         if(self.isImageZoneRightClicked) {
             _imageZoneOnRightClick();
@@ -27,23 +51,32 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
         }
     }
+    */
+    this.getContextMenu = function () {
+        if (self.isImageZoneRightClicked) {
+            self.isImageZoneRightClicked = false;
+            return _getImageZoneContextMenu();
+        } else {
+            return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
+        }
+    }
     this.openPropertiesDialog = function () {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack.getProperties();
-        track.isCreated = true;
-        DialogUtils.imageTrackPropertiesDialog(ModalService, self.wiD3Ctrl.wiLogplotCtrl, track, function (props) {
+        let viTrack = self.viTrack;
+        let trackProps = viTrack.getProperties();
+        trackProps.isCreated = true;
+        DialogUtils.imageTrackPropertiesDialog(ModalService, trackProps, function (props) {
             if (props) {
-                _currentTrack.removeAllDrawings();
-                props.idImageTrack = _currentTrack.id;
+                viTrack.removeAllDrawings();
+                props.idImageTrack = viTrack.id;
                 console.log(props);
                 wiApiService.editImageTrack(props, function (data) {
                     $timeout(function () {
                         data.width = Utils.inchToPixel(data.width);
-                        _currentTrack.setProperties(data);
+                        viTrack.setProperties(data);
                         for (let img of data.image_of_tracks) {
-                            self.addImageZoneToTrack(_currentTrack, img);
+                            self.addImageZoneToTrack(viTrack, img);
                         }
-                        _currentTrack.doPlot(true);
+                        viTrack.doPlot(true);
                     });
                 });
             }
@@ -58,14 +91,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.plotImageZone(imgzone);
         track.rearrangeHeaders();
         track.onImageZoneMouseDown(imgzone, function() {
-            self.wiD3Ctrl.setCurrentTrack(track);
             if (d3.event.button == 2) {
                 self.isImageZoneRightClicked = true;
                 // _imageZoneOnRightClick();
             }
         });
         track.onImageZoneHeaderMouseDown(imgzone, function() {
-            self.wiD3Ctrl.setCurrentTrack(track);
             let depthRange = imgzone.getDepthRange();
             let rangeValue = depthRange[1] - depthRange[0];
             depthRange[0] -= rangeValue * 0.5;
@@ -98,14 +129,39 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         return imgzone;
     }
-
+    this.onTrackKeyPressCallback = function () {
+        if(!d3.event) return;
+        let track = self.viTrack;
+        switch(d3.event.key) {
+            case 'Backspace':
+            case 'Delete':
+                let drawing = track.getCurrentDrawing();
+                if (!drawing) return;
+                if (drawing.isImageZone()) {
+                    // Send api before deleting
+                    wiApiService.removeImage(drawing.idImageOfTrack, function () {
+                        track.removeDrawing(drawing);
+                    })
+                }
+            case 'Escape':
+                // Bug
+                if (track && track.setMode) track.setMode(null);
+                return;
+        }
+    }
     this.$onInit = function () {
+        wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
     }
     this.onReady = function () {
-        self.viTrack = createVisualizeImageTrack(getProperties());
-        self.wiD3Ctrl.subscribeTrackCtrlWithD3Ctrl(self);
-
+        self.viTrack = createVisualizeImageTrack(self.getProperties());
+        self.registerTrackCallback();
+        self.registerTrackHorizontalResizerDragCallback();
+        self.viTrack.on('keydown', self.onTrackKeyPressCallback);
+        self.registerTrackMouseEventHandlers();
+        self.getProperties().controller = self;
+        if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
+        
         wiApiService.getImagesOfTrack(self.viTrack.id, function (images) {
             for (let img of images) {
                 self.addImageZoneToTrack(self.viTrack, img);
@@ -194,7 +250,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                     }
                                     self.drawImageZone(imgzone, imgProps, isNewDraw);
                                     track.onImageZoneHeaderMouseDown(imgzone, function() {
-                                        self.wiD3Ctrl.setCurrentTrack(track);
                                         let depthRange = imgzone.getDepthRange();
                                         let rangeValue = depthRange[1] - depthRange[0];
                                         depthRange[0] -= rangeValue * 0.5;
@@ -203,7 +258,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                         self.wiD3Ctrl.setDepthRange(depthRange);
                                         self.wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
                                         if (d3.event.button == 2) {
-                                            _imageZoneOnRightClick();
+                                            self.isImageZoneRightClicked = true;
+                                            // _imageZoneOnRightClick();
                                         }
                                     });
                                     imgzone.doPlot();
@@ -224,8 +280,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let config = angular.copy(imageTrack);
         config.id = imageTrack.idImageTrack;
         config.name = imageTrack.title;
-        config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
-        config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+
+        // TO BE REMOVED
+        // config.yStep = parseFloat(self.wiD3Ctrl.getWellProps().step);
+        // config.offsetY = parseFloat(self.wiD3Ctrl.getWellProps().topDepth);
+
         config.width = Utils.inchToPixel(imageTrack.width);
         config.wiComponentService = wiComponentService;
         config.bgColor = imageTrack.background;
@@ -235,22 +294,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.putComponent('vi-image-track-' + config.id, track);
         return track;
     }
-    function getProperties() {
-        if(!props) {
-            props = self.wiD3Ctrl.trackComponents.find(function(track) { return track.name == self.name}).props;
-        }
-        return props;
-    }
     function showImage() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack;
-        let imgzone = track.getCurrentImageZone();
+        let imgzone = self.viTrack.getCurrentImageZone();
         DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), self.wiD3Ctrl.trackComponents, function () {
         });
     }
     function imageProperties() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let track = _currentTrack;
+        let viTrack = self.viTrack;
+        let track = viTrack;
         let imgzone = track.getCurrentImageZone();
         imgzone.setProperties({
             done: true
@@ -268,7 +319,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 		self.drawImageZone(imgzone, imgProps, false);
                         imgzone.doPlot();
                         track.onImageZoneHeaderMouseDown(imgzone, function() {
-                            self.wiD3Ctrl.setCurrentTrack(track);
                             let depthRange = imgzone.getDepthRange();
                             let rangeValue = depthRange[1] - depthRange[0];
                             depthRange[0] -= rangeValue * 0.5;
@@ -288,9 +338,32 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
         });
     }
-    function _imageZoneOnRightClick() {
-        let _currentTrack = self.wiD3Ctrl.getCurrentTrack();
-        let imgzone = _currentTrack.getCurrentImageZone();
+    function _getImageZoneContextMenu() {
+        let viTrack = self.viTrack;
+        let imgzone = viTrack.getCurrentImageZone();
+        return [
+            {
+                name: "ImageProperties",
+                label: "Image Properties",
+                icon: "imgzone-edit-16x16",
+                handler: imageProperties
+            }, {
+                name: "ShowImage",
+                label: "Show Image",
+                icon: "imgzone-show-16x16",
+                handler: showImage
+            }, {
+                name: "RemoveImage",
+                label: "Remove Image",
+                icon: "imgzone-delete-16x16",
+                handler: function () {
+                    wiApiService.removeImage(imgzone.idImageOfTrack, function () {
+                        viTrack.removeImage(imgzone);
+                    });
+                }
+            }
+        ];
+        /*
         self.wiD3Ctrl.setContextMenu([
             {
                 name: "ImageProperties",
@@ -308,11 +381,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 icon: "imgzone-delete-16x16",
                 handler: function () {
                     wiApiService.removeImage(imgzone.idImageOfTrack, function () {
-                        _currentTrack.removeImage(imgzone);
+                        viTrack.removeImage(imgzone);
                     });
                 }
             }
         ]);
+        */
     }
     function _imageZoneOnDoubleClick() {
         imageProperties();
@@ -338,7 +412,10 @@ app.component(componentName, {
     transclude: true,
     bindings: {
         name: '@',
-        wiD3Ctrl: '<'
+        wiD3Ctrl: '<',
+        properties: '<',
+        minY: '<',
+        maxY: '<'
     }
 });
 exports.name = moduleName;

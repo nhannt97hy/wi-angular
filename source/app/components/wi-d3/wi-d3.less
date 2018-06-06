@@ -32,13 +32,14 @@ wi-d3 {
     .vi-track-vertical-resizer {
         display: flex;
         justify-content: center;
-        margin-left: -3px;
+        margin-left: -5px;
         width: 5px;
         z-index: 10;
         cursor: col-resize;
+        position: relative;
         div {
             width: 1px;
-            background-color: black;
+            //background-color: black;
         }
         &:hover {
             background: #33333333;
@@ -54,6 +55,11 @@ wi-d3 {
                 margin-left: -3px;
                 border-left: 0;
             }
+        }
+    }
+    .wi-d3-track-container:nth-last-child(2) {
+        .vi-track-vertical-resizer {
+            border-right: 1px solid black;
         }
     }
 }

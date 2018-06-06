@@ -5,6 +5,7 @@ let ViImage = require('./visualize-image');
 let Marker = require('./visualize-marker');
 let Annotation = require('./visualize-annotation');
 let Utils = require('./visualize-utils');
+let Zone = require('./visualize-zone');
 let Selection = require('./visualize-selection');
 
 module.exports = LogTrack;
@@ -92,7 +93,9 @@ LogTrack.prototype.getProperties = function() {
         showEndLabels: this.showEndLabels,
         displayType: Utils.capitalize(this.scale),
         labelFormat: this.labelFormat,
-        zoomFactor: this.zoomFactor
+        zoomFactor: this.zoomFactor,
+        idZoneSet: this.idZoneSet,
+        showZoneSet: this.showZoneSet
     }
 }
 
@@ -114,6 +117,8 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
     Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
     Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
+    Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);
+    Utils.setIfNotNull(this, 'showZoneSet', props.showZoneSet);
 }
 
 LogTrack.prototype.setMode = function(newMode) {
@@ -226,6 +231,11 @@ LogTrack.prototype.getMarkers = function() {
 LogTrack.prototype.getAnnotations = function() {
     return this.drawings.filter(function(d) {
         return d.isAnnotation();
+    })
+}
+LogTrack.prototype.getZones = function() {
+    return this.drawings.filter(function(d) {
+        return d.isZone();
     })
 }
 
@@ -372,12 +382,12 @@ LogTrack.prototype.addCurve = function(data, config) {
         config.line = {
             color: this.genColor(),
             width: 1,
-            dash: null
+            dash: [0]
         };
     }
     config._data = data;
-    config.yStep = config.yStep || this.yStep;
-    config.offsetY = config.offsetY || this.offsetY;
+    config.yStep = config.yStep; // || this.yStep;
+    config.offsetY = config.offsetY; // || this.offsetY;
     config.orderNum = config.orderNum || this.getCurveOrderKey();
 
     let curve = new Curve(config);
@@ -749,6 +759,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     this.getShadings().filter(s => s !== this.currentDrawing).forEach(s => s.lower());
     this.getImages().forEach(function(img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
+    this.getZones().forEach(zone => zone.lower());
     this.svgContainer.raise();
     this.axisContainer.lower();
 }
@@ -1073,6 +1084,7 @@ LogTrack.prototype.addCurveHeader = function(curve) {
             .text(function(d) { return d; });
 
     this.drawingHeaderContainer.selectAll('.vi-shading-header').raise();
+    this.drawingHeaderContainer.selectAll('.vi-zone-header').raise();
     return curveHeader;
 }
 
@@ -1107,6 +1119,8 @@ LogTrack.prototype.addShadingHeader = function(shading) {
         .style('position', 'absolute')
         .style('top', 0)
         .style('left', 0);
+
+    this.drawingHeaderContainer.selectAll('.vi-zone-header').raise();
 
     return header;
 }
@@ -1187,6 +1201,7 @@ LogTrack.prototype.plotMouseDownCallback = function() {
     }
 }
 
+/***************** MOVE TO SUPER CLASS ****************************
 LogTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let svg = this.svgContainer;
@@ -1288,10 +1303,12 @@ LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
 
+******************************** END MOVING TO SUPPER CLASS **************************/
+
 /**
  * Register event when drag curve
  */
-LogTrack.prototype.onCurveDrag = function (callbackDrop) {
+LogTrack.prototype.onCurveDrag = function (trackComponent, callbackDrop) {
     let self = this;
     function triggerClickPlot (event) {
         d3.event = event;
@@ -1304,7 +1321,7 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
     }
     $(this.plotContainer.node()).draggable({
         axis: 'x',
-        containment: self.root.node().parentNode.parentNode,
+        containment: self.root.node().parentNode.parentNode.parentNode,
         helper: function () {
             if (self.getCurrentCurve()) {
                 let currentCurve = self.getCurrentCurve();
@@ -1336,7 +1353,7 @@ LogTrack.prototype.onCurveDrag = function (callbackDrop) {
         tolerance: 'pointer',
         drop: function (event, ui) {
             let onCurveDrop = new Event('oncurvedrop');
-            onCurveDrop.desTrack = self;
+            onCurveDrop.desTrack = trackComponent;
             document.dispatchEvent(onCurveDrop);
         }
     });
@@ -1368,4 +1385,74 @@ LogTrack.prototype.addSelection = function(selectionConfig) {
     this.drawings.push(viSelection);
     viSelection.doPlot();
     return viSelection;
+}
+
+LogTrack.prototype.addZoneSet = function(zonesetConfig) {
+    let self = this;
+    console.log("zoneset to vi log track", zonesetConfig);
+    self.idZoneSet = zonesetConfig.idZoneSet;
+    self.addZoneSetHeader(zonesetConfig);
+    for(let zone of zonesetConfig.zones) {
+        self.addZone(zone);
+    }
+    self.plotAllDrawings();
+}
+
+LogTrack.prototype.removeAllZones = function() {
+    let self = this;
+    this.drawingHeaderContainer.selectAll('.vi-zone-header').remove();
+    this.drawings.filter(d => d.isZone())
+        .forEach(zone => {
+            self.removeZone(zone);
+        })
+}
+
+LogTrack.prototype.removeZone = function (zone) {
+    if(zone && zone.isZone()) 
+        this.removeDrawing(zone);
+}
+
+LogTrack.prototype.addZone = function(zoneConfig) {
+    let self = this;
+    // zoneConfig.idZoneTrack = this.id;
+    // if (!zoneConfig.fill) {
+    //     zoneConfig.fill = {
+    //         pattern: {
+    //             name: 'none',
+    //             background: this.genColor(),
+    //             foreground: 'white'
+    //         }
+    //     }
+    // }
+    // if (zoneConfig.minY == null) zoneConfig.minY = this.minY;
+    // if (zoneConfig.maxY == null) zoneConfig.maxY = this.maxY;
+    let zone = new Zone(zoneConfig);
+    zone.init(this.plotContainer);
+    zone.svgGroup.attr('fill-opacity', 0.5);
+    // zone.header = this.addZoneHeader(zone);
+    // zone.on('mousedown', function() {
+    //     self.drawingMouseDownCallback(zone);
+    // });
+    this.drawings.push(zone);
+    return zone;
+}
+LogTrack.prototype.addZoneSetHeader = function(zoneset) {
+    let self = this;
+    let header = this.drawingHeaderContainer.append('div')
+        .attr('class', 'vi-zone-header')
+        .style('border', this.HEADER_ITEM_BORDER_WIDTH + 'px solid black')
+        .style('margin-bottom', this.HEADER_ITEM_MARGIN_BOTTOM + 'px')
+        .on('mousedown', function() {
+        });
+
+    header.append('div')
+        .attr('class', 'vi-drawing-header-highlight-area vi-drawing-header-name vi-zone-header-name')
+        .text(zoneset.name);
+
+    let rect = header.node().getBoundingClientRect();
+    header.append('svg')
+        .attr('class', 'vi-drawing-header-fill vi-zone-header-fill')
+        .attr('width', rect.width)
+        .attr('height', rect.height);
+    return header;
 }
