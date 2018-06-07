@@ -568,9 +568,8 @@ function createCurveModel(curve) {
     curveModel.name = curve.name;
     curveModel.type = 'curve';
     curveModel.id = curve.idCurve;
-    curveModel.properties = curve;
     const listFamily = getListFamily() || [];
-    Object.assign(curveModel.properties, {
+    curveModel.properties = Object.assign({}, {
         idDataset: curve.idDataset,
         idCurve: curve.idCurve,
         idFamily: curve.idFamily,
@@ -579,7 +578,6 @@ function createCurveModel(curve) {
         unit: curve.unit,
         alias: curve.name
     });
-    // curveModel.datasetName = curve.dataset;
     curveModel.data = {
         childExpanded: false,
         icon: 'curve-16x16',
@@ -616,7 +614,6 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
             unit: curve.unit,
             alias: curve.name
         };
-        // curveModel.datasetName = curve.dataset;
         curveModel.data = {
             childExpanded: false,
             icon: 'curve-16x16',
@@ -625,7 +622,6 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
         };
         curveModel.lineProperties = curve.LineProperty;
         curveModel.curveData = null;
-        curveModel.parent = curve.dataset;
         return curveModel;
     } else {
         return curveModel;

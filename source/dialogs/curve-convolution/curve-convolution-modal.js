@@ -89,7 +89,7 @@ module.exports = function(ModalService, wiComponentService, isDeconvolution){
 
         this.onWellChanged();
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
         this.onRefresh = function() {
             self.applyingInProgress = false;

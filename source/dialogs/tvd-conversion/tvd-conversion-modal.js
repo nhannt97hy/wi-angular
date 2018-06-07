@@ -19,7 +19,7 @@ module.exports = function (ModalService, wiComponentService) {
         this.input = [];
         this.curvesData = [];
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);

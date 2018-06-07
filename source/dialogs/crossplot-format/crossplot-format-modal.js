@@ -254,7 +254,7 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         };
         this.drawIcon = utils.drawIcon;
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.checkLogStatus = function () {

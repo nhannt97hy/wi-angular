@@ -95,7 +95,7 @@ module.exports = function (ModalService, wiHistogramId, callback, cancelCallback
             }
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         function getTopFromWell() {

@@ -87,7 +87,7 @@ module.exports = function (ModalService, objectConfig, callback) {
             return inValid;
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.checkNameAvailable = function () {

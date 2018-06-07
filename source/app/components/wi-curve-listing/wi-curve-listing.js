@@ -72,18 +72,19 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         default:
                         let idCurve = self.dataSettings[self.currentIndex].setting.columns[col].data;
                         let curve = self.dataSettings[self.currentIndex].curves[idCurve];
-                        let _header = curve.name;
-                        let datasets = self.SelectedWell.children.filter(c => c.type == 'dataset');
-                        if (datasets.length > 1) {
-                            let cName = datasets.filter(d => {
-                                return d.children.find(
-                                    c => c.name == curve.name
-                                );
-                            });
-                            if (cName.length > 1)
-                                _header = curve.name + "(" + curve.datasetName + ")";
+                        let cModel = utils.getModel("curve", parseInt(idCurve));
+                        let _header = cModel.properties.name;
+                        let options = [];
+                        utils.visit(self.SelectedWell, function(_node, _options){
+                            if(_node.type == 'curve' && _node.data.label == _header){
+                                _options.push(_node);
+                                return false;
+                            }
+                        }, options)
+                        if (options.length > 1) {
+                            _header = cModel.properties.name + "(" + cModel.parent + ")";
                         }
-                        if(curve.modified) {
+                        if(curve) {
                             _header = '<i class="fa fa-exclamation" aria-hidden="true"></i>'+ _header;
                         }
                         return _header;
@@ -100,18 +101,33 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         rm_col: {
                             name: "Remove column(s)",
                             callback: function() {
-                                let selected = dataCtrl.getSelected()[0];
-                                let idx = Math.min(selected[1], selected[3]);
-                                let len =
-                                    Math.abs(selected[1] - selected[3]) + 1;
-                                self.dataSettings[self.currentIndex].setting.columns.splice(idx, len);
+                                let selected = dataCtrl.getSelected();
+                                let cols = new Set();
+                                selected.forEach(sel => {
+                                    let min = Math.min(sel[1], sel[3]);
+                                    let max = Math.max(sel[1], sel[3]);
+                                    let i = min;
+                                    while(i <= max){
+                                        cols.add(i);
+                                        i++;
+                                    }
+                                })
+                                let rm = Array.from(cols).sort((a, b) => b - a);
+                                rm.forEach(idx => {
+                                    idx != 0 && self.dataSettings[self.currentIndex].setting.columns.splice(idx, 1);
+                                })
                                 dataCtrl.updateSettings(
                                     self.dataSettings[self.currentIndex].setting
                                 );
                             },
                             disabled: function() {
                                 let selected = dataCtrl.getSelected();
-                                return !selected || (selected[0][1] == 0 ||selected[0][3] == 0);
+                                if(!selected) return true;
+                                return selected.every(sel => {
+                                    if((sel[1] == 0 && sel[3] == 0)){
+                                        return true;
+                                    }
+                                })
                             }
                         },
                         hsep1: "---------",
@@ -130,16 +146,15 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                         readOnly: true
                     }
                 ],
-                beforeCopy: function(data, coords){
-                    console.log(data, coords);
-                },
+                // beforeCopy: function(data, coords){
+                //     console.log(data, coords);
+                // },
                 copyPaste: {
                     columnsLimit: 1000,
                     rowsLimit: length
                 },
                 renderAllRows: false,
                 beforeChange: function(changes, source) {
-                    // console.log(changes);
                     changes = changes.map(r => {
                         r[3] = '' + parseFloat(r[3]);
                         return r;
@@ -150,7 +165,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     if (change && change.length) {
                         change.forEach(c => {
                             if (c[2] != c[3])
-                                self.dataSettings[self.currentIndex].curves[c[1]].modified = true;
+                                self.dataSettings[self.currentIndex].curves[c[1]] = true;
                         });
                         dataCtrl.render();
                     }
@@ -240,14 +255,14 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         switch(model.type){
             case 'dataset':
             idWell = model.properties.idWell;
-            if(self.dataSettings[idWell]){
-                let _current = self.dataSettings[idWell];
-                for (const [key, value] of Object.entries(_current.curves)){
-                    if(value.idDataset == model.id){
-                        value.datasetName = model.name;
-                    }
-                }
-            }
+            // if(self.dataSettings[idWell]){
+            //     let _current = self.dataSettings[idWell];
+            //     for (const [key, value] of Object.entries(_current.curves)){
+            //         if(value.idDataset == model.id){
+            //             value.datasetName = model.name;
+            //         }
+            //     }
+            // }
             if(idWell == self.currentIndex){
                 getWellConfig();
                 dataCtrl.render();
@@ -256,10 +271,10 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
 
             case 'curve':
             idWell = utils.findWellByCurve(model.id).id;
-            if(self.dataSettings[idWell]){
-                let _current = self.dataSettings[idWell];
-                if (_current.curves[model.id]) _current.curves[model.id].name = model.name;
-            }
+            // if(self.dataSettings[idWell]){
+            //     let _current = self.dataSettings[idWell];
+            //     if (_current.curves[model.id]) _current.curves[model.id].name = model.name;
+            // }
             if(idWell == self.currentIndex){
                 getWellConfig();
                 dataCtrl.render();
@@ -285,7 +300,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             let _current = self.dataSettings[idWell];
             if(_current.curves.hasOwnProperty(curve.idCurve)){
                 console.log('WCL overwrite data curve');
-                _current.curves[curve.idCurve].modified = false;
+                _current.curves[curve.idCurve] = false;
                 _current.setting.data.forEach((r, i) => {
                     r[curve.idCurve] = curve.data[i] || NaN;
                 })
@@ -293,6 +308,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.keyEventandler = function(event) {
+        if(self.visualizationMode == "Statistic") return;
         if (event.ctrlKey && event.keyCode == 71) {//Ctrl + g
             event.preventDefault();
             if(self.goToWidgetOpened) return;
@@ -401,7 +417,6 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 if (ui.draggable[0].className.includes("modal-content")) return;
                 let idCurve = $(ui.draggable[0]).attr("data");
                 let _current = self.dataSettings[self.currentIndex];
-                let cModel = utils.getModel("curve", parseInt(idCurve));
                 function addCol() {
                     let curveIdx = _current.setting.columns.findIndex(
                         c => c.data == idCurve
@@ -430,13 +445,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     // curveData == null => need pollute through api)
                     wiApiService.dataCurve(parseInt(idCurve), function(result) {
                         if (!result) return;
-                        _current.curves[idCurve] = {
-                            id: parseInt(idCurve),
-                            name: cModel.name,
-                            idDataset: cModel.properties.idDataset,
-                            datasetName: cModel.parent,
-                            modified: false
-                        };
+                        _current.curves[idCurve] = false;
 
                         _current.setting.data.forEach(
                             (r, i) =>
@@ -476,11 +485,16 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
     this.onSaveButtonClicked = function() {
         console.log("onSaveButtonClicked");
         let modifiedCurves = [];
-        for (let c in self.dataSettings[self.currentIndex].curves) {
-            let curve = angular.copy(
-                self.dataSettings[self.currentIndex].curves[c]
-            );
-            if (curve.modified) {
+        let __curves = self.dataSettings[self.currentIndex].curves;
+        for (let c in __curves) {
+            if (__curves[c]) {
+                let cModel = utils.getModel("curve", parseInt(c));
+                let curve = {
+                    name: cModel.properties.name,
+                    datasetName: cModel.parent,
+                    id: cModel.properties.idCurve,
+                    idDataset: cModel.properties.idDataset
+                }
                 curve.data = self.dataSettings[self.currentIndex].setting.data.map(r => {
                     let tmp = parseFloat(r["" + curve.id]);
                     return isNaN(tmp) ? null : tmp;
@@ -492,13 +506,11 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             DialogUtils.saveCurvesDialog(ModalService, modifiedCurves, function(
                 savedCurves
             ) {
-                toastr.success("Save curve(s) successed!");
+                toastr.success(savedCurves.length + "/" + modifiedCurves.length + " curves saved!");
                 $timeout(function() {
                     savedCurves.forEach(curve => {
                         // check curve as saved
-                        self.dataSettings[self.currentIndex].curves[
-                            curve
-                        ].modified = false;
+                        __curves[curve] = false;
                     });
                     dataCtrl.render();
                 });
