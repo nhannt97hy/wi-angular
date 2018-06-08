@@ -12,7 +12,8 @@ module.exports = function (ModalService, zoneTrackProperties, callback) {
         this.showName = props.showName;
         this.name = props.name;
 
-        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
+        
         this.foreground = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill.pattern.foreground, function (colorStr) {
                 self.fill.pattern.foreground = colorStr;
@@ -21,6 +22,13 @@ module.exports = function (ModalService, zoneTrackProperties, callback) {
         this.background = function () {
             dialogUtils.colorPickerDialog(ModalService, self.fill.pattern.background, function (colorStr) {
                 self.fill.pattern.background = colorStr;
+            });
+        }
+        this.choosePattern = function(name) {
+            dialogUtils.fillPatternDialog(ModalService, name, self.fill.pattern.foreground, self.fill.pattern.background, function(_name) {
+                if(_name) {
+                    self.fill.pattern.name = _name;
+                }
             });
         }
         this.onApplyButtonClicked = function () {

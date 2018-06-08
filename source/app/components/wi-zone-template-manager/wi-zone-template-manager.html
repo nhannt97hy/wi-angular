@@ -58,12 +58,12 @@
                 <table class="text-on-table table table-bordered" ng-show="wiZoneTemplateManager.zoneTemplates.length!==0">
                     <thead>
                         <tr>
-                            <th style="width: 10%"></th>
-                            <th width="20%">Zone name</th>
-                            <th width="20%">Sample</th>
-                            <th width="15%">Background</th>
-                            <th width="15%">Foreground</th>
-                            <th width="20%">Pattern</th>
+                            <th style="width: 5%"></th>
+                            <th width="20%" style="text-align: center;">Zone name</th>
+                            <!-- <th width="20%">Sample</th> -->
+                            <th width="25%" style="text-align: center;">Background</th>
+                            <th width="25%" style="text-align: center;">Foreground</th>
+                            <th width="25%" style="text-align: center;">Pattern</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,23 +73,39 @@
                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
                             </td>
                             <td width="20%">
-                                <input type="text" ng-model="zone.name" class="form-control wi-form-control" ng-change="wiZoneTemplateManager.onZoneTemplateChanged($index);">
+                                <input type="text" ng-model="zone.name" class="form-control" 
+                                        ng-change="wiZoneTemplateManager.onZoneTemplateChanged($index);" 
+                                        style="height: auto;">
                             </td>
-                            <td width="20%">
+                            <!-- <td width="20%">
                                 <wi-canvas-rect name="{{zone.name}}" pattern="{{zone.pattern}}" foreground="{{zone.foreground}}" background="{{zone.background}}"
                                     width="80" height="20">
                                 </wi-canvas-rect>
-                            </td>
+                            </td> -->
 
-                            <td width="15%">
-                                <button ng-click="wiZoneTemplateManager.backgroundZoneTemplate($index);" ng-style="{'background-color':zone.background}" class="form-control wi-form-control width-80px height-20px thick-border">
+                            <td width="25%">
+                                <button ng-click="wiZoneTemplateManager.backgroundZoneTemplate($index);" 
+                                        ng-style="{'background-color':zone.background}" class="form-control wi-form-control thick-border"
+                                        style="width: 103px; height: 28px; margin: auto;">
                             </td>
-                            <td width="15%">
-                                <button ng-click="wiZoneTemplateManager.foregroundZoneTemplate($index);" ng-style="{'background-color':zone.foreground}" class="form-control wi-form-control width-80px height-20px thick-border">
+                            <td width="25%">
+                                <button ng-click="wiZoneTemplateManager.foregroundZoneTemplate($index);" 
+                                        ng-style="{'background-color':zone.foreground}" class="form-control wi-form-control thick-border"
+                                        style="width: 103px; height: 28px; margin: auto;">
                                 </button>
                             </td>
-                            <td width="20%">
-                                <ui-select theme="bootstrap" ng-model="zone.pattern" ng-change="wiZoneTemplateManager.onZoneTemplateChanged($index);" search-enabled="false">
+                            <td width="25%">
+                                <button ng-click="wiZoneTemplateManager.choosePattern($index)"
+                                            class="btn btn-default padding-0 thick-border">
+                                        <wi-canvas-rect name="row_{{$index}}" 
+                                                    pattern="{{zone.pattern}}" 
+                                                    width="100" height="26" 
+                                                    foreground="{{zone.foreground}}"
+                                                    background='{{zone.background}}'>
+                                        </wi-canvas-rect>
+                                    </button>
+                                </div>
+                                <!-- <ui-select theme="bootstrap" ng-model="zone.pattern" ng-change="wiZoneTemplateManager.onZoneTemplateChanged($index);" search-enabled="false">
                                     <ui-select-match>
                                         <wi-canvas-rect name="row_{{$index}}" pattern="{{zone.pattern}}" width="80" height="20">
                                         </wi-canvas-rect>
@@ -101,7 +117,7 @@
                                             </wi-canvas-rect>
                                         </div>
                                     </ui-select-choices>
-                                </ui-select>
+                                </ui-select> -->
                             </td>
                         </tr>
                     </tbody>

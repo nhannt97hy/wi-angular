@@ -18,19 +18,29 @@ module.exports = function (ModalService, callback) {
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);        
         this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         
-        this.backgroundZone = function (index) {
+        this.backgroundZone = function () {
             DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.background, function (colorStr) {
                 self.zone.fill.pattern.background = colorStr;
                 console.log('bg', self.zone.background);
             });
         };
 
-        this.foregroundZone = function (index) {
+        this.foregroundZone = function () {
             DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.foreground, function (colorStr) {
                 self.zone.fill.pattern.foreground = colorStr;
             });
         };
-
+        this.choosePattern = function() {
+            DialogUtils.fillPatternDialog(ModalService, 
+                                        self.zone.fill.pattern.name, 
+                                        self.zone.fill.pattern.foreground, 
+                                        self.zone.fill.pattern.background, 
+                                        function(_name) {
+                if(_name) {
+                    self.zone.fill.pattern.name = _name;
+                }
+            });
+        }
         this.onOkButtonClicked = function () {
            close(self.zone);
         };
