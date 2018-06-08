@@ -4,13 +4,15 @@ const moduleName = 'wi-api-service';
 var __USERINFO = {
     username: null,
     token: null,
-    refreshToken: null
+    refreshToken: null,
+    company: null
 };
 
 function getAuthInfo() {
     __USERINFO.username = window.localStorage.getItem('username');
     __USERINFO.token = window.localStorage.getItem('token');
     __USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
+    __USERINFO.company = window.localStorage.getItem('company');
 }
 getAuthInfo();
 
@@ -41,6 +43,7 @@ const INVENTORY_SERVICE = 'http://13.250.197.210';
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
+const COMPANY_LIST = '/company/list';
 const DATABASE_UPDATE = '/database/update';
 const REFRESH_TOKEN = '/refresh-token';
 
@@ -656,17 +659,21 @@ Service.prototype.delete = function (route, payload) {
 }
 */
 
+Service.prototype.getCompanyList = function (data, callback) {
+    this.post(COMPANY_LIST, data, callback, 'auth');
+};
+
 Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     this.post(LOGIN, data, callback, 'auth');
-}
+};
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     console.log(data);
     this.post(REGISTER, data, callback, 'auth');
-}
+};
 Service.prototype.createDatabase = function (data, callback) {
     this.post(DATABASE_UPDATE, data, callback);
 }

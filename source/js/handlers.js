@@ -58,13 +58,14 @@ exports.ShareProjectButtonClicked = function () {
     let wiComponentService = this.wiComponentService;
     let DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
     let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    let company = JSON.parse(window.localStorage.getItem('company'));
     if(project.owner){
         toastr.error("You can't share this project!");
     } else {
-        wiApiService.listGroup({}, function (groups) {
-            wiApiService.listUser({}, function (users) {
+        wiApiService.listGroup({idCompany: company.idCompany}, function (groups) {
+            wiApiService.listUser({idCompany: company.idCompany}, function (users) {
                 DialogUtils.shareProjectDialog(ModalService, function () {
-                }, groups, users);
+                }, groups, users, company);
             });
         });
     }

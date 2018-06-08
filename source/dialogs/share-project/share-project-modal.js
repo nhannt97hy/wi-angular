@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, callback, groups, users) {
+module.exports = function (ModalService, callback, groups, users, company) {
     function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -35,7 +35,7 @@ module.exports = function (ModalService, callback, groups, users) {
         }
 
         function reload() {
-            wiApiService.listGroup({}, function (groups) {
+            wiApiService.listGroup({idCompany: company.idCompany}, function (groups) {
                 $timeout(function () {
                     self.groups = groups;
                     preGroup();
@@ -302,7 +302,7 @@ module.exports = function (ModalService, callback, groups, users) {
                 input: ''
             };
             DialogUtils.promptDialog(ModalService, promptConfig, function (group) {
-                wiApiService.addUserGroup({name: group}, function (response) {
+                wiApiService.addUserGroup({name: group, idCompany: company.idCompany}, function (response) {
                     reload();
                 });
             });
