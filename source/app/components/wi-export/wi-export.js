@@ -1,7 +1,7 @@
 const componentName = 'wiExport';
 const moduleName = 'wi-export';
 
-function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnlineInvService) {
+function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, wiOnlineInvService) {
     let currentWell = '';
     let self = this;
     this.exportQueueItems = [];
@@ -17,6 +17,7 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiExport', self);
+        console.log('from', self.from);
     };
 
     // this.getProjectList = function (wiItemDropdownCtrl) {
@@ -552,6 +553,9 @@ app.component(componentName, {
     templateUrl: 'wi-export.html',
     controller: Controller,
     controllerAs: componentName,
+    bindings: {
+        from: "@"
+    }
 });
 
 exports.name = moduleName;

@@ -1,7 +1,7 @@
 const wiCanvasRectName = 'wiCanvasRect';
 const moduleName = 'wi-canvas-rect';
 
-function Controller(wiComponentService, $timeout) {
+function Controller(wiComponentService, wiPatternService, $timeout) {
     let self = this;
 
     this.$onInit = function () {
@@ -15,27 +15,22 @@ function Controller(wiComponentService, $timeout) {
     this.paint = function() {
         let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
         let canvasHelper = graph.CanvasHelper;
+
         let canvas = $('#' + self.name)[0];
         if(!canvas) return;
         let context = canvas.getContext('2d');
         if(!context) return;
         context.clearRect(0,0, canvas.width, canvas.height);
-        context.beginPath();
-        canvasHelper.createPattern2(
-            context, 
-            self.pattern, 
-            self.foreground, 
-            self.background,
-            function(img, option) {
-                context.fillStyle = context.createPattern(img, option);
-                context.rect(0, 0, self.width, self.height);
-                context.fill();
-            }
-        );
+        wiPatternService.createPattern(context, self.pattern, self.foreground, self.background, function(pattern) {
+            context.fillStyle = pattern;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        })
     }
     this.$onChanges = function(changesObj) {
         if(changesObj) {
-            self.paint();
+            $timeout(function() {
+                self.paint();
+            },50)
         }
     }
 

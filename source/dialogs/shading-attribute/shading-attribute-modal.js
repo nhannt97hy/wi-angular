@@ -46,7 +46,8 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
         if (this.shadingOptions.type == 'pair') this.shadingOptions.leftCurve = getLine(this.shadingOptions.idLeftLine);
         this.shadingOptions.rightCurve = getLine(this.shadingOptions.idRightLine);
 
-        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        // this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+        this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
 
         let customLimit = [{"id": -1, "name": "left"}, {"id": -2, "name": "right"}, {"id": -3, "name": "custom"}];
         this.leftLimit = customLimit.concat(self.curveList);
@@ -100,8 +101,6 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
             self.paletteName = Object.keys(self.paletteList);
         });
         this.patternDisplayType = !this.fillPatternOptions.fill.display;
-
-        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
         this.enableFill = function (idEnable, value) {
             $('#' + idEnable + ":button").attr("disabled", value);
@@ -203,7 +202,6 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
             });
         }
         this.negPositiveForeground = function () {
-            if(!self.fillPatternOptions.negativeFill.pattern.foreground) self.fillPatternOptions.negativeFill.pattern.name = 'basement';
             $timeout(function() {
                 DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.negativeFill.pattern.foreground, function (colorStr) {
                     self.fillPatternOptions.negativeFill.pattern.foreground = colorStr;
@@ -213,6 +211,27 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
         this.negPositiveBackground = function () {
             DialogUtils.colorPickerDialog(ModalService, self.fillPatternOptions.negativeFill.pattern.background, function (colorStr) {
                 self.fillPatternOptions.negativeFill.pattern.background = colorStr;
+            });
+        }
+        this.chooseFillPattern = function(name, foreground, background) {
+            DialogUtils.fillPatternDialog(ModalService, name, foreground, background, function(_name) {
+                if(_name) {
+                    self.fillPatternOptions.fill.pattern.name = _name;
+                }
+            });
+        }
+        this.choosePositivePattern = function(name, foreground, background) {
+            DialogUtils.fillPatternDialog(ModalService, name, foreground, background, function(_name) {
+                if(_name) {
+                    self.fillPatternOptions.positiveFill.pattern.name = _name;
+                }
+            });
+        }
+        this.chooseNegativePattern = function(name, foreground, background) {
+            DialogUtils.fillPatternDialog(ModalService, name, foreground, background, function(_name) {
+                if(_name) {
+                    self.fillPatternOptions.negativeFill.pattern.name = _name;
+                }
             });
         }
         this.correctFillingStyle = function() {
@@ -438,7 +457,14 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
                 self.variableShadingOptions.fill.varShading.customFills.content[index].background = colorStr;
             });
         };
-
+        this.chooseCustomPattern = function(index) {
+            let content = self.variableShadingOptions.fill.varShading.customFills.content[index];
+            DialogUtils.fillPatternDialog(ModalService, content.pattern, content.foreground, content.background, function(_name) {
+                if(_name) {
+                    self.variableShadingOptions.fill.varShading.customFills.content[index].pattern = _name;
+                }
+            });
+        }
         this.idx = null;
         this.setClickedRow = function(index){
             $scope.selectedRow = index;

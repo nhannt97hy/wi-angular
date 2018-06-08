@@ -137,6 +137,8 @@ let wiApiService = require('./wi-api-service');
 let wiOnlineInvService = require('./wi-online-inv-service');
 let wiMachineLearningApiService = require('./wi-machine-learning-api-service');
 let wiComponentService = require('./wi-component-service');
+let wiPatternService = require('./wi-pattern-service');
+
 
 let wiConditionNode = require('./wi-condition-node');
 
@@ -215,6 +217,8 @@ let app = angular.module('wiapp',
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
+        wiPatternService.name, 
+
         
 
         wiCanvasRect.name,
@@ -415,13 +419,14 @@ function restoreProject($timeout, wiApiService, ModalService) {
         }
     }
 }
-app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
+app.controller('AppController', function ($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService, wiPatternService) {
     let functionBindingProp = {
         $scope,
         wiComponentService,
         ModalService,
         wiApiService,
         wiOnlineInvService,
+        wiPatternService,
         $timeout
     };
     window.utils = utils;

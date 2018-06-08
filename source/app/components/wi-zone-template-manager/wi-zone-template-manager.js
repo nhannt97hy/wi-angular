@@ -54,7 +54,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.onZoneTemplateChanged(index);
         });
     };
-
+    this.choosePattern = function (index) {
+        DialogUtils.fillPatternDialog(ModalService, 
+                                    self.zoneTemplates[index].pattern, 
+                                    self.zoneTemplates[index].foreground, 
+                                    self.zoneTemplates[index].background, function(_name) {
+            if(_name) {
+                self.zoneTemplates[index].pattern = _name;
+                self.onZoneTemplateChanged(index);
+            }
+        });
+    }
     function refreshZoneTemplateList() {
         self.selectedZoneTemplate = [];
         wiApiService.listAllZoneByTemplate({template: self.selectedTemplate.name}, function(zones){
