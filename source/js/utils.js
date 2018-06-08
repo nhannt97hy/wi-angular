@@ -571,7 +571,7 @@ function createCurveModel(curve) {
     curveModel.type = 'curve';
     curveModel.id = curve.idCurve;
     const listFamily = getListFamily() || [];
-    curveModel.properties = Object.assign({}, {
+    curveModel.properties = Object.assign(curve, {
         idDataset: curve.idDataset,
         idCurve: curve.idCurve,
         idFamily: curve.idFamily,
@@ -589,7 +589,7 @@ function createCurveModel(curve) {
     };
     curveModel.lineProperties = curve.LineProperty;
     curveModel.curveData = null;
-    curveModel.parent = curve.dataset;
+    // curveModel.parent = curve.dataset;
     return curveModel;
 }
 
@@ -603,31 +603,33 @@ function curveToTreeConfig(curve, isDeleted, wellModel, datasetModel, treeRoot) 
         let _datasetModel = datasetModel || getModel('dataset', curve.idDataset, treeRoot);
         let _wellModel = wellModel || getModel('well', _.get(_datasetModel, 'properties.idWell'), treeRoot);
         curveModel.parentDataArr = [(_wellModel || {}).data, (_datasetModel || {}).data];
+        curveModel.parent = ((_datasetModel || {}).data || {}).label;
     });
     if (isDeleted) {
-        curveModel.name = 'curve-deleted-child';
+        // curveModel.name = 'curve-deleted-child';
         curveModel.type = 'curve-deleted-child';
-        curveModel.id = curve.idCurve;
-        curveModel.properties = {
-            idDataset: curve.idDataset,
-            idCurve: curve.idCurve,
-            idFamily: curve.idFamily,
-            name: curve.name,
-            unit: curve.unit,
-            alias: curve.name
-        };
-        curveModel.data = {
-            childExpanded: false,
-            icon: 'curve-16x16',
-            label: curve.name,
-            unit: curveModel.properties.unit
-        };
-        curveModel.lineProperties = curve.LineProperty;
-        curveModel.curveData = null;
-        return curveModel;
-    } else {
-        return curveModel;
+        // curveModel.id = curve.idCurve;
+        // curveModel.properties = {
+        //     idDataset: curve.idDataset,
+        //     idCurve: curve.idCurve,
+        //     idFamily: curve.idFamily,
+        //     name: curve.name,
+        //     unit: curve.unit,
+        //     alias: curve.name
+        // };
+        // curveModel.data = {
+        //     childExpanded: false,
+        //     icon: 'curve-16x16',
+        //     label: curve.name,
+        //     unit: curveModel.properties.unit
+        // };
+        // curveModel.lineProperties = curve.LineProperty;
+        // curveModel.curveData = null;
+        // return curveModel;
     }
+    // else {
+        return curveModel;
+    // }
 }
 
 exports.curveToTreeConfig = curveToTreeConfig;
@@ -664,29 +666,29 @@ function datasetToTreeConfig(dataset, isDeleted, wellModel, treeRoot) {
         datasetModel.parentData = wM.data;
     });
     if (isDeleted) {
-        datasetModel.name = "dataset-deleted-child";
+        // datasetModel.name = "dataset-deleted-child";
         datasetModel.type = "dataset-deleted-child";
-        datasetModel.id = dataset.idDataset;
-        datasetModel.properties = {
-            idWell: dataset.idWell,
-            idDataset: dataset.idDataset,
-            name: dataset.name,
-            datasetKey: dataset.datasetKey,
-            datasetLabel: dataset.datasetLabel
-        };
-        datasetModel.data = {
-            childExpanded: false,
-            icon: "curve-data-16x16",
-            label: dataset.name
-        };
+        // datasetModel.id = dataset.idDataset;
+        // datasetModel.properties = {
+        //     idWell: dataset.idWell,
+        //     idDataset: dataset.idDataset,
+        //     name: dataset.name,
+        //     datasetKey: dataset.datasetKey,
+        //     datasetLabel: dataset.datasetLabel
+        // };
+        // datasetModel.data = {
+        //     childExpanded: false,
+        //     icon: "curve-data-16x16",
+        //     label: dataset.name
+        // };
         datasetModel.parent = 'well' + dataset.idWell;
-        datasetModel.children = new Array();
-        if (!dataset.curves) return datasetModel;
+        // datasetModel.children = new Array();
+        // if (!dataset.curves) return datasetModel;
         return datasetModel;
     } else {
         if (!dataset.curves) return datasetModel;
         dataset.curves.forEach(function (curve) {
-            curve.dataset = dataset.name;
+            // curve.dataset = dataset.name;
             datasetModel.children.push(curveToTreeConfig(curve, false, wM, datasetModel));
         });
         return datasetModel;
