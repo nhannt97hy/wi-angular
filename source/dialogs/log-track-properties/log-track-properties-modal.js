@@ -102,17 +102,16 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.datasets = [];
         this.curvesArr = [];
 
-        /*
-        let zonesets = [];
+        // let zonesets = [];
         if(this.well) {
             this.well.children.forEach(function (child) {
                 if (child.type == 'dataset') self.datasets.push(child);
-                else if (child.type == 'zonesets') {
-                    child.children.forEach(c => {
-                        if(c.type == 'zoneset')
-                            zonesets.push(c);
-                    })    
-                }
+                // else if (child.type == 'zonesets') {
+                //     child.children.forEach(c => {
+                //         if(c.type == 'zoneset')
+                //             zonesets.push(c);
+                //     })    
+                // }
             });
         } else {
             let logplotProps = utils.findLogplotModelById(trackComponent.idPlot).properties;
@@ -132,6 +131,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                 }
             });
         }
+        /*
         let lastZoneSetId = this.props.general.idZoneSet;
         this.getZonesetList = function(wiItemDropdownCtrl) {
             $timeout(function() {

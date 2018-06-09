@@ -1120,7 +1120,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }, 100);
         } else {
             // Ready for update track
-            console.log('ready for update track');
+            console.log('ready for update track with config: ', config);
             updateFunction(config);
         }
 
@@ -1139,6 +1139,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     this.onShowTrackButtonClicked = function() {
         self.showWFControlLine = !self.showWFControlLine;
         console.log('task config: ', self.taskConfig);
+        if(!self.showWFControlLine) return;
         // get input map for hard code data
         let inputMap = self.taskConfig.inputData.map(d => {
             let tmp =  {
@@ -1164,8 +1165,17 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         let config = {};
         let promises = [];
         promises.push(new Promise(function(resolve) {
-            config.curves = inputMap[0].inputs.map(node => node.properties);
-            resolve();
+            let inputs = inputMap[0].inputs.map(node => node.properties);
+            async.eachSeries(inputs, function(inputCurve, callback) {
+                wiApiService.infoCurve(inputCurve.idCurve, function(curveInfo) {
+                    if(!config.curves || !Array.isArray(config.curves)) config.curves = [];
+                    config.curves.push(curveInfo);
+                    callback();
+                });
+            }, function(err) {
+                console.log('this is callback function');
+                resolve();
+            })
         }))
         Promise.all(promises)
             .then(function() {

@@ -428,7 +428,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.updateScale = function () {
         let trackPlot = $(`wi-logplot[id=${self.wiLogplotCtrl.id}] .vi-track-plot-container .vi-track-drawing`)[0];
         if (!trackPlot) return;
-        let trackPlotHeight = trackPlot.getAttribute('height');
+
+        // BUG: sometime trackPlotHeight = 0 because the svg element is not ready yet.
+        // let trackPlotHeight = trackPlot.getAttribute('height');
+        // FIXED(TO BE REVIEWED): use actual height of parent element instead
+        let trackPlotHeight = $(trackPlot.parentElement).height();
+
         let dpCm = Utils.getDpcm();
         let heightCm = trackPlotHeight / dpCm;
         let depthRange = this.getDepthRange();
@@ -448,6 +453,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         _setCurrentTrack(trackComponent);
     }
     this.setDepthRange = function (depthRange, notPlot) {
+        if(Number.isNaN(depthRange[0] || Number.isNaN(depthRange[1]))) return;
         self._minY = depthRange[0];
         self._maxY = depthRange[1];
     };
@@ -624,20 +630,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         .sort((track1, track2) => {
                             return track1.orderNum.localeCompare(track2.orderNum);
                         });
-                    //self.Tracks = tracks;
                     
                     let currentState = JSON.parse(plot.currentState);
                     let depthRange = [];
-                    if(currentState.top && currentState.bottom) {
+                    if(_.isNumber(currentState.top) && _.isNumber(currentState.bottom)) {
                         depthRange = [currentState.top, currentState.bottom];
                     } else {
+                        // default depth range for logplot (1/10 sliding bar)
                         depthRange = [self.getMinDepth(), self.getMaxDepth() / 10];
                     }
                     let wiSlidingBarCtrl = logplotCtrl.getSlidingbarCtrl();
-
-                    logplotCtrl.cropDisplay = plot.cropDisplay;
-                    wiSlidingBarCtrl.slidingBarState.top0 = currentState.top0;
-                    wiSlidingBarCtrl.slidingBarState.range0 = currentState.range0;
 
                     self._minY = depthRange[0];
                     self._maxY = depthRange[1];
@@ -701,6 +703,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let slidingBarWidth = $(`wi-slidingbar[name=${self.wiLogplotCtrl.name + "Slidingbar"}]`).width();
         self.contentWidth = $("#" + self.plotAreaId).width();
         self.sliderWidth = wholeWidth - slidingBarWidth - 56;
+        self.sliderWidth = self.sliderWidth < 0 ? 0:self.sliderWidth;
         if (!self.shouldShowSlider()) self.slider.noUiSlider.reset();
         self.slider.noUiSlider.updateOptions({}); // fire event 'update';
         $scope.safeApply();
