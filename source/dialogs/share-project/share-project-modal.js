@@ -2,16 +2,23 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback, groups, users, company) {
     function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
+        window.SP = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
         this.project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.groups = groups;
-        this.users = users;
-        this.selectedGroup = null;
-        this.selectedUser = null;
-        this.isSelectedGroup = false;
-        this.isSelectedUser = false;
+        this.users = [];
         this.idGroups = [];
         this.objects = null;
+
+        this.groupsConfig = [];
+        this.usersConfig = [];
+
+        this.selectGroupNode = {};
+        let topIdx = 0;
+        let selectionLength = 15;
+        let delta = 5;
 
         preGroup();
 
@@ -21,6 +28,45 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 user.isShared = !!tmp;
             });
         }
+        function addGroupNode (gr) {
+            let node = {
+                name: gr.name,
+                type: "group",
+                data: {
+                    childExpanded: true,
+                    label: gr.name,
+                    tooltip: gr.name,
+                    selected : false
+                }, 
+                actions: [{
+                    icon: gr.isShared ? "apply-16x16" : ""
+                    }],
+                properties: gr
+            }
+            return node;
+        }
+        function addUserNode (user) {
+            let node = {
+                name: user.username,
+                type: "user",
+                data: {
+                    childExpanded: true,
+                    label: user.username,
+                    tooltip: user.username
+                },
+                properties: user
+            }
+            return node;
+        }
+        function initUserConfig (users) {
+            let cutUsers = users.slice(0, selectionLength);
+            self.usersConfig = cutUsers.map(u => addUserNode(u));
+        }
+        function initGroupConfig (groups) {
+            let cutGroups = groups.slice(0, selectionLength);
+            self.groupsConfig = cutGroups.map(g => addGroupNode(g));
+        }
+        initGroupConfig(this.groups);
 
         function preGroup() {
             self.groups.forEach(function (group) {
@@ -31,19 +77,6 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 } else {
                     group.isShared = false;
                 }
-            });
-        }
-
-        function reload() {
-            wiApiService.listGroup({idCompany: company.idCompany}, function (groups) {
-                $timeout(function () {
-                    self.groups = groups;
-                    preGroup();
-                    if (!self.selectedGroup) return;
-
-                    self.selectedGroup = self.groups.find(g => g.idGroup === self.selectedGroup.idGroup);
-                    if (self.selectedGroup) preUser(self.selectedGroup);
-                });
             });
         }
 
@@ -286,16 +319,90 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 }
             });
         }
+        function setSelectedGroupNode(node) {
+            self.groupsConfig.forEach(function (item) {
+                utils.visit(item, function (n) {
+                    if (n.data) n.data.selected = false;
+                    if (n.name == node.name) n.data.selected = true;
+                });
+            });
+        }
+        this.groupClicked = function ($event, $index, node) {
+            self.usersConfig = [];
+            self.selectGroupNode = node.properties;
+            self.users = node.properties.users;
+            setSelectedGroupNode(node);
+            loadGroupPerm(node.properties);
+            preUser(node.properties);
+            initUserConfig(self.users);
+        };
 
-        this.groupClicked = function (group) {
-            self.selectedGroup = group;
-            loadGroupPerm(group);
-            preUser(group);
+        this.upTriggerGroup = function(cb) {
+            if(topIdx > 0) {
+                if(topIdx > delta) {
+                    let newSource = self.groups.slice(topIdx - delta, topIdx).reverse();
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = topIdx - delta;
+                    cb(newList, self.groupsConfig);
+                } else {
+                    let newSource = self.groups.slice(0, topIdx).reverse();
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = 0;
+                    cb(newList, self.groupsConfig);
+                }
+            } else cb([]);
         };
-        this.userClicked = function () {
-            self.objects = null;
+
+        this.downTriggerGroup = function (cb) {
+            let bottomIdx = topIdx + selectionLength;
+            if(bottomIdx < self.groups.length) {
+                if(self.groups.length - bottomIdx > delta) {
+                    let newSource = self.groups.slice(bottomIdx, delta + bottomIdx);
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = topIdx + delta;
+                    cb(newList, self.groupsConfig);
+                } else {
+                    let newSource = self.groups.slice(bottomIdx, self.groups.length);
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = topIdx + self.groups.length - bottomIdx;
+                    cb(newList, self.groupsConfig);
+                }
+            } else cb([]);
         };
-        this.addNewGroup = function () {
+
+        this.upTriggerUser = function(cb) {
+            if(topIdx > 0) {
+                if(topIdx > delta) {
+                    let newSource = self.users.slice(topIdx - delta, topIdx).reverse();
+                    let newList = newSource.map(u => addUserNode(u));
+                    topIdx = topIdx - delta;
+                    cb(newList, self.usersConfig);
+                } else {
+                    let newSource = self.users.slice(0, topIdx).reverse();
+                    let newList = newSource.map(u => addUserNode(u));
+                    topIdx = 0;
+                    cb(newList, self.usersConfig);
+                }
+            } else cb([]);
+        };
+
+        this.downTriggerUser = function (cb) {
+            let bottomIdx = topIdx + selectionLength;
+            if(bottomIdx < self.users.length) {
+                if(self.users.length - bottomIdx > delta) {
+                    let newSource = self.users.slice(bottomIdx, delta + bottomIdx);
+                    let newList = newSource.map(g => addUserNode(g));
+                    topIdx = topIdx + delta;
+                    cb(newList, self.usersConfig);
+                } else {
+                    let newSource = self.users.slice(bottomIdx, self.users.length);
+                    let newList = newSource.map(g => addUserNode(g));
+                    topIdx = topIdx + self.users.length - bottomIdx;
+                    cb(newList, self.usersConfig);
+                }
+            } else cb([]);
+        }
+        /*this.addNewGroup = function () {
             let promptConfig = {
                 title: 'Add new user group',
                 inputName: 'Group name',
@@ -306,15 +413,15 @@ module.exports = function (ModalService, callback, groups, users, company) {
                     reload();
                 });
             });
-        };
-        this.deleteGroup = function (group) {
+        };*/
+        /*this.deleteGroup = function (group) {
             wiApiService.removeUserGroup({idGroup: group.idGroup}, function (response) {
                 if (self.selectedGroup && self.selectedGroup.idGroup === group.idGroup) self.selectedGroup = null;
                 toastr.success("Successfull delete group " + group.name);
                 reload();
             });
-        };
-        this.addUser = function (user) {
+        };*/
+        /*this.addUser = function (user) {
             wiApiService.addUserToGroup({
                 idGroup: self.selectedGroup.idGroup,
                 idUser: user.idUser
@@ -335,8 +442,8 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 }
                 reload();
             })
-        };
-        this.shareProjectToGroup = function (group) {
+        };*/
+        /*this.shareProjectToGroup = function (group) {
             wiApiService.addSharedProject({name: self.project.name}, function (sharedProject) {
                 wiApiService.addProjectToGroup({
                     type: "add",
@@ -359,18 +466,7 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 toastr.success("Successfull stop sharing " + self.project.name + " from group " + group.name);
                 reload();
             });
-        };
-        this.onOkButtonClicked = function () {
-            // wiApiService.addSharedProject({name: self.project.name}, function (sharedProject) {
-            //     wiApiService.addProjectToGroup({
-            //         idGroups: [self.selectedGroup.idGroup],
-            //         idSharedProject: sharedProject.idSharedProject
-            //     }, function () {
-            //         close(500);
-            //     });
-            // });
-            close(500);
-        };
+        };*/
         this.onCancelButtonClicked = function () {
             close(null);
         };
