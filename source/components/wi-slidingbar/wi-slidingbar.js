@@ -194,7 +194,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 
     function updateState(top, height) {
-        let pHeight = actual(self.contentId, 'height');
+        let pHeight = actual($(self.contentId).parent(), 'height');
         self.slidingBarState.top = top / pHeight * 100.;
         self.slidingBarState.range = height / pHeight * 100.;
 
@@ -296,6 +296,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         });
 
         let sensor = new ResizeSensor($(self.contentId), function () {
+            if(!self.wiLogplotCtrl.getwiD3Ctrl().isReady) return;
             self.refreshHandler();
             _viCurve && _viCurve.doPlot();
         });
@@ -319,7 +320,10 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
                 if (model.type == 'comboview' && comboviewId == model.properties.id) handler();
                 return;
             }
-            if (model.type == 'logplot' && model.id == self.wiLogplotCtrl.id) handler();
+            if (model.type == 'logplot' && model.id == self.wiLogplotCtrl.id) {
+                if(self.wiLogplotCtrl.getwiD3Ctrl().isReady) 
+                    handler();   
+            }
         }
         document.addEventListener('resize', self.resizeHandler);
 
@@ -400,7 +404,6 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
     }
 */
     function updateSlidingHandler(top, height) {
-        if(!_.isNumber(_offsetTop)) _offsetTop = 0;
         $(self.handleId).css('top', (top - _offsetTop) + 'px');
         $(self.handleId).css('height', height + 'px');
         $(self.handleId).resizable("option", "minHeight", getMinTinyWinHeight());
@@ -411,12 +414,14 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         //parentHeight = $(self.contentId).height();
         _doScaleView(self.slidingBarState);
         self.updateSlidingHandlerByPercent(self.slidingBarState.top, self.slidingBarState.range);
+        self.scroll(0);
     }
 
+    // let _tempStateByPercent = [];
     this.updateSlidingHandlerByPercent = function (topPercent, rangePercent) {
         //let newTop = Math.round((topPercent * parentHeight) / 100);
         //let newHeight = Math.ceil((rangePercent * parentHeight) / 100);
-        let parentHeight = actual(self.contentId, 'height');
+        let parentHeight = actual($(self.contentId).parent(), 'height');
         let newTop = (topPercent * parentHeight) / 100.;
         let newHeight = (rangePercent * parentHeight) / 100.;
 
@@ -508,7 +513,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
 
         // TUNG for limiting height of resizable
         $(self.handleId).resizable('option', 'minHeight', getMinTinyWinHeight());
-        
+
         redrawLogplot();
     }
 
