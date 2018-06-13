@@ -35,32 +35,29 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.createZoneSet = function () {
         let selectedNodes = self.zoneSetConfig.__SELECTED_NODES;
         let parentWell = false;
-        if(self.lastSelectedWell){
-            parentWell = self.lastSelectedWell; 
-        } else if(self.lastSelectedZoneSet) {  
+        if (self.lastSelectedWell) {
+            parentWell = self.lastSelectedWell;
+        } else if (self.lastSelectedZoneSet) {
             let parentWell = getParentNode(self.lastSelectedZoneSet);
         }
         if (parentWell) {
-            let promptConfig = {
-                title: '<span class="zone-edit-16x16"></span> Create New Zone Set',
-                inputName: 'Name',
-                input: ''
-            }
-            DialogUtils.promptDialog(ModalService, promptConfig, function (ret) {
-                if (!ret) return;
+            DialogUtils.newZoneSetDialog(ModalService, function (data) {
+                if (!data) return;
                 else {
-                    if (!parentWell.children.find(function (node) { return node.name == ret })) {
+                    console.log(data);
+                    if (!parentWell.children.find(function (node) { return node.name == data.name })) {
                         if (self.newZoneSet) {
                             parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
                         }
                         let newNode = {
                             id: "",
-                            name: ret,
+                            name: data.name,
                             idWell: parentWell.id,
                             type: 'zoneSet',
                             data: {
                                 icon: 'mineral-zone-16x16',
-                                label: ret,
+                                label: data.name,
+                                template: data.template,
                                 childExpanded: true
                             },
                             children: []
@@ -68,6 +65,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         self.newZoneSet = newNode;
                         self.lastSelectedZoneSet = newNode;
                         parentWell.children.push(newNode);
+                        parentWell.data.childExpanded = true;
                         unselectAllNodes(self.zoneSetConfig);
                         selectHandler(newNode, self.zoneSetConfig);
                         self.refreshZoneList();
@@ -77,7 +75,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         }
                         // alert('template name existed');
                         unselectAllNodes(self.zoneSetConfig);
-                        selectHandler(parentWell.children.find(function (node) { return node.name == ret }), self.zoneSetConfig);
+                        selectHandler(parentWell.children.find(function (node) { return node.name == data.name }), self.zoneSetConfig);
                         self.refreshZoneList();
                     }
                 }
@@ -86,7 +84,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.deleteZoneSet = function () {
         for (node of self.zoneSetConfig.__SELECTED_NODES) {
-            if(node == self.newZoneSet){
+            if (node == self.newZoneSet) {
                 let parentWell = getParentNode(node)
                 parentWell.children.splice(parentWell.children.indexOf(node), 1);
                 self.newZoneSet = false;
@@ -94,7 +92,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 let parentWell = getParentNode(node);
                 let idZoneSet = node.id;
                 wiApiService.removeZoneSet(idZoneSet, function () {
-                    console.log('done');  
+                    console.log('done');
                     parentWell.children.splice(parentWell.children.indexOf(node), 1);
                 })
             }
@@ -108,7 +106,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
             self.newZoneSet = false;
         }
-        if(node.type == 'well'){
+        if (node.type == 'well') {
             self.zones = [];
             self.lastSelectedWell = node;
             self.lastSelectedZoneSet = false;
@@ -170,7 +168,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.newZone = false;
         self.selectedZones = [];
         self.zoneEditted = false;
-        if(self.newZoneSet) {
+        if (self.newZoneSet) {
             self.zones = []
         } else {
             wiApiService.getZoneSet(self.lastSelectedZoneSet.id, function (info) {
@@ -179,23 +177,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
     this.editZone = function () {
-        if(self.newZone){
+        if (self.newZone) {
             let newZoneSet = {
                 name: self.newZoneSet.name,
                 idWell: self.newZoneSet.idWell
             }
-            wiApiService.createZoneSet(newZoneSet, function (zoneSet){
+            wiApiService.createZoneSet(newZoneSet, function (zoneSet) {
                 self.lastSelectedZoneSet.id = zoneSet.idZoneSet;
-                for(zone of self.zones){
+                for (zone of self.zones) {
                     zone.idZoneSet = zoneSet.idZoneSet;
                     self.newZoneSet = false;
-                    wiApiService.createZone(zone, function(zone){
+                    wiApiService.createZone(zone, function (zone) {
                         console.log('success', zone);
                     })
                 }
             })
         }
-        else if(self.zoneEditted){
+        else if (self.zoneEditted) {
             for (zone of self.zones) {
                 if (zone.zoneEditted) {
                     wiApiService.editZone(zone, function () {
@@ -203,7 +201,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     });
                 }
             }
-        } 
+        }
     }
     this.createZone = function () {
         DialogUtils.createNewZoneDialog(ModalService, function (data) {
@@ -221,16 +219,20 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         });
     }
     this.deleteZone = function () {
-        if(self.newZoneSet) {
+        if (self.newZoneSet) {
             self.zones = [];
             let parentWell = getParentNode(self.newZoneSet);
-            parentWell.children.splice(parentWell.children.length-1,1);
+            parentWell.children.splice(parentWell.children.length - 1, 1);
         } else {
-            for (zone of self.zones) {
-                if (zone.flag) {
-                    wiApiService.removeZone(zone.idZone, function () {
+            for (var z=0; z < self.zones.length; z++) {
+                if (self.zones[z].flag) {
+                    wiApiService.removeZone(self.zones[z].idZone, function () {
                         console.log('delete successfully');
-                        self.zones.splice(self.zones.indexOf(zone), 1);
+                        self.zones.splice(z, 1);
+                        if(z = self.zones.length-1){
+                            self.selectedZones = [];                            
+                        }
+                        z = z-1;
                     })
                 }
             }
