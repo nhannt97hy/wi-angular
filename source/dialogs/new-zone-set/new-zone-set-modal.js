@@ -2,7 +2,7 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback) {
     function ModalController($scope, close, wiApiService, $timeout) {
         let self = this;
-        $scope.name = randomString();
+        $scope.name = "";
         self.template = {template: ''};
         this.onOkButtonClicked = function () {
             let data = {
@@ -43,7 +43,6 @@ module.exports = function (ModalService, callback) {
             self.template.idZoneTemplate = templateProp.idZoneTemplate;
             self.template.template = templateProp.template;
             console.log($scope.name);
-            $scope.name = self.template.template;
         }
     }
 

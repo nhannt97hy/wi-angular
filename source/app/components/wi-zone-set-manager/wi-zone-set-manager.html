@@ -4,27 +4,33 @@
             <div class='left-heading'>
                 <h5>ZoneSets</h5>
                 <div class="button-area">
-                    <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
+                    <!-- <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                         <i class="fa fa-arrow-up"></i>
                     </button>
                     <button class='btn' ng-click="wiZoneSetManager.deleteZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                         <i class="fa fa-times"></i>
-                    </button> 
-                    <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
-                        <i class="fa fa-plus"></i>
+                    </button>  -->
+                    <button title="Create new zoneset" class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
+                        <i class="ti-plus"></i>
                     </button>
-                    <button class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
-                        <i class="fa fa-refresh"></i>
+                    <button title="Refresh zonesets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
+                        <i class="ti-reload"></i>
+                    </button>
+                    <button title="More" class = 'btn' ng-click="">
+                        <i class="ti-more"></i>
                     </button>
                 </div>
             </div>
             <div class="scroll-container">
-                <wi-base-treeview name="zoneTemplateManagerTreeview" 
-                    config="wiZoneSetManager.zoneSetConfig" 
-                    container="wiZoneSetManagerTab2"
-                    on-click-function="wiZoneSetManager.clickFunction"
-                    filter="" >
-                </wi-base-treeview>
+                <wi-scroll id-scroll="templateTreeScroll" style='flex:1;' up-trigger='wiZoneSetManager.upTriggerPrj'
+                    down-trigger='wiZoneSetManager.downTriggerPrj'>
+                    <wi-base-treeview name="zoneTemplateManagerTreeview" 
+                        config="wiZoneSetManager.zoneSetConfig" 
+                        container="wiZoneSetManagerTab2"
+                        on-click-function="wiZoneSetManager.clickFunction"
+                        filter="" >
+                    </wi-base-treeview>
+                </wi-scroll>
             </div>
         </div>
     </div>
@@ -38,17 +44,17 @@
                 <option value="name">Zone name</option>
             </select>
             <div class="button-area">
-                <button class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)">
-                    <i class="fa fa-check"></i>
+                <button title="Apply changes" class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)">
+                    <i class="ti-check"></i>
                 </button>
-                <button class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
-                    <i class="fa fa-times"></i>
+                <button tilte="Delete selected zones" class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
+                    <i class="ti-close"></i>
                 </button>
-                <button class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-                    <i class="fa fa-plus"></i>
+                <button title="Create new zone"class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
+                    <i class="ti-plus"></i>
                 </button>
-                <button class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
-                    <i class="fa fa-refresh"></i>
+                <button title="Refresh zones list" class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
+                    <i class="ti-reload"></i>
                 </button>
             </div>
         </div>
