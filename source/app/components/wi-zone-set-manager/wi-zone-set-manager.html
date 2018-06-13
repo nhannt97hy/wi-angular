@@ -3,13 +3,8 @@
         <div class="template-tree">
             <div class='left-heading'>
                 <h5>ZoneSets</h5>
-<<<<<<< HEAD
                 <div class="button-area" style="position: relative">
                     <!-- <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-=======
-                <div class="button-area">
-                    <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
                         <i class="fa fa-arrow-up"></i>
                     </button>
                     <button class='btn' ng-click="wiZoneSetManager.deleteZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
@@ -18,33 +13,19 @@
                     <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
                         <i class="fa fa-plus"></i>
                     </button>
-<<<<<<< HEAD
                     <button title="Refresh zonesets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
                         <i class="ti-reload"></i>
                     </button>
                     <button title="More" class="btn" ng-click="wiZoneSetManager.showMoreButtonContextMenuFunction($event, $index)" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet"> 
                         <i class="ti-more"></i>
-=======
-                    <button class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
-                        <i class="fa fa-refresh"></i>
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
                     </button>
                 </div>
             </div>
             <div class="scroll-container">
-<<<<<<< HEAD
                 <!-- <wi-scroll id-scroll="templateTreeScroll" style='flex:1;' up-trigger='wiZoneSetManager.upTriggerPrj' down-trigger='wiZoneSetManager.downTriggerPrj'> -->
                     <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneSetManager.zoneSetConfig" container="wiZoneSetManager"
                         on-click-function="wiZoneSetManager.clickFunction" filter="" show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
                     </wi-base-treeview>
-=======
-                <wi-base-treeview name="zoneTemplateManagerTreeview" 
-                    config="wiZoneSetManager.zoneSetConfig" 
-                    container="wiZoneSetManagerTab2"
-                    on-click-function="wiZoneSetManager.clickFunction"
-                    filter="" >
-                </wi-base-treeview>
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
             </div>
         </div>
     </div>
@@ -116,20 +97,9 @@
                                 <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control thick-border"
                                         style="width: 103px; height: 28px; margin: auto;">
                             </td>
-<<<<<<< HEAD
-
-                            <td width="10%">
-                                <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}"
-                                    class="form-control wi-form-control width-80px height-20px thick-border">
-                            </td>
-                            <td width="10%">
-                                <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}"
-                                    class="form-control wi-form-control width-80px height-20px thick-border">
-=======
                             <td width="15%">
                                 <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border"
                                         style="width: 103px; height: 28px; margin: auto;">
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
                                 </button>
                             </td>
                             <td width="20%">
