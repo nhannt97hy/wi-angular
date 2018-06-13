@@ -10,10 +10,10 @@
                     <button class='btn' ng-click="wiZoneSetManager.deleteZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                         <i class="fa fa-times"></i>
                     </button> 
-                    <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
+                    <button title="create new zoneset" class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
                         <i class="fa fa-plus"></i>
                     </button>
-                    <button class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
+                    <button title="reload zonesets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
                         <i class="fa fa-refresh"></i>
                     </button>
                 </div>
