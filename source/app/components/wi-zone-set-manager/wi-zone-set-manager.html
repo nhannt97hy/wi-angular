@@ -3,13 +3,25 @@
         <div class="template-tree">
             <div class='left-heading'>
                 <h5>ZoneSets</h5>
-                <div style='background-color:white;display: flex;padding-left: 7px; border: 1px solid #ccc; margin: 0.5em'>
-                    <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
-                    <input type='text' id="focus" 
-                            style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
-                            ng-model="wiZoneSetManager.filter"
-                            placeholder="[Search]">
+                <div class="button-area">
+                    <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
+                        <i class="ti-plus"></i>
+                    </button>
+                    <button title="Refresh zonesets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
+                        <i class="ti-reload"></i>
+                    </button>
+                    <button title="More" class="btn" ng-click="wiZoneSetManager.showMoreButtonContextMenuFunction($event, $index)" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet"> 
+                        <i class="ti-more"></i>
+                    </button>
                 </div>
+            </div>
+            <div style='background-color:white;display: flex;padding-left: 7px; border: 1px solid #ccc; margin: 0.5em'>
+                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                <input type='text' id="focus" 
+                        style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
+                        ng-model="wiZoneSetManager.filter"
+                        placeholder="[Search]">
+            </div>
             <wi-scroll id-scroll="'wzsmTreeScroll'" 
                         style='flex:1;display:flex;flex-direction:column; height: 80%' 
                         up-trigger='wiInventory.upTrigger' down-trigger='wiInventory.downTrigger'>
@@ -91,20 +103,9 @@
                                 <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control thick-border"
                                         style="width: 103px; height: 28px; margin: auto;">
                             </td>
-<<<<<<< HEAD
-
-                            <td width="10%">
-                                <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}"
-                                    class="form-control wi-form-control width-80px height-20px thick-border">
-                            </td>
-                            <td width="10%">
-                                <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}"
-                                    class="form-control wi-form-control width-80px height-20px thick-border">
-=======
                             <td width="15%">
                                 <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border"
                                         style="width: 103px; height: 28px; margin: auto;">
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
                                 </button>
                             </td>
                             <td width="20%">
@@ -117,20 +118,6 @@
                                                 background='{{zone.fill.pattern.background}}'>
                                     </wi-canvas-rect>
                                 </button>
-                            </div>
-                                <!-- <ui-select theme="bootstrap" ng-model="zone.fill.pattern.name" ng-change="wiZoneSetManager.onZoneChanged($index);" search-enabled="false">
-                                    <ui-select-match>
-                                        <wi-canvas-rect name="row_{{$index}}" pattern="{{zone.fill.pattern.name}}" width="80" height="20">
-                                        </wi-canvas-rect>
-                                    </ui-select-match>
-                                    <ui-select-choices repeat="selectedPattern in wiZoneSetManager.selectPatterns">
-                                        <div>
-                                            <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" width="40" height="20" style="float: right;">
-                                            </wi-canvas-rect>
-                                        </div>
-                                    </ui-select-choices>
-                                </ui-select> -->
                             </td>
                         </tr>
                     </tbody>
