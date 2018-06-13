@@ -27,7 +27,8 @@ const BUILD_DIR = {
     js: 'build/js',
     css: 'build/css',
     img: 'build/img',
-    vendor: 'build/vendor'
+    vendor: 'build/vendor',
+    pattern: 'build/pattern'
 };
 const SOURCE_DIR = {
     root: 'source',
@@ -41,7 +42,8 @@ const SOURCE_DIR = {
     html: 'source/html/**/*.html',
     img: 'source/img/**/*',
     less: 'source/less/**/*.less',
-    vendor: 'source/vendor/**/*'
+    vendor: 'source/vendor/**/*',
+    pattern: 'source/pattern/**/*'
 };
 
 gulp.task('watch', ['build'], function () {
@@ -57,6 +59,8 @@ gulp.task('watch', ['build'], function () {
     gulp.watch('source/*.js', ['build']);
     gulp.watch('source/img/**/*', ['img']);
     gulp.watch('source/vendor/**/*', ['vendor']);
+    gulp.watch('source/pattern/**/*', ['pattern']);
+
 });
 
 gulp.task('component', function (taskCallback) {
@@ -184,6 +188,10 @@ gulp.task('css', function () {
 gulp.task('vendor', function () {
     var DEST = BUILD_DIR.vendor;
     return gulp.src(SOURCE_DIR.vendor).pipe(changed(DEST)).pipe(gulp.dest(DEST));
+});
+gulp.task('pattern', function () {
+    var DEST = BUILD_DIR.pattern;
+    return gulp.src(SOURCE_DIR.pattern).pipe(changed(DEST)).pipe(gulp.dest(DEST));
 });
 
 gulp.task('clean', function () {
@@ -385,7 +393,7 @@ gulp.task('gen-wi-explorer-functions', function () {
 gulp.task('pre', ['gen-template', 'gen-functions'], function () {
 });
 
-const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor',
+const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor', 'pattern',
                     'wi-histogram-include', 'wi-crossplot-include', 'wi-logplot-include', 'wi-explorer-include', 'wi-workflow-machine-learning-include', 'wi-workflow-player-include'];
 gulp.task('build-full', mainTasks, function () {
     glob('build/js/*.js', function (err, files) {
