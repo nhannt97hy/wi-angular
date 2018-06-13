@@ -14,6 +14,21 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
     let selectedNodes = wiComponentService.getComponent(
         wiComponentService.SELECTED_NODES
     );
+    function getMin(data){
+        return d3.min(data);
+    }
+    function getMax(data){
+        return d3.max(data);
+    }
+    function getMean(data){
+        return d3.mean(data);
+    }
+    function getStandardDeviation(data){
+        return d3.deviation(data);
+    }
+    function getQuantile(data, percent){
+        return d3.quantile(data.sort((a,b) => a - b), percent/100);
+    }
     function draggableSetting() {
         $timeout(function() {
             $(
@@ -85,7 +100,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                             _header = cModel.properties.name + "(" + cModel.parent + ")";
                         }
                         if(curve) {
-                            _header = '<i class="fa fa-exclamation" aria-hidden="true"></i>'+ _header;
+                            _header = '<i class="fa fa-asterisk unsaved" aria-hidden="true"></i><i>'+ _header + '</i>';
                         }
                         return _header;
                     }
@@ -154,12 +169,12 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     rowsLimit: length
                 },
                 renderAllRows: false,
-                beforeChange: function(changes, source) {
-                    changes = changes.map(r => {
-                        r[3] = '' + parseFloat(r[3]);
-                        return r;
-                    })
-                },
+                // beforeChange: function(changes, source) {
+                //     changes = changes.map(r => {
+                //         r[3] = '' + parseFloat(r[3]);
+                //         return r;
+                //     })
+                // },
                 afterChange: function(change, source) {
                     if (source == "loadData") return;
                     if (change && change.length) {
@@ -171,9 +186,18 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     }
                 },
                 search: true,
+                headerTooltips: {
+                    rows: false,
+                    columns: true,
+                    onlyTrimmed: true
+                },
+                formulas: true
             };
 
             _current.length = length;
+            _current.topDepth = topDepth,
+            _current.bottomDepth = bottomDepth,
+            _current.step = step;
             _current.setting.data = new Array(length)
                 .fill()
                 .map(d => new Object());
@@ -196,28 +220,73 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             );
         }
     }
+    function getStatisticData(){
+        let _currentSetting = self.dataSettings[self.currentIndex];
+        if(!_currentSetting) return [];
+        return _currentSetting.setting.columns.reduce((total, col) => {
+            let idCurve = col.data;
+            if(idCurve != 'depth'){
+                let cModel = utils.getModel("curve", parseInt(idCurve));
+                let data = _currentSetting.setting.data.map(row => {
+                    let tmp = parseFloat(row[idCurve]);
+                    return isNaN(tmp) ? null : tmp;
+                })
+                total.push([
+                    cModel.name,
+                    cModel.properties.LineProperty ? cModel.properties.LineProperty.name : '',
+                    cModel.properties.unit,
+                    getMin(data),
+                    getMax(data),
+                    getMean(data),
+                    getStandardDeviation(data),
+                    _currentSetting.topDepth,
+                    _currentSetting.bottomDepth,
+                    _currentSetting.step,
+                    data.filter(d => d == null).length,
+                    new Date(cModel.properties.updatedAt).toDateString(),
+                    '',
+                    getQuantile(data, 5),
+                    getQuantile(data, 10),
+                    getQuantile(data, 25),
+                    getQuantile(data, 50),
+                    getQuantile(data, 75),
+                    getQuantile(data, 90),
+                    getQuantile(data, 95)
+                ])
+            }
+            return total;
+        }, [])
+    }
     function initStatistic(){
-        if (!self.statisticSettings[self.currentIndex]) {
-            self.statisticSettings[self.currentIndex] = new Object();
-            let _current = self.statisticSettings[self.currentIndex];
-            _current.setting = {
-                data: Handsontable.helper.createSpreadsheetData(20,20),
+        if (!self.statisticSettings) {
+            self.statisticSettings = {
+                // data: getStatisticData(),
                 colHeaders: ["Name", "Family", "Unit", "Min value", "Max value", "Mean value", "Standard deviation", "Top", "Bottom", "Step", "Fraction of missing value", "Last modification date", "Description", "Quantile 5", "Quantile 10", "Quantile 25", "Quantile 50", "Quantile 75", "Quantile 90", "Quantile 95"],
                 rowHeaders: true,
                 manualColumnResize: true,
                 fixedColumnsLeft: 1,
                 renderAllRows: false,
-                headerTooltips: true
+                headerTooltips: {
+                    rows: false,
+                    columns: true,
+                    onlyTrimmed: true
+                },
+                columns: function(col){
+                    return {
+                        readOnly: true
+                    }
+                }
             };
         }
+        self.statisticSettings.data = getStatisticData();
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
                 dataContainer,
-                self.statisticSettings[self.currentIndex].setting
+                self.statisticSettings
             );
         } else {
             dataCtrl.updateSettings(
-                self.statisticSettings[self.currentIndex].setting
+                self.statisticSettings
             );
         }
     }
@@ -370,7 +439,6 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         self.visualizationMode = "Data";
         self.wells = utils.findWells();
         self.dataSettings = new Object();
-        self.statisticSettings = new Object();
         if (selectedNodes && selectedNodes.length) {
             switch (selectedNodes[0].type) {
                 case "well":
