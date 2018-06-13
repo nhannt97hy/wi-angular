@@ -340,23 +340,35 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         });
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
     };
+    this.removeReferenceCurve = function() {
+        console.log('removing curve from sliding bar', _viCurve);
+        let request = {
+            idPlot: self.wiLogplotCtrl.id,
+            referenceCurve: null 
+        }
+        wiApiService.editLogplot(request, function(res) {
+            console.log('response from server', res);
+            _viCurve.destroy();
+            _viCurve = null;
+        })
+    }
     this.onDelete = function(model) {
         console.log('onDelete Sliding bar: ', model);
         switch(model.type){
             case 'curve':
-            if(_viCurve && _viCurve.idCurve == model.id) {
-                console.log('removing curve from sliding bar', _viCurve);
-                let request = {
-                    idPlot: self.wiLogplotCtrl.id,
-                    referenceCurve: null 
+                if(_viCurve && _viCurve.idCurve == model.id) {
+                    self.removeReferenceCurve();
                 }
-                wiApiService.editLogplot(request, function(res) {
-                    console.log('response from server', res);
-                    _viCurve.destroy();
-                    _viCurve = null;
-                })
-            }
-            break;
+                break;
+            case 'well': 
+                let curveNodes = model.children.find(child => child.type == 'dataset').children;
+                if(curveNodes && Array.isArray(curveNodes) && _viCurve.idCurve) {
+                    let hasCurve = !!curveNodes.find(curveNode => curveNode.properties.idCurve == _viCurve.idCurve);
+                    if(hasCurve) {
+                        self.removeReferenceCurve();
+                    }
+                }
+                break;
             default:
             break;
         }

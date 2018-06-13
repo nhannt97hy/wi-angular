@@ -87,14 +87,34 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             _plotZoneTrack(baseSource, self.viTrack);
             updateTrackWellStatus();
         } else {
-            self.viTrack.removeAllZones();
-            wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
-                for (let zone of zoneset.zones) {
-                    self.addZoneToTrack(self.viTrack, zone);
+            wiApiService.getZoneTrack(self.getProperties().idZoneTrack, function(zoneTrack) { 
+                console.log('get zone track information: ', zoneTrack);
+                self.viTrack.idZoneSet = zoneTrack.idZoneSet;
+                updateAllZones(zoneTrack.idZoneSet)
+                    .then(function() {
+                        updateTrackWellStatus();
+                        self.isIdle = true;
+                    })
+            })
+        }
+
+        function updateAllZones(newIdZoneSet) {
+            return new Promise(function(resolve, reject) {
+                // updating all zones
+                self.viTrack.removeAllZones();
+                if(newIdZoneSet) {
+                    wiApiService.getZoneSet(newIdZoneSet, function(zoneset) {
+                        if(zoneset.idZoneSet) {
+                            for (let zone of zoneset.zones) {
+                                self.addZoneToTrack(self.viTrack, zone);
+                            }
+                        }
+                        resolve();
+                    })
+                } else {
+                    resolve();
                 }
-                updateTrackWellStatus();
-                self.isIdle = true;
-            });
+            })
         }
 
         function updateTrackWellStatus() {
@@ -218,6 +238,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.registerTrackMouseEventHandlers();
         self.getProperties().controller = self;
         if (self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
+        wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         
         self.update();
         /*
@@ -332,6 +353,39 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 })
             })
         );
+    }
+
+    this.removeZoneSetFromTrack = function() {
+        let request = {
+            idZoneTrack: self.getProperties().idZoneTrack,
+            idZoneSet: null
+        }
+        wiApiService.editZoneTrack(request, function(res) {
+            console.log('response from server', res);
+            self.update();
+        })
+    }
+    this.onDelete = function(model) {
+        console.log('on delete zone track', model);
+        switch(model.type) {
+            case 'well':
+                let zonesetNodes = model.children.find(child => child.type == 'zonesets').children;
+                if(zonesetNodes && Array.isArray(zonesetNodes)) {
+                    let hasZoneSet = !!zonesetNodes.find(zoneset => zoneset.properties.idZoneSet == self.viTrack.idZoneSet);
+                    if(hasZoneSet) { 
+                        self.removeZoneSetFromTrack();
+                    }
+                }
+                break;
+            case 'zoneset':
+                if(model.id == self.viTrack.idZoneSet) {
+                    self.removeZoneSetFromTrack();
+                }
+                break;
+            default: 
+                break;
+        }
+    
     }
 
     function createVisualizeZoneTrack (trackProperties) {
