@@ -21,11 +21,25 @@
                     </button>
                 </div>
             </div>
-            <div class="scroll-container">
-                <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneTemplateManager.templateConfig" container="wiZoneTemplateManager"
-                    on-click-function="wiZoneTemplateManager.templateClickFunction" filter="" show-context-menu-function="wiZoneTemplateManager.showTreeContextMenuFunction">
-                </wi-base-treeview>
+            <div style='background-color:white;display: flex;padding-left: 7px; border: 1px solid #ccc; margin: 0.5em'>
+                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                <input type='text' id="focus" 
+                        style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
+                        ng-model="wiZoneTemplateManager.filter"
+                        placeholder="[Search]">
             </div>
+            <wi-scroll id-scroll="'wztmTreeScroll'" 
+                        style='flex:1;display:flex;flex-direction:column; height: 80%' 
+                        up-trigger='wiZoneTemplateManager.upTrigger' down-trigger='wiZoneTemplateManager.downTrigger'>
+                <wi-base-treeview name="zoneTemplateManagerTreeview" 
+                    config="wiZoneTemplateManager.templateConfig" 
+                    container="wiZoneTemplateManager" 
+                    on-click-function="wiZoneTemplateManager.templateClickFunction"
+                    filter="{{wiZoneTemplateManager.filter}}"
+                    show-context-menu-function="wiZoneTemplateManager.showTreeContextMenuFunction"
+                    >
+                </wi-base-treeview>
+            </wi-scroll>
         </div>
     </div>
     <div class="right-side" style="box-sizing:border-box">

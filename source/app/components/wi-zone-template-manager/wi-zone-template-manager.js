@@ -3,11 +3,30 @@ const moduleName = 'wi-zone-templateManager';
 
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     let self = this;
+    window.ZST = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiZoneTemplateManager', self);
+    }
+
+    let topIdx = 0;
+    let selectionLength = 10;
+    let delta = 3;
+
+    function addNode (template) {
+        let node = {
+            name: template.template,
+                type: 'template',
+                data: {
+                    icon: 'mineral-zone-16x16',
+                    label: template.template,
+                    childExpanded: true
+                },
+                children: []
+        }
+        return node;
     }
     this.refreshTemplateList = function () {
         self.templateConfig = [];
@@ -16,26 +35,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.selectedTemplate = false;
         self.newTemplate = false;
 
+
         wiApiService.listZoneTemplate({}, function (templates) {
             if (templates) {
                 for (template of templates) {
-                    self.templateConfig.push({
-                        name: template.template,
-                        type: 'template',
-                        data: {
-                            icon: 'mineral-zone-16x16',
-                            label: template.template,
-                            childExpanded: true
-                        },
-                        children: []
-                    })
+                    self.templateConfig.push(addNode(template))
                 }
             }
         })
     }
     this.refreshTemplateList();
-
-    this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
     this.onZoneTemplateChanged = function (index) {
         self.zoneTemplateEditted = true;
@@ -64,6 +73,46 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     self.onZoneTemplateChanged(index);
                 }
             });
+    }
+
+    this.upTrigger = function (cb) {
+        wiApiService.listZoneTemplate({}, function (templates) {
+            if (templates) {
+                if(topIdx > 0) {
+                    if(topIdx > delta) {
+                        let newSource = templates.slice(topIdx - delta, topIdx).reverse();
+                        let newList = newSource.map(t => addNode(t));
+                        topIdx = topIdx - delta;
+                        cb(newList, self.templateConfig);
+                    } else {
+                        let newSource = templates.slice(0, topIdx).reverse();
+                        let newList = newSource.map(t => addNode(t));
+                        topIdx = 0;
+                        cb(newList, self.templateConfig);
+                    }
+                } else cb([]);
+            }
+        })
+    };
+    this.downTrigger = function (cb) {
+        wiApiService.listZoneTemplate({}, function (templates) {
+            if (templates) {
+                let bottomIdx = topIdx + selectionLength;
+                if(bottomIdx < templates.length) {
+                    if(templates.length - bottomIdx > delta) {
+                        let newSource = templates.slice(bottomIdx, delta + bottomIdx);
+                        let newList = newSource.map(t => addNode(t));
+                        topIdx = topIdx + delta;
+                        cb(newList, self.templateConfig);
+                    } else {
+                        let newSource = templates.slice(bottomIdx, templates.length);
+                        let newList = newSource.map(t => addNode(t));
+                        topIdx = topIdx + templates.length - bottomIdx;
+                        cb(newList, self.templateConfig);
+                    }
+                } else cb([]);
+            }
+        })
     }
     function refreshZoneTemplateList() {
         self.selectedZoneTemplate = [];

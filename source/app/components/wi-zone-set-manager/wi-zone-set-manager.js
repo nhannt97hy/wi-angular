@@ -10,6 +10,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.$onInit = function () {
         wiComponentService.putComponent('wiZoneSetManager', self);
     }
+
+    let topIdx = 0;
+    let selectionLength = 30;
+    let delta = 10;
+
     this.refreshZoneSetList = function () {
         self.lastSelectedWell = false;
         self.lastSelectedZoneSet = false;
@@ -20,7 +25,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             if (wells) {
                 for (well of wells) {
                     self.zoneSetConfig.push(createWellModel(well));
-                    console.log('self.zoneSetConfig', self.zoneSetConfig);
                 }
             }
         })
@@ -82,6 +86,47 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         }
     }
+    this.upTrigger = function (cb) {
+        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            if (wells) {
+                if(topIdx > 0) {
+                    if(topIdx > delta) {
+                        let newSource = wells.slice(topIdx - delta, topIdx).reverse();
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = topIdx - delta;
+                        cb(newList, self.zoneSetConfig);
+                    } else {
+                        let newSource = wells.slice(0, topIdx).reverse();
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = 0;
+                        cb(newList, self.zoneSetConfig);
+                    }
+                } else cb([]);
+            }
+        })
+    };
+
+    this.downTrigger = function (cb) {
+        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            if (wells) {
+                let bottomIdx = topIdx + selectionLength;
+                if(bottomIdx < wells.length) {
+                    if(wells.length - bottomIdx > delta) {
+                        let newSource = wells.slice(bottomIdx, delta + bottomIdx);
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = topIdx + delta;
+                        cb(newList, self.zoneSetConfig);
+                    } else {
+                        let newSource = wells.slice(bottomIdx, wells.length);
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = topIdx + wells.length - bottomIdx;
+                        cb(newList, self.zoneSetConfig);
+                    }
+                } else cb([]);
+            }
+        })
+    };
+
     this.deleteZoneSet = function () {
         for (node of self.zoneSetConfig.__SELECTED_NODES) {
             if (node == self.newZoneSet) {

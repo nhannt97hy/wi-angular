@@ -3,49 +3,24 @@
         <div class="template-tree">
             <div class='left-heading'>
                 <h5>ZoneSets</h5>
-<<<<<<< HEAD
-                <div class="button-area" style="position: relative">
-                    <!-- <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-=======
-                <div class="button-area">
-                    <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
-                        <i class="fa fa-arrow-up"></i>
-                    </button>
-                    <button class='btn' ng-click="wiZoneSetManager.deleteZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-                        <i class="fa fa-times"></i>
-                    </button> 
-                    <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
-                        <i class="fa fa-plus"></i>
-                    </button>
-<<<<<<< HEAD
-                    <button title="Refresh zonesets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
-                        <i class="ti-reload"></i>
-                    </button>
-                    <button title="More" class="btn" ng-click="wiZoneSetManager.showMoreButtonContextMenuFunction($event, $index)" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet"> 
-                        <i class="ti-more"></i>
-=======
-                    <button class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
-                        <i class="fa fa-refresh"></i>
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
-                    </button>
+                <div style='background-color:white;display: flex;padding-left: 7px; border: 1px solid #ccc; margin: 0.5em'>
+                    <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                    <input type='text' id="focus" 
+                            style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
+                            ng-model="wiZoneSetManager.filter"
+                            placeholder="[Search]">
                 </div>
-            </div>
-            <div class="scroll-container">
-<<<<<<< HEAD
-                <!-- <wi-scroll id-scroll="templateTreeScroll" style='flex:1;' up-trigger='wiZoneSetManager.upTriggerPrj' down-trigger='wiZoneSetManager.downTriggerPrj'> -->
-                    <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneSetManager.zoneSetConfig" container="wiZoneSetManager"
-                        on-click-function="wiZoneSetManager.clickFunction" filter="" show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
-                    </wi-base-treeview>
-=======
+            <wi-scroll id-scroll="'wzsmTreeScroll'" 
+                        style='flex:1;display:flex;flex-direction:column; height: 80%' 
+                        up-trigger='wiInventory.upTrigger' down-trigger='wiInventory.downTrigger'>
                 <wi-base-treeview name="zoneTemplateManagerTreeview" 
                     config="wiZoneSetManager.zoneSetConfig" 
                     container="wiZoneSetManagerTab2"
                     on-click-function="wiZoneSetManager.clickFunction"
-                    filter="" >
+                    filter="{{wiZoneSetManager.filter}}" 
+                    show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
                 </wi-base-treeview>
->>>>>>> 5721be350b98812d7b8be585c0fc50152a98eddf
-            </div>
+            </wi-scroll>
         </div>
     </div>
     <div class="right-side" style="box-sizing:border-box">
