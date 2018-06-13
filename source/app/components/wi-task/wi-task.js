@@ -827,7 +827,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             handler: function () {
                 let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
                 selectedNodes.forEach(node => {
-                    let idx = self.taskConfig.inputData.findIndex(ip => ip.id == node.id);
+                    let idx = self.taskConfig.inputData.findIndex(ip => ip.$index == node.$index);
                     if(idx > -1) self.taskConfig.inputData.splice(idx, 1);
                 })
                 self.taskConfig.inputData.__SELECTED_NODES = [];
