@@ -969,6 +969,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         });
                     }
                 }
+                config.userDefineLines = config.user_define_lines;
+                delete config.user_define_lines;
                 self.viCrossplot = graph.createCrossplot(viCurveX, viCurveY, config, domElem);
                 self.viCrossplot.onMouseDown(self.viCrossplotMouseDownCallback);
                 if (self.containerName) {

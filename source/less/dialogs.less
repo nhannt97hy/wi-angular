@@ -20,7 +20,9 @@ img {
 		padding: 0px;
 	}
 }
-
+.modal-md {
+	width: 400px;
+}
 .modal-body{
 	padding: 5px 15px;
 	max-height: calc(~"100% - 150px");
@@ -571,9 +573,18 @@ input[type=checkbox].input-check {
 .ui-select-search {
 	height: 24px;
 }
+.ui-select-bootstrap > .ui-select-choices, .ui-select-bootstrap > .ui-select-no-choice {
+	width: fit-content;
+	min-width: 100%;
+}
 .ui-select-bootstrap > .ui-select-no-choice{
 	padding-left: 20px;
 	color: red;
+}
+.ui-select-bootstrap .ui-select-match-text{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 #spinner-holder {
 	position: absolute;
@@ -676,4 +687,95 @@ input[type=checkbox].input-check {
 			background-color: #f2f2f2;
 		}
 	}
+}
+.text-head {
+	text-shadow: 1px 1px 8px #73b1e6;
+	font-weight: bolder;
+}
+.dialog-re-style {
+	.modal-header, .modal-footer {
+		background-color: #f5f5f5;
+	}
+	.wi-form-control, .ui-select-container > .ui-select-match > .form-control{
+		border-radius: 2px;
+	}
+}
+
+.hidden-text {
+  	width : 180px;
+  	overflow:hidden;
+  	display:inline-block;
+  	text-overflow: ellipsis;
+  	white-space: nowrap;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: #ccc;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+}
+
+.list-pattern-style>wi-scroll>div>.scroll-container>wi-base-treeview {
+	.wi-treeview-container{
+    	.wi-parent-node>.wi-parent-content {
+    		.icon-expanded {
+    			display: none;
+    		}
+    		.item-content {
+    			span {
+				    // color: #ffa;
+				    color: #444;
+				    font-weight: bold;
+				    // text-shadow: 1px 1px #000;
+				    // background: rgba(0, 0, 255, 0.2);
+				}
+				border: 1px solid #888;
+    		}
+
+    	}
+    	
+	}
+}
+.list-pattern-style>wi-scroll>div>.scroll-container>wi-base-treeview {
+    .wi-treeview-container {
+    	.wi-parent-node:hover>.wi-parent-content {
+    		.item-content>span {
+    		    color: yellow;
+    		    font-weight: bold;
+    		    background: none;
+    		}
+    	} 
+        .wi-parent-node:hover {
+            background: rgba(0, 0, 255, 0.7);
+        }
+        .wi-parent-node.item-active > .wi-parent-content{
+        	.item-content>span {
+    		    color: yellow;
+    		    font-weight: bold;
+    		    text-shadow: 1px 1px #000;
+    		    background: none;
+    		}
+        	background: rgba(0, 0, 255, 0.7);
+        }
+    }
+    .rootview {
+        padding-left: 0;
+    }
 }

@@ -116,7 +116,7 @@
                                             <label class="control-label col-sm-5 padding-left-2em">Wrap mode</label>
                                             <div class="col-sm-7">
                                                 <select ng-model="wiModal.curveOptions.wrapMode"
-                                                        name="wrapMode" id="wrapMode" value=""
+                                                        name="wrapMode" id="wrapMode" value="{{wiModal.unit}}" id="unit"
                                                         class="form-control wi-form-control"
                                                         ng-options="item for item in wiModal.selectData.wrapMode track by item" disabled></select>
                                             </div>
@@ -132,6 +132,25 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
+                                            <label class="control-label col-sm-5 padding-left-2em">Log/Linear</label>
+                                            <div class="col-sm-7">
+                                                <select ng-model="wiModal.curveOptions.displayType"
+                                                        name="logLinear" value="" class="form-control wi-form-control"
+                                                        ng-options="item for item in wiModal.selectData.logLinear track by item">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-5 padding-left-2em" style="letter-spacing: -0.4px">Block Position</label>
+                                            <div class="col-sm-7">
+                                                <select ng-model="wiModal.curveOptions.blockPosition"
+                                                        name="blockPosition" value="" id="blockPosition"
+                                                        class="form-control wi-form-control"
+                                                        ng-options="item for item in wiModal.selectData.blockPosition track by item" disabled>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
                                             <label class="control-label col-sm-5"></label>
                                             <div class="col-sm-7 text-right">
                                                 <button type="button" ng-click="wiModal.onEditAttributeButtonClicked()"
@@ -142,21 +161,33 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5">Log/Linear</label>
+                                            <label class="control-label col-sm-5" style="letter-spacing: -0.4px">Unit </label>
                                             <div class="col-sm-7">
-                                                <select ng-model="wiModal.curveOptions.displayType"
-                                                        name="logLinear" value="" class="form-control wi-form-control"
-                                                        ng-options="item for item in wiModal.selectData.logLinear track by item">
-                                                </select>
+                                                <input type="text" class="form-control wi-form-control"
+                                                       ng-model="wiModal.lineUnit" ng-change="wiModal.onChangeLineUnit()">
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-sm-5" style="letter-spacing: -0.4px">Block Position</label>
+                                            <label class="control-label col-sm-5" style="letter-spacing: -0.4px">Compatiable Unit</label>
                                             <div class="col-sm-7">
-                                                <select ng-model="wiModal.curveOptions.blockPosition"
-                                                        name="blockPosition" value="" id="blockPosition"
-                                                        class="form-control wi-form-control"
-                                                        ng-options="item for item in wiModal.selectData.blockPosition track by item" disabled>
+                                                <select ng-model="wiModal.compatiableUnit" class="form-control wi-form-control"
+                                                        ng-change="wiModal.onChangeCompatiableUnit()"
+                                                        ng-options="item.name for item in wiModal.units track by item.name">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!--<div class="form-group" ng-show="{{wiModal.isUnKnown}}">-->
+                                            <!--<label class="control-label col-sm-5" style="letter-spacing: -0.4px">Unknown</label>-->
+                                            <!--<div class="col-sm-7">-->
+                                                <!--<b style="color:red;">{{wiModal.lineUnit}}</b>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-5" style="letter-spacing: -0.4px">Long Unit</label>
+                                            <div class="col-sm-7">
+                                                <select ng-model="wiModal.longListSelected" class="form-control wi-form-control"
+                                                        ng-change="wiModal.onChangeLongList()"
+                                                        ng-options="item.name for item in wiModal.longList track by item.name">
                                                 </select>
                                             </div>
                                         </div>

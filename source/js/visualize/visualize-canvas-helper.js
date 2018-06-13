@@ -1,7 +1,7 @@
 module.exports = exports = CanvasHelper;
 
 let usedPatterns = {};
-
+let gUtils = require('./../utils');
 function CanvasHelper(ctx, config) {
     this.ctx = ctx;
     this.fillStyle = config.fillStyle || 'transparent';
@@ -69,7 +69,9 @@ CanvasHelper.prototype.star = function(x, y) {
 }
 
 CanvasHelper.createPattern = function(ctx, name, foreground, background, callback) {
-    if (name == 'none') {
+    let wiPatternService = gUtils.getPatternService();
+    wiPatternService.createPattern(ctx, name, foreground, background, callback);
+    /*if (name == 'none') {
         return callback(background);
     }
 
@@ -93,7 +95,7 @@ CanvasHelper.createPattern = function(ctx, name, foreground, background, callbac
         if (Object.keys(usedPatterns).length > 50) usedPatterns = {};
         usedPatterns[key] = pattern;
         callback(pattern);
-    }
+    }*/
 }
 
 CanvasHelper.createPattern2 = function(ctx, name, foreground, background, callback) {
@@ -116,7 +118,7 @@ CanvasHelper.PATTERN_HEIGHT = 16;
 
 CanvasHelper.RAW_PATTERNS = {
     none: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="" stroke="none" fill="none"/></g></svg>',
-    basement: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M2,0L8,6M9,15L15,9" stroke="black" fill="none"/></g></svg>',
+    basement: 'img/pattern/Breccia1.png',
     chert: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M0,3L3,0L6,3M8,7L11,4L14,7M1,11L4,8L7,11M9,15L12,12L15,15" stroke="black" fill="none"/></g></svg>',
     dolomite: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M0,4L16,4M0,12L16,12M6,4L2,12M12,0L10,4M14,12L12,16" stroke="black" fill="none"/></g></svg>',
     limestone: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="white"/><path d="M0,4L16,4M0,12L16,12M4,4L4,12M12,0L12,4M12,12L12,16" stroke="black" fill="none"/></g></svg>',
@@ -124,7 +126,6 @@ CanvasHelper.RAW_PATTERNS = {
     shale: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M5,1L7,3M7,1L9,3M9,1L11,3M11,1L13,3M13,1L15,3M0,11L2,9M2,11L4,9M4,11L6,9M6,11L8,9M14,11L16,9" stroke="black" fill="none"/></g></svg>',
     siltstone: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1"><g><path d="M0,0L0,16L16,16L16,0" fill="none"/><path d="M13,0L14,0M5,4L7,6M7,4L9,6M9,4L11,6M11,4L13,6M13,4L15,6M1,6L2,6M5,8L6,8M11,9L13,9M0,13L2,11M2,13L4,11M4,13L6,11M6,13L8,11M14,13L16,11" stroke="black" fill="none"/></g></svg>'
 }
-
 function prepare(canvas) {
     let ctx = canvas.ctx;
     ctx.save();

@@ -19,7 +19,8 @@
                         'wi-hidden': item.children == null || item.children.length == 0}"></i>
             </div>
             <div class="item-content" ng-click="wiBaseTreeview.onClick($index, $event, item)"
-                ng-dblclick="wiBaseTreeview.onDoubleClick($index);">
+                ng-dblclick="wiBaseTreeview.onDoubleClick($index);"
+                style="position: relative;">
                 <div class="display-inline-block margin-right-0_5em">
                     <span class="{{item.data.icon}}"></span>
                     <div ng-show="wiBaseTreeview.showId && item.id" class='wi-parent-id'>{{item.id}}</div>
@@ -29,6 +30,8 @@
                 <span title="{{item.data.toggle?item.data.label:item.data.tooltip}}">{{item.data.toggle?item.data.tooltip:item.data.label}}</span>
                 <div class="pull-right actions">
                     <wi-button ng-repeat="action in item.actions" icon="{{action.icon}}" handler="action.handler" label="{{action.label}}"></wi-button>
+                </div>
+                <div ng-if="item.data.imageBg" style="position: absolute; top: 0; right: 0; left: 0; bottom: 0; opacity: 0.3" ng-style="{'background-image': item.data.imageBg}">
                 </div>
             </div>
         </div>

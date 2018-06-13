@@ -18,15 +18,15 @@ let app = angular.module(moduleName, []);
 
 const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
-const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://dev.sflow.me';
 // const BASE_URL = 'http://localhost:9000';
-const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-const INVENTORY_SERVICE = 'http://13.250.197.210';
+// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+// const INVENTORY_SERVICE = 'http://13.250.197.210';
 
 //production
-// const BASE_URL = 'http://wi.i2g.cloud';
-// const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
-// const INVENTORY_SERVICE = 'http://inv.sflow.me';
+const BASE_URL = 'http://wi.i2g.cloud';
+const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
+const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://127.0.0.1:3000';
@@ -83,6 +83,7 @@ const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 const FAMILY_LIST = '/family/list';
 const FAMILY_UNIT_LIST = '/family/list-unit';
 const CONVERT_CURVE_UNIT = '/project/well/dataset/curve/convert-unit';
+const ALL_SYSTEM_UNIT = '/family/all-unit';
 
 const CREATE_PLOT = '/project/well/plot/new';
 const EDIT_PLOT = '/project/well/plot/edit';
@@ -280,6 +281,7 @@ const DELETE_ZONE_TEMPLATE = '/zone-template/delete';
 const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
 const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
 const NEW_ZONE_TEMPLATE = '/zone-template/new';
+const GET_LIST_PATTERN = '/pattern/list';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -1907,7 +1909,9 @@ Service.prototype.listZoneTemplate = function (payload, callback) {
 Service.prototype.listAllZoneByTemplate = function (payload, callback) {
     this.post(GET_ALL_ZONE_TEMPLATE, payload, callback)
 };
-
+Service.prototype.listPattern = function (payload, callback) {
+    this.post(GET_LIST_PATTERN, payload, callback)
+};
 //convert unit
 Service.prototype.getListUnit = function (payload, callback) {
     this.post(FAMILY_UNIT_LIST, payload, callback);
@@ -1921,5 +1925,13 @@ Service.prototype.asyncGetListUnit = function (payload) {
          self.post(FAMILY_UNIT_LIST, payload, function (response) {
              resolve(response);
          });
+    });
+};
+Service.prototype.asyncGetAllUnit = function (payload) {
+    let self = this;
+    return new Promise(function (resole) {
+        self.post(ALL_SYSTEM_UNIT, payload, function (response) {
+            resole(response);
+        });
     });
 };

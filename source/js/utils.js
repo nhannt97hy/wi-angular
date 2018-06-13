@@ -102,7 +102,9 @@ exports.projectOpen = function (projectData) {
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     putListFamily(function () {
-        wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+        putPattern(function () {
+            wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+        })
     })
 };
 
@@ -1597,7 +1599,7 @@ function findWells() {
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
     if (!rootNodes || !rootNodes.length) return;
     let prjNode = rootNodes[0];
-    restrictedVisit(prjNode, 3, function (node) {
+    visit(prjNode, function (node) {
         if (node.type == 'well') {
             wells.push(node);
         }
@@ -1902,114 +1904,127 @@ function pasteCurve(destModel) {
         // selectedNode is Dataset
         currentDataset = selectedNode;
     }
-    // if copying
-    let copyingCurves = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
-    if (Array.isArray(copyingCurves)) {
-        async.eachOf(
-            copyingCurves,
-            function (copyingCurve, index, next) {
+    function paste(curveModels, apiFunction, callbackEach) {
+        if (Array.isArray(curveModels)) {
+            const existedCurves = [];
+            curveModels.forEach((curveModel) => {
                 let isCurveExist = false;
                 currentDataset.children.forEach(function (curve) {
-                    if (copyingCurve.properties.name == curve.properties.name) {
-                        isCurveExist = true;
-                    }
+                    if (curveModel.properties.name == curve.properties.name) return isCurveExist = true;
                 });
-                if (!isCurveExist) {
-                    if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                    let curveInfo = {
-                        idCurve: copyingCurve.properties.idCurve,
-                        desDatasetId: selectedNode.properties.idDataset,
-                    };
-                    wiApiService.copyCurve(curveInfo, function (curve) {
-                        next();
-                    });
-                    wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
-                } else {
-                    // curve existed
-                    DialogUtils.confirmDialog(
-                        __GLOBAL.ModalService,
-                        'WARNING!',
-                        copyingCurve.properties.name + ' existed! Override it ?',
-                        function (yes) {
-                            if (yes) {
-                                if (copyingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                                let curveInfo = {
-                                    idCurve: copyingCurve.properties.idCurve,
-                                    desDatasetId: selectedNode.properties.idDataset,
-                                };
-                                wiApiService.copyCurve(curveInfo, function (curve) {
-                                    next();
-                                });
-                                wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
-                            } else {
-                                next();
-                                return;
-                            }
-                        },
-                    );
+                if (isCurveExist) {
+                    curveModel.isCurveExist = true;
+                    existedCurves.push(curveModel);
                 }
-            },
-            function (err) {
-                refreshProjectState();
-            },
-        );
-        return;
+            })
+            function pasteCurves (curveModels) {
+                async.eachOfSeries(
+                    curveModels,
+                    function (curveModel, index, next) {
+                        if (!curveModel.isCurveExist) {
+                            if (curveModel.properties.idDataset == currentDataset.properties.idDataset) return;
+                            let curveInfo = {
+                                idCurve: curveModel.properties.idCurve,
+                                desDatasetId: currentDataset.properties.idDataset,
+                            };
+                            apiFunction(curveInfo, function () {
+                                callbackEach && callbackEach(curveModel);
+                                next();
+                            });
+                        } else {
+                            // curve existed
+                            DialogUtils.confirmDialog(
+                                __GLOBAL.ModalService,
+                                'Override confirmation',
+                                curveModel.properties.name + ' existed! Override it ?',
+                                function (yes) {
+                                    if (yes) {
+                                        if (curveModel.properties.idDataset == currentDataset.properties.idDataset) return;
+                                        let curveInfo = {
+                                            idCurve: curveModel.properties.idCurve,
+                                            desDatasetId: currentDataset.properties.idDataset,
+                                        };
+                                        apiFunction(curveInfo, function () {
+                                            callbackEach && callbackEach(curveModel);
+                                            next();
+                                        });
+                                    } else {
+                                        next();
+                                        return;
+                                    }
+                                },
+                            );
+                            delete curveModel.isCurveExist;
+                        }
+                    },
+                    function (err) {
+                        wiComponentService.putComponent(wiComponentService.COPYING_CURVE, null);
+                        wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
+                        refreshProjectState();
+                    }
+                );
+            }
+            if (existedCurves.length > 1) {
+                let message = 'These curves existed! Override all?<br><b>' + existedCurves.map(c => c.properties.name).join('</b><br><b>') + '</b>';
+                DialogUtils.confirmDialog(
+                    __GLOBAL.ModalService, 'Override confirmation', message, function (res) {
+                        if (res === 'all') {
+                            curveModels.forEach((curveModel) => {
+                                const curveInfo = {
+                                    idCurve: curveModel.properties.idCurve,
+                                    desDatasetId: currentDataset.properties.idDataset,
+                                };
+                                apiFunction(curveInfo, function () {
+                                    callbackEach && callbackEach(curveModel);
+                                });
+                            })
+                            return;
+                        }
+                        if (res === 'pick') {
+                            pasteCurves(curveModels);
+                            return;
+                        }
+                        if (res === 'no') {
+                            let notExistedCurves = []
+                            curveModels.forEach(c => {
+                                if (!existedCurves.find(c1 => c === c1)) notExistedCurves.push(c);
+                            })
+                            pasteCurves(notExistedCurves);
+                            return;
+                        }
+                    },
+                    [
+                        {
+                            title: 'Override all',
+                            onClick: function (modalCtrl) {
+                                modalCtrl.close('all');
+                            }
+                        }, {
+                            title: 'Pick curves',
+                            onClick: function (modalCtrl) {
+                                modalCtrl.close('pick');
+                            }
+                        }, {
+                            title: 'Dont override',
+                            onClick: function (modalCtrl) {
+                                modalCtrl.close('no');
+                            }
+                        }
+                    ]
+                )
+            } else {
+                pasteCurves(curveModels);
+            }
+        }
     }
+    // if copying
+    const copyingCurves = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
+    if (copyingCurves) paste(copyingCurves, wiApiService.copyCurve.bind(wiApiService));
     // if cutting
     let cuttingCurves = wiComponentService.getComponent(wiComponentService.CUTTING_CURVE);
-    if (Array.isArray(cuttingCurves)) {
-        async.eachOf(
-            cuttingCurves,
-            function (cuttingCurve, index, next) {
-                let isCurveExist = false;
-                currentDataset.children.forEach(function (curve) {
-                    if (cuttingCurve.properties.name == curve.properties.name) {
-                        isCurveExist = true;
-                    }
-                });
-                if (!isCurveExist) {
-                    if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                    let curveInfo = {
-                        idCurve: cuttingCurve.properties.idCurve,
-                        desDatasetId: selectedNode.properties.idDataset,
-                    };
-                    wiApiService.cutCurve(curveInfo, function () {
-                        wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
-                        next();
-                    });
-                    wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
-                } else {
-                    // curve existed
-                    DialogUtils.confirmDialog(
-                        __GLOBAL.ModalService,
-                        'WARNING!',
-                        cuttingCurve.properties.name + ' existed! Override it ?',
-                        function (yes) {
-                            if (yes) {
-                                if (cuttingCurve.properties.idDataset == selectedNode.properties.idDataset) return;
-                                let curveInfo = {
-                                    idCurve: cuttingCurve.properties.idCurve,
-                                    desDatasetId: selectedNode.properties.idDataset,
-                                };
-                                wiApiService.cutCurve(curveInfo, function () {
-                                    wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
-                                    next();
-                                });
-                                wiComponentService.putComponent(wiComponentService.CUTTING_CURVE, null);
-                            } else {
-                                next();
-                                return;
-                            }
-                        },
-                    );
-                }
-            },
-            function (err) {
-                refreshProjectState();
-            },
-        );
-        return;
-    }
+    if (cuttingCurves) paste(cuttingCurves, wiApiService.cutCurve.bind(wiApiService), function (cuttingCurve) {
+        wiComponentService.emit(wiComponentService.DELETE_MODEL, cuttingCurve);
+    })
 }
 
 
@@ -2092,6 +2107,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.fill.shadingType = 'pattern';
         shadingObj.positiveFill.shadingType = 'pattern';
         shadingObj.negativeFill.shadingType = 'pattern';
+        shadingObj.isNegPosFill = !fillPatternStyles.fill.pattern.displayType;
 
     }
     else if (shadingObj.shadingStyle == 'varShading') {
@@ -2103,6 +2119,7 @@ exports.mergeShadingObj = function (shadingOptions, fillPatternStyles, variableS
         shadingObj.fill.shadingType = 'varShading';
         shadingObj.positiveFill.shadingType = 'varShading';
         shadingObj.negativeFill.shadingType = 'varShading';
+        shadingObj.isNegPosFill = !variableShadingStyle.fill.varShading.displayType;
 
     } else {
         error("shadingObj has undefined shadingStyle");
@@ -2573,7 +2590,11 @@ exports.pixelToCm = pixelToCm;
 
 function hexToRgbA(hex) {
     var c;
-    var hexStr = hex;
+    var colors = [{name: "blue", hex: "#0000FF"}, {name: "white", hex: "#fff"}, {name: "black", hex: "#000"}];
+    var fdColor = colors.find(color => hex == color.name);
+    var hexStr;
+    if(fdColor) hexStr = fdColor.hex;
+        else hexStr = hex;
     if (!hex || hex.length == 0) {
         hexStr = '#FFFFFE';
     }
@@ -2599,6 +2620,20 @@ exports.hexToRgbA = hexToRgbA;
 
 exports.rgbaObjToString = function (rgbaObj) {
     return 'rgba(' + rgbaObj.r + ',' + rgbaObj.g + ',' + rgbaObj.b + ',' + rgbaObj.a + ')';
+}
+exports.rgbaStringToObj = function(rgbaString) {
+    if (rgbaString.substring(0, 4) == 'rgb(') {
+        rgbaString = rgbaString.replace('rgb(', 'rgba(').replace(')', ', 1)');
+    }
+    let rgbaArr = rgbaString.substring(5, rgbaString.length-1)
+            .replace(/ /g, '')
+            .split(',');
+    return {
+        r: parseInt(rgbaArr[0]),
+        g: parseInt(rgbaArr[1]),
+        b: parseInt(rgbaArr[2]),
+        a: parseInt(rgbaArr[3])
+    }
 }
 
 function getValPalette(palName, paletteList) {
@@ -2636,6 +2671,73 @@ function getListFamily() {
 }
 
 exports.getListFamily = getListFamily;
+
+function putPattern(callback) {
+    __GLOBAL.wiApiService.listPattern({}, function (pts) {
+        let baseUrl = __GLOBAL.wiApiService.BASE_URL;
+        let patterns = sortProperties(pts, 'full_name', false, false);
+        /*for (var pat in patterns) {
+            patterns[pat].src = baseUrl + patterns[pat].src;
+            console.log("src", patterns[pat].src)
+        };*/
+        __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.PATTERN, patterns);
+        callback && callback();
+    })
+}
+exports.putPattern = putPattern;
+
+function getListPattern() {
+    return __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.PATTERN);
+}
+
+exports.getListPattern = getListPattern;
+
+function sortProperties(obj, sortedBy, isNumericSort, reverse) {
+    sortedBy = sortedBy || 1; // by default first key
+    isNumericSort = isNumericSort || false; // by default text sort
+    reverse = reverse || false; // by default no reverse
+
+    var reversed = (reverse) ? -1 : 1;
+
+    var sortable = [];
+    var sorted = {};
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            sortable.push([key, obj[key]]);
+        }
+    }
+    if (isNumericSort)
+        sortable.sort(function (a, b) {
+            return reversed * (a[1][sortedBy] - b[1][sortedBy]);
+        });
+    else
+        sortable.sort(function (a, b) {
+            var x = a[1][sortedBy].toLowerCase(),
+                y = b[1][sortedBy].toLowerCase();
+            return x < y ? reversed * -1 : x > y ? reversed : 0;
+        });
+    for(var i = 0; i < sortable.length; i++) {
+        sorted[sortable[i][0]] = sortable[i][1];
+    }
+    return sorted; // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+}
+function sortObject(o) {
+    var sorted = {},
+    key, a = [];
+
+    for (key in o) {
+        if (o.hasOwnProperty(key)) {
+            a.push(key);
+        }
+    }
+
+    a.sort();
+
+    for (key = 0; key < a.length; key++) {
+        sorted[a[key]] = o[a[key]];
+    }
+    return sorted;
+}
 
 exports.openZonemanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
@@ -3096,3 +3198,24 @@ exports.colorGenerator = function () {
     }
     return "rgb(" + rand() + "," + rand() + "," + rand() + ")";
 }
+exports.getPatternService = function() {
+    return __GLOBAL.wiPatternService;
+}
+function getPattern(callback) {
+    let wiApiService = __GLOBAL.wiApiService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let patterns = wiComponentService.getComponent(wiComponentService.PATTERN);
+    if (patterns) {
+        if (callback) callback(patterns);
+        return;
+    }
+    else {
+        wiApiService.listPattern(function (patternList) {
+            wiComponentService.putComponent(wiComponentService.PATTERN, patternList);
+            if (callback) callback(patternList);
+        });
+        return;
+    }
+}
+
+exports.getPattern = getPattern;
