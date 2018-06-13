@@ -277,6 +277,47 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         rootNode.__SELECTED_NODES = [];
     }
 
+    this.showTreeContextMenuFunction = function($event, $index) {
+        console.log('showContextMenu', this.config[$index]);
+        let contextMenu = self.getDefaultTreeviewCtxMenu(
+            $index,
+            this
+        );
+        wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, contextMenu);
+    };
+    this.showMoreButtonContextMenuFunction = function($event, $index) {
+        console.log('showHeaderContextMenu');
+        let contextMenu = self.getDefaultTreeviewCtxMenu(
+            $index,
+            this
+        );
+        wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, contextMenu);
+    };
+
+    this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
+        return [
+            {
+                name: "Export",
+                label: "Export Zoneset",
+                icon: "file-export-16x16",
+                handler: function () {
+                    self.exportZoneSet();
+                }
+            }, {
+                name: "Delete",
+                label: "Delete Zoneset",
+                icon: "delete-16x16",
+                handler: function () {
+                    self.deleteZoneSet();
+                }
+            }
+        ]
+    };
+    
     function selectHandler(currentNode, rootNode, callback) {
         if (currentNode.data) {
             $timeout(function () { currentNode.data.selected = true; });

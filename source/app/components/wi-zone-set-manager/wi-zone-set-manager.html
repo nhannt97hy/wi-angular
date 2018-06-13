@@ -3,7 +3,7 @@
         <div class="template-tree">
             <div class='left-heading'>
                 <h5>ZoneSets</h5>
-                <div class="button-area">
+                <div class="button-area" style="position: relative">
                     <!-- <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                         <i class="fa fa-arrow-up"></i>
                     </button>
@@ -16,21 +16,16 @@
                     <button title="Refresh zonesets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
                         <i class="ti-reload"></i>
                     </button>
-                    <button title="More" class = 'btn' ng-click="">
+                    <button title="More" class="btn" ng-click="wiZoneSetManager.showMoreButtonContextMenuFunction($event, $index)" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet"> 
                         <i class="ti-more"></i>
                     </button>
                 </div>
             </div>
             <div class="scroll-container">
-                <wi-scroll id-scroll="templateTreeScroll" style='flex:1;' up-trigger='wiZoneSetManager.upTriggerPrj'
-                    down-trigger='wiZoneSetManager.downTriggerPrj'>
-                    <wi-base-treeview name="zoneTemplateManagerTreeview" 
-                        config="wiZoneSetManager.zoneSetConfig" 
-                        container="wiZoneSetManagerTab2"
-                        on-click-function="wiZoneSetManager.clickFunction"
-                        filter="" >
+                <!-- <wi-scroll id-scroll="templateTreeScroll" style='flex:1;' up-trigger='wiZoneSetManager.upTriggerPrj' down-trigger='wiZoneSetManager.downTriggerPrj'> -->
+                    <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneSetManager.zoneSetConfig" container="wiZoneSetManager"
+                        on-click-function="wiZoneSetManager.clickFunction" filter="" show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
                     </wi-base-treeview>
-                </wi-scroll>
             </div>
         </div>
     </div>
@@ -50,7 +45,7 @@
                 <button tilte="Delete selected zones" class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
                     <i class="ti-close"></i>
                 </button>
-                <button title="Create new zone"class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
+                <button title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-plus"></i>
                 </button>
                 <button title="Refresh zones list" class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
@@ -74,8 +69,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="zone in wiZoneSetManager.zones | orderBy: wiZoneSetManager.zoneOrder" ng-init="zone.flag = false"
-                            ng-class="{'selected': zone.flag}">
+                        <tr ng-repeat="zone in wiZoneSetManager.zones | orderBy: wiZoneSetManager.zoneOrder" ng-init="zone.flag = false" ng-class="{'selected': zone.flag}">
                             <td style="width: 5%;" class="border-right-gray" ng-click="wiZoneSetManager.selectZoneToggle(zone)">
                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
                             </td>
@@ -95,10 +89,12 @@
                             </td>
 
                             <td width="10%">
-                                <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control width-80px height-20px thick-border">
+                                <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}"
+                                    class="form-control wi-form-control width-80px height-20px thick-border">
                             </td>
                             <td width="10%">
-                                <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control width-80px height-20px thick-border">
+                                <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}"
+                                    class="form-control wi-form-control width-80px height-20px thick-border">
                                 </button>
                             </td>
                             <td width="15%">
