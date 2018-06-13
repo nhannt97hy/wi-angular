@@ -238,6 +238,18 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         }
     }
+    this.choosePattern = function (index) {
+        DialogUtils.fillPatternDialog(ModalService, 
+                                    self.zones[index].fill.pattern.name, 
+                                    self.zones[index].fill.pattern.foreground, 
+                                    self.zones[index].fill.pattern.background, function(_name) {
+            if(_name) {
+                self.zones[index].fill.pattern.name = _name;
+                self.onZoneChanged(index);
+            }
+        });
+    };
+
     this.onZoneChanged = function (index) {
         self.zoneEditted = true;
         self.zones[index].zoneEditted = true;

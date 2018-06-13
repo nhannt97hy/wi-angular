@@ -830,10 +830,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 }
                 break;
 
-            case 'well': case 'dataset':
+            case 'dataset':
                 hasCurve = self.viTrack.getCurves().find(curve => curve.idDataset == model.id);
                 if(hasCurve) {
                     console.log('updating log track', self.viTrack);
+                    self.update();
+                }
+                break;
+            case 'well': 
+                let wellProps = self.getWellProps(); 
+                if(wellProps && model.id == wellProps.idWell) {
+                    console.log('updating log track', self);
                     self.update();
                 }
                 break;
