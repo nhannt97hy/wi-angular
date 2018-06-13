@@ -42,7 +42,7 @@ module.exports = function (ModalService, callback, groups, _users, company) {
                     selected : false
                 }, 
                 actions: [{
-                    icon: gr.isShared ? "ti-check checkFilter" : "ti-check",
+                    icon: gr.isShared ? "ti-check isShared" : "ti-check isNotShared",
                     handler: function() {
                         handlerFunc(gr);
                         }
