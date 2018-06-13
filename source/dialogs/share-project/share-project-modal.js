@@ -1,5 +1,5 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, callback, groups, users, company) {
+module.exports = function (ModalService, callback, groups, _users, company) {
     function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
         window.SP = this;
@@ -7,7 +7,7 @@ module.exports = function (ModalService, callback, groups, users, company) {
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         this.project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        this.groups = groups;
+        // this.groups = groups;
         this.users = [];
         this.idGroups = [];
         this.objects = null;
@@ -16,22 +16,25 @@ module.exports = function (ModalService, callback, groups, users, company) {
         this.usersConfig = [];
 
         this.selectGroupNode = {};
+        
         let topIdx = 0;
         let selectionLength = 15;
         let delta = 5;
 
-        preGroup();
+        preGroup(groups);
+        this.groups = groups.filter(g => (g.isShared == true));
 
         function preUser(group) {
-            self.users.forEach(user => {
+            _users.forEach(user => {
                 let tmp = group.users.find(u => u.idUser === user.idUser);
                 user.isShared = !!tmp;
             });
         }
+
         function addGroupNode (gr) {
             let node = {
                 name: gr.name,
-                type: "group",
+                type: gr.isShared ? "group" : "group-checked",
                 data: {
                     childExpanded: true,
                     label: gr.name,
@@ -39,7 +42,10 @@ module.exports = function (ModalService, callback, groups, users, company) {
                     selected : false
                 }, 
                 actions: [{
-                    icon: gr.isShared ? "apply-16x16" : ""
+                    icon: gr.isShared ? "ti-check checkFilter" : "ti-check",
+                    handler: function() {
+                        handlerFunc(gr);
+                        }
                     }],
                 properties: gr
             }
@@ -68,8 +74,8 @@ module.exports = function (ModalService, callback, groups, users, company) {
         }
         initGroupConfig(this.groups);
 
-        function preGroup() {
-            self.groups.forEach(function (group) {
+        function preGroup(groups) {
+            groups.forEach(function (group) {
                 let tmp = group.shared_projects.find(s => s.project_name === self.project.name);
                 if (tmp) {
                     group.isShared = true;
@@ -319,6 +325,27 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 }
             });
         }
+
+        this.onFilterBy = function () {
+            self.groupsConfig = [];
+            reload();
+        };
+
+        /*this.onFilterBy = function() {
+            if(self.fb) {
+                self.filterBy = 'group-checked';
+            } else self.filterBy = '';
+        };*/
+
+        function handlerFunc(group) {
+            if(group.isShared) {
+                self.unShareProjectFromGroup(group);
+                group.isShared = false;
+            } else {
+                self.shareProjectToGroup(group);
+                group.isShared = true;
+            }
+        }
         function setSelectedGroupNode(node) {
             self.groupsConfig.forEach(function (item) {
                 utils.visit(item, function (n) {
@@ -338,14 +365,15 @@ module.exports = function (ModalService, callback, groups, users, company) {
         };
 
         this.upTriggerGroup = function(cb) {
+            let sourceData = self.fb ? self.groups : groups;
             if(topIdx > 0) {
                 if(topIdx > delta) {
-                    let newSource = self.groups.slice(topIdx - delta, topIdx).reverse();
+                    let newSource = sourceData.slice(topIdx - delta, topIdx).reverse();
                     let newList = newSource.map(g => addGroupNode(g));
                     topIdx = topIdx - delta;
                     cb(newList, self.groupsConfig);
                 } else {
-                    let newSource = self.groups.slice(0, topIdx).reverse();
+                    let newSource = sourceData.slice(0, topIdx).reverse();
                     let newList = newSource.map(g => addGroupNode(g));
                     topIdx = 0;
                     cb(newList, self.groupsConfig);
@@ -354,17 +382,18 @@ module.exports = function (ModalService, callback, groups, users, company) {
         };
 
         this.downTriggerGroup = function (cb) {
+            let sourceData = self.fb ? self.groups : groups;
             let bottomIdx = topIdx + selectionLength;
-            if(bottomIdx < self.groups.length) {
-                if(self.groups.length - bottomIdx > delta) {
-                    let newSource = self.groups.slice(bottomIdx, delta + bottomIdx);
+            if(bottomIdx < sourceData.length) {
+                if(sourceData.length - bottomIdx > delta) {
+                    let newSource = sourceData.slice(bottomIdx, delta + bottomIdx);
                     let newList = newSource.map(g => addGroupNode(g));
                     topIdx = topIdx + delta;
                     cb(newList, self.groupsConfig);
                 } else {
-                    let newSource = self.groups.slice(bottomIdx, self.groups.length);
+                    let newSource = sourceData.slice(bottomIdx, sourceData.length);
                     let newList = newSource.map(g => addGroupNode(g));
-                    topIdx = topIdx + self.groups.length - bottomIdx;
+                    topIdx = topIdx + sourceData.length - bottomIdx;
                     cb(newList, self.groupsConfig);
                 }
             } else cb([]);
@@ -443,7 +472,17 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 reload();
             })
         };*/
-        /*this.shareProjectToGroup = function (group) {
+        function reload() {
+            wiApiService.listGroup({idCompany: company.idCompany}, function (groups) {
+                // $timeout(function () {
+                    preGroup(groups);
+                    self.groups = groups.filter(g => (g.isShared == true));
+                    let sourceData = self.fb ? self.groups : groups;
+                    initGroupConfig(sourceData);
+                // });
+            });
+        }
+        this.shareProjectToGroup = function (group) {
             wiApiService.addSharedProject({name: self.project.name}, function (sharedProject) {
                 wiApiService.addProjectToGroup({
                     type: "add",
@@ -466,11 +505,8 @@ module.exports = function (ModalService, callback, groups, users, company) {
                 toastr.success("Successfull stop sharing " + self.project.name + " from group " + group.name);
                 reload();
             });
-        };*/
-        this.onCancelButtonClicked = function () {
-            close(null);
         };
-        this.onApplyButtonClicked = function () {
+        function doApply(callback) {
             if (self.selectedGroup && self.objects) {
                 unloadGroupPerm(self.objects, function () {
                     let _u = "";
@@ -490,9 +526,23 @@ module.exports = function (ModalService, callback, groups, users, company) {
                         toastr.info("Reload permission for users successfull: " + _u);
                     });
                 });
+                callback & callback();
             } else {
                 toastr.warning("No permission changed!");
+                callback & callback();
             }
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+
+        this.onOkButtonClicked = function () {
+            doApply(function() {
+                close();
+            });
+        };
+        this.onApplyButtonClicked = function () {
+            doApply(function() {});
         }
     }
 

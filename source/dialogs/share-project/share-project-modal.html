@@ -5,33 +5,58 @@
                 <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">
                     &times;
                 </button>
-                <h4>Advance Sharing Project : {{wiModal.project.name}}</h4>
+                <h4>Sharing Config (Project : {{wiModal.project.name}})</h4>
             </div>
             <div class="modal-body">
-                <div style="display: flex; height: 40%">
-                    <div style="flex:1; margin: 0 5px;display: flex;flex-direction:column;height: 90%;margin-bottom:0;">
-                        <h4 style="text-align: center">Groups</h4>
-                        <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px; padding-left: 8px;'>
+                <div style="display: flex; height: 40%; margin-bottom: 5px">
+                    <div class="list-body" style="padding-right: 10px">
+                        <div class="panel-heading" style="padding: 0">
+                            <p style="float: left;" class="text-heading" ng-if="wiModal.fb">Share To Groups</p>
+                            <p style="float: left;" class="text-heading" ng-if="!wiModal.fb">All Groups</p>
+                            <!-- <div class='filter-block' ng-init="wiModal.filterBy=''" style="float: right;">
+                                <div class="filter-main">
+                                    <label class="btn" ng-class='{active: wiModal.filterBy=="group-checked"}' title='Active Group'>
+                                        <input type="radio" class="display-none" value='group-checked' ng-model="wiModal.filterBy">
+                                        <span class='group-manager-16x16'></span>
+                                    </label>
+                                </div>
+                            </div> -->
+                            
+                        </div>
+                        <div style='background-color:white;border:none;display: flex;padding-left: 7px; border: 1px solid #a9a9a9'>
                             <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
                             <input type='text' id="focus" 
-                                    style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' 
+                                    style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
                                     ng-model="wiModal.grFilter">
+                            <div class='filter-block' ng-init="wiModal.fb=true" style="float: right;">
+                                <div class="filter-main" style="width: 45px;">
+                                    <label class="btn" ng-class='{checkFilter: wiModal.fb==true}' title='Active Group'>
+                                        <input type="checkbox" class="display-none" ng-model="wiModal.fb"
+                                                ng-change="wiModal.onFilterBy()">
+                                        <span class='ti-check'></span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         <wi-scroll id-scroll="'groupTreeScroll'" style='flex:1;display:flex;flex-direction:column;'
                                     class="list-scroll"
-                                    up-trigger='wiModal.upTriggerGroup' down-trigger='wiModal.downTriggerGroup'>
+                                    up-trigger='wiModal.upTriggerGroup' down-trigger='wiModal.downTriggerGroup'
+                                    animation-timeout="0">
                             <wi-base-treeview
                                         name="_group"
                                         container="wiModal"
                                         config="wiModal.groupsConfig"
                                         on-click-function='wiModal.groupClicked'
-                                        filter="{{wiModal.grFilter}}">
+                                        filter="{{wiModal.grFilter}}"
+                                        filter-by="{{wiModal.filterBy}}">
                             </wi-base-treeview>
                         </wi-scroll>
                     </div>
-                    <div style="flex:1; margin: 0 5px; display: flex;flex-direction:column;height: 90%;margin-bottom:0;">
-                        <h4 style="text-align: center">Users in {{wiModal.selectGroupNode.name}}</h4>
-                        <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px; padding-left: 8px;'>
+                    <div class="list-body" style="padding-left: 10px">
+                        <div class="panel-heading" style="padding: 0">
+                            <p style="float: left;" class="text-heading">Users in: <span style="font-weight: bold">{{wiModal.selectGroupNode.name}}</span></p>
+                        </div>
+                        <div style='background-color:white;border:none;display: flex;padding-left: 7px;'>
                             <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
                             <input type='text' id="focus" 
                                     style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' 
@@ -49,15 +74,15 @@
                         </wi-scroll>
                     </div>
                 </div>
-                <hr/>
-                <div style="display: flex; height: 25%; border: 1px solid #ccc; ">
+                <p style="padding-left: 5px" class="text-heading">Permission</p>
+                <div style="display: flex; height: 25%; border: 1px solid #A9A9A9; margin: 0 5px; border-radius: 5px;">
                     <div style="width: 100%; text-align: center; padding: 4em;" ng-show="!wiModal.objects">
                         <p style="font-weight: bold; color: #ccc; font-size: 3em">NO INFORMATION</p>
                     </div>
                     <div style="flex:1; overflow-y: overlay;" ng-show="wiModal.objects">
-                        <ul class="list-group" style="margin-bottom: 0">
+                        <ul class="list-group">
                             <li ng-repeat="object in wiModal.objects" class="list-group-item"
-                                style="display: flex; padding: 3px 15px"><span style="flex: 1; line-height: 36px; ">{{object.displayAs}}</span>
+                                style="display: flex; padding: 3px 15px"><span style="flex: 1; line-height: 25px; ">{{object.displayAs}}</span>
                                 <span style="padding: inherit">
                                     <label class="checkbox-inline"><input type="checkbox" ng-model="object.get" ng-checked="{{object.get}}" ng-disabled="true">Get</label>
                                     <label class="checkbox-inline"><input type="checkbox" ng-model="object.create" ng-checked="{{object.create}}">Create</label>
@@ -70,6 +95,7 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button class='btn btn-default' ng-click='wiModal.onOkButtonClicked()'><span class="ok-16x16"></span>&nbsp;Ok</button>
                 <button class='btn btn-default' ng-click='wiModal.onApplyButtonClicked()'><span class="apply-16x16"></span>&nbsp;Apply Permission</button>
                 <button class='btn btn-default' ng-click='wiModal.onCancelButtonClicked()'><span class="cancel-16x16"></span>&nbsp;Cancel</button>
             </div>
