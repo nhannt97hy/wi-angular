@@ -3,7 +3,7 @@
         <div class="template-tree">
             <div class='left-heading'>
                 <h5>ZoneSets</h5>
-                <div class="button-area">
+                <div class="button-area" style="position: relative"> 
                     <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
                         <i class="ti-plus"></i>
                     </button>
@@ -46,16 +46,16 @@
             </select>
             <div class="button-area">
                 <button class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)">
-                    <i class="fa fa-check"></i>
+                    <i class="ti-check"></i>
                 </button>
                 <button class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
-                    <i class="fa fa-times"></i>
+                    <i class="ti-close"></i>
                 </button>
                 <button title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-plus"></i>
                 </button>
                 <button class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
-                    <i class="fa fa-refresh"></i>
+                    <i class="ti-reload"></i>
                 </button>
             </div>
         </div>
