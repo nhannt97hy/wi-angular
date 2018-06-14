@@ -1131,6 +1131,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         })
     }
+
     this.logTrackProps = {
         width: 2.5,
         title: 'Track',
@@ -1143,7 +1144,6 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         majorTicks: 1,
         minorTicks: 5
     }
-
     this.currentInput = {
         zoneset: null,
         curves: [],

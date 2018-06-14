@@ -604,6 +604,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         });
     }
 
+    this.$onDestroy = function(){
+        wiComponentService.removeEvent(wiComponentService.DELETE_MODEL, self.onDelete);
+    }
 }
 
 let app = angular.module(moduleName, []);

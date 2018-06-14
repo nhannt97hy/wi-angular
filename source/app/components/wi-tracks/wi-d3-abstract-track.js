@@ -164,6 +164,30 @@ Controller.prototype.registerTrackCallback = function() {
             });
         }
     });
+    if(!self.wiD3Ctrl) {
+        viTrack.on('mousewheel', function() {
+            let mouse = d3.mouse(viTrack.plotContainer.node());
+            if (mouse[1] < 0) return;
+
+            if (d3.event.ctrlKey) {
+                self.zoom();
+                d3.event.preventDefault();
+                d3.event.stopPropagation();
+            }
+            else
+                self.scroll();
+        })
+    }
+}
+
+Controller.prototype.zoom = function() {
+    console.log('on track zoom');
+}
+
+Controller.prototype.scroll = function() {
+    let deltaY = d3.event.deltaY;
+    console.log('on track scroll', deltaY, d3.event);
+
 }
 
 Controller.prototype.getContextMenu = function () {
