@@ -4,6 +4,10 @@
     width: 100%;
     height: 100%;
     background-color: white;
+    ::-webkit-input-placeholder {
+       color: #ccc;
+       font-style: italic;
+    }
     .selected {
         background-color: #eee !important
     };
@@ -41,6 +45,12 @@
         }   
         wi-base-treeview {
             margin: 0;
+            .wi-parent-content {
+                padding-left: 0.5em;
+                .icon-expanded {
+                    display: none;
+                }
+            }
         }
     };
     .right-side {

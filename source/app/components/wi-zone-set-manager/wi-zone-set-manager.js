@@ -12,8 +12,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     let topIdx = 0;
-    let selectionLength = 30;
-    let delta = 10;
+    let selectionLength = 20;
+    let delta = 5;
 
     this.refreshZoneSetList = function () {
         self.lastSelectedWell = false;
@@ -22,8 +22,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.zoneSetConfig = [];
         self.zones = [];
         wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            wells.sort(function (a, b) {
+                return parseInt(a.idWell) - parseInt(b.idWell);
+            });
             if (wells) {
-                for (well of wells) {
+                let cutWells = wells.slice(0, selectionLength);
+                for (well of cutWells) {
                     self.zoneSetConfig.push(createWellModel(well));
                 }
             }
@@ -87,9 +91,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
     this.upTrigger = function (cb) {
-        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
-            if (wells) {
-                if(topIdx > 0) {
+        if(topIdx > 0) {
+            wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+                if (wells) {
+                    wells.sort(function (a, b) {
+                        return parseInt(a.idWell) - parseInt(b.idWell);
+                    });
                     if(topIdx > delta) {
                         let newSource = wells.slice(topIdx - delta, topIdx).reverse();
                         let newList = newSource.map(w => createWellModel(w));
@@ -101,14 +108,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         topIdx = 0;
                         cb(newList, self.zoneSetConfig);
                     }
-                } else cb([]);
-            }
-        })
+                }
+            })
+        } else cb([]);
     };
 
     this.downTrigger = function (cb) {
         wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
             if (wells) {
+                wells.sort(function (a, b) {
+                    return parseInt(a.idWell) - parseInt(b.idWell);
+                });
                 let bottomIdx = topIdx + selectionLength;
                 if(bottomIdx < wells.length) {
                     if(wells.length - bottomIdx > delta) {
