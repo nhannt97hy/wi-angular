@@ -41,6 +41,18 @@ module.exports = function (ModalService, callback) {
                 }
             });
         }
+        this.chooseTemplate = function(){
+            console.log('chooseTemplateFunction called');
+            DialogUtils.chooseTemplateDialog(ModalService, function (template){
+                if(template){
+                    self.zone.name = template.name;
+                    self.zone.fill.pattern.name = template.fill.pattern.name;
+                    self.zone.fill.pattern.background = template.fill.pattern.background;
+                    self.zone.fill.pattern.foreground = template.fill.pattern.foreground;
+                    console.log('data got from chooseTemlateDialog', self.zone);
+                }
+            })
+        }
         this.onOkButtonClicked = function () {
            close(self.zone);
         };
