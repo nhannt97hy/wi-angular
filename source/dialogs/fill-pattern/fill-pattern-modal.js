@@ -8,25 +8,48 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.name = name;
         this.foreground = foreground;
         this.background = background;
-        this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
+        let selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
         this.filter = '';
         
         let topIdx = 0;
         let selectionLength = 30;
         let delta = 10;
 
+        let solidPattern = {
+            Solid: {
+                full_name: "Solid",
+                src: ""
+            }
+        }
+        this.selectPatterns = Object.assign({}, solidPattern, selectPatterns);
+
         function addNode(p) {
-            let node = {
-                name: p,
-                type: "pattern",
-                data: {
-                    childExpanded: true,
-                    label: self.selectPatterns[p].full_name,
-                    tooltip: self.selectPatterns[p].full_name,
-                    selected : (self.name == p) ? true : false,
-                    imageBg : 'url(' + self.selectPatterns[p].src + ')'
-                }, 
-                properties: self.selectPatterns[p]
+            let node;
+            if (p == "Solid") {
+                node = {
+                    name: p,
+                    type: "pattern",
+                    data: {
+                        childExpanded: true,
+                        label: "Solid",
+                        tooltip: "Solid",
+                        selected : ((self.name).toLowerCase() === "solid" || (self.name).toLowerCase() === "none") ? true : false
+                    }, 
+                    properties: self.selectPatterns[p]
+                }
+            } else {
+                node = {
+                    name: p,
+                    type: "pattern",
+                    data: {
+                        childExpanded: true,
+                        label: self.selectPatterns[p].full_name,
+                        tooltip: self.selectPatterns[p].full_name,
+                        selected : (self.name == p) ? true : false,
+                        imageBg : 'url(' + self.selectPatterns[p].src + ')'
+                    }, 
+                    properties: self.selectPatterns[p]
+                }
             }
             return node;
         }
