@@ -259,7 +259,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.createZone = function () {
         DialogUtils.createNewZoneDialog(ModalService, function (data) {
             if (data) {
-                if (self.zones.length !== 0) {
+                console.log('data', data)
+                if (!self.newZoneSet) {
                     data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
                     wiApiService.createZone(data, function (zone) {
                         self.zones.push(data);

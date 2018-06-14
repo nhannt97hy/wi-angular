@@ -51,7 +51,7 @@
                     <i class="ti-check"  ng-class="{'color-blue': !(!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)}"></i>
                 </label>
                 <label class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
-                    <i class="ti-close"  ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)}"></i>
+                    <i class="ti-close"  ng-class="{'color-blue': !(!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)}"></i>
                 </label>
                 <label title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-plus"  ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>

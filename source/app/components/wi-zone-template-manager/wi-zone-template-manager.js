@@ -189,8 +189,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.createTemplate = function () {
         let promptConfig = {
-            title: '<span class="zone-edit-16x16"></span> Create New Zone Template',
-            inputName: 'Name',
+            title: '<span class="zone-edit-16x16"></span> New Zone Template',
+            inputName: 'Zone name',
             input: ''
         }
         DialogUtils.promptDialog(ModalService, promptConfig, function (ret) {
