@@ -8,17 +8,21 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.name = name;
         this.foreground = foreground;
         this.background = background;
-        this.selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
+        let selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
         this.filter = '';
         
         let topIdx = 0;
         let selectionLength = 30;
         let delta = 10;
 
-        this.selectPatterns.Solid = {
-            full_name: "Solid",
-            src: ""
+        let solidPattern = {
+            Solid: {
+                full_name: "Solid",
+                src: ""
+            }
         }
+        this.selectPatterns = Object.assign({}, solidPattern, selectPatterns);
+
         function addNode(p) {
             let node;
             if (p == "Solid") {
