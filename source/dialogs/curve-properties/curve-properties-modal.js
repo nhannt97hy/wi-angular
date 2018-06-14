@@ -279,10 +279,10 @@ module.exports = function (ModalService, trackComponent, callback) {
             console.log(self.curveOptions, self.lineOptions);
             utils.changeLine(lineObj, wiApiService, function () {
                 console.log("lineObj", lineObj);
-                currentCurve.setProperties(lineObj);
+                currentCurve.setProperties(lineObj, self.units);
                 viTrack.plotCurve(currentCurve);
                 viTrack.doPlot(true);
-                if (callback) callback();
+                if(callback) callback();
             });
         }
 

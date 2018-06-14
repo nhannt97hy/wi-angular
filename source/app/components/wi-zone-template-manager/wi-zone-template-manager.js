@@ -12,8 +12,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     let topIdx = 0;
-    let selectionLength = 10;
-    let delta = 3;
+    let selectionLength = 20;
+    let delta = 5;
 
     function addNode (template) {
         let node = {
@@ -37,8 +37,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
 
         wiApiService.listZoneTemplate({}, function (templates) {
+            templates.sort(function (a, b) {
+                return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
+            });
             if (templates) {
-                for (template of templates) {
+                let cutTemplates = templates.slice(0, selectionLength);
+                for (template of cutTemplates) {
                     self.templateConfig.push(addNode(template))
                 }
             }
@@ -76,9 +80,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.upTrigger = function (cb) {
-        wiApiService.listZoneTemplate({}, function (templates) {
-            if (templates) {
-                if(topIdx > 0) {
+        if(topIdx > 0) {
+            wiApiService.listZoneTemplate({}, function (templates) {
+                templates.sort(function (a, b) {
+                    return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
+                });
+                if (templates) {
                     if(topIdx > delta) {
                         let newSource = templates.slice(topIdx - delta, topIdx).reverse();
                         let newList = newSource.map(t => addNode(t));
@@ -90,13 +97,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         topIdx = 0;
                         cb(newList, self.templateConfig);
                     }
-                } else cb([]);
-            }
-        })
+                }   
+            })
+        } else cb([]);
     };
     this.downTrigger = function (cb) {
         wiApiService.listZoneTemplate({}, function (templates) {
             if (templates) {
+                templates.sort(function (a, b) {
+                    return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
+                });
                 let bottomIdx = topIdx + selectionLength;
                 if(bottomIdx < templates.length) {
                     if(templates.length - bottomIdx > delta) {
