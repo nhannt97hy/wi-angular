@@ -9,9 +9,9 @@ module.exports = function (ModalService, callback) {
             endDepth: "",
             fill: {
                 pattern: {
-                    name: "",
-                    background: "",
-                    foreground: ""
+                    name: "none",
+                    background: "rgb(0, 0, 0)",
+                    foreground: "rgb(220, 220, 220)"
                 }
             }
         }
