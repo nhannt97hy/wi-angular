@@ -149,8 +149,9 @@ Curve.prototype.getProperties = function() {
 
 /**
  * @param {Object} props - New properties for the curve
+ * @param {Array} units - list of units for the curve
  */
-Curve.prototype.setProperties = function(props) {
+Curve.prototype.setProperties = function(props, units) {
     let self = this;
     this.prevProps = this.getProperties();
 
@@ -208,10 +209,36 @@ Curve.prototype.setProperties = function(props) {
         this.dataMap = dataMap;
     }
 
+    if(this.prevProps.unit && props.unit && this.prevProps.unit !== props.unit) {
+        if(units && Array.isArray(units)) {
+            let prevUnit = units.find(u => u.name === this.prevProps.unit);
+            let currUnit = units.find(u => u.name === props.unit);
+            self.changeUnitValue(prevUnit, currUnit);
+        } else {
+            console.error('no unit list for convertion')   
+        }
+    }
+
     // if (props.displayMode == 'None') {
     //     this.symbol = null;
     //     this.line = null;
     // }
+}
+
+/**
+ * @param {String} prevUnit - previous unit for the curve
+ * @param {String} currUnit - current unit for the curve
+ * @param {Array} units - list of units for the curve
+ */
+Curve.prototype.changeUnitValue = function(prevUnit, currUnit) {
+    let self = this;
+    function mapUnit(x) {
+        return x * currUnit.rate / prevUnit.rate;
+    }
+    this.data.forEach(function(d) {
+        d.x = mapUnit(d.x);
+        self.dataMap[d.y] = d.x;
+    })
 }
 
 /**
@@ -572,6 +599,11 @@ Curve.prototype.addHighlightEffect = function() {
     ctx.shadowBlur = 2;
 }
 
+Curve.prototype.updateWindowY = function(minY, maxY) {
+    this.minY = minY;
+    this.maxY = maxY;
+    this.doPlot();
+}
 
 function plotLine(curve, data, highlight) {
     if (typeof curve.line != 'object') return;

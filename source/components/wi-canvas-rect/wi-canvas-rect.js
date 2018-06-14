@@ -21,6 +21,10 @@ function Controller(wiComponentService, wiPatternService, $timeout) {
         let context = canvas.getContext('2d');
         if(!context) return;
         context.clearRect(0,0, canvas.width, canvas.height);
+        if(self.pattern.toLowerCase() == "none" || self.pattern.toLowerCase() == "solid") {
+            context.fillStyle = self.background;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        }
         wiPatternService.createPattern(context, self.pattern, self.foreground, self.background, function(pattern) {
             context.fillStyle = pattern;
             context.fillRect(0, 0, canvas.width, canvas.height);

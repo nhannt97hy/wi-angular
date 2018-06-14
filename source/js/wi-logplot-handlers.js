@@ -10,9 +10,13 @@ function genSamples(nSamples) {
 }
 
 exports.EditFormatButtonClicked = function () {
-    const wiLogplot = this.wiLogplot;
-    // wiLogplot.getwiD3Ctrl().openPropertiesDialog();
-    wiLogplot.getwiD3Ctrl().openTrackPropertiesDialog();
+    // const wiLogplot = this.wiLogplot;
+    // // wiLogplot.getwiD3Ctrl().openPropertiesDialog();
+    // wiLogplot.getwiD3Ctrl().openTrackPropertiesDialog();
+    let curTrackComponent = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if(curTrackComponent && curTrackComponent.controller) {
+        curTrackComponent.controller.openPropertiesDialog();
+    }
 };
 
 exports.SaveAsLogplotButtonClicked = function () {
@@ -25,7 +29,7 @@ exports.SaveAsLogplotButtonClicked = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = wiLogplot.getLogplotModel().properties.name + '.plot';
+        let fileName = wiLogplot.getLogplotModelAsync().properties.name + '.plot';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';
@@ -45,7 +49,6 @@ exports.DuplicateButtonClicked = function () {
     DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this plot?", function (yes) {
         if (yes) {
             wiApiService.duplicateLogplot(wiLogplot.id, idWell, function (response) {
-
                 Utils.refreshProjectState();
             });
         }
@@ -148,11 +151,13 @@ function scaleTo(rangeUnit, wiLogplot, wiComponentService) {
     }
     wiD3Ctrl.setDepthRange(depthRange, true);
     wiD3Ctrl.processZoomFactor();
-    wiD3Ctrl.plotAll();
+    //wiD3Ctrl.plotAll();
     wiD3Ctrl.updateScale();
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
+    wiD3Ctrl.wiLogplotCtrl.emit('depth-range-updated', depthRange);
 }
 
+/*
 exports.ScalePreviousState = function (top, bottom) {
     let wiLogplot = this.wiLogplot;
     let track = $(`wi-logplot[id=${wiLogplot.id}] .vi-track-plot-container`);
@@ -166,6 +171,7 @@ exports.ScalePreviousState = function (top, bottom) {
     wiD3Ctrl.updateScale();
     wiD3Ctrl.adjustSlidingBarFromDepthRange(depthRange);
 };
+*/
 
 exports.Scale1ButtonClicked = function() {
     let rangeUnit = 1;
@@ -327,21 +333,18 @@ exports.DuplicateTrackButtonClicked = function () {
     const wiD3Ctrl = wiLogplot.getwiD3Ctrl();
     const currentTrack = wiD3Ctrl.getCurrentTrack();
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    if(!currentTrack.isLogTrack()) {
+    if(!currentTrack.idTrack) {
         // DialogUtils.errorMessageDialog(ModalService, "this track is not a log track. Please select a log track and try again.");
         toastr.error("This track is not a log track. Please select a log track and try again.", 'Error');
         return;
     }
     let timeoutFunc = this.$timeout;
-    let trackInfo = currentTrack.getProperties();
+    // let trackInfo = currentTrack.getProperties();
     DialogUtils.confirmDialog(this.ModalService, "DUPLICATE!", "Do you want to duplicate this log track?", function (yes) {
         if (yes) {
-            wiApiService.duplicateLogTrack({orderNum: wiD3Ctrl.getOrderKey(currentTrack), idTrack: trackInfo.idTrack}, function (aTrack) {
-                let trackObj = wiD3Ctrl.pushLogTrack(aTrack);
-                // wiD3Ctrl.updateTrack(trackObj);
-                timeoutFunc(function () {
-                    wiD3Ctrl.getComponentCtrlByProperties(aTrack).update();
-                })
+            wiApiService.duplicateLogTrack({orderNum: wiD3Ctrl.getOrderKey(currentTrack), idTrack: currentTrack.idTrack}, function (aTrack) {
+                wiD3Ctrl.trackComponents.push(aTrack);
+                wiD3Ctrl.trackComponents.sort((tc1, tc2) => tc1.orderNum.localeCompare(tc2.orderNum));
             });
         }
     });
@@ -356,38 +359,44 @@ exports.DeleteTrackButtonClicked = function () {
     let currentTrack = wiD3Ctrl.getCurrentTrack();
     let wiApiService = this.wiApiService;
     const DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
-    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete " + currentTrack.name + "?", function (yes) {
+    DialogUtils.confirmDialog(this.ModalService, "Delete Track", "Are you sure to delete " + (currentTrack.title||currentTrack.name) + "?", function (yes) {
         if (!yes) return;
-        if (currentTrack.type == 'log-track') {
-            wiApiService.removeLogTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'depth-track') {
-            wiApiService.removeDepthTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'zone-track') {
-            wiApiService.removeZoneTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'image-track') {
-            wiApiService.removeImageTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
-        } else if (currentTrack.type == 'object-track') {
-            console.log("deleting track with id: ", currentTrack.id);
-            wiApiService.removeObjectTrack(currentTrack.id, wiD3Ctrl.removeCurrentTrack);
+        if (currentTrack.idTrack) {
+            wiApiService.removeLogTrack(currentTrack.idTrack, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idDepthAxis) {
+            wiApiService.removeDepthTrack(currentTrack.idDepthAxis, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idZoneTrack) {
+            wiApiService.removeZoneTrack(currentTrack.idZoneTrack, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idImageTrack) {
+            wiApiService.removeImageTrack(currentTrack.idImageTrack, wiD3Ctrl.removeCurrentTrack);
+        } else if (currentTrack.idObjectTrack) {
+            wiApiService.removeObjectTrack(currentTrack.idObjectTrack, wiD3Ctrl.removeCurrentTrack);
         }
     });
 };
 
 exports.AddMarkerButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().addMarker();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if(curTrack && curTrack.controller && curTrack.controller.addMarker) 
+        curTrack.controller.addMarker();
 };
 
 exports.AddZoneButtonClicked = function () {
-    const currentTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
-    if (currentTrack && currentTrack.isZoneTrack()) {
-        currentTrack.setMode('AddZone');
-    } else {
-        toastr.error('Please select a zonation track and try again.', 'Error');
-    }
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    // if (curTrack && curTrack.isZoneTrack()) {
+    //     curTrack.setMode('AddZone');
+    // } else {
+    //     toastr.error('Please select a zonation track and try again.', 'Error');
+    // }
+    
+    if (curTrack && curTrack.idZoneTrack && curTrack.controller && curTrack.controller.viTrack.setMode) 
+        curTrack.controller.viTrack.setMode('AddZone');
 };
 
 exports.AnnotationsButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().addAnnotation();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (curTrack && curTrack.controller && curTrack.controller.addAnnotation)
+        curTrack.controller.addAnnotation();
 };
 
 exports.AddImageButtonClicked = function () {
@@ -471,15 +480,21 @@ exports.RemoveImageButtonClicked = function () {
 }
 
 exports.AddShadingButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().createShadingForSelectedCurve();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (curTrack && curTrack.controller && curTrack.controller.createShadingForSelectedCurve)
+        curTrack.controller.createShadingForSelectedCurve();
 };
 
 exports.CrossPlotButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().createCrossplot();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (curTrack && curTrack.controller && curTrack.controller.createCrossplot) 
+        curTrack.controller.createCrossplot();
 };
 
 exports.HistogramButtonClicked = function () {
-    this.wiLogplot.getwiD3Ctrl().createHistogram();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (curTrack && curTrack.controller && curTrack.controller.createHistogram) 
+        curTrack.controller.createHistogram();
 };
 
 exports.ExportTrackButtonClicked = function () {
@@ -546,6 +561,11 @@ exports.ImportTrackButtonClicked = function () {
         });
     }, true);
 }
+exports.AutoOrganizeTrackButtonClicked = function() {
+    let self = this;
+    let wiD3Ctrl = this.wiLogplot.getwiD3Ctrl();
+    wiD3Ctrl.autoOrganizeTrackByWell();
+}
 exports.AutoSizeTrackButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
@@ -560,7 +580,7 @@ exports.TrackBulkUpdateButtonClicked = function () {
     let self = this;
     let DialogUtils = this.wiComponentService.getComponent(this.wiComponentService.DIALOG_UTILS);
     let wiLogplot = this.wiLogplot;
-    let allTracks = wiLogplot.getwiD3Ctrl().getTracks();
+    let allTracks = wiLogplot.getwiD3Ctrl().getTrackComponents().map(tc => tc.controller.viTrack);
     console.log("allTracks", wiLogplot);
     DialogUtils.trackBulkUpdateDialog(this.ModalService, allTracks, wiLogplot.id, function () {
 
@@ -573,7 +593,8 @@ exports.CurveBulkUpdateButtonClicked = function () {
     let wiLogplot = this.wiLogplot;
     let timeoutFunc = this.$timeout;
 
-    let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    // let logTracks = wiLogplot.getwiD3Ctrl().getTracks().filter(track => track.type == 'log-track');
+    let logTracks = wiLogplot.getwiD3Ctrl().trackComponents.filter(tc => !!tc.idTrack).map(tc => tc.controller.viTrack);
     DialogUtils.curveBulkUpdateDialog(this.ModalService, logTracks, function () {
 
     });
@@ -595,9 +616,10 @@ exports.SaveAsLogplotNameButtonClicked = function () {
     };
     DialogUtils.promptDialog(mds, promptConfig, function (logplotName) {
         if(!logplotName) return;
-        let idWell = wiLogplot.logplotModel.properties.idWell;
+        //let idWell = wiLogplot.logplotModel.properties.idWell;
         let idPlot = wiLogplot.logplotModel.properties.idPlot;
-        let plots = wics.getComponent(wics.PROJECT_LOADED).wells.find(w => w.idWell == idWell).plots;
+        let project = wics.getComponent(wics.PROJECT_LOADED);
+        let plots = project.plots;
         let isExisted = false;
         plots.forEach(function (plot, index) {
             if(plot.name == logplotName){
@@ -608,7 +630,7 @@ exports.SaveAsLogplotNameButtonClicked = function () {
         if(isExisted){
             DialogUtils.confirmDialog(mds, 'Existed!', 'Logplot '+ logplotName +' is existed! OVERWRITE IT?', function (yes) {
                 if(yes){
-                    wiApiService.savePlotAs({name: logplotName, idWell : idWell, idPlot: idPlot}, function (response) {
+                    wiApiService.savePlotAs({name: logplotName, idProject : project.idProject, idPlot: idPlot}, function (response) {
                         console.log("==============", response);
                         Utils.refreshProjectState();
                         // Utils.openLogplotTab(wics, Utils.getModel('logplot', response.idPlot));
@@ -616,7 +638,7 @@ exports.SaveAsLogplotNameButtonClicked = function () {
                 }
             });
         } else {
-            wiApiService.savePlotAs({name: logplotName, idWell : idWell, idPlot: idPlot}, function (response) {
+            wiApiService.savePlotAs({name: logplotName, idProject : project.idProject, idPlot: idPlot}, function (response) {
                 console.log("=============", response);
                 Utils.refreshProjectState();
                 // Utils.openLogplotTab(wics, Utils.getModel('logplot', response.idPlot));
@@ -651,5 +673,7 @@ exports.BaselineShiftButtonClicked = function() {
 
 exports.DepthShiftButtonClicked = function() {
     console.log('DepthShiftButton is clicked');
-    this.wiLogplot.getwiD3Ctrl().depthShiftDialog();
+    let curTrack = this.wiLogplot.getwiD3Ctrl().getCurrentTrack();
+    if (curTrack && curTrack.idTrack && curTrack.controller) 
+        curTrack.controller.depthShiftDialog();
 }

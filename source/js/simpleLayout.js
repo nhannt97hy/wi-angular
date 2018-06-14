@@ -44,6 +44,8 @@ let wiReferenceWindow = require('./wi-reference-window');
 
 
 let wiPlot = require('./wi-plot');
+let wiXplot = require('./wi-xplot');
+let wiHis = require('./wi-his');
 let wiInventory = require('./wi-inventory');
 let wiCurveListing = require('./wi-curve-listing');
 let wiD3Histogram = require('./wi-d3-histogram');
@@ -80,7 +82,6 @@ let historyState = require('./historyState');
 let handlers = require('./simple-layout-handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
-let treeviewHandlers = require('./wi-treeview-handlers');
 let crossplotHanders = require('./wi-crossplot-handlers');
 let histogramHandlers = require('./wi-histogram-handlers');
 
@@ -158,6 +159,8 @@ let app = angular.module('wiapp',
         wiInventory.name,
         wiNeuralNetwork.name,
         wiPlot.name,
+        wiXplot.name,
+        wiHis.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -249,7 +252,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
-    utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
 
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     // wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);
@@ -704,6 +706,217 @@ app.controller('wiPlotPlaygroundController', function($scope) {
         showLine: true
     }
 })
+
+app.controller('wiXplotController', function ($scope, wiComponentService, $timeout) {
+    // test
+    this.data = [{ 'x': 1, 'y': 2, options: {} }, { 'x': 2, 'y': 1, options: {} }, { 'x': 1, 'y': 1, options: {} }, { 'x': 2, 'y': 2, options: {} }];
+    // this.idCurves = [{'x': 1, 'y': 2}, {'x':2, 'y': 1}];
+    this.curvesProperties = [];
+    this.config = {
+        logX: false,
+        logY: false,
+        majorX: 5,
+        majorY: 5,
+        minorX : 1,
+        minorY : 1,
+        decimalsX: 2,
+        decimalsY: 2,
+        scale: {
+            left: null,
+            right: null,
+            bottom: null,
+            top: null
+        },
+        isShowWiZone: false,
+        referenceDisplay: false
+    };
+
+    this.onChange = function (curvesProperties) {
+        this.curvesProperties = curvesProperties;
+    }
+
+    this.checkLogStatus = function () {
+        if (this.config.logX) {
+            this.checkLogValueX(this.config.scale.left, 'scaleLeft');
+            this.checkLogValueX(this.config.scale.right, 'scaleRight');
+        }
+        if (this.config.logY) {
+            this.checkLogValueY(this.config.scale.bottom, 'scaleBottom');
+            this.checkLogValueY(this.config.scale.top, 'scaleTop');
+        }
+    }
+    this.checkLogValueX = function (value, label) {
+        if (this.config.logX) {
+            switch (label) {
+                case 'scaleLeft':
+                    this.config.scale.left = value < 0 ? 0.01 : value;
+                    break;
+                case 'scaleRight':
+                    this.config.scale.right = value < 0 ? 0.01 : value;
+                    break;
+            }
+            if(Math.ceil(value) <= 0) {
+                $('#' + label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                }, 255);
+            }
+        }
+    }
+    this.checkLogValueY = function (value, label) {
+        if (this.config.logY) {
+            switch (label) {
+                case 'scaleBottom':
+                    this.config.scale.bottom = value < 0 ? 0.01 : value;
+                    break;
+                case 'scaleTop':
+                    this.config.scale.top = value < 0 ? 0.01 : value;
+                    break;
+            }
+            if(Math.ceil(value) <= 0) {
+                $('#' + label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                }, 255);
+            }
+        }
+    }
+
+    this.closeZone = function () {
+        let wiXplot = wiComponentService.getComponent('wi-xplot');
+        if (!wiXplot) return;
+        wiXplot.switchReferenceZone(false);
+    }
+
+    this.onZoneCtrlReady = function (zoneCtrl) {
+
+    }
+
+    this.closeReferenceWindow = function () {
+        let wiXplot = wiComponentService.getComponent('wi-xplot');
+        if (!wiXplot) return;
+        wiXplot.switchReferenceWindow(false);
+    }
+
+    this.onRefWindCtrlReady = function (refWindCtrl) {
+
+    }
+
+    this.testUpdate = function () {
+        if (this.config.logX) {
+            if (this.config.scale.left == 0
+                || this.config.scale.right == 0) {
+                    this.config.logX = false;
+                    toastr.error("Scale can't be 0 in Logarithmic");
+                    return;
+                }
+        }
+        if (this.config.logY) {
+            if (this.config.scale.bottom == 0
+                || this.config.scale.top == 0) {
+                    this.config.logY = false;
+                    toastr.error("Scale can't be 0 in Logarithmic");
+                    return;
+                }
+        }
+        let wiXplot = wiComponentService.getComponent('wi-xplot');
+        let changes = {
+            config: this.config,
+            curvesProperties: this.curvesProperties
+        }
+        wiXplot.update(changes);
+    }
+    // end test
+})
+
+app.controller('wiHistogramController', function ($scope, wiComponentService, $timeout) {
+    // test
+    this.data = [{ idCurve: 1, options: {} }, { idCurve: 2, options: {} }];
+    this.curvesProperties = [];
+    this.config = {
+        showGaussian: false,
+        showCumulative: true,
+        loga: false,
+        showGrid: false,
+        flipHorizontal: false,
+        plotType: null,
+        plot: null,
+        numOfDivisions: null,
+        scale: {
+            left: null,
+            right: null,
+        },
+        isShowWiZone: false,
+        referenceDisplay: false
+    };
+
+    this.onChange = function (curvesProperties) {
+        this.curvesProperties = curvesProperties;
+    }
+
+    this.closeZone = function () {
+        let wiHis = wiComponentService.getComponent('wi-his');
+        if (!wiHis) return;
+        wiHis.switchReferenceZone(false);
+    }
+
+    this.onZoneCtrlReady = function (zoneCtrl) {
+
+    }
+
+    this.closeReferenceWindow = function () {
+        let wiHis = wiComponentService.getComponent('wi-his');
+        if (!wiHis) return;
+        wiHis.switchReferenceWindow(false);
+    }
+
+    this.onRefWindCtrlReady = function (refWindCtrl) {
+
+    }
+
+    this.checkLogStatus = function () {
+        if (this.config.loga) {
+            this.checkLogValueX(this.config.scale.left, 'scaleLeft');
+            this.checkLogValueX(this.config.scale.right, 'scaleRight');
+        }
+    }
+    this.checkLogValueX = function (value, label) {
+        if (this.config.loga) {
+            switch (label) {
+                case 'scaleLeft':
+                    this.config.scale.left = value < 0 ? 0.01 : value;
+                    break;
+                case 'scaleRight':
+                    this.config.scale.right = value < 0 ? 0.01 : value;
+                    break;
+            }
+            if (Math.ceil(value) <= 0) {
+                $('#' + label).css('box-shadow', '0px 0px 5px red');
+                $timeout(function () {
+                    $('#' + label).css('box-shadow', '');
+                }, 255);
+            }
+        }
+    }
+
+    this.testUpdate = function () {
+        if (this.config.loga) {
+            if (this.config.scale.left == 0
+                || this.config.scale.right == 0) {
+                this.config.loga = false;
+                toastr.error("Scale can't be 0 in Logarithmic");
+                return;
+            }
+        }
+        let wiHis = wiComponentService.getComponent('wi-his');
+        let changes = {
+            config: this.config,
+            curvesProperties: this.curvesProperties
+        }
+        wiHis.update(changes);
+    }
+    // end test
+});
 
 app.filter('datetimeFormat', function() {
     return function(timestamp) {

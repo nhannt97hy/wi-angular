@@ -4,21 +4,25 @@
     width: 100%;
     height: 100%;
     background-color: white;
+    ::-webkit-input-placeholder {
+       color: #ccc;
+       font-style: italic;
+    }
     .selected {
-        background-color: #ddd !important
+        background-color: #eee !important
     };
     .left-side {
         flex: 1;
         height: 100%;
-        border: 1px solid #aaa;
+        border: 1px solid #ccc;
         border-radius: 5px;
         position: relative;   
         margin-right: 1em;
         .left-heading {
             display: flex;
-            border-bottom: 1px solid #aaa;
-            padding: 5px 15px;
-            margin-bottom: 15px;
+            border-bottom: 1px solid #ccc;
+            padding: 0px 15px;
+            background-color: #eee;
             h5 {
                 display: inline-block;
             }
@@ -28,25 +32,25 @@
                 justify-content: flex-end;
             }
         }
-        button {
-            border: 1px solid #fff;
-            font-size: 15px;
-            padding: 5px;
-            background-color: white;
+        label {
+            font-size: 13px;
+            padding: 10px 5px;
+            color: blue;
         }
-        button:hover {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #eee;
-        }   
-        wi-base-treeview {
+        wi-scroll wi-base-treeview {
             margin: 0;
+            .wi-parent-content {
+                padding-left: 0.5em;
+                .icon-expanded {
+                    display: none;
+                }
+            }
         }
     };
     .right-side {
         flex: 3;
         height: 100%;
-        border: 1px solid #aaa;
+        border: 1px solid #ccc;
         border-radius: 5px;
         position: relative;
         box-sizing: border-box;  
@@ -54,6 +58,8 @@
             padding: 5px 15px;
             display: flex;
             align-items: center;
+            border-bottom: 1px solid #ccc;
+            background-color: #eee;
             input {
                 height: 25px;
             }
@@ -63,16 +69,11 @@
                 justify-content: flex-end;
             }
         }
-        button {
-            border: 1px solid #fff;
-            font-size: 20px;
-            background-color: white;
-        }
-        button:hover {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #eee;
-        }         
+        label {
+            color: blue;
+            font-size: 15px;
+            padding:5px;
+        }    
         .content-area {
             box-sizing: border-box;
             padding: 1em;
@@ -82,16 +83,21 @@
                 width: auto;
             }
             table{
-                border-color: #bbb;
+                border-color: #ccc;
                 input{
                     width: 100%;
                 }
                 td {
+                    border-color: #ccc;
                     text-align: center;
-                    border-color: #bbb;
+                    vertical-align: middle;
                 }
                 th {
-                    border-color: #bbb;
+                    background-color: #f3f3f3;
+                    border-color: #ccc;
+                    border-bottom: none;
+                    text-align: center;
+                    vertical-align: middle;
                 }
             }    
         }

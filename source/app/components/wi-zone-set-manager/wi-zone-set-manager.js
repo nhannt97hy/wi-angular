@@ -10,6 +10,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.$onInit = function () {
         wiComponentService.putComponent('wiZoneSetManager', self);
     }
+
+    let topIdx = 0;
+    let selectionLength = 20;
+    let delta = 5;
+
     this.refreshZoneSetList = function () {
         self.lastSelectedWell = false;
         self.lastSelectedZoneSet = false;
@@ -17,10 +22,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.zoneSetConfig = [];
         self.zones = [];
         wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            wells.sort(function (a, b) {
+                return parseInt(a.idWell) - parseInt(b.idWell);
+            });
             if (wells) {
-                for (well of wells) {
+                let cutWells = wells.slice(0, selectionLength);
+                for (well of cutWells) {
                     self.zoneSetConfig.push(createWellModel(well));
-                    console.log('self.zoneSetConfig', self.zoneSetConfig);
                 }
             }
         })
@@ -30,37 +38,42 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
     this.exportZoneSet = function () {
-        console.log('export');
+        console.log('export zone set');
+        let zoneSetObj = {
+            idZoneSet: "",
+            name: "",
+            idWell: "",
+            zones: [{
+                idZone: "",
+            }
+            ]
+        }
     }
     this.createZoneSet = function () {
         let selectedNodes = self.zoneSetConfig.__SELECTED_NODES;
         let parentWell = false;
-        if(self.lastSelectedWell){
-            parentWell = self.lastSelectedWell; 
-        } else if(self.lastSelectedZoneSet) {  
+        if (self.lastSelectedWell) {
+            parentWell = self.lastSelectedWell;
+        } else if (self.lastSelectedZoneSet) {
             let parentWell = getParentNode(self.lastSelectedZoneSet);
         }
         if (parentWell) {
-            let promptConfig = {
-                title: '<span class="zone-edit-16x16"></span> Create New Zone Set',
-                inputName: 'Name',
-                input: ''
-            }
-            DialogUtils.promptDialog(ModalService, promptConfig, function (ret) {
-                if (!ret) return;
+            DialogUtils.newZoneSetDialog(ModalService, function (data) {
+                if (!data) return;
                 else {
-                    if (!parentWell.children.find(function (node) { return node.name == ret })) {
+                    if (!parentWell.children.find(function (node) { return node.name == data.name })) {
                         if (self.newZoneSet) {
                             parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
                         }
                         let newNode = {
-                            id: "",
-                            name: ret,
-                            idWell: parentWell.id,
+                            idZoneSet: "",
+                            name: data.name,
+                            idWell: parentWell.idWell,
                             type: 'zoneSet',
                             data: {
                                 icon: 'mineral-zone-16x16',
-                                label: ret,
+                                label: data.name,
+                                template: data.template,
                                 childExpanded: true
                             },
                             children: []
@@ -68,6 +81,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         self.newZoneSet = newNode;
                         self.lastSelectedZoneSet = newNode;
                         parentWell.children.push(newNode);
+                        parentWell.data.childExpanded = true;
                         unselectAllNodes(self.zoneSetConfig);
                         selectHandler(newNode, self.zoneSetConfig);
                         self.refreshZoneList();
@@ -77,24 +91,71 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         }
                         // alert('template name existed');
                         unselectAllNodes(self.zoneSetConfig);
-                        selectHandler(parentWell.children.find(function (node) { return node.name == ret }), self.zoneSetConfig);
+                        selectHandler(parentWell.children.find(function (node) { return node.name == data.name }), self.zoneSetConfig);
                         self.refreshZoneList();
                     }
                 }
             });
         }
     }
+    this.upTrigger = function (cb) {
+        if(topIdx > 0) {
+            wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+                if (wells) {
+                    wells.sort(function (a, b) {
+                        return parseInt(a.idWell) - parseInt(b.idWell);
+                    });
+                    if(topIdx > delta) {
+                        let newSource = wells.slice(topIdx - delta, topIdx).reverse();
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = topIdx - delta;
+                        cb(newList, self.zoneSetConfig);
+                    } else {
+                        let newSource = wells.slice(0, topIdx).reverse();
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = 0;
+                        cb(newList, self.zoneSetConfig);
+                    }
+                }
+            })
+        } else cb([]);
+    };
+
+    this.downTrigger = function (cb) {
+        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            if (wells) {
+                wells.sort(function (a, b) {
+                    return parseInt(a.idWell) - parseInt(b.idWell);
+                });
+                let bottomIdx = topIdx + selectionLength;
+                if (bottomIdx < wells.length) {
+                    if (wells.length - bottomIdx > delta) {
+                        let newSource = wells.slice(bottomIdx, delta + bottomIdx);
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = topIdx + delta;
+                        cb(newList, self.zoneSetConfig);
+                    } else {
+                        let newSource = wells.slice(bottomIdx, wells.length);
+                        let newList = newSource.map(w => createWellModel(w));
+                        topIdx = topIdx + wells.length - bottomIdx;
+                        cb(newList, self.zoneSetConfig);
+                    }
+                } else cb([]);
+            }
+        })
+    };
+
     this.deleteZoneSet = function () {
         for (node of self.zoneSetConfig.__SELECTED_NODES) {
-            if(node == self.newZoneSet){
+            if (node == self.newZoneSet) {
                 let parentWell = getParentNode(node)
                 parentWell.children.splice(parentWell.children.indexOf(node), 1);
                 self.newZoneSet = false;
             } else if (node.type == 'zoneSet') {
                 let parentWell = getParentNode(node);
-                let idZoneSet = node.id;
+                let idZoneSet = node.idZoneSet;
                 wiApiService.removeZoneSet(idZoneSet, function () {
-                    console.log('done');  
+                    console.log('done');
                     parentWell.children.splice(parentWell.children.indexOf(node), 1);
                 })
             }
@@ -108,13 +169,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
             self.newZoneSet = false;
         }
-        if(node.type == 'well'){
+        if (node.type == 'well') {
             self.zones = [];
             self.lastSelectedWell = node;
             self.lastSelectedZoneSet = false;
         }
         if (node.type == 'well' && node.children.length == 0) {
-            wiApiService.listZoneSet(node.id, function (zoneSets) {
+            wiApiService.listZoneSet(node.idWell, function (zoneSets) {
                 for (zoneSet of zoneSets) {
                     node.children.push(createZoneSetModel(zoneSet));
                 }
@@ -170,32 +231,32 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.newZone = false;
         self.selectedZones = [];
         self.zoneEditted = false;
-        if(self.newZoneSet) {
+        if (self.newZoneSet) {
             self.zones = []
         } else {
-            wiApiService.getZoneSet(self.lastSelectedZoneSet.id, function (info) {
+            wiApiService.getZoneSet(self.lastSelectedZoneSet.idZoneSet, function (info) {
                 self.zones = info.zones;
             })
         }
     }
     this.editZone = function () {
-        if(self.newZone){
+        if (self.newZone) {
             let newZoneSet = {
                 name: self.newZoneSet.name,
                 idWell: self.newZoneSet.idWell
             }
-            wiApiService.createZoneSet(newZoneSet, function (zoneSet){
-                self.lastSelectedZoneSet.id = zoneSet.idZoneSet;
-                for(zone of self.zones){
+            wiApiService.createZoneSet(newZoneSet, function (zoneSet) {
+                self.lastSelectedZoneSet.idZoneSet = zoneSet.idZoneSet;
+                for (zone of self.zones) {
                     zone.idZoneSet = zoneSet.idZoneSet;
                     self.newZoneSet = false;
-                    wiApiService.createZone(zone, function(zone){
+                    wiApiService.createZone(zone, function (zone) {
                         console.log('success', zone);
                     })
                 }
             })
         }
-        else if(self.zoneEditted){
+        else if (self.zoneEditted) {
             for (zone of self.zones) {
                 if (zone.zoneEditted) {
                     wiApiService.editZone(zone, function () {
@@ -203,16 +264,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     });
                 }
             }
-        } 
+        }
     }
     this.createZone = function () {
         DialogUtils.createNewZoneDialog(ModalService, function (data) {
-            if(data){
-                if(self.zones.length!==0){
-                    data.idZoneSet = self.lastSelectedZoneSet.id;
-                    wiApiService.createZone(data, function(zone){
+            if (data) {
+                console.log('data', data)
+                if (!self.newZoneSet) {
+                    data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
+                    wiApiService.createZone(data, function (zone) {
                         self.zones.push(data);
-                    }) 
+                    })
                 } else {
                     self.newZone = true;
                     self.zones.push(data);
@@ -221,36 +283,53 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         });
     }
     this.deleteZone = function () {
-        if(self.newZoneSet) {
+        if (self.newZoneSet) {
             self.zones = [];
             let parentWell = getParentNode(self.newZoneSet);
-            parentWell.children.splice(parentWell.children.length-1,1);
+            parentWell.children.splice(parentWell.children.length - 1, 1);
         } else {
-            for (zone of self.zones) {
-                if (zone.flag) {
-                    wiApiService.removeZone(zone.idZone, function () {
+            for (var z = 0; z < self.zones.length; z++) {
+                if (self.zones[z].flag) {
+                    wiApiService.removeZone(self.zones[z].idZone, function () {
                         console.log('delete successfully');
-                        self.zones.splice(self.zones.indexOf(zone), 1);
+                        self.zones.splice(z, 1);
+                        if (z = self.zones.length - 1) {
+                            self.selectedZones = [];
+                        }
+                        z = z - 1;
                     })
                 }
             }
         }
     }
-    this.onZoneChanged = function (index) {
+    this.choosePattern = function (zone) {
+        DialogUtils.fillPatternDialog(ModalService,
+            zone.fill.pattern.name,
+            zone.fill.pattern.foreground,
+            zone.fill.pattern.background, function (_name) {
+                if (_name) {
+                    zone.fill.pattern.name = _name;
+                    self.onZoneChanged(zone);
+                }
+            });
+    };
+
+    this.onZoneChanged = function (zone) {
         self.zoneEditted = true;
-        self.zones[index].zoneEditted = true;
+        zone.zoneEditted = true;
     }
 
-    this.backgroundZone = function (index) {
-        DialogUtils.colorPickerDialog(ModalService, self.zones[index].fill.pattern.background, function (colorStr) {
-            self.zones[index].fill.pattern.background = colorStr;
-            self.onZoneChanged(index);
+    this.backgroundZone = function (zone) {
+        DialogUtils.colorPickerDialog(ModalService, zone.fill.pattern.background, function (colorStr) {
+            zone.fill.pattern.background = colorStr;
+            self.onZoneChanged(zone);
         });
     };
-    this.foregroundZone = function (index) {
-        DialogUtils.colorPickerDialog(ModalService, self.zones[index].fill.pattern.foreground, function (colorStr) {
-            self.zones[index].fill.pattern.foreground = colorStr;
-            self.onZoneChanged(index);
+    this.foregroundZone = function (zone) {
+        let index = self.zones.indexOf(zone);
+        DialogUtils.colorPickerDialog(ModalService, zone.fill.pattern.foreground, function (colorStr) {
+            zone.fill.pattern.foreground = colorStr;
+            self.onZoneChanged(zone);
         });
     };
 
@@ -275,6 +354,47 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         rootNode.__SELECTED_NODES = [];
     }
 
+    this.showTreeContextMenuFunction = function ($event, $index) {
+        console.log('showContextMenu', this.config[$index]);
+        let contextMenu = self.getDefaultTreeviewCtxMenu(
+            $index,
+            this
+        );
+        wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, contextMenu);
+    };
+    this.showMoreButtonContextMenuFunction = function ($event, $index) {
+        console.log('showHeaderContextMenu');
+        let contextMenu = self.getDefaultTreeviewCtxMenu(
+            $index,
+            this
+        );
+        wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, contextMenu);
+    };
+
+    this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
+        return [
+            {
+                name: "Export",
+                label: "Export ZoneSet",
+                icon: "file-export-16x16",
+                handler: function () {
+                    self.exportZoneSet();
+                }
+            }, {
+                name: "Delete",
+                label: "Delete ZoneSet",
+                icon: "delete-16x16",
+                handler: function () {
+                    self.deleteZoneSet();
+                }
+            }
+        ]
+    };
+
     function selectHandler(currentNode, rootNode, callback) {
         if (currentNode.data) {
             $timeout(function () { currentNode.data.selected = true; });
@@ -290,7 +410,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     function createWellModel(well) {
         return {
-            id: well.idWell,
+            idWell: well.idWell,
             name: well.name,
             type: 'well',
             data: {
@@ -302,8 +422,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
     function createZoneSetModel(zoneSet) {
+        console.log('zoneSet', zoneSet);
         return {
-            id: zoneSet.idZoneSet,
+            idZoneSet: zoneSet.idZoneSet,
             name: zoneSet.name,
             idWell: zoneSet.idWell,
             type: 'zoneSet',

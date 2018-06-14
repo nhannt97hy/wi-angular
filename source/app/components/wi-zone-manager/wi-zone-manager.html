@@ -1,17 +1,17 @@
-<div class="zone-manager" style = "height:100%;background-color:white">
+<div class="zone-manager" style="height:100%;background-color:white">
     <style>
-        wi-zone-manager wi-tab > div {
+        wi-zone-manager wi-tab>div {
             border: none;
             height: calc(100% - 25px);
             width: 100%;
         }
     </style>
     <wi-tabset style="height:100%">
-        <wi-tab heading="Zone Template" style="display:flex;flex-direction:row;width:100%">
-            <wi-zone-template-manager></wi-zone-template-manager>
-        </wi-tab>
-        <wi-tab heading="Zone Set" style="display:flex;flex-direction:row;width:100%">
+        <wi-tab heading="Zonesets" style="display:flex;flex-direction:row;width:100%">
             <wi-zone-set-manager></wi-zone-set-manager>
+        </wi-tab>
+        <wi-tab heading="Templates" style="display:flex;flex-direction:row;width:100%">
+            <wi-zone-template-manager></wi-zone-template-manager>
         </wi-tab>
     </wi-tabset>
 </div>

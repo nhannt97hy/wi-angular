@@ -375,6 +375,8 @@ ZoneTrack.prototype.highlightHeader = function(drawing) {
         .style('background-color', drawing == self.currentDrawing ? self.HEADER_HIGHLIGHT_COLOR : 'white');
 }
 
+
+/************************** MOVE TO SUPER CLASS ***********************
 ZoneTrack.prototype.drawTooltipLines = function(depth, drawVertical) {
     let plotRect = Utils.getBoundingClientDimension(this.plotContainer.node());
     let svg = this.svgContainer;
@@ -466,3 +468,4 @@ ZoneTrack.prototype.drawTooltipText = function(depth, showDepth) {
 ZoneTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
+******************** END MOVE TO SUPERCLASS *******************/

@@ -1,29 +1,81 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, callback, groups, users) {
+module.exports = function (ModalService, callback, groups, _users, company) {
     function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
+        window.SP = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
         this.project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
-        this.groups = groups;
-        this.users = users;
-        this.selectedGroup = null;
-        this.selectedUser = null;
-        this.isSelectedGroup = false;
-        this.isSelectedUser = false;
+        // this.groups = groups;
+        this.users = [];
         this.idGroups = [];
         this.objects = null;
 
-        preGroup();
+        this.groupsConfig = [];
+        this.usersConfig = [];
+
+        this.selectGroupNode = {};
+        
+        let topIdx = 0;
+        let selectionLength = 15;
+        let delta = 5;
+
+        preGroup(groups);
+        this.groups = groups.filter(g => (g.isShared == true));
 
         function preUser(group) {
-            self.users.forEach(user => {
+            _users.forEach(user => {
                 let tmp = group.users.find(u => u.idUser === user.idUser);
                 user.isShared = !!tmp;
             });
         }
 
-        function preGroup() {
-            self.groups.forEach(function (group) {
+        function addGroupNode (gr) {
+            let node = {
+                name: gr.name,
+                type: gr.isShared ? "group" : "group-checked",
+                data: {
+                    childExpanded: true,
+                    label: gr.name,
+                    tooltip: gr.name,
+                    selected : false
+                }, 
+                actions: [{
+                    icon: gr.isShared ? "ti-check isShared" : "ti-check isNotShared",
+                    handler: function() {
+                        handlerFunc(gr);
+                        }
+                    }],
+                properties: gr
+            }
+            return node;
+        }
+        function addUserNode (user) {
+            let node = {
+                name: user.username,
+                type: "user",
+                data: {
+                    childExpanded: true,
+                    label: user.username,
+                    tooltip: user.username
+                },
+                properties: user
+            }
+            return node;
+        }
+        function initUserConfig (users) {
+            let cutUsers = users.slice(0, selectionLength);
+            self.usersConfig = cutUsers.map(u => addUserNode(u));
+        }
+        function initGroupConfig (groups) {
+            let cutGroups = groups.slice(0, selectionLength);
+            self.groupsConfig = cutGroups.map(g => addGroupNode(g));
+        }
+        initGroupConfig(this.groups);
+
+        function preGroup(groups) {
+            groups.forEach(function (group) {
                 let tmp = group.shared_projects.find(s => s.project_name === self.project.name);
                 if (tmp) {
                     group.isShared = true;
@@ -31,19 +83,6 @@ module.exports = function (ModalService, callback, groups, users) {
                 } else {
                     group.isShared = false;
                 }
-            });
-        }
-
-        function reload() {
-            wiApiService.listGroup({}, function (groups) {
-                $timeout(function () {
-                    self.groups = groups;
-                    preGroup();
-                    if (!self.selectedGroup) return;
-
-                    self.selectedGroup = self.groups.find(g => g.idGroup === self.selectedGroup.idGroup);
-                    if (self.selectedGroup) preUser(self.selectedGroup);
-                });
             });
         }
 
@@ -287,34 +326,131 @@ module.exports = function (ModalService, callback, groups, users) {
             });
         }
 
-        this.groupClicked = function (group) {
-            self.selectedGroup = group;
-            loadGroupPerm(group);
-            preUser(group);
+        this.onFilterBy = function () {
+            self.groupsConfig = [];
+            reload();
         };
-        this.userClicked = function () {
-            self.objects = null;
+
+        /*this.onFilterBy = function() {
+            if(self.fb) {
+                self.filterBy = 'group-checked';
+            } else self.filterBy = '';
+        };*/
+
+        function handlerFunc(group) {
+            if(group.isShared) {
+                self.unShareProjectFromGroup(group);
+                group.isShared = false;
+            } else {
+                self.shareProjectToGroup(group);
+                group.isShared = true;
+            }
+        }
+        function setSelectedGroupNode(node) {
+            self.groupsConfig.forEach(function (item) {
+                utils.visit(item, function (n) {
+                    if (n.data) n.data.selected = false;
+                    if (n.name == node.name) n.data.selected = true;
+                });
+            });
+        }
+        this.groupClicked = function ($event, $index, node) {
+            self.usersConfig = [];
+            self.selectGroupNode = node.properties;
+            self.users = node.properties.users;
+            setSelectedGroupNode(node);
+            loadGroupPerm(node.properties);
+            preUser(node.properties);
+            initUserConfig(self.users);
         };
-        this.addNewGroup = function () {
+
+        this.upTriggerGroup = function(cb) {
+            let sourceData = self.fb ? self.groups : groups;
+            if(topIdx > 0) {
+                if(topIdx > delta) {
+                    let newSource = sourceData.slice(topIdx - delta, topIdx).reverse();
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = topIdx - delta;
+                    cb(newList, self.groupsConfig);
+                } else {
+                    let newSource = sourceData.slice(0, topIdx).reverse();
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = 0;
+                    cb(newList, self.groupsConfig);
+                }
+            } else cb([]);
+        };
+
+        this.downTriggerGroup = function (cb) {
+            let sourceData = self.fb ? self.groups : groups;
+            let bottomIdx = topIdx + selectionLength;
+            if(bottomIdx < sourceData.length) {
+                if(sourceData.length - bottomIdx > delta) {
+                    let newSource = sourceData.slice(bottomIdx, delta + bottomIdx);
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = topIdx + delta;
+                    cb(newList, self.groupsConfig);
+                } else {
+                    let newSource = sourceData.slice(bottomIdx, sourceData.length);
+                    let newList = newSource.map(g => addGroupNode(g));
+                    topIdx = topIdx + sourceData.length - bottomIdx;
+                    cb(newList, self.groupsConfig);
+                }
+            } else cb([]);
+        };
+
+        this.upTriggerUser = function(cb) {
+            if(topIdx > 0) {
+                if(topIdx > delta) {
+                    let newSource = self.users.slice(topIdx - delta, topIdx).reverse();
+                    let newList = newSource.map(u => addUserNode(u));
+                    topIdx = topIdx - delta;
+                    cb(newList, self.usersConfig);
+                } else {
+                    let newSource = self.users.slice(0, topIdx).reverse();
+                    let newList = newSource.map(u => addUserNode(u));
+                    topIdx = 0;
+                    cb(newList, self.usersConfig);
+                }
+            } else cb([]);
+        };
+
+        this.downTriggerUser = function (cb) {
+            let bottomIdx = topIdx + selectionLength;
+            if(bottomIdx < self.users.length) {
+                if(self.users.length - bottomIdx > delta) {
+                    let newSource = self.users.slice(bottomIdx, delta + bottomIdx);
+                    let newList = newSource.map(g => addUserNode(g));
+                    topIdx = topIdx + delta;
+                    cb(newList, self.usersConfig);
+                } else {
+                    let newSource = self.users.slice(bottomIdx, self.users.length);
+                    let newList = newSource.map(g => addUserNode(g));
+                    topIdx = topIdx + self.users.length - bottomIdx;
+                    cb(newList, self.usersConfig);
+                }
+            } else cb([]);
+        }
+        /*this.addNewGroup = function () {
             let promptConfig = {
                 title: 'Add new user group',
                 inputName: 'Group name',
                 input: ''
             };
             DialogUtils.promptDialog(ModalService, promptConfig, function (group) {
-                wiApiService.addUserGroup({name: group}, function (response) {
+                wiApiService.addUserGroup({name: group, idCompany: company.idCompany}, function (response) {
                     reload();
                 });
             });
-        };
-        this.deleteGroup = function (group) {
+        };*/
+        /*this.deleteGroup = function (group) {
             wiApiService.removeUserGroup({idGroup: group.idGroup}, function (response) {
                 if (self.selectedGroup && self.selectedGroup.idGroup === group.idGroup) self.selectedGroup = null;
                 toastr.success("Successfull delete group " + group.name);
                 reload();
             });
-        };
-        this.addUser = function (user) {
+        };*/
+        /*this.addUser = function (user) {
             wiApiService.addUserToGroup({
                 idGroup: self.selectedGroup.idGroup,
                 idUser: user.idUser
@@ -335,7 +471,17 @@ module.exports = function (ModalService, callback, groups, users) {
                 }
                 reload();
             })
-        };
+        };*/
+        function reload() {
+            wiApiService.listGroup({idCompany: company.idCompany}, function (groups) {
+                // $timeout(function () {
+                    preGroup(groups);
+                    self.groups = groups.filter(g => (g.isShared == true));
+                    let sourceData = self.fb ? self.groups : groups;
+                    initGroupConfig(sourceData);
+                // });
+            });
+        }
         this.shareProjectToGroup = function (group) {
             wiApiService.addSharedProject({name: self.project.name}, function (sharedProject) {
                 wiApiService.addProjectToGroup({
@@ -360,21 +506,7 @@ module.exports = function (ModalService, callback, groups, users) {
                 reload();
             });
         };
-        this.onOkButtonClicked = function () {
-            // wiApiService.addSharedProject({name: self.project.name}, function (sharedProject) {
-            //     wiApiService.addProjectToGroup({
-            //         idGroups: [self.selectedGroup.idGroup],
-            //         idSharedProject: sharedProject.idSharedProject
-            //     }, function () {
-            //         close(500);
-            //     });
-            // });
-            close(500);
-        };
-        this.onCancelButtonClicked = function () {
-            close(null);
-        };
-        this.onApplyButtonClicked = function () {
+        function doApply(callback) {
             if (self.selectedGroup && self.objects) {
                 unloadGroupPerm(self.objects, function () {
                     let _u = "";
@@ -394,9 +526,23 @@ module.exports = function (ModalService, callback, groups, users) {
                         toastr.info("Reload permission for users successfull: " + _u);
                     });
                 });
+                callback & callback();
             } else {
                 toastr.warning("No permission changed!");
+                callback & callback();
             }
+        }
+        this.onCancelButtonClicked = function () {
+            close(null);
+        }
+
+        this.onOkButtonClicked = function () {
+            doApply(function() {
+                close();
+            });
+        };
+        this.onApplyButtonClicked = function () {
+            doApply(function() {});
         }
     }
 

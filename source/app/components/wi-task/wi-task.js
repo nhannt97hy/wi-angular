@@ -21,7 +21,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
 
     this.$onInit = function() {
-        wiComponentService.putComponent("wiTask", self);
+        wiComponentService.putComponent("wiTask" + self.id, self);
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
         wiApiService.listFamily(listF => {
@@ -29,6 +29,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             list = listF;
             onSelectionTypeChanged();
         });
+
+        //TreeName
+        let name = 'wiTask' + self.id;
+        self.SelectionTreeName = name + 'SelectionTree';
+        self.projectTreeName = name + 'projectTree';
+        self.zonationTreeName = name + 'zonationTree';
+        self.taskDataTreeName = name + 'taskDataTree';
+
+        self.idxTab = 0;
 
         // SELECT INPUT TAB
         self.idProject = self.getCurrentProjectId();
@@ -43,6 +52,9 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         );
         return (openProject || {}).idProject;
     };
+    this.onShowTab = function(idx){
+        self.idxTab = idx;
+    }
 
     this.onClick = function($index, $event, node) {
         self.selectionList.forEach(item => {
@@ -386,32 +398,67 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     };
 
     // SELECT INPUT TAB
-    function buildWellList(wells) {
-        wells.forEach(well => {
-            const wellModel = utils.createWellModel(well);
-            self.projectConfig.push(wellModel);
-        });
-    }
+    // function buildWellList(wells) {
+    //     wells.forEach(well => {
+    //         const wellModel = utils.createWellModel(well);
+    //         self.projectConfig.push(wellModel);
+    //     });
+    // }
     function buildZoneSetListFromServer(wells) {
         async.each(wells, function (well, __end) {
             wiApiService.getWell(well.idWell, function (wellProps) {
+                const wellModel = utils.createWellModel(well);
+                wellModel.ts = Date.now();
                 for (let zoneset of wellProps.zone_sets) {
                     self.zone_set_list.push(zoneset);
                 }
+                if (wellProps.datasets && wellProps.datasets.length) {
+                    wellModel.children.length = 0;
+                    wellProps.datasets.forEach(dataset => {
+                        const datasetModel = utils.createDatasetModel(
+                            dataset
+                        );
+                        wellModel.children.push(datasetModel);
+                        dataset.curves &&
+                            dataset.curves.length &&
+                            dataset.curves.forEach(curve => {
+                                datasetModel.children.push(
+                                    utils.createCurveModel(curve)
+                                );
+                            });
+                    });
+                }
+                self.projectConfig.push(wellModel);
                 __end();
             })
         }, function (err) {
             let hash = new Object();
             self.zone_set_list.forEach(zone => hash[zone.name] = 1);
-            self.zonesetConfig = Object.keys(hash).map(key => {
+            let zoneChild = function(zonesets){
+                let zoneArr = zonesets.reduce((total, curVal) => total.concat(curVal.zones.map(z => z.name)), []);
+                return Array.from(new Set(zoneArr)).map((item, idx) => {
+                    return {
+                        id: idx,
+                        data: {
+                            label: item,
+                            icon: "zone-table-16x16",
+                            selected: false,
+                        },
+                        type: 'zone'
+                    }
+                })
+            }
+            self.zonationConfig = Object.keys(hash).map((key, idx) => {
+                let zonesetArr = self.zone_set_list.filter(zs => zs.name == key);
                 return {
-                    id: -1,
+                    id: idx,
                     data: {
                         label: key,
                         selected: false,
                         icon: 'project-16x16-edit'
                     },
-                    children: []
+                    children: zoneChild(zonesetArr),
+                    type: 'zoneset'
                 }
             })
         });
@@ -455,17 +502,15 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 wells => {
                     self.projectConfig.length = 0;
                     self.zone_set_list.length = 0;
-                    buildWellList(wells);
+                    // buildWellList(wells);
                     buildZoneSetListFromServer(wells);
                 }
             );
         }
     };
-    function draggableSetting() {
+    function draggableSetting(domEle) {
         $timeout(() => {
-            $(
-                'wi-task wi-base-treeview#__projectWellTree .wi-parent-node[type="dataset"],[type="zoneset"]'
-            ).draggable({
+            domEle.draggable({
                 helper: "clone",
                 start: function(event, ui) {
                     __dragging = true;
@@ -477,6 +522,14 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                 appendTo: document.querySelector("wi-task #dragElement")
             });
         }, 500);
+    }
+    this.onPrjReady = function(){
+        let domEle = $( '#' + self.projectTreeName + ' .wi-parent-node[type="dataset"]');
+        draggableSetting(domEle);
+    }
+    this.onZoneReady = function(){
+        let domEle = $('#' + self.zonationTreeName + ' .wi-parent-node[type="zoneset"]');
+        draggableSetting(domEle);
     }
     function matchCurves(curves, matchCriterion) {
         switch (matchCriterion.type) {
@@ -542,6 +595,45 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     }
                     return tempItem;
                 })
+                let zoneItems = function(wellProps){
+                    if(self.taskConfig.zonation){
+                        let zoneset = self.zone_set_list.find(zs => {
+                            return zs.name == self.taskConfig.zonation.name && zs.idWell == wellProps.idWell;
+                        });
+                        if(zoneset && zoneset.zones.length){
+                            let ret = zoneset.zones.reduce((total, zone) => {
+                                if(self.taskConfig.zonation.children.findIndex(c => c == zone.name) >= 0){
+                                    total.push({
+                                            data: {
+                                                childExpanded: true,
+                                                icon: 'zone-table-16x16',
+                                                label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}` ,
+                                                selected: false
+                                            },
+                                            type: 'zone',
+                                            children: angular.copy(paramItems),
+                                            startDepth: zone.startDepth,
+                                            endDepth: zone.endDepth
+                                        })
+                                }
+                                return total;
+                            }, [])
+                            if(ret.length) return ret;
+                        }
+                    }
+                    return [
+                        {
+                            data: {
+                                childExpanded: true,
+                                icon: 'zone-table-16x16',
+                                label: `ZONENATION_ALL: ${wellProps.topDepth} - ${wellProps.bottomDepth}` ,
+                                selected: false
+                            },
+                            type: 'zone',
+                            children: paramItems
+                        }
+                    ]
+                }
                 switch(type){
                     case 'dataset':
                         const idDataset = parseInt($(ui.draggable[0]).attr("data"));
@@ -573,7 +665,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         wellModel = self.projectConfig.find(
                             well => well.id == idWell
                         );
-                        const wellName = wellModel.properties.name;
+                        const wellProps = wellModel.properties;
                         if (
                             !self.taskConfig.inputData ||
                             !Array.isArray(self.taskConfig.inputData)
@@ -605,15 +697,12 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         let input = {
                             type: 'dataset',
                             idDataset: idDataset,
-                            idWell: idWell,
+                            wellProps: wellProps,
                             dataset: datasetName,
-                            topDepth: parseFloat(wellModel.properties.topDepth),
-                            bottomDepth: parseFloat(wellModel.properties.bottomDepth),
-                            step: parseFloat(wellModel.properties.step),
                             data: {
                                 childExpanded: true,
                                 icon: "well-16x16",
-                                label: `${wellModel.properties.name} / ${datasetModel.properties.name}`,
+                                label: `${wellProps.name} / ${datasetModel.properties.name}`,
                                 selected: false
                             },
                             children: [
@@ -632,18 +721,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                                         label: 'Zonation',
                                         selected: false
                                     },
-                                    children: [
-                                        {
-                                            data: {
-                                                childExpanded: true,
-                                                icon: 'zone-table-16x16',
-                                                label: `ZONENATION_ALL: ${wellModel.properties.topDepth} - ${wellModel.properties.bottomDepth}` ,
-                                                selected: false
-                                            },
-                                            type: 'zone',
-                                            children: paramItems
-                                        }
-                                    ],
+                                    children: zoneItems(wellProps),
                                     type: 'zoneset'
                                 }
                             ]
@@ -654,66 +732,28 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                         }
                         $timeout(() => {
                             self.taskConfig.inputData.push(input);
-                            self.typeFilter = 'inputchoice';
+                            // self.typeFilter = 'inputchoice';
                         })
                         break;
 
                     case 'zoneset':
-                    const idZoneSet = parseInt($(ui.draggable[0]).attr("data"));
-                        for (const node of self.projectConfig) {
-                            utils.visit(
-                                node,
-                                (_node, _options) => {
-                                    if (
-                                        _node.type == "zoneset" &&
-                                        _node.id == idZoneSet
-                                    ) {
-                                        _options.result = _node;
-                                        return true;
-                                    }
-                                    return false;
-                                },
-                                options
-                            );
-                            if (options.found) break;
-                        }
-                        // populate data into self.inputArray
-                        if (!options.result) {
-                            toastr.error("Zonset doesn't exist");
+                        const idZoneSet = parseInt($(ui.draggable[0]).attr("data"));
+                        let zoneset = self.zonationConfig.find(zs => zs.id == idZoneSet);
+                        let child = zoneset.children.filter(z => !z.data.unused).map(z => z.data.label);
+                        if(!child.length) {
+                            toastr.error("Zoneset must contains at least 1 used zone!");
                             return;
                         }
-                        const zonesetModel = options.result;
-                        // console.log(zonesetModel);
-                        idWell = zonesetModel.properties.idWell;
-                        wellModel = self.projectConfig.find(
-                            well => well.id == idWell
-                        );
-                        self.taskConfig.inputData.forEach(input => {
-                            if(input.idWell == idWell && zonesetModel.children.length){
-                                $timeout(() => {
-                                    input.idZoneSet = idZoneSet;
-                                    input.children[1].data.label = 'Zonation - ' + zonesetModel.name;
-                                    input.children[1].children = [];
-                                    zonesetModel.children.forEach(zone => {
-                                        input.children[1].children.push(
-                                            {
-                                                data: {
-                                                    childExpanded: true,
-                                                    icon: 'zone-table-16x16',
-                                                    label: `${zone.name}: ${zone.properties.startDepth} - ${zone.properties.endDepth}` ,
-                                                    selected: false
-                                                },
-                                                type: 'zone',
-                                                children: angular.copy(paramItems),
-                                                startDepth: zone.properties.startDepth,
-                                                endDepth: zone.properties.endDepth
-                                            }
-                                        )
-                                    })
-                                    self.typeFilter = 'zonechoice';
-                                })
-                            }
+                        self.taskConfig.zonation = {
+                            name: zoneset.data.label,
+                            children: child
+                        }
+                        self.taskConfig.inputData && self.taskConfig.inputData.forEach(input => {
+                            $timeout(() => {
+                                input.children[1].children = zoneItems(input.wellProps);
+                            })
                         })
+                        // self.typeFilter = 'zonechoice';
                         break;
                 }
             }
@@ -735,7 +775,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         }
         if (currentNode.type == "well" && !noLoadData) {
-            if (Date.now() - (currentNode.ts || 0) > 20 * 1000) {
+            if (Date.now() - (currentNode.ts || 0) > 30 * 1000) {
                 wiApiService.getWell(currentNode.id, wellProps => {
                     // console.log(wellProps);
                     currentNode.ts = Date.now();
@@ -779,6 +819,11 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     this.prjClickFunction = function($index, $event, node) {
         clickFunction($index, $event, node, self.projectConfig);
     };
+    this.zoneClickFunction = function($index, $event, node){
+        if(node && node.type == 'zone'){
+            node.data.unused = !node.data.unused;
+        }
+    }
 
     this.taskClickFuntion = function($index, $event, node){
         if(node && node.type == 'dataset'){
@@ -795,13 +840,25 @@ function Controller(wiComponentService, wiApiService, $timeout) {
 
     const inputContextMenu = [
         {
+            name: "Enabled/Disabled",
+            label: "Enabled/Disabled",
+            icon: "fa fa-exchange",
+            handler: function(){
+                let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
+                selectedNodes.forEach(node => {
+                    node.data.unused = node.data.unused ? !node.data.unused : true;
+                })
+                self.taskConfig.inputData.__SELECTED_NODES = [];
+            }
+        },
+        {
             name: "Delete",
             label: "Delete",
             icon: "delete-16x16",
             handler: function () {
                 let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
                 selectedNodes.forEach(node => {
-                    let idx = self.taskConfig.inputData.findIndex(ip => ip.id == node.id);
+                    let idx = self.taskConfig.inputData.findIndex(ip => ip.$index == node.$index);
                     if(idx > -1) self.taskConfig.inputData.splice(idx, 1);
                 })
                 self.taskConfig.inputData.__SELECTED_NODES = [];
@@ -844,7 +901,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         }
         selectHandler(node, false, rootNode, () => {
-            draggableSetting();
+            // draggableSetting();
         });
     }
 
@@ -892,101 +949,114 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             })
         });
     }
-    function createLogplotFromResult(wfInput, wfOutput, callback) {
+    function createLogplotFromResult(inputMap, callback) {
         let payload = {
-            idWell: wfOutput.idWell,
-            name: wfOutput.plotName,
+            idProject: self.idProject,
+            name: self.name,
             override: true
         };
 
         wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
-            wfOutput.idPlot = response.idPlot;
+            self.idPlot = response.idPlot;
             let currentOrderNum = 'm';
-            async.eachSeries(wfInput, function(ipt, done1) {
-                wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                    //create line
-                    wiApiService.createLine({
-                        idTrack: trackData.idTrack,
-                        idCurve: ipt.id,
-                        orderNum: currentOrderNum
-                    }, function(line){
-                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                        done1();
-                    })
-                }, {
-                        title: ipt.name
-                });
-            }, function (err) {
-                if (err) toastr.error(err);
-                async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
-                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                        // create line
-                        currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                        wiApiService.createLine({
-                            idTrack: trackData.idTrack,
-                            idCurve: opt.idCurve,
-                            orderNum: 'm'
-                        }, function(line){
-                            let bgColor = null;
-                            switch (opt.family) {
-                                case "Net Reservoir Flag":
-                                    bgColor = "green";
-                                    break;
-                                case "Net Pay Flag":
-                                    bgColor = "red";
-                                    break;
-                            }
-                            if (!bgColor) {
-                                done2();
-                                return;
-                            }
-                            wiApiService.createShading({
-                                idTrack:trackData.idTrack,
-                                name:opt.name + "-left",
-                                orderNum: 'm',
-                                negativeFill : {
-                                    display: false,
-                                    sadingType: "pattern",
-                                    pattern: {
-                                        background : "blue",
-                                        foreground : "black",
-                                        name : "none"
-                                    }
-                                },
-                                positiveFill: {
-                                    display: false,
-                                    sadingType: "pattern",
-                                    pattern: {
-                                        background : "blue",
-                                        foreground : "black",
-                                        name : "none"
-                                    }
-                                },
-                                fill:{
-                                    display:true,
-                                    shadingType:"pattern",
-                                    pattern:{
-                                        name: "none",
-                                        foreground:"black",
-                                        background:bgColor
-                                    }
-                                },
-                                isNegPosFill:false,
-                                idLeftLine:null,
-                                idRightLine:line.idLine,
-                                leftFixedValue:0,
-                                idControlCurve:opt.idCurve
-                            }, function(shadingProps) {
-                                done2();
+            async.eachOfSeries(inputMap, function(item, idx, end){
+                let wfInput = item.inputs;
+                let wfOutput = self.taskConfig.outputData[idx];
+                async.parallel([
+                    function(_end1){
+                        wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                            async.eachSeries(wfInput, function(ipt, done1) {
+                                //create line
+                                wiApiService.createLine({
+                                    idTrack: trackData.idTrack,
+                                    idCurve: ipt.id,
+                                    orderNum: currentOrderNum
+                                }, function(line){
+                                    currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                                    done1();
+                                })
+                            },(err) => {
+                                _end1();
                             });
+                        }, {
+                            title: 'Inputs'
+                        })
+                }, function (_end2) {
+                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
+                        async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
+                            // create line
+                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
+                            wiApiService.createLine({
+                                idTrack: trackData.idTrack,
+                                idCurve: opt.idCurve,
+                                orderNum: currentOrderNum
+                            }, function(line){
+                                let bgColor = null;
+                                switch (opt.family) {
+                                    case "Net Reservoir Flag":
+                                        bgColor = "green";
+                                        break;
+                                    case "Net Pay Flag":
+                                        bgColor = "red";
+                                        break;
+                                }
+                                if (!bgColor) {
+                                    done2();
+                                    return;
+                                }
+                                wiApiService.createShading({
+                                    idTrack:trackData.idTrack,
+                                    name:opt.name + "-left",
+                                    orderNum: 'm',
+                                    negativeFill : {
+                                        display: false,
+                                        sadingType: "pattern",
+                                        pattern: {
+                                            background : "blue",
+                                            foreground : "black",
+                                            name : "none"
+                                        }
+                                    },
+                                    positiveFill: {
+                                        display: false,
+                                        sadingType: "pattern",
+                                        pattern: {
+                                            background : "blue",
+                                            foreground : "black",
+                                            name : "none"
+                                        }
+                                    },
+                                    fill:{
+                                        display:true,
+                                        shadingType:"pattern",
+                                        pattern:{
+                                            name: "none",
+                                            foreground:"black",
+                                            background:bgColor
+                                        }
+                                    },
+                                    isNegPosFill:false,
+                                    idLeftLine:null,
+                                    idRightLine:line.idLine,
+                                    leftFixedValue:0,
+                                    idControlCurve:opt.idCurve
+                                }, function(shadingProps) {
+                                    done2();
+                                });
+                            })
+                        }, (err) => {
+                            _end2();
                         })
                     }, {
-                            title: opt.name
-                        })
-                }, function (err) {
+                        title: 'Outputs'
+                    }
+                )}
+                ], function (err, result) {
                     if (err) toastr.error(err);
-                    callback();
+                    end();
                 })
+            }, (err) => {
+                callback();
             })
         })
     }
@@ -997,29 +1067,30 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             toastr.error('Not yet implement');
             return;
         }
-        // if (!self.taskConfig.outputData || !Array.isArray(self.taskConfig.outputData)) {
-            self.taskConfig.outputData = new Array();
-        // }
-        let inputMap = self.taskConfig.inputData.map(d => {
-            let tmp =  {
-                inputs: d.children[0].children.map(c => c.data.value),
-                parameters: d.children[1].children.map(c => {
-                    return {
-                        endDepth: c.endDepth,
-                        startDepth: c.startDepth,
-                        param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
-                    }
-                }),
-                idDataset: d.idDataset,
-                idWell: d.idWell,
-                dataset: d.dataset
-            };
+        self.taskConfig.outputData = new Array();
+        let inputMap = self.taskConfig.inputData.reduce((total, d) => {
+            if(!d.data.unused){
+                let tmp =  {
+                    inputs: d.children[0].children.map(c => c.data.value),
+                    parameters: d.children[1].children.map(c => {
+                        return {
+                            endDepth: c.endDepth,
+                            startDepth: c.startDepth,
+                            param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                        }
+                    }),
+                    idDataset: d.idDataset,
+                    idWell: d.wellProps.idWell,
+                    dataset: d.dataset
+                };
 
-            tmp.parameters.step = d.step;
-            tmp.parameters.topDepth = d.topDepth;
-            tmp.parameters.bottomDepth = d.bottomDepth;
-            return tmp;
-        })
+                tmp.parameters.step = parseFloat(d.wellProps.step);
+                tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
+                tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
+                total.push(tmp);
+            }
+            return total;
+        }, [])
 
         async.eachOf(inputMap, function(data, idx, callback){
             let curveData = [];
@@ -1033,32 +1104,128 @@ function Controller(wiComponentService, wiApiService, $timeout) {
                     runFunc(curveData, data.parameters, function(ret){
                         let wf = self.taskConfig;
                         wf.outputData[idx] = new Object();
-                        wf.outputData[idx].idWell = data.idWell;
-                        wf.outputData[idx].plotName = self.name + ' / ' + data.dataset;
+                        wf.outputData[idx].idDataset = data.idDataset;
                         wf.outputData[idx].outputCurves = new Array();
                         wf.outputs.forEach((o, i) => {
-                            wf.outputData[idx].outputCurves[i] = o;
+                            wf.outputData[idx].outputCurves[i] = Object.assign({},o);
                             wf.outputData[idx].outputCurves[i].data = ret[i];
                         });
                         async.each(wf.outputData[idx].outputCurves, function(d, cb2) {
                             d.idDataset = data.idDataset;
-                            d.idWell = data.idWell;
                             saveCurve(d, function(curveProps) {
                                 delete d.data;
                                 updateChoices(curveProps);
                                 cb2();
                             });
                         }, function(err) {
-                            createLogplotFromResult(data.inputs, wf.outputData[idx], callback);
+                            callback();
                         });
                     })
                 }
             })
         }, function(err){
             if(!err){
-                utils.refreshProjectState();
+                createLogplotFromResult(inputMap, function(){
+                    utils.refreshProjectState();
+                });
             }
         })
+    }
+
+    this.logTrackProps = {
+        width: 2.5,
+        title: 'Track',
+        showTitle: true,
+        showDepthGrid: true,
+        showEndLabels: true,
+        showValueGrid:true,
+        topJustification: 'center',
+        bottomJustification: 'center',
+        majorTicks: 1,
+        minorTicks: 5
+    }
+    this.currentInput = {
+        zoneset: null,
+        curves: [],
+        well: {
+            topDepth: 0,
+            bottomDepth: 10000,
+        }
+    }
+    function updateTrack(config) {
+        let timerHandler = null;
+        if(!self.logTrackProps.controller) {
+            timerHandler = setInterval(function() {
+                if(self.logTrackProps.controller) {
+                    clearInterval(timerHandler);
+                    updateTrack();
+                } else {
+                    console.log('not ready yet');
+                }
+            }, 100);
+        } else {
+            // Ready for update track
+            console.log('ready for update track with config: ', config);
+            updateFunction(config);
+        }
+
+        function updateFunction(config) {
+            if(config.curves) {
+                self.currentInput.well = utils.findWellByCurve(config.curves[0].idCurve);
+                async.eachSeries(config.curves, function(curveProps) {
+                    wiApiService.dataCurve(curveProps.idCurve, function(dataCurve) {
+                        let controller = self.logTrackProps.controller;
+                        controller.addCurveToTrack(controller.viTrack, dataCurve, curveProps);
+                    })
+                })
+            }
+        }
+    }
+    this.onShowTrackButtonClicked = function() {
+        self.showWFControlLine = !self.showWFControlLine;
+        console.log('task config: ', self.taskConfig);
+        if(!self.showWFControlLine) return;
+        // get input map for hard code data
+        let inputMap = self.taskConfig.inputData.map(d => {
+            let tmp =  {
+                inputs: d.children[0].children.map(c => c.data.value),
+                parameters: d.children[1].children.map(c => {
+                    return {
+                        endDepth: c.endDepth,
+                        startDepth: c.startDepth,
+                        param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                    }
+                }),
+                idDataset: d.idDataset,
+                idWell: d.wellProps.idWell,
+                dataset: d.dataset
+            };
+
+            tmp.parameters.step = parseFloat(d.wellProps.step);
+            tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
+            tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
+            return tmp;
+        });
+        console.log('input map: ', inputMap);
+        let config = {};
+        let promises = [];
+        promises.push(new Promise(function(resolve) {
+            let inputs = inputMap[0].inputs.map(node => node.properties);
+            async.eachSeries(inputs, function(inputCurve, callback) {
+                wiApiService.infoCurve(inputCurve.idCurve, function(curveInfo) {
+                    if(!config.curves || !Array.isArray(config.curves)) config.curves = [];
+                    config.curves.push(curveInfo);
+                    callback();
+                });
+            }, function(err) {
+                console.log('this is callback function');
+                resolve();
+            })
+        }))
+        Promise.all(promises)
+            .then(function() {
+                updateTrack(config);
+            });
     }
 }
 
@@ -1071,7 +1238,7 @@ app.component(name, {
     transclude: true,
     bindings: {
         name: "@",
-        idTask: "<"
+        id: "<"
     }
 });
 

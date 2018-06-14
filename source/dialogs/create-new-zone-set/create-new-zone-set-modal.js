@@ -5,11 +5,14 @@ module.exports = function (ModalService, callback) {
         self.template = {template: ''};
         this.zoneSet = {
             name: "",
-            background: "blue",
+            background: "black",
             foreground: "white",
-            pattern: "none"
+            pattern: "none",
+            desciption: ""
         }
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
         
         this.backgroundZone = function (index) {
             DialogUtils.colorPickerDialog(ModalService, self.zoneSet.background, function (colorStr) {
@@ -23,7 +26,6 @@ module.exports = function (ModalService, callback) {
                 self.zoneSet.foreground = colorStr;
             });
         };
-
         this.choosePattern = function() {
             DialogUtils.fillPatternDialog(ModalService, 
                                         self.zoneSet.pattern, 

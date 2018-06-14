@@ -66,6 +66,17 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <label class="control-label col-sm-4" for="userfullnameReg">Company</label>
+                                    <div class="col-sm-8">
+                                        <ui-select ng-model="wiModal.company">
+                                            <ui-select-match placeholder='Select a company'>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat='com in wiModal.companyList | filter:{name:$select.search}'>
+                                                <div class="padding-left-20px">{{com.name}}</div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label class="control-label col-sm-4" for="userfullnameReg">Captcha</label>
                                     <div class="col-sm-8">
                                         <img style="float: left" src="{{wiModal.captchaPNG}}">

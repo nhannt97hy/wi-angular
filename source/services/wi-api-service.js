@@ -4,13 +4,15 @@ const moduleName = 'wi-api-service';
 var __USERINFO = {
     username: null,
     token: null,
-    refreshToken: null
+    refreshToken: null,
+    company: null
 };
 
 function getAuthInfo() {
     __USERINFO.username = window.localStorage.getItem('username');
     __USERINFO.token = window.localStorage.getItem('token');
     __USERINFO.refreshToken = window.localStorage.getItem('refreshToken');
+    __USERINFO.company = window.localStorage.getItem('company');
 }
 getAuthInfo();
 
@@ -18,24 +20,30 @@ let app = angular.module(moduleName, []);
 
 const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
-// const BASE_URL = 'http://dev.sflow.me';
-// const BASE_URL = 'http://localhost:9000';
-// const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
-// const INVENTORY_SERVICE = 'http://13.250.197.210';
+const BASE_URL = 'http://dev.sflow.me';
+const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
+const INVENTORY_SERVICE = 'http://13.250.197.210';
+// //inv server for dev
 
 //production
-const BASE_URL = 'http://wi.i2g.cloud';
-const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
-const INVENTORY_SERVICE = 'http://inv.sflow.me';
+// const BASE_URL = 'http://wi.i2g.cloud';
+// const AUTHENTICATION_SERVICE = 'http://login.i2g.cloud';
+// const INVENTORY_SERVICE = 'http://inv.sflow.me';
 
 //local
 // const BASE_URL = 'http://127.0.0.1:3000';
 // const AUTHENTICATION_SERVICE = 'http://127.0.0.1:2999';
 // const INVENTORY_SERVICE = 'http://13.250.197.210';
 
+// local
+// const BASE_URL = 'http://multi-plot.sflow.me';
+// const AUTHENTICATION_SERVICE = 'http://login.multi-plot.sflow.me';
+// const INVENTORY_SERVICE = 'http://13.250.197.210';
+
 // route: GET, CREATE, UPDATE, DELETE
 const REGISTER = '/register';
 const LOGIN = '/login';
+const COMPANY_LIST = '/company/list';
 const DATABASE_UPDATE = '/database/update';
 const REFRESH_TOKEN = '/refresh-token';
 
@@ -43,8 +51,10 @@ const UPLOAD_MULTIFILES = '/files';
 const UPLOAD_MULTIFILES_PREPARE = '/files/prepare';
 const UPLOAD_FILE = '/file-1';
 const UPLOAD_IMAGE = '/image-upload';
-const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import';
-const UPLOAD_PLOT_TRACK_TEMPLATE = '/project/well/plot/track/import';
+// const UPLOAD_PLOT_TEMPLATE = '/project/well/plot/import';
+// const UPLOAD_PLOT_TRACK_TEMPLATE = '/project/well/plot/track/import';
+const UPLOAD_PLOT_TEMPLATE = '/project/plot/import';
+const UPLOAD_PLOT_TRACK_TEMPLATE = '/project/plot/track/import';
 
 const IMPORT_FILE = '/file-2';
 const GET_PROJECT = '/project/fullinfo';
@@ -85,50 +95,95 @@ const FAMILY_UNIT_LIST = '/family/list-unit';
 const CONVERT_CURVE_UNIT = '/project/well/dataset/curve/convert-unit';
 const ALL_SYSTEM_UNIT = '/family/all-unit';
 
-const CREATE_PLOT = '/project/well/plot/new';
-const EDIT_PLOT = '/project/well/plot/edit';
-const DELETE_PLOT = '/project/well/plot/delete';
-const GET_PLOT = '/project/well/plot/info';
-const DUPLICATE_PLOT = '/project/well/plot/duplicate';
-const EXPORT_PLOT = '/project/well/plot/export';
-const EXPORT_PLOT_TRACK = '/project/well/plot/track/export';
-const SAVE_PLOT_AS = '/project/well/plot/save-as';
+// const CREATE_PLOT = '/project/well/plot/new';
+// const EDIT_PLOT = '/project/well/plot/edit';
+// const DELETE_PLOT = '/project/well/plot/delete';
+// const GET_PLOT = '/project/well/plot/info';
+// const DUPLICATE_PLOT = '/project/well/plot/duplicate';
+// const EXPORT_PLOT = '/project/well/plot/export';
+// const EXPORT_PLOT_TRACK = '/project/well/plot/track/export';
+// const SAVE_PLOT_AS = '/project/well/plot/save-as';
+// 
+// const CREATE_LOG_TRACK = '/project/well/plot/track/new';
+// const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
+// const GET_LOG_TRACK = '/project/well/plot/track/info';
+// const EDIT_TRACK = '/project/well/plot/track/edit';
+// const DUPLICATE_LOG_TRACK = '/project/well/plot/track/duplicate';
+// 
+// const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
+// const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
+// const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
+// const EDIT_DEPTH_AXIS = '/project/well/plot/depth-axis/edit';
+// 
+// const CREATE_LINE = '/project/well/plot/track/line/new';
+// const DELETE_LINE = '/project/well/plot/track/line/delete';
+// const EDIT_LINE = '/project/well/plot/track/line/edit';
+// const GET_LINE = '/project/well/plot/track/line/info';
+// 
+// const CREATE_SHADING = '/project/well/plot/track/shading/new';
+// const DELETE_SHADING = '/project/well/plot/track/shading/delete';
+// const EDIT_SHADING = '/project/well/plot/track/shading/edit';
+// const GET_SHADING = '/project/well/plot/track/shading/info';
+// 
+// const CREATE_MARKER = '/project/well/plot/track/marker/new';
+// const EDIT_MARKER = '/project/well/plot/track/marker/edit';
+// const GET_MARKER = '/project/well/plot/track/marker/info';
+// const DELETE_MARKER = '/project/well/plot/track/marker/delete';
+// 
+// const CREATE_ANNOTATION = '/project/well/plot/track/annotation/new';
+// const EDIT_ANNOTATION = '/project/well/plot/track/annotation/edit';
+// const GET_ANNOTATION = '/project/well/plot/track/annotation/info';
+// const DELETE_ANNOTATION = '/project/well/plot/track/annotation/delete';
+// 
+// const CREATE_ZONE_TRACK = '/project/well/plot/zone-track/new';
+// const EDIT_ZONE_TRACK = '/project/well/plot/zone-track/edit';
+// const GET_ZONE_TRACK = '/project/well/plot/zone-track/info';
+// const DELETE_ZONE_TRACK = '/project/well/plot/zone-track/delete';
 
-const CREATE_LOG_TRACK = '/project/well/plot/track/new';
-const DELETE_LOG_TRACK = '/project/well/plot/track/delete';
-const GET_LOG_TRACK = '/project/well/plot/track/info';
-const EDIT_TRACK = '/project/well/plot/track/edit';
-const DUPLICATE_LOG_TRACK = '/project/well/plot/track/duplicate';
+const CREATE_PLOT = '/project/plot/new';
+const EDIT_PLOT = '/project/plot/edit';
+const DELETE_PLOT = '/project/plot/delete';
+const GET_PLOT = '/project/plot/info';
+const DUPLICATE_PLOT = '/project/plot/duplicate';
+const EXPORT_PLOT = '/project/plot/export';
+const EXPORT_PLOT_TRACK = '/project/plot/track/export';
+const SAVE_PLOT_AS = '/project/plot/save-as';
 
-const CREATE_DEPTH_AXIS = '/project/well/plot/depth-axis/new';
-const DELETE_DEPTH_AXIS = '/project/well/plot/depth-axis/delete';
-const GET_DEPTH_AXIS = '/project/well/plot/depth-axis/info';
-const EDIT_DEPTH_AXIS = '/project/well/plot/depth-axis/edit';
+const CREATE_LOG_TRACK = '/project/plot/track/new';
+const DELETE_LOG_TRACK = '/project/plot/track/delete';
+const GET_LOG_TRACK = '/project/plot/track/info';
+const EDIT_TRACK = '/project/plot/track/edit';
+const DUPLICATE_LOG_TRACK = '/project/plot/track/duplicate';
 
-const CREATE_LINE = '/project/well/plot/track/line/new';
-const DELETE_LINE = '/project/well/plot/track/line/delete';
-const EDIT_LINE = '/project/well/plot/track/line/edit';
-const GET_LINE = '/project/well/plot/track/line/info';
+const CREATE_DEPTH_AXIS = '/project/plot/depth-axis/new';
+const DELETE_DEPTH_AXIS = '/project/plot/depth-axis/delete';
+const GET_DEPTH_AXIS = '/project/plot/depth-axis/info';
+const EDIT_DEPTH_AXIS = '/project/plot/depth-axis/edit';
 
-const CREATE_SHADING = '/project/well/plot/track/shading/new';
-const DELETE_SHADING = '/project/well/plot/track/shading/delete';
-const EDIT_SHADING = '/project/well/plot/track/shading/edit';
-const GET_SHADING = '/project/well/plot/track/shading/info';
+const CREATE_LINE = '/project/plot/track/line/new';
+const DELETE_LINE = '/project/plot/track/line/delete';
+const EDIT_LINE = '/project/plot/track/line/edit';
+const GET_LINE = '/project/plot/track/line/info';
 
-const CREATE_MARKER = '/project/well/plot/track/marker/new';
-const EDIT_MARKER = '/project/well/plot/track/marker/edit';
-const GET_MARKER = '/project/well/plot/track/marker/info';
-const DELETE_MARKER = '/project/well/plot/track/marker/delete';
+const CREATE_SHADING = '/project/plot/track/shading/new';
+const DELETE_SHADING = '/project/plot/track/shading/delete';
+const EDIT_SHADING = '/project/plot/track/shading/edit';
+const GET_SHADING = '/project/plot/track/shading/info';
 
-const CREATE_ANNOTATION = '/project/well/plot/track/annotation/new';
-const EDIT_ANNOTATION = '/project/well/plot/track/annotation/edit';
-const GET_ANNOTATION = '/project/well/plot/track/annotation/info';
-const DELETE_ANNOTATION = '/project/well/plot/track/annotation/delete';
+const CREATE_MARKER = '/project/plot/track/marker/new';
+const EDIT_MARKER = '/project/plot/track/marker/edit';
+const GET_MARKER = '/project/plot/track/marker/info';
+const DELETE_MARKER = '/project/plot/track/marker/delete';
 
-const CREATE_ZONE_TRACK = '/project/well/plot/zone-track/new';
-const EDIT_ZONE_TRACK = '/project/well/plot/zone-track/edit';
-const GET_ZONE_TRACK = '/project/well/plot/zone-track/info';
-const DELETE_ZONE_TRACK = '/project/well/plot/zone-track/delete';
+const CREATE_ANNOTATION = '/project/plot/track/annotation/new';
+const EDIT_ANNOTATION = '/project/plot/track/annotation/edit';
+const GET_ANNOTATION = '/project/plot/track/annotation/info';
+const DELETE_ANNOTATION = '/project/plot/track/annotation/delete';
+
+const CREATE_ZONE_TRACK = '/project/plot/zone-track/new';
+const EDIT_ZONE_TRACK = '/project/plot/zone-track/edit';
+const GET_ZONE_TRACK = '/project/plot/zone-track/info';
+const DELETE_ZONE_TRACK = '/project/plot/zone-track/delete';
 
 const CREATE_ZONE_SET = '/project/well/zone-set/new';
 const LIST_ZONE_SET = '/project/well/zone-set/list';
@@ -142,16 +197,27 @@ const EDIT_ZONE = '/project/well/zone-set/zone/edit';
 const GET_ZONE = '/project/well/zone-set/zone/info';
 const DELETE_ZONE = '/project/well/zone-set/zone/delete';
 
-const CREATE_IMAGE_TRACK = '/project/well/plot/image-track/new';
-const EDIT_IMAGE_TRACK = '/project/well/plot/image-track/edit';
-const GET_IMAGE_TRACK = '/project/well/plot/image-track/info';
-const DELETE_IMAGE_TRACK = '/project/well/plot/image-track/delete';
+// const CREATE_IMAGE_TRACK = '/project/well/plot/image-track/new';
+// const EDIT_IMAGE_TRACK = '/project/well/plot/image-track/edit';
+// const GET_IMAGE_TRACK = '/project/well/plot/image-track/info';
+// const DELETE_IMAGE_TRACK = '/project/well/plot/image-track/delete';
+// 
+// const CREATE_IMAGE = '/project/well/plot/image-track/image/new';
+// const EDIT_IMAGE = '/project/well/plot/image-track/image/edit';
+// const GET_IMAGE = '/project/well/plot/image-track/image/info';
+// const DELETE_IMAGE = '/project/well/plot/image-track/image/delete';
+// const LIST_IMAGE_OF_TRACK = '/project/well/plot/image-track/image/list';
 
-const CREATE_IMAGE = '/project/well/plot/image-track/image/new';
-const EDIT_IMAGE = '/project/well/plot/image-track/image/edit';
-const GET_IMAGE = '/project/well/plot/image-track/image/info';
-const DELETE_IMAGE = '/project/well/plot/image-track/image/delete';
-const LIST_IMAGE_OF_TRACK = '/project/well/plot/image-track/image/list';
+const CREATE_IMAGE_TRACK = '/project/plot/image-track/new';
+const EDIT_IMAGE_TRACK = '/project/plot/image-track/edit';
+const GET_IMAGE_TRACK = '/project/plot/image-track/info';
+const DELETE_IMAGE_TRACK = '/project/plot/image-track/delete';
+
+const CREATE_IMAGE = '/project/plot/image-track/image/new';
+const EDIT_IMAGE = '/project/plot/image-track/image/edit';
+const GET_IMAGE = '/project/plot/image-track/image/info';
+const DELETE_IMAGE = '/project/plot/image-track/image/delete';
+const LIST_IMAGE_OF_TRACK = '/project/plot/image-track/image/list';
 
 const GET_IMAGE_GALLERY = '/image-list';
 
@@ -229,15 +295,25 @@ const EDIT_GROUP = '/project/group/edit';
 const DELETE_GROUP = '/project/group/delete';
 const GET_GROUP = '/project/group/info';
 
-const CREATE_OBJECT_TRACK = '/project/well/plot/object-track/new/';
-const GET_OBJECT_TRACK = '/project/well/plot/object-track/info/';
-const EDIT_OBJECT_TRACK = '/project/well/plot/object-track/edit/';
-const DELETE_OBJECT_TRACK = '/project/well/plot/object-track/delete/';
+// const CREATE_OBJECT_TRACK = '/project/well/plot/object-track/new/';
+// const GET_OBJECT_TRACK = '/project/well/plot/object-track/info/';
+// const EDIT_OBJECT_TRACK = '/project/well/plot/object-track/edit/';
+// const DELETE_OBJECT_TRACK = '/project/well/plot/object-track/delete/';
+// 
+// const CREATE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/new/';
+// const GET_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/info/';
+// const EDIT_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/edit/';
+// const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/delete/';
 
-const CREATE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/new/';
-const GET_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/info/';
-const EDIT_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/edit/';
-const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/well/plot/object-track/object/delete/';
+const CREATE_OBJECT_TRACK = '/project/plot/object-track/new/';
+const GET_OBJECT_TRACK = '/project/plot/object-track/info/';
+const EDIT_OBJECT_TRACK = '/project/plot/object-track/edit/';
+const DELETE_OBJECT_TRACK = '/project/plot/object-track/delete/';
+
+const CREATE_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/new/';
+const GET_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/info/';
+const EDIT_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/edit/';
+const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/delete/';
 
 const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
 const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
@@ -584,17 +660,21 @@ Service.prototype.delete = function (route, payload) {
 }
 */
 
+Service.prototype.getCompanyList = function (data, callback) {
+    this.post(COMPANY_LIST, data, callback, 'auth');
+};
+
 Service.prototype.login = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     this.post(LOGIN, data, callback, 'auth');
-}
+};
 Service.prototype.register = function (data, callback) {
     if (!data || !callback) return;
     let self = this;
     console.log(data);
     this.post(REGISTER, data, callback, 'auth');
-}
+};
 Service.prototype.createDatabase = function (data, callback) {
     this.post(DATABASE_UPDATE, data, callback);
 }

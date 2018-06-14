@@ -1,7 +1,7 @@
 const componentName = 'wiExport';
 const moduleName = 'wi-export';
 
-function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnlineInvService) {
+function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, wiOnlineInvService) {
     let currentWell = '';
     let self = this;
     this.exportQueueItems = [];
@@ -17,6 +17,7 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiExport', self);
+        console.log('from', self.from);
     };
 
     // this.getProjectList = function (wiItemDropdownCtrl) {
@@ -285,37 +286,42 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
                 // pushNodeToQueue(child, self.projectConfig);
             for (child of self.inventoryConfig.__SELECTED_NODES) {  
                 console.log('selectedNode', self.inventoryConfig.__SELECTED_NODES);      
-                let childCopy = angular.copy(child);
-                childCopy.data.toggle = true;          
-                pushNodeToQueue(childCopy, self.inventoryConfig);                    
+                // let childCopy = angular.copy(child);
+                // childCopy.data.toggle = true;          
+                pushNodeToQueue(child, self.inventoryConfig);                    
                 console.log('self.idExportQueueItems', self.idExportQueueItems);
             }
         }
     }
 
     function pushNodeToQueue(node, rootNode) {
+        console.log('node', node, 'rootNode', rootNode, node == rootNode[0].children[0]);
         if(node.type ==="well"){
+            let nodeCopy = angular.copy(node);
+            nodeCopy.data.toggle = true;
             let wellExisted = self.exportQueueItems.find(function(wellNode){
                 return wellNode.id === node.id
             })
             if(wellExisted){
-                mergeWell(rootNode, node, rootNode);
+                mergeWell(rootNode, nodeCopy, rootNode);
             } else {
-                self.exportQueueItems.push(angular.copy(node));
-                self.idExportQueueItems.push(getIdObjectFromWell(node));
+                self.exportQueueItems.push(nodeCopy);
+                self.idExportQueueItems.push(getIdObjectFromWell(nodeCopy));
             }
         } else if(node.type === "dataset"){
             let parentWell = rootNode.find(function(wellNode){
                 return wellNode.children.indexOf(node)!==-1;
             })
+            console.log('parent well', parentWell);
             let wellExisted = self.exportQueueItems.find(function(wellNode){
                 return wellNode.id === parentWell.id;
             })
+            let nodeCopy = angular.copy(node);
             if(wellExisted){
-                mergeWell(wellExisted, node, rootNode);
+                mergeWell(wellExisted, nodeCopy, rootNode);
             } else {
                 let parentWellCopy = angular.copy(parentWell);
-                parentWellCopy.children = new Array(angular.copy(node));
+                parentWellCopy.children = new Array(nodeCopy);
                 $timeout(function() {
                     self.exportQueueItems.push(parentWellCopy);
                     let wellIndex = self.exportQueueItems.indexOf(parentWellCopy);
@@ -325,7 +331,9 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
             }
         } else if(node.type === "curve"){
             for(wellNode of rootNode){
+                let nodeCopy = angular.copy(node);
                 let wellNodeCopy = angular.copy(wellNode);
+                console.log('111', wellNodeCopy);
                 let parentDataset = wellNodeCopy.children.find(function(datasetNode){
                     return datasetNode.children.find(function(curveNode){
                         return curveNode.id === node.id
@@ -338,13 +346,15 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, wiOnline
                     })
                     if(wellExisted){
                         console.log('wellExisted');
-                        mergeWell(parentDataset, node, rootNode);
+                        mergeWell(parentDataset, nodeCopy, rootNode);
                         break;
                     } else {
                         let parentDatasetCopy = angular.copy(parentDataset);
-                        parentDatasetCopy.children = new Array(angular.copy(node));
+                        parentDatasetCopy.children = new Array(nodeCopy);
                         wellNodeCopy.children = new Array(parentDatasetCopy);
+                        
                         $timeout(function(){
+                            console.log('xxx', wellNodeCopy);
                             self.exportQueueItems.push(wellNodeCopy);
                             let wellIndex = self.exportQueueItems.indexOf(wellNodeCopy);
                             self.idExportQueueItems[wellIndex] = getIdObjectFromWell(wellNodeCopy);
@@ -543,6 +553,9 @@ app.component(componentName, {
     templateUrl: 'wi-export.html',
     controller: Controller,
     controllerAs: componentName,
+    bindings: {
+        from: "@"
+    }
 });
 
 exports.name = moduleName;

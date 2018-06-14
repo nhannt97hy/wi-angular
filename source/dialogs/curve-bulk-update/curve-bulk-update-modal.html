@@ -43,8 +43,9 @@
                                 <th width="10%">Log/Linear</th>
                             </tr>
                         </thead>
-                        <tbody ng-repeat="track in wiModal.tracks">
-                            <tr ng-repeat="line in track.lines" ng-if="track.use">
+                        <!-- ng-style="wiModal.setDisableStyle(wiModal.tracks_edit[$index].edit)" -->
+                        <tbody ng-repeat="track in wiModal.tracks track by $index" >
+                            <tr ng-repeat="line in track.lines" ng-if="track.use" >
                                 <td width="5%" rowspan="{{track.lines.length}}"
                                     ng-hide="$index>0">
                                     <input type="checkbox" 
@@ -116,6 +117,51 @@
                                 <td width="10%"></td>
                                 <td width="5%"></td>
                                 <td width="10%"></td>
+                            </tr>
+                            <tr ng-if="track.use">
+                                <td width="35%" colspan="4"
+                                    style="text-align: left; padding-left: 15px">
+                                    <label>
+                                        <input type="checkbox" 
+                                                ng-model="wiModal.tracks_edit[$index].edit">
+                                        Edit All Line In {{track.name}}
+                                    </label>
+                                </td>
+                                <td width="10%"></td>
+                                <td width="10%"></td>
+                                <td width="10%">
+                                    <input type="number" step="any"
+                                            class="form-control wi-form-control"
+                                            ng-model="wiModal.tracks_edit[$index].minValue">
+                                </td>
+                                <td width="10%">
+                                    <input type="number" step="any"
+                                            class="form-control wi-form-control"
+                                            ng-model="wiModal.tracks_edit[$index].maxValue">
+                                </td>
+                                <td width="10%">
+                                    <select ng-model="wiModal.tracks_edit[$index].displayMode"
+                                            class="form-control wi-form-control">
+                                        <option value="Line">Line</option>
+                                        <option value="Symbol">Symbol</option>            
+                                        <option value="Both">Both</option>            
+                                        <option value="None">None</option>
+                                    </select>
+                                </td>
+                                <td width="5%">
+                                    <button type="button"
+                                            ng-click="wiModal.editStyle($index)"
+                                            ng-disabled="wiModal.tracks_edit[$index].displayMode =='None'"
+                                            class="btn btn-default wi-form-control" 
+                                            style="font-size: 10px; width: 100%">Edit</button>
+                                </td>
+                                <td width="10%">
+                                    <select ng-model="wiModal.tracks_edit[$index].displayType"
+                                            class="form-control wi-form-control">
+                                        <option value="Logarithmic">Logarithmic</option>
+                                        <option value="Linear">Linear</option>
+                                    </select>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

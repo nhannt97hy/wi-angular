@@ -16,7 +16,13 @@ module.exports = function (ModalService, logTracks) {
                 "max-height": "50em",
             };
         };
-
+        this.setDisableStyle = function (param) {
+            if(!param) return {}
+            else return {
+                "opacity": "0.7",
+                "pointer-events": "none"
+            }
+        }
         this.zoomOutDialog = function() {
             self.modalSize = {};
             self.maxHeightModal = {};
@@ -29,6 +35,7 @@ module.exports = function (ModalService, logTracks) {
             })
         }
         this.tracks = [];
+        this.tracks_edit = [];
         logTracks.forEach(function(lt) {
             let lineArr = [];
             (lt.drawings).filter(d => d.type == 'curve').forEach(function(item) {
@@ -60,6 +67,34 @@ module.exports = function (ModalService, logTracks) {
                 id : lt.id,
                 lines : lineArr
             });
+
+            let item_edit = {
+                edit: false,
+                minValue: null,
+                maxValue: null,
+                displayMode: "Line",
+                displayType: "Linear"
+            };
+            item_edit.lineOptions = {
+                display: (item_edit.displayMode == 'Line' || item_edit.displayMode == 'Both'),
+                lineStyle: {
+                    lineColor: "blue",
+                    lineStyle: [10],
+                    lineWidth: 1
+                }
+            };
+            item_edit.symbolOptions = {
+                display: (item_edit.displayMode == 'Symbol' || item_edit.displayMode == 'Both'),
+                symbolStyle: {
+                    symbolFillStyle: 'blue',
+                    symbolLineDash: [10,0],
+                    symbolLineWidth: 1,
+                    symbolName: 'circle',
+                    symbolSize: 5,
+                    symbolStrokeStyle: 'blue'
+                }
+            };
+            self.tracks_edit.push(item_edit);
         });
         this.onEditStyleButtonClicked = function(line) {
             line.lineOptions.display = false;
@@ -87,6 +122,33 @@ module.exports = function (ModalService, logTracks) {
                 if (symbolOptions) line.symbolOptions = symbolOptions;
             });
         }
+
+        this.editStyle = function(index) {
+            self.tracks_edit[index].lineOptions.display = false;
+            self.tracks_edit[index].symbolOptions.display = false;
+
+            switch (self.tracks_edit[index].displayMode) {
+                case "Line":
+                    self.tracks_edit[index].lineOptions.display = true;
+                break;
+                case "Symbol":
+                    self.tracks_edit[index].symbolOptions.display = true;
+                break;
+                case "Both":
+                    self.tracks_edit[index].lineOptions.display = true;
+                    self.tracks_edit[index].symbolOptions.display = true;
+                break;
+                default:
+                break;
+            };
+            DialogUtils.lineSymbolAttributeDialog(ModalService, wiComponentService,
+                                                self.tracks_edit[index].lineOptions,
+                                                self.tracks_edit[index].symbolOptions,
+                                                function (lineOptions, symbolOptions) {
+                if (lineOptions) self.tracks_edit[index].lineOptions = lineOptions;
+                if (symbolOptions) self.tracks_edit[index].symbolOptions = symbolOptions;
+            });
+        }
         function preUpdate (lineProps) {
             let line = lineProps;
             line.lineColor = lineProps.lineOptions.lineStyle.lineColor;
@@ -102,12 +164,26 @@ module.exports = function (ModalService, logTracks) {
         }
         function getLinesUpdated () {
             let linesUpdated = [];
-            self.tracks.forEach(function(t) {
-                if (t.use) {
+            self.tracks.forEach(function(t, index) {
+                if(self.tracks_edit[index].edit) {
                     t.lines.forEach(function(l) {
                         l.idTrack = t.id;
+                        l.minValue = self.tracks_edit[index].minValue;
+                        l.maxValue = self.tracks_edit[index].maxValue;
+                        l.displayMode = self.tracks_edit[index].displayMode;
+                        l.displayType = self.tracks_edit[index].displayType;
+                        l.lineOptions = self.tracks_edit[index].lineOptions;
+                        l.symbolOptions = self.tracks_edit[index].symbolOptions;
                         linesUpdated.push(preUpdate(l));
-                    })
+                    });
+                }
+                else {
+                    if (t.use) {
+                        t.lines.forEach(function(l) {
+                            l.idTrack = t.id;
+                            linesUpdated.push(preUpdate(l));
+                        })
+                    }
                 }
             });
 

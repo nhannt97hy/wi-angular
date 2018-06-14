@@ -9,9 +9,9 @@ module.exports = function (ModalService, callback) {
             endDepth: "",
             fill: {
                 pattern: {
-                    name: "",
-                    background: "",
-                    foreground: ""
+                    name: "none",
+                    background: "rgb(0, 0, 0)",
+                    foreground: "rgb(220, 220, 220)"
                 }
             }
         }
@@ -40,6 +40,18 @@ module.exports = function (ModalService, callback) {
                     self.zone.fill.pattern.name = _name;
                 }
             });
+        }
+        this.chooseTemplate = function(){
+            console.log('chooseTemplateFunction called');
+            DialogUtils.chooseTemplateDialog(ModalService, function (template){
+                if(template){
+                    self.zone.name = template.name;
+                    self.zone.fill.pattern.name = template.fill.pattern.name;
+                    self.zone.fill.pattern.background = template.fill.pattern.background;
+                    self.zone.fill.pattern.foreground = template.fill.pattern.foreground;
+                    console.log('data got from chooseTemlateDialog', self.zone);
+                }
+            })
         }
         this.onOkButtonClicked = function () {
            close(self.zone);

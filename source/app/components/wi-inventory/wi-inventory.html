@@ -42,7 +42,9 @@
                 <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiInventory.prjFilter' size='10'>
             </form>
         </div>
-        <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiInventory.upTriggerPrj', down-trigger='wiInventory.downTriggerPrj'>
+        <wi-scroll id-scroll="'projectTreeScroll'" style='flex:1;display:flex;flex-direction:column; height: 100%' 
+                    up-trigger='wiInventory.upTriggerPrj'
+                    down-trigger='wiInventory.downTriggerPrj'>
             <wi-base-treeview name="projectTreeview" 
                 config="wiInventory.projectConfig" 
                 container="wiInventory" 

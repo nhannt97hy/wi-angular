@@ -24,7 +24,7 @@ function TabsetController($timeout) {
         deactiveAllTabs(self.tabs);
 
         self.tabs[index].active = true;
-        self.tabs[index].onShow && self.tabs[index].onShow();
+        self.tabs[index].onShow && self.tabs[index].onShow(index);
     };
 
     this.closeTab = function (index) {

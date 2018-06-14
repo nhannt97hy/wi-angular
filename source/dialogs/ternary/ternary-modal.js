@@ -155,7 +155,7 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                 if(!vertex || typeof(vertex) == 'string') {
                     toastr.error(vertex || "Invalid point!");
                     viCrossplot.onMouseDown(
-                        wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                        wiD3CrossplotCtrl.mouseDownCallback
                     );
                     return;
                 }
@@ -178,7 +178,7 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                 }
                 $scope.$apply();
                 viCrossplot.onMouseDown(
-                    wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    wiD3CrossplotCtrl.mouseDownCallback
                 );
             });
         };
@@ -196,7 +196,7 @@ module.exports = function(ModalService, wiComponentService, wiD3CrossplotCtrl, c
                     $scope.$apply();
                 }
                 viCrossplot.onMouseDown(
-                    wiD3CrossplotCtrl.viCrossplotMouseDownCallback
+                    wiD3CrossplotCtrl.mouseDownCallback
                 );
             });
         };

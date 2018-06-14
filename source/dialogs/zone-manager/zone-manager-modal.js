@@ -395,7 +395,9 @@ module.exports = function (ModalService, item) {
         this.onApplyButtonClicked = function () {
             console.log('Apply');
             if(self.verify()) {
-                doApply();
+                doApply(function() {
+                    wiComponentService.emit('zone-updated');
+                });
             }else{
                 utils.error(errorMessage);
                 return;
@@ -406,6 +408,7 @@ module.exports = function (ModalService, item) {
             console.log('Ok');
             if(self.verify()) {
                doApply(function(){
+                   wiComponentService.emit('zone-updated');
                    close(null);
                });
             }else{

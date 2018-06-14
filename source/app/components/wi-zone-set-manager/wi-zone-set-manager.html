@@ -2,54 +2,63 @@
     <div class="left-side">
         <div class="template-tree">
             <div class='left-heading'>
-                <h5>ZoneSets</h5>
-                <div class="button-area">
-                    <button class='btn' ng-click="wiZoneSetManager.exportZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-                        <i class="fa fa-arrow-up"></i>
-                    </button>
-                    <button class='btn' ng-click="wiZoneSetManager.deleteZoneSet()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-                        <i class="fa fa-times"></i>
-                    </button> 
-                    <button class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
-                        <i class="fa fa-plus"></i>
-                    </button>
-                    <button class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
-                        <i class="fa fa-refresh"></i>
-                    </button>
+                <h5>Zonesets</h5>
+                <div class="button-area" style="position: relative"> 
+                    <label class='btn pull-right' ng-click="wiZoneSetManager.createZoneSet()" ng-disabled="!(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)">
+                        <i class="ti-plus" ng-class="{'color-blue': (wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet), 'color-lightgray': !(wiZoneSetManager.lastSelectedWell || wiZoneSetManager.lastSelectedZoneSet)}"></i>
+                    </label>
+                    <label title="Refresh zoneSets list" class='btn' ng-click="wiZoneSetManager.refreshZoneSetList()">
+                        <i class="ti-reload color-blue"></i>
+                    </label>
+                    <label title="More" class="btn" ng-click="wiZoneSetManager.showMoreButtonContextMenuFunction($event, $index)" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet"> 
+                        <i class="ti-more" ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet,'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
+                    </label>
                 </div>
             </div>
-            <div class="scroll-container">
+            <div style='background-color:white;display: flex;padding-left: 7px; border-bottom: 1px solid #ccc;'>
+                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                <input type='text' id="focus" 
+                        style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
+                        ng-model="wiZoneSetManager.filter"
+                        placeholder="[Search]">
+            </div>
+            <wi-scroll id-scroll="'wzsmTreeScroll'" 
+                        style='flex:1;display:flex;flex-direction:column; height: 80%' 
+                        up-trigger='wiInventory.upTrigger' down-trigger='wiInventory.downTrigger'>
                 <wi-base-treeview name="zoneTemplateManagerTreeview" 
                     config="wiZoneSetManager.zoneSetConfig" 
-                    container="wiZoneSetManagerTab2"
+                    container="wiZoneSetManager"
                     on-click-function="wiZoneSetManager.clickFunction"
-                    filter="" >
+                    filter="{{wiZoneSetManager.filter}}" 
+                    show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
                 </wi-base-treeview>
-            </div>
+            </wi-scroll>
         </div>
     </div>
     <div class="right-side" style="box-sizing:border-box">
         <div class="right-heading">
-            <h5 style="margin: 8px; font-weight:bold;display:inline-block" ng-show="wiZoneSetManager.zones.length !== 0">
+            <h5 style="margin: 6px; font-weight:bold;display:inline-block" ng-show="wiZoneSetManager.zones.length !== 0">
                 Order by: </h5>
             <select ng-init="wiZoneSetManager.zoneOrder='none'" ng-model="wiZoneSetManager.zoneOrder" ng-show="wiZoneSetManager.zones.length !== 0">
                 <option value="none">None</option>
                 <option value="idZone" ng-hide="wiZoneSetManager.newZone">Zone id</option>
                 <option value="name">Zone name</option>
+                <option value="foreground">Foreground</option>
+                <option value="background">Background</option>
             </select>
             <div class="button-area">
-                <button class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)">
-                    <i class="fa fa-check"></i>
-                </button>
-                <button class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
-                    <i class="fa fa-times"></i>
-                </button>
-                <button class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
-                    <i class="fa fa-plus"></i>
-                </button>
-                <button class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
-                    <i class="fa fa-refresh"></i>
-                </button>
+                <label class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)">
+                    <i class="ti-check"  ng-class="{'color-blue': !(!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)}"></i>
+                </label>
+                <label class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
+                    <i class="ti-close"  ng-class="{'color-blue': !(!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)}"></i>
+                </label>
+                <label title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
+                    <i class="ti-plus"  ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
+                </label>
+                <label class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
+                    <i class="ti-reload"  ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
+                </label>
             </div>
         </div>
         <div class="content-area">
@@ -57,58 +66,60 @@
                 <table class="text-on-table table table-bordered" ng-show="wiZoneSetManager.zones.length!==0">
                     <thead>
                         <tr>
-                            <th style="width: 5%"></th>
+                            <th width="5%"></th>
                             <th width="15%">Zone name</th>
-                            <th style="width: 15%">Top Depth</th>
-                            <th style="width: 15%">Bottom Depth</th>
-                            <th width="15%">Sample</th>
-                            <th width="10%">Background</th>
-                            <th width="10%">Foreground</th>
-                            <th width="15%">Pattern</th>
+                            <th width="15%">Top Depth</th>
+                            <th width="15%">Bottom Depth</th>
+                            <!-- <th width="15%">Sample</th> -->
+                            <th width="15%">Background</th>
+                            <th width="15%">Foreground</th>
+                            <th width="20%">Pattern</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="zone in wiZoneSetManager.zones | orderBy: wiZoneSetManager.zoneOrder" ng-init="zone.flag = false"
-                            ng-class="{'selected': zone.flag}">
+                        <tr ng-repeat="zone in wiZoneSetManager.zones | orderBy: wiZoneSetManager.zoneOrder" ng-init="zone.flag = false" ng-class="{'selected': zone.flag}">
                             <td style="width: 5%;" class="border-right-gray" ng-click="wiZoneSetManager.selectZoneToggle(zone)">
                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
                             </td>
                             <td width="15%">
-                                <input type="text" ng-model="zone.name" class="form-control wi-form-control" ng-change="wiZoneSetManager.onZoneChanged($index);">
+                                <input type="text" ng-model="zone.name" class="form-control" 
+                                        ng-change="wiZoneSetManager.onZoneChanged(zone);"
+                                        style="height: auto;">
                             </td>
                             <td width="15%">
-                                <input type="number" step="any" ng-model="zone.startDepth" class="form-control wi-form-control" ng-change="wiZoneSetManager.onZoneChanged($index);">
+                                <input type="number" step="any" ng-model="zone.startDepth" class="form-control" 
+                                        ng-change="wiZoneSetManager.onZoneChanged(zone);"
+                                        style="height: auto;">
                             </td>
                             <td width="15%">
-                                <input type="number" step="any" ng-model="zone.endDepth" class="form-control wi-form-control" ng-change="wiZoneSetManager.onZoneChanged($index);">
+                                <input type="number" step="any" ng-model="zone.endDepth" class="form-control" 
+                                        ng-change="wiZoneSetManager.onZoneChanged(zone);"
+                                        style="height: auto;">
                             </td>
-                            <td width="15%">
+                            <!-- <td width="15%">
                                 <wi-canvas-rect name="{{zone.name}}" pattern="{{zone.fill.pattern.name}}" foreground="{{zone.fill.pattern.foreground}}" background="{{zone.fill.pattern.background}}"
                                     width="80" height="20">
                                 </wi-canvas-rect>
-                            </td>
-
-                            <td width="10%">
-                                <button ng-click="wiZoneSetManager.backgroundZone($index);" ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control width-80px height-20px thick-border">
-                            </td>
-                            <td width="10%">
-                                <button ng-click="wiZoneSetManager.foregroundZone($index);" ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control width-80px height-20px thick-border">
-                                </button>
+                            </td> -->
+                            <td width="15%">
+                                <button ng-click="wiZoneSetManager.backgroundZone(zone);" ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control thick-border"
+                                        style="width: 103px; height: 28px; margin: auto;">
                             </td>
                             <td width="15%">
-                                <ui-select theme="bootstrap" ng-model="zone.fill.pattern.name" ng-change="wiZoneSetManager.onZoneChanged($index);" search-enabled="false">
-                                    <ui-select-match>
-                                        <wi-canvas-rect name="row_{{$index}}" pattern="{{zone.fill.pattern.name}}" width="80" height="20">
-                                        </wi-canvas-rect>
-                                    </ui-select-match>
-                                    <ui-select-choices repeat="selectedPattern in wiZoneSetManager.selectPatterns">
-                                        <div>
-                                            <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" width="40" height="20" style="float: right;">
-                                            </wi-canvas-rect>
-                                        </div>
-                                    </ui-select-choices>
-                                </ui-select>
+                                <button ng-click="wiZoneSetManager.foregroundZone(zone);" ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border"
+                                        style="width: 103px; height: 28px; margin: auto;">
+                                </button>
+                            </td>
+                            <td width="20%">
+                                <button ng-click="wiZoneSetManager.choosePattern(zone)"
+                                        class="btn btn-default thick-border padding-0">
+                                    <wi-canvas-rect name="rowZS_{{$index}}" 
+                                                pattern="{{zone.fill.pattern.name}}" 
+                                                width="100" height="26" 
+                                                foreground="{{zone.fill.pattern.foreground}}"
+                                                background='{{zone.fill.pattern.background}}'>
+                                    </wi-canvas-rect>
+                                </button>
                             </td>
                         </tr>
                     </tbody>
