@@ -4,25 +4,18 @@ module.exports = function (ModalService, callback) {
         let self = this;
         let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
-        self.zoneset = {
-            idZoneset: 1,
-            name: "1",
-            fill: {
-                pattern: {
-                    name: "none",
-                    background: "rgb(225,225,225)",
-                    foreground: "rgb(255, 0, 0)",
-                }
-            }
-        }
+        let topIdx = 0;
+        let selectionLength = 8;
+        let delta = 5;
+
         this.refreshTree = function () {
             self.config = [];
 
             wiApiService.listZoneTemplate({}, function (templates) {
                 if (templates) {
-                    console.log('got', templates.length);
-                    for (template of templates) {
-                        self.config.push(createTemplateModel(template));                        
+                    let cutTemplates = templates.slice(0, selectionLength);
+                    for (template of cutTemplates) {
+                        self.config.push(createTemplateModel(template));
                     }
                 }
             })
@@ -33,8 +26,8 @@ module.exports = function (ModalService, callback) {
         this.upTrigger = function (cb) {
             wiApiService.listZoneTemplate({}, function (templates) {
                 if (templates) {
-                    if(topIdx > 0) {
-                        if(topIdx > delta) {
+                    if (topIdx > 0) {
+                        if (topIdx > delta) {
                             let newSource = templates.slice(topIdx - delta, topIdx).reverse();
                             let newList = newSource.map(t => addNode(t));
                             topIdx = topIdx - delta;
@@ -52,6 +45,9 @@ module.exports = function (ModalService, callback) {
         this.downTrigger = function (cb) {
             wiApiService.listZoneTemplate({}, function (templates) {
                 if (templates) {
+                    templates.sort(function (a, b) {
+                        return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
+                    });
                     let bottomIdx = topIdx + selectionLength;
                     if(bottomIdx < templates.length) {
                         if(templates.length - bottomIdx > delta) {
@@ -69,10 +65,21 @@ module.exports = function (ModalService, callback) {
                 }
             })
         }
+
         this.clickFunction = function ($index, $event, node) {
-            if(node.type=='zoneset'){
-                console.log('type ==zoneset');
-            } else if(node.type=='template' && node.children.length==0){
+            if (node.type == 'zoneset') {
+                self.returnZoneset = {
+                    idZoneset: node.idZoneset,
+                    name: node.name,
+                    fill: {
+                        pattern: {
+                            name: node.pattern,
+                            background: node.background,
+                            foreground: node.foreground,
+                        }
+                    }
+                }
+            } else if (node.type == 'template' && node.children.length == 0) {
                 wiApiService.listAllZoneByTemplate({ template: node.name }, function (zonesets) {
                     for (zoneset of zonesets) {
                         node.children.push(createZonesetModel(zoneset));
@@ -120,7 +127,7 @@ module.exports = function (ModalService, callback) {
             rootNode.__SELECTED_NODES = [];
         }
         this.onOkButtonClicked = function () {
-            close(self.zoneset);
+            close(self.returnZoneset);
         };
 
         this.onCancelButtonClicked = function () {
@@ -141,9 +148,8 @@ module.exports = function (ModalService, callback) {
         };
         function createZonesetModel(zoneset) {
             let node = {
-                idZoneSet: zoneset.idZoneSet,
+                idZoneset: zoneset.idZoneTemplate,
                 name: zoneset.name,
-                idWell: zoneset.idWell,
                 type: 'zoneset',
                 data: {
                     icon: 'mineral-zone-16x16',
