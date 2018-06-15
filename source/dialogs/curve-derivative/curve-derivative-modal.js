@@ -109,7 +109,7 @@ module.exports = function(ModalService, wiComponentService){
             self.secondCurve.idDataset = self.selectedDataset;
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         function saveCurve(curve, reload, cb){

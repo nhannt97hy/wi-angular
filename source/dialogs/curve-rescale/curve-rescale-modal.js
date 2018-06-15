@@ -62,7 +62,7 @@ module.exports = function (ModalService, callback) {
         }
 
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         function setLinePropertiesIfNull (curve) {

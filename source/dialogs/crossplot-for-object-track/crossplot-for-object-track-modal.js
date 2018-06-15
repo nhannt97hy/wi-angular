@@ -44,7 +44,7 @@ module.exports = function (ModalService, objectConfig, callback) {
             self.SelectedCurveZ = findCurveById(this.crossplotProps.idCurveZ);
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
 

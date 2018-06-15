@@ -108,7 +108,7 @@ module.exports = function(ModalService, wiComponentService){
             self.bottomDepth = self.selectedWell.bottomDepth;
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.checked = false;

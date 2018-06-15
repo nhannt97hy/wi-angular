@@ -60,7 +60,7 @@ module.exports = function( ModalService, SelWell, ShiftCurve, callback ) {
         };
 
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.delete = function(index) {
