@@ -104,6 +104,7 @@ exports.projectOpen = function (projectData) {
     putListFamily(function () {
         wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
     })
+    CHAT_MODULE.initChat(window.localStorage.token, LProject);
 };
 
 exports.projectClose = function () {
@@ -114,6 +115,7 @@ exports.projectClose = function () {
         wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
         window.history.replaceState({}, 'home', '/');
         document.title = 'Well Insight';
+        CHAT_MODULE.initChat(window.localStorage.token, window.localStorage.LProject);
     });
 };
 

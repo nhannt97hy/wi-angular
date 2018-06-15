@@ -246,7 +246,7 @@ let app = angular.module('wiapp',
         'mgo-angular-wizard',
 
         // chat module
-        // 'chatModule'
+        'chatModule'
     ]);
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
