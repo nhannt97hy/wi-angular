@@ -1,0 +1,87 @@
+{
+  "_from": "bpmn-engine",
+  "_id": "bpmn-engine@4.2.0",
+  "_inBundle": false,
+  "_integrity": "sha1-mU+JiSMvVHRJFUtCh9kXi7w/+4w=",
+  "_location": "/bpmn-engine",
+  "_phantomChildren": {
+    "lodash": "3.10.1",
+    "tiny-stack": "0.1.0"
+  },
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "bpmn-engine",
+    "name": "bpmn-engine",
+    "escapedName": "bpmn-engine",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/bpmn-engine/-/bpmn-engine-4.2.0.tgz",
+  "_shasum": "994f8989232f547449154b4287d9178bbc3ffb8c",
+  "_spec": "bpmn-engine",
+  "author": {
+    "name": "Pål Edman",
+    "email": "pal.edman@gmail.com",
+    "url": "https://github.com/paed01"
+  },
+  "bugs": {
+    "url": "https://github.com/paed01/bpmn-engine/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "async": "^2.4.0",
+    "bpmn-moddle": "^0.14.0",
+    "debug": "^2.6.6",
+    "iso8601-duration": "^1.0.6"
+  },
+  "deprecated": false,
+  "description": "BPMN 2.0 execution engine. Open source javascript workflow engine.",
+  "devDependencies": {
+    "camunda-bpmn-moddle": "^0.11.0",
+    "code": "^4.0.0",
+    "coveralls": "^2.13.1",
+    "lab": "^13.0.4",
+    "markdown-toc": "^1.1.0",
+    "nock": "^9.0.13",
+    "request": "^2.81.0",
+    "unnecessary": "^1.3.3"
+  },
+  "engines": {
+    "node": ">=4"
+  },
+  "files": [
+    "API.md",
+    "index.js",
+    "LICENSE",
+    "README.md",
+    "lib/"
+  ],
+  "homepage": "https://github.com/paed01/bpmn-engine#readme",
+  "keywords": [
+    "workflow",
+    "engine",
+    "process",
+    "automation",
+    "bpmn",
+    "bpmn 2"
+  ],
+  "license": "BSD-3-Clause",
+  "licenses": [
+    {
+      "type": "BSD-3-Clause",
+      "url": "https://github.com/paed01/bpmn-node/master/LICENSE"
+    }
+  ],
+  "main": "index.js",
+  "name": "bpmn-engine",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/paed01/bpmn-engine.git"
+  },
+  "version": "4.2.0"
+}

@@ -5,7 +5,7 @@ function ButtonController(wiComponentService) {
     let self = this;
 
     this.default = {
-        type: 'normal',
+        type: 'small',
         label: '',
         tooltip: '',
         layout: 'icon-top',
