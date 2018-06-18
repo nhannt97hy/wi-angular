@@ -1,0 +1,74 @@
+wi-flow-designer {
+  height: 100%;
+  .title {
+    display: inline-block;
+    line-height: 35px;
+    text-align: center;
+    width: calc(~'100% - 125px');
+  }
+  .content {
+    position: relative;
+    // margin-top: 12px;
+    height: calc(~'100% - 35px');
+    width: 100%;
+    background-color: white;
+    > .message {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      display: table;
+      font-size: 16px;
+      color: #111;
+      .note {
+        vertical-align: middle;
+        text-align: center;
+        display: table-cell;
+      }
+      .error {
+        .details {
+          max-width: 500px;
+          font-size: 12px;
+          margin: 20px auto;
+          text-align: left;
+        }
+        pre {
+          border: solid 1px #ccc;
+          background: #eee;
+          padding: 10px;
+        }
+      }
+    }
+    &:not(.with-error) > .error,
+    &.with-error > .intro,
+    &.with-diagram > .intro {
+      display: none;
+    }
+    .modeler {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      .bjs-powered-by {
+        display: none;
+      }
+    }
+    .modeler,
+    wi-props-panel,
+    &.with-error > .modeler {
+      display: none;
+    }
+    &.with-diagram {
+      > .modeler {
+        display: inherit;
+      }
+      > wi-props-panel {
+        display: inherit;
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+      }
+    }
+  }
+}

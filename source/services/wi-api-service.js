@@ -320,13 +320,19 @@ const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
 
 const GET_INVENTORY = '/user/fullinfo';
 // TASK
-const CREATE_TASK = 'task/new';
-const GET_TASK = '/task/info';
-const EDIT_TASK = '/task/edit';
-const DELETE_TASK = '/task/delete';
-const GET_TASK_LIST = "/task/list";
+const CREATE_TASK = '/project/flow/task/new';
+const GET_TASK = '/project/flow/task/info';
+const EDIT_TASK = '/project/flow/task/edit';
+const DELETE_TASK = '/project/flow/task/delete';
+const GET_TASK_LIST = "/project/flow/task/list";
 // TASK SPEC
 const GET_TASK_SPEC_LIST = '/task-spec/list';
+// FLOW
+const CREATE_FLOW = '/project/flow/new';
+const GET_FLOW = '/project/flow/info';
+const EDIT_FLOW = '/project/flow/edit';
+const DELETE_FLOW = '/project/flow/delete';
+const GET_FLOW_LIST = "/project/flow/list";
 // WORKFLOW
 const CREATE_WORKFLOW = '/workflow/new';
 const GET_WORKFLOW = '/workflow/info';
@@ -1906,6 +1912,47 @@ Service.prototype.getInventory = function (callback) {
 Service.prototype.getInventoryUrl = function () {
     return INVENTORY_SERVICE;
 };
+
+Service.prototype.createTask = function (data, callback) {
+    this.post(CREATE_TASK, data, callback);
+}
+
+Service.prototype.editTask = function (data, callback) {
+    this.post(EDIT_TASK, data, callback);
+}
+
+Service.prototype.getTask = function (idTask, callback) {
+    this.post(GET_TASK, { idTask: idTask }, callback);
+}
+
+Service.prototype.removeTask = function (idTask, callback) {
+    this.delete(DELETE_TASK, { idTask: idTask }, callback);
+}
+
+Service.prototype.getTaskList = function(payload, callback){
+    this.post(GET_TASK_LIST, payload, callback);
+}
+
+Service.prototype.createFlow = function (data, callback) {
+    this.post(CREATE_FLOW, data, callback);
+}
+
+Service.prototype.editFlow = function (data, callback) {
+    this.post(EDIT_FLOW, data, callback);
+}
+
+Service.prototype.getFlow = function (idFlow, callback) {
+    this.post(GET_FLOW, { idFlow: idFlow }, callback);
+}
+
+Service.prototype.removeFlow = function (idFlow, callback) {
+    this.delete(DELETE_FLOW, { idFlow: idFlow }, callback);
+}
+
+Service.prototype.getFlowList = function(payload, callback){
+    this.post(GET_FLOW_LIST, payload, callback);
+}
+
 Service.prototype.createWorkflow = function (data, callback) {
     this.post(CREATE_WORKFLOW, data, callback);
 }

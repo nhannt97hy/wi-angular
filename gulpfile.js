@@ -33,7 +33,7 @@ const BUILD_DIR = {
 const SOURCE_DIR = {
     root: 'source',
     main: 'source/*.js',
-    js: 'source/js/**/*.js',
+    js: 'source/js/**/*.{js,json}',
     components: 'source/components/**/*',
     appComponents: 'source/app/components/**/*',
     dialogs: 'source/dialogs/**/*',
@@ -461,7 +461,7 @@ gulp.task('serve', [], function () {
         }
     });
 
-    gulp.watch([BUILD_DIR.js + '/main.js.bundle.js'], reload);
+    gulp.watch([BUILD_DIR.js + '/*.bundle.js'], reload);
 });
 
 gulp.task('build-lightweight', mainTasks, function() {
