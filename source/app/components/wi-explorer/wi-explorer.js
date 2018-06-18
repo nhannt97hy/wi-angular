@@ -213,6 +213,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 icon: "las-import-16x16",
                 handler: function () {
                 }
+            }, {
+                name: "Zoneset Manager",
+                label: "Zoneset Manager",
+                icon: "zone-management-16x16",
+                handler: function () {
+                    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+                    layoutManager.putTabRight({
+                        title: "Zoneset Manager",
+                        componentState: {html: '<wi-zone-manager></wi-zone-manager>'}
+                    });
+                }
             }
         ];
         let copyingCurve = wiComponentService.getComponent(wiComponentService.COPYING_CURVE);
@@ -552,17 +563,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         handler: function () {
                             let zonesetsModel = utils.getSelectedNode();
                             utils.openZonemanager(zonesetsModel);
-                        }
-                    }, {
-                        name: "Zoneset Manager",
-                        label: "Zoneset Manager",
-                        icon: "zone-management-16x16",
-                        handler: function () {
-                            let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-                            layoutManager.putTabRight({
-                                title: "Zoneset Manager",
-                                componentState: {html: '<wi-zone-manager></wi-zone-manager>'}
-                            });
                         }
                     },{
                         separator: '1'

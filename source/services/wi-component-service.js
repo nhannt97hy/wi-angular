@@ -8,9 +8,25 @@ app.factory(wiServiceName, function () {
     let _state = {};
     window.__CPNTS = __Controllers;
     window.__HANDLERS = handlers;
+    function EventHandler(handler, once = false) {
+        this.handler = handler;
+        this.once = once;
+    }
     return {
         getComponent: function (componentName) {
             return __Controllers[componentName];
+        },
+        filterComponents: function (filter) {
+            const components = [];
+            for (const key in __Controllers) {
+                const component = __Controllers[key];
+                if (!component) {
+                    delete __Controllers[key];
+                    continue;
+                }
+                if (filter(component, key)) components.push(component);
+            }
+            return components;
         },
         getD3Area: function (wiLogplotName) {
             return __Controllers[wiLogplotName + 'D3Area'];
@@ -44,14 +60,23 @@ app.factory(wiServiceName, function () {
             if (!Array.isArray(handlers[eventName])) {
                 handlers[eventName] = [];
             }
-            handlers[eventName].push(handlerCb);
+            handlers[eventName].push(new EventHandler(handlerCb));
+        },
+        once: function (eventName, handlerCb) {
+            if (!Array.isArray(handlers[eventName])) {
+                handlers[eventName] = [];
+            }
+            handlers[eventName].push(new EventHandler(handlerCb, true));
         },
         emit: function (eventName, data) {
             let eventHandlers = handlers[eventName];
             if (Array.isArray(eventHandlers)) {
-                eventHandlers.forEach(function (handler) {
-                    handler(data);
-                })
+                const onces = [];
+                eventHandlers.forEach(function (eventHandler) {
+                    eventHandler.once && onces.push(eventHandler);
+                    eventHandler.handler(data);
+                });
+                if (onces.length) handlers[eventName] = eventHandlers.filter((eventHandler => !onces.includes(eventHandler)));
             }
         },
         // remove 1 handler or all handlers
@@ -60,7 +85,7 @@ app.factory(wiServiceName, function () {
             if (typeof handler != 'function') delete handlers[eventName];
             else if (Array.isArray(eventHandlers)) {
                 for (let i = 0; i < eventHandlers.length; i++) {
-                    if (handler == eventHandlers[i]) eventHandlers.splice(i, 1);
+                    if (handler == eventHandlers[i].handler) eventHandlers.splice(i, 1);
                 }
             }
         },
@@ -81,6 +106,7 @@ app.factory(wiServiceName, function () {
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         HISTORYSTATE: 'HISTORY_STATE',
+        TASKSPEC: "TASKSPEC",
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         PROJECT_LOADED: 'project-loaded',

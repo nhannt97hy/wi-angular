@@ -86,7 +86,7 @@ module.exports = function (ModalService, callback) {
         }
         this.changeNumberSplit = changeNumberSplit;
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
         function pushArrayCurve() {
             self.arrayCurve.push({

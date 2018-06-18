@@ -108,7 +108,7 @@ module.exports = function (ModalService, callback) {
             return {curveModel : curveModel, unit : unit};
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.onRunButtonClicked = function () {

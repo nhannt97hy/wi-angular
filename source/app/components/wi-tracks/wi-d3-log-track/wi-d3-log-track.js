@@ -296,6 +296,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     }))
                 }
             });
+
             // TO BE REVIEWED
             promises.push(new Promise(resolve => {
                 if(self.zoneset) {
@@ -326,18 +327,40 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                         if(viTrack.getShadings().find(viShading => viShading.id == shading.idShading)) return;
                         _addShadingToTrack(shading);
                     });
-
                     logTrack.width = Utils.inchToPixel(logTrack.width);
                     viTrack.setProperties(logTrack);
-                    viTrack.doPlot();
-                    callback && callback();
-                    self.isIdle = true; 
+                    updateCurvesUnit().then(function() {
+                        viTrack.doPlot();
+                        callback && callback();
+                        self.isIdle = true; 
+                    })
                 })
                 .catch(function (err) {
                     console.error(err);
                 })
         });
-        
+
+        function updateCurvesUnit()  {
+            return new Promise(function(resolve){
+                let _promises = [];
+                async.eachSeries(self.viTrack.getCurves(), function(viCurve, cb) {
+                    wiApiService.infoCurve(viCurve.idCurve, function(curveInfo) {
+                        if(viCurve.unit !== curveInfo.unit) {
+                            wiApiService.getListUnit({idCurve: viCurve.idCurve}, function(units) {
+                                let defaultUnit = units.find(u => u.name === curveInfo.unit);
+                                let currUnit = units.find(u => u.name === viCurve.unit);
+                                viCurve.changeUnitValue(defaultUnit, currUnit);
+                                cb();
+                            })
+                        }
+                    })
+                }, function(err) {
+                    if(err) console.error(err);
+                    resolve();
+                })
+            })
+        }
+
         function updateTrackWellStatus() {
             let wellProps = self.getWellProps();
             if(wellProps) {
@@ -895,21 +918,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
 
-        // Utils.listenEvent('curve-deleted', )
         _registerLogTrackCallback(self.viTrack);
         update(function () {
             self.viTrack.setCurrentDrawing(null);
         });
         
-        wiComponentService.on('zone-updated', function(eventData) {
-            if(!self.viTrack.idZoneSet) return;
-            if(eventData && eventData.idZoneSet && eventData.idZoneSet != self.viTrack.idZoneSet)
-                return;
-            self.viTrack.removeAllZones();
-            wiApiService.getZoneSet(self.viTrack.idZoneSet, function(zoneset) {
-                self.addZoneSetToTrack(self.viTrack, zoneset);
-            });
-        })
+        // wiComponentService.on('zone-updated', function(eventData) {
+        //     if(!self.viTrack.idZoneSet) return;
+        //     if(eventData && eventData.idZoneSet && eventData.idZoneSet != self.viTrack.idZoneSet)
+        //         return;
+        //     self.viTrack.removeAllZones();
+        //     wiApiService.getZoneSet(self.viTrack.idZoneSet, function(zoneset) {
+        //         self.addZoneSetToTrack(self.viTrack, zoneset);
+        //     });
+        // })
         
         $timeout(function() {
             if (self.wiD3Ctrl && self.wiD3Ctrl.containerName) {

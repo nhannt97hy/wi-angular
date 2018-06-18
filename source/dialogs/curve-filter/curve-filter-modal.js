@@ -89,7 +89,7 @@ module.exports = function(ModalService, wiComponentService){
             close(null);
         }
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.onChangeCurve = function(){

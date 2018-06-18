@@ -62,6 +62,7 @@ let wiChunkedUpload = require('./wi-chunked-upload');
 let wiProgressBar = require('./wi-progress-bar');
 let wiProps = require('./wi-props');
 
+let wiPropsPanel = require('./wi-props-panel');
 
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
@@ -73,6 +74,8 @@ let wiScroll = require('./wi-scroll');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWorkflowMachineLearning = require('./wi-workflow-machine-learning');
+let wiFlowDesigner = require('./wi-flow-designer');
+let wiFlowEngine = require('./wi-flow-engine');
 
 let wiiExplorer = require('./wii-explorer');
 let wiiItems = require('./wii-items');
@@ -102,6 +105,7 @@ let wiElementReady = require('./wi-element-ready');
 let wiRightClick = require('./wi-right-click');
 let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
+let wiResizable = require('./wi-resizable');
 
 // models
 // let wiDepth = require('./wi-depth.model');
@@ -164,6 +168,7 @@ let app = angular.module('wiapp',
         wiXplot.name,
         wiHis.name,
         wiProps.name,
+        wiPropsPanel.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -174,12 +179,15 @@ let app = angular.module('wiapp',
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWorkflowMachineLearning.name,
+        wiFlowDesigner.name,
+        wiFlowEngine.name,
         // wiStep.name,
 
         wiElementReady.name,
         wiRightClick.name,
         wiEnter.name,
         wiDecimalPlaces.name,
+        wiResizable.name,
 
         // models
         // wiDepth.name,
@@ -357,7 +365,8 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
     }
     function onInit() {
         //$timeout(function() { handlers.InventoryInspectionButtonClicked(); }, 500);
-        wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS).InventoryInspectionButtonClicked();
+        // wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS).InventoryInspectionButtonClicked();
+        wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS).WorkflowDesignerButtonClicked();
         /*
         layoutManager.getRoot().addChild({
             type: 'component',

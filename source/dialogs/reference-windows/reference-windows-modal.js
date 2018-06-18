@@ -16,7 +16,7 @@ module.exports = function (ModalService, well, plotModel, callback) {
         this.datasets = [];
         this.curvesArr = [];
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.scaleOpt = [

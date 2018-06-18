@@ -20,7 +20,7 @@ function Controller(wiComponentService, $timeout) {
     }
 
     this.groupFn = function(item){
-        return item.properties.dataset;
+        return item.parent;
     }
 
     this.comparisons = ['<', '>', '=', '<=', '>='];

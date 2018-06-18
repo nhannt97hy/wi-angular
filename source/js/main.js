@@ -61,6 +61,8 @@ let wiZoneSetManager = require('./wi-zone-set-manager');
 let wiInventory = require('./wi-inventory');
 let wiExport = require('./wi-export');
 let wiTask = require('./wi-task');
+let wiFlowDesigner = require('./wi-flow-designer');
+let wiFlowEngine = require('./wi-flow-engine');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -119,6 +121,7 @@ let wiRightClick = require('./wi-right-click');
 let wiEnter = require('./wi-enter');
 let wiDecimalPlaces = require('./wi-decimal-places');
 let wiInputRangeLimit = require('./wi-input-range-limit');
+let wiResizable = require('./wi-resizable');
 
 // models
 // let wiDepth = require('./wi-depth.model');
@@ -182,6 +185,8 @@ let app = angular.module('wiapp',
         wiInventory.name,
         wiExport.name,
         wiTask.name,
+        wiFlowDesigner.name,
+        wiFlowEngine.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -199,6 +204,7 @@ let app = angular.module('wiapp',
         wiEnter.name,
         wiDecimalPlaces.name,
         wiInputRangeLimit.name,
+        wiResizable.name,
 
         // models
         // wiDepth.name,

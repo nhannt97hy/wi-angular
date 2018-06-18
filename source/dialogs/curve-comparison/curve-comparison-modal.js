@@ -137,7 +137,7 @@ module.exports = function(ModalService, callback) {
       });
     }
     this.groupFn = function(item) {
-      return item.properties.dataset;
+      return item.parent;
     };
     this.onRunButtonClicked = function() {
       if (self.applyingInProgress) return;

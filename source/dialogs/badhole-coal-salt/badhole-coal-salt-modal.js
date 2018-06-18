@@ -122,7 +122,7 @@ module.exports = function(ModalService) {
         }
         this.selectZoneSet = selectZoneSet;
         this.groupFn = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
         function selectZoneSet(zoneSetModel) {
             self.zones = [];

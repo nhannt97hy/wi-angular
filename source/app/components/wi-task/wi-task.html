@@ -62,6 +62,13 @@
             transform: translateY(-50%);
             color: #aaa;
         }
+        wi-task *[mfb-menu] a:hover {
+            color: #f1f1f1;
+        }
+        .mfb-component__wrap {
+            margin: unset;
+            padding: unset;
+        }
     </style>
     <div class="form-group">
         <wi-tabset id='mainTab'>
@@ -244,12 +251,12 @@
         </wi-tabset>
     </div>
     <div id="dragElement"></div>
-    <nav mfb-menu position='br' effect='zoomin'
-    active-icon='fa fa-cog' resting-icon='fa fa-magic'
-    toggling-method="click">
-        <a mfb-button icon='fa fa-plus-circle' label='Add to workflow'
-        ng-click='wiTask.addToWorkflowClick()'></a>
-        <a mfb-button icon='fa fa-play-circle-o' label='Run workflow'
-        ng-click="wiTask.runWorkflowClick()"></a>
+    <nav mfb-menu position='br' effect='slidein'
+    active-icon='fa fa-times' resting-icon='fa fa-bars'
+    toggling-method="hover">
+        <button mfb-button icon='fa fa-plus-circle' label='Add to flow'
+        ng-click='wiTask.addToFlowClick()'></button>
+        <button mfb-button icon='fa fa-play-circle-o' label='Run'
+        ng-click="wiTask.runWorkflowClick()"></button>
     </nav>
 </div>

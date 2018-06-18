@@ -17,7 +17,7 @@ module.exports = function (ModalService, shadingOptions, trackComponent, callbac
             return item.datasetName;
         }
         this.groupFnCtrl = function(item){
-            return item.properties.dataset;
+            return item.parent;
         }
 
         this.paletteList = null;

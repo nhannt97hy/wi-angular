@@ -50,31 +50,31 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.refreshTemplateList();
 
-    this.onZoneTemplateChanged = function (index) {
+    this.onZoneTemplateChanged = function (item) {
         self.zoneTemplateEditted = true;
-        self.zoneTemplates[index].zoneTemplateEditted = true;
+        item.zoneTemplateEditted = true;
     }
 
-    this.backgroundZoneTemplate = function (index) {
-        DialogUtils.colorPickerDialog(ModalService, self.zoneTemplates[index].background, function (colorStr) {
-            self.zoneTemplates[index].background = colorStr;
-            self.onZoneTemplateChanged(index);
+    this.backgroundZoneTemplate = function (item) {
+        DialogUtils.colorPickerDialog(ModalService, item.background, function (colorStr) {
+            item.background = colorStr;
+            self.onZoneTemplateChanged(item);
         });
     };
-    this.foregroundZoneTemplate = function (index) {
-        DialogUtils.colorPickerDialog(ModalService, self.zoneTemplates[index].foreground, function (colorStr) {
-            self.zoneTemplates[index].foreground = colorStr;
-            self.onZoneTemplateChanged(index);
+    this.foregroundZoneTemplate = function (item) {
+        DialogUtils.colorPickerDialog(ModalService, item.foreground, function (colorStr) {
+           item.foreground = colorStr;
+            self.onZoneTemplateChanged(item);
         });
     };
-    this.choosePattern = function (index) {
+    this.choosePattern = function (item) {
         DialogUtils.fillPatternDialog(ModalService,
-            self.zoneTemplates[index].pattern,
-            self.zoneTemplates[index].foreground,
-            self.zoneTemplates[index].background, function (_name) {
+            item.pattern,
+            item.foreground,
+            item.background, function (_name) {
                 if (_name) {
-                    self.zoneTemplates[index].pattern = _name;
-                    self.onZoneTemplateChanged(index);
+                    item.pattern = _name;
+                    self.onZoneTemplateChanged(item);
                 }
             });
     }
@@ -199,8 +199,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.createTemplate = function () {
         let promptConfig = {
-            title: '<span class="zone-edit-16x16"></span> Create New Zone Template',
-            inputName: 'Name',
+            title: '<span class="zone-edit-16x16"></span> New Zone Template',
+            inputName: 'Zone name',
             input: ''
         }
         DialogUtils.promptDialog(ModalService, promptConfig, function (ret) {

@@ -18,7 +18,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         // window.logTrack = this;
         this.groupFnTabCurve = function(item){
             let wellProps = utils.findWellByCurve(item.properties.idCurve).properties;
-            return item.properties.dataset + ' (' + wellProps.name + ') ';
+            return item.parent + ' (' + wellProps.name + ') ';
         }
 
         this.groupFnTabShading = function(item){
