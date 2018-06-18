@@ -104,7 +104,9 @@ exports.projectOpen = function (projectData) {
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     putListFamily(function () {
         putPattern(function () {
-            wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+            putTaskSpec(() => {
+                wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
+            })
         })
     })
 };
@@ -2724,6 +2726,20 @@ function getListPattern() {
 }
 
 exports.getListPattern = getListPattern;
+
+function putTaskSpec(callback) {
+    __GLOBAL.wiApiService.listTaskSpec(function (list) {
+        __GLOBAL.wiComponentService.putComponent(__GLOBAL.wiComponentService.TASKSPEC, list);
+        callback && callback();
+    })
+}
+exports.putTaskSpec = putTaskSpec;
+
+function getTaskSpec() {
+    return __GLOBAL.wiComponentService.getComponent(__GLOBAL.wiComponentService.TASKSPEC);
+}
+
+exports.getTaskSpec = getTaskSpec;
 
 function sortProperties(obj, sortedBy, isNumericSort, reverse) {
     sortedBy = sortedBy || 1; // by default first key

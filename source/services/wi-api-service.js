@@ -2015,3 +2015,6 @@ Service.prototype.asyncGetAllUnit = function (payload) {
         });
     });
 };
+Service.prototype.listTaskSpec = function (callback) {
+    this.post(GET_TASK_SPEC_LIST, {}, callback);
+}

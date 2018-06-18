@@ -58,22 +58,36 @@ function calVCLfromGR(inputs, parameters, callback) {
 exports.calVCLfromGR = calVCLfromGR;
 
 function calPorosityFromDensity(inputs, parameters, callback) {
-    let total = new Array();
-    let effective = new Array()
     let density = inputs[0];
     let vclay = inputs[1];
-    let clean = parameters[0].value || 2.65;
-    let fluid = parameters[1].value || 1;
-    let clay = parameters[2].value || 2.3;
+    let total = new Array(density.length).fill(null);
+    let effective = new Array(density.length).fill(null);
 
-    let sh = (clean - clay) / (clean - fluid);
-    for (let i = 0; i < density.length; i++) {
-        total[i] = (clean - density[i]) / (clean - fluid);
-        if (vclay) {
-            let tmp = total[i] - (sh * vclay[i]);
-            effective[i] = parseFloat(tmp.clamp(0, 1).toFixed(4));
-        };
+    for( let i = 0; i < density.length; i++){
+        parameters.forEach(zone => {
+            let clean = zone.param[0].value || 2.65;
+            let fluid = zone.param[1].value || 1;
+            let clay = zone.param[2].value || 2.3;
+            let sh = (clean - clay) / (clean - fluid);
+            if(zone.startDepth && zone.endDepth){
+                let currentDepth = i * parameters.step + parameters.topDepth;
+                if(currentDepth >= zone.startDepth && currentDepth <= zone.endDepth){
+                    total[i] = (clean - density[i]) / (clean - fluid);
+                    if (vclay) {
+                        let tmp = total[i] - (sh * vclay[i]);
+                        effective[i] = parseFloat(tmp.clamp(0, 1).toFixed(4));
+                    };
+                }
+            }else{
+                total[i] = (clean - density[i]) / (clean - fluid);
+                if (vclay) {
+                    let tmp = total[i] - (sh * vclay[i]);
+                    effective[i] = parseFloat(tmp.clamp(0, 1).toFixed(4));
+                };
+            }
+        })
     }
+
     total = total.map(d => parseFloat(d.clamp(0, 1).toFixed(4)));
     callback([total, effective]);
 }
