@@ -5,7 +5,7 @@
   <wi-button icon="play-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.execute" tooltip="Run Flow"></wi-button>
 </wi-toolbar>
 <div class="title" ng-bind="wiFlowDesigner.flow.name || 'New Flow'"></div>
-<div class="content" id="bpmn-drop-zone">
+<div class="content" id="flow{{wiFlowDesigner.id}}">
   <div class="message intro">
     <div class="note">
       Drop BPMN diagram file or
@@ -22,5 +22,4 @@
     </div>
   </div>
   <div class="modeler" id="bpmn-modeler"></div>
-  <!-- <wi-props-panel name="workflow-element-props-panel" width="250"></wi-props-panel> -->
 </div>

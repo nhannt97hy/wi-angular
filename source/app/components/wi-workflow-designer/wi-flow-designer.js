@@ -22,9 +22,6 @@ const initDiagram = `
   </bpmn2:definitions>
 `;
 
-const MODELER_ELEMENT = '#bpmn-modeler';
-const CONTAINER_ELEMENT = '#bpmn-drop-zone';
-
 const Action = Object.freeze({
   CREATE_TASK: Symbol('create-task'),
   EDIT_TASK: Symbol('edit-task'),
@@ -59,7 +56,6 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
       content: '',
     };
     wiComponentService.putComponent('flow' + self.id, self);
-    self.tasks = wiFlowEngine.fns;
     if (!self.new) {
       $timeout(() => {
         _initModeler();
@@ -102,6 +98,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   }
 
   function importDiagramCb(err) {
+    const CONTAINER_ELEMENT = '#flow' + self.id;
     if (err) {
       $(CONTAINER_ELEMENT)
         .removeClass('with-diagram')
@@ -132,7 +129,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   function _initModeler() {
     self.data = {};
     const _modeler = new BpmnModeler({
-      container: MODELER_ELEMENT,
+      container: `#flow${self.id} > #bpmn-modeler`,
       additionalModules: [
         require('./WiPaletteProvider'),
         require('./WiContextPadProvider'),
@@ -156,6 +153,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     window.modeler = self.modeler;
     window.moddle = self.moddle;
 
+    const CONTAINER_ELEMENT = '#flow' + self.id;
     _registerFileDrop($(CONTAINER_ELEMENT), (xml) => {
       _modeler.importXML(xml, importDiagramCb);
     });
