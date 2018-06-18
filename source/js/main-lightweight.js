@@ -68,7 +68,6 @@ let historyState = require('./historyState');
 let handlers = require('./handlers');
 let logplotHandlers = require('./wi-logplot-handlers');
 let explorerHandlers = require('./wi-explorer-handlers');
-let treeviewHandlers = require('./wi-treeview-handlers');
 let crossplotHanders = require('./wi-crossplot-handlers');
 let histogramHandlers = require('./wi-histogram-handlers');
 
@@ -210,7 +209,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
 
     utils.bindFunctions(globalHandlers, handlers, functionBindingProp);
     utils.bindFunctions(wiExplorerHandlers, explorerHandlers, functionBindingProp);
-    utils.bindFunctions(treeHandlers, treeviewHandlers, functionBindingProp);
 
     wiComponentService.putComponent(wiComponentService.GLOBAL_HANDLERS, globalHandlers);
     // wiComponentService.putComponent(wiComponentService.TREE_FUNCTIONS, treeHandlers);

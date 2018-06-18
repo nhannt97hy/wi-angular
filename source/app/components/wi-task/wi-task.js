@@ -2,7 +2,7 @@ const name = "wiTask";
 const moduleName = "wi-task";
 let petrophysics = require('./petrophysics');
 
-function Controller(wiComponentService, wiApiService, $timeout) {
+function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
     const self = this;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     //   const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -11,6 +11,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
     const __selectionDelta = 10;
     let __dragging = false;
     let __familyList;
+    let list;
     self.filterText = "";
     self.filterText1 = "";
     const CURVE_SELECTION = "1";
@@ -22,6 +23,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
 
     this.$onInit = function() {
         wiComponentService.putComponent("wiTask" + self.id, self);
+        self.taskConfig = self.taskConfig || defaultTaskConfig;
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
         wiApiService.listFamily(listF => {
@@ -153,7 +155,7 @@ function Controller(wiComponentService, wiApiService, $timeout) {
             }
         }
     }
-    this.taskConfig = {
+    const defaultTaskConfig = {
         inputs: [
             {
                 name: "Gamma Ray"
@@ -905,8 +907,35 @@ function Controller(wiComponentService, wiApiService, $timeout) {
         });
     }
 
-    this.addToWorkflowClick = function(){
-        console.log('Add to workflow');
+    this.addToFlowClick = function(){
+        const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        const newFlowCtrls = wiComponentService.filterComponents((c, cName) => cName.startsWith('flow') && c.new && c.flow.content);
+        const newFlows = newFlowCtrls.map(ctrl => ctrl.flow);
+        DialogUtils.openFlowDialog(ModalService, function (flow) {
+            const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+            layoutManager.putTabRight({
+                id: 'flow' + flow.idFlow,
+                title: flow.name,
+                tabIcon: 'workflow-16x16',
+                componentState: {
+                    html: `<wi-flow-designer id="${flow.idFlow}" flow="flow"></wi-flow-designer>`,
+                    model: {
+                        type: 'flow',
+                        id: flow.idFlow,
+                    },
+                    flow
+                }
+            });
+            setTimeout(() => {
+                const flowCtrl = wiComponentService.getComponent('flow' + flow.idFlow);
+                flowCtrl.createTask(self.taskConfig);
+            }, 100);
+            // function onFlowReady(idFlow) {
+            //     if (idFlow != flow.idFlow) return;
+            // }
+            // if (newFlows.includes(flow)) onFlowReady(flow.idFlow);
+            // else wiComponentService.once('flow.ready', onFlowReady);
+        }, newFlows);
     }
     function updateChoices(newCurveProps) {
         self.projectConfig.forEach(well => {
@@ -1238,7 +1267,8 @@ app.component(name, {
     transclude: true,
     bindings: {
         name: "@",
-        id: "<"
+        id: "<",
+        taskConfig: '<'
     }
 });
 

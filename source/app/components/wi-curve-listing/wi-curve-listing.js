@@ -97,7 +97,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                             }
                         }, options)
                         if (options.length > 1) {
-                            _header = cModel.properties.name + "(" + cModel.parent + ")";
+                            _header = cModel.parent + "." + cModel.properties.name;
                         }
                         if(curve) {
                             _header = '<i class="fa fa-asterisk unsaved" aria-hidden="true"></i><i>'+ _header + '</i>';
@@ -106,7 +106,8 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     }
                 },
                 rowHeaders: function(row) {
-                    return '<div class="zone-square" style="background-color:'+ utils.colorGenerator()+'"></div>' + row;
+                    // return '<div class="zone-square" style="background-color:'+ utils.colorGenerator()+'"></div>' + row;
+                    return row;
                 },
                 rowHeaderWidth: 70,
                 manualColumnResize: true,
@@ -232,7 +233,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     return isNaN(tmp) ? null : tmp;
                 })
                 total.push([
-                    cModel.name,
+                    cModel.parent + cModel.name,
                     cModel.properties.LineProperty ? cModel.properties.LineProperty.name : '',
                     cModel.properties.unit,
                     getMin(data),
@@ -499,11 +500,17 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                                 culture: "en-US"
                             }
                         });
-                        dataCtrl.updateSettings(_current.setting);
+                        // dataCtrl.updateSettings(_current.setting);
+                        curveIdx = _current.setting.columns.length - 1;
+                        switchSetting();
                     }
-                    dataCtrl.selectColumns(idCurve);
-                    let selected = dataCtrl.getSelectedRange();
-                    dataCtrl.scrollViewportTo(null, selected[0].from.col);
+                    if(self.visualizationMode == "Data"){
+                        dataCtrl.selectColumns(idCurve);
+                        let selected = dataCtrl.getSelectedRange();
+                        dataCtrl.scrollViewportTo(null, selected[0].from.col);
+                    }else{
+                        dataCtrl.selectRows(curveIdx - 1);
+                    }
                     $("#dataContainer.active").toggleClass("active");
                 }
                 if (

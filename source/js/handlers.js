@@ -144,6 +144,49 @@ exports.ProjectButtonClicked = function () {
         wiComponentService.emit(wiComponentService.PROJECT_LOADED_EVENT);
     }
 };
+
+exports.NewFlowButtonClicked = function () {
+    const wiComponentService = this.wiComponentService;
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    const now = Date.now();
+    layoutManager.putTabRight({
+        id: 'flow' + now,
+        title: 'New Flow',
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: `<wi-flow-designer new="true" id="${now}"></wi-flow-designer>`,
+            model: {
+                type: 'flow',
+                id: now
+            }
+        }
+    });
+}
+
+exports.OpenFlowButtonClicked = function () {
+    const self = this;
+    const wiComponentService = this.wiComponentService;
+    const Utils = self.wiComponentService.getComponent('UTILS');
+    const ModalService = this.ModalService;
+    const DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.openFlowDialog(ModalService, function (flow) {
+        const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+        layoutManager.putTabRight({
+            id: 'flow' + flow.idFlow,
+            title: flow.name,
+            tabIcon: 'workflow-16x16',
+            componentState: {
+                html: `<wi-flow-designer id="${flow.idFlow}" flow="flow"></wi-flow-designer>`,
+                model: {
+                    type: 'flow',
+                    id: flow.idFlow,
+                },
+                flow
+            }
+        });
+    })
+}
+
 exports.NewWorkflowButtonClicked = function () {
     console.log('NewWorkflowButton is clicked');
     let self = this;
@@ -1394,15 +1437,18 @@ exports.BasicAnalysisButtonClicked = function () {
 exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
-        layoutManager.putTabRight({
-            id: 'wiTask1',
-            title: 'Clay Volume Gamma Ray',
-            tabIcon: 'workflow-16x16',
-            componentState: {
-                html: '<wi-task name="Clay Volume Gamma Ray" id="1"></wi-task>',
-                name: 'wiTask1'
-            }
-        })
+    // let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
+    // let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
+    const now = Date.now();
+    layoutManager.putTabRight({
+        id: 'wiTask' + now,
+        title: 'Clay Volume Gamma Ray',
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}"></wi-task>`,
+            name: 'wiTask' + now
+        }
+    })
 }
 
 exports.ClayVolumeNeutron_DensityButtonClicked = function() {

@@ -15,7 +15,7 @@ wi-base-treeview {
         transition: background-color 1s ease-in-out;
         display: block;
         // cursor: pointer;
-        padding-left: 12px;
+        // padding-left: 12px;
         wi-base-treeview{
             margin-left: unset;
         }
@@ -29,7 +29,7 @@ wi-base-treeview {
             line-height: 26px;
             // cursor: pointer;
             & > div {
-                text-overflow: ellipsis;
+                // text-overflow: ellipsis;
                 white-space: nowrap;
                 overflow: hidden;
             }
@@ -58,8 +58,11 @@ wi-base-treeview {
                 }
                 &>div.item-content {
                     flex: 1;
-                    text-overflow: ellipsis;
+                    // text-overflow: ellipsis;
                     overflow: hidden;
+                    .wi-parent-icon {
+                        vertical-align: text-bottom;
+                    }
                     .wi-parent-id {
                         font-size: 80%;
                         display:inline-block;

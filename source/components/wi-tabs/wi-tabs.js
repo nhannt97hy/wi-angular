@@ -43,10 +43,15 @@ function TabsetController($timeout) {
     };
 
     this.addTab = function (tab) {
-        self.tabs.push(tab);
+        const tabs = self.tabs;
+        const oldTab = tabs.find(t => t.heading === tab.heading);
+        if (oldTab && tab.heading) {
+            tab.active = oldTab.active;
+            tabs[tabs.indexOf(oldTab)] = tab;
+        } else self.tabs.push(tab);
         $timeout(function() {
-            self.tabs[0].active = true;
-         //   self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
+            if (!tabs.find(t => t.active)) tabs[0].active = true;
+            // self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
         });
         //self.tabs[self.tabs.length - 1].active = self.tabs[self.tabs.length - 1].active || (self.tabs.length === 1);
     };
