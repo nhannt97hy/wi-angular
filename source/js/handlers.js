@@ -1437,6 +1437,8 @@ exports.BasicAnalysisButtonClicked = function () {
 exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+    // let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
+    // let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
     const now = Date.now();
     layoutManager.putTabRight({
         id: 'wiTask' + now,

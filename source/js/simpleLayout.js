@@ -60,6 +60,8 @@ let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
 let wiChunkedUpload = require('./wi-chunked-upload');
 let wiProgressBar = require('./wi-progress-bar');
+let wiProps = require('./wi-props');
+
 let wiPropsPanel = require('./wi-props-panel');
 
 let wiComboview = require('./wi-comboview');
@@ -165,6 +167,7 @@ let app = angular.module('wiapp',
         wiPlot.name,
         wiXplot.name,
         wiHis.name,
+        wiProps.name,
         wiPropsPanel.name,
 
         wiComboview.name,

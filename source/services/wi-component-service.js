@@ -106,6 +106,7 @@ app.factory(wiServiceName, function () {
         CUTTING_CURVE: 'cutting-curve',
         CROSSPLOT_HANDLERS: 'CROSSPLOT_HANDLERS',
         HISTORYSTATE: 'HISTORY_STATE',
+        TASKSPEC: "TASKSPEC",
 
         COMBOVIEW_HANDLERS: 'COMBOVIEW_HANDLERS',
         PROJECT_LOADED: 'project-loaded',
