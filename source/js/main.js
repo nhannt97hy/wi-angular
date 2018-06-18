@@ -82,6 +82,7 @@ let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
+let wiProps = require('./wi-props');
 let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
 
@@ -186,6 +187,7 @@ let app = angular.module('wiapp',
         wiWFMachineLearning.name,
         wiNeuralNetwork.name,
         wiPlot.name,
+        wiProps.name,
 
         wiComboview.name,
         wiD3Comboview.name,

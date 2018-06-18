@@ -12,7 +12,7 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.filter = '';
         
         let topIdx = 0;
-        let selectionLength = 30;
+        let selectionLength = 150;
         let delta = 10;
 
         let solidPattern = {
