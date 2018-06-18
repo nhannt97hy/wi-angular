@@ -259,3 +259,18 @@ exports.MachineLearningButtonClicked = function () {
         }
     });
 };
+
+exports.FlowDesignerButtonClicked = function () {
+    let wiComponentService = this.wiComponentService;
+    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    let root = layoutManager.getRoot();
+    if (root.contentItems.length > 0) root.removeChild(root.contentItems[0]);
+    root.addChild({
+        type: 'component',
+        id: 'flow-designer',
+        componentName: 'wi-block',
+        componentState: {
+            templateId: 'flow-designer'
+        }
+    });
+};

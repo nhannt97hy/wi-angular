@@ -115,11 +115,16 @@ module.exports.createLayout = function (domId, $scope, $compile) {
         }
     })
     layoutManager.init();
-    LAYOUT = layoutManager;
+    layoutManager.rightContainer = layoutManager.root.getItemsById('right')[0];
+    window.LAYOUT = { ...layoutManager, ...module.exports };
 
     layoutManager.registerComponent('wi-block', function (container, componentState) {
+        const newScope = scopeObj.$new(false);
         let templateHtml = $('template#' + componentState.templateId).html();
-        container.getElement().html(compileFunc(templateHtml)(scopeObj));
+        container.getElement().html(compileFunc(templateHtml)(newScope));
+        container.on('destroy', function (component) {
+            newScope.$destroy();
+        });
     });
 
     let wiComponentService = this.wiComponentService;
@@ -128,13 +133,13 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
-        newScope.model = componentState.model;
+        Object.assign(newScope, componentState);
         container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
         if (componentState.model) tabComponents[container.parent.config.id] = container.parent;
         container.on('destroy', function (component) {
             delete tabComponents[component.config.id];
-            if(modelRef){
+            if(modelRef && modelRef.type && modelRef.id){
                 let model = utils.getModel(modelRef.type, modelRef.id);
                 if (model) {
                     model.data.opened = false;

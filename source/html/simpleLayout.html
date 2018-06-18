@@ -58,6 +58,10 @@
     <link rel="stylesheet" href="css/wi-spinner.css">
     <link rel="stylesheet" href="css/wi-multiselect.css">
     <link rel="stylesheet" href="css/wi-condition-node.css">
+    <link rel="stylesheet" href="css/wi-props-panel.css"/>
+    <link rel="stylesheet" href="css/wi-flow-designer.css"/>
+    <link rel="stylesheet" href="vendor/css/diagram-js.css"/>
+    <link rel="stylesheet" href="vendor/css/bpmn.css"/>
     <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
     <link href='css/simpleLayout.css' rel='stylesheet'>
@@ -123,6 +127,7 @@
                         <wi-button name="wiLogplotPlayground" icon="logplot-blank-32x32" label="Wi Logplot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiLogplotButtonClicked"></wi-button>
                         <wi-button name="wiXplot" icon="crossplot-blank-32x32" label="Wi Xplot" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiXplotButtonClicked"></wi-button>
                         <wi-button name="wiHis" icon="histogram-blank-32x32" label="Wi His" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.wiHisButtonClicked"></wi-button>
+                        <wi-button name="FlowDesigner" icon="workflow-32x32" label="Workflow" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.FlowDesignerButtonClicked"></wi-button>
                         <wi-button name="ExitButton" icon="exit-32x32" label="Exit" container="ribbon" disabled="handlers.isDisabled()" class="height65" handler="handlers.ExitButtonClicked"></wi-button>
                     </wi-toolbar>
                 </wi-tab>
@@ -304,7 +309,7 @@
                     </span>
 
                 </div>
-               
+
                 <!-- <div class="col-md-2">
                     <button type="button" class="btn btn-primary" name="button" ng-click="network.neuralNetWorkProperties()">Configure network</button>
                 </div> -->
@@ -341,12 +346,18 @@
             <wi-workflow-machine-learning name="wiWorkflowPlayer" id-project='1'></wi-workflow-machine-learning>
         </div>
     </template>
-    <div id="testElement"></div>
 
     <template id="export-tool">
         <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
             <h3 class="content-heading">Export Tool</h3>
             <wi-export></wi-export>
+        </div>
+    </template>
+
+    <template id="flow-designer">
+        <div style='height:100%;display:flex;flex-direction:column;background-color:#f4f4f4;'>
+            <h3 class="content-heading">Workflow</h3>
+            <wi-flow-designer></wi-flow-designer>
         </div>
     </template>
 

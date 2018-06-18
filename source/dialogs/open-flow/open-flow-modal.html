@@ -1,0 +1,35 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.close()" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title">
+                    <span class="workflow-16x16"></span>&nbsp;Select Flow</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-3">Flow name:</label>
+                        <wi-item-dropdown class='col-sm-9 height34px position-fixed'
+                            on-wi-dropdown-init="wiModal.getFlowList"
+                            on-item-changed="wiModal.flowChanged"
+                            place-holder="Select flow"
+                            ctrl-btn-icon='fa fa-times-circle line-height-1_5'
+                            on-ctrl-btn-click='wiModal.deleteFlow'>
+                        </wi-item-dropdown>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.close(wiModal.selectedFlow)" class="btn btn-default"
+                ng-disabled="!wiModal.selectedFlow">
+                    <span class="ok-16x16"></span>&nbsp;OK
+                </button>
+                <button type="button" class="btn btn-default" ng-click="wiModal.close()">
+                    <span class="cancel-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
