@@ -252,18 +252,18 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             return;
         }
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
-            viTrack.getMarkers().forEach(viMarker => {
-                let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
-                viTrack.removeDrawing(viMarker);
-                if (marker) {
-                    self.addMarkerToTrack(viTrack, marker);
-                } // add if viMarker in track
-            });
-            logTrack.markers.forEach(marker => {
-                if(!viTrack.getMarkers().find(viMarker => viMarker.id == marker.idMarker)) {
-                    self.addMarkerToTrack(viTrack, marker);
-                } // add if marker not in viTrack
-            });
+            // viTrack.getMarkers().forEach(viMarker => {
+            //     let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
+            //     viTrack.removeDrawing(viMarker);
+            //     if (marker) {
+            //         self.addMarkerToTrack(viTrack, marker);
+            //     } // add if viMarker in track
+            // });
+            // logTrack.markers.forEach(marker => {
+            //     if(!viTrack.getMarkers().find(viMarker => viMarker.id == marker.idMarker)) {
+            //         self.addMarkerToTrack(viTrack, marker);
+            //     } // add if marker not in viTrack
+            // });
             viTrack.getAnnotations().forEach(viAnno => {
                 let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
                 viTrack.removeDrawing(viAnno);
