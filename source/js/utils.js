@@ -234,16 +234,19 @@ function zoneToTreeConfig(zone, options = {}) {
         zoneModel.type = 'zone';
     }
     zoneModel.id = zone.idZone;
-    zone.fill = typeof(zone.fill) === "string" ? JSON.parse(zone.fill) : zone.fill;
+    //zone.fill = typeof(zone.fill) === "string" ? JSON.parse(zone.fill) : zone.fill;
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
         idZone: zone.idZone,
         startDepth: zone.startDepth,
         endDepth: zone.endDepth,
         name: zone.name,
-        fill: zone.fill,
-        background: zone.fill.pattern.background,
-        foreground: zone.fill.pattern.foreground,
+        // fill: zone.fill,
+        // background: zone.fill.pattern.background,
+        // foreground: zone.fill.pattern.foreground,
+        background: zone.zone_template ? zone.template.background : null,
+        foreground: zone.zone_template ? zone.template.foreground : null,
+        //fix tiep pattern
     };
     zoneModel.data = {
         icon: 'zone-table-16x16',
