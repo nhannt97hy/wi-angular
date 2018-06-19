@@ -1437,15 +1437,15 @@ exports.BasicAnalysisButtonClicked = function () {
 exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
-    // let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
-    // let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
+    let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
+    let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
     const now = Date.now();
     layoutManager.putTabRight({
         id: 'wiTask' + now,
         title: 'Clay Volume Gamma Ray',
         tabIcon: 'workflow-16x16',
         componentState: {
-            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}"></wi-task>`,
+            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}" task-config="${spec.content}"></wi-task>`,
             name: 'wiTask' + now
         }
     })
@@ -1487,9 +1487,42 @@ exports.ClayVolumeFinalButtonClicked = function() {
     console.log('ClayVolumeFinalButton is clicked');
 }
 
-exports.PorosityAndWaterSaturationButtonClicked = function () {
-    console.log('Porosity&WaterSaturationButton is clicked');
-};
+exports.PorosityDensityButtonClicked = function() {
+    console.log('PorosityDensityButton is clicked');
+    let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+    let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
+    let spec = listSpec.find(sp => sp.name == 'Density' && sp.group == 'Porosity');
+    const now = Date.now();
+    layoutManager.putTabRight({
+        id: 'wiTask' + now,
+        title: 'Porosity Density',
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: `<wi-task name="Porosity Density" id="${now}" task-config="${spec.content}"></wi-task>`,
+            name: 'wiTask' + now
+        }
+    })
+}
+
+exports.PorosityNeutronButtonClicked = function() {
+    console.log('PorosityNeutronButton is clicked');
+}
+
+exports.PorositySonicButtonClicked = function() {
+    console.log('PorositySonicButton is clicked');
+}
+
+exports.PorosityNeutron_DensityButtonClicked = function() {
+    console.log('PorosityNeutron-DensityButton is clicked');
+}
+
+exports.PorosityNeutron_SonicButtonClicked = function() {
+    console.log('PorosityNeutron-SonicButton is clicked');
+}
+
+exports.PorosityFinalButtonClicked = function() {
+    console.log('PorosityFinalButton is clicked');
+}
 
 exports.CutoffandSummationButtonClicked = function () {
     console.log('CutoffandSummationButton is clicked');
