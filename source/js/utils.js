@@ -244,8 +244,8 @@ function zoneToTreeConfig(zone, options = {}) {
         // fill: zone.fill,
         // background: zone.fill.pattern.background,
         // foreground: zone.fill.pattern.foreground,
-        background: zone.zone_template ? zone.template.background : null,
-        foreground: zone.zone_template ? zone.template.foreground : null,
+        background: zone.zone_template ? zone.zone_template.background : null,
+        foreground: zone.zone_template ? zone.zone_template.foreground : null,
         //fix tiep pattern
     };
     zoneModel.data = {

@@ -124,7 +124,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         })
     }
-    function refreshZoneTemplateList() {
+    
+    this.refreshZoneTemplateList= function (){
+        console.log('refreshZoneTemplateList()');
         self.selectedZoneTemplate = [];
         wiApiService.listAllZoneByTemplate({ template: self.selectedTemplate.name }, function (zones) {
             self.zoneTemplates = zones;
@@ -138,7 +140,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.templateConfig.splice(self.templateConfig.indexOf(self.newTemplate), 1);
             self.newTemplate = false;
         }
-        refreshZoneTemplateList();
+        self.refreshZoneTemplateList();
         clickFunction($index, $event, node, self.templateConfig, true);
     }
     function clickFunction($index, $event, node, rootNode, multiNodeFetch = false) {
@@ -195,7 +197,51 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.exportTemplate = function () {
         console.log("exportTemplate", self.templateConfig.__SELECTED_NODES);
+        let selectedNodes = self.templateConfig.__SELECTED_NODES; 
+        let returnData = [];
+        if(Array.isArray(selectedNodes)){
+            for(node of selectedNodes){
+                let index = selectedNodes.indexOf(node);
+                console.log('selectedNOde', node);
+                let templateObj = {
+                    template: node.name,
+                    zonesets: []
+                }
+                wiApiService.listAllZoneByTemplate({ template: node.name }, function (zonesets) {
+                    console.log('zonesets', zonesets);
+                    for(zoneset of zonesets) {
+                        templateObj.zonesets.push({
+                            idZoneset: zoneset.idZoneTemplate,
+                            name: zoneset.name,
+                            background: zoneset.background,
+                            foreground: zoneset.foreground,
+                            pattern: zoneset.pattern
+                        });
+                        if(zoneset == zonesets[zonesets.length-1]){
+                            returnData.push(templateObj);
+                            if(index == selectedNodes.length-1){
+                                console.log('return data', JSON.stringify(returnData));
 
+                                let filename = 'template';       
+                                let blob = new Blob([angular.toJson(returnData, true)], {type: 'text/plain'});
+                                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                                    window.navigator.msSaveOrOpenBlob(blob, filename);
+                                } else {
+                                    var e = document.createEvent('MouseEvents'),
+                                    a = document.createElement('a');
+                                    a.download = filename;
+                                    a.href = window.URL.createObjectURL(blob);
+                                    a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+                                    e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                                    a.dispatchEvent(e);
+                                    // window.URL.revokeObjectURL(url); // clean the url.createObjectURL resource
+                                }
+                            }
+                        }
+                    }
+                })    
+            }
+        }
     }
     this.createTemplate = function () {
         let promptConfig = {
@@ -224,14 +270,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     self.templateConfig.push(newNode);
                     unselectAllNodes(self.templateConfig);
                     selectHandler(newNode, self.templateConfig);
-                    refreshZoneTemplateList()
+                    self.refreshZoneTemplateList()
                 } else {
                     // alert('template name existed');
                     unselectAllNodes(self.templateConfig);
                     selectHandler(self.templateConfig.find(function (node) {
                         return node.name == ret
                     }), self.templateConfig);
-                    refreshZoneTemplateList();
+                    self.refreshZoneTemplateList();
                 }
             }
         });
@@ -262,6 +308,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 data.template = self.selectedTemplate.name;
                 if (self.zoneTemplates.length !== 0) {
                     wiApiService.createZoneTemplate(data, function (zone) {
+                        data.idZoneTemplate = zone.idZoneTemplate;
                         self.zoneTemplates.push(data);
                     })
                 } else {
@@ -310,6 +357,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
     this.editZoneTemplate = function () {
+        console.log('editZoneTemplate');
         if (self.newTemplate) {
             for (zone of self.zoneTemplates) {
                 zone.template = self.selectedTemplate.name;
@@ -320,6 +368,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         } else {
             for (zone of self.zoneTemplates) {
                 if (zone.zoneTemplateEditted) {
+                    console.log('idZoneTemplate', zone.idZoneTemplate)
                     wiApiService.editZoneTemplate({
                         idZoneTemplate: zone.idZoneTemplate,
                         name: zone.name,
@@ -329,6 +378,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     }, function () {
                         wiApiService.listAllZoneByTemplate({ template: self.selectedTemplate.name }, function (zones) {
                             self.zoneTemplates = zones;
+                            zone.zoneTemplateEditted = false;
+                            self.zoneTemplateEditted = false;
                         })
                     })
                 }
@@ -338,7 +389,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.unselectAllNodes = unselectAllNodes;
     function unselectAllNodes(rootNode) {
         rootNode.forEach(function (item) {
-            utils.visit(item, function (node) {
+            utils.visit(item, function 
+                (node) {
                 if (node.data) node.data.selected = false;
             });
         });
