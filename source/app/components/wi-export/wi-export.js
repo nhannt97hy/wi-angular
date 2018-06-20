@@ -11,6 +11,8 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let oUtils = require('./oinv-utils');
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+
     oUtils.setGlobalObj({
         wiComponentService, wiOnlineInvService, $timeout
     })
@@ -46,11 +48,31 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     // }
     // this.projectChanged = projectChanged;
 
-    this.refreshInventory= function () {
+    this.refreshInventory = function () {
         console.log('refresh inventory');
         self.inventoryConfig = oUtils.getWellsFromInventory($scope, $timeout);
     }
-    self.refreshInventory();
+    this.refreshProject = function () {
+        console.log('refresh project');
+        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            wells.sort(function (a, b) {
+                return parseInt(a.idWell) - parseInt(b.idWell);
+            });
+            if (wells) {
+                let cutWells = wells.slice(0, selectionLength);
+                for (well of cutWells) {
+                    self.zoneSetConfig.push(utils.createWellModel(well));
+                }
+            }
+        })
+        
+    }
+    
+    if(this.from == 'inventory'){
+        self.refreshInventory();    
+    } else {
+        self.refreshProject();
+    }
 
     function modelFrom(rootConfig, wells) {
         wells.forEach(well => {

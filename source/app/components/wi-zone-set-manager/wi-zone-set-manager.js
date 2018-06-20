@@ -90,7 +90,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (parentWell) {
             DialogUtils.newZoneSetDialog(ModalService, function (data) {
                 if (!data) return;
-                else if (data.tFemplate.template) {
+                else if (data.template.template) {
                     wiApiService.createZoneSet({
                         name: data.name,
                         template: data.template.template,
@@ -321,8 +321,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 if (!self.newZoneSet) {
                     data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
                     wiApiService.createZone(data, function (zone) {
-                        data.idZone = zone.idZone;
-                        self.zones.push(data);
+                        self.refreshZoneList();
                     })
                 } else {
                     self.newZone = true;
