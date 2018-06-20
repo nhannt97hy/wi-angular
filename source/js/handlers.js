@@ -947,8 +947,7 @@ exports.BlankCrossPlotButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Crossplot',
         inputName: 'Crossplot Name',
@@ -956,7 +955,7 @@ exports.BlankCrossPlotButtonClicked = function () {
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         if(!crossplotName) return;
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
+        utils.createCrossplot(project.idProject, crossplotName, function (err, crossplotModel) {
             if (err) {
                 exports.BlankCrossPlotButtonClicked.call(self);
             }
@@ -971,8 +970,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     console.log("Template Cross Plot clicked ", templateCross);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Crossplots Template',
         inputName: 'Crossplot Name',
@@ -981,7 +979,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         // console.log("CROSS NAME : ", crossplotName);
         if(!crossplotName) return;
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
+        utils.createCrossplot(project.idProject, crossplotName, function (err, crossplotModel) {
             if (err) {
                 newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
             }
@@ -1066,8 +1064,7 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
@@ -1076,12 +1073,14 @@ exports.BlankHistogramButtonClicked = function () {
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
         if(!histogramName) return;
-        utils.createHistogram(currentWell.properties.idWell, null, histogramName)
-            .then(function (histogram) {
-            })
-            .catch(function (err) {
+        utils.createHistogram(project.idProject, histogramName, function (err, histogramModel) {
+            if (err) {
                 exports.BlankHistogramButtonClicked.call(self);
-            });
+            }
+            else {
+                utils.openHistogramTab(histogramModel);
+            }
+        });
     });
 }
 
@@ -1089,8 +1088,7 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Histogram From Template',
         inputName: 'Histogram Name',
@@ -1099,12 +1097,14 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
         if(!histogramName) return;
-        utils.createHistogram(currentWell.properties.idWell, null, histogramName, templateHistogram)
-            .then(function (histogram) {
-            })
-            .catch(function (err) {
+        utils.createHistogram(project.idProject, histogramName, function (err, histogramModel) {
+            if (err) {
                 newTemplateHistogram(histogramName, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
-            });
+            }
+            else {
+                utils.openHistogramTab(histogramModel);
+            }
+        });
     });
 }
 
@@ -1448,7 +1448,7 @@ exports.ClayVolumeGammaRayButtonClicked = function() {
         componentState: {
             html: `<wi-task name="Clay Volume Gamma Ray" id="${now}" task-config="spec"></wi-task>`,
             name: 'wiTask' + now,
-            spec: spec
+            spec: spec.content
         }
     })
 }
@@ -1503,7 +1503,7 @@ exports.PorosityDensityButtonClicked = function() {
         componentState: {
             html: `<wi-task name="Porosity Density" id="${now}" task-config="spec"></wi-task>`,
             name: 'wiTask' + now,
-            spec: spec
+            spec: spec.content
         }
     })
 }

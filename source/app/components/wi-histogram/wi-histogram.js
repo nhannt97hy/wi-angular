@@ -20,7 +20,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         p50: null,
         p90: null
     }
-    this.curvesProperties = [{ idCurve: 1, options: {} }, { idCurve: 2, options: {} }];
+    // this.curvesProperties = [{ idCurve: 1, options: {} }, { idCurve: 2, options: {} }];
+    this.curvesProperties = [];
     this.config = {
         showGaussian: false,
         showCumulative: true,
@@ -29,7 +30,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         flipHorizontal: false,
         plotType: 'Frequency',
         plot: 'Bar',
-        numOfDivisions: null,
+        numOfDivisions: 50,
         scale: {
             left: null,
             right: null,
@@ -119,13 +120,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if(!wiD3HistogramCtrl || !wiD3HistogramCtrl.histogramModel 
             || !wiD3HistogramCtrl.histogramModel.properties
     || !wiD3HistogramCtrl.histogramModel.properties.reference_curves) return;
-        refWindCtrl.update(getWell(), 
-            wiD3HistogramCtrl.histogramModel.properties.reference_curves, 
-            wiD3HistogramCtrl.histogramModel.properties.referenceScale,
-            wiD3HistogramCtrl.histogramModel.properties.referenceVertLineNumber,
-            wiD3HistogramCtrl.histogramModel.properties.referenceTopDepth,
-            wiD3HistogramCtrl.histogramModel.properties.referenceBottomDepth,
-            wiD3HistogramCtrl.histogramModel.properties.referenceShowDepthGrid);
+        // refWindCtrl.update(getWell(),
+        //     wiD3HistogramCtrl.histogramModel.properties.reference_curves,
+        //     wiD3HistogramCtrl.histogramModel.properties.referenceScale,
+        //     wiD3HistogramCtrl.histogramModel.properties.referenceVertLineNumber,
+        //     wiD3HistogramCtrl.histogramModel.properties.referenceTopDepth,
+        //     wiD3HistogramCtrl.histogramModel.properties.referenceBottomDepth,
+        //     wiD3HistogramCtrl.histogramModel.properties.referenceShowDepthGrid);
     }
     this.getWell = getWell;
     function getWell() {
