@@ -109,7 +109,7 @@ module.exports = function (ModalService, callback, groups, _users, company) {
                 project_name: self.project.name,
                 idGroup: group.idGroup
             }, function (perm) {
-                if (!perm['well.get']) {
+                if (!Object.keys(perm).includes('well.get')) {
                     self.objects = null;
                 } else {
                     self.objects = [

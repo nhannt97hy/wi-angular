@@ -12,12 +12,12 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.filter = '';
         
         let topIdx = 0;
-        let selectionLength = 150;
+        let selectionLength = 30;
         let delta = 10;
 
         let solidPattern = {
             Solid: {
-                full_name: "Solid",
+                full_name: "None",
                 src: ""
             }
         }
@@ -25,14 +25,14 @@ module.exports = function (ModalService, name, foreground, background, callback)
 
         function addNode(p) {
             let node;
-            if (p == "Solid") {
+            if (p == "None") {
                 node = {
                     name: p,
                     type: "pattern",
                     data: {
                         childExpanded: true,
-                        label: "Solid",
-                        tooltip: "Solid",
+                        label: "None",
+                        tooltip: "None",
                         selected : ((self.name).toLowerCase() === "solid" || (self.name).toLowerCase() === "none") ? true : false
                     }, 
                     properties: self.selectPatterns[p]
@@ -61,7 +61,6 @@ module.exports = function (ModalService, name, foreground, background, callback)
                 idx += 1;
                 if(idx >= selectionLength) break;
             };
-            console.log("initConfig", treeConfig);
         }
         initConfig(this.config, this.selectPatterns);
         let selectedNode = null;
