@@ -443,6 +443,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         utils.doLogin(function (sameUser) {
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
             if (sameUser) restoreProject($timeout, wiApiService, ModalService);
+            else window.localStorage.removeItem('LProject');
         })
     } else {
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);

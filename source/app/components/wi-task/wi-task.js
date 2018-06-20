@@ -909,8 +909,8 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
 
     this.addToFlowClick = function(){
         const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        const newFlowCtrls = wiComponentService.filterComponents((c, cName) => cName.startsWith('flow') && c.new && c.flow.content);
-        const newFlows = newFlowCtrls.map(ctrl => ctrl.flow);
+        const newFlowCtrls = wiComponentService.filterComponents((c, cName) => cName.startsWith('flow') && c.new);
+        const newFlows = newFlowCtrls.map(ctrl => Object.assign({new: true}, ctrl.flow));
         DialogUtils.openFlowDialog(ModalService, function (flow) {
             const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
             layoutManager.putTabRight({
@@ -930,11 +930,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                 const flowCtrl = wiComponentService.getComponent('flow' + flow.idFlow);
                 flowCtrl.createTask(self.taskConfig);
             }, 100);
-            // function onFlowReady(idFlow) {
-            //     if (idFlow != flow.idFlow) return;
-            // }
-            // if (newFlows.includes(flow)) onFlowReady(flow.idFlow);
-            // else wiComponentService.once('flow.ready', onFlowReady);
         }, newFlows);
     }
     function updateChoices(newCurveProps) {

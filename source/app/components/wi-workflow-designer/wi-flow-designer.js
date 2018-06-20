@@ -53,7 +53,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   this.$onInit = function() {
     self.flow = self.flow || {
       name: 'New Flow',
-      content: '',
+      content: initDiagram,
     };
     wiComponentService.putComponent('flow' + self.id, self);
     if (!self.new) {
@@ -69,6 +69,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   };
   this.$onDestroy = function() {
     wiComponentService.removeEvent('flow.deleted', _onFlowDeleted);
+    wiComponentService.dropComponent('flow' + self.id);
   };
   function _onFlowDeleted(idFlow) {
     if (self.flow.idFlow === idFlow) {
@@ -144,6 +145,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
         wi: require('./wi-moddle-descriptor'),
       },
     });
+    _modeler.importXML(initDiagram, importDiagramCb);
     self.modeler = _modeler;
     self.modeling = _modeler.get('modeling');
     self.eventBus = _modeler.get('eventBus');
@@ -166,6 +168,12 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
           $timeout(() => (self.flow.content = xml));
         });
       }, 100)
+    );
+    _modeler.on(
+      'element.changed',
+      _.debounce(function (event, { element }) {
+        if (!self.new) self.saveFlow();
+      }, 3000)
     );
     _modeler.on('selection.changed', function(event, { newSelection }) {
       const selectedElement = newSelection[0] || self.canvas.getRootElement();
@@ -250,7 +258,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
         componentState: {
           html: `<wi-task name="${name}" id="${idTask}" task-config="task"></wi-task>`,
           name: 'wiTask' + idTask,
-          taskConfig: task,
+          task: task,
         },
       });
     });
@@ -279,6 +287,9 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
               return;
             }
             layoutManager.getItemById('flow' + self.flow.idFlow).addId('flow' + resFlow.idFlow);
+            wiComponentService.dropComponent('flow' + self.id);
+            wiComponentService.putComponent('flow' + resFlow.idFlow, self);
+            self.id = resFlow.idFlow;
             self.flow = resFlow;
             self.new = false;
             _executePending(function() {
