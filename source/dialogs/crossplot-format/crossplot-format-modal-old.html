@@ -1,0 +1,394 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div ng-show="wiModal.updating" id='spinner-holder'></div>
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Crossplot Format</h4>
+            </div>
+            <div class="modal-body padding-0 dialog-style" style='overflow: unset;'>
+                <wi-tabset>
+                    <wi-tab heading="Scales">
+                        <div class="container-fluid">
+                            <form class="form-horizontal form-condensed">
+                                <p></p>
+                                <div class="row">
+                                    <div class="col-sm-1 padding-bottom-1em"><strong>Axis</strong></div>
+                                    <div class="col-sm-2 text-center padding-bottom-1em"><strong>Curve Name</strong></div>
+                                    <div class="col-sm-5 text-center padding-bottom-1em"><strong>Scales</strong></div>
+                                    <div class="col-sm-2 text-center padding-bottom-1em"><strong>Major</strong></div>
+                                    <div class="col-sm-2 text-center padding-bottom-1em"><strong>Minor</strong></div>
+                                </div>
+
+                                <div class="row padding-bottom-0_5em">
+                                    <div class="col-sm-1 top-8px">X</div>
+                                    <div class="col-sm-2"class="form-control wi-form-control">
+                                        <ui-select ng-model="wiModal.crossplotModelProps.pointsets[0].idCurveX"
+                                        ng-change="wiModal.onselectedCurveXChange()">
+                                            <ui-select-match placeholder='Select a curve'>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices group-by="wiModal.groupFn"
+                                                repeat='curve.id as curve in wiModal.curvesOnDataset | filter:{name:$select.search} track by curve.id'>
+                                                    <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label class="control-label col-sm-4 font-weight-normal">Left</label>
+                                        <div class="col-sm-8 padding-right-0">
+                                            <input type="number" class="form-control wi-form-control"
+                                                    id="scaleLeft"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleLeft"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.crossplotModelProps.pointsets[0].scaleLeft, 'scaleLeft')">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label class="control-label col-sm-4 font-weight-normal">Right</label>
+                                        <div class="col-sm-8 padding-right-0">
+                                            <input type="number" class="form-control wi-form-control"
+                                                    id="scaleRight"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleRight"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.crossplotModelProps.pointsets[0].scaleRight, 'scaleRight')">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="font-weight-normal">
+                                            <input type="checkbox" value=""
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].logX"
+                                                    ng-change="wiModal.checkLogStatus()">Log
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control wi-form-control"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].majorX">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control wi-form-control"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].minorX">
+                                    </div>
+                                </div>
+                                <div class="row padding-bottom-0_5em">
+                                    <div class="col-sm-1 top-8px">Y</div>
+                                    <div class="col-sm-2"class="form-control wi-form-control">
+                                        <ui-select ng-model="wiModal.crossplotModelProps.pointsets[0].idCurveY"
+                                        ng-change="wiModal.onselectedCurveYChange()">
+                                            <ui-select-match placeholder='Select a curve'>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices group-by="wiModal.groupFn"
+                                                repeat='curve.id as curve in wiModal.curvesOnDataset | filter:{name:$select.search} track by curve.id'>
+                                                    <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label class="control-label col-sm-4 font-weight-normal">Bottom</label>
+                                        <div class="col-sm-8 padding-right-0">
+                                            <input type="number" class="form-control wi-form-control"
+                                                    id="scaleBottom"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleBottom"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.crossplotModelProps.pointsets[0].scaleBottom, 'scaleBottom')">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label class="control-label col-sm-4 font-weight-normal">Top</label>
+                                        <div class="col-sm-8 padding-right-0">
+                                            <input type="number" class="form-control wi-form-control"
+                                                    id="scaleTop"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].scaleTop"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.crossplotModelProps.pointsets[0].scaleTop, 'scaleTop')">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <label class="font-weight-normal">
+                                            <input type="checkbox" value=""
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].logY"
+                                                    ng-change="wiModal.checkLogStatus()">Log
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control wi-form-control"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].majorY">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control wi-form-control"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].minorY">
+                                    </div>
+                                </div>
+                                <div class="row padding-bottom-0_5em">
+                                    <div class="col-sm-1 top-8px">Z Color</div>
+                                    <div class="col-sm-2"class="form-control wi-form-control">
+                                        <ui-select ng-model="wiModal.crossplotModelProps.pointsets[0].idCurveZ"
+                                        ng-change="wiModal.onselectedCurveZChange()">
+                                            <ui-select-match placeholder='Select a curve'>{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices group-by="wiModal.groupFn"
+                                                repeat='curve.id as curve in wiModal.curvesOnDatasetWithBlank | filter:{name:$select.search} track by curve.id'>
+                                                    <div class="padding-left-20px">{{curve.properties.name}}</div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label class="control-label col-sm-4 font-weight-normal">Min</label>
+                                        <div class="col-sm-8 padding-right-0">
+                                            <input type="number" class="form-control wi-form-control"
+                                                       ng-model="wiModal.crossplotModelProps.pointsets[0].scaleMin"
+                                                       ng-disabled="!wiModal.crossplotModelProps.pointsets[0].idCurveZ">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label class="control-label col-sm-4 font-weight-normal">Max</label>
+                                        <div class="col-sm-8 padding-right-0">
+                                            <input type="number" class="form-control wi-form-control"
+                                                       ng-model="wiModal.crossplotModelProps.pointsets[0].scaleMax"
+                                                       ng-disabled="!wiModal.crossplotModelProps.pointsets[0].idCurveZ">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label class="control-label col-sm-3 font-weight-normal padding-left-0">Colors</label>
+                                        <div class="col-sm-9 padding-right-0">
+                                            <input type="text" class="form-control wi-form-control"
+                                                    ng-model="wiModal.crossplotModelProps.pointsets[0].numColor">
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row padding-bottom-0_5em">
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4 font-weight-normal">
+                                                Point Symbol
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <ui-select theme="bootstrap"
+                                                            ng-model="wiModal.crossplotModelProps.pointsets[0].pointSymbol"
+                                                            search-enabled='false'>
+                                                    <ui-select-match>
+                                                        <div ng-repeat="type in wiModal.selectPointSymbol"
+                                                             ng-if="wiModal.crossplotModelProps.pointsets[0].pointSymbol==type">
+                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
+                                                        </div>
+                                                    </ui-select-match>
+                                                    <ui-select-choices repeat="type in wiModal.selectPointSymbol" position="down">
+                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>&nbsp;{{type}}
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4 font-weight-normal">Point Size</label>
+                                            <div class="col-sm-8">
+                                                <input type="number" class="form-control wi-form-control"
+                                                        ng-model="wiModal.crossplotModelProps.pointsets[0].pointSize">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-3 font-weight-normal">
+                                                Color
+                                            </label>
+                                            <div class="col-sm-9">
+                                                <div class="float-left">
+                                                    <button type="button" ng-click="wiModal.colorSymbol();"
+                                                            ng-style="{'background-color':wiModal.crossplotModelProps.pointsets[0].pointColor}"
+                                                            class="form-control wi-form-control width-80px thick-border">
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row padding-bottom-0_5em">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2 font-weight-normal padding-right-0">
+                                                Overlay Lines
+                                            </label>
+                                            <div class="col-sm-10 padding-left-0" style="left: -10px">
+                                                <ui-select ng-model='wiModal.crossplotModelProps.pointsets[0].idOverlayLine'
+                                                ng-disabled="!wiModal.overlayLines.length">
+                                                    <ui-select-match placeholder='Select Overlay Lines'>{{$select.selected.name}}</ui-select-match>
+                                                    <ui-select-choices repeat='item.idOverlayLine as item in wiModal.overlayLines | filter: {name:$select.search}'
+                                                    >{{item.name}}</ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="col-sm-12">
+                                        <input type="checkbox">Standalone Pickett Crossplot
+                                    </label>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <label for="isIntervalDepths" class="font-weight-normal">
+                                            <input type="radio" id="isIntervalDepths" ng-model="wiModal.depthType" value="intervalDepth" ng-change="wiModal.onDepthTypeChanged()">
+                                            Interval Depths
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <!-- <div class="form-group"> -->
+                                            <label class="control-label col-sm-4 font-weight-normal">Top (m)</label>
+                                            <div class="col-sm-8 padding-right-0">
+                                                <input type="number" step="0.0001" class="form-control wi-form-control"
+                                                ng-model="wiModal.crossplotModelProps.pointsets[0].intervalDepthTop"
+                                                ng-disabled="!(wiModal.depthType=='intervalDepth')">
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <!-- <div class="form-group"> -->
+                                            <label class="control-label col-sm-4 font-weight-normal">Bottom (m)</label>
+                                            <div class="col-sm-8 padding-right-0">
+                                                <input type="number" step="0.0001" class="form-control wi-form-control"
+                                                ng-model="wiModal.crossplotModelProps.pointsets[0].intervalDepthBottom"
+                                                ng-disabled="!(wiModal.depthType=='intervalDepth')">
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <label for="isZonalDepths" class="font-weight-normal">
+                                            <input type="radio" id="isZonalDepths" ng-model="wiModal.depthType" value="zonalDepth" ng-change="wiModal.onDepthTypeChanged()" ng-disabled="!wiModal.zoneSets.length">
+                                            Zonal Depths
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <!-- <div class="form-group"> -->
+                                            <label class="control-label col-sm-4 font-weight-normal">
+                                                Zone set
+                                            </label>
+                                            <div class="col-sm-8 padding-right-0">
+                                                <select class="form-control wi-form-control"
+                                                        ng-model="wiModal.selectedZoneSet"
+                                                        ng-change="wiModal.onZoneSetChange()"
+                                                        ng-options="zoneset as zoneset.properties.name for zoneset in wiModal.zoneSets"
+                                                        ng-disabled="wiModal.depthType=='intervalDepth'">
+                                                </select>
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <!-- <div class="form-group"> -->
+                                            <label class="control-label col-sm-4 font-weight-normal">
+                                                Active Zone
+                                            </label>
+                                            <div class="col-sm-8 padding-right-0">
+                                                <select class="form-control wi-form-control" ng-model="wiModal.selectedZone" ng-change="wiModal.onActiveZoneChange()"
+                                                ng-disabled="wiModal.depthType=='intervalDepth'">
+                                                    <option value="All" ng-selected="wiModal.crossplotModelProps.pointsets[0].activeZone=='All'">All</option>
+                                                    <option value="{{zone.id}}" ng-repeat="zone in wiModal.zoneSets[wiModal.selectedZoneSet.idx].children" ng-selected="wiModal.crossplotModelProps.pointsets[0].activeZone==zone.id">{{zone.properties.name}}</option>
+                                                </select>
+                                            </div>
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Axis Colors">
+                        <div class="container-fluid">
+                            <form class="form-condensed">
+                                <div class="form-group">
+                                    <label class="control-label">
+                                        <input ng-model="isDefineDepthColors" type="checkbox" ng-change="toggleDefineDepthColors()" /> Define Z Axis Colors
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <table class="font-size-10px table table-bordered">
+                                        <thead style='display:block;'>
+                                            <tr style="width: 100%;display: table;">
+                                                <th width='40%' style='text-align: center;'>Min Value</th>
+                                                <th width='40%' style='text-align: center;'>Max Value</th>
+                                                <th width='10%' style='text-align: center;'>Color</th>
+                                                <th width='10%' style='text-align: center;'>
+                                                    <button type="button" class="btn btn-default" type="button" ng-click="addAxisColorRow();">
+                                                            <span class="plus-16x16"></span>
+                                                        </button>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style='display: block;overflow-y:overlay;height:20em;'>
+                                            <tr ng-repeat="item in axisColors track by $index" ng-class="{selected:$index == selectedAxisColorRow}" ng-click="setClickedAxisColorRow($index)"
+                                            style="width: 100%;display: table;">
+                                                <td width='40%'>
+                                                    <input ng-model="item.minValue" ng-disabled="isDefineDepthColors == false" type="text" class="form-control wi-form-control valign-middle pull-left"
+                                                    />
+                                                </td>
+                                                <td width='40%'>
+                                                    <input ng-model="item.maxValue" ng-disabled="isDefineDepthColors == false" type="text" class="form-control wi-form-control valign-middle pull-left"
+                                                    />
+                                                </td>
+                                                <td width='10%' style='text-align: center;'>
+                                                    <button type="button" ng-click="selectAxisColor($index)" ng-style="{'background-color':item.color}" ng-disabled="isDefineDepthColors == false"
+                                                        class="form-control wi-form-control width-80px thick-border">
+                                                    </button>
+                                                </td>
+                                                <td width='10%' style='text-align: center;'>
+                                                    <button type="button" class="btn btn-default" type="button" ng-click="removeAxisColorRow($index);">
+                                                            <span class="delete-16x16"></span>
+                                                        </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
+                    <wi-tab heading="Options">
+                        <div class="container-fluid">
+                            <form class="form-horizontal form-condensed">
+                            <br>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2">Crossplot Title</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.title">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">X Axes Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.labelX">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Y Axes Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.labelY">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-4">Z Axes Label</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.title.labelZ">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </wi-tab>
+                </wi-tabset>
+            </div>
+            <div class="modal-footer">
+                <button ng-show='!wiModal.hideApply' type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default"><span class="apply-16x16"></span>&nbsp;Apply</button>
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

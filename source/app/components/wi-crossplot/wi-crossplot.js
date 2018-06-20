@@ -22,7 +22,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             wiCrossplot: self
         });
         self.handlers = $scope.handlers;
-        self.curvesProperties = [{ 'x': 1, 'y': 2, options: {} }, { 'x': 2, 'y': 1, options: {} }];
+        // self.curvesProperties = [{ 'x': 1, 'y': 2, options: {} }, { 'x': 2, 'y': 1, options: {} }];
+        self.curvesProperties = [];
         self.config = {
             logX: false,
             logY: false,
@@ -81,14 +82,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             || !wiD3CrossplotCtrl.crossplotModel.properties
             || !wiD3CrossplotCtrl.crossplotModel.properties.reference_curves) return;
         console.log('start update reference window ', wiD3CrossplotCtrl);
-        refWindCtrl.update(
-            getWell(),
-            wiD3CrossplotCtrl.crossplotModel.properties.reference_curves,
-            wiD3CrossplotCtrl.crossplotModel.properties.referenceScale,
-            wiD3CrossplotCtrl.crossplotModel.properties.referenceVertLineNumber,
-            wiD3CrossplotCtrl.crossplotModel.properties.referenceTopDepth,
-            wiD3CrossplotCtrl.crossplotModel.properties.referenceBottomDepth,
-            wiD3CrossplotCtrl.crossplotModel.properties.referenceShowDepthGrid);
+        // refWindCtrl.update(
+        //     getWell(),
+        //     wiD3CrossplotCtrl.crossplotModel.properties.reference_curves,
+        //     wiD3CrossplotCtrl.crossplotModel.properties.referenceScale,
+        //     wiD3CrossplotCtrl.crossplotModel.properties.referenceVertLineNumber,
+        //     wiD3CrossplotCtrl.crossplotModel.properties.referenceTopDepth,
+        //     wiD3CrossplotCtrl.crossplotModel.properties.referenceBottomDepth,
+        //     wiD3CrossplotCtrl.crossplotModel.properties.referenceShowDepthGrid);
     }
 
     this.zoneArr = null; // important. This will be set in wi-d3-crossplot. TUNG
