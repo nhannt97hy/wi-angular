@@ -21,6 +21,7 @@ let app = angular.module(moduleName, []);
 const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
 const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://localhost:3000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
 // //inv server for dev
@@ -87,6 +88,8 @@ const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
 const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
 const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
+
+const EXPORT_LAS2 = '/export/las2';
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -2064,4 +2067,7 @@ Service.prototype.asyncGetAllUnit = function (payload) {
 };
 Service.prototype.listTaskSpec = function (callback) {
     this.post(GET_TASK_SPEC_LIST, {}, callback);
+}
+Service.prototype.exportLas2 = function(idObjs, callback) {
+    this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
 }

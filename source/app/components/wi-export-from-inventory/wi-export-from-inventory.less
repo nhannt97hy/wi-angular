@@ -1,0 +1,118 @@
+
+wi-export-from-inventory {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 5px;
+    background: #f4f4f4;
+    .panel-heading {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .export-main {
+        display: flex;
+        flex:1;
+        .left-container {
+            margin: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 0;
+            .export-left {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                margin-bottom: 0;    
+                border: 1px solid #888;  
+            }
+        }
+        .center-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;      
+            width: 0;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+            .export-center {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                margin-bottom: 0;
+                wi-base-treeview {
+                    margin-left: 0;
+                }
+                border: 1px solid #888;  
+            }
+        }
+        .right-container {
+            flex: 1;  
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            width: 0;
+            margin-top: 1em;
+            margin-bottom: 1em;
+            margin-right: 1em;
+            i {
+                float: left;
+            }
+            li {
+                border: none;
+            }
+            a {
+                font-size: 13px;
+            }
+            .export-right {
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                margin-bottom: 0;
+                wi-base-treeview {
+                    margin-left: 5px;
+                }
+                border: 1px solid #888;   
+            }
+        }
+        .export-button-container {
+            flex-basis: 30px;
+            overflow:auto;
+            display: flex;
+            position: relative;
+            flex-direction: column;
+            width: 0;
+            margin-top: 1em;
+            margin-bottom: 1em;
+            margin-right: 1em;
+        }
+    }
+    wi-scroll {
+        width: 100%;
+    }
+    li {
+        list-style: none;
+        padding:5px;
+        padding-left: 15px;
+        padding-right: 15px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+    li:hover {
+        background-color: #f5f5f5;
+    }
+    ul {
+        padding: 0;
+    }
+    b {
+        margin-left: 8px;
+    }
+    wi-base-treeview i {
+        float: right;
+        color: #3385ff;
+        font-size: 125%;
+    }
+    .body {
+        padding: 0;
+        height: 400px
+    }
+}

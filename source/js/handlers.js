@@ -310,14 +310,14 @@ exports.ExportFromInventoryButtonClicked = function() {
     let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
-        id: 'export-tool',
-        title: 'Export Tool',
+        id: 'export-inventory',
+        title: 'Export From Inventory',
         tabIcon: 'export-well-top-16x16',
         componentState: {
             html: `
                 <div style='height:100%;display:flex;flex-direction:column;'>
                   
-                   <wi-export style='flex:1;' from="inventory"></wi-export>
+                   <wi-export-from-inventory style='flex:1;'></wi-export-from-inventory>
                 </div>
             `,
             name: 'wiExport'
@@ -333,14 +333,14 @@ exports.ExportFromProjectButtonClicked = function (){
     let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
-        id: 'export-tool',
-        title: 'Export Tool',
+        id: 'export-project',
+        title: 'Export From Project',
         tabIcon: 'export-well-top-16x16',
         componentState: {
             html: `
                 <div style='height:100%;display:flex;flex-direction:column;'>
                   
-                   <wi-export style='flex:1;' from="project"></wi-export>
+                   <wi-export-from-project style='flex:1;'></wi-export-from-project>
                 </div>
             `,
             name: 'wiExport'

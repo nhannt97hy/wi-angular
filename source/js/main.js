@@ -59,7 +59,9 @@ let wiZoneManager = require('./wi-zone-manager');
 let wiZoneSetManager = require('./wi-zone-set-manager');
 
 let wiInventory = require('./wi-inventory');
-let wiExport = require('./wi-export');
+// let wiExport = require('./wi-export');
+let wiExportFromInventory = require('./wi-export-from-inventory');
+let wiExportFromProject = require('./wi-export-from-project');
 let wiTask = require('./wi-task');
 let wiFlowDesigner = require('./wi-flow-designer');
 let wiFlowEngine = require('./wi-flow-engine');
@@ -182,7 +184,8 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
-        wiExport.name,
+        wiExportFromInventory.name,
+        wiExportFromProject.name,        
         wiTask.name,
         wiFlowDesigner.name,
         wiFlowEngine.name,
