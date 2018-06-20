@@ -513,7 +513,7 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                 if (curveProps.x && curveProps.y) {
                     if (curveProps.flag == 'create') {
                         if (self.curvesProperties.findIndex(cp => {
-                            return cp.idWell == curveProps.idWell && cp.idDataset == curveProps.idDataset;
+                            return cp.idWell == curveProps.idWell;
                         }) == -1) {
                             self.curvesProperties.push(curveProps);
                         } else {
@@ -977,6 +977,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                                 break;
                         }
                     }
+                    let intervalDepthTopArr = new Array();
+                    let intervalDepthBottomArr = new Array();
+                    self.pointsets.forEach(ps => {
+                        intervalDepthTopArr.push(ps.intervalDepthTop);
+                        intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                    });
+                    self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
+                    self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
                     self.crossplotModelProps.pointsets = self.pointsets;
                     self.crossplotModelProps.curvesProperties = self.curvesProperties;
                     self.crossplotModelProps.config = self.config;
@@ -984,6 +992,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                     if (callback) callback(self.crossplotModelProps);
                 });
             } else {
+                let intervalDepthTopArr = new Array();
+                let intervalDepthBottomArr = new Array();
+                self.pointsets.forEach(ps => {
+                    intervalDepthTopArr.push(ps.intervalDepthTop);
+                    intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                });
+                self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
+                self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
                 self.crossplotModelProps.pointsets = self.pointsets = [];
                 self.crossplotModelProps.curvesProperties = self.curvesProperties = [];
                 self.crossplotModelProps.config = self.config;
