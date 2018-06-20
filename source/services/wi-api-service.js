@@ -1937,8 +1937,8 @@ Service.prototype.createFlow = function (data, callback) {
     this.post(CREATE_FLOW, data, callback);
 }
 
-Service.prototype.editFlow = function (data, callback) {
-    this.post(EDIT_FLOW, data, callback);
+Service.prototype.editFlow = function (data, callback, options) {
+    this.post(EDIT_FLOW, data, callback, options);
 }
 
 Service.prototype.getFlow = function (idFlow, callback) {

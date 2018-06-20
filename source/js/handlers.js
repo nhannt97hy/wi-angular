@@ -1448,7 +1448,7 @@ exports.ClayVolumeGammaRayButtonClicked = function() {
         componentState: {
             html: `<wi-task name="Clay Volume Gamma Ray" id="${now}" task-config="spec"></wi-task>`,
             name: 'wiTask' + now,
-            spec: spec
+            spec: spec.content
         }
     })
 }
@@ -1503,7 +1503,7 @@ exports.PorosityDensityButtonClicked = function() {
         componentState: {
             html: `<wi-task name="Porosity Density" id="${now}" task-config="spec"></wi-task>`,
             name: 'wiTask' + now,
-            spec: spec
+            spec: spec.content
         }
     })
 }

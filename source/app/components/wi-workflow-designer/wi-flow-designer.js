@@ -15,7 +15,7 @@ const initDiagram = `
     <bpmndi:BPMNDiagram id="BPMNDiagram_1">
       <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
         <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-          <dc:Bounds height="36.0" width="36.0" x="400.0" y="240.0"/>
+          <dc:Bounds height="36.0" width="36.0" x="200.0" y="350.0"/>
         </bpmndi:BPMNShape>
       </bpmndi:BPMNPlane>
     </bpmndi:BPMNDiagram>
@@ -159,6 +159,13 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     _registerFileDrop($(CONTAINER_ELEMENT), (xml) => {
       _modeler.importXML(xml, importDiagramCb);
     });
+    self.eventBus.on('element.dblclick', 1500, function (event, { element }) {
+      if (is(element, 'bpmn:ServiceTask')) {
+        const idTask = getBusinessObject(element).get('idTask');
+        !!idTask && self.openTask(idTask, element);
+      }
+      event.stopPropagation();
+    });
     _modeler.on(
       'element.changed',
       _.debounce(function(event, { element }) {
@@ -171,7 +178,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     );
     _modeler.on(
       'element.changed',
-      _.debounce(function (event, { element }) {
+      _.debounce(function(event, { element }) {
         if (!self.new) self.saveFlow();
       }, 3000)
     );
@@ -239,7 +246,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
           () => ({ idFlow: self.flow.idFlow, idTaskSpec: 1, content: taskConfig }),
           function(res, err) {
             if (err) return;
-            bo.set('idTask', res.idTask);
+            updateProp(shape, { idTask: res.idTask });
           }
         )
       );
@@ -247,10 +254,10 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   };
   this.openTask = function(idTask, element) {
     if (!idTask) return;
-    wiApiService.getTask(idTask, function (task, err) {
+    wiApiService.getTask(idTask, function(task, err) {
       if (err) return;
       const bo = getBusinessObject(element);
-      const name = `${bo.name || ''}(VCL-GR)`
+      const name = `${bo.name || ''}(VCL-GR)`;
       layoutManager.putTabRight({
         id: 'wiTask' + idTask,
         title: name,
@@ -268,7 +275,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   };
 
   // buttons
-  this.saveFlow = function() {
+  this.saveFlow = function(notice) {
     if (self.new) {
       DialogUtils.promptDialog(
         ModalService,
@@ -286,27 +293,34 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
               self.saveFlow();
               return;
             }
-            layoutManager.getItemById('flow' + self.flow.idFlow).addId('flow' + resFlow.idFlow);
+            const tabElement = layoutManager.getItemById('flow' + self.flow.idFlow);
+            tabElement.addId('flow' + resFlow.idFlow);
+            tabElement.setTitle(tabElement.config.title.replace('New Flow', resFlow.name));
             wiComponentService.dropComponent('flow' + self.id);
             wiComponentService.putComponent('flow' + resFlow.idFlow, self);
             self.id = resFlow.idFlow;
             self.flow = resFlow;
             self.new = false;
             _executePending(function() {
-              wiApiService.editFlow(self.flow, function(resFlow, err) {
-                if (err) return;
-                toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
-              });
+              setTimeout(() => {
+                wiApiService.editFlow(self.flow, function(resFlow, err) {
+                  if (err) return;
+                  toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
+                });
+              }, 100);
             });
           });
         }
       );
     } else {
       _executePending(function() {
-        wiApiService.editFlow(self.flow, function(resFlow, err) {
-          if (err) return;
-          toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
-        });
+        wiApiService.editFlow(
+          self.flow,
+          () => {
+            !!notice && toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
+          },
+          { silent: true }
+        );
       });
     }
   };
