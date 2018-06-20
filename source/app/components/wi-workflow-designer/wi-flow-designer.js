@@ -56,15 +56,16 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
       content: initDiagram,
     };
     wiComponentService.putComponent('flow' + self.id, self);
-    if (!self.new) {
-      $timeout(() => {
+    $timeout(() => {
+      if (!self.new) {
         _initModeler();
         self.modeler.importXML(self.flow.content, importDiagramCb);
-      });
-    } else {
-      self.flow.idFlow = self.id;
-      $timeout(_initModeler);
-    }
+      } else {
+        self.flow.idFlow = self.id;
+        _initModeler();
+        self.modeler.importXML(initDiagram, importDiagramCb);
+      }
+    });
     wiComponentService.on('flow.deleted', _onFlowDeleted);
   };
   this.$onDestroy = function() {
@@ -128,7 +129,6 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   }
 
   function _initModeler() {
-    self.data = {};
     const _modeler = new BpmnModeler({
       container: `#flow${self.id} > #bpmn-modeler`,
       additionalModules: [
@@ -145,7 +145,6 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
         wi: require('./wi-moddle-descriptor'),
       },
     });
-    _modeler.importXML(initDiagram, importDiagramCb);
     self.modeler = _modeler;
     self.modeling = _modeler.get('modeling');
     self.eventBus = _modeler.get('eventBus');
@@ -159,7 +158,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     _registerFileDrop($(CONTAINER_ELEMENT), (xml) => {
       _modeler.importXML(xml, importDiagramCb);
     });
-    self.eventBus.on('element.dblclick', 1500, function (event, { element }) {
+    self.eventBus.on('element.dblclick', 1500, function(event, { element }) {
       if (is(element, 'bpmn:ServiceTask')) {
         const idTask = getBusinessObject(element).get('idTask');
         !!idTask && self.openTask(idTask, element);
@@ -324,9 +323,12 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
       });
     }
   };
-  this.createNewDiagram = function() {
-    this.modeler && this.modeler.importXML(initDiagram, importDiagramCb);
-    self.flow.content = initDiagram;
+  this.clearDiagram = function () {
+    DialogUtils.confirmDialog(ModalService, 'Clear Diagram', 'Are you sure to clear diagram?', function (yes) {
+      if (!yes) return;
+      this.modeler && this.modeler.importXML(initDiagram, importDiagramCb);
+      self.flow.content = initDiagram;
+    })
   };
   this.execute = async function() {
     try {
@@ -336,7 +338,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
           resolve(xml);
         });
       });
-      const outputObj = await wiFlowEngine.execute({ diagram: xml, data: self.data });
+      const outputObj = await wiFlowEngine.execute({ diagram: xml });
       console.log(outputObj);
     } catch (error) {
       console.error(error);
