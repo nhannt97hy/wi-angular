@@ -23,17 +23,83 @@
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Top depth:</label>
                             <div class="col-sm-9">
-                                <input type="number" class="form-control" ng-model="wiModal.zone.startDepth" required>
+                                <input type="number" class="form-control" ng-model="wiModal.returnZone.startDepth" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Bottom depth:</label>
                             <div class="col-sm-9">
-                                <input type="number" class="form-control" ng-model="wiModal.zone.endDepth" required>
+                                <input type="number" class="form-control" ng-model="wiModal.returnZone.endDepth" required>
                             </div>
                         </div>
                         <hr>
-                        <div class="form-group">
+                        <div class="">
+                                <h5 class="modal-infomation-title">
+                                    <span class="user-define-16x16"></span>&nbsp;Template
+                                </h5>
+                                <div class="create-new-zone-modal-treeview col-sm-5" style="padding:5px; border: 1px solid #ddd">
+                                    <h4 style="margin:0; padding: 5px; font-size:15px; margin-bottom: 5px;">Template Tree</h4>
+                                    <div style='background-color:white;display: flex;padding-left: 7px; border: 1px solid #eee; margin-bottom: 15px'>
+                                        <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                                        <input type='text' id="createNewZoneSearch" style='flex:1; width:100%; padding-left: 32px;color:steelblue;border: none'
+                                            ng-model="wiModal.filter" placeholder="Search">
+                                    </div>
+                                    <wi-scroll id-scroll="'createNewZoneModalTreeScroll'" style='flex:1;display:flex;flex-direction:column;height: 30%;' up-trigger='wiModal.upTrigger'
+                                        down-trigger='wiModal.downTrigger'>
+                                        <wi-base-treeview name="createNewZoneModalTreeview" config="wiModal.config" container="wiModal" on-click-function="wiModal.clickFunction"
+                                            filter="{{wiModal.filter}}">
+                                        </wi-base-treeview>
+                                    </wi-scroll>
+                                </div>
+                                <div class="zoneset-property col-sm-7" style="padding:5px 0px 5px 15px">
+                                    <h4 style="margin:0; padding: 5px; font-size:15px; margin-bottom:5px;">Properties</h4>
+                                    <table class="text-on-table table table-bordered" ng-show="wiModal.returnZone.name" style="width:100%">
+                                        <tbody>
+                                            <tr>
+                                                <td width="45%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    Zone name
+                                                </td>
+                                                <td width="55%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    {{wiModal.returnZone.name}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="45%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    Background
+                                                </td>
+                                                <td width="55%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    <label ng-style="{'background-color':wiModal.returnZone.background}" class="form-control wi-form-control thick-border"
+                                                        style="width: 103px; height: 28px; margin: auto;">
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="45%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    Foreground
+                                                </td>
+                                                <td width="55%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    <label ng-style="{'background-color':wiModal.returnZone.foreground}" class="form-control wi-form-control thick-border"
+                                                        style="width: 103px; height: 28px; margin: auto;">
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td width="45%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    Pattern
+                                                </td>
+                                                <td width="55%" style="text-align: center; vertical-align: middle; font-size: 13px">
+                                                    <label class="btn btn-default thick-border padding-0">
+                                                        <wi-canvas-rect name="rowZS_{{wiModal.returnZone.idZoneTemplate}}" pattern="{{wiModal.returnZone.pattern}}" width="100"
+                                                            height="26" foreground="{{wiModal.returnZone.foreground}}" background='{{wiModal.returnZone.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <!-- <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Zone name:</label>
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" ng-model="wiModal.zone.name" required>
@@ -45,28 +111,37 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Foreground:</label>
-                            <div class="col-sm-4">
-                                <button ng-click="wiModal.foregroundZone();" ng-style="{background: wiModal.zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border"
-                                    style="width: 100%; height: 26px">
+                            <div class="col-sm-4"> -->
+                                <!-- <button ng-click="wiModal.foregroundZone();" ng-style="{background: wiModal.zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border"
+                                    style="width: 100%; height: 26px"> -->
+                                <!-- <label ng-style="{background: wiModal.zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border" style="width: 100%; height: 26px">
+                                </label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3" for="name">Background:</label>
-                            <div class="col-sm-4">
-                                <button ng-click="wiModal.backgroundZone();" ng-style="{background: wiModal.zone.fill.pattern.background}" class="form-control wi-form-control thick-border"
-                                    style="width: 100%; height: 26px">
+                            <div class="col-sm-4"> -->
+                                <!-- <button ng-click="wiModal.backgroundZone();" ng-style="{background: wiModal.zone.fill.pattern.background}" class="form-control wi-form-control thick-border"
+                                    style="width: 100%; height: 26px"> -->
+                                <!-- <label ng-style="{background: wiModal.zone.fill.pattern.background}" class="form-control wi-form-control thick-border" style="width: 100%; height: 26px">
+                                </label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label col-sm-3">Pattern</label>
-                            <div class="col-sm-4">
-                                <button ng-click="wiModal.choosePattern()" class="btn btn-default padding-0 thick-border" style="width:100%">
+                            <div class="col-sm-4"> -->
+                                <!-- <button ng-click="wiModal.choosePattern()" class="btn btn-default padding-0 thick-border" style="width:100%">
                                     <wi-canvas-rect name="_selectedPatternCanvas" pattern="{{wiModal.zone.fill.pattern.name}}" width="100" height="26" foreground="{{wiModal.zone.fill.pattern.foreground}}"
                                         background='{{wiModal.zone.fill.pattern.background}}'>
                                     </wi-canvas-rect>
-                                </button>
+                                </button> -->
+                                <!-- <label class="btn btn-default padding-0 thick-border" style="width:100%">
+                                    <wi-canvas-rect name="_selectedPatternCanvas" pattern="{{wiModal.zone.fill.pattern.name}}" width="100" height="26" foreground="{{wiModal.zone.fill.pattern.foreground}}"
+                                        background='{{wiModal.zone.fill.pattern.background}}'>
+                                    </wi-canvas-rect>
+                                </label>
                             </div>
-                        </div>
+                        </div> -->
                     </form>
                 </div>
             </div>
