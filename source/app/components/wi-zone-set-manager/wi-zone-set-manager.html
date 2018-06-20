@@ -46,11 +46,11 @@
                 <option value="background">Background</option>
             </select>
             <div class="button-area">
-                <label class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)">
-                    <i class="ti-check" ng-class="{'color-blue': !(!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.zoneEditted || wiZoneSetManager.newZoneSet) || !(wiZoneSetManager.zones.length!=0 || !wiZoneSetManager.newZoneSet)}"></i>
+                <label class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.zoneEditted">
+                    <i class="ti-check" ng-class="{'color-blue': wiZoneSetManager.zoneEditted, 'color-lightgray': !wiZoneSetManager.zoneEditted}"></i>
                 </label>
-                <label class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet) ">
-                    <i class="ti-close" ng-class="{'color-blue': !(!wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)), 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet || !(wiZoneSetManager.selectedZones.length!=0 || wiZoneSetManager.newZoneSet)}"></i>
+                <label class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="wiZoneSetManager.selectedZones.length==0">
+                    <i class="ti-close" ng-class="{'color-blue': wiZoneSetManager.selectedZones.length!=0, 'color-lightgray': wiZoneSetManager.selectedZones.length==0}"></i>
                 </label>
                 <label title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-plus" ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>

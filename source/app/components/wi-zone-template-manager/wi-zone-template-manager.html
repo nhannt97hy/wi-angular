@@ -53,17 +53,17 @@
                 <option value="background">Background</option>
             </select>
             <div class="button-area">
-                <label title="Apply changes" class='btn' ng-disabled="!(wiZoneTemplateManager.zoneTemplateEditted || !(!wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.zoneTemplates.length==0))" 
+                <label title="Apply changes" class='btn' ng-disabled="!wiZoneTemplateManager.zoneTemplateEditted" 
                     ng-click="wiZoneTemplateManager.editZoneTemplate()">
-                    <i class="ti-check" ng-class="{'color-blue':(wiZoneTemplateManager.zoneTemplateEditted || !(!wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.zoneTemplates.length==0)), 'color-lightgray':!(wiZoneTemplateManager.zoneTemplateEditted || !(!wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.zoneTemplates.length==0))}"></i>
+                    <i class="ti-check" ng-class="{'color-blue': wiZoneTemplateManager.zoneTemplateEditted, 'color-lightgray':!wiZoneTemplateManager.zoneTemplateEditted}"></i>
                 </label>
-                <label title="Delete selected zones" class='btn' ng-click="wiZoneTemplateManager.deleteZoneTemplate()" ng-disabled="!(wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.selectedZoneTemplates.length!=0)">
-                    <i class="ti-close"  ng-class="{'color-blue': (wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.selectedZoneTemplates.length!=0), 'color-lightgray': !(wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.selectedZoneTemplates.length!=0)}"></i>
+                <label title="Delete selected zones" class='btn' ng-click="wiZoneTemplateManager.deleteZoneTemplate()" ng-disabled="wiZoneTemplateManager.selectedZoneTemplates.length==0">
+                    <i class="ti-close"  ng-class="{'color-blue': wiZoneTemplateManager.selectedZoneTemplates.length!=0, 'color-lightgray': !wiZoneTemplateManager.selectedZoneTemplates.length!=0}"></i>
                 </label>
                 <label title="Create new zone" class='btn' ng-click="wiZoneTemplateManager.createZoneTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
                     <i class="ti-plus" ng-class="{'color-blue': wiZoneTemplateManager.selectedTemplate, 'color-lightgray': !wiZoneTemplateManager.selectedTemplate}"></i>
                 </label>
-                <label title="Refresh zones list" class='btn' ng-click="wiZoneTemplateManager.refreshZoneTemplateList()" ng-disabled="!wiZoneTemplateManager.selectedTemplate || wiZoneTemplateManager.newTemplate">
+                <label title="Refresh zones list" class='btn' ng-click="wiZoneTemplateManager.refreshZoneTemplateList()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
                     <i class="ti-reload" ng-class="{'color-blue': wiZoneTemplateManager.selectedTemplate, 'color-lightgray': !wiZoneTemplateManager.selectedTemplate}"></i>
                 </label>
             </div>
@@ -74,7 +74,7 @@
                     <thead>
                         <tr>
                             <th style="width: 5%"></th>
-                            <th width="20%" style="text-align: center;">Zoneset name</th>
+                            <th width="20%" style="text-align: center;">ZoneTemplate name</th>
                             <!-- <th width="20%">Sample</th> -->
                             <th width="25%" style="text-align: center;">Background</th>
                             <th width="25%" style="text-align: center;">Foreground</th>

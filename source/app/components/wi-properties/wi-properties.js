@@ -26,6 +26,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
         let itemProperties = currentItem.properties;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         switch (currentItem.type) {
             case 'well':
                 config = {
@@ -320,7 +321,6 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                 break;
             case 'logplot':
                 // var well = utils.findWellById(itemProperties.idWell);
-                let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
                 config = {
                     name: currentItem.name,
                     heading: 'Informations',
@@ -405,7 +405,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                 listConfig.push(config);
                 break;
             case 'crossplot':
-                var well = utils.findWellById(itemProperties.idWell);
+                // var well = utils.findWellById(itemProperties.idWell);
                 config = {
                     name: currentItem.name,
                     heading: 'Informations',
@@ -420,9 +420,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                         value: itemProperties.name,
                         editable: true
                     }, {
-                        key: 'wellName',
-                        label: 'Well Name',
-                        value: well.properties.name,
+                        key: 'projectName',
+                        label: 'Project Name',
+                        value: project.name
                     }]
                 }
                 listConfig.push(config);
@@ -524,7 +524,7 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                 */
                 break;
             case 'histogram':
-                var well = utils.findWellById(itemProperties.idWell);
+                // var well = utils.findWellById(itemProperties.idWell);
                 config = {
                     name: currentItem.name,
                     heading: 'Division and Scales',
@@ -565,9 +565,9 @@ function Controller(wiComponentService, wiApiService, $timeout, $scope, ModalSer
                         value: itemProperties.name,
                         editable: true
                     }, {
-                        key: 'wellName',
-                        label: 'Well Name',
-                        value: well.properties.name,
+                        key: 'projectName',
+                        label: 'project Name',
+                        value: project.name,
                     }]
                 }
                 listConfig.push(config);

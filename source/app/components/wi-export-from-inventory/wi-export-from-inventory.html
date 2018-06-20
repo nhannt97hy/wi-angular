@@ -1,0 +1,116 @@
+<div class="export-main" style="display:flex;flex-direction:row;">
+        <div class="left-container">
+            <div class="panel panel-default export-left">
+                <div style='display:flex;' class='panel-heading'>
+                    <h5 style='margin-right:10px;'>Inventory</h5>
+                    <!-- <wi-item-dropdown style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiExportFromInventory.getProjectList'
+                        on-item-changed="wiExportFromInventory.projectChanged">
+                    </wi-item-dropdown> -->
+                    <!-- <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiExportFromInventory.refreshProject()">
+                        <i class="fa fa-refresh"></i>
+                    </button> -->
+                    <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default pull-right' title="Reload project" ng-click="wiExportFromInventory.refreshInventory()">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                    <button style='margin:5px 0px 5px 5px;padding:0 10px;' title="Toggle Well name/File name"
+                        class='btn btn-default pull-right'
+                        ng-click="wiExportFromInventory.switchLabelTooltip(wiExportFromInventory.inventoryConfig)">
+                        <i class="fa fa-exchange"></i>
+                    </button>
+                </div>
+                <div style='background-color:white;border:none;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
+                    <form style='width:100%;display:flex;' ng-submit='wiExportFromInventory.prjSearch()'>
+                        <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                        <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiExportFromInventory.filter'
+                            size='10'>
+                    </form>
+                </div>
+                <!-- <wi-base-treeview name="exportTreeview" config="wiExportFromInventory.projectConfig" container="wiExportFromInventory"
+                    on-select-function="wiExportFromInventory.selectProjectNode" filter="{{wiExportFromInventory.prjFilter}}">
+                </wi-base-treeview> -->
+                <div style="flex:1;display:flex;padding:0px;" class="panel-body">
+                    <wi-scroll id-scroll="exportTreeScroll" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiExportFromInventory.upTriggerPrj'
+                        down-trigger='wiExportFromInventory.downTriggerPrj'>
+                        <!-- <wi-base-treeview name="exportTreeview" 
+                            config="wiExportFromInventory.projectConfig" 
+                            container="wiExportFromInventory" 
+                            on-click-function="wiExportFromInventory.prjClickFunction"
+                            filter="{{wiExportFromInventory.prjFilter}}">
+                        </wi-base-treeview> -->
+                        <wi-base-treeview name="exportTreeview" 
+                            config="wiExportFromInventory.inventoryConfig" 
+                            container="wiExportFromInventory" 
+                            on-click-function="wiExportFromInventory.invClickFunction"
+                            filter="{{wiExportFromInventory.filter}}">
+                        </wi-base-treeview>
+                    </wi-scroll>
+                </div>
+            </div>
+        </div>
+        <div class="export-button-container">
+            <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:40%;left:50%;transform:translate(-50%, -50%);"
+                title="export" ng-click='wiExportFromInventory.onSelectButtonClicked()'>
+                <span class="arrow-right-16x16"></span>
+            </button>
+            <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:60%;left:50%;transform:translate(-50%, -50%);"
+                title="delete" ng-click='wiExportFromInventory.onUnSelectButtonClicked()'>
+                <span class="arrow-left-16x16"></span>
+            </button>
+        </div>
+        <div class="center-container">
+            <div class='panel panel-default export-center'>
+                <div class='panel-heading' style='display:flex;'>
+                    <h5 style='flex:1;'>Export Queue</h5>
+                    <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromInventory.clearExportQueueItems()">
+                        <span class='ti-brush-alt'></span>
+                    </button>
+                </div>
+                <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
+                    <form style='width:100%;display:flex;'>
+                        <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                        <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiExportFromInventory.queueFilter'
+                            size='10'>
+                    </form>
+                </div>
+                <wi-base-treeview name="ExportQueueTreeview" 
+                    style="flex:1;overflow-x:hidden;overflow-y:auto;" 
+                    config="wiExportFromInventory.exportQueueItems"
+                    container="wiExportFromInventory" 
+                    on-click-function="wiExportFromInventory.exportQueueClickFunction" 
+                    filter="{{wiExportFromInventory.queueFilter}}">
+                </wi-base-treeview>
+            </div>
+        </div>
+        <div class="export-button-container">
+            <button class="btn btn-default" style="padding:6px 6px;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"
+                title="export" ng-click='wiExportFromInventory.exportAllItems()'>
+                <span class="arrow-right-16x16"></span>
+            </button>
+        </div>
+        <div class="right-container">
+            <div class='panel panel-default export-right'>
+                <div class='panel-heading' style='display:flex;'>
+                    <h5 style='flex:1;'>Las Files</h5>
+                    <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromInventory.lasFiles.length = 0;">
+                        <span class='ti-brush-alt'></span>
+                    </button>
+                </div>
+                <div style='background-color:white;border:none;display: flex;padding-top: 2px;padding-bottom: 2px;' class="panel-heading">
+                    <form style='width:100%;display:flex;'>
+                        <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;" class="fa fa-search"></i>
+                        <input type='text' style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;' ng-model='wiExportFromInventory.lasFilesFilter'
+                            size='10'>
+                    </form>
+                </div>
+                <ul>
+                    <li ng-repeat='file in wiExportFromInventory.lasFiles | filter: wiExportFromInventory.lasFilesFilter'>
+                        <a href="{{file.url}}">
+                            <i style="font-size: 16px;z-index:1;color:#aaa;" class="fa fa-file"></i>
+                            <b>{{file.name}}</b>
+                        </a>
+                    </li>
+                </ul>
+    
+            </div>
+        </div>
+    </div>

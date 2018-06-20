@@ -21,6 +21,7 @@ let app = angular.module(moduleName, []);
 const PROCESSING_SERVICE = 'http://13.251.24.65';
 //dev
 const BASE_URL = 'http://dev.sflow.me';
+// const BASE_URL = 'http://localhost:3000';
 const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const INVENTORY_SERVICE = 'http://13.250.197.210';
 // //inv server for dev
@@ -87,6 +88,8 @@ const SCALE_CURVE = '/project/well/dataset/curve/scale';
 const EDIT_DATA_CURVE = '/project/well/dataset/curve/updateData';
 const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
 const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
+
+const EXPORT_LAS2 = '/export/las2';
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -221,51 +224,51 @@ const LIST_IMAGE_OF_TRACK = '/project/plot/image-track/image/list';
 
 const GET_IMAGE_GALLERY = '/image-list';
 
-const CREATE_CROSSPLOT = '/project/well/cross-plot/new';
-const EDIT_CROSSPLOT = '/project/well/cross-plot/edit';
-const GET_CROSSPLOT = '/project/well/cross-plot/info';
-const DELETE_CROSSPLOT = '/project/well/cross-plot/delete';
-const DUPLICATE_CROSSPLOT = '/project/well/cross-plot/duplicate';
-const SAVE_CROSSPLOT_AS = '/project/well/cross-plot/save-as';
+const CREATE_CROSSPLOT = '/project/cross-plot/new';
+const EDIT_CROSSPLOT = '/project/cross-plot/edit';
+const GET_CROSSPLOT = '/project/cross-plot/info';
+const DELETE_CROSSPLOT = '/project/cross-plot/delete';
+const DUPLICATE_CROSSPLOT = '/project/cross-plot/duplicate';
+const SAVE_CROSSPLOT_AS = '/project/cross-plot/save-as';
 
-const CREATE_POINTSET = '/project/well/cross-plot/point-set/new';
-const EDIT_POINTSET = '/project/well/cross-plot/point-set/edit';
-const GET_POINTSET = '/project/well/cross-plot/point-set/info';
-const DELETE_POINTSET = '/project/well/cross-plot/point-set/delete';
+const CREATE_POINTSET = '/project/cross-plot/point-set/new';
+const EDIT_POINTSET = '/project/cross-plot/point-set/edit';
+const GET_POINTSET = '/project/cross-plot/point-set/info';
+const DELETE_POINTSET = '/project/cross-plot/point-set/delete';
 
-const CREATE_POLYGON = '/project/well/cross-plot/polygon/new';
-const EDIT_POLYGON = '/project/well/cross-plot/polygon/edit';
-const GET_POLYGON = '/project/well/cross-plot/polygon/info';
-const DELETE_POLYGON = '/project/well/cross-plot/polygon/delete';
+const CREATE_POLYGON = '/project/cross-plot/polygon/new';
+const EDIT_POLYGON = '/project/cross-plot/polygon/edit';
+const GET_POLYGON = '/project/cross-plot/polygon/info';
+const DELETE_POLYGON = '/project/cross-plot/polygon/delete';
 
-const CREATE_REGRESSIONLINES = '/project/well/cross-plot/regression-line/new';
-const EDIT_REGRESSIONLINES = '/project/well/cross-plot/regression-line/edit';
-const GET_REGRESSIONLINES = '/project/well/cross-plot/regression-line/info';
-const DELETE_REGRESSIONLINES = '/project/well/cross-plot/regression-line/delete';
+const CREATE_REGRESSIONLINES = '/project/cross-plot/regression-line/new';
+const EDIT_REGRESSIONLINES = '/project/cross-plot/regression-line/edit';
+const GET_REGRESSIONLINES = '/project/cross-plot/regression-line/info';
+const DELETE_REGRESSIONLINES = '/project/cross-plot/regression-line/delete';
 
 const GET_PALETTES = '/pal/all';
 
-const CREATE_HISTOGRAM = '/project/well/histogram/new';
-const EDIT_HISTOGRAM = '/project/well/histogram/edit';
-const GET_HISTOGRAM = '/project/well/histogram/info';
-const DELETE_HISTOGRAM = '/project/well/histogram/delete';
-const DUPLICATE_HISTOGRAM = '/project/well/histogram/duplicate';
-const SAVE_HISTOGRAM_AS = '/project/well/histogram/save-as';
+const CREATE_HISTOGRAM = '/project/histogram/new';
+const EDIT_HISTOGRAM = '/project/histogram/edit';
+const GET_HISTOGRAM = '/project/histogram/info';
+const DELETE_HISTOGRAM = '/project/histogram/delete';
+const DUPLICATE_HISTOGRAM = '/project/histogram/duplicate';
+const SAVE_HISTOGRAM_AS = '/project/histogram/save-as';
 
 const CREATE_REF_CURVE = '/project/well/reference-curve/new';
 const EDIT_REF_CURVE = '/project/well/reference-curve/edit';
 const GET_REF_CURVE = '/project/well/reference-curve/info';
 const DELETE_REF_CURVE = '/project/well/reference-curve/delete';
 
-const CREATE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/new';
-const EDIT_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/edit';
-const GET_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/info';
-const DELETE_USER_DEFINE_LINE = '/project/well/cross-plot/user-define-line/delete';
+const CREATE_USER_DEFINE_LINE = '/project/cross-plot/user-define-line/new';
+const EDIT_USER_DEFINE_LINE = '/project/cross-plot/user-define-line/edit';
+const GET_USER_DEFINE_LINE = '/project/cross-plot/user-define-line/info';
+const DELETE_USER_DEFINE_LINE = '/project/cross-plot/user-define-line/delete';
 
-const CREATE_TERNARY = '/project/well/cross-plot/ternary/new';
-const EDIT_TERNARY = '/project/well/cross-plot/ternary/edit';
-const GET_TERNARY = '/project/well/cross-plot/ternary/info';
-const DELETE_TERNARY = '/project/well/cross-plot/ternary/delete';
+const CREATE_TERNARY = '/project/cross-plot/ternary/new';
+const EDIT_TERNARY = '/project/cross-plot/ternary/edit';
+const GET_TERNARY = '/project/cross-plot/ternary/info';
+const DELETE_TERNARY = '/project/cross-plot/ternary/delete';
 
 const GET_CUSTOM_FILLS = '/custom-fill/all';
 const SAVE_CUSTOM_FILLS = '/custom-fill/save';
@@ -315,8 +318,8 @@ const GET_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/info/';
 const EDIT_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/edit/';
 const DELETE_OBJECT_OF_OBJECT_TRACK = '/project/plot/object-track/object/delete/';
 
-const LIST_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/list/'
-const GET_OVERLAY_LINE = '/project/well/cross-plot/overlay-line/info/'
+const LIST_OVERLAY_LINE = '/project/cross-plot/overlay-line/list/'
+const GET_OVERLAY_LINE = '/project/cross-plot/overlay-line/info/'
 
 const GET_INVENTORY = '/user/fullinfo';
 // TASK
@@ -1937,8 +1940,8 @@ Service.prototype.createFlow = function (data, callback) {
     this.post(CREATE_FLOW, data, callback);
 }
 
-Service.prototype.editFlow = function (data, callback) {
-    this.post(EDIT_FLOW, data, callback);
+Service.prototype.editFlow = function (data, callback, options) {
+    this.post(EDIT_FLOW, data, callback, options);
 }
 
 Service.prototype.getFlow = function (idFlow, callback) {
@@ -2064,4 +2067,7 @@ Service.prototype.asyncGetAllUnit = function (payload) {
 };
 Service.prototype.listTaskSpec = function (callback) {
     this.post(GET_TASK_SPEC_LIST, {}, callback);
+}
+Service.prototype.exportLas2 = function(idObjs, callback) {
+    this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
 }
