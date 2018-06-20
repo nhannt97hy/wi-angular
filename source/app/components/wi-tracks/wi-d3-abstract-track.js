@@ -181,13 +181,39 @@ Controller.prototype.registerTrackCallback = function() {
 }
 
 Controller.prototype.zoom = function() {
-    console.log('on track zoom');
+    let self = this;
+    let sign = d3.event.deltaY<0 ? 1:-1;
+    let transformY = self.viTrack.getTransformY();
+    let mouseDepth = transformY.invert(d3.event.offsetY);
+
+    // calculate new factor 
+    let minFactor = (mouseDepth - this.minY) / 10;
+    let maxFactor = (this.maxY - mouseDepth) / 10;
+    if(minFactor < 0 ) minFactor = 0; 
+    if(maxFactor < 0 ) maxFactor = 0; 
+
+    // assign new depth
+    if(sign == 1) {
+        this.minY += minFactor;
+        this.maxY -= maxFactor;
+    } else if (sign == -1) {
+        this.minY -= minFactor;
+        this.maxY += maxFactor;
+    }
+    this.setDepthRange([this.minY, this.maxY]);
 }
 
 Controller.prototype.scroll = function() {
-    let deltaY = d3.event.deltaY;
-    console.log('on track scroll', deltaY, d3.event);
-
+    let sign = d3.event.deltaY<0 ? 1:-1;
+    const _SPEED = (this.maxY - this.minY) / 10;
+    if(sign == 1) {
+        this.minY += _SPEED;
+        this.maxY += _SPEED;
+    } else if (sign == -1) {
+        this.minY -= _SPEED;
+        this.maxY -= _SPEED;
+    }
+    this.setDepthRange([this.minY, this.maxY]);
 }
 
 Controller.prototype.getContextMenu = function () {

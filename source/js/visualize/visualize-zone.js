@@ -20,6 +20,11 @@ function Zone(config) {
 
     this.startDepth = config.startDepth;
     this.endDepth = config.endDepth;
+
+    this.scaleLeft = config.scaleLeft;
+    this.scaleRight = config.scaleRight;
+
+    this.params = config.params || [];
 }
 
 Zone.prototype.getProperties = function() {
@@ -44,12 +49,27 @@ Zone.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'startDepth', props.startDepth);
     Utils.setIfNotNull(this, 'endDepth', props.endDepth);
     Utils.setIfNotNull(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
+    Utils.setIfNotNull(this, 'params', props.params);
+    Utils.setIfNotNull(this, 'scaleLeft', props.scaleLeft);
+    Utils.setIfNotNull(this, 'scaleRight', props.scaleRight);
 
     if (this.startDepth > this.endDepth) {
         let tmp = this.startDepth;
         this.startDepth = this.endDepth;
         this.endDepth = tmp;
     }
+}
+
+Zone.prototype.getWindowX = function() {
+    return [this.scaleLeft, this.scaleRight];
+}
+
+Zone.prototype.getTransformX = function() {
+    let windowX = this.getWindowX();
+    let rangeX = this.getViewportX();
+    return d3.scaleLinear()
+            .domain(windowX)
+            .range(rangeX);
 }
 
 Zone.prototype.init = function(plotContainer) {
@@ -85,10 +105,92 @@ Zone.prototype.init = function(plotContainer) {
     this.text = this.svgGroup.append('text')
         .attr('class', 'vi-zone-text')
         .attr('font-size', 10);
+
+    if(this.params) {
+        this.controlLineContainer = this.svgGroup.append('g')
+            .attr('class', 'vi-zone-control-line-container');
+
+        this.controlLines = this.controlLineContainer.selectAll('line.vi-zone-control-line')
+            .data(self.params || [])
+            .enter()
+            .append('line')
+                .attr('class', 'vi-zone-control-line')
+                .attr('stroke', gUtils.colorGenerator())
+                .attr('stroke-width', '2')
+                .style('cursor', 'col-resize');
+    }
+}
+
+Zone.prototype.onControlinesDrag = function(cb) {
+    let lastOpacity = null;
+    if(this.controlLines) {
+        let self = this;
+        this.controlLines.call(d3.drag()
+            .on('start', function() {
+                lastOpacity = self.svgContainer.attr('fill-opacity') || 1;
+            })
+            .on('drag', function() {
+                self.svgContainer.attr('fill-opacity', 0.75);
+                self.controlLineDragCallback(d3.select(this), cb);
+                self.drawControlLineText([d3.select(this).datum()]);
+            })
+            .on('end', function() {
+                self.svgContainer.attr('fill-opacity', lastOpacity);
+                self.drawControlLineText([]);
+            }))
+    }
+}
+
+Zone.prototype.drawControlLineText = function(params) {
+    if(!this.controlLineContainer || !this.controlLines) return;
+    let self = this;
+    let transformY = this.getTransformY();
+    let transformX = this.getTransformX();
+    let yValue = d3.event.y ? d3.event.y : transformY(self.startDepth);
+    let textGroup =  this.controlLineContainer.selectAll('g.vi-zone-control-line-text').data(params);
+    // enter
+    let group = textGroup.enter()
+                    .append('g')
+                    .attr('class', 'vi-zone-control-line-text');
+    group.append('text')
+            .attr('text-anchor', 'middle');
+    group.append('rect')
+        .attr('height', '2em')
+        .attr('fill', '#f4ce42')
+        .attr('stroke', 'black')
+        .attr('stroke-width', 1);
+
+    textGroup.select('text')
+            .attr('y', yValue - 10)
+            .attr('dx', d => transformX(d.value))
+            .html(d => d.label);
+    let textBBox = textGroup.select('text').node() ? textGroup.select('text').node().getBBox():{width: 40, height: 20};
+    textGroup.select('rect')
+        .attr('width', textBBox.width + 10)
+        .attr('y', yValue - textBBox.height - 13)
+        .attr('x', d => transformX(d.value) - textBBox.width/2 - 5)
+        .lower();
+
+    textGroup.exit()
+        .remove();
+}
+
+Zone.prototype.controlLineDragCallback = function(controlLine, cb) {
+    let self = this;
+    let transformX = self.getTransformX();
+    let xValue = d3.mouse(self.root.node())[0];
+    controlLine
+        .attr('x1', xValue)
+        .attr('x2', xValue);
+    let datum = controlLine.datum();
+    let param = self.params.find(p => p.label == datum.label);
+    param.value = transformX.invert(xValue);
+    cb(param);
 }
 
 Zone.prototype.doPlot = async function(highlight) {
     if (this.startDepth == null || this.endDepth == null) return;
+    let self = this;
 
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
@@ -117,6 +219,27 @@ Zone.prototype.doPlot = async function(highlight) {
         .attr('width', maxX - minX)
         .attr('height', maxY - minY)
         .attr('fill', await this.createFillStyle());
+
+    if(this.controlLines) {
+        let transformX = this.getTransformX();
+        let controlLines = this.controlLines.data(self.params || [])
+        controlLines
+            .enter()
+            .append('line')
+                .attr('class', 'vi-zone-control-line')
+                .attr('stroke', 'black')
+                .attr('stroke-width', '1.5')
+                .style('cursor', 'col-resize');
+        controlLines
+            .attr('x1', d => transformX(d.value))
+            .attr('x2', d => transformX(d.value))
+            .attr('y1', minY)
+            .attr('y2', maxY)
+        controlLines
+            .exit()
+            .remove();
+    }
+
     this.updateHeader();
     this.updateText();
 }
@@ -193,7 +316,7 @@ Zone.prototype.createFillStyle = async function() {
         return patUrl;
     }
     let canvas = document.createElement('canvas');
-    
+
     canvas.width = 128;
     canvas.height = 128;
 
@@ -277,6 +400,12 @@ Zone.prototype.lineDragCallback = function(line) {
     this.rect
         .attr('y', minY)
         .attr('height', maxY - minY);
+
+    if(this.controlLines) {
+        this.controlLines
+            .attr('y1', minY)
+            .attr('y2', maxY);
+    }
 
     this.startDepth = transformY.invert(minY);
     this.endDepth = transformY.invert(maxY);

@@ -89,8 +89,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         } else {
             wiApiService.getZoneTrack(self.getProperties().idZoneTrack, function(zoneTrack) { 
                 console.log('get zone track information: ', zoneTrack);
-                self.viTrack.idZoneSet = zoneTrack.idZoneSet;
-                updateAllZones(zoneTrack.idZoneSet)
+                self.viTrack.idZoneSet = zoneTrack.zone_set ? zoneTrack.zone_set.idZoneSet : null;
+                updateAllZones(zoneTrack.zone_set)
                     .then(function() {
                         updateTrackWellStatus();
                         self.isIdle = true;
@@ -98,16 +98,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             })
         }
 
-        function updateAllZones(newIdZoneSet) {
+        function updateAllZones(zoneset) {
             return new Promise(function(resolve, reject) {
                 // updating all zones
                 self.viTrack.removeAllZones();
-                if(newIdZoneSet) {
-                    wiApiService.getZoneSet(newIdZoneSet, function(zoneset) {
-                        if(zoneset.idZoneSet) {
-                            for (let zone of zoneset.zones) {
-                                self.addZoneToTrack(self.viTrack, zone);
-                            }
+                if(zoneset && zoneset.idZoneSet) {
+                    wiApiService.getZoneSet(zoneset.idZoneSet, function(zonesetResponse) {
+                        for (let zone of zonesetResponse.zones) {
+                            self.addZoneToTrack(self.viTrack, zone);
                         }
                         resolve();
                     })

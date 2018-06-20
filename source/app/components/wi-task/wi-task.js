@@ -614,8 +614,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                                             },
                                             type: 'zone',
                                             children: angular.copy(paramItems),
-                                            startDepth: zone.startDepth,
-                                            endDepth: zone.endDepth
+                                            properties: zone
                                         })
                                 }
                                 return total;
@@ -1161,6 +1160,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         })
     }
 
+    /*************************** THANG: hard code for interative track *****************************/
     this.logTrackProps = {
         width: 2.5,
         title: 'Track',
@@ -1201,11 +1201,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         function updateFunction(config) {
             if(config.curves) {
                 self.currentInput.well = utils.findWellByCurve(config.curves[0].idCurve);
-                async.eachSeries(config.curves, function(curveProps) {
+                async.eachSeries(config.curves, function(curveProps, cb) {
                     wiApiService.dataCurve(curveProps.idCurve, function(dataCurve) {
                         let controller = self.logTrackProps.controller;
                         controller.addCurveToTrack(controller.viTrack, dataCurve, curveProps);
+                        cb();
                     })
+                }, function(err) {
+                    self.currentInput.zoneset = self.taskConfig.inputData[0].children.find(c => c.type == 'zoneset');
                 })
             }
         }
@@ -1222,7 +1225,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                     return {
                         endDepth: c.endDepth,
                         startDepth: c.startDepth,
-                        param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                        name: c.name,
+                        fill: c.fill,
+                        params: c.children.map(cc => {
+                                return {
+                                    label: cc.data.label,
+                                    value: cc.data.value
+                                }
+                        }).filter(p => typeof(p.value) == 'number')
                     }
                 }),
                 idDataset: d.idDataset,
@@ -1236,6 +1246,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             return tmp;
         });
         console.log('input map: ', inputMap);
+        console.log('task config', self.taskConfig);
         let config = {};
         let promises = [];
         promises.push(new Promise(function(resolve) {
@@ -1247,15 +1258,22 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                     callback();
                 });
             }, function(err) {
-                console.log('this is callback function');
                 resolve();
             })
+        }));
+        promises.push(new Promise(function(resolve) {
+            config.zoneset = {
+                name: 'zoneset',
+                zones: inputMap[0].parameters
+            };
+            resolve();
         }))
         Promise.all(promises)
             .then(function() {
                 updateTrack(config);
             });
     }
+    /*************************** END OF HARD CODE *****************************/
 }
 
 const app = angular.module(moduleName, []);

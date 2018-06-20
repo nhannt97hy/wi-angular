@@ -241,7 +241,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.update = update;
     this.isIdle = false;
     function update(callback) {
-        isIdle = false;
         let viTrack = self.viTrack;
         if (!viTrack.isLogTrack()) return;
 
@@ -249,6 +248,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         if(!trackProps.idTrack) {
             // TO DO something without track id (anonymous track - for preview purpose)
+            if(self.zoneset) {
+                self.addZoneSetToTrack(self.zoneset);
+            }
+            self.isIdle = true;
             return;
         }
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
@@ -352,7 +355,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                                 viCurve.changeUnitValue(defaultUnit, currUnit);
                                 cb();
                             })
-                        }
+                        } else cb();
                     })
                 }, function(err) {
                     if(err) console.error(err);
@@ -447,10 +450,28 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         return marker;
     }
     this.addZoneSetToTrack = function (zonesetConfig) {
-        //remove all previous zone
         self.viTrack.removeAllZones();
-        self.viTrack.addZoneSet(zonesetConfig);
+        for(let zone of zonesetConfig.children) {
+            console.log('zone config: ', zone);
+            zone.properties.params = zone.children.map(c => c.data).filter(p => typeof(p.value) == 'number');
+            let viZone = self.viTrack.addZone(zone.properties);
+            viZone.onControlinesDrag(function(param) {
+                if(self.viTrack.currentDrawing != viZone) {
+                    self.viTrack.setCurrentDrawing(viZone);
+                }
+                self.viTrack.drawControlLinesOnCurvesHeaders(zone.properties.params); 
+                $scope.$apply();
+            });
+
+            self.viTrack.onDrawingMouseDown(viZone, function() {
+                $timeout(function() {
+                    self.viTrack.setCurrentDrawing(viZone);
+                })
+            })
+
+        }
     }
+
     this.addAnnotation = function () {
         if (!self.viTrack.isLogTrack()) return;
         // let [topDepth, bottomDepth] = self.wiD3Ctrl.getDepthRangeFromSlidingBar();
@@ -1015,7 +1036,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.onPlotDoubleClick(function () {
             _onPlotDoubleClickCallback(track);
         });
-        track.onCurveDrag(self.getProperties(), function (desTrackComponent) {
+        self.wiD3Ctrl && track.onCurveDrag(self.getProperties(), function (desTrackComponent) {
             let currentCurve = track.getCurrentCurve();
             let curve = currentCurve.getProperties();
             let errorCode = desTrackComponent.controller.verifyDroppedIdCurve(curve.idCurve);
@@ -1509,6 +1530,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
     this.$doCheck = function() {
         wiD3AbstractTrack.prototype.$doCheck.call(self);
+        if(self.zoneset && self.isIdle) {
+            self.viTrack.getZones().forEach(viZone => viZone.doPlot());
+            if(self.viTrack.currentDrawing && self.viTrack.currentDrawing.isZone())
+                self.viTrack.drawControlLinesOnCurvesHeaders(self.viTrack.currentDrawing.params);
+            else 
+                self.viTrack.removeControlLinesOnCurvesHeaders();
+        }
+
     }
 
     this.$onDestroy = function(){
