@@ -13,7 +13,7 @@ function Zone(config) {
     this.id = config.idZone || config.id;
     this.idZoneSet = config.idZoneSet;
     this.idZoneTrack = config.idZoneTrack;
-    this.fill = Utils.isJson(config.fill) ? JSON.parse(config.fill) : config.fill;
+    this.fill = Utils.isJson(config.zone_template) ? JSON.parse(config.zone_template) : config.zone_template;
 
     this.name = config.name || 'Zone';
     this.showName = config.showName == null ? true : config.showName;
@@ -48,7 +48,7 @@ Zone.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'showName', props.showName);
     Utils.setIfNotNull(this, 'startDepth', props.startDepth);
     Utils.setIfNotNull(this, 'endDepth', props.endDepth);
-    Utils.setIfNotNull(this, 'fill', Utils.isJson(props.fill) ? JSON.parse(props.fill) : props.fill);
+    Utils.setIfNotNull(this, 'fill', Utils.isJson(props.zone_template) ? JSON.parse(props.zone_template) : props.zone_template);
     Utils.setIfNotNull(this, 'params', props.params);
     Utils.setIfNotNull(this, 'scaleLeft', props.scaleLeft);
     Utils.setIfNotNull(this, 'scaleRight', props.scaleRight);

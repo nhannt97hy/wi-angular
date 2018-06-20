@@ -637,23 +637,26 @@ Curve.prototype.drawControlLineText = function(params) {
     let headerBox = this.header.node().getBoundingClientRect();
     let transformX = this.getTransformX();
     // enter
-    let textGroup = this.headerSvgContainer.selectAll('g.vi-control-line-header').data(params);
+    let textGroup = this.headerSvgContainer.selectAll('g.vi-control-line-header-text').data(params);
     let group = textGroup.enter().append('g')
-            .attr('class', 'vi-control-line-header');
+            .attr('class', 'vi-control-line-header-text');
     group.append('rect')
-            .attr('width', 50)
             .attr('height', headerBox.height / 2)
             .attr('y', headerBox.height / 2 - 5)
+            .attr('stroke', 'black')
             .attr('fill', '#f4ce42');
     group.append('text')
             .attr('y', headerBox.height * 3 / 4)
             .attr('text-anchor', 'middle')
     // update
-    textGroup.select('rect')
-            .attr('x', d => transformX(d.value) - 25);
     textGroup.select('text')
             .attr('dx', d => transformX(d.value))
-            .html(d => d.value.toFixed(2));
+            .html(d => d.value.toFixed(2))
+            .raise();
+    let textBBox = textGroup.select('text').node() ? textGroup.select('text').node().getBBox() : {width: 40, height: 20};
+    textGroup.select('rect')
+            .attr('width', textBBox.width + 10)
+            .attr('x', d => transformX(d.value) - textBBox.width / 2 - 5);
     // exit
     textGroup.exit()
         .remove();
