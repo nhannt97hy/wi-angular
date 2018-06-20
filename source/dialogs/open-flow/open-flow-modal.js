@@ -7,7 +7,7 @@ module.exports = function(ModalService, callback, additionalFlows = []) {
     this.flows = [];
     this.selectedFlow = null;
     this.getFlowList = function(wiItemDropdownCtrl) {
-      wiApiService.getFlowList({ idProject: project.idProject }, function (flows, err) {
+      wiApiService.getFlowList({ idProject: project.idProject }, function(flows, err) {
         if (err) return;
         self.flows = additionalFlows;
         wiItemDropdownCtrl.items = self.flows.concat(flows).map((flow) => ({
@@ -24,14 +24,46 @@ module.exports = function(ModalService, callback, additionalFlows = []) {
     this.deleteFlow = function(flowItem, $event, wiItemDropdownCtrl) {
       $event.stopPropagation();
       $event.preventDefault();
-      wiApiService.removeFlow(flowItem.properties.idFlow, function (resFlow, err) {
-        if (err) return;
-        wiComponentService.emit('flow.deleted', resFlow.idFlow);
-        self.getFlowList(wiItemDropdownCtrl);
+      if (flowItem.properties.new) {
+        wiComponentService.emit('flow.deleted', flowItem.properties.idFlow);
+      } else {
+        wiApiService.removeFlow(flowItem.properties.idFlow, function(resFlow, err) {
+          if (err) return;
+          wiComponentService.emit('flow.deleted', resFlow.idFlow);
+          self.getFlowList(wiItemDropdownCtrl);
+        });
+      }
+    };
+    this.newFlow = function() {
+      const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+      const now = Date.now();
+      layoutManager.putTabRight({
+        id: 'flow' + now,
+        title: 'New Flow',
+        tabIcon: 'workflow-16x16',
+        componentState: {
+          html: `<wi-flow-designer new="true" id="${now}"></wi-flow-designer>`,
+          model: {
+            type: 'flow',
+            id: now,
+          },
+        },
       });
+      setTimeout(() => {
+        const flowCtrl = wiComponentService.getComponent('flow' + now);
+        close(flowCtrl.flow);
+      }, 100);
     };
     this.close = function (flow) {
-      close(flow);
+      if (!flow) return close();
+      if (flow.new) {
+        close(flow);
+      } else {
+        wiApiService.getFlow(flow.idFlow, function (resFlow, err) {
+          if (err) close();
+          else close(resFlow);
+        })
+      }
     };
   }
 

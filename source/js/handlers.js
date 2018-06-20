@@ -1438,15 +1438,17 @@ exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
     let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
-    let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
+    // let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
+    let spec = listSpec[0];
     const now = Date.now();
     layoutManager.putTabRight({
         id: 'wiTask' + now,
         title: 'Clay Volume Gamma Ray',
         tabIcon: 'workflow-16x16',
         componentState: {
-            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}" task-config="${spec.content}"></wi-task>`,
-            name: 'wiTask' + now
+            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}" task-config="spec"></wi-task>`,
+            name: 'wiTask' + now,
+            spec: spec
         }
     })
 }
@@ -1491,15 +1493,17 @@ exports.PorosityDensityButtonClicked = function() {
     console.log('PorosityDensityButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
     let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
-    let spec = listSpec.find(sp => sp.name == 'Density' && sp.group == 'Porosity');
+    // let spec = listSpec.find(sp => sp.name == 'Density' && sp.group == 'Porosity');
+    let spec = listSpec[1];
     const now = Date.now();
     layoutManager.putTabRight({
         id: 'wiTask' + now,
         title: 'Porosity Density',
         tabIcon: 'workflow-16x16',
         componentState: {
-            html: `<wi-task name="Porosity Density" id="${now}" task-config="${spec.content}"></wi-task>`,
-            name: 'wiTask' + now
+            html: `<wi-task name="Porosity Density" id="${now}" task-config="spec"></wi-task>`,
+            name: 'wiTask' + now,
+            spec: spec
         }
     })
 }
