@@ -87,13 +87,10 @@
                                 <div style="height:100%;display:flex;flex-direction:row;padding:10px;">
                                     <div class="panel panel-default tree-side">
                                         <div style='display:flex;' class='panel-heading'>
-                                            <h5 style='margin-right:10px;'>Project</h5>
                                             <wi-item-dropdown ng-show='!wiModal.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'"
-                                                on-wi-dropdown-init='wiModal.getProjectList' on-item-changed="wiModal.projectChanged">
+                                            on-wi-dropdown-init='wiModal.getProjectList'
+                                            on-item-changed="wiModal.projectChanged">
                                             </wi-item-dropdown>
-                                            <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiModal.refreshProject()">
-                                                <i class="fa fa-refresh"></i>
-                                            </button>
                                         </div>
                                         <div style='margin: 5px;position: relative;'>
                                             <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
@@ -113,8 +110,7 @@
                                     </div>
                                     <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiModal.droppableSetting();">
                                         <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
-                                            <div class="panel-heading">
-                                            </div>
+                                            <div class="panel-heading"></div>
                                             <div style='margin: 5px;position: relative;'>
                                                 <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
                                                 <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiModal.inputFilter' size='10'>
@@ -134,7 +130,6 @@
                     <wi-tab heading="Configurations">
                         <div class="container-fluid">
                             <form class="form-horizontal form-condensed">
-                                <p></p>
                                 <div class="row">
                                     <div class="col-sm-2 text-center padding-bottom-1em">
                                         <strong>Scales</strong>
@@ -174,50 +169,6 @@
                                         <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.minorX">
                                     </div>
                                 </div>
-                                <hr>
-                                <!-- <div class="row padding-bottom-0_5em">
-                                    <div class="col-sm-5">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-4 font-weight-normal">
-                                                Point Symbol
-                                            </label>
-                                            <div class="col-sm-8">
-                                                <ui-select theme="bootstrap" ng-model="wiModal.crossplotModelProps.pointsets[0].pointSymbol" search-enabled='false'>
-                                                    <ui-select-match>
-                                                        <div ng-repeat="type in wiModal.selectPointSymbol" ng-if="wiModal.crossplotModelProps.pointsets[0].pointSymbol==type">
-                                                            <canvas id="{{type}}-match" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match', type)"></canvas>{{type}}
-                                                        </div>
-                                                    </ui-select-match>
-                                                    <ui-select-choices repeat="type in wiModal.selectPointSymbol" position="down">
-                                                        <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>&nbsp;{{type}}
-                                                    </ui-select-choices>
-                                                </ui-select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-4 font-weight-normal">Point Size</label>
-                                            <div class="col-sm-8">
-                                                <input type="number" class="form-control wi-form-control" ng-model="wiModal.crossplotModelProps.pointsets[0].pointSize">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-3 font-weight-normal">
-                                                Color
-                                            </label>
-                                            <div class="col-sm-9">
-                                                <div class="float-left">
-                                                    <button type="button" ng-click="wiModal.colorSymbol();" ng-style="{'background-color':wiModal.crossplotModelProps.pointsets[0].pointColor}"
-                                                        class="form-control wi-form-control width-80px thick-border">
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
                             </form>
                         </div>
                     </wi-tab>

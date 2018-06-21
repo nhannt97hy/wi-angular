@@ -164,6 +164,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 };
                 self.curvesProperties.push(data);
             });
+            let intervalDepthTopArr = new Array();
+            let intervalDepthBottomArr = new Array();
+            xplotProps.pointsets.forEach(ps => {
+                intervalDepthTopArr.push(ps.intervalDepthTop);
+                intervalDepthBottomArr.push(ps.intervalDepthBottom);
+            });
             self.config = xplotProps.config = {
                 logX: xplotProps.pointsets[0].logX,
                 logY: xplotProps.pointsets[0].logY,
@@ -171,14 +177,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 majorY: xplotProps.pointsets[0].majorY,
                 minorX: xplotProps.pointsets[0].minorX,
                 minorY: xplotProps.pointsets[0].minorY,
-                decimalsX: xplotProps.pointsets[0].decimalsX,
-                decimalsY: xplotProps.pointsets[0].decimalsY,
+                decimalsX: self.config.decimalsX,
+                decimalsY: self.config.decimalsY,
                 scale: {
                     left: xplotProps.pointsets[0].scaleLeft,
                     right: xplotProps.pointsets[0].scaleRight,
                     bottom: xplotProps.pointsets[0].scaleBottom,
                     top: xplotProps.pointsets[0].scaleTop
                 },
+                intervalDepthTop: d3.min(intervalDepthTopArr),
+                intervalDepthBottom: d3.max(intervalDepthBottomArr),
                 isShowWiZone: xplotProps.pointsets[0].isShowWiZone,
                 referenceDisplay: xplotProps.pointsets[0].referenceDisplay
             };

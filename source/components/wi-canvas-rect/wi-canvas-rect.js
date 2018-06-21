@@ -24,6 +24,7 @@ function Controller(wiComponentService, wiPatternService, $timeout) {
         if(self.pattern.toLowerCase() == "none" || self.pattern.toLowerCase() == "solid") {
             context.fillStyle = self.background;
             context.fillRect(0, 0, canvas.width, canvas.height);
+            return;
         }
         wiPatternService.createPattern(context, self.pattern, self.foreground, self.background, function(pattern) {
             context.fillStyle = pattern;
