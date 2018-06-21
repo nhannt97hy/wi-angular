@@ -2071,3 +2071,6 @@ Service.prototype.listTaskSpec = function (callback) {
 Service.prototype.exportLas2 = function(idObjs, callback) {
     this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
 }
+Service.prototype.getLasFileUrl = function (url) {
+    return BASE_URL + url;
+}
