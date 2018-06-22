@@ -492,31 +492,55 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     idWell: set.wellProps.idWell,
                     idDataset: set.idDataset,
                     idCurve: curve.idCurve,
-                    options: {},
                     flag: set.flag
                 };
 
-                self.config.scale.left = curve.family.family_spec[0].minScale;
-                self.config.scale.right = curve.family.family_spec[0].maxScale;
+                let lineColor = null;
 
-                if (curveProps.idCurve) {
-                    if (curveProps.flag == 'create') {
-                        if (self.curvesProperties.findIndex(cp => {
-                            return cp.idDataset == curveProps.idDataset;
-                        }) == -1) {
-                            self.curvesProperties.push(curveProps);
-                        } else {
-                            let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
-                            self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
-                        }
-                        // if (!set.drop) set.flag = 'edit';
-                    } else if (curveProps.flag == 'edit') {
-                        let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
-                        self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
-                    }
+                if (!curve.family) {
+                    wiApiService.infoCurve(curveProps.idCurve, function (info) {
+                        self.config.scale.left = info.LineProperty.minScale;
+                        self.config.scale.right = info.LineProperty.maxScale;
+                        lineColor = info.LineProperty.lineColor;
+                    });
+                } else {
+                    self.config.scale.left = curve.family.family_spec[0].minScale;
+                    self.config.scale.right = curve.family.family_spec[0].maxScale;
+                    lineColor = curve.family.family_spec[0].lineColor
                 }
+
+                let timerHandle = setInterval(function() {
+                    let isReady = self.config.scale.left && self.config.scale.right && lineColor;
+                    if (isReady) {
+                        clearInterval(timerHandle);
+                        if (curveProps.idCurve) {
+                            if (curveProps.flag == 'create') {
+                                if (self.curvesProperties.findIndex(cp => {
+                                    return cp.idDataset == curveProps.idDataset;
+                                }) == -1) {
+                                    curveProps.options = {
+                                        plot: 'Bar',
+                                        lineColor: lineColor,
+                                        showGaussian: false,
+                                        showCumulative: true
+                                    };
+                                    self.curvesProperties.push(curveProps);
+                                } else {
+                                    let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
+                                    curveProps.options = props.options;
+                                    self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                                }
+                                // if (!set.drop) set.flag = 'edit';
+                            } else if (curveProps.flag == 'edit') {
+                                let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
+                                curveProps.options = props.options;
+                                self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                            }
+                            self.histogramModelProps.curvesProperties = self.curvesProperties;
+                        }
+                    }
+                }, 500);
             });
-            self.histogramModelProps.curvesProperties = self.curvesProperties;
         }
 
         function selectHandler(currentNode, noLoadData, rootNode, callback) {
@@ -791,13 +815,12 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
         }
 
         // For configurations
-        // this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-        // this.colorSymbol = function () {
-        //     DialogUtils.colorPickerDialog(ModalService, self.histogramModelProps.pointsets[0].pointColor, function (colorStr) {
-        //         self.histogramModelProps.pointsets[0].pointColor = colorStr;
-        //     });
-        // };
-        // this.drawIcon = utils.drawIcon;
+        this.pickColor = function (props) {
+            DialogUtils.colorPickerDialog(ModalService, props.options.lineColor, function (colorStr) {
+                props.options.lineColor = colorStr;
+                if (!props.flag) props.flag = 'edit';
+            });
+        };
 
         this.checkLogaStatus = function () {
             if (self.config.loga) {
@@ -850,30 +873,50 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     rightScale: self.config.scale.right,
                     loga: self.config.loga,
                     showGrid: self.config.showGrid,
-                    showCumulative: self.config.showCumulative,
+                    // showCumulative: self.config.showCumulative,
                     flipHorizontal: self.config.flipHorizontal,
-                    plot: self.config.plot,
+                    // plot: self.config.plot,
                     plotType: self.config.plotType
                 };
                 wiApiService.editHistogram(dataRequest, function (hisProps) {
                     wiApiService.getHistogram(hisProps.idHistogram, function (histogram) {
-                        self.histogramModelProps = histogram;
-                        self.histogramModelProps.curves = self.curves = histogram.curves;
-                        self.histogramModelProps.config = self.config;
-                        self.histogramModelProps.curvesProperties = self.curvesProperties;
-                        self.histogramModelProps.wells = new Object();
-                        histogram.curves.forEach(curve => {
-                            let w = utils.findWellByCurve(curve.idCurve);
-                            let well = {
-                                idWell: w.idWell,
-                                topDepth: w.topDepth,
-                                bottomDepth: w.bottomDepth,
-                                step: w.step
-                            };
-                            self.histogramModelProps.wells[curve.idCurve] = well;
+                        async.eachSeries(histogram.curves, function (curve, cb) {
+                            let props = self.curvesProperties.find(cp => {
+                                return cp.idCurve == curve.idCurve;
+                            });
+                            props.options.idHistogramCurveSet = curve.histogram_curve_set.idHistogramCurveSet;
+                            wiApiService.editHistogramCurveSet(props.options, function (returnData) {
+                                curve.histogram_curve_set = curve.options = returnData;
+                                cb();
+                            });
+                        }, function (err) {
+                            if (err) {
+                                console.error(err);
+                                return;
+                            }
+                            if (histogram.curves[0]) {
+                                self.config.showGaussian = histogram.curves[0].histogram_curve_set.showGaussian;
+                                self.config.showCumulative = histogram.curves[0].histogram_curve_set.showCumulative;
+                                self.config.plot = histogram.curves[0].histogram_curve_set.plot;
+                            }
+                            self.histogramModelProps = histogram;
+                            self.histogramModelProps.curves = self.curves = histogram.curves;
+                            self.histogramModelProps.config = self.config;
+                            self.histogramModelProps.curvesProperties = self.curvesProperties;
+                            self.histogramModelProps.wells = new Object();
+                            histogram.curves.forEach(curve => {
+                                let w = utils.findWellByCurve(curve.idCurve);
+                                let well = {
+                                    idWell: w.idWell,
+                                    topDepth: w.topDepth,
+                                    bottomDepth: w.bottomDepth,
+                                    step: w.step
+                                };
+                                self.histogramModelProps.wells[curve.idCurve] = well;
+                            });
+                            _histogramModel.properties = self.histogramModelProps; // save change back to the data tree
+                            if (callback) callback(self.histogramModelProps);
                         });
-                        _histogramModel.properties = self.histogramModelProps; // save change back to the data tree
-                        if (callback) callback(self.histogramModelProps);
                     });
                 });
             } else {

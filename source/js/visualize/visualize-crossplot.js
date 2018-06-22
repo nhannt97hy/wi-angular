@@ -510,6 +510,7 @@ Crossplot.prototype.clearAll = function () {
 
 Crossplot.prototype.adjustSize = function() {
     let rect = this.getPlotRect();
+    this.rect = rect;
     this.canvas
         .attr('width', rect.width)
         .attr('height', rect.height);
@@ -762,8 +763,8 @@ Crossplot.prototype.updateAxesLabels = function () {
     let self = this;
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
-    let _PADDING_BOTTOM = 20;
-    let _PADDING_LEFT = 20;
+    let _PADDING_BOTTOM = 10;
+    let _PADDING_LEFT = 10;
 
     let labelXElem = this.axesContainer.select('text.vi-crossplot-axis-x-label')
         .text(this.getLabelX());

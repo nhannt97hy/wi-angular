@@ -14,7 +14,7 @@
                                 <div style='padding:10px;display:flex;flex-direction:row;height:100%;'>
                                     <div class='panel panel-default tree-side'>
                                         <div class='panel-heading' style='display: flex;'>
-                                            <h5 style="flex:1;">Data type</h5>
+                                            <h5 style="flex:1" class="margin-top-0_5em">Data type</h5>
                                             <div style='flex:2;text-align: right;'>
                                                 <label class="btn btn-default" ng-click="wiModal.onSelectionTypeChanged(wiModal.FAMILY_GROUP_SELECTION)" ng-class='{active: wiModal.selectionType==wiModal.FAMILY_GROUP_SELECTION}'
                                                     style="margin-right: 5px;" title='Family Group'>
@@ -87,7 +87,9 @@
                             <form class="form-condensed">
                                 <div style="height:100%;display:flex;flex-direction:row;padding:10px;">
                                     <div class="panel panel-default tree-side">
-                                        <div style='display:flex;' class='panel-heading'></div>
+                                        <div style='display:flex;' class='panel-heading'>
+                                            <h5>Project</h5>
+                                        </div>
                                         <div style='margin: 5px;position: relative;'>
                                             <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
                                             <input type='text' class='form-control' style='text-indent:1.5em;' ng-if='wiModal.idxTab==0' ng-model='wiModal.prjFilter'
@@ -107,6 +109,7 @@
                                     <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiModal.droppableSetting();">
                                         <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
                                             <div class="panel-heading">
+                                                <h5>Input Data</h5>
                                                 <wi-item-dropdown ng-show='!wiModal.isFrozen' style='flex:1;margin:5px 0;' class='height24px' icon="'project-open-16x16'" on-wi-dropdown-init='wiModal.getProjectList'
                                                 on-item-changed="wiModal.projectChanged">
                                                 </wi-item-dropdown>
@@ -117,8 +120,9 @@
                                             </div>
                                             <div style="flex: 1; position: relative; overflow-y: auto;">
                                                 <wi-base-treeview id='{{wiModal.taskDataTreeName}}' name='wiCrossplotFormatModalTaskDataTreeName' style="margin-left: 0px;" config='wiModal.taskConfig.inputData'
-                                                    on-click-function='wiModal.taskClickFuntion' show-context-menu-function='wiModal.taskShowContextMenu'
-                                                    filter='{{wiModal.inputFilter}}' filter-by='{{wiModal.typeFilter}}'></wi-base-treeview>
+                                                on-click-function='wiModal.taskClickFuntion' show-context-menu-function='wiModal.taskShowContextMenu'
+                                                filter='{{wiModal.inputFilter}}' filter-by='{{wiModal.typeFilter}}'>
+                                                </wi-base-treeview>
                                                 <div ng-if="!wiModal.taskConfig.inputData.length" class='dropLabel'>DROP DATASET HERE</div>
                                             </div>
                                         </div>
@@ -131,69 +135,131 @@
                         <div class="container-fluid">
                             <form class="form-horizontal form-condensed">
                                 <div class="row">
-                                    <div class="col-sm-2 text-center padding-bottom-1em">
-                                        <strong>Scales</strong>
+                                    <div class="col-sm-6 text-center padding-bottom-0_5em padding-top-1em">
+                                        <div class="row padding-bottom-0_5em">
+                                            <strong>Scales</strong>
+                                        </div>
+                                        <div class="row padding-bottom-0_5em">
+                                            <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Left</label>
+                                            <div class="col-sm-3 padding-right-0 padding-left-0">
+                                                <input type="number" class="form-control wi-form-control" id="scaleLeft" ng-model="wiModal.config.scale.left"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.config.scale.left, 'scaleLeft')">
+                                            </div>
+                                            <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Right</label>
+                                            <div class="col-sm-3 padding-right-0 padding-left-0">
+                                                <input type="number" class="form-control wi-form-control" id="scaleRight" ng-model="wiModal.config.scale.right"
+                                                    ng-change="wiModal.checkLogValueX(wiModal.config.scale.right, 'scaleRight')">
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <label class="font-weight-normal">
+                                                    <input type="checkbox" value="" ng-model="wiModal.config.logX" ng-change="wiModal.checkLogStatus()">Log
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Bottom</label>
+                                            <div class="col-sm-3 padding-right-0 padding-left-0">
+                                                <input type="number" class="form-control wi-form-control" id="scaleBottom" ng-model="wiModal.config.scale.bottom"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.config.scale.bottom, 'scaleBottom')">
+                                            </div>
+                                            <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Top</label>
+                                            <div class="col-sm-3 padding-right-0 padding-left-0">
+                                                <input type="number" class="form-control wi-form-control" id="scaleTop" ng-model="wiModal.config.scale.top"
+                                                    ng-change="wiModal.checkLogValueY(wiModal.config.scale.top, 'scaleTop')">
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <label class="font-weight-normal">
+                                                    <input type="checkbox" value="" ng-model="wiModal.config.logY" ng-change="wiModal.checkLogStatus()">Log
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-2 text-center padding-bottom-1em">
-                                        <strong>Major</strong>
+                                    <div class="col-sm-3 text-center padding-bottom-0_5em padding-top-1em">
+                                        <div class="padding-bottom-0_5em">
+                                            <strong>Major</strong>
+                                        </div>
+                                        <div class="padding-bottom-0_5em">
+                                            <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.majorX">
+                                        </div>
+                                        <div>
+                                            <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.majorY">
+                                        </div>
                                     </div>
-                                    <div class="col-sm-2 text-center padding-bottom-1em">
-                                        <strong>Minor</strong>
+                                    <div class="col-sm-3 text-center padding-bottom-0_5em padding-top-1em">
+                                        <div class="padding-bottom-0_5em">
+                                            <strong>Minor</strong>
+                                        </div>
+                                        <div class="padding-bottom-0_5em">
+                                            <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.minorX">
+                                        </div>
+                                        <div>
+                                            <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.minorY">
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div class="row padding-bottom-0_5em">
-                                    <div class="col-sm-2">
-                                        <label class="control-label col-sm-4 font-weight-normal">Left</label>
-                                        <div class="col-sm-8 padding-right-0">
-                                            <input type="number" class="form-control wi-form-control" id="scaleLeft" ng-model="wiModal.config.scale.left"
-                                                ng-change="wiModal.checkLogValueX(wiModal.config.scale.left, 'scaleLeft')">
+                                <hr>
+                                <div style="height:100%;display:flex;flex-direction:row;padding:10px;">
+                                    <div class="panel panel-default tree-side">
+                                        <div style="flex: 1; position: relative; overflow-y: auto;">
+                                            <wi-base-treeview id='{{wiModal.taskDataTreeName}}' name='wiCrossplotFormatModalTaskDataTreeName' style="margin-left: 0px;" config='wiModal.taskConfig.inputData'>
+                                            </wi-base-treeview>
                                         </div>
                                     </div>
-                                    <div class="col-sm-2">
-                                        <label class="control-label col-sm-4 font-weight-normal">Right</label>
-                                        <div class="col-sm-8 padding-right-0">
-                                            <input type="number" class="form-control wi-form-control" id="scaleRight" ng-model="wiModal.config.scale.right"
-                                                ng-change="wiModal.checkLogValueX(wiModal.config.scale.right, 'scaleRight')">
+                                    <div style="flex:2;margin-left: 5px;">
+                                        <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
+                                            <ul>
+                                                <li style="list-style-type: none"
+                                                ng-repeat="props in wiModal.curvesProperties"
+                                                ng-if="props.flag != 'delete'">
+                                                    <div class="row">
+                                                        <div class="col-sm-5">
+                                                            <div class="form-group">
+                                                                <label class="col-sm-4 font-weight-normal">Symbol</label>
+                                                                <div class="col-sm-8">
+                                                                    <ui-select theme="bootstrap"
+                                                                        ng-model="props.options.pointSymbol"
+                                                                        ng-change="wiModal.onChange(props)"
+                                                                        search-enabled='false'>
+                                                                        <ui-select-match>
+                                                                            <div ng-repeat="type in wiModal.pointSymbolList"
+                                                                                ng-if="props.options.pointSymbol==type">
+                                                                                <canvas id="{{type}}-match-{{props.idWell}}" class="valign-bottom" width="20" height="20" wi-element-ready="wiModal.drawIcon(type+'-match-'+props.idWell, type)"></canvas>{{type}}
+                                                                            </div>
+                                                                        </ui-select-match>
+                                                                        <ui-select-choices repeat="type in wiModal.pointSymbolList" position="down">
+                                                                            <canvas id="{{type}}" width="20" height="20" class="valign-bottom" wi-element-ready="wiModal.drawIcon(type, type)"></canvas>&nbsp;{{type}}
+                                                                        </ui-select-choices>
+                                                                    </ui-select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label class="col-sm-4 font-weight-normal">Size</label>
+                                                                <div class="col-sm-8">
+                                                                    <input type="number" class="form-control wi-form-control"
+                                                                        ng-model="props.options.pointSize"
+                                                                        ng-change="wiModal.onChange(props)">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group">
+                                                                <label class="col-sm-3 font-weight-normal">Color</label>
+                                                                <div class="col-sm-9">
+                                                                    <div class="float-left">
+                                                                        <button type="button" ng-click="wiModal.colorSymbol(props);"
+                                                                            ng-style="{'background-color':props.options.pointColor}"
+                                                                            class="form-control wi-form-control width-80px thick-border">
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
                                         </div>
-                                    </div>
-                                    <div class="col-sm-1">
-                                        <label class="font-weight-normal">
-                                            <input type="checkbox" value="" ng-model="wiModal.config.logX" ng-change="wiModal.checkLogStatus()">Log
-                                        </label>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.majorX">
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.minorX">
-                                    </div>
-                                </div>
-                                <div class="row padding-bottom-0_5em">
-                                    <div class="col-sm-2">
-                                        <label class="control-label col-sm-4 font-weight-normal">Bottom</label>
-                                        <div class="col-sm-8 padding-right-0">
-                                            <input type="number" class="form-control wi-form-control" id="scaleBottom" ng-model="wiModal.config.scale.bottom"
-                                                ng-change="wiModal.checkLogValueY(wiModal.config.scale.bottom, 'scaleBottom')">
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <label class="control-label col-sm-4 font-weight-normal">Top</label>
-                                        <div class="col-sm-8 padding-right-0">
-                                            <input type="number" class="form-control wi-form-control" id="scaleTop" ng-model="wiModal.config.scale.top"
-                                                ng-change="wiModal.checkLogValueY(wiModal.config.scale.top, 'scaleTop')">
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-1">
-                                        <label class="font-weight-normal">
-                                            <input type="checkbox" value="" ng-model="wiModal.config.logY" ng-change="wiModal.checkLogStatus()">Log
-                                        </label>
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.majorY">
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <input type="number" class="form-control wi-form-control" ng-model="wiModal.config.minorY">
                                     </div>
                                 </div>
                             </form>
@@ -213,6 +279,18 @@
         </div>
     </div>
     <style>
+        .margin-bottom-0 {
+            margin-bottom: 0;
+        }
+
+        .margin-top-0_25em {
+            margin-top: 0.25em;
+        }
+
+        .margin-top-0_5em {
+            margin-top: 0.5em;
+        }
+
         wi-tabset>div {
             height: calc(100% - 180px);
         }

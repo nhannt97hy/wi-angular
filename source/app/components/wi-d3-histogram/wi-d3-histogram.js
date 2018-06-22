@@ -22,22 +22,36 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
     let saveHistogram= _.debounce(function (callback) {
-            let config = self.histogramModel.properties.config;
-            let curves = self.histogramModel.properties.curves;
-            let curvesProperties = self.histogramModel.properties.curvesProperties;
-            let wells = self.histogramModel.properties.wells;
-            delete self.histogramModel.properties.config;
-            delete self.histogramModel.properties.curvesProperties;
-            delete self.histogramModel.properties.wells;
-            self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
-            wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
+        let config = self.histogramModel.properties.config;
+        let curves = self.histogramModel.properties.curves;
+        let curvesProperties = self.histogramModel.properties.curvesProperties;
+        let wells = self.histogramModel.properties.wells;
+        delete self.histogramModel.properties.config;
+        delete self.histogramModel.properties.curvesProperties;
+        delete self.histogramModel.properties.wells;
+        self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
+        wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
+            async.eachSeries(curves, function (curve, cb) {
+                wiApiService.editHistogramCurveSet(curve.options, function (retData) {
+                    curve.options = curve.histogram_curve_set = retData;
+                    cb();
+                });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
                 self.histogramModel.properties.config = config;
                 self.histogramModel.properties.curves = curves;
                 self.histogramModel.properties.curvesProperties = curvesProperties;
                 self.histogramModel.properties.wells = wells;
+                self.histogramModel.properties.showGaussian = config.showGaussian;
+                self.histogramModel.properties.showCumulative = config.showCumulative;
+                self.histogramModel.properties.plot = config.plot;
                 if (callback) callback();
             });
-        }, 1000);
+        });
+    }, 1000);
 
     this.saveHistogram = saveHistogram;
 
@@ -51,11 +65,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         delete self.histogramModel.properties.wells;
         self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
         wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
-            self.histogramModel.properties.config = config;
-            self.histogramModel.properties.curves = curves;
-            self.histogramModel.properties.curvesProperties = curvesProperties;
-            self.histogramModel.properties.wells = wells;
-            if (callback) callback();
+            async.eachSeries(curves, function (curve, cb) {
+                wiApiService.editHistogramCurveSet(curve.options, function (retData) {
+                    curve.options = curve.histogram_curve_set = retData;
+                    cb();
+                });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.histogramModel.properties.config = config;
+                self.histogramModel.properties.curves = curves;
+                self.histogramModel.properties.curvesProperties = curvesProperties;
+                self.histogramModel.properties.wells = wells;
+                self.histogramModel.properties.showGaussian = config.showGaussian;
+                self.histogramModel.properties.showCumulative = config.showCumulative;
+                self.histogramModel.properties.plot = config.plot;
+                if (callback) callback();
+            });
         });
     }
     this.saveHistogramNow = saveHistogramNow;
@@ -197,19 +225,25 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let data = {
                     idCurve: curve.idCurve,
                     idDataset: curve.idDataset,
-                    options: {},
+                    options: {
+                        idHistogramCurveSet: curve.histogram_curve_set.idHistogramCurveSet,
+                        plot: curve.histogram_curve_set.plot,
+                        lineColor: curve.histogram_curve_set.lineColor,
+                        showGaussian: curve.histogram_curve_set.showGaussian,
+                        showCumulative: curve.histogram_curve_set.showCumulative
+                    },
                     flag: 'edit'
                 };
                 self.curvesProperties.push(data);
             })
             self.config = hisProps.config = {
-                showGaussian: hisProps.showGaussian,
-                showCumulative: hisProps.showCumulative,
+                showGaussian: hisProps.curves[0].histogram_curve_set.showGaussian,
+                showCumulative: hisProps.curves[0].histogram_curve_set.showCumulative,
                 loga: hisProps.loga,
                 showGrid: hisProps.showGrid,
                 flipHorizontal: hisProps.flipHorizontal,
                 plotType: hisProps.plotType,
-                plot: hisProps.plot,
+                plot: hisProps.curves[0].histogram_curve_set.plot || self.config.plot,
                 numOfDivisions: hisProps.divisions,
                 scale: {
                     left: hisProps.leftScale,
@@ -218,6 +252,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 isShowWiZone: hisProps.isShowWiZone,
                 referenceDisplay: hisProps.referenceDisplay
             };
+            hisProps.showGaussian = self.config.showGaussian;
+            hisProps.showCumulative = self.config.showCumulative;
+            hisProps.plot = self.config.plot;
             hisProps.curvesProperties = self.curvesProperties;
             self.wells = hisProps.wells = new Object();
             hisProps.curves.forEach(curve => {
@@ -229,6 +266,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     step: w.step
                 };
                 self.wells[curve.idCurve] = hisProps.wells[curve.idCurve] = well;
+                curve.options = curve.histogram_curve_set;
             });
             self.histogramModel.properties = hisProps;
             self.createVisualizeHistogram(self.histogramModel.properties);
@@ -366,10 +404,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         self.curvesProperties = histogramProperties.curvesProperties;
                         self.wells = histogramProperties.wells;
 
+                        histogramProperties.showGaussian = self.config.showGaussian;
+                        histogramProperties.showCumulative = self.config.showCumulative;
+                        histogramProperties.plot = self.config.plot;
+
                         self.histogramModel.properties = histogramProperties;
-                        self.visHistogram.updateHistogram(histogramProperties);
+                        self.visHistogram.updateHistogram(self.histogramModel.properties);
                         if (!histogramProperties.curves.length) {
-                            self.visHistogram.footerContainer.selectAll('*').remove();
                             self.visHistogram.container.selectAll('*').remove();
                             delete self.visHistogram;
                         }
@@ -450,8 +491,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     self.histogramModel.properties.flipHorizontal = !self.histogramModel.properties.flipHorizontal;
                     self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;
                     self.config.flipHorizontal = self.histogramModel.properties.flipHorizontal;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowGrid",
@@ -462,8 +503,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
                     self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
                     self.config.showGrid = self.histogramModel.properties.showGrid;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowGaussian",
@@ -472,10 +513,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 checked: self.config.showGaussian,
                 handler: function (index) {
                     self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
+                    let showGaussian = self.histogramModel.properties.showGaussian;
+                    self.histogramModel.properties.curves.forEach(c => {
+                        c.options.showGaussian = showGaussian;
+                    });
+                    self.curvesProperties.forEach(cp => {
+                        cp.options.showGaussian = showGaussian;
+                    });
+                    self.curves = self.visHistogram.curves = self.histogramModel.properties.curves;
                     self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
                     self.config.showGaussian = self.histogramModel.properties.showGaussian;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowAxisYAsPercent",
@@ -488,8 +537,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     else self.histogramModel.properties.plotType = "Frequency";
                     self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
                     self.config.plotType = self.histogramModel.properties.plotType;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowReferenceWindow",
@@ -507,10 +556,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 checked: self.config.showCumulative,
                 handler: function (index) {
                     self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
+                    let showCumulative = self.histogramModel.properties.showCumulative;
+                    self.histogramModel.properties.curves.forEach(c => {
+                        c.options.showCumulative = showCumulative;
+                    });
+                    self.curvesProperties.forEach(cp => {
+                        cp.options.showCumulative = showCumulative;
+                    });
+                    self.curves = self.visHistogram.curves = self.histogramModel.properties.curves;
                     self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
                     self.config.showCumulative = self.histogramModel.properties.showCumulative;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowTooltip",
@@ -561,6 +618,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.config = hisProps.config;
             self.curvesProperties = hisProps.curvesProperties;
             self.wells = hisProps.wells;
+
+            self.histogramModel.properties.showGaussian = self.config.showGaussian;
+            self.histogramModel.properties.showCumulative = self.config.showCumulative;
+            self.histogramModel.properties.plot = self.config.plot;
 
             self.visHistogram = graph.createHistogram(hisProps, document.getElementById(self.histogramAreaId));
             loadStatistics();

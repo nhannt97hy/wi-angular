@@ -19,17 +19,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.saveCrossplotNow = saveCrossplotNow;
     function saveCrossplotNow(callback) {
         async.series([ function(cb) {
-            let refCurves = self.crossplotModel.properties.reference_curves;
-            self.crossplotModel.properties.reference_curves = null;
+            let config = self.crossplotModel.properties.config;
             let pointsets = self.crossplotModel.properties.pointsets;
-            self.crossplotModel.properties.pointsets = null;
-            let pointSet = self.crossplotModel.properties.pointSet;
-            self.crossplotModel.properties.pointSet = null;
+            let curvesProperties = self.crossplotModel.properties.curvesProperties;
+            delete self.crossplotModel.properties.config;
+            delete self.crossplotModel.properties.curvesProperties;
+            self.crossplotModel.properties.pointsets.forEach(ps => {
+                delete ps.curveX;
+                delete ps.curveY;
+            });
 
-            wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
-                self.crossplotModel.properties.reference_curves = refCurves;
+            wiApiService.editCrossplot(self.crossplotModel.properties, function (returnData) {
+                self.crossplotModel.properties.config = config;
                 self.crossplotModel.properties.pointsets = pointsets;
-                self.crossplotModel.properties.pointSet = pointSet;
+                self.crossplotModel.properties.curvesProperties = curvesProperties;
                 cb();
             });
         }], function(err, result) {
