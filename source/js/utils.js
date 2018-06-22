@@ -3064,17 +3064,6 @@ function getSelectedNode(rootNode) {
 
 exports.getSelectedNode = getSelectedNode;
 
-function getDepthCurve(well) {
-    let length = Math.round((well.bottomDepth - well.topDepth) / well.step) + 1;
-    let depth = new Array(length);
-    for (i = 0; i < length; i++) {
-        depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
-    }
-    return depth;
-}
-
-exports.getDepthCurve = getDepthCurve;
-
 function emitEvent(eventName, eventData) {
     let event = new CustomEvent(eventName, {detail: eventData});
     document.dispatchEvent(event);

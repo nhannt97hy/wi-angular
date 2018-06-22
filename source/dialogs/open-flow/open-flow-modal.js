@@ -23,36 +23,21 @@ module.exports = function(ModalService, callback, additionalFlows = []) {
     };
     this.deleteFlow = function(flowItem, $event, wiItemDropdownCtrl) {
       $event.stopPropagation();
-      $event.preventDefault();
-      if (flowItem.properties.new) {
-        wiComponentService.emit('flow.deleted', flowItem.properties.idFlow);
-      } else {
+      const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+      DialogUtils.confirmDialog(ModalService, 'Delete flow', `Are you sure to delete flow <b>${flowItem.properties.name}</b>?`, function (yes) {
+        if (!yes) return;
         wiApiService.removeFlow(flowItem.properties.idFlow, function(resFlow, err) {
           if (err) return;
           wiComponentService.emit('flow.deleted', resFlow.idFlow);
           self.getFlowList(wiItemDropdownCtrl);
         });
-      }
+      })
     };
     this.newFlow = function() {
-      const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-      const now = Date.now();
-      layoutManager.putTabRight({
-        id: 'flow' + now,
-        title: 'New Flow',
-        tabIcon: 'workflow-16x16',
-        componentState: {
-          html: `<wi-flow-designer new="true" id="${now}"></wi-flow-designer>`,
-          model: {
-            type: 'flow',
-            id: now,
-          },
-        },
-      });
-      setTimeout(() => {
-        const flowCtrl = wiComponentService.getComponent('flow' + now);
-        close(flowCtrl.flow);
-      }, 100);
+      const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+      globalHandlers.NewFlowButtonClicked((newFlow) => {
+        close(newFlow);
+      })
     };
     this.close = function (flow) {
       if (!flow) return close();

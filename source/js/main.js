@@ -65,6 +65,7 @@ let wiExportFromProject = require('./wi-export-from-project');
 let wiTask = require('./wi-task');
 let wiFlowDesigner = require('./wi-flow-designer');
 let wiFlowEngine = require('./wi-flow-engine');
+let wiPetrophysics = require('./wi-petrophysics');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -185,10 +186,11 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiExportFromInventory.name,
-        wiExportFromProject.name,        
+        wiExportFromProject.name,
         wiTask.name,
         wiFlowDesigner.name,
         wiFlowEngine.name,
+        wiPetrophysics.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -226,9 +228,9 @@ let app = angular.module('wiapp',
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
-        wiPatternService.name, 
+        wiPatternService.name,
 
-        
+
 
         wiCanvasRect.name,
         wiZone.name,

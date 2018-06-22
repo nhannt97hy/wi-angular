@@ -1,6 +1,6 @@
 const name = "wiWorkflowPlayer";
 const moduleName = "wi-workflow-player";
-let petrophysics = require('./petrophysics');
+// let petrophysics = require('./petrophysics');
 
 function Controller(wiComponentService, wiApiService, $timeout, $scope) {
     let self = this;
