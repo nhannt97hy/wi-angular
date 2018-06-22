@@ -14,7 +14,7 @@ module.exports = function (ModalService, callback, groups, _users, company) {
 
         this.groupsConfig = [];
         this.usersConfig = [];
-
+        this.selectedGroup = null;
         this.selectGroupNode = {};
         
         let topIdx = 0;
@@ -356,7 +356,8 @@ module.exports = function (ModalService, callback, groups, _users, company) {
         }
         this.groupClicked = function ($event, $index, node) {
             self.usersConfig = [];
-            self.selectGroupNode = node.properties;
+            // self.selectGroupNode = node.properties;
+            self.selectedGroup = node.properties;
             self.users = node.properties.users;
             setSelectedGroupNode(node);
             loadGroupPerm(node.properties);
