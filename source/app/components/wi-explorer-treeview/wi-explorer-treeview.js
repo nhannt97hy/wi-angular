@@ -25,12 +25,12 @@ function WiExpTreeController(
                 let selectedNodes = wiComponentService.getComponent(wiComponentService.SELECTED_NODES);
                 let dom = null;
                 if (!selectedNodes || selectedNodes.find(n => n.type != 'curve')) {
-                    dom = $(event.currentTarget).find('div:nth-child(2)').clone();
+                    dom = $(event.currentTarget).find('div.item-content').clone();
                     dom.css('pointer-events', 'none');
                 } else {
                     dom = $('<div/>');
                     dom.css('pointer-events', 'none');
-                    dom.append(selectedObjs.find('.wi-parent-content div:nth-child(2)'));
+                    dom.append(selectedObjs.find('.wi-parent-content div.item-content'));
                 }
                 return dom;
             },
@@ -59,10 +59,10 @@ function WiExpTreeController(
                 }
                 async function handleDrop(idCurves) {
                     if (idDataset) {
-                        const curveModels = idCurves.map(idCurve => getModel('curve', idCurve));
-                        copyCurve(curveModels);
-                        const datasetModel = getModel('dataset', idDataset)
-                            pasteCurve(datasetModel);
+                        const curveModels = idCurves.map(idCurve => utils.getModel('curve', idCurve));
+                        utils.copyCurve(curveModels);
+                        const datasetModel = utils.getModel('dataset', idDataset)
+                        utils.pasteCurve(datasetModel);
                         return;
                     }
                     if (wiSlidingBarCtrl) {

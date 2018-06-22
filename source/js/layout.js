@@ -132,7 +132,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     layoutManager.registerComponent('html-block', function (container, componentState) {
         let html = componentState.html;
         let newScope = scopeObj.$new(false);
-        Object.assign(newScope, componentState);
+        Object.assign(newScope, componentState, { tabComponent: container.parent });
         container.getElement().html(compileFunc(html)(newScope));
         let modelRef = componentState.model;
         if (componentState.model) tabComponents[container.parent.config.id] = container.parent;
@@ -210,7 +210,7 @@ module.exports.putTabRight = function (config) {
         title: 'Title'
     }
     Object.assign(childConfig, config);
-    childConfig.title = `<span class="${config.tabIcon}"></span> <span>${config.title}</span>`
+    childConfig.title = `<span class="${config.tabIcon}"></span> <span class="title">${config.title}</span>`
     layoutManager.root.getItemsById('right')[0].addChild(childConfig);
 }
 
@@ -265,7 +265,7 @@ module.exports.putTabRightWithModel = function (model, isClosable = true) {
             html: htmlTemplate,
             model: model
         },
-        title:  `<span class="${tabIcon}"></span> <span> ${model.properties.name}${well ? ' - ( ' + well.properties.name + ')':''}</span>`
+        title:  `<span class="${tabIcon}"></span> <span class="title"> ${model.properties.name}${well ? ' - ( ' + well.properties.name + ')':''}</span>`
     });
     let historyState = wiComponentService.getComponent(wiComponentService.HISTORYSTATE);
     historyState.putPlotToHistory(model.type, model.id);
@@ -323,4 +323,14 @@ module.exports.getItemById = function (itemId) {
 module.exports.getRoot = function() {
     return layoutManager.root;
 }
-
+/**
+ *
+ *
+ * @param {*} tabComponent
+ * @param {String} title
+ * @returns
+ */
+module.exports.updateTabTitle = function (tabComponent, title) {
+    if (!tabComponent || !tabComponent.config) return;
+    tabComponent.setTitle(tabComponent.config.title.replace(/(<span class="title">).*(<\/span>)/, (match, p1, p2) => p1 + title + p2));
+}

@@ -1,10 +1,11 @@
 const name = "wiTask";
 const moduleName = "wi-task";
-let petrophysics = require('./petrophysics');
+// let petrophysics = require('./petrophysics');
 
-function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
+function Controller(wiComponentService, wiApiService, $timeout, ModalService, wiPetrophysics, $scope) {
     const self = this;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     //   const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let __selectionTop = 0;
     const __selectionLength = 50;
@@ -907,12 +908,24 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         });
     }
 
+    this.saveTask = function () {
+        if (self.new) return;
+        wiApiService.editTask({ idTask: self.id, name: self.name, content: self.taskConfig }, (resTask) => {
+            const tabComponent = $scope.$parent.tabComponent;
+            layoutManager.updateTabTitle(tabComponent, resTask.name);
+            wiComponentService.emit('task.changed', resTask);
+            toastr.success(`Task ${self.name} saved`, null, { timeOut: 1000, progressBar: false });
+        });
+    }
+
     this.addToFlowClick = function(){
         const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        const newFlowCtrls = wiComponentService.filterComponents((c, cName) => cName.startsWith('flow') && c.new);
-        const newFlows = newFlowCtrls.map(ctrl => Object.assign({new: true}, ctrl.flow));
         DialogUtils.openFlowDialog(ModalService, function (flow) {
-            const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+            if (flow.task && flow.tasks.find(t => t.name === self.name)) {
+                toastr.error('Task name existed in this flow');
+                self.addToFlowClick();
+                return;
+            }
             layoutManager.putTabRight({
                 id: 'flow' + flow.idFlow,
                 title: flow.name,
@@ -928,10 +941,11 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             });
             setTimeout(() => {
                 const flowCtrl = wiComponentService.getComponent('flow' + flow.idFlow);
-                flowCtrl.createTask(self.taskConfig);
+                flowCtrl.createTask(self);
             }, 100);
-        }, newFlows);
+        });
     }
+
     function updateChoices(newCurveProps) {
         self.projectConfig.forEach(well => {
             well.children.forEach(dataset => {
@@ -943,6 +957,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         })
     }
 
+/* 
     function saveCurve(curveInfo, callback) {
         getFamilyList(familyList => {
             let family = familyList.find(f => f.data.label == curveInfo.family);
@@ -1155,6 +1170,10 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             }
         })
     }
+ */
+    this.runTask = function () {
+        wiPetrophysics.execute(self, utils.refreshProjectState);
+    }
 
     this.logTrackProps = {
         width: 2.5,
@@ -1263,7 +1282,8 @@ app.component(name, {
     bindings: {
         name: "@",
         id: "<",
-        taskConfig: '<'
+        taskConfig: '<',
+        new: '<',
     }
 });
 

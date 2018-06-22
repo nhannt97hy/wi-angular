@@ -9,16 +9,16 @@ const getBusinessObject = BpmnModelUtil.getBusinessObject;
 const initDiagram = `
   <?xml version="1.0" encoding="UTF-8"?>
   <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="diagram" targetNamespace="http://bpmn.io/schema/bpmn">
-    <bpmn2:process id="Process_1" isExecutable="true">
+      <bpmn2:process id="Process_1" isExecutable="true">
       <bpmn2:startEvent id="StartEvent_1"/>
-    </bpmn2:process>
-    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+      </bpmn2:process>
+      <bpmndi:BPMNDiagram id="BPMNDiagram_1">
       <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-        <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+          <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
           <dc:Bounds height="36.0" width="36.0" x="200.0" y="350.0"/>
-        </bpmndi:BPMNShape>
+          </bpmndi:BPMNShape>
       </bpmndi:BPMNPlane>
-    </bpmndi:BPMNDiagram>
+      </bpmndi:BPMNDiagram>
   </bpmn2:definitions>
 `;
 
@@ -43,7 +43,7 @@ class Pending {
   }
 }
 
-function Controller($timeout, wiApiService, wiComponentService, ModalService, wiFlowEngine) {
+function Controller($scope, $timeout, wiApiService, wiComponentService, ModalService, wiFlowEngine) {
   window.WFD = this;
   const self = this;
   const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
@@ -51,30 +51,38 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
   const pendings = [];
 
   this.$onInit = function() {
-    self.flow = self.flow || {
-      name: 'New Flow',
-      content: initDiagram,
-    };
     wiComponentService.putComponent('flow' + self.id, self);
     $timeout(() => {
-      if (!self.new) {
-        _initModeler();
-        self.modeler.importXML(self.flow.content, importDiagramCb);
-      } else {
-        self.flow.idFlow = self.id;
-        _initModeler();
-        self.modeler.importXML(initDiagram, importDiagramCb);
-      }
+      _initModeler();
+      self.modeler.importXML(self.flow.content, _importDiagramCb);
+      $timeout(() => {
+        self.flow.tasks.forEach(task => {
+          _updateTaskLabel(task);
+        });
+      });
     });
-    wiComponentService.on('flow.deleted', _onFlowDeleted);
+    wiComponentService.on('task.changed', _updateTaskLabel);
+    wiComponentService.on('flow.deleted', _closeTab);
   };
   this.$onDestroy = function() {
-    wiComponentService.removeEvent('flow.deleted', _onFlowDeleted);
+    wiComponentService.removeEvent('task.changed', _updateTaskLabel);
+    wiComponentService.removeEvent('flow.deleted', _closeTab);
     wiComponentService.dropComponent('flow' + self.id);
   };
-  function _onFlowDeleted(idFlow) {
+  function _updateTaskLabel(task) {
+    if (task.idFlow != self.flow.idFlow) return;
+    const serviceTaskElems = getServiceTasks();
+    serviceTaskElems.some(sTaskElem => {
+      const bo = getBusinessObject(sTaskElem);
+      const isMatch = bo.get('idTask') == task.idTask;
+      if (!isMatch) return;
+      if (bo.get('name') != task.name) self.modeling.updateLabel(sTaskElem, task.name);
+      return isMatch;
+    })
+  }
+  function _closeTab(idFlow) {
     if (self.flow.idFlow === idFlow) {
-      layoutManager.getItemById('flow' + idFlow).remove();
+      $scope.$parent.tabComponent.remove();
     }
   }
   function _registerFileDrop(container, callback) {
@@ -98,8 +106,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     container.get(0).addEventListener('dragover', handleDragOver, false);
     container.get(0).addEventListener('drop', handleFileDrop, false);
   }
-
-  function importDiagramCb(err) {
+  function _importDiagramCb(err) {
     const CONTAINER_ELEMENT = '#flow' + self.id;
     if (err) {
       $(CONTAINER_ELEMENT)
@@ -113,18 +120,6 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
       $(CONTAINER_ELEMENT)
         .removeClass('with-error')
         .addClass('with-diagram');
-    }
-  }
-
-  function _setEncoded(button, fileName, data) {
-    const encodedData = encodeURIComponent(data);
-    if (data) {
-      button.removeClass('disabled').attr({
-        href: 'data:application/bpmn20-xml;charset=UTF-8,' + encodedData,
-        download: fileName,
-      });
-    } else {
-      button.addClass('disabled');
     }
   }
 
@@ -151,15 +146,13 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     self.moddle = _modeler.get('moddle');
     self.canvas = _modeler.get('canvas');
     self.elementRegistry = _modeler.get('elementRegistry');
-    window.modeler = self.modeler;
-    window.moddle = self.moddle;
 
     const CONTAINER_ELEMENT = '#flow' + self.id;
     _registerFileDrop($(CONTAINER_ELEMENT), (xml) => {
-      _modeler.importXML(xml, importDiagramCb);
+      _modeler.importXML(xml, _importDiagramCb);
     });
     self.eventBus.on('element.dblclick', 1500, function(event, { element }) {
-      if (is(element, 'bpmn:ServiceTask')) {
+      if (isServiceTask(element)) {
         const idTask = getBusinessObject(element).get('idTask');
         !!idTask && self.openTask(idTask, element);
       }
@@ -169,17 +162,15 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
       'element.changed',
       _.debounce(function(event, { element }) {
         self.modeler.saveXML({ format: true }, function(err, xml) {
-          // _setEncoded($(DOWNLOAD_DIAGRAM), 'diagram.bpmn', err ? null : xml);
-          console.warn(xml);
           $timeout(() => (self.flow.content = xml));
         });
-      }, 100)
+      }, 500)
     );
     _modeler.on(
       'element.changed',
       _.debounce(function(event, { element }) {
         if (!self.new) self.saveFlow();
-      }, 3000)
+      }, 2000)
     );
     _modeler.on('selection.changed', function(event, { newSelection }) {
       const selectedElement = newSelection[0] || self.canvas.getRootElement();
@@ -187,9 +178,14 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     });
   }
 
+  function isServiceTask(element) {
+    return is(element, 'bpmn:ServiceTask');
+  }
+  function getServiceTasks() {
+    return self.elementRegistry.filter(e => isServiceTask(e));
+  }
   function updateProp(element, props) {
     self.modeling.updateProperties(element, props);
-    self.eventBus.fire('element.changed', { element });
   }
   function removeElements(elements) {
     if (!Array.isArray(elements)) elements = [elements];
@@ -227,13 +223,14 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     );
   }
   // public
-  this.createTask = function(taskConfig) {
+  this.createTask = function ({ taskConfig, name }) {
     taskConfig.expression = taskConfig.function;
     const create = self.modeler.get('create');
     const elementFactory = self.modeler.get('elementFactory');
     const shape = elementFactory.createShape(Object.assign({ type: 'bpmn:ServiceTask' }));
     const bo = getBusinessObject(shape);
-    bo.set('name', 'Untitled Task');
+    bo.set('name', name);
+    bo.set('expression', 'execute');
     create.start(new MouseEvent('click'), shape);
     const eventBus = self.modeler.get('eventBus');
     eventBus.once('create.end', function(event) {
@@ -242,7 +239,7 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
       pendings.push(
         new Pending(
           Action.CREATE_TASK,
-          () => ({ idFlow: self.flow.idFlow, idTaskSpec: 1, content: taskConfig }),
+          { idFlow: self.flow.idFlow, idTaskSpec: 1, content: taskConfig, name },
           function(res, err) {
             if (err) return;
             updateProp(shape, { idTask: res.idTask });
@@ -256,13 +253,12 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
     wiApiService.getTask(idTask, function(task, err) {
       if (err) return;
       const bo = getBusinessObject(element);
-      const name = `${bo.name || ''}(VCL-GR)`;
       layoutManager.putTabRight({
         id: 'wiTask' + idTask,
-        title: name,
+        title: task.name,
         tabIcon: 'workflow-16x16',
         componentState: {
-          html: `<wi-task name="${name}" id="${idTask}" task-config="task"></wi-task>`,
+          html: `<wi-task name="${task.name}" id="${idTask}" task-config="task.content"></wi-task>`,
           name: 'wiTask' + idTask,
           task: task,
         },
@@ -275,65 +271,37 @@ function Controller($timeout, wiApiService, wiComponentService, ModalService, wi
 
   // buttons
   this.saveFlow = function(notice) {
-    if (self.new) {
-      DialogUtils.promptDialog(
-        ModalService,
-        {
-          title: 'Save Flow',
-          inputName: 'Flow Name',
-          input: 'New Flow',
+    _executePending(function() {
+      wiApiService.editFlow(
+        Object.assign({}, self.flow, {tasks: null}),
+        () => {
+          !!notice && toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
         },
-        function(flowName) {
-          if (!flowName) return;
-          self.flow.name = flowName;
-          self.flow.idProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).idProject;
-          wiApiService.createFlow(Object.assign({}, self.flow, { idFlow: null }), function(resFlow, err) {
-            if (err) {
-              self.saveFlow();
-              return;
-            }
-            const tabElement = layoutManager.getItemById('flow' + self.flow.idFlow);
-            tabElement.addId('flow' + resFlow.idFlow);
-            tabElement.setTitle(tabElement.config.title.replace('New Flow', resFlow.name));
-            wiComponentService.dropComponent('flow' + self.id);
-            wiComponentService.putComponent('flow' + resFlow.idFlow, self);
-            self.id = resFlow.idFlow;
-            self.flow = resFlow;
-            self.new = false;
-            _executePending(function() {
-              setTimeout(() => {
-                wiApiService.editFlow(self.flow, function(resFlow, err) {
-                  if (err) return;
-                  toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
-                });
-              }, 100);
-            });
-          });
-        }
+        { silent: true }
       );
-    } else {
-      _executePending(function() {
-        wiApiService.editFlow(
-          self.flow,
-          () => {
-            !!notice && toastr.success(`Flow ${self.flow.name} saved`, null, { timeOut: 1000, progressBar: false });
-          },
-          { silent: true }
-        );
-      });
-    }
+    });
   };
   this.clearDiagram = function () {
     DialogUtils.confirmDialog(ModalService, 'Clear Diagram', 'Are you sure to clear diagram?', function (yes) {
       if (!yes) return;
-      this.modeler && this.modeler.importXML(initDiagram, importDiagramCb);
+      this.modeler && this.modeler.importXML(initDiagram, _importDiagramCb);
       self.flow.content = initDiagram;
     })
   };
+  this.downloadDiagram = function () {
+    const a = document.createElement('a');
+    const encodedData = encodeURIComponent(self.flow.content);
+    a.download = self.flow.name + '.bpmn';
+    a.href = 'data:application/bpmn20-xml;charset=UTF-8,' + encodedData;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.parentNode.removeChild(a);
+  }
   this.execute = async function() {
     try {
       const xml = await new Promise((resolve, reject) => {
-        self.modeler.saveXML({ format: true }, function(err, xml) {
+        self.modeler.saveXML(function(err, xml) {
           if (err) return reject(err);
           resolve(xml);
         });
@@ -354,7 +322,6 @@ app.component(name, {
   controllerAs: name,
   bindings: {
     id: '@',
-    new: '<',
     flow: '<',
   },
 });
