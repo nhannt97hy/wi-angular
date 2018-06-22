@@ -502,44 +502,42 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                         self.config.scale.left = info.LineProperty.minScale;
                         self.config.scale.right = info.LineProperty.maxScale;
                         lineColor = info.LineProperty.lineColor;
+                        updateCurveProps(curveProps);
                     });
                 } else {
                     self.config.scale.left = curve.family.family_spec[0].minScale;
                     self.config.scale.right = curve.family.family_spec[0].maxScale;
-                    lineColor = curve.family.family_spec[0].lineColor
+                    lineColor = curve.family.family_spec[0].lineColor;
+                    updateCurveProps(curveProps);
                 }
 
-                let timerHandle = setInterval(function() {
-                    let isReady = self.config.scale.left && self.config.scale.right && lineColor;
-                    if (isReady) {
-                        clearInterval(timerHandle);
-                        if (curveProps.idCurve) {
-                            if (curveProps.flag == 'create') {
-                                if (self.curvesProperties.findIndex(cp => {
-                                    return cp.idDataset == curveProps.idDataset;
-                                }) == -1) {
-                                    curveProps.options = {
-                                        plot: 'Bar',
-                                        lineColor: lineColor,
-                                        showGaussian: false,
-                                        showCumulative: true
-                                    };
-                                    self.curvesProperties.push(curveProps);
-                                } else {
-                                    let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
-                                    curveProps.options = props.options;
-                                    self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
-                                }
-                                // if (!set.drop) set.flag = 'edit';
-                            } else if (curveProps.flag == 'edit') {
+                function updateCurveProps (curveProps) {
+                    if (curveProps.idCurve) {
+                        if (curveProps.flag == 'create') {
+                            if (self.curvesProperties.findIndex(cp => {
+                                return cp.idDataset == curveProps.idDataset;
+                            }) == -1) {
+                                curveProps.options = {
+                                    plot: 'Bar',
+                                    lineColor: lineColor,
+                                    showGaussian: false,
+                                    showCumulative: true
+                                };
+                                self.curvesProperties.push(curveProps);
+                            } else {
                                 let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
                                 curveProps.options = props.options;
                                 self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
                             }
-                            self.histogramModelProps.curvesProperties = self.curvesProperties;
+                            // if (!set.drop) set.flag = 'edit';
+                        } else if (curveProps.flag == 'edit') {
+                            let props = self.curvesProperties.find(cp => cp.idDataset == curveProps.idDataset);
+                            curveProps.options = props.options;
+                            self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
                         }
                     }
-                }, 500);
+                    self.histogramModelProps.curvesProperties = self.curvesProperties;
+                }
             });
         }
 

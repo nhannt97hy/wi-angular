@@ -508,56 +508,61 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                     wiApiService.infoCurve(curveProps.x, function (info) {
                         self.config.scale.left = info.LineProperty.minScale;
                         self.config.scale.right = info.LineProperty.maxScale;
+                        if (!yCurve.family) {
+                            wiApiService.infoCurve(curveProps.y, function (info) {
+                                self.config.scale.bottom = info.LineProperty.minScale;
+                                self.config.scale.top = info.LineProperty.maxScale;
+                                updateCurveProps(curveProps);
+                            });
+                        } else {
+                            self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                            self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                            updateCurveProps(curveProps);
+                        }
                     });
                 } else {
                     self.config.scale.left = xCurve.family.family_spec[0].minScale;
                     self.config.scale.right = xCurve.family.family_spec[0].maxScale;
+                    if (!yCurve.family) {
+                        wiApiService.infoCurve(curveProps.y, function (info) {
+                            self.config.scale.bottom = info.LineProperty.minScale;
+                            self.config.scale.top = info.LineProperty.maxScale;
+                            updateCurveProps(curveProps);
+                        });
+                    } else {
+                        self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                        self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                        updateCurveProps(curveProps);
+                    }
                 }
 
-                if (!yCurve.family) {
-                    wiApiService.infoCurve(curveProps.y, function (info) {
-                        self.config.scale.bottom = info.LineProperty.minScale;
-                        self.config.scale.top = info.LineProperty.maxScale;
-                    });
-                } else {
-                    self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
-                    self.config.scale.top = yCurve.family.family_spec[0].maxScale;
-                }
-
-                let timerHandle = setInterval(function() {
-                    let isReady = self.config.scale.left
-                        && self.config.scale.right
-                        && self.config.scale.bottom
-                        && self.config.scale.top;
-                    if (isReady) {
-                        clearInterval(timerHandle);
-                        if (curveProps.x && curveProps.y) {
-                            if (curveProps.flag == 'create') {
-                                if (self.curvesProperties.findIndex(cp => {
-                                    return cp.idWell == curveProps.idWell;
-                                }) == -1) {
-                                    curveProps.options = {
-                                        pointColor: 'blue',
-                                        pointSize: 5,
-                                        pointSymbol: 'Circle'
-                                    };
-                                    self.curvesProperties.push(curveProps);
-                                } else {
-                                    let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
-                                    curveProps.options = props.options;
-                                    self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
-                                }
-                                // if (!set.drop) set.flag = 'edit';
-                            } else if (curveProps.flag == 'edit') {
+                function updateCurveProps (curveProps) {
+                    if (curveProps.x && curveProps.y) {
+                        if (curveProps.flag == 'create') {
+                            if (self.curvesProperties.findIndex(cp => {
+                                return cp.idWell == curveProps.idWell;
+                            }) == -1) {
+                                curveProps.options = {
+                                    pointColor: 'blue',
+                                    pointSize: 5,
+                                    pointSymbol: 'Circle'
+                                };
+                                self.curvesProperties.push(curveProps);
+                            } else {
                                 let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
-                                curveProps.idPointSet = props.idPointSet;
                                 curveProps.options = props.options;
                                 self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
                             }
+                            // if (!set.drop) set.flag = 'edit';
+                        } else if (curveProps.flag == 'edit') {
+                            let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
+                            curveProps.idPointSet = props.idPointSet;
+                            curveProps.options = props.options;
+                            self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
                         }
-                        self.crossplotModelProps.curvesProperties = self.curvesProperties;
                     }
-                }, 500);
+                    self.crossplotModelProps.curvesProperties = self.curvesProperties;
+                }
             });
         }
 
