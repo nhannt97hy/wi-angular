@@ -103,6 +103,7 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
 
         this.onTabChange = function (index) {
             if (index != 1 || !self.inputChange) return;
+            self.config.scale = {};
             self.projectChanged({ idProject: self.idProject });
             self.inputChange = false;
             self.tabChange = true;
@@ -367,14 +368,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                     switch (type) {
                         case 'dataset':
                             const idDataset = parseInt($(ui.draggable[0]).attr("data"));
-                            self.getInputData(idDataset, true);
+                            self.getInputData(idDataset, true, self.updateProperties);
                             break;
                     }
                 }
             });
         };
 
-        this.getInputData = function (idDataset, drop) {
+        this.getInputData = function (idDataset, drop, callback) {
             let options = new Object();
             for (let node of self.projectConfig) {
                 utils.visit(
@@ -485,12 +486,13 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                 } else {
                     return;
                 }
-                self.updateProperties();
+                console.log('trong getInputData');
+                if (callback) callback();
             });
         }
 
         this.updateProperties = function () {
-            let self = this;
+            console.log('sau getInputData');
             let datasets = self.taskConfig.inputData;
             datasets.forEach(set => {
                 let xCurve = set.children[0].data.value.properties;
@@ -506,32 +508,44 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
 
                 if (!xCurve.family) {
                     wiApiService.infoCurve(curveProps.x, function (info) {
-                        self.config.scale.left = info.LineProperty.minScale;
-                        self.config.scale.right = info.LineProperty.maxScale;
+                        if (!self.config.scale.left || self.config.scale.left > info.LineProperty.minScale)
+                            self.config.scale.left = info.LineProperty.minScale;
+                        if (!self.config.scale.right || self.config.scale.right < info.LineProperty.maxScale)
+                            self.config.scale.right = info.LineProperty.maxScale;
                         if (!yCurve.family) {
                             wiApiService.infoCurve(curveProps.y, function (info) {
-                                self.config.scale.bottom = info.LineProperty.minScale;
-                                self.config.scale.top = info.LineProperty.maxScale;
+                                if (!self.config.scale.bottom || self.config.scale.bottom > info.LineProperty.minScale)
+                                    self.config.scale.bottom = info.LineProperty.minScale;
+                                if (!self.config.scale.top || self.config.scale.top < info.LineProperty.maxScale)
+                                    self.config.scale.top = info.LineProperty.maxScale;
                                 updateCurveProps(curveProps);
                             });
                         } else {
-                            self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
-                            self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                            if (!self.config.scale.bottom || self.config.scale.bottom > yCurve.family.family_spec[0].minScale)
+                                self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                            if (!self.config.scale.top || self.config.scale.top < yCurve.family.family_spec[0].maxScale)
+                                self.config.scale.top = yCurve.family.family_spec[0].maxScale;
                             updateCurveProps(curveProps);
                         }
                     });
                 } else {
-                    self.config.scale.left = xCurve.family.family_spec[0].minScale;
-                    self.config.scale.right = xCurve.family.family_spec[0].maxScale;
+                    if (!self.config.scale.left || self.config.scale.left > xCurve.family.family_spec[0].minScale)
+                        self.config.scale.left = xCurve.family.family_spec[0].minScale;
+                    if (!self.config.scale.right || self.config.scale.right < xCurve.family.family_spec[0].maxScale)
+                        self.config.scale.right = xCurve.family.family_spec[0].maxScale;
                     if (!yCurve.family) {
                         wiApiService.infoCurve(curveProps.y, function (info) {
-                            self.config.scale.bottom = info.LineProperty.minScale;
-                            self.config.scale.top = info.LineProperty.maxScale;
+                            if (!self.config.scale.bottom || self.config.scale.bottom > info.LineProperty.minScale)
+                                self.config.scale.bottom = info.LineProperty.minScale;
+                            if (!self.config.scale.top || self.config.scale.top < info.LineProperty.maxScale)
+                                self.config.scale.top = info.LineProperty.maxScale;
                             updateCurveProps(curveProps);
                         });
                     } else {
-                        self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
-                        self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                        if (!self.config.scale.bottom || self.config.scale.bottom > yCurve.family.family_spec[0].minScale)
+                            self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                        if (!self.config.scale.top || self.config.scale.top < yCurve.family.family_spec[0].maxScale)
+                            self.config.scale.top = yCurve.family.family_spec[0].maxScale;
                         updateCurveProps(curveProps);
                     }
                 }
@@ -693,8 +707,8 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
         }
 
         function buildWellList(wells) {
-            wells.forEach(well => {
-                const wellModel = utils.createWellModel(well);
+            async.each(wells, function (well, cb) {
+                let wellModel = utils.createWellModel(well);
                 self.projectConfig.push(wellModel);
                 wiApiService.getWell(well.idWell, wellProps => {
                     if (wellProps.datasets && wellProps.datasets.length) {
@@ -709,10 +723,19 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                             });
                             if (self.taskConfig.inputs[0].label && self.taskConfig.inputs[1].label) {
                                 self.getInputData(dataset.idDataset);
+                                $timeout(() => {
+                                    cb();
+                                })
                             }
                         });
                     }
                 });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.updateProperties();
             });
         }
 

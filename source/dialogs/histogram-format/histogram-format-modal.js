@@ -96,6 +96,7 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
 
         this.onTabChange = function (index) {
             if (index != 1 || !self.inputChange) return;
+            self.config.scale = {};
             self.projectChanged({ idProject: self.idProject });
             self.inputChange = false;
             self.tabChange = true;
@@ -360,14 +361,14 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     switch (type) {
                         case 'dataset':
                             const idDataset = parseInt($(ui.draggable[0]).attr("data"));
-                            self.getInputData(idDataset, true);
+                            self.getInputData(idDataset, true, self.updateProperties);
                             break;
                     }
                 }
             });
         };
 
-        this.getInputData = function (idDataset, drop) {
+        this.getInputData = function (idDataset, drop, callback) {
             let options = new Object();
             for (let node of self.projectConfig) {
                 utils.visit(
@@ -479,12 +480,13 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                 } else {
                     return;
                 }
-                self.updateProperties();
+                console.log('trong getInputData');
+                if (callback) callback();
             });
         }
 
         this.updateProperties = function () {
-            let self = this;
+            console.log('sau getInputData');
             let datasets = self.taskConfig.inputData;
             datasets.forEach(set => {
                 let curve = set.children[0].data.value.properties;
@@ -499,14 +501,18 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
 
                 if (!curve.family) {
                     wiApiService.infoCurve(curveProps.idCurve, function (info) {
-                        self.config.scale.left = info.LineProperty.minScale;
-                        self.config.scale.right = info.LineProperty.maxScale;
+                        if (!self.config.scale.left || self.config.scale.left > info.LineProperty.minScale)
+                            self.config.scale.left = info.LineProperty.minScale;
+                        if (!self.config.scale.right || self.config.scale.right < info.LineProperty.maxScale)
+                            self.config.scale.right = info.LineProperty.maxScale;
                         lineColor = info.LineProperty.lineColor;
                         updateCurveProps(curveProps);
                     });
                 } else {
-                    self.config.scale.left = curve.family.family_spec[0].minScale;
-                    self.config.scale.right = curve.family.family_spec[0].maxScale;
+                    if (!self.config.scale.left || self.config.scale.left > curve.family.family_spec[0].minScale)
+                        self.config.scale.left = curve.family.family_spec[0].minScale;
+                    if (!self.config.scale.right || self.config.scale.right < curve.family.family_spec[0].maxScale)
+                        self.config.scale.right = curve.family.family_spec[0].maxScale;
                     lineColor = curve.family.family_spec[0].lineColor;
                     updateCurveProps(curveProps);
                 }
@@ -668,8 +674,8 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
         }
 
         function buildWellList(wells) {
-            wells.forEach(well => {
-                const wellModel = utils.createWellModel(well);
+            async.each(wells, function (well, cb) {
+                let wellModel = utils.createWellModel(well);
                 self.projectConfig.push(wellModel);
                 wiApiService.getWell(well.idWell, wellProps => {
                     if (wellProps.datasets && wellProps.datasets.length) {
@@ -684,10 +690,19 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                             });
                             if (self.taskConfig.inputs[0].label) {
                                 self.getInputData(dataset.idDataset);
+                                $timeout(() => {
+                                    cb();
+                                })
                             }
                         });
                     }
                 });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.updateProperties();
             });
         }
 
