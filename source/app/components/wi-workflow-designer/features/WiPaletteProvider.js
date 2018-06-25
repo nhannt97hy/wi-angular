@@ -32,6 +32,7 @@ function WiPaletteProvider(injector) {
     'hand-tool',
     'lasso-tool',
     'space-tool',
+    'global-connect-tool',
     'tool-separator',
     'create.start-event',
     'create.end-event',

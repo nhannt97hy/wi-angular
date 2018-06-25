@@ -55,7 +55,7 @@ function WiContextPadProvider(injector, wiFlowDesigner, modeling) {
     if (is(element, 'bpmn:FlowNode')) {
       // flownode
       if (is(element, 'bpmn:EndEvent')) {
-        // delete actions['replace'];
+        delete actions['connect'];
       } else {
         // !endevent
         actions['append.append-service-task'] = appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task');

@@ -254,6 +254,7 @@ const GET_HISTOGRAM = '/project/histogram/info';
 const DELETE_HISTOGRAM = '/project/histogram/delete';
 const DUPLICATE_HISTOGRAM = '/project/histogram/duplicate';
 const SAVE_HISTOGRAM_AS = '/project/histogram/save-as';
+const EDIT_HISTOGRAM_CURVE_SET = '/project/histogram/histogram-curve-set/edit';
 
 const CREATE_REF_CURVE = '/project/well/reference-curve/new';
 const EDIT_REF_CURVE = '/project/well/reference-curve/edit';
@@ -1575,6 +1576,10 @@ Service.prototype.removeHistogram = function (idHistogram, callback) {
     let self = this;
     this.delete(DELETE_HISTOGRAM, { idHistogram: idHistogram }, callback);
 }
+Service.prototype.editHistogramCurveSet = function (data, callback) {
+    let self = this;
+    this.post(EDIT_HISTOGRAM_CURVE_SET, data, callback);
+}
 
 Service.prototype.duplicateLogplot = function (idPlot, idWell, callback) {
     const self = this;
@@ -2070,4 +2075,7 @@ Service.prototype.listTaskSpec = function (callback) {
 }
 Service.prototype.exportLas2 = function(idObjs, callback) {
     this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
+}
+Service.prototype.getLasFileUrl = function (url) {
+    return BASE_URL + url;
 }

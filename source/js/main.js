@@ -65,6 +65,7 @@ let wiExportFromProject = require('./wi-export-from-project');
 let wiTask = require('./wi-task');
 let wiFlowDesigner = require('./wi-flow-designer');
 let wiFlowEngine = require('./wi-flow-engine');
+let wiPetrophysics = require('./wi-petrophysics');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -78,6 +79,7 @@ let wiD3ZoneTrack = require('./wi-d3-zone-track');
 let wiD3ImageTrack = require('./wi-d3-image-track');
 let wiD3ObjectTrack = require('./wi-d3-object-track');
 let wiD3LogTrack = require('./wi-d3-log-track');
+let wiD3CorrelationTrack = require('./wi-d3-correlation-track');
 
 let wiD3 = require('./wi-d3');
 // let wiD3 = require('./wi-d3-new');
@@ -175,6 +177,7 @@ let app = angular.module('wiapp',
         wiD3ImageTrack.name,
         wiD3ObjectTrack.name,
         wiD3LogTrack.name,
+        wiD3CorrelationTrack.name,
 
         wiD3.name,
         wiHistogram.name,
@@ -187,10 +190,11 @@ let app = angular.module('wiapp',
         wiCurveListing.name,
         wiInventory.name,
         wiExportFromInventory.name,
-        wiExportFromProject.name,        
+        wiExportFromProject.name,
         wiTask.name,
         wiFlowDesigner.name,
         wiFlowEngine.name,
+        wiPetrophysics.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -229,9 +233,9 @@ let app = angular.module('wiapp',
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
-        wiPatternService.name, 
+        wiPatternService.name,
 
-        
+
 
         wiCanvasRect.name,
         wiZone.name,

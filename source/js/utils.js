@@ -231,27 +231,31 @@ function zoneToTreeConfig(zone, options = {}) {
         zoneModel.name = 'zone-deleted-child';
         zoneModel.type = 'zone-deleted-child';
     } else {
-        zoneModel.name = zone.name;
+        zoneModel.name = zone.zone_template.name;
         zoneModel.type = 'zone';
     }
     zoneModel.id = zone.idZone;
     //zone.fill = typeof(zone.fill) === "string" ? JSON.parse(zone.fill) : zone.fill;
+    zoneModel.properties = zone;
+    /*
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
         idZone: zone.idZone,
         startDepth: zone.startDepth,
         endDepth: zone.endDepth,
-        name: zone.name,
+        name: zone.zone_template.name,
         // fill: zone.fill,
         // background: zone.fill.pattern.background,
         // foreground: zone.fill.pattern.foreground,
+        zone_template: zone.zone_template,
         background: zone.zone_template ? zone.zone_template.background : null,
         foreground: zone.zone_template ? zone.zone_template.foreground : null,
         //fix tiep pattern
     };
+    */
     zoneModel.data = {
         icon: 'zone-table-16x16',
-        label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}`
+        label: `${zone.zone_template.name}: ${zone.startDepth} - ${zone.endDepth}`
     }
     zoneModel.parent = 'zoneset' + zone.idZoneSet;
     return zoneModel;
@@ -483,17 +487,17 @@ function histogramToTreeConfig(histogram, options = {}) {
             divisions: histogram.divisions,
             leftScale: histogram.leftScale,
             rightScale: histogram.rightScale,
-            showGaussian: histogram.showGaussian,
-            loga: histogram.loga,
-            showGrid: histogram.showGrid,
-            showCumulative: histogram.showCumulative,
-            flipHorizontal: histogram.flipHorizontal,
-            lineStyle: histogram.lineStyle,
-            lineColor: histogram.lineColor,
-            plot: histogram.plot,
-            plotType: histogram.plotType,
-            color: histogram.color,
-            discriminator: histogram.discriminator == 'null' ? null : JSON.parse(histogram.discriminator),
+            // showGaussian: histogram.showGaussian,
+            // loga: histogram.loga,
+            // showGrid: histogram.showGrid,
+            // showCumulative: histogram.showCumulative,
+            // flipHorizontal: histogram.flipHorizontal,
+            // lineStyle: histogram.lineStyle,
+            // lineColor: histogram.lineColor,
+            // plot: histogram.plot,
+            // plotType: histogram.plotType,
+            // color: histogram.color,
+            // discriminator: histogram.discriminator == 'null' ? null : JSON.parse(histogram.discriminator),
             idCurves: histogram.idCurves,
             idZoneSet: histogram.idZoneSet,
             referenceTopDepth: histogram.referenceTopDepth,
@@ -528,17 +532,17 @@ function histogramToTreeConfig(histogram, options = {}) {
         divisions: histogram.divisions,
         leftScale: histogram.leftScale,
         rightScale: histogram.rightScale,
-        showGaussian: histogram.showGaussian,
-        loga: histogram.loga,
-        showGrid: histogram.showGrid,
-        showCumulative: histogram.showCumulative,
-        flipHorizontal: histogram.flipHorizontal,
-        lineStyle: histogram.lineStyle,
-        lineColor: histogram.lineColor,
-        plot: histogram.plot,
-        plotType: histogram.plotType,
-        color: histogram.color,
-        discriminator: histogram.discriminator == 'null' ? null : JSON.parse(histogram.discriminator),
+        // showGaussian: histogram.showGaussian,
+        // loga: histogram.loga,
+        // showGrid: histogram.showGrid,
+        // showCumulative: histogram.showCumulative,
+        // flipHorizontal: histogram.flipHorizontal,
+        // lineStyle: histogram.lineStyle,
+        // lineColor: histogram.lineColor,
+        // plot: histogram.plot,
+        // plotType: histogram.plotType,
+        // color: histogram.color,
+        // discriminator: histogram.discriminator == 'null' ? null : JSON.parse(histogram.discriminator),
         idCurves: histogram.idCurves,
         idZoneSet: histogram.idZoneSet,
         referenceTopDepth: histogram.referenceTopDepth,
@@ -3064,17 +3068,6 @@ function getSelectedNode(rootNode) {
 }
 
 exports.getSelectedNode = getSelectedNode;
-
-function getDepthCurve(well) {
-    let length = Math.round((well.bottomDepth - well.topDepth) / well.step) + 1;
-    let depth = new Array(length);
-    for (i = 0; i < length; i++) {
-        depth[i] = parseFloat((well.step * i + well.topDepth).toFixed(4));
-    }
-    return depth;
-}
-
-exports.getDepthCurve = getDepthCurve;
 
 function emitEvent(eventName, eventData) {
     let event = new CustomEvent(eventName, {detail: eventData});

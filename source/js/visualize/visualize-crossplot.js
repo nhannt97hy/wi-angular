@@ -510,6 +510,7 @@ Crossplot.prototype.clearAll = function () {
 
 Crossplot.prototype.adjustSize = function() {
     let rect = this.getPlotRect();
+    this.rect = rect;
     this.canvas
         .attr('width', rect.width)
         .attr('height', rect.height);
@@ -762,8 +763,8 @@ Crossplot.prototype.updateAxesLabels = function () {
     let self = this;
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
-    let _PADDING_BOTTOM = 20;
-    let _PADDING_LEFT = 20;
+    let _PADDING_BOTTOM = 10;
+    let _PADDING_LEFT = 10;
 
     let labelXElem = this.axesContainer.select('text.vi-crossplot-axis-x-label')
         .text(this.getLabelX());
@@ -1299,12 +1300,12 @@ Crossplot.prototype.plotPoints = function() {
     let rect = this.getPlotRect();
 
     let ctx = this.ctx;
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.save();
 
     if (!this.pointsets.length) return;
     this.outliers = 0;
     this.pointsets.forEach(pointSet => {
-        ctx.clearRect(0, 0, rect.width, rect.height);
-        ctx.save();
         ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
         ctx.clip();
 
@@ -1323,8 +1324,8 @@ Crossplot.prototype.plotPoints = function() {
             }
             plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
-        ctx.restore();
     });
+    ctx.restore();
 }
 
 Crossplot.prototype.plotSelections = function() {
@@ -1396,6 +1397,12 @@ Crossplot.prototype.prepareData = function() {
         });
 
         Utils.parseData(pointSet.curveY.data).forEach(function (d) {
+            // if (self.config.intervalDepthTop != null && d.y < self.config.intervalDepthTop) {
+            //     return;
+            // }
+            // if (self.config.intervalDepthBottom != null && d.y > self.config.intervalDepthBottom) {
+            //     return;
+            // }
             if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
                 data.push({
                     x: mapX[d.y],

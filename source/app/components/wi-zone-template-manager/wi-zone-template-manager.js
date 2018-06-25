@@ -136,10 +136,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.zoneTemplates = [];
         self.zoneTemplateEditted = false;
         self.selectedTemplate = node;
-        if (self.newTemplate && node != self.newTemplate) {
-            self.templateConfig.splice(self.templateConfig.indexOf(self.newTemplate), 1);
-            self.newTemplate = false;
-        }
         self.refreshZoneTemplateList();
         clickFunction($index, $event, node, self.templateConfig, true);
     }
@@ -246,7 +242,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.createTemplate = function () {
         let promptConfig = {
             title: '<span class="zone-edit-16x16"></span> New Zone Template',
-            inputName: 'Template name',
+            inputName: 'Zoneset template name',
             input: ''
         }
         DialogUtils.promptDialog(ModalService, promptConfig, function (ret) {
@@ -303,7 +299,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
     }
     this.createZoneTemplate = function () {
-        DialogUtils.createNewZoneSetDialog(ModalService, function (data) {
+        DialogUtils.createNewZoneTemplateDialog(ModalService, function (data) {
             if (data) {
                 data.template = self.selectedTemplate.name;
                 // if (self.zoneTemplates.length !== 0) {

@@ -49,7 +49,7 @@
         <div class="wi-parent-choices" ng-if='item.type.includes("choice")'>
             <select ng-model='item.data.value' ng-if='item.data.choices'
             ng-options="choice as choice.name for choice in item.data.choices track by choice.value"></select>
-            <input type="number" ng-model="item.data.value" ng-if="!item.data.choices" step="any">
+            <input type="number" ng-model="item.data.value" ng-value="item.data.value | number: 4"ng-if="!item.data.choices" step="any">
         </div>
     </div>
 

@@ -55,18 +55,32 @@ exports.ZoneButtonClicked = function() {
 exports.GaussianButtonClicked = function() {
     console.log('GaussianButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian;
-    wiHistogramCtrl.getwiD3Ctrl().config.showGaussian = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showGaussian;
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
+    let properties = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties;
+    wiHistogramCtrl.getwiD3Ctrl().config.showGaussian = properties.showGaussian = !properties.showGaussian;
+    let showGaussian = properties.showGaussian;
+    properties.curves.forEach(c => {
+        c.options.showGaussian = c.histogram_curve_set.showGaussian = showGaussian;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().curvesProperties.forEach(cp => {
+        cp.options.showGaussian = showGaussian;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.updateHistogram(properties);
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
 exports.CumulativeButtonClicked = function() {
     console.log('CumulativeButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative = !wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative;
-    wiHistogramCtrl.getwiD3Ctrl().config.showCumulative = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.showCumulative;
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
+    let properties = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties;
+    wiHistogramCtrl.getwiD3Ctrl().config.showCumulative = properties.showCumulative = !properties.showCumulative;
+    let showCumulative = properties.showCumulative;
+    properties.curves.forEach(c => {
+        c.options.showCumulative = c.histogram_curve_set.showCumulative = showCumulative;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().curvesProperties.forEach(cp => {
+        cp.options.showCumulative = showCumulative;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.updateHistogram(properties);
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
@@ -74,17 +88,24 @@ exports.PlotBarsButtonClicked = PlotBarsButtonClicked;
 function PlotBarsButtonClicked() {
     console.log('PlotBarsButton is clicked');
     let wiHistogramCtrl = this.wiHistogram;
-    let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
+    let properties = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties;
+    let currentPlot = properties.plot;
     switch(currentPlot) {
         case 'Bar':
-            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
+            properties.plot = "Curve";
             break;
         default:
-            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
+            properties.plot = "Bar";
     }
     // wiHistogramCtrl.histogramModel.properties.plot = "Bar";
-    wiHistogramCtrl.getwiD3Ctrl().config.plot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
+    let plot = wiHistogramCtrl.getwiD3Ctrl().config.plot = properties.plot;
+    properties.curves.forEach(c => {
+        c.options.plot = c.histogram_curve_set.plot = plot;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().curvesProperties.forEach(cp => {
+        cp.options.plot = plot;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.updateHistogram(properties);
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
@@ -92,17 +113,24 @@ exports.PlotCurvesButtonClicked = function() {
     console.log('PlotCurvesButton is clicked');
     // PlotBarsButtonClicked.call(this);
     let wiHistogramCtrl = this.wiHistogram;
-    let currentPlot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
+    let properties = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties;
+    let currentPlot = properties.plot;
     switch(currentPlot) {
         case 'Bar':
-            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Curve";
+            properties.plot = "Curve";
             break;
         default:
-            wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot = "Bar";
+            properties.plot = "Bar";
     }
     //wiHistogramCtrl.histogramModel.properties.plot = "Curve";
-    wiHistogramCtrl.getwiD3Ctrl().config.plot = wiHistogramCtrl.getwiD3Ctrl().histogramModel.properties.plot;
-    wiHistogramCtrl.getwiD3Ctrl().visHistogram.doPlot();
+    let plot = wiHistogramCtrl.getwiD3Ctrl().config.plot = properties.plot;
+    properties.curves.forEach(c => {
+        c.options.plot = c.histogram_curve_set.plot = plot;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().curvesProperties.forEach(cp => {
+        cp.options.plot = plot;
+    });
+    wiHistogramCtrl.getwiD3Ctrl().visHistogram.updateHistogram(properties);
     wiHistogramCtrl.getwiD3Ctrl().saveHistogram();
 }
 
