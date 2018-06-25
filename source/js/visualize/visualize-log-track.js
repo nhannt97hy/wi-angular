@@ -72,6 +72,8 @@ function LogTrack(config, wiApiService) {
 
     this.curvesRemoved = 0;
     this.mode = null;
+
+    this.showZoneSet = config.showZoneSet;
 }
 
 LogTrack.prototype.getProperties = function() {
@@ -772,9 +774,9 @@ LogTrack.prototype.plotDrawing = function(drawing) {
         drawing.doPlot();
     }
     this.getShadings().filter(s => s !== this.currentDrawing).forEach(s => s.lower());
-    this.getImages().forEach(function(img) { img.lower(); });
+    this.getImages().forEach(function (img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
-    this.getZones().forEach(zone => zone.lower());
+    // this.getZones().forEach(zone => zone.lower());
     this.svgContainer.raise();
     this.axisContainer.lower();
 }
@@ -1435,6 +1437,7 @@ LogTrack.prototype.addZone = function(zoneConfig) {
     let self = this;
     let zone = new Zone(zoneConfig);
     zone.init(self.plotContainer);
+    zone.svgGroup.attr('fill-opacity', '0.5');
     this.drawings.push(zone);
     return zone;
 }

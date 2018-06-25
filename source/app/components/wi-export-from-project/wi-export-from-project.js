@@ -306,7 +306,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
         console.log('node', node, 'rootNode', rootNode, node == rootNode[0].children[0]);
         if (node.type === "well") {
             let nodeCopy = angular.copy(node);
-            nodeCopy.data.toggle = true;
+            // nodeCopy.data.toggle = true;
             let wellExisted = self.exportQueueItems.find(function (wellNode) {
                 return wellNode.id === node.id
             })
@@ -314,7 +314,6 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
                 mergeWell(rootNode, nodeCopy, rootNode);
             } else {
                 self.exportQueueItems.push(nodeCopy);
-                console.log('nodeCopy', nodeCopy, 'node', node);
                 self.idExportQueueItems.push(getIdObjectFromWell(nodeCopy));
             }
         } else if (node.type === "dataset") {
@@ -441,6 +440,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     }
     function getIdObjectFromWell(well) {
         let idObject = {
+            idProject: projectLoaded.idProject,
             idWell: "",
             datasets: []
         }
@@ -543,7 +543,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
                 if (response) {
                     for (r of response) {
                         if (r !== null) {
-                            let url = wiOnlineInvService.getFileUrl(r.path);
+                            let url = wiApiService.getLasFileUrl(r.path);
                             self.lasFiles.push({
                                 name: r.datasetName + "_" + r.wellName,
                                 url: url
@@ -555,6 +555,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
 
         }
     }
+    
 }
 
 

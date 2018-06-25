@@ -15,7 +15,7 @@ function Zone(config) {
     this.idZoneTrack = config.idZoneTrack;
     this.fill = Utils.isJson(config.zone_template) ? JSON.parse(config.zone_template) : config.zone_template;
 
-    this.name = config.name || 'Zone';
+    this.name = config.zone_template ? config.zone_template.name : (config.name ? config.name:'Zone');
     this.showName = config.showName == null ? true : config.showName;
 
     this.startDepth = config.startDepth;
@@ -36,7 +36,7 @@ Zone.prototype.getProperties = function() {
         showName: this.showName,
         startDepth: this.startDepth,
         endDepth: this.endDepth,
-        fill: this.fill
+        zone_template: this.fill
     }
 }
 
@@ -107,7 +107,7 @@ Zone.prototype.init = function(plotContainer) {
         .attr('font-size', 10);
 
     if(this.params) {
-        this.controlLineContainer = this.svgGroup.append('g')
+        this.controlLineContainer = this.svgContainer.append('g')
             .attr('class', 'vi-zone-control-line-container');
 
         this.controlLines = this.controlLineContainer.selectAll('line.vi-zone-control-line')
@@ -126,16 +126,11 @@ Zone.prototype.onControlinesDrag = function(cb) {
     if(this.controlLines) {
         let self = this;
         this.controlLines.call(d3.drag()
-            .on('start', function() {
-                lastOpacity = self.svgContainer.attr('fill-opacity') || 1;
-            })
             .on('drag', function() {
-                self.svgContainer.attr('fill-opacity', 0.75);
                 self.controlLineDragCallback(d3.select(this), cb);
                 self.drawControlLineText([d3.select(this).datum()]);
             })
             .on('end', function() {
-                self.svgContainer.attr('fill-opacity', lastOpacity);
                 self.drawControlLineText([]);
             }))
     }
@@ -303,11 +298,14 @@ Zone.prototype.updateText = function() {
 Zone.prototype.createFillStyle = async function() {
     let wiPatternService = gUtils.getPatternService();
     let patternList = gUtils.getListPattern();
-    if (!this.fill || !this.fill.pattern) return null;
+    // if (!this.fill || !this.fill.pattern) return null;
+    if(!this.fill) return null;
     let pattern = this.fill.pattern;
-    if (pattern.name == 'none') return pattern.background;
+    // if (pattern.name == 'none') return pattern.background;
+    if(!pattern) return this.fill.background;
 
-    let src = patternList[pattern.name].src;
+    // let src = patternList[pattern.name].src;
+    let src = patternList[pattern].src;
     if (!src) return null;
 
     let patId = this.createPatternId(pattern);
@@ -321,7 +319,8 @@ Zone.prototype.createFillStyle = async function() {
     canvas.height = 128;
 
     let context = canvas.getContext('2d'); 
-    let _pattern = await wiPatternService.createPatternSync(context, pattern.name, pattern.foreground, pattern.background);
+    // let _pattern = await wiPatternService.createPatternSync(context, pattern.name, pattern.foreground, pattern.background);
+    let _pattern = await wiPatternService.createPatternSync(context, this.fill.pattern, this.fill.foreground, this.fill.background);
     context.fillStyle = _pattern;
     context.fillRect(0, 0, 128, 128);
 

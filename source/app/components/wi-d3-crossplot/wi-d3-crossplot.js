@@ -19,17 +19,20 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.saveCrossplotNow = saveCrossplotNow;
     function saveCrossplotNow(callback) {
         async.series([ function(cb) {
-            let refCurves = self.crossplotModel.properties.reference_curves;
-            self.crossplotModel.properties.reference_curves = null;
+            let config = self.crossplotModel.properties.config;
             let pointsets = self.crossplotModel.properties.pointsets;
-            self.crossplotModel.properties.pointsets = null;
-            let pointSet = self.crossplotModel.properties.pointSet;
-            self.crossplotModel.properties.pointSet = null;
+            let curvesProperties = self.crossplotModel.properties.curvesProperties;
+            delete self.crossplotModel.properties.config;
+            delete self.crossplotModel.properties.curvesProperties;
+            self.crossplotModel.properties.pointsets.forEach(ps => {
+                delete ps.curveX;
+                delete ps.curveY;
+            });
 
-            wiApiService.editCrossplot(self.crossplotModel.properties, function(returnData) {
-                self.crossplotModel.properties.reference_curves = refCurves;
+            wiApiService.editCrossplot(self.crossplotModel.properties, function (returnData) {
+                self.crossplotModel.properties.config = config;
                 self.crossplotModel.properties.pointsets = pointsets;
-                self.crossplotModel.properties.pointSet = pointSet;
+                self.crossplotModel.properties.curvesProperties = curvesProperties;
                 cb();
             });
         }], function(err, result) {
@@ -164,6 +167,12 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 };
                 self.curvesProperties.push(data);
             });
+            let intervalDepthTopArr = new Array();
+            let intervalDepthBottomArr = new Array();
+            xplotProps.pointsets.forEach(ps => {
+                intervalDepthTopArr.push(ps.intervalDepthTop);
+                intervalDepthBottomArr.push(ps.intervalDepthBottom);
+            });
             self.config = xplotProps.config = {
                 logX: xplotProps.pointsets[0].logX,
                 logY: xplotProps.pointsets[0].logY,
@@ -171,14 +180,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 majorY: xplotProps.pointsets[0].majorY,
                 minorX: xplotProps.pointsets[0].minorX,
                 minorY: xplotProps.pointsets[0].minorY,
-                decimalsX: xplotProps.pointsets[0].decimalsX,
-                decimalsY: xplotProps.pointsets[0].decimalsY,
+                decimalsX: self.config.decimalsX,
+                decimalsY: self.config.decimalsY,
                 scale: {
                     left: xplotProps.pointsets[0].scaleLeft,
                     right: xplotProps.pointsets[0].scaleRight,
                     bottom: xplotProps.pointsets[0].scaleBottom,
                     top: xplotProps.pointsets[0].scaleTop
                 },
+                intervalDepthTop: d3.min(intervalDepthTopArr),
+                intervalDepthBottom: d3.max(intervalDepthBottomArr),
                 isShowWiZone: xplotProps.pointsets[0].isShowWiZone,
                 referenceDisplay: xplotProps.pointsets[0].referenceDisplay
             };

@@ -657,6 +657,8 @@ Curve.prototype.drawControlLineText = function(params) {
     textGroup.select('rect')
             .attr('width', textBBox.width + 10)
             .attr('x', d => transformX(d.value) - textBBox.width / 2 - 5);
+    
+    textGroup.raise();
     // exit
     textGroup.exit()
         .remove();

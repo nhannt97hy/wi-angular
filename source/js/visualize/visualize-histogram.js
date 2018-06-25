@@ -485,13 +485,13 @@ Histogram.prototype.plotDrawContainer = function () {
         let idx = self.curves.indexOf(curve);
         let curveDrawContainer = self.drawContainer.append('g')
             .attr('id', 'curve-' + curve.idCurve + '-draw-container');
-        if (self.config.plot === 'Bar')
+        if (curve.options.plot === 'Bar')
             self.drawBarHistogram(curveDrawContainer, idx);
-        else if (self.config.plot === 'Curve')
+        else if (curve.options.plot === 'Curve')
             self.drawCurveHistogram(curveDrawContainer, idx);
-        if (self.config.showGaussian)
+        if (curve.options.showGaussian)
             self.drawGaussianCurve(curveDrawContainer, idx);
-        if (self.config.showCumulative)
+        if (curve.options.showCumulative)
             self.drawCumulativeCurve(curveDrawContainer, idx);
     });
 }
@@ -951,7 +951,7 @@ Histogram.prototype.init = function(domElem) {
         .attr('width', $(this.container.node()).width())
         .attr('height', $(this.container.node()).height());
 
-    this.rect = {
+    this.rect = this.containerSize = {
         width: $(this.container.node()).width(),
         height: $(this.container.node()).height()
     };

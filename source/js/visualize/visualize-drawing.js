@@ -111,7 +111,7 @@ Drawing.prototype.raise = function() {
  */
 Drawing.prototype.lower = function() {
     if (this.canvas) this.canvas.lower();
-    if (this.svgGroup) this.svgGroup.lower();
+    if (this.svgGroup) this.svgContainer.lower();
 }
 
 /**

@@ -79,6 +79,11 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if (self.props.general.width < 0 ) self.props.general.width = 0;
+            if (lastZoneset && self.props.general.idZoneSet != lastZoneset.properties.idZoneSet) {
+                trackComponent.controller.zoneset = utils.getModel('zoneset', self.props.general.idZoneSet);
+            } else if(self.props.general.idZoneSet) {
+                trackComponent.controller.zoneset = utils.getModel('zoneset', self.props.general.idZoneSet);
+            }
             wiApiService.editTrack(self.props.general, function (res) {
                 if (!res) return;
                 let newProps = angular.copy(self.props);
@@ -102,16 +107,16 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.datasets = [];
         this.curvesArr = [];
 
-        // let zonesets = [];
+        let zonesets = [];
         if(this.well) {
             this.well.children.forEach(function (child) {
                 if (child.type == 'dataset') self.datasets.push(child);
-                // else if (child.type == 'zonesets') {
-                //     child.children.forEach(c => {
-                //         if(c.type == 'zoneset')
-                //             zonesets.push(c);
-                //     })    
-                // }
+                else if (child.type == 'zonesets') {
+                    child.children.forEach(c => {
+                        if(c.type == 'zoneset')
+                            zonesets.push(c);
+                    })    
+                }
             });
         } else {
             let logplotProps = utils.findLogplotModelById(trackComponent.idPlot).properties;
@@ -122,17 +127,17 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         if(wellChild.type == 'dataset') {
                             self.datasets.push(wellChild);
                         }
-                        // else if (wellChild.type == 'zonesets') {
-                        //     wellChild.children.forEach(zoneset => {
-                        //         zonesets.push(zoneset);
-                        //     })
-                        // }
+                        else if (wellChild.type == 'zonesets') {
+                            wellChild.children.forEach(zoneset => {
+                                zonesets.push(zoneset);
+                            })
+                        }
                     })
                 }
             });
         }
-        /*
-        let lastZoneSetId = this.props.general.idZoneSet;
+
+        let lastZoneset = utils.getModel('zoneset', this.props.general.idZoneSet);
         this.getZonesetList = function(wiItemDropdownCtrl) {
             $timeout(function() {
                 if(!zonesets.length) return;
@@ -144,13 +149,14 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         properties: zoneset.properties
                     }
                 });
-                wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneSetId)
+                if(lastZoneset) {
+                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneset.properties.idZoneSet);
+                }
             }, 10); 
         }
         this.zonesetChanged = function(selectedItem) {
             self.props.general.idZoneSet = selectedItem.idZoneSet;
         }
-        */
 
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {
@@ -385,8 +391,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                             utils.getCurveData(wiApiService, line.idCurve, function (err, data) {
                                 let lineModel = utils.lineToTreeConfig(line);
                                 if (!err) {
-                                    // wiD3Ctrl.getComponentCtrlByViTrack(viTrack).addCurveToTrack(viTrack, data, lineModel.data);
-                                    trackComponent.controller.addCurveToTrack(viTrack, data, lineModel.data);
+                                    trackComponent.controller.addCurveToTrack(data, lineModel.data);
                                     self.getCurveList();
                                     self.curves[idx].idLine = line.idLine;
                                     item.changed = changed.unchanged;

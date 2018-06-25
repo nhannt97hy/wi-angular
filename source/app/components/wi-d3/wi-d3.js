@@ -233,6 +233,23 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.shouldShowSlider = function() {
         return self.contentWidth > self.sliderWidth + 45;
     }
+    this.shouldHaveCorrelationTrack = function(index) {
+        let currTC = self.trackComponents[index];
+        let prevTC = self.trackComponents[index-1];
+        if(!prevTC)  return false;
+        let currTCWellProps = currTC.controller ? currTC.controller.getWellProps() : null;
+        let prevTCWellProps = prevTC.controller ? prevTC.controller.getWellProps() : null;
+        if(currTCWellProps && prevTCWellProps && currTCWellProps.idWell != prevTCWellProps.idWell) {
+            return true;
+        }
+        return false;
+    }
+    this.getPropertiesForCorrelationTrack = function(index) {
+        return {
+            name: 'Correlation ' + index,
+            width: 1
+        }
+    }
     this.adjustSlidingBarFromDepthRange = function (vY) {
         let slidingBar = wiComponentService.getSlidingBarForD3Area(self.name);
         let maxDepth = self.getMaxDepth();

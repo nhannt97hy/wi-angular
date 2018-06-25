@@ -75,11 +75,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         DialogUtils.zoneTrackPropertiesDialog(ModalService, this.getProperties());
     }
 
-    this.getWellProps = function() {
-        if(!self.viTrack.idZoneSet) return null;
-        else return Utils.findWellByZoneSet(self.viTrack.idZoneSet).properties;
-    }
-
     this.isIdle = false;
     this.update = function (baseSource) {
         self.isIdle = false;

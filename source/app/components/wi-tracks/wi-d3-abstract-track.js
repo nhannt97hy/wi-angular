@@ -65,8 +65,6 @@ Controller.prototype.registerTrackMouseEventHandlers = function () {
     if (!self.viTrack) return;
     // for Tooltips
     self.viTrack.plotContainer.on('mousemove', handleMouseMove);
-    // self.wiComponentService.on(self.wiD3Ctrl.name + 'onScroll', handleMouseMove);
-
     function handleMouseMove() {
         let mouse = d3.mouse(self.viTrack.plotContainer.node());
         if(!mouse || !Array.isArray(mouse)) return;
@@ -111,7 +109,7 @@ Controller.prototype.registerTrackCallback = function() {
     let Utils = self.wiComponentService.getComponent(self.wiComponentService.UTILS);
 
     d3.select(viTrack.root.node().parentNode)
-            .attr('class', 'wi-d3-track-component')
+        .attr('class', 'wi-d3-track-component')
 
     viTrack.on('focus', function () {
         self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
@@ -123,7 +121,7 @@ Controller.prototype.registerTrackCallback = function() {
     });
     viTrack.on('dblclick', function () {
         self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
-        self.openPropertiesDialog();
+        self.wiD3Ctrl && self.openPropertiesDialog();
     });
     viTrack.onVerticalResizerDrag(function () {
         if (trackComponent.idTrack) {
@@ -200,12 +198,25 @@ Controller.prototype.zoom = function() {
         this.minY -= minFactor;
         this.maxY += maxFactor;
     }
+    if(self.getWellProps) {
+        let wellProps = self.getWellProps();
+        if(wellProps) {
+            if(self.minY <= Number(wellProps.topDepth)) self.minY = Number(wellProps.topDepth);
+            if(self.maxY >= Number(wellProps.bottomDepth)) self.maxY = Number(wellProps.bottomDepth);
+        }
+    }
     this.setDepthRange([this.minY, this.maxY]);
+    // this.viTrack.getZones().forEach(zone => zone.lower());
 }
 
 Controller.prototype.scroll = function() {
     let sign = d3.event.deltaY<0 ? 1:-1;
     const _SPEED = (this.maxY - this.minY) / 10;
+    if(this.getWellProps) {
+        let wellProps = this.getWellProps();
+        if(wellProps && (this.minY - _SPEED <= wellProps.topDepth && sign == -1) || (this.maxY + _SPEED >= wellProps.bottomDepth && sign == 1))
+            return;
+    }
     if(sign == 1) {
         this.minY += _SPEED;
         this.maxY += _SPEED;
@@ -214,6 +225,7 @@ Controller.prototype.scroll = function() {
         this.maxY -= _SPEED;
     }
     this.setDepthRange([this.minY, this.maxY]);
+    // this.viTrack.getZones().forEach(zone => zone.lower());
 }
 
 Controller.prototype.getContextMenu = function () {
@@ -229,6 +241,11 @@ Controller.prototype.showContextMenu = function (event) {
     event.stopPropagation();
     self.wiComponentService.getComponent('ContextMenu')
         .open(event.clientX, event.clientY, contextMenu, function() {});
+}
+
+Controller.prototype.getWellProps = function() {
+    if(this.viTrack) return this.viTrack.getWellProps();
+    return null;
 }
 
 Controller.prototype.$onInit = function() {

@@ -103,6 +103,7 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
 
         this.onTabChange = function (index) {
             if (index != 1 || !self.inputChange) return;
+            self.config.scale = {};
             self.projectChanged({ idProject: self.idProject });
             self.inputChange = false;
             self.tabChange = true;
@@ -367,14 +368,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                     switch (type) {
                         case 'dataset':
                             const idDataset = parseInt($(ui.draggable[0]).attr("data"));
-                            self.getInputData(idDataset, true);
+                            self.getInputData(idDataset, true, self.updateProperties);
                             break;
                     }
                 }
             });
         };
 
-        this.getInputData = function (idDataset, drop) {
+        this.getInputData = function (idDataset, drop, callback) {
             let options = new Object();
             for (let node of self.projectConfig) {
                 utils.visit(
@@ -485,12 +486,13 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                 } else {
                     return;
                 }
-                self.updateProperties();
+                console.log('trong getInputData');
+                if (callback) callback();
             });
         }
 
         this.updateProperties = function () {
-            let self = this;
+            console.log('sau getInputData');
             let datasets = self.taskConfig.inputData;
             datasets.forEach(set => {
                 let xCurve = set.children[0].data.value.properties;
@@ -501,34 +503,81 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                     x: xCurve.idCurve,
                     y: yCurve.idCurve,
                     z: null,
-                    options: {},
                     flag: set.flag
                 };
 
-                self.config.scale.left = xCurve.family.family_spec[0].minScale;
-                self.config.scale.right = xCurve.family.family_spec[0].maxScale;
-                self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
-                self.config.scale.top = yCurve.family.family_spec[0].maxScale;
-
-                if (curveProps.x && curveProps.y) {
-                    if (curveProps.flag == 'create') {
-                        if (self.curvesProperties.findIndex(cp => {
-                            return cp.idWell == curveProps.idWell && cp.idDataset == curveProps.idDataset;
-                        }) == -1) {
-                            self.curvesProperties.push(curveProps);
+                if (!xCurve.family) {
+                    wiApiService.infoCurve(curveProps.x, function (info) {
+                        if (!self.config.scale.left || self.config.scale.left > info.LineProperty.minScale)
+                            self.config.scale.left = info.LineProperty.minScale;
+                        if (!self.config.scale.right || self.config.scale.right < info.LineProperty.maxScale)
+                            self.config.scale.right = info.LineProperty.maxScale;
+                        if (!yCurve.family) {
+                            wiApiService.infoCurve(curveProps.y, function (info) {
+                                if (!self.config.scale.bottom || self.config.scale.bottom > info.LineProperty.minScale)
+                                    self.config.scale.bottom = info.LineProperty.minScale;
+                                if (!self.config.scale.top || self.config.scale.top < info.LineProperty.maxScale)
+                                    self.config.scale.top = info.LineProperty.maxScale;
+                                updateCurveProps(curveProps);
+                            });
                         } else {
-                            let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
-                            self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                            if (!self.config.scale.bottom || self.config.scale.bottom > yCurve.family.family_spec[0].minScale)
+                                self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                            if (!self.config.scale.top || self.config.scale.top < yCurve.family.family_spec[0].maxScale)
+                                self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                            updateCurveProps(curveProps);
                         }
-                        // if (!set.drop) set.flag = 'edit';
-                    } else if (curveProps.flag == 'edit') {
-                        let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
-                        curveProps.idPointSet = props.idPointSet;
-                        self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                    });
+                } else {
+                    if (!self.config.scale.left || self.config.scale.left > xCurve.family.family_spec[0].minScale)
+                        self.config.scale.left = xCurve.family.family_spec[0].minScale;
+                    if (!self.config.scale.right || self.config.scale.right < xCurve.family.family_spec[0].maxScale)
+                        self.config.scale.right = xCurve.family.family_spec[0].maxScale;
+                    if (!yCurve.family) {
+                        wiApiService.infoCurve(curveProps.y, function (info) {
+                            if (!self.config.scale.bottom || self.config.scale.bottom > info.LineProperty.minScale)
+                                self.config.scale.bottom = info.LineProperty.minScale;
+                            if (!self.config.scale.top || self.config.scale.top < info.LineProperty.maxScale)
+                                self.config.scale.top = info.LineProperty.maxScale;
+                            updateCurveProps(curveProps);
+                        });
+                    } else {
+                        if (!self.config.scale.bottom || self.config.scale.bottom > yCurve.family.family_spec[0].minScale)
+                            self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                        if (!self.config.scale.top || self.config.scale.top < yCurve.family.family_spec[0].maxScale)
+                            self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                        updateCurveProps(curveProps);
                     }
                 }
+
+                function updateCurveProps (curveProps) {
+                    if (curveProps.x && curveProps.y) {
+                        if (curveProps.flag == 'create') {
+                            if (self.curvesProperties.findIndex(cp => {
+                                return cp.idWell == curveProps.idWell;
+                            }) == -1) {
+                                curveProps.options = {
+                                    pointColor: 'blue',
+                                    pointSize: 5,
+                                    pointSymbol: 'Circle'
+                                };
+                                self.curvesProperties.push(curveProps);
+                            } else {
+                                let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
+                                curveProps.options = props.options;
+                                self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                            }
+                            // if (!set.drop) set.flag = 'edit';
+                        } else if (curveProps.flag == 'edit') {
+                            let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
+                            curveProps.idPointSet = props.idPointSet;
+                            curveProps.options = props.options;
+                            self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                        }
+                    }
+                    self.crossplotModelProps.curvesProperties = self.curvesProperties;
+                }
             });
-            self.crossplotModelProps.curvesProperties = self.curvesProperties;
         }
 
         function selectHandler(currentNode, noLoadData, rootNode, callback) {
@@ -658,8 +707,8 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
         }
 
         function buildWellList(wells) {
-            wells.forEach(well => {
-                const wellModel = utils.createWellModel(well);
+            async.each(wells, function (well, cb) {
+                let wellModel = utils.createWellModel(well);
                 self.projectConfig.push(wellModel);
                 wiApiService.getWell(well.idWell, wellProps => {
                     if (wellProps.datasets && wellProps.datasets.length) {
@@ -674,10 +723,19 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                             });
                             if (self.taskConfig.inputs[0].label && self.taskConfig.inputs[1].label) {
                                 self.getInputData(dataset.idDataset);
+                                $timeout(() => {
+                                    cb();
+                                })
                             }
                         });
                     }
                 });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.updateProperties();
             });
         }
 
@@ -807,13 +865,18 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
         }
 
         // For configurations
-        // this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-        // this.colorSymbol = function () {
-        //     DialogUtils.colorPickerDialog(ModalService, self.crossplotModelProps.pointsets[0].pointColor, function (colorStr) {
-        //         self.crossplotModelProps.pointsets[0].pointColor = colorStr;
-        //     });
-        // };
-        // this.drawIcon = utils.drawIcon;
+        this.pointSymbolList = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.drawIcon = utils.drawIcon;
+        this.colorSymbol = function (props) {
+            DialogUtils.colorPickerDialog(ModalService, props.options.pointColor, function (colorStr) {
+                props.options.pointColor = colorStr;
+                if (!props.flag) props.flag = 'edit';
+            });
+        };
+
+        this.onChange = function (props) {
+            if (!props.flag) props.flag = 'edit';
+        }
 
         this.checkLogStatus = function () {
             if (self.config.logX) {
@@ -901,7 +964,10 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                                 scaleLeft: self.config.scale.left,
                                 scaleRight: self.config.scale.right,
                                 scaleBottom: self.config.scale.bottom,
-                                scaleTop: self.config.scale.top
+                                scaleTop: self.config.scale.top,
+                                pointColor: curveProps.options.pointColor,
+                                pointSize: curveProps.options.pointSize,
+                                pointSymbol: curveProps.options.pointSymbol
                             }, function (pointSet, err) {
                                 if (err) {
                                     cb('create pointset failed');
@@ -931,7 +997,10 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                                 scaleLeft: self.config.scale.left,
                                 scaleRight: self.config.scale.right,
                                 scaleBottom: self.config.scale.bottom,
-                                scaleTop: self.config.scale.top
+                                scaleTop: self.config.scale.top,
+                                pointColor: curveProps.options.pointColor,
+                                pointSize: curveProps.options.pointSize,
+                                pointSymbol: curveProps.options.pointSymbol
                             }, function (pointSet, err) {
                                 if (err) {
                                     cb('edit pointset failed');
@@ -977,6 +1046,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                                 break;
                         }
                     }
+                    let intervalDepthTopArr = new Array();
+                    let intervalDepthBottomArr = new Array();
+                    self.pointsets.forEach(ps => {
+                        intervalDepthTopArr.push(ps.intervalDepthTop);
+                        intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                    });
+                    self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
+                    self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
                     self.crossplotModelProps.pointsets = self.pointsets;
                     self.crossplotModelProps.curvesProperties = self.curvesProperties;
                     self.crossplotModelProps.config = self.config;
@@ -984,6 +1061,14 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                     if (callback) callback(self.crossplotModelProps);
                 });
             } else {
+                let intervalDepthTopArr = new Array();
+                let intervalDepthBottomArr = new Array();
+                self.pointsets.forEach(ps => {
+                    intervalDepthTopArr.push(ps.intervalDepthTop);
+                    intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                });
+                self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
+                self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
                 self.crossplotModelProps.pointsets = self.pointsets = [];
                 self.crossplotModelProps.curvesProperties = self.curvesProperties = [];
                 self.crossplotModelProps.config = self.config;
