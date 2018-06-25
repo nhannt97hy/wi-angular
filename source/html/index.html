@@ -75,6 +75,8 @@
     <link rel="stylesheet" href="css/wii-explorer.css">
     <link rel="stylesheet" href="css/wii-items.css">
     <link rel="stylesheet" href="css/wii-properties.css">
+    <link rel="stylesheet" href="css/wi-props.css">
+
     <link rel="stylesheet" href="css/wi-item-dropdown.css">
     <link href='css/graph.css' rel='stylesheet'>
     <link href='css/main.css' rel='stylesheet'>
@@ -151,8 +153,8 @@
     </template>
 
     <template id='property-block'>
-        <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties>
-        <!-- <wi-props input="myPropertiesConfig" translation="labelConfig" option="optionConfig"></wi-props> -->
+        <!-- <wi-properties name="WiProperties" list-config=" "></wi-properties> -->
+        <wi-props name="WiProps" input="inputProps" config="configData"></wi-props>
     </template>
     <template id="stack-header-control">
         <div class="stack-header-control">

@@ -88,6 +88,8 @@ let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
 let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
+let wiProps = require('./wi-props');
+
 
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
@@ -194,6 +196,7 @@ let app = angular.module('wiapp',
         wiWFMachineLearning.name,
         wiNeuralNetwork.name,
         wiPlot.name,
+        wiProps.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -290,17 +293,40 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
     wiComponentService.putComponent(wiComponentService.COMBOVIEW_HANDLERS, comboviewHandlers);
-
+    $.getJSON( "./js/configFile.json", function(data) {
+        wiComponentService.putComponent(wiComponentService.LIST_CONFIG_PROPERTIES, data);
+    });
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
     // config explorer block - treeview
     $scope.myTreeviewConfig = {};
     // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
-
+    
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    wiComponentService.on('update-properties', function(data){
+        $scope.inputProps = data.props;
+        $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
+    })
     $scope.myPropertiesConfig = {};
+
+    $scope.sampleData={
+        bottomDepth: 1000,
+        topDepth: 2000,
+        step: 1,
+        name: "Well1",
+        unit: "US",
+        background: "#000",
+        pattern: {
+            name: "none",
+            foreground: "#00f",
+            background: "#f00"
+        }
+    };
+    
+    // $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES).well;
+    
 
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);

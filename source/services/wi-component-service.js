@@ -133,7 +133,8 @@ app.factory(wiServiceName, function () {
         RENAME_MODEL: 'rename-model',
         DELETE_MODEL: 'delete-model',
         MODIFIED_CURVE_DATA: 'modified-curve-data',
-        PATTERN: 'PATTERN'
+        PATTERN: 'PATTERN',
+        LIST_CONFIG_PROPERTIES: 'LIST_CONFIG_PROPERTIES'
     };
 });
 

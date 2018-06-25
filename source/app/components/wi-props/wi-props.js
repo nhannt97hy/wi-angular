@@ -1,0 +1,130 @@
+const componentName = 'wiProps';
+const moduleName = 'wi-props';
+
+function Controller ($scope, $http, $timeout, wiComponentService, ModalService) {
+    let self = this;
+    window.wi = this;
+    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+
+    this.fields = null;
+    this.$onInit = function() {
+        wiComponentService.putComponent(self.name, self);
+    }
+    this.$onChanges = function(changeObj) {
+        if(changeObj.input || changeObj.config) {
+            self.fields = obj2Array(self.input, self.config);
+            self.section = sectionObj(self.config);
+            self.shown =  self.getSections(self.section).map(s => true);
+        }
+    }
+    this.doChange = function(field) {
+        onChangeDefault({key: field.name, value: field.value}, function() {
+            self.input[field.name] = field.value;
+        });
+    }
+    function onChangeDefault(item, cb) {
+        utils.editProperty(item, _.debounce(function () {
+            cb && cb();
+        }, 200));
+    }
+    function obj2Array(obj, config) {
+
+        let array = new Array();
+        if(!obj) return [];
+        for (let key of Object.keys(config)) {
+            let item = {
+                name: key,
+                value: obj[key] || config[key].defaultValue,
+                type: (config[key] && config[key].typeSpec) ? config[key].typeSpec : toType(obj[key]),
+                label: (config[key] && config[key].translation) ? config[key].translation : key,
+                use: false,
+                readOnly: false,
+                section: ""
+            }
+            if (config[key] && config[key].option && config[key].option == "use") item.use = true;
+            if (config[key] && config[key].option && config[key].option == "readonly") {
+                item.readOnly = true;
+                item.use = true;
+            }
+            if (config[key] && config[key].section && config[key].section != undefined) item.section = config[key].section;
+            array.push(item);
+        }
+        return array;
+    }
+
+    function sectionObj (config) {
+        let section = new Object();
+        if(!config) return {};
+        for(let key of Object.keys(config)) {
+            section[key] = config[key].section;
+        };
+        return section;
+    };
+
+    this.getSections = function(sectionObj) {
+        let sectionHash = new Object();
+        for (let key of Object.keys(sectionObj)){
+            sectionHash[sectionObj[key]] = true;
+        };
+        let ret = Object.keys(sectionHash).filter(sh => sh!='undefined');
+        return ret;
+    };
+
+    this.getShown = function(sectionName, section) {
+        return self.shown[section.indexOf(sectionName)];
+    };
+
+    this.getFieldsOfSection = function(sectionName, fields) {
+        return fields.filter(f => f.section == sectionName);
+    };
+    
+    function toType(obj) {
+        var typeName = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+        return typeName.replace("string", "text");;
+    };
+
+    this.changeColor = function(field, fields) {
+        DialogUtils.colorPickerDialog(ModalService, field, function (colorStr) {
+            fields[fields.indexOf(field)].value = colorStr;
+            self.doChange(field);
+        });
+    };
+
+    this.changePattern = function(field, fields) {
+        DialogUtils.fillPatternDialog(ModalService, 
+            field.value.name, 
+            field.value.foreground, 
+            field.value.background, 
+            function(_name) {
+                if(_name) {
+                    fields[fields.indexOf(field)].value.name = _name;
+                    self.doChange(field);
+                }
+        });
+    }
+    this.changeFamily = function(field, fields) {
+        let listFamily = utils.getListFamily();
+        DialogUtils.curveFamilyDialog(ModalService, wiComponentService, field.value.idFamily, listFamily, function (newFamily) {
+            if (!newFamily) return;
+            field.value = newFamily;
+            utils.editProperty({key: 'idFamily', value: newFamily.idFamily}, function() {
+
+            })
+        });
+    }
+}
+
+let app = angular.module(moduleName, []);
+app.component(componentName, {
+    templateUrl: 'wi-props.html',
+    controller: Controller,
+    controllerAs: 'self',
+    bindings: {
+        name: "@",
+        input: "<",
+        config: "<"
+    }
+});
+
+exports.name = moduleName;

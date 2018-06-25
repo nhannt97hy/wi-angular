@@ -33,7 +33,7 @@ module.exports = function (ModalService, name, foreground, background, callback)
                         childExpanded: true,
                         label: "None",
                         tooltip: "None",
-                        selected : ((self.name).toLowerCase() === "solid" || (self.name).toLowerCase() === "none") ? true : false
+                        selected : ((self.name).toLowerCase() === "none") ? true : false
                     }, 
                     properties: self.selectPatterns[p]
                 }

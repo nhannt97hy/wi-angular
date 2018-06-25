@@ -223,7 +223,37 @@ function WiExpTreeController(
             this.container.unselectAllNodes();
             return;
         }
-        wiComponentService.emit("update-properties", node);
+        //for wi-props
+        let nodeProperties;
+        switch (node.type) {
+            case 'dataset':
+            {
+                nodeProperties = node.properties;
+                let well = utils.findWellById(nodeProperties.idWell);
+                nodeProperties.well = well.properties.name;
+                break;
+            }
+            case 'curve':
+            {
+                nodeProperties = node.properties;
+                let dataset = utils.findDatasetById(nodeProperties.idDataset);
+                let well = utils.findWellById(dataset.properties.idWell);
+
+                nodeProperties.endDepth = well.properties.bottomDepth;
+                nodeProperties.startDepth = well.properties.topDepth;
+                nodeProperties.dataset = dataset.properties.name;
+                nodeProperties.exportName = nodeProperties.name;
+                //family
+                
+                break;
+                
+            }
+            
+            default:
+                nodeProperties = node.properties;
+                break;
+        }
+        wiComponentService.emit("update-properties", {type: node.type, props: nodeProperties});
         let selectedNodes = wiComponentService.getComponent(
             wiComponentService.SELECTED_NODES
         );
