@@ -86,6 +86,7 @@ Track.prototype.isObjectTrack = function() {
  * @param {String} color - CSS color string
  */
 Track.prototype.setBackgroundColor = function(color) {
+    if (!color) return;
     let wellProps = this.getWellProps();
     if(wellProps == undefined) {
         this.trackContainer

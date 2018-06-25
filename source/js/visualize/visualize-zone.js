@@ -195,6 +195,8 @@ Zone.prototype.doPlot = async function(highlight) {
     let minX = d3.min(viewportX);
     let maxX = d3.max(viewportX);
 
+    if (Number.isNaN(minY) || Number.isNaN(maxY)) return;
+
     this.lines
         .data([
             { x1: minX, y1: minY, x2: maxX, y2: minY },
@@ -346,7 +348,8 @@ Zone.prototype.getAllColors = function() {
 }
 
 Zone.prototype.createPatternId = function(pattern) {
-    return 'vi-zone-pattern-' + this.id + '-' + btoa(pattern.name + '-' + pattern.background + '-' + pattern.foreground);
+    if(!this.suffix) this.suffix = Date.now().toString();
+    return 'vi-zone-pattern-' + this.id + '-' + btoa(pattern.name + '-' + pattern.background + '-' + pattern.foreground) + this.suffix;
 }
 
 Zone.prototype.updateHeader = async function() {
