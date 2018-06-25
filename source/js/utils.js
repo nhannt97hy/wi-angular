@@ -230,27 +230,31 @@ function zoneToTreeConfig(zone, options = {}) {
         zoneModel.name = 'zone-deleted-child';
         zoneModel.type = 'zone-deleted-child';
     } else {
-        zoneModel.name = zone.name;
+        zoneModel.name = zone.zone_template.name;
         zoneModel.type = 'zone';
     }
     zoneModel.id = zone.idZone;
     //zone.fill = typeof(zone.fill) === "string" ? JSON.parse(zone.fill) : zone.fill;
+    zoneModel.properties = zone;
+    /*
     zoneModel.properties = {
         idZoneSet: zone.idZoneSet,
         idZone: zone.idZone,
         startDepth: zone.startDepth,
         endDepth: zone.endDepth,
-        name: zone.name,
+        name: zone.zone_template.name,
         // fill: zone.fill,
         // background: zone.fill.pattern.background,
         // foreground: zone.fill.pattern.foreground,
+        zone_template: zone.zone_template,
         background: zone.zone_template ? zone.zone_template.background : null,
         foreground: zone.zone_template ? zone.zone_template.foreground : null,
         //fix tiep pattern
     };
+    */
     zoneModel.data = {
         icon: 'zone-table-16x16',
-        label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}`
+        label: `${zone.zone_template.name}: ${zone.startDepth} - ${zone.endDepth}`
     }
     zoneModel.parent = 'zoneset' + zone.idZoneSet;
     return zoneModel;
