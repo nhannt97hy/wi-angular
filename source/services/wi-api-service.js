@@ -691,7 +691,7 @@ Service.prototype.createDatabase = function (data, callback) {
 Service.prototype.dropDatabase = function (data, callback) {
     this.delete(DATABASE_UPDATE, data, callback);
 }
-Service.prototype.refreshToken = function (refreshToken, callback) {
+Service.prototype.refreshToken = _.throttle(function (refreshToken, callback) {
     if (!refreshToken) return;
     let self = this;
     this.post(REFRESH_TOKEN, { refresh_token: refreshToken }, function (res, err) {
@@ -708,7 +708,7 @@ Service.prototype.refreshToken = function (refreshToken, callback) {
         getAuthInfo();
         callback && callback();
     }, 'auth');
-}
+}, 2 * 60 * 60 * 1000);
 Service.prototype.postWithTemplateFile = function (dataPayload) {
     var self = this;
     return new Promise(function (resolve, reject) {
@@ -960,24 +960,16 @@ Service.prototype.closeProject = function(infoProject, callback){
     this.post(CLOSE_PROJECT, infoProject, callback);
 }
 Service.prototype.createProject = function (infoProject, callback) {
-    console.log('infoProject', infoProject);
     this.post(CREATE_PROJECT, infoProject, callback);
 }
 
 Service.prototype.getProject = function (infoProject, callback) {
-    console.log('infoProject', infoProject);
+    this.refreshToken(__USERINFO.refreshToken);
     this.post(GET_PROJECT, infoProject, callback);
 }
 
 Service.prototype.getProjectInfo = function (idProject, callback) {
-    let self = this;
-    if (__USERINFO.refreshToken) {
-        this.refreshToken(__USERINFO.refreshToken, function () {
-            self.post(GET_PROJECT_INFO, { idProject: idProject }, callback);
-        });
-    } else {
-        self.post(GET_PROJECT_INFO, { idProject: idProject }, callback);
-    }
+    this.post(GET_PROJECT_INFO, { idProject: idProject }, callback);
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {

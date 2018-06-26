@@ -237,8 +237,7 @@ Histogram.prototype.updateConfig = function () {
     let realStep = step;
     let jumpFactor = Math.ceil(nBins / jumpFactorSeed);
     if (jumpFactor > 1) realStep = jumpFactor * step;
-    let nDecimal = Math.ceil(-1 * Math.log10(Math.abs(realStep)));
-    nDecimal = nDecimal >= 0 ? nDecimal : 0;
+    let nDecimal = 2;
     let cfg = {
         nBins: nBins,
         nDecimal: nDecimal,
@@ -484,7 +483,7 @@ Histogram.prototype.plotDrawContainer = function () {
     this.curves.forEach(curve => {
         let idx = self.curves.indexOf(curve);
         let curveDrawContainer = self.drawContainer.append('g')
-            .attr('id', 'curve-' + curve.idCurve + '-draw-container');
+            .attr('class', 'curve-' + curve.idCurve + '-draw-container');
         if (curve.options.plot === 'Bar')
             self.drawBarHistogram(curveDrawContainer, idx);
         else if (curve.options.plot === 'Curve')

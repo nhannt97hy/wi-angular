@@ -112,7 +112,7 @@
                                     <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiModal.droppableSetting();">
                                         <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
                                             <div class="panel-heading">
-                                                    <h5>Input Data</h5>
+                                                <h5>Input Data</h5>
                                             </div>
                                             <div style='margin: 5px;position: relative;'>
                                                 <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
@@ -120,7 +120,7 @@
                                             </div>
                                             <div style="flex: 1; position: relative; overflow-y: auto;">
                                                 <wi-base-treeview id='{{wiModal.taskDataTreeName}}' name='wiCrossplotFormatModalTaskDataTreeName' style="margin-left: 0px;" config='wiModal.taskConfig.inputData'
-                                                    on-click-function='wiModal.taskClickFuntion' show-context-menu-function='wiModal.taskShowContextMenu'
+                                                    on-click-function='wiModal.taskClickFunction' show-context-menu-function='wiModal.taskShowContextMenu'
                                                     filter='{{wiModal.inputFilter}}' filter-by='{{wiModal.typeFilter}}'></wi-base-treeview>
                                                 <div ng-if="!wiModal.taskConfig.inputData.length" class='dropLabel'>DROP DATASET HERE</div>
                                             </div>
@@ -132,97 +132,100 @@
                     </wi-tab>
                     <wi-tab heading="Configurations">
                         <div class="container-fluid">
-                            <form class="form-horizontal form-condensed">
-                                <div class="row">
-                                    <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Left</label>
-                                    <div class="col-sm-2 padding-right-0 padding-left-0">
+                            <form class="form-horizontal form-condensed"
+                            style="display:flex;flex-direction:column;height:90%">
+                                <div class="row" style="margin-left:0px;margin-right:0px;">
+                                    <div class="col-sm-4 input-field">
+                                        <label>Left</label>
                                         <input type="number" class="form-control wi-form-control" id="scaleLeft" ng-model="wiModal.config.scale.left"
-                                            ng-change="wiModal.checkLogaValue(wiModal.config.scale.left, 'scaleLeft')">
+                                            ng-change="wiModal.checkLogaValue(wiModal.config.scale.left, 'scaleLeft')" style="margin-bottom:6px;">
                                     </div>
-                                    <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Right</label>
-                                    <div class="col-sm-2 padding-right-0 padding-left-0">
+                                    <div class="col-sm-4 input-field">
+                                        <label>Right</label>
                                         <input type="number" class="form-control wi-form-control" id="scaleRight" ng-model="wiModal.config.scale.right"
-                                            ng-change="wiModal.checkLogaValue(wiModal.config.scale.right, 'scaleRight')">
+                                            ng-change="wiModal.checkLogaValue(wiModal.config.scale.right, 'scaleRight')" style="margin-bottom:6px;">
                                     </div>
-                                    <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Divisions</label>
-                                    <div class="col-sm-2 padding-right-0 padding-left-0">
+                                    <div class="col-sm-4 input-field">
+                                        <label>Divisions</label>
                                         <input type="number" class="form-control wi-form-control"
-                                        ng-model="wiModal.config.numOfDivisions">
+                                        ng-model="wiModal.config.numOfDivisions" style="margin-bottom:6px;">
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-4 input-field">
                                         <input type="checkbox" ng-model="wiModal.config.loga">
                                         <label>Loga</label>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-4 input-field">
                                         <input type="checkbox" ng-model="wiModal.config.showGrid">
                                         <label>Show Grid</label>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-sm-4 input-field">
                                         <input type="checkbox" ng-model="wiModal.config.flipHorizontal">
                                         <label>Flip Horizontal</label>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-4">
+                                    <div class="col-sm-4 input-field">
                                         <input type="radio" name='plotType' ng-model="wiModal.config.plotType" value="Frequency">
                                         <label>Frequency count</label>
                                     </div>
-                                    <div class="col-sm-4">
+                                    <div class="col-sm-4 input-field">
                                         <input type="radio" name='plotType' ng-model="wiModal.config.plotType" value="Percent">
                                         <label>Percentile</label>
                                     </div>
                                 </div>
-                                <hr>
-                                <div style="height:100%;display:flex;flex-direction:row;padding:10px;">
+                                <hr style="width:100%;">
+                                <div style="flex:1;display:flex;flex-direction:row;padding:10px;">
                                     <div class="panel panel-default tree-side">
+                                        <div style='display:flex;' class='panel-heading'>
+                                            <h6 style="font-weight:700">Datasets</h6>
+                                        </div>
                                         <div style="flex: 1; position: relative; overflow-y: auto;">
-                                            <wi-base-treeview id='{{wiModal.taskDataTreeName}}' name='wiCrossplotFormatModalTaskDataTreeName' style="margin-left: 0px;" config='wiModal.taskConfig.inputData'>
+                                            <wi-base-treeview id='{{wiModal.taskDataTreeName}}' name='wiCrossplotFormatModalTaskDataTreeName' style="margin-left: 0px;" config='wiModal.inputDataClone'
+                                            on-click-function='wiModal.datasetPropsClickFunction'>
                                             </wi-base-treeview>
                                         </div>
                                     </div>
-                                    <div style="flex:2;margin-left: 5px;">
-                                        <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
-                                            <ul>
-                                                <li style="list-style-type: none"
-                                                ng-repeat="props in wiModal.curvesProperties"
-                                                ng-if="props.flag != 'delete'">
-                                                    <form>
-                                                        <div class="row">
-                                                            <div class="col-sm-3">
-                                                                <input type="checkbox" ng-model="props.options.showGaussian">
-                                                                <label>Show Gaussian</label>
-                                                            </div>
-                                                            <div class="col-sm-3">
-                                                                <input type="checkbox" ng-model="props.options.showCumulative">
-                                                                <label>Show Cumulative</label>
-                                                            </div>
-                                                            <div class="col-sm-2">
-                                                                <input type="radio" name='plot{{props.idCurve}}' ng-model="props.options.plot" value="Bar">
-                                                                <label>Bar</label>
-                                                            </div>
-                                                            <div class="col-sm-2">
-                                                                <input type="radio" name='plot{{props.idCurve}}' ng-model="props.options.plot" value="Curve">
-                                                                <label>Curve</label>
-                                                            </div>
-                                                            <div class="col-sm-2">
-                                                                <div class="form-group">
-                                                                    <label class="col-sm-3">Color</label>
-                                                                    <div class="col-sm-9">
-                                                                        <div class="float-left">
-                                                                            <button type="button" ng-click="wiModal.pickColor(props);"
-                                                                                ng-style="{'background-color':props.options.lineColor}"
-                                                                                class="form-control wi-form-control width-80px thick-border">
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </li>
-                                            </ul>
+                                    <div style="display:flex;flex:2;padding-left:10px;">
+                                        <div class="panel panel-default"
+                                        style='display:flex;flex-direction:column;margin-bottom:0px;width:100%'>
+                                            <div class='panel-heading'>
+                                                <h6 style="font-weight:700">
+                                                    Display Properties ({{wiModal.selectedDatasetProps.name}})
+                                                </h6>
+                                            </div>
+                                            <div ng-if="wiModal.selectedDatasetProps">
+                                                <div class="col-sm-6 input-field">
+                                                    <input type="checkbox"
+                                                    ng-model="wiModal.selectedDatasetProps.options.showGaussian">
+                                                    <label>Show Gaussian</label>
+                                                </div>
+                                                <div class="col-sm-6 input-field">
+                                                    <input type="checkbox"
+                                                    ng-model="wiModal.selectedDatasetProps.options.showCumulative">
+                                                    <label>Show Cumulative</label>
+                                                </div>
+                                                <div class="col-sm-6 input-field">
+                                                    <input type="radio" name='plot{{props.idCurve}}'
+                                                    ng-model="wiModal.selectedDatasetProps.options.plot"
+                                                    value="Bar">
+                                                    <label>Bar</label>
+                                                </div>
+                                                <div class="col-sm-6 input-field">
+                                                    <input type="radio" name='plot{{props.idCurve}}'
+                                                    ng-model="wiModal.selectedDatasetProps.options.plot"
+                                                    value="Curve">
+                                                    <label>Curve</label>
+                                                </div>
+                                                <div class="col-sm-6 input-field">
+                                                    <label>Color</label>
+                                                    <div style="display:inline-block;margin-left:10px;margin-bottom:5px;vertical-align:middle;">
+                                                        <button type="button"
+                                                        ng-click="wiModal.pickColor(wiModal.selectedDatasetProps);"
+                                                        ng-style="{'background-color':wiModal.selectedDatasetProps.options.lineColor}"
+                                                        class="form-control wi-form-control width-80px thick-border"
+                                                        style="width:70px;">
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -247,6 +250,9 @@
         </div>
     </div>
     <style>
+        .input-field {
+            margin-top:12px;
+        }
         .margin-bottom-0 {
             margin-bottom: 0;
         }

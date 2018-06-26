@@ -160,7 +160,7 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, ModalSer
     });
     _modeler.on(
       'element.changed',
-      _.debounce(function(event, { element }) {
+      _.debounce(function() {
         self.modeler.saveXML({ format: true }, function(err, xml) {
           $timeout(() => (self.flow.content = xml));
         });
@@ -168,14 +168,18 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, ModalSer
     );
     _modeler.on(
       'element.changed',
-      _.debounce(function(event, { element }) {
+      _.debounce(function() {
         if (!self.new) self.saveFlow();
       }, 2000)
     );
-    _modeler.on('selection.changed', function(event, { newSelection }) {
+    _modeler.on('selection.changed', function({ newSelection }) {
       const selectedElement = newSelection[0] || self.canvas.getRootElement();
       console.log(selectedElement);
     });
+    _modeler.on('shape.removed', function ({ element }) {
+      const idTask = getBusinessObject(element).get('idTask');
+      idTask && pendings.push(new Pending(Action.DELETE_TASK, idTask));
+    })
   }
 
   function isServiceTask(element) {
@@ -233,8 +237,7 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, ModalSer
     bo.set('expression', 'execute');
     create.start(new MouseEvent('click'), shape);
     const eventBus = self.modeler.get('eventBus');
-    eventBus.once('create.end', function(event) {
-      const shape = event.context.shape;
+    function onCreateEnd(event) {
       console.log('created', shape);
       pendings.push(
         new Pending(
@@ -246,7 +249,11 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, ModalSer
           }
         )
       );
-    });
+    }
+    eventBus.once('create.end', onCreateEnd);
+    eventBus.once('create.rejected', function (event) {
+      eventBus.off('create.end', onCreateEnd);
+    })
   };
   this.openTask = function(idTask, element) {
     if (!idTask) return;
@@ -258,16 +265,30 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, ModalSer
         title: task.name,
         tabIcon: 'workflow-16x16',
         componentState: {
-          html: `<wi-task name="${task.name}" id="${idTask}" task-config="task.content"></wi-task>`,
+          html: `<wi-task name="${task.name}" id="${idTask}" task-config="task.content" wi-flow-designer="wiFlowDesigner"></wi-task>`,
           name: 'wiTask' + idTask,
           task: task,
+          wiFlowDesigner: self,
         },
       });
     });
   };
-  this.deleteTask = function(idTask, element) {
-    pendings.push(new Pending(Action.DELETE_TASK, idTask));
-  };
+  /**
+   * @param {String | Object} element idTask || element
+   */
+  this.getPreviousTasks = function getPreviousTasks(element) {
+    if (typeof element !== 'object') {
+      element = self.elementRegistry.filter(e => getBusinessObject(e).get('idTask') == element)[0];
+    }
+    if (!element || !element.incoming.length) return [];
+    const prevTasks = element.incoming.reduce((acc, cur, idx) => {
+      cur.source && isServiceTask(cur.source) && acc.push(cur.source);
+      return acc;
+    }, []);
+    return prevTasks.concat(prevTasks.reduce((acc, cur, idx) => {
+      return getPreviousTasks(cur);
+    }, []));
+  }
 
   // buttons
   this.saveFlow = function(notice) {
