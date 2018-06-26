@@ -373,15 +373,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         handler: function () {
                             utils.renameWell();
                         }
-                    },{
+                    },  {
+                        name: "Export To Inventory",
+                        label: "Export To Inventory",
+                        icon: "arrow-right-16x16",
+                        handler: function () {
+                            utils.exportWellToInventory();
+                        }
+                    }, {
                         name: "DuplicateCurve",
                         label: "Duplicate",
                         icon: "copy-16x16",
                         handler: function () {
                             self.handlers.DuplicateButtonClicked('well');
                         }
-                    },
-                    {
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -463,6 +469,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.renameDataset();
                         }
                     }, {
+                        name: "Export to Inventory",
+                        label: "Export to Inventory",
+                        icon: "arrow-right-16x16",
+                        handler: function () {
+                            utils.exportDatasetToInventory();
+                        }
+                    }, {
                         name: "DuplicateDataset",
                         label: "Duplicate",
                         icon: "copy-16x16",
@@ -515,6 +528,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "copy-16x16",
                         handler: function() {
                             utils.copyCurve();
+                        }
+                    }, {
+                        name: "Export to Inventory",
+                        label: "Export to Inventory",
+                        icon: "arrow-right-16x16",
+                        handler: function() {
+                            utils.exportCurveToInventory();
                         }
                     }, {
                         name: "Cut",
