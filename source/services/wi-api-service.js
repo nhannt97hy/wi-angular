@@ -981,7 +981,14 @@ Service.prototype.getProjectInfo = function (idProject, callback) {
 }
 
 Service.prototype.getProjectList = function (infoProject, callback) {
-    this.post(GET_PROJECT_LIST, infoProject, callback);
+    const self = this;
+    if (__USERINFO.refreshToken) {
+        this.refreshToken(__USERINFO.refreshToken, function () {
+            self.post(GET_PROJECT_LIST, infoProject, callback);
+        });
+    } else {
+        self.post(GET_PROJECT_LIST, infoProject, callback);
+    }
 }
 Service.prototype.listWells = function (wellQuery, callback) {
     this.post(LIST_WELL, wellQuery, callback);

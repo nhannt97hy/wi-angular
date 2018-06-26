@@ -426,6 +426,10 @@ function restoreProject($timeout, wiApiService, ModalService) {
     let query = queryString.parse(location.search);
     if (Object.keys(query).length && query.idProject) {
         $timeout(function () {
+            const refreshToken = window.localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                wiApiService.refreshToken(refreshToken);
+            }
             wiApiService.getProject({
                 idProject: query.idProject,
                 name: query.name,
