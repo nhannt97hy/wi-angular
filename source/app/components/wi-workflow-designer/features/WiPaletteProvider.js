@@ -36,7 +36,7 @@ function WiPaletteProvider(injector) {
     'tool-separator',
     'create.start-event',
     'create.end-event',
-    'create.exclusive-gateway',
+    // 'create.exclusive-gateway',
     'append.text-annotation',
   ];
   this.getPaletteEntries = function(element) {

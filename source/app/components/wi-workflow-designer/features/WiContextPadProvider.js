@@ -49,7 +49,7 @@ function WiContextPadProvider(injector, wiFlowDesigner, modeling) {
     }
 
     const actions = bpmnGetContextPadEntries(element);
-    ['append.intermediate-event', 'append.append-task', 'append.text-annotation', 'replace'].forEach((action) => {
+    ['append.intermediate-event', 'append.append-task', 'append.text-annotation', 'replace', 'append.gateway'].forEach((action) => {
       delete actions[action];
     });
     if (is(element, 'bpmn:FlowNode')) {
@@ -71,14 +71,14 @@ function WiContextPadProvider(injector, wiFlowDesigner, modeling) {
               },
             },
           };
-          actions['delete'] = Object.assign(actions['delete'], {
-            action: {
-              click: function (event, element) {
-                modeling.removeElements([element]);
-                wiFlowDesigner.deleteTask(idTask, element);
-              },
-            },
-          })
+          // actions['delete'] = Object.assign(actions['delete'], {
+          //   action: {
+          //     click: function (event, element) {
+          //       modeling.removeElements([element]);
+          //       wiFlowDesigner.deleteTask(idTask, element);
+          //     },
+          //   },
+          // })
         }
       }
     }
