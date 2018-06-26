@@ -318,7 +318,7 @@ Service.prototype.wellInfo = function (idWell, callback) {
 }
 
 Service.prototype.wellInfoByName = function (wellName, callback) {
-    this.post(WELL_INFO_BY_NAME, {name: name}, callback);
+    this.post(WELL_INFO_BY_NAME, {name: wellName}, callback);
 }
 
 Service.prototype.wellFullInfo = function (wellName, callback) {
