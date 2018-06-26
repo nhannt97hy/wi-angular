@@ -92,10 +92,6 @@
                         <div class='panel-heading' style='display: flex;'>
                             <h5 style="flex:1;">Data type</h5>
                             <div style='flex:2;text-align: right;'>
-                                <!-- <label class="btn btn-default" ng-click="wiTask.onSelectionTypeChanged(wiTask.TASK_SELECTION)" ng-class='{active: wiTask.selectionType==wiTask.TASK_SELECTION}'
-                                title='Task'>
-                                    <span class='workflow-16x16'></span>
-                                </label> -->
                                 <label class="btn btn-default" ng-click="wiTask.onSelectionTypeChanged(wiTask.FAMILY_GROUP_SELECTION)" ng-class='{active: wiTask.selectionType==wiTask.FAMILY_GROUP_SELECTION}'
                                 style="margin-right: 5px;" title='Family Group'>
                                     <span class='zone-table-16x16'></span>
@@ -214,11 +210,6 @@
                                         filter="{{wiTask.zoneFilter}}">
                                     </wi-base-treeview>
                                 </wi-tab>
-                                <!-- <wi-tab heading='Tasks' on-show='wiTask.onShowTab'>
-                                    <wi-base-treeview id='{{wiTask.taskTreeName}}' name="{{wiTask.taskTreeName}}" config="wiTask.taskConfig" container="wiTask"
-                                        on-click-function="wiTask.taskClickFunction" on-ready-function='wiTask.onTaskReady' filter="{{wiTask.taskFilter}}">
-                                    </wi-base-treeview>
-                                </wi-tab> -->
                             </wi-tabset>
                         </div>
                     </div>

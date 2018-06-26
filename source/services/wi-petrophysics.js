@@ -364,10 +364,21 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
         async.eachOf(inputMap, function (data, idx, callback) {
             let curveData = [];
             async.eachSeries(data.inputs, function (curve, cb) {
-                wiApiService.dataCurve(curve.id, function (dataCurve) {
-                    curveData.push(dataCurve.map(d => parseFloat(d.x)));
-                    cb();
-                })
+                (async () => {
+                    if (!curve.id) {
+                        await new Promise((resolve, reject) => {
+                            wiApiService.checkCurveExisted(curve.name, data.idDataset, (res, err) => {
+                                if (err || !res.idCurve) reject(res);
+                                curve.id = res.idCurve;
+                                resolve();
+                            });
+                        })
+                    }
+                    wiApiService.dataCurve(curve.id, function (dataCurve) {
+                        curveData.push(dataCurve.map(d => parseFloat(d.x)));
+                        cb();
+                    })
+                })();
             }, function (err) {
                 if (!err) {
                     runFunc(curveData, data.parameters, function (ret) {
