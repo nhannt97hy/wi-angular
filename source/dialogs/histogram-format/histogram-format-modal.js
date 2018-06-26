@@ -541,6 +541,12 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                             curveProps.options = props.options;
                             self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
                         }
+                        self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                        self.inputDataClone.forEach(d => { delete d.children; });
+                        self.curvesPropertiesClone = self.curvesProperties.filter(cp => {
+                            return cp.flag != 'delete';
+                        });
+                        self.selectedDatasetProps = null;
                     }
                     self.histogramModelProps.curvesProperties = self.curvesProperties;
                 }
@@ -619,6 +625,12 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                             self.curvesProperties[self.curvesProperties.indexOf(props)].flag = 'delete';
                             self.taskConfig.inputData.splice(idx, 1);
                             self.datasetsList.splice(self.datasetsList.indexOf(d), 1);
+                            self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                            self.inputDataClone.forEach(d => { delete d.children; });
+                            self.curvesPropertiesClone = self.curvesProperties.filter(cp => {
+                                return cp.flag != 'delete';
+                            });
+                            self.selectedDatasetProps = null;
                         }
                     })
                     self.taskConfig.inputData.__SELECTED_NODES = [];
@@ -638,7 +650,7 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
             clickFunction($index, $event, node, self.projectConfig);
         };
 
-        this.taskClickFuntion = function ($index, $event, node) {
+        this.taskClickFunction = function ($index, $event, node) {
             if (node && node.type == 'dataset') {
                 let rootNode = self.taskConfig.inputData;
                 if (!Array.isArray(rootNode.__SELECTED_NODES)) rootNode.__SELECTED_NODES = [];
@@ -648,6 +660,17 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                 rootNode.__SELECTED_NODES = selectedNodes;
                 node.data.selected = true;
                 node.$index = $index;
+            }
+        }
+
+        this.datasetPropsClickFunction = function ($index, $event, node) {
+            if (node && node.type == 'dataset') {
+                if (!$event.ctrlKey) unselectAllNodes(self.inputDataClone);
+                node.data.selected = true;
+                node.$index = $index;
+                self.selectedDatasetProps = self.curvesPropertiesClone[$index];
+                self.selectedDatasetProps.name = self.taskConfig.inputData[$index].data.label;
+                console.log(self.selectedDatasetProps);
             }
         }
 
