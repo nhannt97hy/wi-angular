@@ -1889,15 +1889,20 @@ exports.exportCurveToInventory = function () {
     let selectedNode = getSelectedNode();
     if(selectedNode.type!= 'curve') return;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let wiApiService = __GLOBAL.wiApiService;    
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     console.log('selectedNode', selectedNode);
-    wiOnlineInvService.datasetInfoByName(selectedNode.parentDataArr[0].label, selectedNode.parentDataArr[1].label, function(dataset, err) {
+    wiApiService.getWellInfoByName(selectedNode.parentDataArr[1].label, projectLoaded.idProject, function(well, err) {
         if(err) {
             toastr.error(err);
         } else {
             wiOnlineInvService.importCurveFromProject([{
                 idCurve: selectedNode.properties.idCurve,
-                idDesDataset: dataset.idDataset,
-                name: selectedNode.properties.name
+                name: selectedNode.properties.name,
+                wellName: well.name,
+                datasetName: selectedNode.parentDataArr[0].label,
+                idProject: projectLoaded.idProject
             }], function (result, err) {
                 if(err) {
                     toastr.error(err);
@@ -1949,6 +1954,7 @@ exports.exportWellToInventory = function () {
 }
 exports.renameCurve = function renameCurve(newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
+
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
