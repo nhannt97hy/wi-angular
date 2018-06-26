@@ -116,6 +116,7 @@ module.exports.createLayout = function (domId, $scope, $compile) {
     })
     layoutManager.init();
     layoutManager.rightContainer = layoutManager.root.getItemsById('right')[0];
+    // window.LAYOUT = { ...layoutManager, ...module.exports };
 
     layoutManager.registerComponent('wi-block', function (container, componentState) {
         const newScope = scopeObj.$new(false);

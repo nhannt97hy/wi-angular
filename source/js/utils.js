@@ -111,6 +111,7 @@ exports.projectOpen = function (projectData) {
     })
 };
 
+
 exports.projectClose = function () {
     let wiComponentService = __GLOBAL.wiComponentService;
     let wiApiService = __GLOBAL.wiApiService;

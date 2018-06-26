@@ -242,10 +242,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         if(!trackProps.idTrack) {
             // TO DO something without track id (anonymous track - for preview purpose)
-            if(self.viTrack.showZoneSet && self.zoneset) {
+            if(self.zoneset) {
                 self.addZoneSetToTrack(self.zoneset);
-            } else if(!self.viTrack.showZoneSet) {
-                self.viTrack.removeAllZones();
             }
             if (self.getProperties().lines) {
                 let promises = [];
