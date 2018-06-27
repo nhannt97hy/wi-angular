@@ -182,7 +182,7 @@ exports.NewFlowButtonClicked = function (callback) {
                 }
                 layoutManager.putTabRight({
                     id: 'flow' + resFlow.idFlow,
-                    title: 'New Flow',
+                    title: flowName,
                     tabIcon: 'workflow-16x16',
                     componentState: {
                         html: `<wi-flow-designer id="${resFlow.idFlow}" flow="flow"></wi-flow-designer>`,

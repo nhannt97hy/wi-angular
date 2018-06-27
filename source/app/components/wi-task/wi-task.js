@@ -709,13 +709,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                 })
                             })
                         }
+                        datasetModel.children.push(...prevTaskCurves.filter(taskCurve => !datasetModel.children.find(c => c.name == taskCurve.name)));
                         let inputItems = self.taskConfig.inputs.map(ipt => {
                             let tempItem = {
                                 data: {
                                     childExpanded: false,
                                     icon: "curve-16x16",
                                     label: ipt.name,
-                                    choices: matchCurves(datasetModel.children.concat(prevTaskCurves), ipt),
+                                    choices: matchCurves(datasetModel.children, ipt),
                                     selected: false
                                 },
                                 type: "inputchoice"
