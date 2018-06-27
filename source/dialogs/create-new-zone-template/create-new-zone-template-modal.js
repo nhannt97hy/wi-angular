@@ -48,7 +48,7 @@ module.exports = function (ModalService, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: 'create-new-zone-set-modal.html',
+        templateUrl: 'create-new-zone-template-modal.html',
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

@@ -7,7 +7,7 @@ module.exports = function(ModalService, callback, additionalFlows = []) {
     this.flows = [];
     this.selectedFlow = null;
     this.getFlowList = function(wiItemDropdownCtrl) {
-      wiApiService.getFlowList({ idProject: project.idProject }, function (flows, err) {
+      wiApiService.getFlowList({ idProject: project.idProject }, function(flows, err) {
         if (err) return;
         self.flows = additionalFlows;
         wiItemDropdownCtrl.items = self.flows.concat(flows).map((flow) => ({
@@ -23,15 +23,32 @@ module.exports = function(ModalService, callback, additionalFlows = []) {
     };
     this.deleteFlow = function(flowItem, $event, wiItemDropdownCtrl) {
       $event.stopPropagation();
-      $event.preventDefault();
-      wiApiService.removeFlow(flowItem.properties.idFlow, function (resFlow, err) {
-        if (err) return;
-        wiComponentService.emit('flow.deleted', resFlow.idFlow);
-        self.getFlowList(wiItemDropdownCtrl);
-      });
+      const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+      DialogUtils.confirmDialog(ModalService, 'Delete flow', `Are you sure to delete flow <b>${flowItem.properties.name}</b>?`, function (yes) {
+        if (!yes) return;
+        wiApiService.removeFlow(flowItem.properties.idFlow, function(resFlow, err) {
+          if (err) return;
+          wiComponentService.emit('flow.deleted', resFlow.idFlow);
+          self.getFlowList(wiItemDropdownCtrl);
+        });
+      })
+    };
+    this.newFlow = function() {
+      const globalHandlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
+      globalHandlers.NewFlowButtonClicked((newFlow) => {
+        close(newFlow);
+      })
     };
     this.close = function (flow) {
-      close(flow);
+      if (!flow) return close();
+      if (flow.new) {
+        close(flow);
+      } else {
+        wiApiService.getFlow(flow.idFlow, function (resFlow, err) {
+          if (err) close();
+          else close(resFlow);
+        })
+      }
     };
   }
 

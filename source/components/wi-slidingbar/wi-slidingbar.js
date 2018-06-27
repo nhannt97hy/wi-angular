@@ -177,7 +177,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         updateState(tempTinyWindowsTop, tempTinyWindowsHeight);
     }
     
-    this.updateWid3 = updateWid3;
+    this.updateWid3 = updateWid3
     function updateWid3() {
         let wiD3Controller = wiComponentService.getD3AreaForSlidingBar(self.name);
         let max = wiD3Controller.getMaxDepth();
@@ -256,7 +256,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
             let _ui = ui;
             tungTrickHandle = setTimeout(function() {
                 update(_ui);
-                updateWid3();
+                self.updateWid3();
                 tungTrickHandle = null;
             }, 200);
         }
@@ -272,13 +272,13 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).on("resize", function (event, ui) {
             event.stopPropagation();
             update(ui);
-            updateWid3();
+            self.updateWid3();
             //tungTrick(ui);
         });
         $(self.handleId).on("resizestop", function (event, ui) {
             event.stopPropagation();
             update(ui);
-            updateWid3();
+            self.updateWid3();
             //tungTrick(ui);
             saveStateToServer();
         });
@@ -286,12 +286,12 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         $(self.handleId).on("drag", function (event, ui) {
             event.stopPropagation();
             update(ui);
-            updateWid3();
+            self.updateWid3();
         });
         $(self.handleId).on("dragstop", function (event, ui) {
             event.stopPropagation();
             update(ui);
-            updateWid3();
+            self.updateWid3();
             saveStateToServer();
         });
 
@@ -398,7 +398,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let newTop = tempTopHandler;
         let newHeight = _tinyWindow.height;
         updateSlidingHandler(newTop, newHeight);
-        updateWid3();
+        self.updateWid3();
         saveStateToServer();
     }
 

@@ -59,10 +59,13 @@ let wiZoneManager = require('./wi-zone-manager');
 let wiZoneSetManager = require('./wi-zone-set-manager');
 
 let wiInventory = require('./wi-inventory');
-let wiExport = require('./wi-export');
+// let wiExport = require('./wi-export');
+let wiExportFromInventory = require('./wi-export-from-inventory');
+let wiExportFromProject = require('./wi-export-from-project');
 let wiTask = require('./wi-task');
 let wiFlowDesigner = require('./wi-flow-designer');
 let wiFlowEngine = require('./wi-flow-engine');
+let wiPetrophysics = require('./wi-petrophysics');
 let wiWorkflow = require('./wi-workflow');
 let wiWorkflowPlayer = require('./wi-workflow-player');
 let wiWFMachineLearning = require('./wi-workflow-machine-learning');
@@ -76,6 +79,7 @@ let wiD3ZoneTrack = require('./wi-d3-zone-track');
 let wiD3ImageTrack = require('./wi-d3-image-track');
 let wiD3ObjectTrack = require('./wi-d3-object-track');
 let wiD3LogTrack = require('./wi-d3-log-track');
+let wiD3CorrelationTrack = require('./wi-d3-correlation-track');
 
 let wiD3 = require('./wi-d3');
 // let wiD3 = require('./wi-d3-new');
@@ -86,6 +90,8 @@ let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
 let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
+let wiProps = require('./wi-props');
+
 
 let wiComboview = require('./wi-comboview');
 let wiD3Comboview = require('./wi-d3-comboview');
@@ -171,6 +177,7 @@ let app = angular.module('wiapp',
         wiD3ImageTrack.name,
         wiD3ObjectTrack.name,
         wiD3LogTrack.name,
+        wiD3CorrelationTrack.name,
 
         wiD3.name,
         wiHistogram.name,
@@ -182,10 +189,12 @@ let app = angular.module('wiapp',
         wiCustomInput.name,
         wiCurveListing.name,
         wiInventory.name,
-        wiExport.name,
+        wiExportFromInventory.name,
+        wiExportFromProject.name,
         wiTask.name,
         wiFlowDesigner.name,
         wiFlowEngine.name,
+        wiPetrophysics.name,
         wiWorkflow.name,
         wiWorkflowPlayer.name,
         wiWFMachineLearning.name,
@@ -223,9 +232,9 @@ let app = angular.module('wiapp',
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
-        wiPatternService.name, 
+        wiPatternService.name,
 
-        
+
 
         wiCanvasRect.name,
         wiZone.name,
@@ -287,17 +296,40 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
     wiComponentService.putComponent(wiComponentService.COMBOVIEW_HANDLERS, comboviewHandlers);
-
+    $.getJSON( "./js/configFile.json", function(data) {
+        wiComponentService.putComponent(wiComponentService.LIST_CONFIG_PROPERTIES, data);
+    });
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
     // config explorer block - treeview
     $scope.myTreeviewConfig = {};
     // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
-
+    
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
+    wiComponentService.on('update-properties', function(data){
+        $scope.inputProps = data.props;
+        $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
+    })
     $scope.myPropertiesConfig = {};
+
+    $scope.sampleData={
+        bottomDepth: 1000,
+        topDepth: 2000,
+        step: 1,
+        name: "Well1",
+        unit: "US",
+        background: "#000",
+        pattern: {
+            name: "none",
+            foreground: "#00f",
+            background: "#f00"
+        }
+    };
+    
+    // $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES).well;
+    
 
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);
@@ -443,6 +475,7 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         utils.doLogin(function (sameUser) {
             appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
             if (sameUser) restoreProject($timeout, wiApiService, ModalService);
+            else window.localStorage.removeItem('LProject');
         })
     } else {
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);

@@ -452,7 +452,7 @@ Curve.prototype.updateHeader = function() {
     const rect = this.header.node().getBoundingClientRect();
     const headerBorderWidth = parseInt(this.header.style('border-width'));
     const width = rect.width - headerBorderWidth;
-    const height = Math.max(_.get(self, 'line.width'), _.get(self, 'symbol.size'));
+    const height = Math.max(_.get(self, 'line.width') || 0, _.get(self, 'symbol.size') || 0);
     const headerCanvas = this.header.select('canvas');
     headerCanvas.attr('width', width).attr('height', height);
     const headerCtx = headerCanvas.node().getContext('2d');
@@ -603,6 +603,66 @@ Curve.prototype.updateWindowY = function(minY, maxY) {
     this.minY = minY;
     this.maxY = maxY;
     this.doPlot();
+}
+
+Curve.prototype.drawControlLines = function(params) {
+    let headerBox = this.header.node().getBoundingClientRect();
+    let transformX = this.getTransformX();
+    if(!this.headerSvgContainer) 
+        this.headerSvgContainer = this.header.append('svg')
+            .attr('class', 'vi-curve-header-svg-container')
+            .attr('width', headerBox.width)
+            .attr('height', headerBox.height)
+            .style('position', 'absolute')
+            .style('top', 0)
+            .style('left', 0);
+    let controlLines = this.headerSvgContainer.selectAll('line.vi-control-line').data(params); 
+    controlLines
+        .enter()
+            .append('line')
+            .attr('y1', 0)
+            .attr('y2', headerBox.height)
+            .attr('class', 'vi-control-line')
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1.5);
+    controlLines
+        .attr('x1', d => transformX(d.value))
+        .attr('x2', d => transformX(d.value));
+    controlLines
+        .exit().remove();
+}
+
+Curve.prototype.drawControlLineText = function(params) {
+    if(!this.headerSvgContainer) return;
+    let headerBox = this.header.node().getBoundingClientRect();
+    let transformX = this.getTransformX();
+    // enter
+    let textGroup = this.headerSvgContainer.selectAll('g.vi-control-line-header-text').data(params);
+    let group = textGroup.enter().append('g')
+            .attr('class', 'vi-control-line-header-text');
+    group.append('rect')
+            .attr('height', headerBox.height / 2)
+            .attr('y', headerBox.height / 2 - 5)
+            .attr('stroke', 'black')
+            .attr('fill', '#f4ce42');
+    group.append('text')
+            .attr('y', headerBox.height * 3 / 4)
+            .attr('text-anchor', 'middle')
+    // update
+    textGroup.select('text')
+            .attr('dx', d => transformX(d.value))
+            .html(d => d.value.toFixed(2))
+            .raise();
+    let textBBox = textGroup.select('text').node() ? textGroup.select('text').node().getBBox() : {width: 40, height: 20};
+    textGroup.select('rect')
+            .attr('width', textBBox.width + 10)
+            .attr('x', d => transformX(d.value) - textBBox.width / 2 - 5);
+    
+    textGroup.raise();
+    // exit
+    textGroup.exit()
+        .remove();
+
 }
 
 function plotLine(curve, data, highlight) {

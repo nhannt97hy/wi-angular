@@ -390,7 +390,7 @@ gulp.task('gen-wi-explorer-functions', function () {
 //     })
 // });
 
-gulp.task('pre', ['gen-template', 'gen-functions'], function () {
+gulp.task('pre', ['gen-template', 'gen-functions', 'gen-properties-specs'], function () {
 });
 
 const mainTasks = ['include', 'css', 'component', 'appcomponent', 'dialogs', 'services', 'directives', 'js', 'img', 'vendor', 'pattern',
@@ -481,3 +481,57 @@ gulp.task('build-simpleLayout', mainTasks, function() {
         'build/js/simpleLayout.js'
     ]).pipe(exec('browserify <%= file.path %> -o <%= file.path %>.bundle.js'));
 });
+
+gulp.task('gen-properties-specs', [], function () {
+    let XLSXFile = 'wi-properties.xlsx';
+    let configFile = 'source/js/configFile.json';
+    let sheetName = 'properties';
+
+    let workbook = XLSX.readFile(XLSXFile);
+    let worksheet = workbook.Sheets[sheetName];
+
+    fs.writeFile (configFile, JSON.stringify(sheetToJson(worksheet), null, 4), function(err) {
+        if (err) throw err;
+        console.log('complete');
+    });
+});
+
+function getClass(worksheet, range) {
+    let ret = [];
+    for (let R = range.s.r+1; R <= range.e.r; ++R) {
+        let valueCell = getValueAtCell(R, 0, worksheet);
+        if(valueCell) ret.push(valueCell);
+    }
+    return ret;
+}
+function sheetToJson(worksheet) {
+    let range = XLSX.utils.decode_range(worksheet['!ref']);
+    let config = {};
+    getClass(worksheet, range).forEach(function(c) {
+        let classObj = {};
+        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+            if(getValueAtCell(R, 0, worksheet) == c) {
+                let propConfig = {
+                    translation: getValueAtCell(R, 2, worksheet),
+                    option: getValueAtCell(R, 3, worksheet),
+                    section: getValueAtCell(R, 4, worksheet),
+                    typeSpec: getValueAtCell(R, 5, worksheet),
+                    function: getValueAtCell(R, 6, worksheet),
+                    defaultValue: getValueAtCell(R, 7, worksheet)
+                }
+                classObj[getValueAtCell(R, 1, worksheet)] = propConfig;
+            }
+        }
+        config[c] = classObj;
+    });
+    return config;
+};
+function getValueAtCell(rowIndex, colIndex, sheet) {
+    let cellPositionObject = {r: rowIndex, c: colIndex};
+    let cellPositionString = XLSX.utils.encode_cell(cellPositionObject);
+    let cell = sheet[cellPositionString];
+    if (typeof cell === 'undefined') {
+        return null;
+    }
+    return cell.v.trim();
+}

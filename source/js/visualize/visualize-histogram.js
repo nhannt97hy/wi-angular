@@ -13,13 +13,11 @@ const _DECIMAL_LEN = 4;
  */
 function Histogram(props) {
     this.handlers = new Object();
-    this.histogramModel = props.histogramModel;
+    this.histogramModel = props;
     this.curves = props.curves;
     this.config = props.config;
 
-    this.depthStep = props.well.step;
-    this.startDepth = props.well.topDepth;
-    this.endDepth = props.well.bottomDepth;
+    this.wells = props.wells;
 
     this.discriminatorArr = null;
 
@@ -50,6 +48,13 @@ Histogram.prototype.signal = function (eventName, data) {
 
 Histogram.prototype.setHistogramModel = function(histogramModel) {
     this.histogramModel = histogramModel;
+}
+
+Histogram.prototype.setProperties = function (props) {
+    Utils.setIfNotUndefined(this, 'histogramModel', props);
+    Utils.setIfNotUndefined(this, 'curves', props.curves);
+    Utils.setIfNotUndefined(this, 'config', props.config);
+    Utils.setIfNotUndefined(this, 'wells', props.wells);
 }
 
 Histogram.prototype.setConfig = function (props) {
@@ -100,40 +105,53 @@ Histogram.prototype.getDiscriminatorData = function (){
                     result.push(curve.data[i]);
                 }
             }
-            discriminatorData.push(result.filter(d => {
+            result = result.filter(d => {
                 return !isNaN(d.x);
-            }));
+            });
+            result.id = curve.idCurve;
+            discriminatorData.push(result);
         } else {
-            discriminatorData.push(curve.data.filter(d => {
+            curve.data = curve.data.filter(d => {
                 return !isNaN(d.x);
-            }));
+            });
+            curve.data.id = curve.idCurve;
+            discriminatorData.push(curve.data);
         }
     });
     return discriminatorData;
 }
 
-Histogram.prototype.filterF = function(d, zoneIdx) {
+Histogram.prototype.filterF = function(d, idCurve, zoneIdx) {
     let tempDepth = 0;
     if (!this.histogramModel) return false;
     if (this.config.scale.left == this.config.scale.right) return false;
-    if (this.histogramModel.properties.idZoneSet & !zoneIdx) {
+    if (this.histogramModel.idZoneSet & !zoneIdx) {
         return true;
     }
 
-    tempDepth = this.startDepth + this.depthStep * parseInt(d.y);
+    let well = this.wells[idCurve];
+    let startDepth = well.topDepth;
+    let endDepth = well.bottomDepth;
+    let depthStep = well.step;
+
+    tempDepth = startDepth + depthStep * parseInt(d.y);
     let left = Math.min(this.config.scale.left, this.config.scale.right);
     let right = Math.max(this.config.scale.left, this.config.scale.right);
 
-    if(this.histogramModel && this.histogramModel.properties.idZoneSet) {
+    if (this.histogramModel && this.histogramModel.idZoneSet) {
         let zone = this.zoneSet[zoneIdx];
         return (!isNaN(d.y) && ( tempDepth >= zone.properties.startDepth ) &&
                 ( tempDepth < zone.properties.endDepth ) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
     }
     let xFloat = parseFloat(d.x);
+    // fake
+    this.histogramModel.intervalDepthTop = startDepth;
+    this.histogramModel.intervalDepthBottom = endDepth;
+    // end fake
     return (
         !isNaN(d.y) &&
-        ( tempDepth >= this.histogramModel.properties.intervalDepthTop ) &&
-        ( tempDepth < this.histogramModel.properties.intervalDepthBottom ) &&
+        ( tempDepth >= this.histogramModel.intervalDepthTop ) &&
+        ( tempDepth < this.histogramModel.intervalDepthBottom ) &&
         (xFloat >= left) &&
         (xFloat <= right)
     );
@@ -143,11 +161,11 @@ Histogram.prototype.filterSelection = function(d, selectionDataSegment) {
     let self = this;
     let tempDepth = 0;
     if (!self.histogramModel) return false;
-    if (self.histogramModel.properties.leftScale == self.histogramModel.properties.rightScale) return false;
+    if (self.histogramModel.leftScale == self.histogramModel.rightScale) return false;
 
     tempDepth = self.startDepth + self.depthStep * parseInt(d.y);
-    left = Math.min(self.histogramModel.properties.leftScale, self.histogramModel.properties.rightScale);
-    right = Math.max(self.histogramModel.properties.leftScale, self.histogramModel.properties.rightScale);
+    left = Math.min(self.histogramModel.leftScale, self.histogramModel.rightScale);
+    right = Math.max(self.histogramModel.leftScale, self.histogramModel.rightScale);
 
     if (self.histogramModel) {
         return (!isNaN(d.y) && (tempDepth >= selectionDataSegment.startDepth) &&
@@ -156,8 +174,8 @@ Histogram.prototype.filterSelection = function(d, selectionDataSegment) {
     let xFloat = parseFloat(d.x);
     return (
         !isNaN(d.y) &&
-        (tempDepth >= self.histogramModel.properties.intervalDepthTop) &&
-        (tempDepth < self.histogramModel.properties.intervalDepthBottom) &&
+        (tempDepth >= self.histogramModel.intervalDepthTop) &&
+        (tempDepth < self.histogramModel.intervalDepthBottom) &&
         (xFloat >= left) &&
         (xFloat <= right)
     );
@@ -175,7 +193,7 @@ Histogram.prototype.getIntervalData = function() {
     let intervalData = [];
     this.discriminatorData.forEach(discriminatorDatum => {
         intervalData.push(discriminatorDatum.filter(d => {
-            return self.filterF.call(self, d);
+            return self.filterF(d, discriminatorDatum.id);
         }).map(d => { return parseFloat(d.x); }));
     });
     return intervalData;
@@ -219,8 +237,7 @@ Histogram.prototype.updateConfig = function () {
     let realStep = step;
     let jumpFactor = Math.ceil(nBins / jumpFactorSeed);
     if (jumpFactor > 1) realStep = jumpFactor * step;
-    let nDecimal = Math.ceil(-1 * Math.log10(Math.abs(realStep)));
-    nDecimal = nDecimal >= 0 ? nDecimal : 0;
+    let nDecimal = 2;
     let cfg = {
         nBins: nBins,
         nDecimal: nDecimal,
@@ -259,7 +276,7 @@ Histogram.prototype.prepareDrawContainer = function () {
 
     this.svgContainer.append('defs')
         .append('clipPath')
-            .attr('id', 'myClip')
+            .attr('id', self.getClipPathId())
             .append('rect')
                 .attr("x", 0)
                 .attr("y", 0)
@@ -268,14 +285,14 @@ Histogram.prototype.prepareDrawContainer = function () {
 
     this.drawContainer = this.svgContainer.append('g')
         .attr('class', 'wi-histogram-draw-container')
-        .attr('clip-path', 'url(#myClip)')
+        .attr('clip-path', 'url(#' + self.getClipPathId() + ')')
             .append('g')
                 .attr('width', self.rect.width)
                 .attr('height', self.rect.height);
 }
 
 Histogram.prototype.doPlot = function () {
-    if (this.rect.width < 0 || this.rect.height < 0) return;
+    if($(this.container.node()).width() < 0 || $(this.container.node()).height() < 0) return;
     this.adjustSize();
     this.clearPlot();
     this.updateConfig();
@@ -283,6 +300,21 @@ Histogram.prototype.doPlot = function () {
     this.generateHistogram();
     this.plotAxesContainer();
     this.plotDrawContainer();
+}
+
+Histogram.prototype.updateHistogram = function (newProps) {
+    this.setProperties(newProps);
+
+    if (!newProps) {
+        this.doPlot();
+        return;
+    }
+
+    this.svgContainer.selectAll('*').remove();
+    this.prepareAxesContainer();
+    this.prepareDrawContainer();
+    if (!this.curves.length) return;
+    this.doPlot();
 }
 
 Histogram.prototype.adjustSize = function () {
@@ -321,16 +353,21 @@ Histogram.prototype.clearPlot = function () {
 }
 
 Histogram.prototype.updateClipPath = function() {
+    let self = this;
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
 
     this.svgContainer.select('clipPath')
-        .attr('id', 'myClip')
+        .attr('id', self.getClipPathId())
         .select('rect')
         .attr('x', d3.min(vpX))
         .attr('y', d3.min(vpY))
         .attr('width', Math.abs(vpX[0] - vpX[1]))
         .attr('height', Math.abs(vpY[0] - vpY[1]));
+}
+
+Histogram.prototype.getClipPathId = function () {
+    return 'histogramClipPath' + this.histogramModel.idHistogram;
 }
 
 Histogram.prototype.generateHistogram = function () {
@@ -446,14 +483,14 @@ Histogram.prototype.plotDrawContainer = function () {
     this.curves.forEach(curve => {
         let idx = self.curves.indexOf(curve);
         let curveDrawContainer = self.drawContainer.append('g')
-            .attr('id', 'curve-' + curve.idCurve + '-draw-container');
-        if (self.config.plot === 'Bar')
+            .attr('class', 'curve-' + curve.idCurve + '-draw-container');
+        if (curve.options.plot === 'Bar')
             self.drawBarHistogram(curveDrawContainer, idx);
-        else if (self.config.plot === 'Curve')
+        else if (curve.options.plot === 'Curve')
             self.drawCurveHistogram(curveDrawContainer, idx);
-        if (self.config.showGaussian)
+        if (curve.options.showGaussian)
             self.drawGaussianCurve(curveDrawContainer, idx);
-        if (self.config.showCumulative)
+        if (curve.options.showCumulative)
             self.drawCumulativeCurve(curveDrawContainer, idx);
     });
 }
@@ -519,7 +556,7 @@ Histogram.prototype.drawBarHistogram = function (curveDrawContainer, idx) {
                 })
                 .attr('y', function (d, i) {
                     let fullBinHeight, cumHeight;
-                    if (self.histogramModel.properties.plotType != 'Frequency') {
+                    if (self.histogramModel.plotType != 'Frequency') {
                         let len = self.getLength();
                         fullBinHeight = (transformY(wdY[0]) - transformY(self.fullBins[i].length * 100 / self.fullData.length));
                         cumHeight = fullBinHeight;
@@ -538,17 +575,17 @@ Histogram.prototype.drawBarHistogram = function (curveDrawContainer, idx) {
                     return cumHeight;
                 })
                 .attr('height', function (d, i) {
-                    if (self.histogramModel.properties.plotType != 'Frequency') {
+                    if (self.histogramModel.plotType != 'Frequency') {
                         let len = self.getLength();
                         return transformY(wdY[0])
                             - transformY(self.zoneBins[j][i].length * 100 / len);
                     }
                     return transformY(wdY[0]) - transformY(self.zoneBins[j][i].length);
                 })
-                .attr('fill', self.histogramModel.properties.colorBy == 'curve' ? self.histogramModel.properties.color : (self.zoneSet[j].properties.background || 'steelblue'))
-                .attr('stroke', self.histogramModel.properties.colorBy == 'curve' ? 'black' : 'transparent')
+                .attr('fill', self.histogramModel.colorBy == 'curve' ? self.histogramModel.color : (self.zoneSet[j].properties.background || 'steelblue'))
+                .attr('stroke', self.histogramModel.colorBy == 'curve' ? 'black' : 'transparent')
                 .on('mousemove', function (d, i) {
-                    if (self.histogramModel.properties.showTooltip)
+                    if (self.histogramModel.showTooltip)
                         showTooltip(self.zoneBins[j][i]);
                 })
                 .on('mouseout', hideTooltip);
@@ -626,7 +663,7 @@ Histogram.prototype.drawCurveHistogram = function (curveDrawContainer, idx) {
                         binsHeight += self.zoneBins[j][i].length;
                     }
                 }
-                if (self.histogramModel.properties.plotType != 'Frequency') {
+                if (self.histogramModel.plotType != 'Frequency') {
                     let len = self.getLength();
                     return transformY(binsHeight * 100 / len);
                 }
@@ -827,7 +864,7 @@ Histogram.prototype.drawCumulativeCurve = function (curveDrawContainer, idx) {
             }
         }
         else {
-            if (self.histogramModel.properties.plotType != 'Frequency') {
+            if (self.histogramModel.plotType != 'Frequency') {
                 let fullData = 0;
 
                 for (let i in self.zoneBins)
@@ -913,7 +950,7 @@ Histogram.prototype.init = function(domElem) {
         .attr('width', $(this.container.node()).width())
         .attr('height', $(this.container.node()).height());
 
-    this.rect = {
+    this.rect = this.containerSize = {
         width: $(this.container.node()).width(),
         height: $(this.container.node()).height()
     };
@@ -937,6 +974,7 @@ Histogram.prototype.init = function(domElem) {
     function zooming() {
         let transform = d3.event.transform;
         self.drawContainer.attr('transform', transform);
+        if (!self.axisXGroup && !self.axisYLeftGroup && !self.axisYRightGroup) return;
         self.axisXGroup.call(self.axisX.scale(transform.rescaleX(self.getTransformX())));
         self.axisYLeftGroup.call(self.axisYLeft.scale(transform.rescaleY(self.getTransformY())));
         self.axisYRightGroup.call(self.axisYRight.scale(transform.rescaleY(self.getTransformY())));
@@ -953,7 +991,7 @@ Histogram.prototype.getViewportX = function() {
     return [0, this.containerSize.width];
 }
 Histogram.prototype.getWindowY = function() {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         let self = this;
         let max = -1;
@@ -977,7 +1015,7 @@ Histogram.prototype.getWindowY = function() {
             return r;
         }, []);
 
-        if (this.histogramModel.properties.plotType != 'Frequency') {
+        if (this.histogramModel.plotType != 'Frequency') {
             let total = this.getLength();
             return [0, d3.max(totalLenArr, function(d) { return d*100/total;})];
         }
@@ -1021,7 +1059,7 @@ Histogram.prototype.getTransformCumulativeY = function() {
 }
 
 Histogram.prototype.getLength = function (idx) {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         return this.intervalData[idx] ? this.intervalData[idx].length : null;
     }
@@ -1046,7 +1084,7 @@ Histogram.prototype.unsetJoinedZoneData = function() {
 }
 
 Histogram.prototype.getAverage = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         let self = this;
         let mean = [];
@@ -1063,7 +1101,7 @@ Histogram.prototype.getAverage = function () {
 }
 
 Histogram.prototype.getStandardDeviation = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         let self = this;
         let standardDeviation = [];
@@ -1081,7 +1119,7 @@ Histogram.prototype.getStandardDeviation = function () {
 }
 
 Histogram.prototype.getMin = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData) return null;
         return d3.min(this.intervalData);
@@ -1098,7 +1136,7 @@ Histogram.prototype.getMin = function () {
 }
 
 Histogram.prototype.getMax = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData) return null;
         return d3.max(this.intervalData);
@@ -1115,7 +1153,7 @@ Histogram.prototype.getMax = function () {
 }
 
 Histogram.prototype.getAverageDeviation = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData || !this.intervalData.length) return null;
         return calAverageDeviation(this.intervalData);
@@ -1143,7 +1181,7 @@ Histogram.prototype._getStandardDeviation = function() {
 }
 
 Histogram.prototype.getVariance = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData || !this.intervalData.length) return null;
         return d3.variance(this.intervalData).toFixed(_DECIMAL_LEN);
@@ -1155,7 +1193,7 @@ Histogram.prototype.getVariance = function () {
 }
 
 Histogram.prototype.getSkewness = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData || !this.intervalData.length) return null;
         return ss.sampleSkewness(this.intervalData).toFixed(_DECIMAL_LEN);
@@ -1167,7 +1205,7 @@ Histogram.prototype.getSkewness = function () {
 }
 
 Histogram.prototype.getKurtosis = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData || !this.intervalData.length) return null;
         return ss.sampleKurtosis(this.intervalData).toFixed(_DECIMAL_LEN);
@@ -1178,7 +1216,7 @@ Histogram.prototype.getKurtosis = function () {
 }
 
 Histogram.prototype.getMedian = function () {
-    if (!this.histogramModel.properties.idZoneSet) {
+    if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
         if (!this.intervalData || !this.intervalData.length) return null;
         return d3.median(this.intervalData).toFixed(_DECIMAL_LEN);

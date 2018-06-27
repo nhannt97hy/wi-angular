@@ -4,12 +4,6 @@
             <div class='left-heading'>
                 <h5>Templates</h5>
                 <div class="button-area" style="position:relative">
-                    <!-- <button class='btn' ng-click="wiZoneTemplateManager.exportTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
-                        <i class="fa fa-arrow-up"></i>
-                    </button>
-                    <button class='btn' ng-click="wiZoneTemplateManager.deleteTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
-                        <i class="fa fa-times"></i> -->
-                    <!-- </button> -->
                     <label title="Create new template" class='btn pull-right' ng-click="wiZoneTemplateManager.createTemplate()">
                         <i class="ti-plus color-blue"></i>
                     </label>
@@ -23,19 +17,13 @@
             </div>
             <div style='background-color:white;display: flex;padding-left: 7px; border-bottom: 1px solid #ccc;'>
                 <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
-                <input type='text' id="focus" 
-                        style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' 
-                        ng-model="wiZoneTemplateManager.filter"
-                        placeholder="[Search]">
+                <input type='text' id="focus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' ng-model="wiZoneTemplateManager.filter"
+                    placeholder="[Search]">
             </div>
-            <wi-scroll id-scroll="'wztmTreeScroll'" 
-                        style='flex:1;display:flex;flex-direction:column;height:80%' 
-                        up-trigger='wiZoneTemplateManager.upTrigger' down-trigger='wiZoneTemplateManager.downTrigger'>
-                <wi-base-treeview name="zoneTemplateManagerTreeview" 
-                    config="wiZoneTemplateManager.templateConfig" 
-                    container="wiZoneTemplateManager" 
-                    on-click-function="wiZoneTemplateManager.templateClickFunction"
-                    filter="{{wiZoneTemplateManager.filter}}"
+            <wi-scroll id-scroll="'wztmTreeScroll'" style='flex:1;display:flex;flex-direction:column;height:79%' up-trigger='wiZoneTemplateManager.upTrigger'
+                down-trigger='wiZoneTemplateManager.downTrigger'>
+                <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneTemplateManager.templateConfig" container="wiZoneTemplateManager"
+                    on-click-function="wiZoneTemplateManager.templateClickFunction" filter="{{wiZoneTemplateManager.filter}}"
                     show-context-menu-function="wiZoneTemplateManager.showTreeContextMenuFunction">
                 </wi-base-treeview>
             </wi-scroll>
@@ -53,17 +41,16 @@
                 <option value="background">Background</option>
             </select>
             <div class="button-area">
-                <label title="Apply changes" class='btn' ng-disabled="!(wiZoneTemplateManager.zoneTemplateEditted || !(!wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.zoneTemplates.length==0))" 
-                    ng-click="wiZoneTemplateManager.editZoneTemplate()">
-                    <i class="ti-check" ng-class="{'color-blue':(wiZoneTemplateManager.zoneTemplateEditted || !(!wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.zoneTemplates.length==0)), 'color-lightgray':!(wiZoneTemplateManager.zoneTemplateEditted || !(!wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.zoneTemplates.length==0))}"></i>
+                <label title="Apply changes" class='btn' ng-disabled="!wiZoneTemplateManager.zoneTemplateEditted" ng-click="wiZoneTemplateManager.editZoneTemplate()">
+                    <i class="ti-check" ng-class="{'color-blue': wiZoneTemplateManager.zoneTemplateEditted, 'color-lightgray':!wiZoneTemplateManager.zoneTemplateEditted}"></i>
                 </label>
-                <label title="Delete selected zones" class='btn' ng-click="wiZoneTemplateManager.deleteZoneTemplate()" ng-disabled="!(wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.selectedZoneTemplates.length!=0)">
-                    <i class="ti-close"  ng-class="{'color-blue': (wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.selectedZoneTemplates.length!=0), 'color-lightgray': !(wiZoneTemplateManager.newTemplate || wiZoneTemplateManager.selectedZoneTemplates.length!=0)}"></i>
+                <label title="Delete selected zones" class='btn' ng-click="wiZoneTemplateManager.deleteZoneTemplate()" ng-disabled="wiZoneTemplateManager.selectedZoneTemplates.length==0">
+                    <i class="ti-close" ng-class="{'color-blue': wiZoneTemplateManager.selectedZoneTemplates.length!=0, 'color-lightgray': !wiZoneTemplateManager.selectedZoneTemplates.length!=0}"></i>
                 </label>
                 <label title="Create new zone" class='btn' ng-click="wiZoneTemplateManager.createZoneTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
                     <i class="ti-plus" ng-class="{'color-blue': wiZoneTemplateManager.selectedTemplate, 'color-lightgray': !wiZoneTemplateManager.selectedTemplate}"></i>
                 </label>
-                <label title="Refresh zones list" class='btn' ng-click="wiZoneTemplateManager.refreshZoneTemplateList()" ng-disabled="!wiZoneTemplateManager.selectedTemplate || wiZoneTemplateManager.newTemplate">
+                <label title="Refresh zones list" class='btn' ng-click="wiZoneTemplateManager.refreshZoneTemplateList()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
                     <i class="ti-reload" ng-class="{'color-blue': wiZoneTemplateManager.selectedTemplate, 'color-lightgray': !wiZoneTemplateManager.selectedTemplate}"></i>
                 </label>
             </div>
@@ -74,8 +61,7 @@
                     <thead>
                         <tr>
                             <th style="width: 5%"></th>
-                            <th width="20%" style="text-align: center;">Zoneset name</th>
-                            <!-- <th width="20%">Sample</th> -->
+                            <th width="20%" style="text-align: center;">ZoneTemplate name</th>
                             <th width="25%" style="text-align: center;">Background</th>
                             <th width="25%" style="text-align: center;">Foreground</th>
                             <th width="25%" style="text-align: center;">Pattern</th>
@@ -91,19 +77,14 @@
                                 <input type="text" ng-model="zone.name" class="form-control" ng-change="wiZoneTemplateManager.onZoneTemplateChanged(zone);"
                                     style="height: auto;">
                             </td>
-                            <!-- <td width="20%">
-                                <wi-canvas-rect name="{{zone.name}}" pattern="{{zone.pattern}}" foreground="{{zone.foreground}}" background="{{zone.background}}"
-                                    width="80" height="20">
-                                </wi-canvas-rect>
-                            </td> -->
 
                             <td width="25%">
-                                <button ng-click="wiZoneTemplateManager.backgroundZoneTemplate(zone);" ng-style="{'background-color':zone.background}"
-                                    class="form-control wi-form-control thick-border" style="width: 103px; height: 28px; margin: auto;">
+                                <button ng-click="wiZoneTemplateManager.backgroundZoneTemplate(zone);" ng-style="{'background-color':zone.background}" class="form-control wi-form-control thick-border"
+                                    style="width: 103px; height: 28px; margin: auto;">
                             </td>
                             <td width="25%">
-                                <button ng-click="wiZoneTemplateManager.foregroundZoneTemplate(zone);" ng-style="{'background-color':zone.foreground}"
-                                    class="form-control wi-form-control thick-border" style="width: 103px; height: 28px; margin: auto;">
+                                <button ng-click="wiZoneTemplateManager.foregroundZoneTemplate(zone);" ng-style="{'background-color':zone.foreground}" class="form-control wi-form-control thick-border"
+                                    style="width: 103px; height: 28px; margin: auto;">
                                 </button>
                             </td>
                             <td width="25%">
@@ -112,25 +93,11 @@
                                         background='{{zone.background}}'>
                                     </wi-canvas-rect>
                                 </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <!-- <ui-select theme="bootstrap" ng-model="zone.pattern" ng-change="wiZoneTemplateManager.onZoneTemplateChanged($index);" search-enabled="false">
-                                    <ui-select-match>
-                                        <wi-canvas-rect name="row_{{$index}}" pattern="{{zone.pattern}}" width="80" height="20">
-                                        </wi-canvas-rect>
-                                    </ui-select-match>
-                                    <ui-select-choices repeat="selectedPattern in wiZoneTemplateManager.selectPatterns">
-                                        <div>
-                                            <span class="col-sm-3 tiny-text padding-0">{{selectedPattern | uppercase}}</span>
-                                            <wi-canvas-rect name="{{selectedPattern}}" pattern="{{selectedPattern}}" width="40" height="20" style="float: right;">
-                                            </wi-canvas-rect>
-                                        </div>
-                                    </ui-select-choices>
-                                </ui-select> -->
-            </td>
-            </tr>
-            </tbody>
-            </table>
         </div>
     </div>
-</div>
 </div>

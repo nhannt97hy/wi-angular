@@ -13,6 +13,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
     let curveLoading = false;
     this.visHistogram = {};
+    this.curves = [];
     let graph = wiComponentService.getComponent(wiComponentService.GRAPH);
     this.histogramModel = null;
     this.curveModel = null;
@@ -20,25 +21,80 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
-    let saveHistogram= _.debounce(function(callback) {
-            wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
-                console.log('updated');
+    let saveHistogram= _.debounce(function (callback) {
+        let config = angular.copy(self.histogramModel.properties.config);
+        let curves = angular.copy(self.histogramModel.properties.curves);
+        let curvesProperties = angular.copy(self.histogramModel.properties.curvesProperties);
+        let wells = angular.copy(self.histogramModel.properties.wells);
+        delete self.histogramModel.properties.config;
+        delete self.histogramModel.properties.curvesProperties;
+        delete self.histogramModel.properties.wells;
+        self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
+        wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
+            async.eachSeries(curves, function (curve, cb) {
+                wiApiService.editHistogramCurveSet(curve.options, function (retData) {
+                    curve.options = curve.histogram_curve_set = retData;
+                    cb();
+                });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.config = self.histogramModel.properties.config = config;
+                self.curves = self.histogramModel.properties.curves = curves;
+                self.curvesProperties = self.histogramModel.properties.curvesProperties = curvesProperties;
+                self.wells = self.histogramModel.properties.wells = wells;
+                self.config.showGaussian = self.histogramModel.properties.showGaussian = config.showGaussian;
+                self.config.showCumulative = self.histogramModel.properties.showCumulative = config.showCumulative;
+                self.config.plot = self.histogramModel.properties.plot = config.plot;
+                delete config;
+                delete curves;
+                delete curvesProperties;
+                delete wells;
                 if (callback) callback();
             });
-        }, 1000);
+        });
+    }, 1000);
 
     this.saveHistogram = saveHistogram;
 
     function saveHistogramNow(callback) {
-        wiApiService.editHistogram(self.histogramModel.properties, function(returnData) {
-            if (callback) callback();
+        let config = angular.copy(self.histogramModel.properties.config);
+        let curves = angular.copy(self.histogramModel.properties.curves);
+        let curvesProperties = angular.copy(self.histogramModel.properties.curvesProperties);
+        let wells = angular.copy(self.histogramModel.properties.wells);
+        delete self.histogramModel.properties.config;
+        delete self.histogramModel.properties.curvesProperties;
+        delete self.histogramModel.properties.wells;
+        self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
+        wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
+            async.eachSeries(curves, function (curve, cb) {
+                wiApiService.editHistogramCurveSet(curve.options, function (retData) {
+                    curve.options = curve.histogram_curve_set = retData;
+                    cb();
+                });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.histogramModel.properties.config = config;
+                self.histogramModel.properties.curves = curves;
+                self.histogramModel.properties.curvesProperties = curvesProperties;
+                self.histogramModel.properties.wells = wells;
+                self.histogramModel.properties.showGaussian = config.showGaussian;
+                self.histogramModel.properties.showCumulative = config.showCumulative;
+                self.histogramModel.properties.plot = config.plot;
+                delete config;
+                delete curves;
+                delete curvesProperties;
+                delete wells;
+                if (callback) callback();
+            });
         });
     }
     this.saveHistogramNow = saveHistogramNow;
-
-    function getIdHistogram() {
-        return self.name.replace('histogram', "").replace("D3Area", "");
-    }
 
     this.getWell = getWell;
     function getWell() {
@@ -166,8 +222,59 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         return refWindCtrl;
     }
     this.onReady = function () {
-        self.linkModels();
-        self.createVisualizeHistogram(self.histogramModel.properties);
+        wiApiService.getHistogram(this.idHistogram || this.wiHistogramCtrl.id, function (hisProps) {
+            self.idHistogram = self.wiHistogramCtrl.id;
+            if (!hisProps.curves.length) return;
+            hisProps.curves.forEach(curve => {
+                let data = {
+                    idCurve: curve.idCurve,
+                    idDataset: curve.idDataset,
+                    options: {
+                        idHistogramCurveSet: curve.histogram_curve_set.idHistogramCurveSet,
+                        plot: curve.histogram_curve_set.plot,
+                        lineColor: curve.histogram_curve_set.lineColor,
+                        showGaussian: curve.histogram_curve_set.showGaussian,
+                        showCumulative: curve.histogram_curve_set.showCumulative
+                    },
+                    flag: 'edit'
+                };
+                self.curvesProperties.push(data);
+            })
+            self.config = hisProps.config = {
+                showGaussian: hisProps.curves[0].histogram_curve_set.showGaussian,
+                showCumulative: hisProps.curves[0].histogram_curve_set.showCumulative,
+                loga: hisProps.loga,
+                showGrid: hisProps.showGrid,
+                flipHorizontal: hisProps.flipHorizontal,
+                plotType: hisProps.plotType,
+                plot: hisProps.curves[0].histogram_curve_set.plot || self.config.plot,
+                numOfDivisions: hisProps.divisions,
+                scale: {
+                    left: hisProps.leftScale,
+                    right: hisProps.rightScale
+                },
+                isShowWiZone: hisProps.isShowWiZone,
+                referenceDisplay: hisProps.referenceDisplay
+            };
+            hisProps.showGaussian = self.config.showGaussian;
+            hisProps.showCumulative = self.config.showCumulative;
+            hisProps.plot = self.config.plot;
+            hisProps.curvesProperties = self.curvesProperties;
+            self.wells = hisProps.wells = new Object();
+            hisProps.curves.forEach(curve => {
+                let w = utils.findWellByCurve(curve.idCurve);
+                let well = {
+                    idWell: w.idWell,
+                    topDepth: w.topDepth,
+                    bottomDepth: w.bottomDepth,
+                    step: w.step
+                };
+                self.wells[curve.idCurve] = hisProps.wells[curve.idCurve] = well;
+                curve.options = curve.histogram_curve_set;
+            });
+            self.histogramModel.properties = hisProps;
+            self.createVisualizeHistogram(self.histogramModel.properties);
+        });
         function handler () {
             self.visHistogram && self.visHistogram.doPlot && self.visHistogram.doPlot();
         }
@@ -256,27 +363,67 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         wiComponentService.on(wiComponentService.MODIFIED_CURVE_DATA, self.onModifiedCurve);
     };
 
-    this.switchReferenceWindow = function(state){
+    this.switchReferenceWindow = function (state) {
         if (state != undefined || state != null) self.histogramModel.properties.referenceDisplay = state;
         else self.histogramModel.properties.referenceDisplay = !self.histogramModel.properties.referenceDisplay;
+        self.config.referenceDisplay = self.histogramModel.properties.referenceDisplay;
         saveHistogram();
         wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
     }
 
-    this.histogramFormat = function(){
-        DialogUtils.histogramFormatDialog(ModalService, self.idHistogram || self.wiHistogramCtrl.id,
-            function(histogramProperties) {
-                if (self.wiHistogramCtrl) {
-                    if(!histogramProperties.idZoneSet){
-                        self.wiHistogramCtrl.CloseZone();
-                    }else{
-                        self.wiHistogramCtrl.isShowWiZone = true;
-                    }
-                }
-                self.linkModels();
-                // if (self.getZoneCtrl()) self.getZoneCtrl().zoneUpdate();
+    this.histogramFormat = function() {
+        if (self.curves[0]) {
+            self.label = {
+                type: '1',
+                name: self.curves[0].name
+            };
+            self.curvesProperties.forEach(cp => cp.flag = 'edit');
+        } else {
+            self.label = {};
+        }
+        DialogUtils.histogramFormatDialog(ModalService, self, function (histogramProperties) {
+            if (!self.visHistogram || !Object.keys(self.visHistogram).length
+                || !self.visHistogram.curves || !self.visHistogram.curves.length) {
+                self.createVisualizeHistogram(histogramProperties);
+            } else {
+                self.saveHistogramNow(function () {
+                    if (!histogramProperties) return;
+                    if (!histogramProperties.curves && !histogramProperties.curves.length) return;
+                    async.eachSeries(histogramProperties.curves, function (curveProps, next) {
+                        wiApiService.infoCurve(curveProps.idCurve, function (curveInfo) {
+                            if (!curveProps.options) curveProps.options = {};
+                            if (!curveProps.options.lineColor) curveProps.options.lineColor = curveInfo.LineProperty.lineColor;
+                            wiApiService.dataCurve(curveProps.idCurve, function (curveData) {
+                                curveProps.data = curveData;
+                                next();
+                            });
+                        });
+                    }, function (err, result) {
+                        if (err) {
+                            console.error(err);
+                            return;
+                        }
+
+                        self.curves = histogramProperties.curves;
+                        self.config = histogramProperties.config;
+                        self.curvesProperties = histogramProperties.curvesProperties;
+                        self.wells = histogramProperties.wells;
+
+                        histogramProperties.showGaussian = self.config.showGaussian;
+                        histogramProperties.showCumulative = self.config.showCumulative;
+                        histogramProperties.plot = self.config.plot;
+
+                        self.histogramModel.properties = histogramProperties;
+                        self.visHistogram.updateHistogram(self.histogramModel.properties);
+                        if (!histogramProperties.curves.length) {
+                            self.visHistogram.container.selectAll('*').remove();
+                            delete self.visHistogram;
+                        }
+                        loadStatistics();
+                    });
+                });
             }
-        );
+        });
     }
 
     this.discriminator = function(){
@@ -348,9 +495,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function (index) {
                     self.histogramModel.properties.flipHorizontal = !self.histogramModel.properties.flipHorizontal;
                     self.contextMenu[index].checked = self.histogramModel.properties.flipHorizontal;
-                    self.config.flipHorizontal = self.histogramModel.properties.flipHorizontal;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.histogramModel.properties.config.flipHorizontal = self.config.flipHorizontal = self.histogramModel.properties.flipHorizontal;
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowGrid",
@@ -360,9 +507,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 handler: function (index) {
                     self.histogramModel.properties.showGrid = !self.histogramModel.properties.showGrid;
                     self.contextMenu[index].checked = self.histogramModel.properties.showGrid;
-                    self.config.showGrid = self.histogramModel.properties.showGrid;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.histogramModel.properties.config.showGrid = self.config.showGrid = self.histogramModel.properties.showGrid;
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowGaussian",
@@ -371,10 +518,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 checked: self.config.showGaussian,
                 handler: function (index) {
                     self.histogramModel.properties.showGaussian = !self.histogramModel.properties.showGaussian;
+                    let showGaussian = self.histogramModel.properties.showGaussian;
+                    self.histogramModel.properties.curves.forEach(c => {
+                        c.options.showGaussian = showGaussian;
+                    });
+                    self.curvesProperties.forEach(cp => {
+                        cp.options.showGaussian = showGaussian;
+                    });
+                    self.curves = self.visHistogram.curves = self.histogramModel.properties.curves;
                     self.contextMenu[index].checked = self.histogramModel.properties.showGaussian;
-                    self.config.showGaussian = self.histogramModel.properties.showGaussian;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.histogramModel.properties.config.showGaussian = self.config.showGaussian = self.histogramModel.properties.showGaussian;
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowAxisYAsPercent",
@@ -386,18 +541,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         self.histogramModel.properties.plotType = "Percent";
                     else self.histogramModel.properties.plotType = "Frequency";
                     self.contextMenu[index].checked = self.histogramModel ? (self.histogramModel.properties.plotType == "Percent") : false;
-                    self.config.plotType = self.histogramModel.properties.plotType;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.histogramModel.properties.config.plotType = self.config.plotType = self.histogramModel.properties.plotType;
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowReferenceWindow",
                 label: "Show Reference Window",
                 isCheckType: true,
-                checked: self.config.referenceDisplay,
+                checked: self.histogramModel ? self.histogramModel.properties.referenceDisplay : false,
                 handler: function (index) {
                     self.switchReferenceWindow();
-                    self.contextMenu[index].checked = self.config.referenceDisplay;
+                    self.contextMenu[index].checked = self.histogramModel.properties.referenceDisplay;
                 }
             }, {
                 name: "ShowCumulative",
@@ -406,10 +561,18 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 checked: self.config.showCumulative,
                 handler: function (index) {
                     self.histogramModel.properties.showCumulative = !self.histogramModel.properties.showCumulative;
+                    let showCumulative = self.histogramModel.properties.showCumulative;
+                    self.histogramModel.properties.curves.forEach(c => {
+                        c.options.showCumulative = showCumulative;
+                    });
+                    self.curvesProperties.forEach(cp => {
+                        cp.options.showCumulative = showCumulative;
+                    });
+                    self.curves = self.visHistogram.curves = self.histogramModel.properties.curves;
                     self.contextMenu[index].checked = self.histogramModel.properties.showCumulative;
-                    self.config.showCumulative = self.histogramModel.properties.showCumulative;
-                    self.visHistogram.doPlot();
-                    saveHistogram();
+                    self.histogramModel.properties.config.showCumulative = self.config.showCumulative = self.histogramModel.properties.showCumulative;
+                    self.visHistogram.updateHistogram(self.histogramModel.properties);
+                    saveHistogramNow();
                 }
             }, {
                 name: "ShowTooltip",
@@ -436,131 +599,37 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             .open(event.clientX, event.clientY, self.contextMenu);
     }
 
-    function buildConfigFromHistogramModel(histogramModel) {
-        let config = {
-            idHistogram: histogramModel.properties.idHistogram,
-            name: histogramModel.properties.name,
-            histogramTitle: histogramModel.properties.histogramTitle || "Noname",
-            hardCopyWidth: histogramModel.properties.hardCopyWidth,
-            hardCopyHeight: histogramModel.properties.hardCopyHeight,
-            intervalDepthTop: histogramModel.properties.intervalDepthTop,
-            intervalDepthBottom: histogramModel.properties.intervalDepthBottom,
-            activeZone: histogramModel.properties.activeZone,
-            divisions: histogramModel.properties.divisions,
-            leftScale: histogramModel.properties.leftScale,
-            rightScale: histogramModel.properties.rightScale,
-            showGaussian: histogramModel.properties.showGaussian || false,
-            loga: histogramModel.properties.loga || false,
-            showGrid: histogramModel.properties.showGrid || false,
-            showCumulative: histogramModel.properties.showCumulative || false,
-            flipHorizontal: histogramModel.properties.flipHorizontal || false,
-            line: {
-                color: histogramModel.properties.lineColor,
-                width: histogramModel.properties.lineWidth,
-                dash: histogramModel.properties.lineStyle
-            },
-            plot: histogramModel.properties.plot, // Bars or lines
-            plotType: histogramModel.properties.plotType, // Frequency or percent
-            fill: {
-                pattern: null,
-                background: histogramModel.properties.color,
-                foreground: histogramModel.properties.color
-            },
-            color: histogramModel.properties.color,
-            discriminator: histogramModel.properties.discriminator,
-            idWell: histogramModel.properties.idWell,
-            idCurve: histogramModel.properties.idCurve,
-            idZoneSet: histogramModel.properties.idZoneSet,
-            data: null,
-            zones: histogramModel.properties.zones,
-            referenceTopDepth: histogramModel.properties.referenceTopDepth,
-            referenceBottomDepth: histogramModel.properties.referenceBottomDepth,
-            referenceScale: histogramModel.properties.referenceScale,
-            referenceVertLineNumber: histogramModel.properties.referenceVertLineNumber,
-            referenceDisplay: histogramModel.properties.referenceDisplay,
-            referenceShowDepthGrid: histogramModel.properties.referenceShowDepthGrid,
-            reference_curves: histogramModel.properties.reference_curves
-        }
-        return config;
-    }
-
     this.createVisualizeHistogram = function (hisProps) {
         let self = this;
-        let curve = {};
-        let scale = {
-            left: hisProps.leftScale,
-            right: hisProps.rightScale
-        };
-        this.curves = [];
-        if (!this.curvesProperties.length) return;
-        async.eachSeries(this.curvesProperties, function (curveProps, next) {
-            curve = {
-                idCurve: curveProps.idCurve,
-                name: '',
-                options: {},
-                data: []
-            };
+        if (this.visHistogram && this.visHistogram.curves) return;
+        if (!hisProps) return;
+        if (!hisProps.curves && !hisProps.curves.length) return;
+        async.eachSeries(hisProps.curves, function (curveProps, next) {
             wiApiService.infoCurve(curveProps.idCurve, function (curveInfo) {
-                if (!scale.left) scale.left = curveInfo.LineProperty.minScale;
-                if (!scale.right) scale.right = curveInfo.LineProperty.maxScale;
-                curve.name = curveInfo.name;
+                if (!curveProps.options) curveProps.options = {};
                 if (!curveProps.options.lineColor) curveProps.options.lineColor = curveInfo.LineProperty.lineColor;
-                curve.options = curveProps.options;
                 wiApiService.dataCurve(curveProps.idCurve, function (curveData) {
-                    curve.data = curveData;
-                    self.curves.push(curve);
+                    curveProps.data = curveData;
                     next();
                 });
             });
         }, function (err, result) {
             if (err) {
-                console.log('err', err);
+                console.error(err);
                 return;
             }
-            console.log('curves', self.curves);
 
-            // if (!self.viWiHis) {
-                if (!self.config.scale.left && !self.config.scale.right) {
-                    self.config.scale = scale;
-                }
-                if (self.config.loga) {
-                    if (self.config.scale.left == 0
-                        || self.config.scale.right == 0) {
-                        self.config.loga = false;
-                        toastr.error("Scale can't be 0 in Logarithmic");
-                        return;
-                    }
-                }
+            self.curves = hisProps.curves;
+            self.config = hisProps.config;
+            self.curvesProperties = hisProps.curvesProperties;
+            self.wells = hisProps.wells;
 
-                // test
-                self.config.numOfDivisions = 50;
-                // end test
+            self.histogramModel.properties.showGaussian = self.config.showGaussian;
+            self.histogramModel.properties.showCumulative = self.config.showCumulative;
+            self.histogramModel.properties.plot = self.config.plot;
 
-                self.config.showGaussian = hisProps.showGaussian;
-                self.config.showCumulative = hisProps.showCumulative;
-                self.config.showGrid = hisProps.showGrid;
-                self.config.loga = hisProps.loga;
-                self.config.flipHorizontal = hisProps.flipHorizontal;
-                self.config.plot = hisProps.plot;
-                self.config.plotType = hisProps.plotType;
-                self.config.isShowWiZone = hisProps.isShowWiZone;
-                self.config.referenceDisplay = hisProps.referenceDisplay;
-
-                let well = getWell();
-                hisProps.well = well;
-                hisProps.curves = self.curves;
-                hisProps.config = self.config;
-                hisProps.histogramModel = self.histogramModel;
-
-                self.visHistogram = graph.createHistogram(hisProps, document.getElementById(self.histogramAreaId));
-                loadStatistics();
-                // self.setContextMenu();
-                // debug
-                window.__visHistogram = self.visHistogram;
-            // } else {
-            //     self.viWiHis.curves = self.curves;
-            //     self.viWiHis.updatePlot(changes);
-            // }
+            self.visHistogram = graph.createHistogram(hisProps, document.getElementById(self.histogramAreaId));
+            loadStatistics();
         });
     }
     this.unloadCurve = unloadCurve;

@@ -61,6 +61,7 @@ let wiCustomInput = require('./wi-custom-input');
 let wiChunkedUpload = require('./wi-chunked-upload');
 let wiProgressBar = require('./wi-progress-bar');
 
+
 let wiPropsPanel = require('./wi-props-panel');
 
 let wiComboview = require('./wi-comboview');
@@ -167,6 +168,7 @@ let app = angular.module('wiapp',
         wiXplot.name,
         wiHis.name,
         wiPropsPanel.name,
+        wiProps.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -281,7 +283,39 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
     $scope.myPropertiesConfig = {};
-
+    
+    $scope.sampleData={
+        bottomDepth: 1000,
+        topDepth: 2000,
+        step: 1,
+        name: "Well1",
+        unit: "US",
+        background: "#000",
+    };
+    $scope.labelData = {
+        bottomDepth: "Bottom Depth",
+        topDepth: "Top Depth",
+        step: "Step",
+        name: "Name",
+        unit: "Unit"
+    }
+    $scope.optionData = {
+        bottomDepth: 'readonly',
+        topDepth: "use",
+        step: "use",
+        name: "use",
+        unit: "readonly",
+        background: "use"
+    }
+    $scope.sectionsData = {
+        bottomDepth: "section 1",
+        topDepth: "section 1",
+        step: "section 1",
+        name: "section 2"
+    }
+    $scope.type = {
+        background: "wicolor"
+    }
     $scope.onRibbonToggle = function(isCollapsed) {
         if (isCollapsed) {
             $('.ribbon-wrapper').css('height', 'auto');

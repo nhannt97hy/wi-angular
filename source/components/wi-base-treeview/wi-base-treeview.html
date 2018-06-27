@@ -10,6 +10,7 @@
         ng-hide="item.data.hide"
         tabindex="0">
         <div class="wi-parent-content">
+            <div style="width: {{12 * wiBaseTreeview.offset}}px"></div>
             <div class="icon-expanded"
                 ng-click="wiBaseTreeview.onCollapse($index)">
                 <i aria-hidden="true" class="fa"
@@ -48,12 +49,13 @@
         <div class="wi-parent-choices" ng-if='item.type.includes("choice")'>
             <select ng-model='item.data.value' ng-if='item.data.choices'
             ng-options="choice as choice.name for choice in item.data.choices track by choice.value"></select>
-            <input type="number" ng-model="item.data.value" ng-if="!item.data.choices" step="any">
+            <input type="number" ng-model="item.data.value" ng-value="item.data.value | number: 4"ng-if="!item.data.choices" step="any">
         </div>
     </div>
 
     <div ng-show="item.data.childExpanded">
         <wi-base-treeview
+            offset='wiBaseTreeview.offset+1'
             container="wiBaseTreeview.container"
             config="item.children"
             on-ready-function='wiBaseTreeview.onReadyFunction'

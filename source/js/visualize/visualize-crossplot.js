@@ -124,8 +124,10 @@ const POINTSET_SCHEMA = {
         idPointSet: { type: 'Integer' },
         idCurveZ: { type: 'Integer' },
         idOverlayLine: { type: 'String' },
+        idCurveX: { type: 'Integer' },
         curveX: { type: 'Object' },
         labelX: { type: 'String' },
+        idCurveY: { type: 'Integer' },
         curveY: { type: 'Object' },
         labelY: { type: 'String' },
         curveZ: { type: 'Object' },
@@ -253,7 +255,6 @@ const WELL_SCHEMA = {
 
 Crossplot.prototype.PROPERTIES = {
     idCrossPlot: { type: 'Integer' },
-    idWell: { type: 'Integer'},
     name: { type: 'String', default: 'Noname' },
     config: CONFIG_SCHEMA,
     pointsets: {
@@ -286,7 +287,13 @@ Crossplot.prototype.PROPERTIES = {
         },
         default: []
     },
-    well: WELL_SCHEMA,
+    wells: {
+        type: 'Object',
+        properties: {
+            type: 'Object',
+            properties: WELL_SCHEMA
+        }
+    },
     isDefineDepthColors: {
         type: 'Boolean',
         default: false
@@ -412,17 +419,15 @@ Crossplot.prototype.getTransformZ = function() {
 }
 
 Crossplot.prototype.getLabelX = function() {
-    // return this.title.labelX || (this.pointSet.curveX || {}).name;
-    return this.pointsets[0].curveX.name;
+    return ((this.pointsets[0] || {}).curveX || {}).name;
 }
 
 Crossplot.prototype.getLabelY = function() {
-    // return this.title.labelY || (this.pointSet.curveY || {}).name;
-    return this.pointsets[0].curveY.name;
+    return ((this.pointsets[0] || {}).curveY || {}).name;
 }
 
 Crossplot.prototype.getLabelZ = function() {
-    return this.title.labelZ || (this.pointSet.curveZ || {}).name;
+    return ((this.pointsets[0] || {}).curveZ || {}).name;
 }
 
 Crossplot.prototype.getPlotRect = function() {
@@ -483,8 +488,29 @@ Crossplot.prototype.createContainer = function() {
         .attr('class', 'vi-crossplot-footer-right');
 }
 
+Crossplot.prototype.updateCrossplot = function (newProps) {
+    this.setProperties(newProps);
+
+    if (!newProps) {
+        this.doPlot();
+        return;
+    }
+
+    this.clearAll();
+    this.prepareContainer();
+    if (!this.pointsets.length) return;
+    this.prepareData();
+    this.doPlot();
+}
+
+Crossplot.prototype.clearAll = function () {
+    this.svgContainer.selectAll('*').remove();
+    this.ctx.clearRect(0, 0, this.rect.width, this.rect.height);
+}
+
 Crossplot.prototype.adjustSize = function() {
     let rect = this.getPlotRect();
+    this.rect = rect;
     this.canvas
         .attr('width', rect.width)
         .attr('height', rect.height);
@@ -523,7 +549,7 @@ Crossplot.prototype.prepareAxesContainer = function () {
     let yScale = this.getTransformY();
 
     this.axesContainer = this.svgContainer.append('g')
-        .attr('class', 'wi-crossplot-axes-container')
+        .attr('class', 'vi-crossplot-axes-container')
         .attr('width', self.rect.width)
         .attr('height', self.rect.height);
 
@@ -551,7 +577,7 @@ Crossplot.prototype.prepareFunctionsContainer = function () {
     let self = this;
 
     this.functionsContainer = this.svgContainer.append('g')
-        .attr('class', 'wi-crossplot-functions-container')
+        .attr('class', 'vi-crossplot-functions-container')
         .attr('width', self.rect.width)
         .attr('height', self.rect.height);
 
@@ -592,6 +618,11 @@ Crossplot.prototype.prepareFunctionsContainer = function () {
 // };
 
 Crossplot.prototype.doPlot = function () {
+    let nullPointsetCounter = 0;
+    this.pointsets.forEach(pointSet => {
+        if (!pointSet || !pointSet.idCurveX || !pointSet.idCurveY) nullPointsetCounter++;
+    });
+    if (nullPointsetCounter == this.pointsets.length) return;
     this.adjustSize();
     this.updateAxesContainer();
     this.updateClipPath();
@@ -702,7 +733,7 @@ Crossplot.prototype.updateAxesGrids = function () {
         .call(this.gridsX)
         .selectAll('.tick line')
         .attr('class', function (d, i) {
-            return (xTickType(i)) ? 'major' : 'minor';
+            return (xTickType(i)) ? 'vi-major-tick' : 'vi-minor-tick';
         });
 
     this.gGridsY = this.axesContainer.select('g.vi-crossplot-axis-y-grids')
@@ -710,7 +741,7 @@ Crossplot.prototype.updateAxesGrids = function () {
         .call(this.gridsY)
         .selectAll('.tick line')
         .attr('class', function (d, i) {
-            return (yTickType(i)) ? 'major' : 'minor';
+            return (yTickType(i)) ? 'vi-major-tick' : 'vi-minor-tick';
         });
 
     function xLinearMajorTest(i) {
@@ -732,8 +763,8 @@ Crossplot.prototype.updateAxesLabels = function () {
     let self = this;
     let vpX = this.getViewportX();
     let vpY = this.getViewportY();
-    let _PADDING_BOTTOM = 20;
-    let _PADDING_LEFT = 20;
+    let _PADDING_BOTTOM = 10;
+    let _PADDING_LEFT = 10;
 
     let labelXElem = this.axesContainer.select('text.vi-crossplot-axis-x-label')
         .text(this.getLabelX());
@@ -1266,7 +1297,11 @@ Crossplot.prototype.plotPoints = function() {
     let windowX = this.getWindowX();
     let windowY = this.getWindowY();
 
+    let rect = this.getPlotRect();
+
     let ctx = this.ctx;
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.save();
 
     if (!this.pointsets.length) return;
     this.outliers = 0;
@@ -1274,12 +1309,9 @@ Crossplot.prototype.plotPoints = function() {
         ctx.rect(d3.min(vpX), d3.min(vpY), d3.max(vpX) - d3.min(vpX), d3.max(vpY) - d3.min(vpY));
         ctx.clip();
 
-        // test
-        pointSet.pointSymbol = 'circle';
-        // end test
         let helper = new CanvasHelper(ctx, {
-            strokeStyle: pointSet.options.pointColor,
-            fillStyle: pointSet.options.pointColor,
+            strokeStyle: pointSet.pointColor,
+            fillStyle: pointSet.pointColor,
             size: pointSet.pointSize
         });
 
@@ -1293,6 +1325,7 @@ Crossplot.prototype.plotPoints = function() {
             plotFunc.call(helper, transformX(d.x), transformY(d.y));
         });
     });
+    ctx.restore();
 }
 
 Crossplot.prototype.plotSelections = function() {
@@ -1349,8 +1382,8 @@ Crossplot.prototype.plotSelections = function() {
 
 Crossplot.prototype.prepareData = function() {
     let self = this;
-    if (!this.pointsets.length) return;
     this.data = [];
+    if (!this.pointsets.length) return;
     this.nullDatas = 0;
     this.pointsets.forEach(pointSet => {
         if (!pointSet.curveX || !pointSet.curveY || !pointSet.curveX.data || !pointSet.curveY.data)
@@ -1364,12 +1397,20 @@ Crossplot.prototype.prepareData = function() {
         });
 
         Utils.parseData(pointSet.curveY.data).forEach(function (d) {
+            // if (self.config.intervalDepthTop != null && d.y < self.config.intervalDepthTop) {
+            //     return;
+            // }
+            // if (self.config.intervalDepthBottom != null && d.y > self.config.intervalDepthBottom) {
+            //     return;
+            // }
             if (d.y != null && d.x != null && mapX[d.y] != null && !isNaN(d.y) && !isNaN(d.x) && !isNaN(mapX[d.y])) {
                 data.push({
                     x: mapX[d.y],
                     y: d.x,
                     depth: d.y
                 });
+            } else {
+                self.nullDatas++;
             }
         });
         self.data.push(data);

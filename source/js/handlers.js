@@ -145,22 +145,60 @@ exports.ProjectButtonClicked = function () {
     }
 };
 
-exports.NewFlowButtonClicked = function () {
+exports.NewFlowButtonClicked = function (callback) {
     const wiComponentService = this.wiComponentService;
+    const wiApiService = this.wiApiService;
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    const now = Date.now();
-    layoutManager.putTabRight({
-        id: 'flow' + now,
-        title: 'New Flow',
-        tabIcon: 'workflow-16x16',
-        componentState: {
-            html: `<wi-flow-designer new="true" id="${now}"></wi-flow-designer>`,
-            model: {
-                type: 'flow',
-                id: now
-            }
+    const DialogUtils = wiComponentService.getComponent('DIALOG_UTILS');
+    DialogUtils.promptDialog(
+        this.ModalService,
+        {
+            title: 'Create New Flow',
+            inputName: 'Flow Name',
+            input: 'New Flow',
+        },
+        function (flowName) {
+            if (!flowName) return;
+            const initDiagram = `
+            <?xml version="1.0" encoding="UTF-8"?>
+            <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="diagram" targetNamespace="http://bpmn.io/schema/bpmn">
+                <bpmn2:process id="Process_1" isExecutable="true">
+                <bpmn2:startEvent id="StartEvent_1"/>
+                </bpmn2:process>
+                <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+                <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+                    <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                    <dc:Bounds height="36.0" width="36.0" x="200.0" y="350.0"/>
+                    </bpmndi:BPMNShape>
+                </bpmndi:BPMNPlane>
+                </bpmndi:BPMNDiagram>
+            </bpmn2:definitions>
+            `;
+            const idProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).idProject;
+            wiApiService.createFlow({idProject, name: flowName, content: initDiagram}, function (resFlow, err) {
+                if (err) {
+                    self.saveFlow();
+                    return;
+                }
+                layoutManager.putTabRight({
+                    id: 'flow' + resFlow.idFlow,
+                    title: 'New Flow',
+                    tabIcon: 'workflow-16x16',
+                    componentState: {
+                        html: `<wi-flow-designer id="${resFlow.idFlow}" flow="flow"></wi-flow-designer>`,
+                        model: {
+                            type: 'flow',
+                            id: resFlow.idFlow
+                        },
+                        flow: resFlow
+                    }
+                });
+                setTimeout(() => {
+                    callback && callback(resFlow)
+                }, 100);
+            });
         }
-    });
+    );
 }
 
 exports.OpenFlowButtonClicked = function () {
@@ -310,14 +348,14 @@ exports.ExportFromInventoryButtonClicked = function() {
     let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
-        id: 'export-tool',
-        title: 'Export Tool',
+        id: 'export-inventory',
+        title: 'Export From Inventory',
         tabIcon: 'export-well-top-16x16',
         componentState: {
             html: `
                 <div style='height:100%;display:flex;flex-direction:column;'>
-                  
-                   <wi-export style='flex:1;' from="inventory"></wi-export>
+
+                   <wi-export-from-inventory style='flex:1;'></wi-export-from-inventory>
                 </div>
             `,
             name: 'wiExport'
@@ -333,14 +371,14 @@ exports.ExportFromProjectButtonClicked = function (){
     let loadedProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     layoutManager.putTabRight({
-        id: 'export-tool',
-        title: 'Export Tool',
+        id: 'export-project',
+        title: 'Export From Project',
         tabIcon: 'export-well-top-16x16',
         componentState: {
             html: `
                 <div style='height:100%;display:flex;flex-direction:column;'>
-                  
-                   <wi-export style='flex:1;' from="project"></wi-export>
+
+                   <wi-export-from-project style='flex:1;'></wi-export-from-project>
                 </div>
             `,
             name: 'wiExport'
@@ -947,8 +985,7 @@ exports.BlankCrossPlotButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Crossplot',
         inputName: 'Crossplot Name',
@@ -956,7 +993,7 @@ exports.BlankCrossPlotButtonClicked = function () {
     }
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         if(!crossplotName) return;
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
+        utils.createCrossplot(project.idProject, crossplotName, function (err, crossplotModel) {
             if (err) {
                 exports.BlankCrossPlotButtonClicked.call(self);
             }
@@ -971,8 +1008,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     console.log("Template Cross Plot clicked ", templateCross);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Crossplots Template',
         inputName: 'Crossplot Name',
@@ -981,7 +1017,7 @@ function newCrossPlotTemplate(templateCross, wiComponentService, ModalService) {
     DialogUtils.promptDialog(ModalService, promptConfig, function (crossplotName) {
         // console.log("CROSS NAME : ", crossplotName);
         if(!crossplotName) return;
-        utils.createCrossplot(currentWell.properties.idWell, crossplotName, function (err, crossplotModel) {
+        utils.createCrossplot(project.idProject, crossplotName, function (err, crossplotModel) {
             if (err) {
                 newCrossPlotTemplate(templateCross, wiComponentService, ModalService);
             }
@@ -1066,8 +1102,7 @@ exports.BlankHistogramButtonClicked = function () {
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const wiApiService = this.wiApiService;
     const $timeout = this.$timeout;
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Histogram',
         inputName: 'Histogram Name',
@@ -1076,12 +1111,14 @@ exports.BlankHistogramButtonClicked = function () {
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
         if(!histogramName) return;
-        utils.createHistogram(currentWell.properties.idWell, null, histogramName)
-            .then(function (histogram) {
-            })
-            .catch(function (err) {
+        utils.createHistogram(project.idProject, histogramName, function (err, histogramModel) {
+            if (err) {
                 exports.BlankHistogramButtonClicked.call(self);
-            });
+            }
+            else {
+                utils.openHistogramTab(histogramModel);
+            }
+        });
     });
 }
 
@@ -1089,8 +1126,7 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
     console.log("Template Hisogram clicked ", templateHistogram);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    let currentWell = utils.getCurrentWell();
-    if (!currentWell) return;
+    let project = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let promptConfig = {
         title: 'Create New Histogram From Template',
         inputName: 'Histogram Name',
@@ -1099,12 +1135,14 @@ function newTemplateHistogram(name, templateHistogram, wiComponentService, Modal
 
     DialogUtils.promptDialog(ModalService, promptConfig, function (histogramName) {
         if(!histogramName) return;
-        utils.createHistogram(currentWell.properties.idWell, null, histogramName, templateHistogram)
-            .then(function (histogram) {
-            })
-            .catch(function (err) {
+        utils.createHistogram(project.idProject, histogramName, function (err, histogramModel) {
+            if (err) {
                 newTemplateHistogram(histogramName, templateHistogram, wiComponentService, ModalService, wiApiService, $timeout, callback);
-            });
+            }
+            else {
+                utils.openHistogramTab(histogramModel);
+            }
+        });
     });
 }
 
@@ -1437,16 +1475,18 @@ exports.BasicAnalysisButtonClicked = function () {
 exports.ClayVolumeGammaRayButtonClicked = function() {
     console.log('ClayVolumeGammaRayButton is clicked');
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
-    // let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
+    let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
     // let spec = listSpec.find(sp => sp.name == 'Gamma Ray' && sp.group == 'Clay Volume');
+    let spec = listSpec[0];
     const now = Date.now();
     layoutManager.putTabRight({
         id: 'wiTask' + now,
         title: 'Clay Volume Gamma Ray',
         tabIcon: 'workflow-16x16',
         componentState: {
-            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}"></wi-task>`,
-            name: 'wiTask' + now
+            html: `<wi-task name="Clay Volume Gamma Ray" id="${now}" task-config="spec" new="true"></wi-task>`,
+            name: 'wiTask' + now,
+            spec: spec.content
         }
     })
 }
@@ -1487,9 +1527,44 @@ exports.ClayVolumeFinalButtonClicked = function() {
     console.log('ClayVolumeFinalButton is clicked');
 }
 
-exports.PorosityAndWaterSaturationButtonClicked = function () {
-    console.log('Porosity&WaterSaturationButton is clicked');
-};
+exports.PorosityDensityButtonClicked = function() {
+    console.log('PorosityDensityButton is clicked');
+    let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
+    let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
+    // let spec = listSpec.find(sp => sp.name == 'Density' && sp.group == 'Porosity');
+    let spec = listSpec[1];
+    const now = Date.now();
+    layoutManager.putTabRight({
+        id: 'wiTask' + now,
+        title: 'Porosity Density',
+        tabIcon: 'workflow-16x16',
+        componentState: {
+            html: `<wi-task name="Porosity Density" id="${now}" task-config="spec" new="true"></wi-task>`,
+            name: 'wiTask' + now,
+            spec: spec.content
+        }
+    })
+}
+
+exports.PorosityNeutronButtonClicked = function() {
+    console.log('PorosityNeutronButton is clicked');
+}
+
+exports.PorositySonicButtonClicked = function() {
+    console.log('PorositySonicButton is clicked');
+}
+
+exports.PorosityNeutron_DensityButtonClicked = function() {
+    console.log('PorosityNeutron-DensityButton is clicked');
+}
+
+exports.PorosityNeutron_SonicButtonClicked = function() {
+    console.log('PorosityNeutron-SonicButton is clicked');
+}
+
+exports.PorosityFinalButtonClicked = function() {
+    console.log('PorosityFinalButton is clicked');
+}
 
 exports.CutoffandSummationButtonClicked = function () {
     console.log('CutoffandSummationButton is clicked');

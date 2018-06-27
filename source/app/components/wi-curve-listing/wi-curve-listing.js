@@ -7,6 +7,11 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
     let dataCtrl;
     let __dragging = false;
 
+    // Limit
+    const _Limit_No = "0";
+    const _Limit_Index = "1";
+    const _Limit_Depth = "2";
+
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(
         wiComponentService.DIALOG_UTILS
@@ -77,7 +82,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
             let step = self.SelectedWell.step;
             let topDepth = self.SelectedWell.topDepth;
             let bottomDepth = self.SelectedWell.bottomDepth;
-            let length = Math.round((bottomDepth - topDepth) / step) + 1;
+            let length = Math.round((bottomDepth - topDepth) / step);
             _current.setting = {
                 colHeaders: function(col){
                     switch (col){
@@ -167,7 +172,7 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                 // },
                 copyPaste: {
                     columnsLimit: 1000,
-                    rowsLimit: length
+                    rowsLimit: length + 1
                 },
                 renderAllRows: false,
                 // beforeChange: function(changes, source) {
@@ -192,23 +197,30 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     columns: true,
                     onlyTrimmed: true
                 },
-                formulas: true
+                formulas: true,
+                hiddenRows: {
+                    rows: [],
+                    indicators: false,
+                    copyPasteEnabled: false
+                }
             };
 
             _current.length = length;
             _current.topDepth = topDepth,
             _current.bottomDepth = bottomDepth,
             _current.step = step;
-            _current.setting.data = new Array(length)
+            _current.limit = {
+                type: _Limit_No,
+                index: [0, length],
+                depth: [topDepth, bottomDepth]
+                }
+            _current.setting.data = new Array(length + 1)
                 .fill()
                 .map(d => new Object());
-            for (let i = 0; i < length - 1; i++) {
-                _current.setting.data[i]["depth"] = (
-                    step * i +
-                    topDepth
-                ).toFixed(4);
+            for (let i = 0; i < length; i++) {
+                _current.setting.data[i]["depth"] = (step * i + topDepth).toFixed(4);
             }
-            _current.setting.data[length - 1]["depth"] = bottomDepth;
+            _current.setting.data[length]["depth"] = bottomDepth;
         }
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
@@ -401,12 +413,12 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
     this.goToRowEnter = function(){
-        if(!self.goToRowInput) return;
+        if(self.goToRowInput == null) return;
         let ret = self.goToRowInput;
         if (ret < 0) {
             ret = Math.abs(ret);
         } else if (ret >=self.dataSettings[self.currentIndex].length) {
-            ret = self.dataSettings[self.currentIndex].length - 1;
+            ret = self.dataSettings[self.currentIndex].length;
         }
         dataCtrl.selectRows(ret);
         dataCtrl.scrollViewportTo(ret);
@@ -542,6 +554,30 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
     this.togglePropPanel = function() {
         self.isShowPropPanel = !self.isShowPropPanel;
     };
+
+    this.onLimitChange = function(){
+        let _current = self.dataSettings[self.currentIndex];
+        switch(_current.limit.type){
+            case _Limit_No:
+                _current.setting.hiddenRows.rows.length = 0;
+                break;
+            case _Limit_Index:
+                _current.setting.hiddenRows.rows = _current.setting.data.reduce((total, val, idx) => {
+                    if(idx < _current.limit.index[0] || idx > _current.limit.index[1])
+                    total.push(idx);
+                    return total;
+                }, []);
+                break;
+            case _Limit_Depth:
+                _current.setting.hiddenRows.rows = _current.setting.data.reduce((total, val, idx) => {
+                    if(+val.depth < _current.limit.depth[0] || +val.depth > _current.depth.index[1])
+                    total.push(idx);
+                    return total;
+                }, []);
+                break;
+        }
+        switchSetting();
+    }
     this.toggleVisualizationMode = function(){
         if(self.visualizationMode == "Data"){
             self.visualizationMode = "Statistic";

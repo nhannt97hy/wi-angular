@@ -53,6 +53,33 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         WICS = wiComponentService;
         WIEXPLORER = self;
         if (self.name) wiComponentService.putComponent(self.name, self);
+
+        setTimeout(() => {
+            $('wi-explorer .wi-parent-content').each(function (index, element) {
+                $(element).css({ 'flex': `0 1 ${$(element).width()}px` });
+            })
+            $('wi-explorer .wi-parent-family').each(function (index, element) {
+                $(element).css({ 'flex': `0 1 ${$(element).width()}px` });
+            })
+            $(`wi-explorer .label_treeview span:first-child`).resizable({
+                handles: 'e',
+                containment: 'parent',
+                minWidth: 0,
+                resize: (event, ui) => {
+                    ui.element.css({ flex: `0 1 ${ui.size.width}px` });
+                    $('wi-explorer .wi-parent-content').css({ 'flex': `0 1 ${ui.size.width}px` });
+                }
+            });
+            $(`wi-explorer .label_treeview span:nth-child(2)`).resizable({
+                handles: 'e',
+                containment: 'parent',
+                minWidth: 0,
+                resize: (event, ui) => {
+                    ui.element.css({ flex: `0 1 ${ui.size.width}px` });
+                    $('wi-explorer .wi-parent-family').css({ 'flex': `0 1 ${ui.size.width}px` });
+                }
+            })
+        }, 100);
     };
 
     this.scrollLeft = function(){
@@ -346,15 +373,21 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         handler: function () {
                             utils.renameWell();
                         }
-                    },{
+                    },  {
+                        name: "Export To Inventory",
+                        label: "Export To Inventory",
+                        icon: "arrow-right-16x16",
+                        handler: function () {
+                            utils.exportWellToInventory();
+                        }
+                    }, {
                         name: "DuplicateCurve",
                         label: "Duplicate",
                         icon: "copy-16x16",
                         handler: function () {
                             self.handlers.DuplicateButtonClicked('well');
                         }
-                    },
-                    {
+                    }, {
                         name: "Delete",
                         label: "Delete",
                         icon: "recycle-bin-empty-16x16",
@@ -436,6 +469,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.renameDataset();
                         }
                     }, {
+                        name: "Export to Inventory",
+                        label: "Export to Inventory",
+                        icon: "arrow-right-16x16",
+                        handler: function () {
+                            utils.exportDatasetToInventory();
+                        }
+                    }, {
                         name: "DuplicateDataset",
                         label: "Duplicate",
                         icon: "copy-16x16",
@@ -488,6 +528,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "copy-16x16",
                         handler: function() {
                             utils.copyCurve();
+                        }
+                    }, {
+                        name: "Export to Inventory",
+                        label: "Export to Inventory",
+                        icon: "arrow-right-16x16",
+                        handler: function() {
+                            utils.exportCurveToInventory();
                         }
                     }, {
                         name: "Cut",

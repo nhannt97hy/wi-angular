@@ -1,0 +1,73 @@
+<form class="form-horizontal properties-block">
+	<div ng-repeat="section in self.getSections(self.section)">
+		<div class="heading" ng-click="self.shown[$index]=!self.shown[$index]">
+			<span>{{section}}</span>
+			<span ng-if="!section && self.getFieldsOfSection(section, self.fields)">General</span>
+			<span style="float: right;" ng-if="self.getShown(section, self.getSections(self.section))"><i class="ti-minus"></i></span>
+			<span style="float: right;" ng-if="!self.getShown(section, self.getSections(self.section))"><i class="ti-plus"></i></span>
+
+		</div>
+		<div class='form-group properties-group' ng-if="self.getShown(section, self.getSections(self.section))"
+				ng-repeat="field in self.getFieldsOfSection(section, self.fields)" ng-hide="!field.use">
+			<label class="control-label col-sm-5" style=" text-align: left;">{{field.label || field.name}}</label>
+			<div class="col-sm-7" style="padding: 0">
+				<input ng-if="field.type=='text'||field.type=='number'"
+						class="form-control props-input"
+						type="{{field.type||'text'}}" 
+						ng-model="field.value" placeholder="{{field.label||field.name}}" 
+						ng-readonly="{{field.readOnly}}"
+						wi-enter="$event.currentTarget.blur();" ng-blur="self.doChange(field)">
+				<div ng-if="field.type=='wicolor'" 
+					class="wicolor">
+					<button ng-click="self.changeColor(field, self.fields)" 
+                            ng-style="{'background-color':field.value}"
+                            class="form-control wi-form-control thick-border" 
+                            style="margin: 3px auto;width: 100px ;height: 20px;">
+                    </button>
+				</div>
+				<div ng-if="field.type=='wipattern'" 
+					class="wipattern" style="text-align: center;">
+					<button ng-click="self.changePattern(field, self.fields)"
+                            class="btn btn-default" style="padding: 0; border: none;">
+                        <wi-canvas-rect name="_pattern{{field.name}}"
+                                        pattern="{{field.value.name}}"
+                                        width="100" height="20"
+                                        foreground="{{field.value.foreground}}"
+                                        background='{{field.value.background}}'>
+                        </wi-canvas-rect>
+                    </button>
+				</div>
+				<div ng-if="field.type=='wifamily'" 
+					class="wifamily" style="text-align: center;">
+					<button ng-click="self.changeFamily(field, self.fields)"
+                            class="btn btn-default" 
+                            style="border: none;margin:auto;width: 100%;text-align: left;font-size: 12px;">
+                            {{field.value.name}}<span class="family-edit-16x16"></span>
+                    </button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- <div ng-if="self.getFieldsNoSection(self.fields).length" ng-init="_shown=true">
+		<div class="heading" ng-click="_shown=!_shown">
+			<span>General</span>
+			<span style="float: right;" ng-if="_shown"><i class="ti-plus"></i></span>
+			<span style="float: right;" ng-if="!_shown"><i class="ti-minus"></i></span>
+		</div>
+		<div class='form-group properties-group' ng-if="_shown"
+				ng-repeat="field in self.getFieldsNoSection(self.fields)" ng-hide="!field.use">
+			<label class="control-label col-sm-5" style=" text-align: left;">{{field.label || field.name}}</label>
+			<div class="col-sm-7" style="padding-right: 0">
+				<input ng-if="field.type=='text'||field.type=='number'"
+						class="form-control props-input"
+						type="{{field.type||'text'}}" 
+						ng-model="field.value" placeholder="{{field.label||field.name}}" 
+						ng-change="self.doChange(field)"
+						ng-readonly="{{field.readOnly}}">
+				<div ng-if="field.type=='wicolor'" 
+					class="wicolor">
+				</div>
+			</div>
+		</div>
+	</div> -->
+</form>

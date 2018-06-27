@@ -11,6 +11,7 @@ function WiBaseTreeController(wiComponentService, $scope) {
         return self.filterBy.includes(input.type)
     }
     this.$onInit = function () {
+        self.offset = self.offset || 0;
         if (self.name && self.name.length) {
             wiComponentService.putComponent(self.name, self);
             let watch = [() => this.filter, () => this.filterBy];
@@ -135,6 +136,7 @@ app.component(componentName, {
     controller: WiBaseTreeController,
     controllerAs: componentName,
     bindings: {
+        offset: '<',
         name: '@',
         container: '<',
         config: '<',
@@ -146,7 +148,7 @@ app.component(componentName, {
         filter: '@',
         filterBy: '@',
         onSelectFunction: '<',
-        showId: '<'
+        showId: '<',
     }
 });
 exports.controller = WiBaseTreeController;

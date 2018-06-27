@@ -72,6 +72,8 @@ function LogTrack(config, wiApiService) {
 
     this.curvesRemoved = 0;
     this.mode = null;
+
+    this.showZoneSet = config.showZoneSet;
 }
 
 LogTrack.prototype.getProperties = function() {
@@ -128,6 +130,7 @@ LogTrack.prototype.setMode = function(newMode) {
 }
 
 LogTrack.prototype.updateScaleInfo = function(scaleOpt) {
+    let self = this;
     if (scaleOpt) {
         this.scale = scaleOpt.scale? scaleOpt.scale.toLowerCase() : this.scale.toLowerCase();
         this.minX = scaleOpt.leftVal;
@@ -154,7 +157,17 @@ LogTrack.prototype.updateScaleInfo = function(scaleOpt) {
             this.maxX = 2;
         }
     }
+
+    let windowX = self.getWindowX();
+    this.getZones().forEach(zone => {
+        zone.setProperties({
+            scaleLeft: windowX[0],  
+            scaleRight: windowX[1]
+        })
+        zone.doPlot();
+    })
 }
+
 /**
  * Get x window of track
  * @returns {Array} Range of actual x values to show
@@ -295,6 +308,10 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
             scale: Utils.lowercase(drawing.scale)
         });
         this.updateAxis();
+    } else if (drawing && drawing.isZone()) {
+        if(drawing.params) {
+            this.drawControlLinesOnCurvesHeaders(drawing.params)
+        }
     }
     this.highlightHeader();
 }
@@ -757,9 +774,9 @@ LogTrack.prototype.plotDrawing = function(drawing) {
         drawing.doPlot();
     }
     this.getShadings().filter(s => s !== this.currentDrawing).forEach(s => s.lower());
-    this.getImages().forEach(function(img) { img.lower(); });
+    this.getImages().forEach(function (img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
-    this.getZones().forEach(zone => zone.lower());
+    // this.getZones().forEach(zone => zone.lower());
     this.svgContainer.raise();
     this.axisContainer.lower();
 }
@@ -1387,16 +1404,20 @@ LogTrack.prototype.addSelection = function(selectionConfig) {
     return viSelection;
 }
 
+/**
+ * This method is no longer needed
+ *
 LogTrack.prototype.addZoneSet = function(zonesetConfig) {
     let self = this;
     console.log("zoneset to vi log track", zonesetConfig);
-    self.idZoneSet = zonesetConfig.idZoneSet;
-    self.addZoneSetHeader(zonesetConfig);
+    // self.idZoneSet = zonesetConfig.idZoneSet;
+    // self.addZoneSetHeader(zonesetConfig);
     for(let zone of zonesetConfig.zones) {
         self.addZone(zone);
     }
     self.plotAllDrawings();
 }
+*/
 
 LogTrack.prototype.removeAllZones = function() {
     let self = this;
@@ -1414,28 +1435,13 @@ LogTrack.prototype.removeZone = function (zone) {
 
 LogTrack.prototype.addZone = function(zoneConfig) {
     let self = this;
-    // zoneConfig.idZoneTrack = this.id;
-    // if (!zoneConfig.fill) {
-    //     zoneConfig.fill = {
-    //         pattern: {
-    //             name: 'none',
-    //             background: this.genColor(),
-    //             foreground: 'white'
-    //         }
-    //     }
-    // }
-    // if (zoneConfig.minY == null) zoneConfig.minY = this.minY;
-    // if (zoneConfig.maxY == null) zoneConfig.maxY = this.maxY;
     let zone = new Zone(zoneConfig);
-    zone.init(this.plotContainer);
-    zone.svgGroup.attr('fill-opacity', 0.5);
-    // zone.header = this.addZoneHeader(zone);
-    // zone.on('mousedown', function() {
-    //     self.drawingMouseDownCallback(zone);
-    // });
+    zone.init(self.plotContainer);
+    zone.svgGroup.attr('fill-opacity', '0.5');
     this.drawings.push(zone);
     return zone;
 }
+/*
 LogTrack.prototype.addZoneSetHeader = function(zoneset) {
     let self = this;
     let header = this.drawingHeaderContainer.append('div')
@@ -1455,4 +1461,13 @@ LogTrack.prototype.addZoneSetHeader = function(zoneset) {
         .attr('width', rect.width)
         .attr('height', rect.height);
     return header;
+}
+*/
+LogTrack.prototype.drawControlLinesOnCurvesHeaders = function(params) {
+    this.getCurves().forEach(viCurve => viCurve.drawControlLines(params));
+    this.getCurves().forEach(viCurve => viCurve.drawControlLineText(params));
+}
+
+LogTrack.prototype.removeControlLinesOnCurvesHeaders = function() {
+    this.getCurves().forEach(viCurve => viCurve.drawControlLines([]));
 }

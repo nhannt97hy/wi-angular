@@ -24,6 +24,9 @@
 
 .vi-track-header-name {
     cursor: move;
+    strong {
+        font-size: 0.9em;
+    }
 }
 
 .vi-zone-header {
@@ -198,7 +201,7 @@
         }
     }
     .vi-track-drawing {
-        pointer-events: none;
+        // pointer-events: none;
 
         >g {
             pointer-events: all;
@@ -274,7 +277,7 @@
             left: 0;
         }
 
-        .vi-crossplot-axis-container {
+        .vi-crossplot-axes-container {
             .vi-crossplot-axis-grids {
                 .tick {
                     line {

@@ -1,255 +1,793 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback, options){
+module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCallback, opt) {
     function ModalController($scope, wiComponentService, wiApiService, close, $timeout) {
-        const CURVE_SYMBOLS = ['X', 'Y', 'Z'];
-        window.CrossF = this;
+        window.modal = this;
+        const __selectionLength = 50;
+        const __selectionDelta = 10;
+        const CURVE_SELECTION = "1";
+        const FAMILY_SELECTION = "2";
+        const FAMILY_GROUP_SELECTION = "3";
         let self = this;
-        this.hideApply = ((options || {}).hideApply || false);
-
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-        let graph = wiComponentService.getComponent('GRAPH');
-
-        let _crossplotModel = utils.getModel('crossplot', wiCrossplotId);
-        //let wiD3CrossplotCtrl = wiCrossplotCtrl.getWiD3CrossplotCtrl();
-
-        //this.crossplotModelProps = angular.copy(wiD3CrossplotCtrl.crossplotModel.properties);
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        //TreeName
+        let name = 'wiCrossplot' + wiD3CrossplotCtrl.wiCrossplotCtrl.id;
+        this.SelectionTreeName = 'wiCrossplotFormatModalSelectionTree';
+        this.projectTreeName = 'wiCrossplotFormatModalProjectTreeName';
+        this.taskDataTreeName = 'wiCrossplotFormatModalTaskDataTree';
+        let __selectionTop = 0;
+        let __dragging = false;
+        let __familyList;
+        let _crossplotModel = utils.getModel('crossplot', wiD3CrossplotCtrl.wiCrossplotCtrl.id);
         this.crossplotModelProps = angular.copy(_crossplotModel.properties);
-
-        this.selectedCurveX = null;
-        this.selectedCurveY = null;
-        this.selectedCurveZ = null;
-        this.selectedZoneSet = null;
-        this.zoneSets = new Array();
-        this.datasetsInWell = new Array();
-        this.curvesOnDataset = new Array(); //curvesInWell + dataset.curve
-        // this.depthType = 'intervalDepth';
-        this.lineMode = false;
-        this.overlayLines = [];
-
-        this.well = utils.findWellByCrossplot(wiCrossplotId);
-        this.selectPointSymbol = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
-
-        async.waterfall([
-            function(cb) {
-                let pointsets = self.crossplotModelProps.pointsets;
-                if (!pointsets || !pointsets.length || !pointsets[0].idPointSet ) {
-                    wiApiService.getCrossplot(self.crossplotModelProps.idCrossPlot, function (crossplot) {
-                        self.crossplotModelProps = crossplot;
-                        //wiCrossplotCtrl.crossplotModel.properties = crossplot;
-                        _crossplotModel.properties = crossplot;
-                        cb();
-                    });
+        this.config = angular.copy(wiD3CrossplotCtrl.config);
+        this.curvesProperties = angular.copy(wiD3CrossplotCtrl.curvesProperties);
+        this.pointsets = angular.copy(wiD3CrossplotCtrl.pointsets);
+        this.labels = angular.copy(wiD3CrossplotCtrl.labels);
+        this.wellsList = this.curvesProperties.map(cp => {
+            return cp.idWell;
+        });
+        this.filterText = "";
+        this.filterText1 = "";
+        this.hideApply = ((opt || {}).hideApply || false);
+        this.CURVE_SELECTION = CURVE_SELECTION;
+        this.FAMILY_SELECTION = FAMILY_SELECTION;
+        this.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
+        this.selectionType = "1";
+        this.taskConfig = {
+            inputs: [
+                {
+                    name: "X Axis",
+                    label: self.labels.x,
+                    value: self.labels.x,
+                    type: self.labels.type
+                },
+                {
+                    name: "Y Axis",
+                    label: self.labels.y,
+                    value: self.labels.y,
+                    type: self.labels.type
                 }
-                else cb();
-            },
-            function(cb) {
-                let pointSet = self.crossplotModelProps.pointsets[0];
-                if (!pointSet.pointSymbol)
-                    pointSet.pointSymbol = 'Circle';
+            ],
+            parameters: [
+            ],
+            outputs: [
+            ],
+            function: ""
+        };
 
-                if (!pointSet.numColor)
-                    pointSet.numColor = 5;
-
-                pointSet.pointSymbol = utils.upperCaseFirstLetter(pointSet.pointSymbol);
-
-                // self.pointSet = self.crossplotModel.properties.pointSet;
-                self.depthType = pointSet.depthType || 'intervalDepth';
-                self.lineMode = pointSet.lineMode ? pointSet.lineMode : true;
-                pointSet.activeZone = pointSet.activeZone ? pointSet.activeZone : 'All';
-                self.selectedZone = pointSet.activeZone ? pointSet.activeZone : 'All'; // To be removed
-                async.setImmediate(cb);
-            },
-            getZonesAndCurvesInDataset,
-            function(cb){
-                let blankCurve = [{
-                    name: '',
-                    type: 'curve',
-                    id: null,
-                    properties: {
-                        name: '',
-                        idCurve: null,
-                        dataset: ''
-                    }
-                }]
-                self.curvesOnDatasetWithBlank = blankCurve.concat(self.curvesOnDataset);
-                cb();
-            },
-            function(cb) {
-                CURVE_SYMBOLS.forEach(function(symbol) {
-                    autoScaleCurve(symbol, true);
-                });
-                loadOverlays();
-                cb();
-            }
-        ], function(err) {
-            if (err) console.error('ERROR', err);
+        wiApiService.listFamily(listF => {
+            list = listF;
+            onSelectionTypeChanged();
         });
 
+        self.idxTab = 0;
 
-        function getZonesAndCurvesInDataset(callback) {
-            self.well.children.forEach(function (child, i) {
-                if (child.type == 'dataset') self.datasetsInWell.push(child);
-                // if (child.type == 'zonesets') self.zoneSets = angular.copy(child.children);
-                if (child.type == 'zonesets') self.zoneSets = child.children;
+        this.getCurrentProjectId = function () {
+            if (self.idProject) return self.idProject;
+            const openProject = wiComponentService.getComponent(
+                wiComponentService.PROJECT_LOADED
+            );
+            return (openProject || {}).idProject;
+        }
 
-                if( i == self.well.children.length - 1) {
+        // SELECT INPUT TAB
+        self.idProject = self.getCurrentProjectId();
+        self.isFrozen = !!self.idProject;
+        self.projectConfig = new Array();
 
-                    self.datasetsInWell.forEach(function (dataset) {
-                        dataset.children.forEach(function (curve) {
-                            if (curve.type == 'curve') {
-                                self.curvesOnDataset.push(curve);
-                            }
-                        })
+        this.onShowTab = function (idx) {
+            self.idxTab = idx;
+        }
+
+        this.onClick = function ($index, $event, node) {
+            self.selectionList.forEach(item => {
+                item.data.selected = false;
+            });
+            node.data.selected = true;
+        }
+
+        this.onSelectTemplate = function (idx) {
+            const __SELECTED_NODE = self.selectionList.find(d => d.data.selected);
+            if (__SELECTED_NODE) {
+                let item = self.taskConfig.inputs[idx];
+                item.label = __SELECTED_NODE.data.label;
+                item.value =
+                    __SELECTED_NODE.id > 0 ? __SELECTED_NODE.id : item.label;
+                item.type = self.selectionType;
+                self.inputChange = true;
+            } else {
+                toastr.error("please select data type!");
+            }
+        }
+
+        this.onTabChange = function (index) {
+            if (index != 1 || !self.inputChange) return;
+            self.config.scale = {};
+            self.projectChanged({ idProject: self.idProject });
+            self.inputChange = false;
+            self.tabChange = true;
+        }
+
+        this.onSelectionTypeChanged = onSelectionTypeChanged;
+        function onSelectionTypeChanged(selType) {
+            self.filterText1 = "";
+            self.filterText = "";
+            self.selectionType = selType || self.selectionType;
+            switch (self.selectionType) {
+                case FAMILY_GROUP_SELECTION:
+                    let temp = utils.getListFamily();
+                    if (!temp) temp = list;
+                    const groups = new Set();
+                    temp.forEach(t => {
+                        groups.add(t.familyGroup);
                     });
-                    let pointSet = self.crossplotModelProps.pointsets[0];
-                    if (self.zoneSets && self.zoneSets.length > 0) {
-                        if (!pointSet.idZoneSet) {
-                            self.selectedZoneSet = self.zoneSets[0];
-                        }
+                    self.selectionList = Array.from(groups).map(g => ({
+                        id: -1,
+                        data: {
+                            label: g,
+                            icon: "zone-table-16x16",
+                            selected: false
+                        },
+                        children: [],
+                        properties: {}
+                    }));
+                    break;
+                case FAMILY_SELECTION:
+                    getFamilyList(function (familyList) {
+                        $timeout(function () {
+                            self.selectionList = familyList.slice(0, __selectionLength);
+                        });
+                        __selectionTop = 0;
+                    });
+                    break;
+                case CURVE_SELECTION:
+                    let hash = new Object();
+                    let wiExplr = wiComponentService.getComponent(wiComponentService.WI_EXPLORER);
+                    let root = null;
+                    if (wiExplr) root = wiExplr.treeConfig[0];
+                    if (root) {
+                        utils.visit(
+                            root,
+                            function (node, _hash) {
+                                if (node.type == "curve") {
+                                    _hash[node.data.label] = 1;
+                                }
+                                return false;
+                            },
+                            hash
+                        );
+                        $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
+                            return {
+                                id: -1,
+                                data: {
+                                    label: key,
+                                    icon: "curve-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: {}
+                            };
+                        }));
+                    }
+                    else {
+                        buildCurveListFromServer(function (curve) {
+                            hash[curve.name] = 1;
+                        }, function () {
+                            $timeout(() => self.selectionList = Object.keys(hash).map(function (key) {
+                                return {
+                                    id: -1,
+                                    data: {
+                                        label: key,
+                                        icon: "curve-16x16",
+                                        selected: false
+                                    },
+                                    children: [],
+                                    properties: {}
+                                };
+                            }));
+                        });
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
-                        for (let i = self.zoneSets.length - 1; i >= 0; i--) {
-                            self.zoneSets[i].idx = i;
-                            if (self.zoneSets[i].properties.idZoneSet == pointSet.idZoneSet) {
-                                self.selectedZoneSet = self.zoneSets[i];
-                            }
-                            /*if (!self.zoneSets[i].children || !self.zoneSets[i].children.length) {
-                                self.zoneSets.splice(i, 1);
-                            }*/
+        this.upTrigger = function (cb) {
+            if (self.selectionType == FAMILY_SELECTION) {
+                if (__selectionTop > 0) {
+                    if (__selectionTop > __selectionDelta) {
+                        getFamilyList(function (familyList) {
+                            let newItems = familyList
+                                .slice(
+                                    __selectionTop - __selectionDelta,
+                                    __selectionTop
+                                )
+                                .reverse();
+                            __selectionTop = __selectionTop - __selectionDelta;
+                            cb(newItems, self.selectionList);
+
+                        });
+                    } else {
+                        getFamilyList(function (familyList) {
+                            let newItems = familyList
+                                .slice(0, __selectionTop)
+                                .reverse();
+                            __selectionTop = 0;
+                            cb(newItems, self.selectionList);
+                        });
+                    }
+                } else cb([]);
+            } else cb([]);
+        };
+        this.downTrigger = function (cb) {
+            if (self.selectionType == FAMILY_SELECTION) {
+                getFamilyList(function (familyList) {
+                    let __selectionBottom = __selectionTop + __selectionLength;
+                    if (__selectionBottom < familyList.length) {
+                        if (familyList.length - __selectionBottom > __selectionDelta) {
+                            let newItems = familyList.slice(
+                                __selectionBottom + 1,
+                                __selectionDelta + __selectionBottom + 1
+                            );
+                            __selectionTop = __selectionTop + __selectionDelta;
+                            cb(newItems, self.selectionList);
+                        } else {
+                            let newItems = familyList.slice(
+                                __selectionBottom + 1,
+                                familyList.length
+                            );
+                            __selectionTop =
+                                __selectionTop +
+                                (familyList.length - __selectionBottom);
+                            cb(newItems, self.selectionList);
                         }
+                    } else cb([]);
+                });
+            } else cb([]);
+        };
+        this.onFilterEnterKey = function (filterText) {
+            self.filterText = filterText;
+            if (self.selectionType == FAMILY_SELECTION) {
+                __selectionTop = 0;
+                $timeout(function () {
+                    getFamilyList(function (familyList) {
+                        self.selectionList = familyList.slice(0, __selectionLength);
+                    });
+                });
+            }
+        };
+
+        this.refreshProject = function () {
+            if (!isNaN(self.idProject) && self.idProject > 0) {
+                self.projectChanged({ idProject: self.idProject });
+            }
+        }
+        this.getProjectList = function (wiItemDropdownCtrl) {
+            if (!self.idProject) {
+                wiApiService.getProjectList(null, projectList => {
+                    console.log(projectList);
+                    wiItemDropdownCtrl.items = projectList.map(prj => ({
+                        data: {
+                            label: prj.name
+                        },
+                        properties: prj
+                    }));
+                });
+            } else {
+                wiApiService.getProjectInfo(self.idProject, projectProps => {
+                    self.projectName = projectProps.name;
+                    self.projectChanged({ idProject: projectProps.idProject });
+                });
+            }
+        };
+
+        this.projectChanged = function (projectProps) {
+            const __idProject = projectProps.idProject;
+            if (__idProject > 0) {
+                wiApiService.listWells(
+                    {
+                        idProject: __idProject,
+                        match:
+                            self.prjFilter && self.prjFilter.length
+                                ? self.prjFilter
+                                : undefined
+                    },
+                    wells => {
+                        self.projectConfig.length = 0;
+                        buildWellList(wells);
+                    }
+                );
+            }
+        };
+        function draggableSetting(domEle) {
+            $timeout(() => {
+                domEle.draggable({
+                    helper: "clone",
+                    start: function (event, ui) {
+                        __dragging = true;
+                    },
+                    stop: function (event, ui) {
+                        __dragging = false;
+                    },
+                    containment: "document",
+                    appendTo: document.querySelector("#dragObjElement"),
+                    scroll: false
+                });
+            }, 500);
+        }
+        this.onPrjReady = function () {
+            let domEle = $('#' + self.projectTreeName + ' .wi-parent-node[type="dataset"]');
+            draggableSetting(domEle);
+        }
+
+        function matchCurves(curves, matchCriterion) {
+            switch (matchCriterion.type) {
+                case FAMILY_GROUP_SELECTION:
+                    const familyList = utils.getListFamily();
+                    return curves.filter(cModel => {
+                        if (familyList) {
+                            const group = familyList.find(f => {
+                                if (cModel.properties) {
+                                    return f.idFamily == cModel.properties.idFamily;
+                                }
+                                return f.idFamily == cModel.idFamily;
+                            });
+                            return group
+                                ? matchCriterion.value == group.familyGroup
+                                : false;
+                        }
+                    });
+                case FAMILY_SELECTION:
+                    return curves.filter(cModel => {
+                        if (cModel.properties) {
+                            return (
+                                matchCriterion.value == cModel.properties.idFamily
+                            );
+                        }
+                        return matchCriterion.value == cModel.idFamily;
+                    });
+                case CURVE_SELECTION:
+                    return curves.filter(cModel => {
+                        if (cModel.properties) {
+                            return matchCriterion.value == cModel.properties.name;
+                        }
+                        return matchCriterion.value == cModel.name;
+                    });
+            }
+            return [];
+        }
+        this.droppableSetting = function () {
+            $(".wi-droppable").droppable({
+                drop(event, ui) {
+                    if (!__dragging) return;
+                    // check modal draggable
+                    if (ui.draggable[0].className.includes("modal-content")) return;
+                    const type = ($(ui.draggable[0]).attr("type"));
+                    switch (type) {
+                        case 'dataset':
+                            const idDataset = parseInt($(ui.draggable[0]).attr("data"));
+                            self.getInputData(idDataset, true, self.updateProperties);
+                            break;
                     }
                 }
             });
-            callback();
-        }
+        };
 
-        function findCurveById (idCurve) {
-            curveObjs = self.curvesOnDataset.filter(function (item, index) {
-               return (item.id == idCurve);
-           });
-            return curveObjs[0];
-        }
-
-        function getScaleKeys(symbol) {
-            return {
-                'X': ['scaleLeft', 'scaleRight'],
-                'Y': ['scaleBottom', 'scaleTop'],
-                'Z': ['scaleMin', 'scaleMax']
-            }[symbol];
-        }
-
-        function autoScaleCurve(symbol, noForce) {
-            let key = 'idCurve' + symbol;
-            let scaleKeys = getScaleKeys(symbol);
-            let pointSet = self.crossplotModelProps.pointsets[0];
-            let idCurve = pointSet[key];
-            if (pointSet && pointSet[key]) {
-                if (noForce && pointSet[scaleKeys[0]] != null && pointSet[scaleKeys[1]] != null) return;
-                let curve = findCurveById(idCurve);
-                if (curve.lineProperties) {
-                    pointSet[scaleKeys[0]] = curve.lineProperties.minScale;
-                    pointSet[scaleKeys[1]] = curve.lineProperties.maxScale;
-                }
-                else {
-                    wiApiService.infoCurve(idCurve, function (info) {
-                        $timeout(function () {
-                            pointSet[scaleKeys[0]] = info.LineProperty.minScale;
-                            pointSet[scaleKeys[1]] = info.LineProperty.maxScale;
-                        });
-                    })
-                }
+        this.getInputData = function (idDataset, drop, callback) {
+            let options = new Object();
+            for (let node of self.projectConfig) {
+                utils.visit(
+                    node,
+                    (_node, _options) => {
+                        if (_node.type == "dataset" && _node.id == idDataset) {
+                            if (drop) {
+                                _options.result = _node;
+                                return true;
+                            } else {
+                                if (self.wellsList.indexOf(_node.properties.idWell) > -1) {
+                                    _options.result = _node;
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    },
+                    options
+                );
+                if (options.found) break;
             }
+            // populate data into self.inputArray
+            if (!options.result) {
+                // toastr.error("Dataset doesn't exist");
+                return;
+            }
+            let datasetModel = options.result;
+            let datasetName = datasetModel.properties.name;
+            let idWell = datasetModel.properties.idWell;
+            let wellModel = self.projectConfig.find(well => well.id == idWell);
+            let wellProps = wellModel.properties;
+            if (!self.taskConfig.inputData || !Array.isArray(self.taskConfig.inputData)) {
+                self.taskConfig.inputData = new Array();
+            }
+            // let existDataset = self.taskConfig.inputData.find(i => i.idDataset == idDataset);
+            // if (existDataset) return;
+
+            let inputItems = self.taskConfig.inputs.map(ipt => {
+                let tempItem = {
+                    data: {
+                        childExpanded: false,
+                        icon: "curve-16x16",
+                        label: ipt.name,
+                        choices: matchCurves(datasetModel.children, ipt),
+                        selected: false
+                    },
+                    type: "inputchoice"
+                };
+                tempItem.data.value = tempItem.data.choices.length
+                    ? tempItem.data.choices[0]
+                    : null;
+                return tempItem;
+            });
+
+            let input = {
+                type: 'dataset',
+                idDataset: idDataset,
+                wellProps: wellProps,
+                dataset: datasetName,
+                data: {
+                    childExpanded: true,
+                    icon: "well-16x16",
+                    label: `${wellProps.name} / ${datasetModel.properties.name}`,
+                    selected: false
+                },
+                children: inputItems
+            };
+            if (input.children.find(c => c.data.value == null)) {
+                if (drop) {
+                    toastr.error('Dataset does not reach requirement inputs');
+                } else {
+                    let tmpIpt = self.taskConfig.inputData.find(ipDt => ipDt.idDataset == input.idDataset);
+                    let idx = self.taskConfig.inputData.indexOf(tmpIpt);
+                    if (idx == -1) return;
+                    let props = self.curvesProperties.find(cp => cp.idWell == (tmpIpt.wellProps.idWell || tmpIpt.idWell));
+                    let w = self.wellsList.find(idWell => idWell == tmpIpt.wellProps.idWell);
+                    if (self.curvesProperties[self.curvesProperties.indexOf(props)].flag != 'create') {
+                        self.curvesProperties[self.curvesProperties.indexOf(props)].flag = 'delete';
+                    } else {
+                        self.curvesProperties.splice(self.curvesProperties.indexOf(props), 1);
+                    }
+                    self.taskConfig.inputData.splice(idx, 1);
+                    self.wellsList.splice(self.wellsList.indexOf(w), 1);
+                }
+                return;
+            }
+            $timeout(() => {
+                if (self.wellsList.indexOf(input.wellProps.idWell) == -1 && drop) {
+                    input.flag = 'create';
+                    input.drop = true;
+                    self.wellsList.push(input.wellProps.idWell);
+                    self.taskConfig.inputData.push(input);
+                } else if (self.wellsList.indexOf(input.wellProps.idWell) != -1) {
+                    let tmpIpt = self.taskConfig.inputData.find(ipDt => ipDt.idDataset == input.idDataset);
+                    let idx = self.taskConfig.inputData.indexOf(tmpIpt);
+                    if (tmpIpt) {
+                        input.flag = tmpIpt.flag;
+                    } else {
+                        input.flag = 'edit';
+                    }
+                    if (idx != -1) {
+                        // if (tmpIpt.drop) return;
+                        self.taskConfig.inputData[idx] = input;
+                    } else {
+                        self.taskConfig.inputData.push(input);
+                    }
+                } else {
+                    return;
+                }
+                console.log('trong getInputData');
+                if (callback) callback();
+            });
         }
 
-        function loadOverlays() {
-            let pointSet = self.crossplotModelProps.pointsets[0];
-            wiApiService.listOverlayLine(pointSet.idCurveX, pointSet.idCurveY, function(ret) {
-                if(ret.length){
-                    let blank = [{
-                        idOverlayLine: null,
-                        name: ''
-                    }]
-                    self.overlayLines = blank.concat(ret);
-                }else{
-                    self.overlayLines = ret;
-                    pointSet.idOverlayLine = null;
+        this.updateProperties = function () {
+            console.log('sau getInputData');
+            let datasets = self.taskConfig.inputData;
+            datasets.forEach(set => {
+                let xCurve = set.children[0].data.value.properties;
+                let yCurve = set.children[1].data.value.properties;
+                let curveProps = {
+                    idWell: set.wellProps.idWell,
+                    idDataset: set.idDataset,
+                    x: xCurve.idCurve,
+                    y: yCurve.idCurve,
+                    z: null,
+                    flag: set.flag
+                };
+
+                if (!xCurve.family) {
+                    wiApiService.infoCurve(curveProps.x, function (info) {
+                        if (!self.config.scale.left || self.config.scale.left > info.LineProperty.minScale)
+                            self.config.scale.left = info.LineProperty.minScale;
+                        if (!self.config.scale.right || self.config.scale.right < info.LineProperty.maxScale)
+                            self.config.scale.right = info.LineProperty.maxScale;
+                        if (!yCurve.family) {
+                            wiApiService.infoCurve(curveProps.y, function (info) {
+                                if (!self.config.scale.bottom || self.config.scale.bottom > info.LineProperty.minScale)
+                                    self.config.scale.bottom = info.LineProperty.minScale;
+                                if (!self.config.scale.top || self.config.scale.top < info.LineProperty.maxScale)
+                                    self.config.scale.top = info.LineProperty.maxScale;
+                                updateCurveProps(curveProps);
+                            });
+                        } else {
+                            if (!self.config.scale.bottom || self.config.scale.bottom > yCurve.family.family_spec[0].minScale)
+                                self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                            if (!self.config.scale.top || self.config.scale.top < yCurve.family.family_spec[0].maxScale)
+                                self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                            updateCurveProps(curveProps);
+                        }
+                    });
+                } else {
+                    if (!self.config.scale.left || self.config.scale.left > xCurve.family.family_spec[0].minScale)
+                        self.config.scale.left = xCurve.family.family_spec[0].minScale;
+                    if (!self.config.scale.right || self.config.scale.right < xCurve.family.family_spec[0].maxScale)
+                        self.config.scale.right = xCurve.family.family_spec[0].maxScale;
+                    if (!yCurve.family) {
+                        wiApiService.infoCurve(curveProps.y, function (info) {
+                            if (!self.config.scale.bottom || self.config.scale.bottom > info.LineProperty.minScale)
+                                self.config.scale.bottom = info.LineProperty.minScale;
+                            if (!self.config.scale.top || self.config.scale.top < info.LineProperty.maxScale)
+                                self.config.scale.top = info.LineProperty.maxScale;
+                            updateCurveProps(curveProps);
+                        });
+                    } else {
+                        if (!self.config.scale.bottom || self.config.scale.bottom > yCurve.family.family_spec[0].minScale)
+                            self.config.scale.bottom = yCurve.family.family_spec[0].minScale;
+                        if (!self.config.scale.top || self.config.scale.top < yCurve.family.family_spec[0].maxScale)
+                            self.config.scale.top = yCurve.family.family_spec[0].maxScale;
+                        updateCurveProps(curveProps);
+                    }
+                }
+
+                function updateCurveProps (curveProps) {
+                    if (curveProps.x && curveProps.y) {
+                        if (curveProps.flag == 'create') {
+                            if (self.curvesProperties.findIndex(cp => {
+                                return cp.idWell == curveProps.idWell;
+                            }) == -1) {
+                                curveProps.options = {
+                                    pointColor: 'blue',
+                                    pointSize: 5,
+                                    pointSymbol: 'Circle'
+                                };
+                                self.curvesProperties.push(curveProps);
+                            } else {
+                                let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
+                                curveProps.options = props.options;
+                                self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                            }
+                            // if (!set.drop) set.flag = 'edit';
+                        } else if (curveProps.flag == 'edit') {
+                            let props = self.curvesProperties.find(cp => cp.idWell == curveProps.idWell);
+                            curveProps.idPointSet = props.idPointSet;
+                            curveProps.options = props.options;
+                            self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
+                        }
+                        self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                        self.inputDataClone.forEach(d => { delete d.children; });
+                        self.curvesPropertiesClone = self.curvesProperties.filter(cp => {
+                            return cp.flag != 'delete';
+                        });
+                        self.selectedDatasetProps = null;
+                    }
+                    self.crossplotModelProps.curvesProperties = self.curvesProperties;
                 }
             });
         }
 
-        function getTopFromWell() {
-            return self.well.topDepth;
-        }
-        function getBottomFromWell() {
-            return self.well.bottomDepth;
-        }
-
-        function onSelectedCurveChange(symbol) {
-            let idCurve = self.crossplotModelProps.pointsets[0]['idCurve' + symbol];
-            if (idCurve) {
-                autoScaleCurve(symbol);
-                if (symbol != 'Z') loadOverlays();
-            }else{
-                let scaleKeys = getScaleKeys(symbol);
-                let pointSet = self.crossplotModelProps.pointsets[0];
-                // pointSet['idCurve' + symbol] = null;
-                pointSet[scaleKeys[0]] = null;
-                pointSet[scaleKeys[1]] = null;
-            }
-        }
-        // this.onOverLayLineChanged = function(){
-        //     if(!crossplotModelProps.pointsets[0].idOverlayLine){
-
-        //     }
-        // }
-
-        this.onselectedCurveXChange = function() {
-            onSelectedCurveChange('X');
-        }
-        this.onselectedCurveYChange = function() {
-            onSelectedCurveChange('Y');
-        }
-        this.onselectedCurveZChange = function() {
-            onSelectedCurveChange('Z');
-        }
-
-        this.onDepthTypeChanged = function(){
-            self.crossplotModelProps.pointsets[0].depthType = self.depthType;
-            console.log('gg', self.depthType, self.crossplotModelProps.pointsets[0])
-            switch (self.depthType) {
-                case "intervalDepth":
-                self.crossplotModelProps.pointsets[0].intervalDepthTop = self.crossplotModelProps.pointsets[0].intervalDepthTop ? self.crossplotModelProps.pointsets[0].intervalDepthTop: getTopFromWell();
-                self.crossplotModelProps.pointsets[0].intervalDepthBottom = self.crossplotModelProps.pointsets[0].intervalDepthBottom ? self.crossplotModelProps.pointsets[0].intervalDepthBottom : getBottomFromWell();
-                // self.crossplotModelProps.pointsets[0].idZoneSet = null;
-                break;
-                case "zonalDepth":
-                if(self.selectedZoneSet){
-                    self.crossplotModelProps.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+        function selectHandler(currentNode, noLoadData, rootNode, callback) {
+            function bareSelectHandler() {
+                if (currentNode.data) {
+                    $timeout(() => {
+                        currentNode.data.selected = true;
+                    });
+                    let selectedNodes = rootNode.__SELECTED_NODES;
+                    if (!Array.isArray(selectedNodes)) selectedNodes = [];
+                    if (!selectedNodes.includes(currentNode)) {
+                        selectedNodes.push(currentNode);
+                    }
+                    rootNode.__SELECTED_NODES = selectedNodes;
                 }
-                break;
+            }
+            if (currentNode.type == "well" && !noLoadData) {
+                if (Date.now() - (currentNode.ts || 0) > 20 * 1000) {
+                    wiApiService.getWell(currentNode.id, wellProps => {
+                        // console.log(wellProps);
+                        currentNode.ts = Date.now();
+                        if (wellProps.datasets && wellProps.datasets.length) {
+                            currentNode.children.length = 0;
+                            wellProps.datasets.forEach(dataset => {
+                                const datasetModel = utils.createDatasetModel(
+                                    dataset
+                                );
+                                currentNode.children.push(datasetModel);
+                                dataset.curves &&
+                                    dataset.curves.length &&
+                                    dataset.curves.forEach(curve => {
+                                        datasetModel.children.push(
+                                            utils.createCurveModel(curve)
+                                        );
+                                    });
+                            });
+                        }
+                        bareSelectHandler();
+                        callback && callback();
+                    });
+                } else {
+                    bareSelectHandler();
+                    callback && callback();
+                }
+            } else {
+                bareSelectHandler();
+                callback && callback();
+            }
+        }
+        function unselectAllNodes(rootNode) {
+            rootNode.forEach(item => {
+                utils.visit(item, node => {
+                    if (node.data) node.data.selected = false;
+                });
+            });
+            rootNode.__SELECTED_NODES = [];
+        }
+
+        const inputContextMenu = [
+            {
+                name: "Delete",
+                label: "Delete",
+                icon: "delete-16x16",
+                handler: function () {
+                    let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
+                    selectedNodes.forEach(node => {
+                        let idx = self.taskConfig.inputData.findIndex(ip => ip.$index == node.$index);
+                        if (idx > -1) {
+                            let tmpIpt = self.taskConfig.inputData[idx];
+                            let props = self.curvesProperties.find(cp => cp.idWell == tmpIpt.wellProps.idWell);
+                            let w = self.wellsList.find(idWell => idWell == tmpIpt.wellProps.idWell);
+                            self.curvesProperties[self.curvesProperties.indexOf(props)].flag = 'delete';
+                            self.taskConfig.inputData.splice(idx, 1);
+                            self.wellsList.splice(self.wellsList.indexOf(w), 1);
+                            self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                            self.inputDataClone.forEach(d => { delete d.children; });
+                            self.curvesPropertiesClone = self.curvesProperties.filter(cp => {
+                                return cp.flag != 'delete';
+                            });
+                            self.selectedDatasetProps = null;
+                        }
+                    })
+                    self.taskConfig.inputData.__SELECTED_NODES = [];
+                }
+            }
+        ];
+
+        this.taskShowContextMenu = function($event, $index, node){
+            if(node && node.type == 'dataset'){
+                wiComponentService
+                .getComponent("ContextMenu")
+                .open($event.clientX, $event.clientY, inputContextMenu);
             }
         }
 
-        this.onZoneSetChange = function () {
-            if(self.selectedZoneSet){
-                self.crossplotModelProps.pointsets[0].idZoneSet = self.selectedZoneSet.properties.idZoneSet;
+        this.prjClickFunction = function ($index, $event, node) {
+            clickFunction($index, $event, node, self.projectConfig);
+        };
+
+        this.taskClickFunction = function ($index, $event, node) {
+            if (node && node.type == 'dataset') {
+                let rootNode = self.taskConfig.inputData;
+                if (!Array.isArray(rootNode.__SELECTED_NODES)) rootNode.__SELECTED_NODES = [];
+                if (!$event.ctrlKey) unselectAllNodes(rootNode)
+                let selectedNodes = rootNode.__SELECTED_NODES;
+                if (!selectedNodes.includes(node)) selectedNodes.push(node);
+                rootNode.__SELECTED_NODES = selectedNodes;
+                node.data.selected = true;
+                node.$index = $index;
             }
         }
 
-        this.onActiveZoneChange = function(){
-            if (self.selectedZone) {
-                self.crossplotModelProps.pointsets[0].activeZone = self.selectedZone;
+        this.datasetPropsClickFunction = function ($index, $event, node) {
+            if (node && node.type == 'dataset') {
+                if (!$event.ctrlKey) unselectAllNodes(self.inputDataClone);
+                node.data.selected = true;
+                node.$index = $index;
+                self.selectedDatasetProps = self.curvesPropertiesClone[$index];
+                self.selectedDatasetProps.name = self.taskConfig.inputData[$index].data.label;
+                console.log(self.selectedDatasetProps);
             }
         }
 
-        this.onLineModeChange = function(){
-            self.crossplotModelProps.pointsets[0].lineMode = self.lineMode;
+        function clickFunction($index, $event, node, rootNode) {
+            // node.$index = $index;
+            if (!node) {
+                unselectAllNodes(rootNode);
+                return;
+            }
+            let selectedNodes = rootNode.__SELECTED_NODES;
+            if (!Array.isArray(selectedNodes)) selectedNodes = [];
+            if (selectedNodes.length) {
+                if (
+                    !$event.ctrlKey ||
+                    node.type != selectedNodes[0].type ||
+                    node.parent != selectedNodes[0].parent
+                ) {
+                    unselectAllNodes(rootNode);
+                }
+            }
+            selectHandler(node, false, rootNode, () => {
+                // draggableSetting();
+            });
         }
 
-        // modal button
-        this.colorSymbol = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.crossplotModelProps.pointsets[0].pointColor, function (colorStr) {
-                self.crossplotModelProps.pointsets[0].pointColor = colorStr;
+        function buildWellList(wells) {
+            async.each(wells, function (well, cb) {
+                let wellModel = utils.createWellModel(well);
+                self.projectConfig.push(wellModel);
+                wiApiService.getWell(well.idWell, wellProps => {
+                    if (wellProps.datasets && wellProps.datasets.length) {
+                        wellModel.children.length = 0;
+                        wellProps.datasets.forEach(dataset => {
+                            const datasetModel = utils.createDatasetModel(dataset);
+                            wellModel.children.push(datasetModel);
+                            dataset.curves && dataset.curves.length && dataset.curves.forEach(curve => {
+                                datasetModel.children.push(
+                                    utils.createCurveModel(curve)
+                                );
+                            });
+                            if (self.taskConfig.inputs[0].label && self.taskConfig.inputs[1].label) {
+                                self.getInputData(dataset.idDataset);
+                                $timeout(() => {
+                                    cb();
+                                })
+                            }
+                        });
+                    }
+                });
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                self.updateProperties();
+            });
+        }
+
+        function buildCurveListFromServer(cb, done) {
+            if (!self.idProject) {
+                toastr.error("No project exists");
+                return;
+            }
+            wiApiService.listWells({
+                idProject: self.idProject,
+                limit: 100000
+            }, function (wells) {
+                if (!Array.isArray(wells)) {
+                    toastr.error('Error in listing wells');
+                    console.error(wells);
+                    return;
+                }
+                async.each(wells, function (well, __end) {
+                    wiApiService.getWell(well.idWell, function (wellProps) {
+                        for (let dataset of wellProps.datasets) {
+                            for (let curve of dataset.curves) {
+                                cb(curve);
+                            }
+                        }
+                        __end();
+                    })
+                }, function (err) {
+                    done();
+                });
             });
         };
         this.drawIcon = utils.drawIcon;
@@ -257,24 +795,130 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             return item.parent;
         }
 
-        this.checkLogStatus = function () {
-            if (self.crossplotModelProps.pointsets[0].logX) {
-                self.checkLogValueX(self.crossplotModelProps.pointsets[0].scaleLeft, 'scaleLeft');
-                self.checkLogValueX(self.crossplotModelProps.pointsets[0].scaleRight, 'scaleRight');
+        function getFamilyList(callback) {
+            if (!self.filterText) {
+                if (!__familyList) {
+                    let temp = utils.getListFamily();
+                    if (temp) {
+                        __familyList = temp.map(function (family) {
+                            return {
+                                id: family.idFamily,
+                                data: {
+                                    label: family.name,
+                                    icon: "user-define-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: family
+                            };
+                        });
+                        callback(__familyList);
+                    }
+                    else {
+                        wiApiService.listFamily(function (lstFamily) {
+                            __familyList = lstFamily.map(function (family) {
+                                return {
+                                    id: family.idFamily,
+                                    data: {
+                                        label: family.name,
+                                        icon: "user-define-16x16",
+                                        selected: false
+                                    },
+                                    children: [],
+                                    properties: family
+                                };
+                            });
+                            callback(__familyList);
+                        });
+                    }
+                }
+                else callback(__familyList);
+            } else {
+                if (!__familyList) {
+                    let temp = utils.getListFamily();
+                    if (temp) {
+                        __familyList = temp.map(function (family) {
+                            return {
+                                id: family.idFamily,
+                                data: {
+                                    label: family.name,
+                                    icon: "user-define-16x16",
+                                    selected: false
+                                },
+                                children: [],
+                                properties: family
+                            };
+                        });
+                        callback(__familyList.filter(item =>
+                            item.data.label
+                                .toLowerCase()
+                                .includes(self.filterText.toLowerCase())
+                        ));
+                    }
+                    else {
+                        wiApiService.listFamily(function (lstFamily) {
+                            __familyList = lstFamily.map(function (family) {
+                                return {
+                                    id: family.idFamily,
+                                    data: {
+                                        label: family.name,
+                                        icon: "user-define-16x16",
+                                        selected: false
+                                    },
+                                    children: [],
+                                    properties: family
+                                };
+                            });
+                            callback(__familyList.filter(item =>
+                                item.data.label
+                                    .toLowerCase()
+                                    .includes(self.filterText.toLowerCase())
+                            ));
+                        });
+                    }
+                }
+                else {
+                    callback(__familyList.filter(item =>
+                        item.data.label
+                            .toLowerCase()
+                            .includes(self.filterText.toLowerCase())
+                    ));
+                }
             }
-            if (self.crossplotModelProps.pointsets[0].logY) {
-                self.checkLogValueY(self.crossplotModelProps.pointsets[0].scaleBottom, 'scaleBottom');
-                self.checkLogValueY(self.crossplotModelProps.pointsets[0].scaleTop, 'scaleTop');
+        }
+
+        // For configurations
+        this.pointSymbolList = ["Circle", "Cross", "Diamond", "Plus", "Square", "Star", "Triangle"];
+        this.drawIcon = utils.drawIcon;
+        this.colorSymbol = function (props) {
+            DialogUtils.colorPickerDialog(ModalService, props.options.pointColor, function (colorStr) {
+                props.options.pointColor = colorStr;
+                if (!props.flag) props.flag = 'edit';
+            });
+        };
+
+        this.onChange = function (props) {
+            if (!props.flag) props.flag = 'edit';
+        }
+
+        this.checkLogStatus = function () {
+            if (self.config.logX) {
+                self.checkLogValueX(self.config.scale.left, 'scaleLeft');
+                self.checkLogValueX(self.config.scale.right, 'scaleRight');
+            }
+            if (self.config.logY) {
+                self.checkLogValueY(self.config.scale.bottom, 'scaleBottom');
+                self.checkLogValueY(self.config.scale.top, 'scaleTop');
             }
         }
         this.checkLogValueX = function (value, label) {
-            if (self.crossplotModelProps.pointsets[0].logX) {
+            if (self.config.logX) {
                 switch (label) {
                     case 'scaleLeft':
-                        self.crossplotModelProps.pointsets[0].scaleLeft = value < 0 ? 0.01 : value;
+                        self.config.scale.left = value < 0 ? 0.01 : value;
                         break;
                     case 'scaleRight':
-                        self.crossplotModelProps.pointsets[0].scaleRight = value < 0 ? 0.01 : value;
+                        self.config.scale.right = value < 0 ? 0.01 : value;
                         break;
                 }
                 if(Math.ceil(value) <= 0) {
@@ -286,13 +930,13 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             }
         }
         this.checkLogValueY = function (value, label) {
-            if (self.crossplotModelProps.pointsets[0].logY) {
+            if (self.config.logY) {
                 switch (label) {
                     case 'scaleBottom':
-                        self.crossplotModelProps.pointsets[0].scaleBottom = value < 0 ? 0.01 : value;
+                        self.config.scale.bottom = value < 0 ? 0.01 : value;
                         break;
                     case 'scaleTop':
-                        self.crossplotModelProps.pointsets[0].scaleTop = value < 0 ? 0.01 : value;
+                        self.config.scale.top = value < 0 ? 0.01 : value;
                         break;
                 }
                 if(Math.ceil(value) <= 0) {
@@ -304,226 +948,169 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
             }
         }
 
-        // function buildPayload(crossplotProps) {
-        //     let props = crossplotProps;
-        //     delete props.pointsets[0].curveX;
-        //     delete props.pointsets[0].curveY;
-        //     delete props.pointsets[0].curveZ;
-        //     return props
-        // }
-
-        // AXIS COLORS - START
-        $scope.isDefineDepthColors = self.crossplotModelProps.isDefineDepthColors;
-        $scope.axisColors = self.crossplotModelProps.axisColors;
-
-        if (!$scope.axisColors || $scope.axisColors == 'null')
-            $scope.axisColors = [];
-        else if (typeof $scope.axisColors == 'string')
-            $scope.axisColors = JSON.parse($scope.axisColors);
-
-        $scope.selectedAxisColorRow = $scope.axisColors.length ? 0 : null;
-
-        $scope.setClickedAxisColorRow = function (indexRow) {
-            $scope.selectedAxisColorRow = indexRow;
-        };
-
-        $scope.removeAxisColorRow = function (index) {
-            // if (!$scope.axisColors[$scope.selectedAxisColorRow]) return;
-            $scope.axisColors.splice(index, 1);
-            if ($scope.axisColors.length) {
-                $scope.setClickedAxisColorRow(index - 1 ||0);
-            }
-        };
-
-        $scope.selectAxisColor = function(index) {
-            let item = $scope.axisColors[index];
-            DialogUtils.colorPickerDialog(ModalService, item.color || 'Black', function (colorStr) {
-                item.color = colorStr;
-            });
-        }
-
-        $scope.addAxisColorRow = function () {
-            $scope.axisColors.push({
-                color: utils.colorGenerator()
-            });
-            $scope.setClickedAxisColorRow($scope.axisColors.length - 1);
-        };
-
-        $scope.toggleDefineDepthColors = function() {
-            $scope.isDefineDepthColors = !$scope.isDefineDepthColors;
-        }
-        // AXIS COLORS - END
-
-        function isOverlapAxisColors(axisColors) {
-            axisColors = axisColors.map(function(a) {
-                return {
-                    minValue: parseFloat(a.minValue),
-                    maxValue: parseFloat(a.maxValue)
-                }
-            }).sort(function(a, b) {
-                return a.minValue - b.minValue;
-            });
-            for (let i = 1; i < axisColors.length; i ++) {
-                if (axisColors[i-1].maxValue >  axisColors[i].minValue)
-                    return true;
-            }
-            return false;
-        }
-
         function updateCrossplot() {
-            self.crossplotModelProps.isDefineDepthColors = $scope.isDefineDepthColors;
-            self.crossplotModelProps.axisColors = JSON.stringify($scope.axisColors);
-            if (self.crossplotModelProps.pointsets[0].logX) {
-                if (self.crossplotModelProps.pointsets[0].scaleLeft == 0
-                    || self.crossplotModelProps.pointsets[0].scaleRight == 0) {
-                        toastr.error("Scale can't be 0 in Logarithmic");
-                        return;
-                    }
-            }
-            if (self.crossplotModelProps.pointsets[0].logY) {
-                if (self.crossplotModelProps.pointsets[0].scaleBottom == 0
-                    || self.crossplotModelProps.pointsets[0].scaleTop == 0) {
-                        toastr.error("Scale can't be 0 in Logarithmic");
-                        return;
-                    }
-            }
-            if ($scope.isDefineDepthColors) {
-                for (let c of $scope.axisColors) {
-                    if (c.minValue == null || c.maxValue == null || c.color == null) {
-                        utils.error("Axis color define value can not be blank");
-                        return;
-                    }
-                    if (parseFloat(c.minValue) > parseFloat(c.maxValue)) {
-                        utils.error("Axis color min value can not be greater than max value");
-                        return;
-                    }
-                }
-                if (isOverlapAxisColors($scope.axisColors)) {
-                    utils.error("Axis color define value is overlap");
+            if (self.config.logX) {
+                if (self.config.scale.left == 0
+                    || self.config.scale.right == 0) {
+                    self.config.logX = self.config.logY = false;
+                    toastr.error("Scale can't be 0 in Logarithmic");
                     return;
                 }
             }
-            // if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
-            //     let overlayProps = self.overlayLines.filter(function(o) {
-            //         return o.idOverlayLine == self.crossplotModelProps.pointsets[0].idOverlayLine;
-            //     })[0];
-            //     self.crossplotModelProps.pointsets[0].isOverlayLineSwap = overlayProps.isSwap;
-            // }
-            _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
-            self.updating = true;
-            self.updating = false;
-            if (callback) callback(self.crossplotModelProps);
-            /*
-            let overlayLine;
+            if (self.config.logY) {
+                if (self.config.scale.bottom == 0
+                    || self.config.scale.top == 0) {
+                    self.config.logY = self.config.logX = false;
+                    toastr.error("Scale can't be 0 in Logarithmic");
+                    return;
+                }
+            }
 
-            let pointSet = self.crossplotModelProps.pointsets[0];
+            if (self.inputChange && !self.tabChange) self.onTabChange(1);
 
-            let xCurveData, yCurveData, zCurveData;
-            async.parallel([
-                function(cb) {
-                    if (pointSet.idCurveX) {
-                        wiApiService.dataCurve(pointSet.idCurveX, function (curveData) {
-                            xCurveData = curveData;
-                            cb();
-                        });
-                    }
-                    else async.setImmediate(cb);
-                },
-                function(cb) {
-                    if (pointSet.idCurveY) {
-                        wiApiService.dataCurve(pointSet.idCurveY, function (curveData) {
-                            yCurveData = curveData;
-                            cb();
-                        });
-                    }
-                    else async.setImmediate(cb);
-                },
-                function(cb) {
-                    if (pointSet.idCurveZ) {
-                        wiApiService.dataCurve(pointSet.idCurveZ, function (curveData) {
-                            zCurveData = curveData;
-                            cb();
-                        })
-                    }
-                    else async.setImmediate(cb);
-                },
-                function(cb) {
-                    if (self.crossplotModelProps.pointsets[0].idOverlayLine) {
-                        wiApiService.getOverlayLine(self.crossplotModelProps.pointsets[0].idOverlayLine, function(ret) {
-                            overlayLine = (ret || {}).data;
-                            cb();
-                        });
-                    }
-                    else {
-                        async.setImmediate(cb);
-                    }
-                }
-            ], function(result, err) {
-                let crossplotProps = angular.copy(self.crossplotModelProps);
-                crossplotProps.pointSet = crossplotProps.pointsets[0];
-                if (xCurveData) {
-                    let curveXProps = utils.getModel("curve", crossplotProps.pointSet.idCurveX) || { idCurve: crossplotProps.pointSet.idCurveX };
-                    crossplotProps.pointSet.curveX = graph.buildCurve(curveXProps, xCurveData, self.well.properties);
-                }
-                if (yCurveData) {
-                    let curveYProps = utils.getModel("curve", crossplotProps.pointSet.idCurveY) || { idCurve: crossplotProps.pointSet.idCurveY };
-                    crossplotProps.pointSet.curveY = graph.buildCurve(curveYProps, yCurveData, self.well.properties);
-                }
-                if (zCurveData) {
-                    let curveZProps = utils.getModel("curve", crossplotProps.pointSet.idCurveZ) || { idCurve: crossplotProps.pointSet.idCurveZ };
-                    crossplotProps.pointSet.curveZ = graph.buildCurve(curveZProps, zCurveData, self.well.properties);
-                }
-                else {
-                    delete crossplotProps.pointSet.curveZ;
-                }
+            if (self.curvesProperties && self.curvesProperties.length) {
+                async.eachSeries(self.curvesProperties, function (curveProps, cb) {
+                    switch (curveProps.flag) {
+                        case 'create':
+                            wiApiService.createPointSet({
+                                idCrossPlot: wiD3CrossplotCtrl.idCrossplot,
+                                idCurveX: curveProps.x,
+                                idCurveY: curveProps.y,
+                                idCurveZ: curveProps.z,
+                                idWell: curveProps.idWell,
+                                majorX: self.config.majorX,
+                                majorY: self.config.majorY,
+                                minorX: self.config.minorX,
+                                minorY: self.config.minorY,
+                                logX: self.config.logX,
+                                logY: self.config.logY,
+                                scaleLeft: self.config.scale.left,
+                                scaleRight: self.config.scale.right,
+                                scaleBottom: self.config.scale.bottom,
+                                scaleTop: self.config.scale.top,
+                                pointColor: curveProps.options.pointColor,
+                                pointSize: curveProps.options.pointSize,
+                                pointSymbol: curveProps.options.pointSymbol
+                            }, function (pointSet, err) {
+                                if (err) {
+                                    cb('create pointset failed');
+                                }
+                                else {
+                                    curveProps.idPointSet = pointSet.idPointSet;
+                                    self.pointsets.push(pointSet);
+                                    cb();
+                                }
+                            });
+                            break;
 
-                if (overlayLine) {
-                    crossplotProps.pointSet.overlayLine = overlayLine;
-                }
-                self.updating = false;
-                if (callback) callback(crossplotProps);
-            });
-            */
+                        case 'edit':
+                            wiApiService.editPointSet({
+                                idCrossPlot: wiD3CrossplotCtrl.idCrossplot,
+                                idPointSet: curveProps.idPointSet,
+                                idCurveX: curveProps.x,
+                                idCurveY: curveProps.y,
+                                idCurveZ: curveProps.z,
+                                idWell: curveProps.idWell,
+                                majorX: self.config.majorX,
+                                majorY: self.config.majorY,
+                                minorX: self.config.minorX,
+                                minorY: self.config.minorY,
+                                logX: self.config.logX,
+                                logY: self.config.logY,
+                                scaleLeft: self.config.scale.left,
+                                scaleRight: self.config.scale.right,
+                                scaleBottom: self.config.scale.bottom,
+                                scaleTop: self.config.scale.top,
+                                pointColor: curveProps.options.pointColor,
+                                pointSize: curveProps.options.pointSize,
+                                pointSymbol: curveProps.options.pointSymbol
+                            }, function (pointSet, err) {
+                                if (err) {
+                                    cb('edit pointset failed');
+                                }
+                                else {
+                                    let element = self.pointsets.find(pS => pS.idPointSet == pointSet.idPointSet);
+                                    self.pointsets[self.pointsets.indexOf(element)] = pointSet;
+                                    cb();
+                                }
+                            });
+                            break;
 
-            /*
-            async.parallel([
-                function(cb) {
-                    payload = {
-                        idCrossPlot: self.crossplotModelProps.idCrossPlot,
-                        isDefineDepthColors: $scope.isDefineDepthColors,
-                        axisColors: JSON.stringify($scope.axisColors),
-                        idWell: self.well.properties.idWell
-                    };
-                    wiApiService.editCrossplot(payload, function(response){
-                        console.log('updateCrossplot', payload, response);
-                        cb();
+                        case 'delete':
+                            wiApiService.removePointSet(curveProps.idPointSet, function (pointSet, err) {
+                                if (err) {
+                                    cb('delete pointset failed');
+                                } else {
+                                    let element = self.pointsets.find(pS => pS.idPointSet == pointSet.idPointSet);
+                                    let idx = self.pointsets.indexOf(element);
+                                    self.pointsets.splice(idx, 1);
+                                    cb();
+                                }
+                            });
+                            break;
+
+                        default:
+                            cb();
+                            break;
+                    }
+                }, function (err) {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    for (let i = self.curvesProperties.length - 1; i >= 0; i--) {
+                        switch (self.curvesProperties[i].flag) {
+                            case 'delete':
+                                self.curvesProperties.splice(i, 1);
+                                break;
+                            case 'create':
+                            case 'edit':
+                                delete self.curvesProperties[i].flag;
+                                break;
+                        }
+                    }
+                    let intervalDepthTopArr = new Array();
+                    let intervalDepthBottomArr = new Array();
+                    self.pointsets.forEach(ps => {
+                        intervalDepthTopArr.push(ps.intervalDepthTop);
+                        intervalDepthBottomArr.push(ps.intervalDepthBottom);
                     });
-                },
-                function(cb) {
-                    wiApiService.editPointSet(self.crossplotModelProps.pointsets[0], function(response) { cb();});
-                }
-            ], function(err, result) {
-                if (err) {
-                    console.error(err);
-                    utils.error(err);
-                }
-                else {
-                }
-            });
-            */
+                    self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
+                    self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
+                    self.crossplotModelProps.pointsets = self.pointsets;
+                    self.crossplotModelProps.curvesProperties = self.curvesProperties;
+                    self.crossplotModelProps.config = self.config;
+                    _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
+                    if (callback) callback(self.crossplotModelProps);
+                });
+            } else {
+                let intervalDepthTopArr = new Array();
+                let intervalDepthBottomArr = new Array();
+                self.pointsets.forEach(ps => {
+                    intervalDepthTopArr.push(ps.intervalDepthTop);
+                    intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                });
+                self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
+                self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
+                self.crossplotModelProps.pointsets = self.pointsets = [];
+                self.crossplotModelProps.curvesProperties = self.curvesProperties = [];
+                self.crossplotModelProps.config = self.config;
+                _crossplotModel.properties = self.crossplotModelProps; // save change back to the data tree
+                if (callback) callback(self.crossplotModelProps);
+            }
         }
 
         this.onOkButtonClicked = function () {
             updateCrossplot();
             close();
-        };
+        }
         this.onApplyButtonClicked = function () {
             updateCrossplot();
-        };
+        }
         this.onCancelButtonClicked = function () {
             if (cancelCallback) cancelCallback();
             close(null);
-        };
+        }
     };
 
     ModalService.showModal({

@@ -18,9 +18,14 @@ const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 // route: GET, CREATE, UPDATE, DELETE
 const USER_INFO = '/user/info';
 
-const EXPORT_WELL = '/export/well';
+const EXPORT_LAS2 = '/export/las2';
 
 const UPLOAD_FILES = '/upload/lases';
+
+const IMPORT_CURVE_FROM_PROJECT = '/import/project/curve';
+const IMPORT_DATASET_FROM_PROJECT = '/import/project/dataset';
+const IMPORT_WELL_FROM_PROJECT = '/import/project/well';
+
 
 // const LIST_FILES = '/user/files';w
 
@@ -32,14 +37,19 @@ const GET_INVENTORY = '/user/fullinfo';
 
 const LIST_WELLS = '/user/wells';
 const WELL_INFO = '/user/well/info';
+const WELL_FULL_INFO = '/user/well/full-info';
+const WELL_INFO_BY_NAME = '/user/well/info-by-name';
 const EDIT_WELL = '/user/well/edit';
 const EDIT_WELL_HEADER = '/user/well/editHeader';
 const DELETE_WELL = '/user/well/delete';
+const CREATE_WELL = '/user/well/new';
 
 const LIST_DATASETS = '/user/well/datasets';
 const DATASET_INFO = '/user/well/dataset/info';
+const DATASET_INFO_BY_NAME = '/user/well/dataset/info-by-name';
 const EDIT_DATASET = '/user/well/dataset/edit';
 const DELETE_DATASET = '/user/well/dataset/delete';
+const CREATE_DATASET = '/user/well/dataset/new';
 
 const LIST_CURVES = '/user/well/dataset/curves';
 const CURVE_INFO = '/user/well/dataset/curve/info';
@@ -295,6 +305,9 @@ Service.prototype.getInventory = function (callback) {
 }
 
 // well apis
+Service.prototype.createWell = function (well, callback) {
+    this.post(CREATE_WELL, well, callback);
+}
 Service.prototype.listWells = function (option, callback) {
     var payload = option || {};
     this.post(LIST_WELLS, payload, callback);
@@ -302,6 +315,14 @@ Service.prototype.listWells = function (option, callback) {
 
 Service.prototype.wellInfo = function (idWell, callback) {
     this.post(WELL_INFO, {idWell: idWell}, callback);
+}
+
+Service.prototype.wellInfoByName = function (wellName, callback) {
+    this.post(WELL_INFO_BY_NAME, {name: wellName}, callback);
+}
+
+Service.prototype.wellFullInfo = function (wellName, callback) {
+    this.post(WELL_FULL_INFO, {name: wellName}, callback);
 }
 
 Service.prototype.editWell = function (request, callback) {
@@ -325,6 +346,10 @@ Service.prototype.datasetInfo = function (idDataset, callback) {
     this.post(DATASET_INFO, {idDataset: idDataset}, callback);
 }
 
+Service.prototype.datasetInfoByName = function (wellName, datasetName, callback) {
+    this.post(DATASET_INFO_BY_NAME, {wellName: wellName, datasetName: datasetName}, callback);
+}
+
 Service.prototype.editDataset = function (dataset, callback) {
     this.post(EDIT_DATASET, dataset, callback);
 }
@@ -333,6 +358,9 @@ Service.prototype.deleteDataset = function (idDataset, callback) {
     this.post(DELETE_DATASET, {idDataset: idDataset}, callback);
 }
 
+Service.prototype.createDataset = function (dataset, callback) {
+    this.post(CREATE_DATASET, dataset, callback);
+} 
 // curve apis
 Service.prototype.listCurves = function (idDataset, callback) {
     this.post(LIST_CURVES, {idDataset: idDataset}, callback);
@@ -356,17 +384,28 @@ Service.prototype.deleteCurve = function (idCurve, callback) {
 
 Service.prototype.exportAllItems = function(idObj, callback){
     console.log('idObj', idObj);
-    this.post(EXPORT_WELL, {idObjs: idObj}, callback);
+    this.post(EXPORT_LAS2, {idObjs: idObj}, callback);
 }
 
 Service.prototype.getFileUrl = function(url){
-    return this.baseUrl + "/" + url;
+    return this.baseUrl + url;
+}
+
+Service.prototype.importCurveFromProject = function(curves, callback){
+    return this.post(IMPORT_CURVE_FROM_PROJECT, {curves: curves}, callback);
+}
+
+Service.prototype.importDatasetFromProject = function(datasets,  callback){
+    return this.post(IMPORT_DATASET_FROM_PROJECT, {datasets: datasets}, callback);
+}
+
+Service.prototype.importWellFromProject = function(well, callback) {
+    return this.post(IMPORT_WELL_FROM_PROJECT, well, callback);
 }
 
 Service.prototype.getCaptcha = function () {
     return AUTHENTICATION_SERVICE + "/captcha.png";
 };
-
 
 app.factory(wiServiceName, function ($http, wiComponentService, Upload) {
     return new Service(BASE_URL, $http, wiComponentService, Upload);

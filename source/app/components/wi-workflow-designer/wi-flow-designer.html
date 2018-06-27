@@ -1,17 +1,11 @@
 <wi-toolbar name="CrossPlotToolbar">
-  <wi-button icon="save-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.saveFlow" tooltip="Save Flow"></wi-button>
-  <wi-button icon="delete-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.createNewDiagram" tooltip="Clear Diagram"></wi-button>
+  <wi-button icon="save-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.saveFlow" handler-args="true" tooltip="Save Flow"></wi-button>
+  <wi-button icon="delete-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.clearDiagram" tooltip="Clear Diagram"></wi-button>
   <wi-button icon="arrow-down-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.downloadDiagram" tooltip="Download Diagram"></wi-button>
   <wi-button icon="play-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.execute" tooltip="Run Flow"></wi-button>
 </wi-toolbar>
 <div class="title" ng-bind="wiFlowDesigner.flow.name || 'New Flow'"></div>
 <div class="content" id="flow{{wiFlowDesigner.id}}">
-  <div class="message intro">
-    <div class="note">
-      Drop BPMN diagram file or
-      <a id="create-diagram" href="javascript:;" ng-click="wiFlowDesigner.createNewDiagram()">create a new diagram</a>
-    </div>
-  </div>
   <div class="message error">
     <div class="note">
       <p>Can not display the diagram.</p>

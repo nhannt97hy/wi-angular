@@ -1,10 +1,11 @@
 const name = "wiTask";
 const moduleName = "wi-task";
-let petrophysics = require('./petrophysics');
+// let petrophysics = require('./petrophysics');
 
-function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
+function Controller(wiComponentService, wiApiService, $timeout, ModalService, wiPetrophysics, $scope) {
     const self = this;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
     //   const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let __selectionTop = 0;
     const __selectionLength = 50;
@@ -17,11 +18,13 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
     const CURVE_SELECTION = "1";
     const FAMILY_SELECTION = "2";
     const FAMILY_GROUP_SELECTION = "3";
+    const TASK_SELECTION = "4";
     self.CURVE_SELECTION = CURVE_SELECTION;
     self.FAMILY_SELECTION = FAMILY_SELECTION;
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
+    self.TASK_SELECTION = TASK_SELECTION;
 
-    this.$onInit = function() {
+    this.$onInit = function () {
         wiComponentService.putComponent("wiTask" + self.id, self);
         self.taskConfig = self.taskConfig || defaultTaskConfig;
         // CONFIGURE INPUT TAB
@@ -37,6 +40,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         self.SelectionTreeName = name + 'SelectionTree';
         self.projectTreeName = name + 'projectTree';
         self.zonationTreeName = name + 'zonationTree';
+        self.taskTreeName = name + 'taskTree';
         self.taskDataTreeName = name + 'taskDataTree';
 
         self.idxTab = 0;
@@ -212,6 +216,19 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         self.filterText = "";
         self.selectionType = selType || self.selectionType;
         switch (self.selectionType) {
+            case TASK_SELECTION:
+                if (!self.wiFlowDesigner) break;
+                self.selectionList = self.wiFlowDesigner.getPreviousTasks(self.id).map(e => ({
+                    id: e.businessObject.get('idTask'),
+                    data: {
+                        label: e.businessObject.get('name'),
+                        icon: "workflow-16x16",
+                        selected: false
+                    },
+                    children: [],
+                    properties: {}
+                }));
+                break;
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
                 if (!temp) temp = list;
@@ -437,7 +454,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             let hash = new Object();
             self.zone_set_list.forEach(zone => hash[zone.name] = 1);
             let zoneChild = function(zonesets){
-                let zoneArr = zonesets.reduce((total, curVal) => total.concat(curVal.zones.map(z => z.name)), []);
+                let zoneArr = zonesets.reduce((total, curVal) => total.concat(curVal.zones.map(z => z.zone_template.name)), []);
                 return Array.from(new Set(zoneArr)).map((item, idx) => {
                     return {
                         id: idx,
@@ -514,14 +531,9 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         $timeout(() => {
             domEle.draggable({
                 helper: "clone",
-                start: function(event, ui) {
-                    __dragging = true;
-                },
-                stop: function(event, ui) {
-                    __dragging = false;
-                },
+                scope: 'wi-task',
                 containment: "document",
-                appendTo: document.querySelector("wi-task #dragElement")
+                appendTo: `wi-task#${self.id} #dragElement`
             });
         }, 500);
     }
@@ -557,7 +569,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                             matchCriterion.value == cModel.properties.idFamily
                         );
                     }
-                    return matchCriterion.value == cModel.idFamily;
+                    return matchCriterion.value == cModel.idFamily || matchCriterion.name == cModel.family;
                 });
             case CURVE_SELECTION:
                 return curves.filter(cModel => {
@@ -570,9 +582,10 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         return [];
     }
     this.droppableSetting = function() {
-        $("wi-task .wi-droppable").droppable({
+        $(`wi-task#${self.id} .wi-droppable`).droppable({
+            scope: 'wi-task',
             drop(event, ui) {
-                if (!__dragging) return;
+                if (!ui.draggable) return;
                 // check modal draggable
                 if (ui.draggable[0].className.includes("modal-content")) return;
                 const type = ($(ui.draggable[0]).attr("type"));
@@ -604,18 +617,17 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                         });
                         if(zoneset && zoneset.zones.length){
                             let ret = zoneset.zones.reduce((total, zone) => {
-                                if(self.taskConfig.zonation.children.findIndex(c => c == zone.name) >= 0){
+                                if(self.taskConfig.zonation.children.findIndex(c => c == zone.zone_template.name) >= 0){
                                     total.push({
                                             data: {
                                                 childExpanded: true,
                                                 icon: 'zone-table-16x16',
-                                                label: `${zone.name}: ${zone.startDepth} - ${zone.endDepth}` ,
+                                                label: `${zone.zone_template.name}: ${zone.startDepth} - ${zone.endDepth}` ,
                                                 selected: false
                                             },
                                             type: 'zone',
                                             children: angular.copy(paramItems),
-                                            startDepth: zone.startDepth,
-                                            endDepth: zone.endDepth
+                                            properties: zone
                                         })
                                 }
                                 return total;
@@ -638,6 +650,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                 }
                 switch(type){
                     case 'dataset':
+                    (async () => {
                         const idDataset = parseInt($(ui.draggable[0]).attr("data"));
                         for (const node of self.projectConfig) {
                             utils.visit(
@@ -679,13 +692,30 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                         );
                         if (existDataset) return;
 
+                        const prevTaskCurves = [];
+                        if (self.wiFlowDesigner) {
+                            const prevTasks = self.wiFlowDesigner.getPreviousTasks(self.id);
+                            await new Promise((resolve, reject) => {
+                                async.each(prevTasks, (taskElement, next) => {
+                                    const idTask = taskElement.businessObject.get('idTask');
+                                    wiApiService.getTask(idTask, (task) => {
+                                        const taskConfig = task.content;
+                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset)) prevTaskCurves.push(...taskConfig.outputs);
+                                        next();
+                                    });
+                                }, (err, result) => {
+                                    if (err) return reject(err);
+                                    resolve();
+                                })
+                            })
+                        }
                         let inputItems = self.taskConfig.inputs.map(ipt => {
                             let tempItem = {
                                 data: {
                                     childExpanded: false,
                                     icon: "curve-16x16",
                                     label: ipt.name,
-                                    choices: matchCurves(datasetModel.children, ipt),
+                                    choices: matchCurves(datasetModel.children.concat(prevTaskCurves), ipt),
                                     selected: false
                                 },
                                 type: "inputchoice"
@@ -736,6 +766,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                             self.taskConfig.inputData.push(input);
                             // self.typeFilter = 'inputchoice';
                         })
+                    })();
                         break;
 
                     case 'zoneset':
@@ -907,12 +938,24 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         });
     }
 
+    this.saveTask = function () {
+        if (self.new) return;
+        wiApiService.editTask({ idTask: self.id, name: self.name, content: self.taskConfig }, (resTask) => {
+            const tabComponent = $scope.$parent.tabComponent;
+            layoutManager.updateTabTitle(tabComponent, resTask.name);
+            wiComponentService.emit('task.changed', resTask);
+            toastr.success(`Task ${self.name} saved`, null, { timeOut: 1000, progressBar: false });
+        });
+    }
+
     this.addToFlowClick = function(){
         const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        const newFlowCtrls = wiComponentService.filterComponents((c, cName) => cName.startsWith('flow') && c.new && c.flow.content);
-        const newFlows = newFlowCtrls.map(ctrl => ctrl.flow);
         DialogUtils.openFlowDialog(ModalService, function (flow) {
-            const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+            if (flow.task && flow.tasks.find(t => t.name === self.name)) {
+                toastr.error('Task name existed in this flow');
+                self.addToFlowClick();
+                return;
+            }
             layoutManager.putTabRight({
                 id: 'flow' + flow.idFlow,
                 title: flow.name,
@@ -928,15 +971,11 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             });
             setTimeout(() => {
                 const flowCtrl = wiComponentService.getComponent('flow' + flow.idFlow);
-                flowCtrl.createTask(self.taskConfig);
+                flowCtrl.createTask(self);
             }, 100);
-            // function onFlowReady(idFlow) {
-            //     if (idFlow != flow.idFlow) return;
-            // }
-            // if (newFlows.includes(flow)) onFlowReady(flow.idFlow);
-            // else wiComponentService.once('flow.ready', onFlowReady);
-        }, newFlows);
+        });
     }
+
     function updateChoices(newCurveProps) {
         self.projectConfig.forEach(well => {
             well.children.forEach(dataset => {
@@ -948,6 +987,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         })
     }
 
+/* 
     function saveCurve(curveInfo, callback) {
         getFamilyList(familyList => {
             let family = familyList.find(f => f.data.label == curveInfo.family);
@@ -1160,7 +1200,12 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             }
         })
     }
+ */
+    this.runTask = function () {
+        wiPetrophysics.execute(self, utils.refreshProjectState);
+    }
 
+    /*************************** THANG: hard code for interative track *****************************/
     this.logTrackProps = {
         width: 2.5,
         title: 'Track',
@@ -1171,7 +1216,8 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         topJustification: 'center',
         bottomJustification: 'center',
         majorTicks: 1,
-        minorTicks: 5
+        minorTicks: 5,
+        showZoneSet: true
     }
     this.currentInput = {
         zoneset: null,
@@ -1201,13 +1247,20 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
         function updateFunction(config) {
             if(config.curves) {
                 self.currentInput.well = utils.findWellByCurve(config.curves[0].idCurve);
-                async.eachSeries(config.curves, function(curveProps) {
+                self.logTrackProps.lines = config.curves;
+                /*
+                async.eachSeries(config.curves, function(curveProps, cb) {
                     wiApiService.dataCurve(curveProps.idCurve, function(dataCurve) {
                         let controller = self.logTrackProps.controller;
-                        controller.addCurveToTrack(controller.viTrack, dataCurve, curveProps);
+                        controller.addCurveToTrack(dataCurve, curveProps);
+                        cb();
                     })
+                }, function(err) {
+                    self.currentInput.zoneset = self.taskConfig.inputData[0].children.find(c => c.type == 'zoneset');
                 })
+                */
             }
+            self.currentInput.zoneset = self.taskConfig.inputData[0].children.find(c => c.type == 'zoneset');
         }
     }
     this.onShowTrackButtonClicked = function() {
@@ -1222,7 +1275,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                     return {
                         endDepth: c.endDepth,
                         startDepth: c.startDepth,
-                        param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                        name: c.name,
+                        fill: c.fill,
+                        params: c.children.map(cc => {
+                                return {
+                                    label: cc.data.label,
+                                    value: cc.data.value
+                                }
+                        }).filter(p => typeof(p.value) == 'number')
                     }
                 }),
                 idDataset: d.idDataset,
@@ -1236,6 +1296,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
             return tmp;
         });
         console.log('input map: ', inputMap);
+        console.log('task config', self.taskConfig);
         let config = {};
         let promises = [];
         promises.push(new Promise(function(resolve) {
@@ -1247,15 +1308,22 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService) {
                     callback();
                 });
             }, function(err) {
-                console.log('this is callback function');
                 resolve();
             })
+        }));
+        promises.push(new Promise(function(resolve) {
+            config.zoneset = {
+                name: 'zoneset',
+                zones: inputMap[0].parameters
+            };
+            resolve();
         }))
         Promise.all(promises)
             .then(function() {
                 updateTrack(config);
             });
     }
+    /*************************** END OF HARD CODE *****************************/
 }
 
 const app = angular.module(moduleName, []);
@@ -1268,7 +1336,9 @@ app.component(name, {
     bindings: {
         name: "@",
         id: "<",
-        taskConfig: '<'
+        taskConfig: '<',
+        new: '<',
+        wiFlowDesigner: '<'
     }
 });
 

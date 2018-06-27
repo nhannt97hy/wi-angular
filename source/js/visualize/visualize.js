@@ -8,6 +8,7 @@ let LogTrack = require('./visualize-log-track');
 let ImageTrack = require('./visualize-image-track');
 let ZoneTrack = require('./visualize-zone-track');
 let ObjectTrack = require('./visualize-object-track');
+let CorrelationTrack = require('./visualize-correlation-track');
 let Crossplot = require('./visualize-crossplot');
 let Curve = require('./visualize-curve');
 let CanvasHelper = require('./visualize-canvas-helper');
@@ -79,6 +80,15 @@ exports.createObjectTrack = function(config, domElem) {
     let objectTrack = new ObjectTrack(config);
     objectTrack.init(domElem);
     return objectTrack;
+}
+
+/**
+ * create and draw a new correlation track inside a new DOM Element
+ */
+exports.createCorrelationTrack = function(config, domElem) {
+    let correlationTrack = new CorrelationTrack(config);
+    correlationTrack.init(domElem);
+    return correlationTrack;
 }
 
 /**

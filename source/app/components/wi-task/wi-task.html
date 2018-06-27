@@ -72,6 +72,20 @@
     </style>
     <div class="form-group">
         <wi-tabset id='mainTab'>
+            <wi-tab heading='General'>
+                <div style="height:100%;display:flex;overflow: hidden;flex-direction: column;padding:10px;"> <div class='panel panel-default' style='flex:1;margin-bottom: 0;'>
+                    <div class="panel-heading">
+                        <h5>General Configuration</h5>
+                    </div>
+                    <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
+                        <li style="display:flex;flex-direction:row; margin-bottom:5px;">
+                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Task Name</label>
+                            <input type="text" class='form-control' style='flex:2' ng-model='wiTask.name'>
+                        </li>
+                    </ul>
+                    </div>
+                </div>
+            </wi-tab>
             <wi-tab heading="Configure Inputs">
                 <div style='padding:10px;display:flex;flex-direction:row;height:100%;'>
                     <div class='panel panel-default tree-side'>
@@ -245,7 +259,6 @@
                             style='display: flex; flex-direction: column; outline: none;'
                         ></wi-d3-log-track>
                     </div>
-                    </div>
                 </div>
             </wi-tab>
         </wi-tabset>
@@ -253,10 +266,12 @@
     <div id="dragElement"></div>
     <nav mfb-menu position='br' effect='slidein'
     active-icon='fa fa-times' resting-icon='fa fa-bars'
-    toggling-method="hover">
+    toggling-method="click" ng-if="wiTask.new">
         <button mfb-button icon='fa fa-plus-circle' label='Add to flow'
         ng-click='wiTask.addToFlowClick()'></button>
         <button mfb-button icon='fa fa-play-circle-o' label='Run'
-        ng-click="wiTask.runWorkflowClick()"></button>
+        ng-click="wiTask.runTask()"></button>
     </nav>
+    <nav mfb-menu position='br' resting-icon='fa fa-floppy-o' active-icon='fa fa fa-floppy-o'
+    label="Save" toggling-method="hover" main-action="wiTask.saveTask()" ng-if="!wiTask.new"></nav>
 </div>

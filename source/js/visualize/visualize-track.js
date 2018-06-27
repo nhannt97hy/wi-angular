@@ -86,8 +86,52 @@ Track.prototype.isObjectTrack = function() {
  * @param {String} color - CSS color string
  */
 Track.prototype.setBackgroundColor = function(color) {
-    this.trackContainer
-        .style('background-color', color)
+    if (!color) return;
+    let wellProps = this.getWellProps();
+    if(wellProps == undefined) {
+        this.trackContainer
+            .style('background-color', color);
+    } else {
+        this.trackContainer
+            .style('background-color', 'gray');
+        if(wellProps) {
+            if(!this.backgroundSvgContainer) 
+                this.backgroundSvgContainer = this.bodyContainer.append('svg')
+                    .style('width', '100%')
+                    .attr('height', '100%')
+                    .attr('class', 'vi-track-background');
+            let transformY = this.getTransformY();
+            if(transformY) {
+                let bgRect = this.backgroundSvgContainer.selectAll('rect').data([color]);
+                let minY = transformY(wellProps.topDepth);
+                let maxY = transformY(wellProps.bottomDepth);
+                bgRect.enter()
+                    .append('rect')
+                    .attr('x', 0)
+                    .attr('width', '100%');
+                bgRect.attr('y', minY)
+                    .attr('height', maxY - minY)
+                    .attr('fill', d => d);
+            }
+        }
+    }
+}
+
+/**
+ * Set well properties this track base on
+ */
+Track.prototype.getWellProps = function()  {
+    if(this.isLogTrack()) {
+        let curves = this.getCurves(); 
+        if(curves.length) {
+            let firstCurve = curves[0]; 
+            return utils.findWellByCurve(firstCurve.idCurve).properties;
+        } else return null;
+    } else if(this.isZoneTrack()) {
+        if(this.idZoneSet) {
+            return utils.findWellByZoneSet(this.idZoneSet).properties;
+        } else return null;
+    } else return undefined; 
 }
 
 /**

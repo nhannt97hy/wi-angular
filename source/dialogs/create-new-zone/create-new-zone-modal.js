@@ -1,60 +1,173 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, callback) {
+module.exports = function (ModalService, template, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService, ModalService, $timeout) {
         let self = this;
-        self.template = {template: ''};
-        this.zone = {
-            name: "",
-            startDepth: "",
-            endDepth: "",
-            fill: {
-                pattern: {
-                    name: "none",
-                    background: "rgb(0, 0, 0)",
-                    foreground: "rgb(220, 220, 220)"
-                }
-            }
-        }
-        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);        
-        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
-        
-        this.backgroundZone = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.background, function (colorStr) {
-                self.zone.fill.pattern.background = colorStr;
-                console.log('bg', self.zone.background);
-            });
-        };
+        self.template = { template: '' };
+        let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
-        this.foregroundZone = function () {
-            DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.foreground, function (colorStr) {
-                self.zone.fill.pattern.foreground = colorStr;
-            });
-        };
-        this.choosePattern = function() {
-            DialogUtils.fillPatternDialog(ModalService, 
-                                        self.zone.fill.pattern.name, 
-                                        self.zone.fill.pattern.foreground, 
-                                        self.zone.fill.pattern.background, 
-                                        function(_name) {
-                if(_name) {
-                    self.zone.fill.pattern.name = _name;
-                }
-            });
-        }
-        this.chooseTemplate = function(){
-            console.log('chooseTemplateFunction called');
-            DialogUtils.chooseTemplateDialog(ModalService, function (template){
-                if(template){
-                    self.zone.name = template.name;
-                    self.zone.fill.pattern.name = template.fill.pattern.name;
-                    self.zone.fill.pattern.background = template.fill.pattern.background;
-                    self.zone.fill.pattern.foreground = template.fill.pattern.foreground;
-                    console.log('data got from chooseTemlateDialog', self.zone);
+        let topIdx = 0;
+        let selectionLength = 8;
+        let delta = 5;
+
+        this.refreshTree = function () {
+            self.config = [];
+            wiApiService.listAllZoneByTemplate({ template: template }, function (zones) {
+                for (zone of zones) {
+                    self.config.push(createZoneModel(zone));
                 }
             })
         }
+
+        self.returnZone = {
+            startDepth: "",
+            endDepth: "",
+            name: "",
+            foreground: "",
+            background: "",
+            pattern: "",
+            idZoneTemplate: ""
+        }
+
+        this.refreshTree();
+
+        let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+
+        // this.backgroundZone = function () {
+        //     DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.background, function (colorStr) {
+        //         self.zone.fill.pattern.background = colorStr;
+        //         console.log('bg', self.zone.background);
+        //     });
+        // };
+
+        // this.foregroundZone = function () {
+        //     DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.foreground, function (colorStr) {
+        //         self.zone.fill.pattern.foreground = colorStr;
+        //     });
+        // };
+        // this.choosePattern = function() {
+        //     DialogUtils.fillPatternDialog(ModalService, 
+        //                                 self.zone.fill.pattern.name, 
+        //                                 self.zone.fill.pattern.foreground, 
+        //                                 self.zone.fill.pattern.background, 
+        //                                 function(_name) {
+        //         if(_name) {
+        //             self.zone.fill.pattern.name = _name;
+        //         }
+        //     });
+        // }
+        this.upTrigger = function (cb) {
+            wiApiService.listZoneTemplate({}, function (templates) {
+                if (templates) {
+                    if (topIdx > 0) {
+                        if (topIdx > delta) {
+                            let newSource = templates.slice(topIdx - delta, topIdx).reverse();
+                            let newList = newSource.map(t => addNode(t));
+                            topIdx = topIdx - delta;
+                            cb(newList, self.config);
+                        } else {
+                            let newSource = templates.slice(0, topIdx).reverse();
+                            let newList = newSource.map(t => addNode(t));
+                            topIdx = 0;
+                            cb(newList, self.config);
+                        }
+                    } else cb([]);
+                }
+            })
+        }
+        this.downTrigger = function (cb) {
+            wiApiService.listZoneTemplate({}, function (templates) {
+                if (templates) {
+                    templates.sort(function (a, b) {
+                        return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
+                    });
+                    let bottomIdx = topIdx + selectionLength;
+                    if (bottomIdx < templates.length) {
+                        if (templates.length - bottomIdx > delta) {
+                            let newSource = templates.slice(bottomIdx, delta + bottomIdx);
+                            let newList = newSource.map(t => addNode(t));
+                            topIdx = topIdx + delta;
+                            cb(newList, self.config);
+                        } else {
+                            let newSource = templates.slice(bottomIdx, templates.length);
+                            let newList = newSource.map(t => addNode(t));
+                            topIdx = topIdx + templates.length - bottomIdx;
+                            cb(newList, self.config);
+                        }
+                    } else cb([]);
+                }
+            })
+        }
+
+        this.clickFunction = function ($index, $event, node) {
+            clickFunction($index, $event, node, self.config, true);
+            let selectedNode = self.config.__SELECTED_NODES[0];
+            if(selectedNode) {
+                self.returnZone.name = selectedNode.name;
+                self.returnZone.background = selectedNode.background;
+                self.returnZone.foreground = selectedNode.foreground;
+                self.returnZone.pattern = selectedNode.pattern;
+                self.returnZone.idZoneTemplate = selectedNode.idZoneTemplate;
+            }
+        }
+        function clickFunction($index, $event, node, rootNode, multiNodeFetch = false) {
+            node.$index = $index;
+            if (!node) {
+                unselectAllNodes(rootNode);
+                return;
+            }
+            let selectedNodes = rootNode.__SELECTED_NODES;
+            if (!Array.isArray(selectedNodes)) selectedNodes = [];
+            if (!$event.shiftKey) {
+                if (selectedNodes.length) {
+                    if (!$event.ctrlKey || node.type != selectedNodes[0].type || node.parent != selectedNodes[0].parent) {
+                        unselectAllNodes(rootNode);
+                    }
+                }
+                selectHandler(node, rootNode);
+            }
+        }
+        function selectHandler(currentNode, rootNode, callback) {
+            if (currentNode.data) {
+                $timeout(function () { currentNode.data.selected = true; });
+                let selectedNodes = rootNode.__SELECTED_NODES;
+                if (!Array.isArray(selectedNodes))
+                    selectedNodes = [];
+                if (!selectedNodes.includes(currentNode)) {
+                    selectedNodes.push(currentNode);
+                }
+                rootNode.__SELECTED_NODES = selectedNodes;
+                self.selectedTemplate = currentNode;
+            }
+        }
+        function unselectAllNodes(rootNode) {
+            rootNode.forEach(function (item) {
+                utils.visit(item, function (node) {
+                    if (node.data) node.data.selected = false;
+                });
+            });
+            rootNode.__SELECTED_NODES = [];
+        }
+
+        function createZoneModel(zone) {
+            return {
+                idZoneTemplate: zone.idZoneTemplate,
+                template: zone.template,
+                type: 'zoneTeplate',
+                background: zone.background,
+                foreground: zone.foreground,
+                pattern: zone.pattern,
+                name: zone.name,
+                data: {
+                    icon: 'mineral-zone-16x16',
+                    label: zone.name,
+                    childExpanded: false
+                }
+            }
+        }
+
         this.onOkButtonClicked = function () {
-           close(self.zone);
+            close(self.returnZone);
         };
 
         this.onCancelButtonClicked = function () {
