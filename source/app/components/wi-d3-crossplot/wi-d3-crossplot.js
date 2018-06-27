@@ -837,42 +837,51 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.showHisContextMenu = function(event, xy){
         if (event.button != 2) return;
-        let _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
-        let visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
+        let _histogram = xy == 'x' ? self.histogramModelX : self.histogramModelY;
+        let visHistogram = xy == 'x' ? self.xHistogram : self.yHistogram;
         self.hisContextMenu = [{
             name: "ShowAsLine",
             label: "Show As Line",
-            "isCheckType": "true",
-            checked: _histogram ? (_histogram.properties.plot == "Curve") : false,
+            isCheckType: "true",
+            checked: _histogram ? (_histogram.config.plot == "Curve") : false,
             handler: function (index) {
-                if (_histogram.properties.plot == "Bar")
-                    _histogram.properties.plot = "Curve";
-                else _histogram.properties.plot = "Bar";
+                if (_histogram.config.plot == "Bar")
+                    _histogram.config.plot = "Curve";
+                else _histogram.config.plot = "Bar";
                 index = index || 0;
-                self.hisContextMenu[index].checked = _histogram ? (_histogram.properties.plot == "Curve") : false;
-                visHistogram.signal('histogram-update', "plot curve/bar");
+                self.hisContextMenu[index].checked = _histogram ? (_histogram.config.plot == "Curve") : false;
+                _histogram.curves.forEach(c => {
+                    c.options.plot = _histogram.config.plot;
+                });
+                visHistogram.updateHistogram(_histogram);
             }
         },
         {
             name: "ShowGaussian",
             label: "Show Gaussian Line",
-            "isCheckType": "true",
-            checked: _histogram ? _histogram.properties.showGaussian : false,
+            isCheckType: "true",
+            checked: _histogram ? _histogram.config.showGaussian : false,
             handler: function (index) {
-                _histogram.properties.showGaussian = !_histogram.properties.showGaussian;
-                self.hisContextMenu[index].checked = _histogram.properties.showGaussian;
-                visHistogram.signal('histogram-update', 'show/hide gaussian');
+                _histogram.config.showGaussian = !_histogram.config.showGaussian;
+                self.hisContextMenu[index].checked = _histogram.config.showGaussian;
+                _histogram.curves.forEach(c => {
+                    c.options.showGaussian = _histogram.config.showGaussian;
+                });
+                visHistogram.updateHistogram(_histogram);
             }
         },
         {
             name: "ShowCumulative",
             label: "Show Cumulative Line",
-            "isCheckType": "true",
-            checked: _histogram ? _histogram.properties.showCumulative : false,
+            isCheckType: "true",
+            checked: _histogram ? _histogram.config.showCumulative : false,
             handler: function (index) {
-                _histogram.properties.showCumulative = !_histogram.properties.showCumulative;
-                self.hisContextMenu[index].checked = _histogram.properties.showCumulative;
-                visHistogram.signal('histogram-update', "show/hide Cumulative curve");
+                _histogram.config.showCumulative = !_histogram.config.showCumulative;
+                self.hisContextMenu[index].checked = _histogram.config.showCumulative;
+                _histogram.curves.forEach(c => {
+                    c.options.showCumulative = _histogram.config.showCumulative;
+                });
+                visHistogram.updateHistogram(_histogram);
             }
         },
         {
@@ -886,32 +895,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     name: "DN25",
                     label: "25",
                     handler: function () {
-                        _histogram.properties.divisions = 25;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 25;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 },
                 {
                     name: "DN50",
                     label: "50",
                     handler: function () {
-                        _histogram.properties.divisions = 50;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 50;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 },
                 {
                     name: "DN75",
                     label: "75",
                     handler: function () {
-                        _histogram.properties.divisions = 75;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 75;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 },
                 {
                     name: "DN100",
                     label: "100",
                     handler: function () {
-                        _histogram.properties.divisions = 100;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 100;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 }
             ]
