@@ -671,7 +671,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     function loadStatistics() {
         if (self.wiHistogramCtrl) {
             $timeout(function () {
-                // self.wiHistogramCtrl.loadStatistics(self.visHistogram);
+                self.wiHistogramCtrl.loadStatistics(self.visHistogram);
             });
         }
     }
