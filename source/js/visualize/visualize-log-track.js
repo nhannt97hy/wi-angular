@@ -337,9 +337,10 @@ LogTrack.prototype.init = function(baseElement) {
         .style('cursor', 'crosshair')
         .style('overflow', 'visible');
 
-    this.svgContainer = this.plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-track-svg-container')
-        .style('cursor', 'crosshair');
+    this.svgContainer.style('cursor', 'crosshair');
+    // this.svgContainer = this.plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-track-svg-container')
+    //     .style('cursor', 'crosshair');
         // .style('overflow', 'visible');
 
     this.xAxisGroup = this.axisContainer.append('g')

@@ -154,8 +154,8 @@ ZoneTrack.prototype.init = function(baseElement) {
             self.setCurrentDrawing(null);
         });
 
-    this.svgContainer = this.plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-track-svg-container');
+    // this.svgContainer = this.plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-track-svg-container');
 }
 
 

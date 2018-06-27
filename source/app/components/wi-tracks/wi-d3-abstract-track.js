@@ -111,29 +111,31 @@ Controller.prototype.registerTrackCallback = function() {
     d3.select(viTrack.root.node().parentNode)
         .attr('class', 'wi-d3-track-component')
 
-    viTrack.on('focus', function () {
-        self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
-    });
-    viTrack.on('mousedown', function () {
-        d3.event.stopPropagation();
-        self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
-        // if (d3.event.button == 2) _trackOnRightClick(track);
-    });
-    viTrack.on('dblclick', function () {
-        self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
-        self.wiD3Ctrl && self.openPropertiesDialog();
-    });
+    if (!viTrack.isCorrelationTrack()) {
+        viTrack.on('focus', function () {
+            self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
+        });
+        viTrack.on('mousedown', function () {
+            d3.event.stopPropagation();
+            self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
+            // if (d3.event.button == 2) _trackOnRightClick(track);
+        });
+        viTrack.on('dblclick', function () {
+            self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
+            self.wiD3Ctrl && self.openPropertiesDialog();
+        });
+    }
     viTrack.onVerticalResizerDrag(function () {
         if (trackComponent.idTrack) {
-            self.wiApiService.editTrack({ 
-                idTrack: trackComponent.idTrack, 
-                width: Utils.pixelToInch(viTrack.width) 
+            self.wiApiService.editTrack({
+                idTrack: trackComponent.idTrack,
+                width: Utils.pixelToInch(viTrack.width)
             }, null, { silent: true });
-        } 
+        }
         else if (trackComponent.idDepthAxis) {
-            self.wiApiService.editDepthTrack({ 
-                idDepthAxis: trackComponent.idDepthAxis, 
-                width: Utils.pixelToInch(viTrack.width) 
+            self.wiApiService.editDepthTrack({
+                idDepthAxis: trackComponent.idDepthAxis,
+                width: Utils.pixelToInch(viTrack.width)
             }, null, { 
                 silent: true 
             });
@@ -251,9 +253,11 @@ Controller.prototype.getWellProps = function() {
 Controller.prototype.$onInit = function() {
     let self = this;
     this.wiD3Ctrl && this.wiD3Ctrl.wiLogplotCtrl.on('depth-range-updated', function(depthRange) {
-        self.viTrack.minY = depthRange[0];
-        self.viTrack.maxY = depthRange[1];
-        self.viTrack.doPlot();
+        if(self.viTrack) {
+            self.viTrack.minY = depthRange[0];
+            self.viTrack.maxY = depthRange[1];
+            self.viTrack.doPlot();
+        }
     });
 }
 
