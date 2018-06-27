@@ -1594,3 +1594,12 @@ exports.MigrationButtonClicked = function () {
         }
     })
 }
+exports.ChatGroupButtonClicked = function() {
+    console.log('ChatGroupButton is clicked', this.$scope);
+    this.$scope.showChatGroup = true;
+}
+
+exports.HelpDeskButtonClicked = function() {
+    console.log('HelpDeskButton is clicked', this.$scope);
+    this.$scope.showHelpDesk = true;
+}

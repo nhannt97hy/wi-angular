@@ -524,7 +524,6 @@ module.exports = function (ModalService, callback, groups, _users, company) {
                         })
                     }, function () {
                         toastr.info("Reload permission for users successfull: " + _u);
-                        CHAT_MODULE.initChat(window.localStorage.token, window.localStorage.LProject.name, window.localStorage.LProject.owner);
                     });
                 });
                 callback & callback();

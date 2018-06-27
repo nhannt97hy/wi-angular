@@ -109,7 +109,6 @@ exports.projectOpen = function (projectData) {
             })
         })
     })
-    CHAT_MODULE.initChat(window.localStorage.token, LProject.name, LProject.owner?LProject.owner:window.localStorage.username); // !!! khoi dong chat khi mo project -- NHAN
 };
 
 exports.projectClose = function () {
@@ -120,7 +119,6 @@ exports.projectClose = function () {
         wiComponentService.emit(wiComponentService.PROJECT_UNLOADED_EVENT);
         window.history.replaceState({}, 'home', '/');
         document.title = 'Well Insight';
-        CHAT_MODULE.closeChat(); // !!! tat chat khi dong project -- NHAN
     });
 };
 

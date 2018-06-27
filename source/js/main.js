@@ -84,7 +84,6 @@ let wiCrossplot = require('./wi-crossplot');
 let wiLogplot = require('./wi-logplot');
 let wiExplorer = require('./wi-explorer');
 let wiProperties = require('./wi-properties');
-let wiProps = require('./wi-props');
 let wiMultiInput = require('./wi-multi-input');
 let wiCustomInput = require('./wi-custom-input');
 
@@ -192,7 +191,6 @@ let app = angular.module('wiapp',
         wiWFMachineLearning.name,
         wiNeuralNetwork.name,
         wiPlot.name,
-        wiProps.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -450,6 +448,25 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
         restoreProject($timeout, wiApiService, ModalService);
     }
+    $scope.token = function() {
+        return window.localStorage.getItem('token');
+    }
+    $scope.groupName = function() {
+        var lp = window.localStorage.getItem('LProject');
+        if(lp) lp = JSON.parse(lp);
+        return (lp || {}).name;
+    } 
+    $scope.groupOwner = function() {
+        var lp = window.localStorage.getItem('LProject');
+        var username = window.localStorage.getItem('username');
+        if(lp) lp = JSON.parse(lp);
+        return (lp || {}).owner || username;
+    }
+    $scope.username = function() {
+        return window.localStorage.getItem('username');
+    }
+    // $scope.showChatGroup = false;
+    // $scope.showHelpDesk = false;
 });
 
 

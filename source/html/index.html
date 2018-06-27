@@ -132,8 +132,8 @@
     <script src="vendor/js/socket.io.js"></script>
 </head>
 
-<body ng-app='wiapp'>
-    <div class='main' id="main" ng-controller="AppController as app">
+<body ng-app='wiapp' ng-controller="AppController as app">
+    <div class='main' id="main">
         <div class="ribbon-wrapper">
             @@include('./ribbon-block/index.html')
         </div>
@@ -150,8 +150,8 @@
     </template>
 
     <template id='property-block'>
-        <!-- <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties> -->
-        <wi-props input="myPropertiesConfig" translation="labelConfig" option="optionConfig"></wi-props>
+        <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties>
+        <!-- <wi-props input="myPropertiesConfig" translation="labelConfig" option="optionConfig"></wi-props> -->
     </template>
     <template id="stack-header-control">
         <div class="stack-header-control">
@@ -159,7 +159,8 @@
             <i class="fa fa-caret-right" aria-hidden="true" id="nextBtn" title="Next"></i>
         </div>
     </template>
-    <chat-module></chat-module>
+    <chat-module token="token()" username="username()" group-name="'Help_Desk'" group-owner="groupOwner()" show-chat-group="showChatGroup" show-help-desk="showHelpDesk" width="320"></chat-module>
+    <chat-module token="token()" username="username()" group-name="groupName()" group-owner="groupOwner()" show-help-desk="showHelpDesk" show-chat-group="showChatGroup" width="320"></chat-module>
     <div id="testElement"></div>
 </body>
 
