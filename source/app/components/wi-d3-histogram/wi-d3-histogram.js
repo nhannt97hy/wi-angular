@@ -409,11 +409,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                         self.curvesProperties = histogramProperties.curvesProperties;
                         self.wells = histogramProperties.wells;
 
+                        Object.keys(histogramProperties).forEach(key => {
+                            self.histogramModel.properties[key] = histogramProperties[key];
+                        });
+
                         histogramProperties.showGaussian = self.config.showGaussian;
                         histogramProperties.showCumulative = self.config.showCumulative;
                         histogramProperties.plot = self.config.plot;
 
-                        self.histogramModel.properties = histogramProperties;
                         self.visHistogram.updateHistogram(self.histogramModel.properties);
                         if (!histogramProperties.curves.length) {
                             self.visHistogram.container.selectAll('*').remove();
@@ -603,7 +606,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let self = this;
         if (this.visHistogram && this.visHistogram.curves) return;
         if (!hisProps) return;
-        if (!hisProps.curves && !hisProps.curves.length) return;
+        if (!hisProps.curves.length) return;
         async.eachSeries(hisProps.curves, function (curveProps, next) {
             wiApiService.infoCurve(curveProps.idCurve, function (curveInfo) {
                 if (!curveProps.options) curveProps.options = {};
@@ -623,6 +626,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.config = hisProps.config;
             self.curvesProperties = hisProps.curvesProperties;
             self.wells = hisProps.wells;
+
+            Object.keys(hisProps).forEach(key => {
+                self.histogramModel.properties[key] = hisProps[key];
+            });
 
             self.histogramModel.properties.showGaussian = self.config.showGaussian;
             self.histogramModel.properties.showCumulative = self.config.showCumulative;
@@ -695,7 +702,7 @@ app.component(componentName, {
 });
 app.filter('toFixed2', function() {
     return function(item) {
-        if (item) return item.toFixed(2);
+        if (item) return (+item).toFixed(2);
     }
 });
 exports.name = moduleName;

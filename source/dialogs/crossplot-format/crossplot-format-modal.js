@@ -494,6 +494,7 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
         this.updateProperties = function () {
             console.log('sau getInputData');
             let datasets = self.taskConfig.inputData;
+            if (!datasets) return;
             datasets.forEach(set => {
                 let xCurve = set.children[0].data.value.properties;
                 let yCurve = set.children[1].data.value.properties;
@@ -1065,15 +1066,34 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
                                 break;
                             case 'create':
                             case 'edit':
-                                delete self.curvesProperties[i].flag;
+                                self.curvesProperties[i].flag = 'edit';
                                 break;
                         }
                     }
+                    self.taskConfig.inputData.forEach(ipt => { ipt.flag = 'edit'; });
                     let intervalDepthTopArr = new Array();
                     let intervalDepthBottomArr = new Array();
+                    self.crossplotModelProps.wellsX = new Object();
+                    self.crossplotModelProps.wellsY = new Object();
                     self.pointsets.forEach(ps => {
                         intervalDepthTopArr.push(ps.intervalDepthTop);
                         intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                        let wX = utils.findWellByCurve(ps.idCurveX);
+                        let wellX = {
+                            idWell: wX.idWell,
+                            topDepth: wX.topDepth,
+                            bottomDepth: wX.bottomDepth,
+                            step: wX.step
+                        };
+                        self.crossplotModelProps.wellsX[ps.idCurveX] = wellX;
+                        let wY = utils.findWellByCurve(ps.idCurveY);
+                        let wellY = {
+                            idWell: wY.idWell,
+                            topDepth: wY.topDepth,
+                            bottomDepth: wY.bottomDepth,
+                            step: wY.step
+                        };
+                        self.crossplotModelProps.wellsY[ps.idCurveY] = wellY;
                     });
                     self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
                     self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
@@ -1086,9 +1106,27 @@ module.exports = function (ModalService, wiD3CrossplotCtrl, callback, cancelCall
             } else {
                 let intervalDepthTopArr = new Array();
                 let intervalDepthBottomArr = new Array();
+                self.crossplotModelProps.wellsX = new Object();
+                self.crossplotModelProps.wellsY = new Object();
                 self.pointsets.forEach(ps => {
                     intervalDepthTopArr.push(ps.intervalDepthTop);
                     intervalDepthBottomArr.push(ps.intervalDepthBottom);
+                    let wX = utils.findWellByCurve(ps.idCurveX);
+                    let wellX = {
+                        idWell: wX.idWell,
+                        topDepth: wX.topDepth,
+                        bottomDepth: wX.bottomDepth,
+                        step: wX.step
+                    };
+                    self.crossplotModelProps.wellsX[ps.idCurveX] = wellX;
+                    let wY = utils.findWellByCurve(ps.idCurveY);
+                    let wellY = {
+                        idWell: wY.idWell,
+                        topDepth: wY.topDepth,
+                        bottomDepth: wY.bottomDepth,
+                        step: wY.step
+                    };
+                    self.crossplotModelProps.wellsY[ps.idCurveY] = wellY;
                 });
                 self.config.intervalDepthTop = d3.min(intervalDepthTopArr);
                 self.config.intervalDepthBottom = d3.max(intervalDepthBottomArr);
