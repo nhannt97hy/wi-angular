@@ -2071,3 +2071,21 @@ Service.prototype.exportLas2 = function(idObjs, callback) {
 Service.prototype.getLasFileUrl = function (url) {
     return BASE_URL + url;
 }
+
+// parameter set
+const PARAMETER_SET = '/project/parameter-set'
+Service.prototype.createParameterSet = function (payload, callback) {
+    this.post(PARAMETER_SET + '/new', payload, callback);
+}
+Service.prototype.getParameterSet = function (idParameterSet, callback) {
+    this.post(PARAMETER_SET + '/info', { idParameterSet }, callback);
+}
+Service.prototype.listParameterSet = function (idProject, callback) {
+    this.post(PARAMETER_SET + '/list', { idProject }, callback);
+}
+Service.prototype.editParameterSet = function (payload, callback) {
+    this.post(PARAMETER_SET + '/edit', payload, callback);
+}
+Service.prototype.removeParameterSet = function (idParameterSet, callback) {
+    this.post(PARAMETER_SET + '/delete', { idParameterSet }, callback);
+}
