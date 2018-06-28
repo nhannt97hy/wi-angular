@@ -1,17 +1,17 @@
-<div wi-element-ready='wiD3.onReady()' wi-right-click='wiD3.showContextMenu($event)' id='{{wiD3.plotAreaId}}' class='d3-region'>
+<div wi-element-ready='wiD3.onReady()' wi-right-click='wiD3.showContextMenu($event)' id='{{wiD3.plotAreaId}}' class='d3-region' style="background-color: #d3d3d352">
     <div class='wi-d3-track-container' style='display:flex;' ng-repeat="track in wiD3.getTrackComponents()">
  <!--    <svg id='{{wiD3.svgId}}' class='d3-region-svg' width='100%' height='100%'></svg> -->
- <!--
         <wi-d3-correlation-track 
             ng-if="wiD3.shouldHaveCorrelationTrack($index)"
-            properties="{name: 'correlation' + $index, width: 1, orderNum: track.orderNum }"
+            properties="{name: 'correlation' + $index,orderNum: track.orderNum + 'a', bgColor: 'white'}"
             name="correlation{{$index}}"
             wi-d3-ctrl='wiD3'
             min-y='wiD3._minY'
             max-y='wiD3._maxY'
+            left-track="wiD3.trackComponents[$index-1]"
+            right-track="track"
             style="display: flex; flex-direction: column; outline: none;">
         </wi-d3-correlation-track>
- -->
         <wi-d3-log-track ng-if="track.idTrack" 
             name='{{wiD3.getTrackName(track)}} '
             properties='track'

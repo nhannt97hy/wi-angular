@@ -398,6 +398,7 @@ Histogram.prototype.generateHistogram = function () {
     }
     this.mean = this.getAverage();
     this.standardDeviation = this.getStandardDeviation();
+    this.bigData = this.getBigData();
 }
 
 Histogram.prototype.plotAxesContainer = function () {
@@ -1118,45 +1119,66 @@ Histogram.prototype.getStandardDeviation = function () {
     return d3.deviation(newArray);
 }
 
-Histogram.prototype.getMin = function () {
+// For Statistics
+
+Histogram.prototype.getBigData = function () {
+    if (!this.intervalData.length) return;
+    let data = new Array();
+    this.intervalData.forEach(d => {
+        data = data.concat(d);
+    });
+    return data;
+}
+
+Histogram.prototype.getLengthStats = function () {
+    if (!this.bigData) return;
+    return this.bigData.length;
+}
+
+Histogram.prototype.getMinStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
-        return d3.min(this.intervalData);
+        if (!this.bigData) return null;
+        return d3.min(this.bigData);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
 
-    let minOfAll = this.zoneData.reduce(function(minVal, aZoneData) {
+    let minOfAll = this.zoneData.reduce(function (minVal, aZoneData) {
         let aMin = d3.min(aZoneData);
-        return (minVal > aMin)?aMin:minVal;
+        return (minVal > aMin) ? aMin : minVal;
     }, 9999999);
 
     return minOfAll;
 }
 
-Histogram.prototype.getMax = function () {
+Histogram.prototype.getMaxStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData) return null;
-        return d3.max(this.intervalData);
+        if (!this.bigData) return null;
+        return d3.max(this.bigData);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
 
-    let maxOfAll = this.zoneData.reduce(function(maxVal, aZoneData) {
+    let maxOfAll = this.zoneData.reduce(function (maxVal, aZoneData) {
         let aMax = d3.max(aZoneData);
-        return (maxVal < aMax)?aMax:maxVal;
+        return (maxVal < aMax) ? aMax : maxVal;
     }, -9999999);
 
     return maxOfAll;
 }
 
-Histogram.prototype.getAverageDeviation = function () {
+Histogram.prototype.getAverageStats = function () {
+    if (!this.bigData) return;
+    return d3.mean(this.bigData).toFixed(_DECIMAL_LEN);
+}
+
+Histogram.prototype.getAverageDeviationStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData || !this.intervalData.length) return null;
-        return calAverageDeviation(this.intervalData);
+        if (!this.bigData) return null;
+        return calAverageDeviation(this.bigData);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
@@ -1172,19 +1194,23 @@ Histogram.prototype.getAverageDeviation = function () {
     }
 }
 
-Histogram.prototype._getAverage = function() {
-    return this.mean?this.mean.toFixed(_DECIMAL_LEN):null;
-}
-
-Histogram.prototype._getStandardDeviation = function() {
-    return this.standardDeviation?this.standardDeviation.toFixed(_DECIMAL_LEN):null;
-}
-
-Histogram.prototype.getVariance = function () {
+Histogram.prototype.getStandardDeviationStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData || !this.intervalData.length) return null;
-        return d3.variance(this.intervalData).toFixed(_DECIMAL_LEN);
+        if (!this.bigData) return;
+        return d3.deviation(this.bigData).toFixed(_DECIMAL_LEN);
+    }
+    // zonalDepth case
+    if (!this.zoneData || !this.zoneData.length) return null;
+    let newArray = this.joinZoneData();
+    return d3.deviation(newArray);
+}
+
+Histogram.prototype.getVarianceStats = function () {
+    if (!this.histogramModel.idZoneSet) {
+        // intervalDepth case
+        if (!this.bigData) return null;
+        return d3.variance(this.bigData).toFixed(_DECIMAL_LEN);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
@@ -1192,11 +1218,11 @@ Histogram.prototype.getVariance = function () {
     return d3.variance(newArray).toFixed(_DECIMAL_LEN);
 }
 
-Histogram.prototype.getSkewness = function () {
+Histogram.prototype.getSkewnessStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData || !this.intervalData.length) return null;
-        return ss.sampleSkewness(this.intervalData).toFixed(_DECIMAL_LEN);
+        if (!this.bigData) return null;
+        return ss.sampleSkewness(this.bigData).toFixed(_DECIMAL_LEN);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
@@ -1204,26 +1230,43 @@ Histogram.prototype.getSkewness = function () {
 
 }
 
-Histogram.prototype.getKurtosis = function () {
+Histogram.prototype.getKurtosisStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData || !this.intervalData.length) return null;
-        return ss.sampleKurtosis(this.intervalData).toFixed(_DECIMAL_LEN);
+        if (!this.bigData) return null;
+        return ss.sampleKurtosis(this.bigData).toFixed(_DECIMAL_LEN);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
     return ss.sampleKurtosis(this.joinZoneData()).toFixed(_DECIMAL_LEN);
 }
 
-Histogram.prototype.getMedian = function () {
+Histogram.prototype.getMedianStats = function () {
     if (!this.histogramModel.idZoneSet) {
         // intervalDepth case
-        if (!this.intervalData || !this.intervalData.length) return null;
-        return d3.median(this.intervalData).toFixed(_DECIMAL_LEN);
+        if (!this.bigData) return null;
+        return d3.median(this.bigData).toFixed(_DECIMAL_LEN);
     }
     // zonalDepth case
     if (!this.zoneData || !this.zoneData.length) return null;
     return d3.median(this.joinZoneData()).toFixed(_DECIMAL_LEN);
+}
+
+Histogram.prototype.getPercentileStats = function (p) {
+    if (!this.histogramModel.idZoneSet) {
+        // intervalDepth case
+        if (!this.bigData) return null;
+        return calPercentile(this.bigData, p);
+    }
+    // zonalDepth case
+    if (!this.zoneData || !this.zoneData.length) return null;
+    return calPercentile(this.joinZoneData(), p);
+
+    function calPercentile(data, p) {
+        return d3.quantile(data.sort(function (a, b) {
+            return a - b;
+        }), p).toFixed(_DECIMAL_LEN);
+    }
 }
 
 Histogram.prototype.addViSelectionToHistogram = function(selectionConfig) {

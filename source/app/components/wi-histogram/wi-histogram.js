@@ -93,19 +93,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.loadStatistics = function(visHistogram) {
         console.log('loadStatistics');
-        self.statistics.length = visHistogram.getLength();
-        self.statistics.min = visHistogram.getMin();
-        self.statistics.max = visHistogram.getMax();
-        self.statistics.avg = visHistogram.getAverage();
-        self.statistics.avg_dev = visHistogram.getAverageDeviation();
-        self.statistics.std_dev = visHistogram.getStandardDeviation();
-        self.statistics.var = visHistogram.getVariance();
-        self.statistics.skew = visHistogram.getSkewness();
-        self.statistics.kur = visHistogram.getKurtosis();
-        self.statistics.med = visHistogram.getMedian();
-        self.statistics.p10 = visHistogram.getPercentile(0.1);
-        self.statistics.p50 = visHistogram.getPercentile(0.5);
-        self.statistics.p90 = visHistogram.getPercentile(0.9);
+        self.statistics.length = visHistogram.getLengthStats();
+        self.statistics.min = visHistogram.getMinStats();
+        self.statistics.max = visHistogram.getMaxStats();
+        self.statistics.avg = visHistogram.getAverageStats();
+        self.statistics.avg_dev = visHistogram.getAverageDeviationStats();
+        self.statistics.std_dev = visHistogram.getStandardDeviationStats();
+        self.statistics.var = visHistogram.getVarianceStats();
+        self.statistics.skew = visHistogram.getSkewnessStats();
+        self.statistics.kur = visHistogram.getKurtosisStats();
+        self.statistics.med = visHistogram.getMedianStats();
+        self.statistics.p10 = visHistogram.getPercentileStats(0.1);
+        self.statistics.p50 = visHistogram.getPercentileStats(0.5);
+        self.statistics.p90 = visHistogram.getPercentileStats(0.9);
     }
 
     this.onZoneCtrlReady = function(zoneCtrl) {

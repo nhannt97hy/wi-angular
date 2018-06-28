@@ -22,6 +22,8 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             let config = angular.copy(self.crossplotModel.properties.config);
             let pointsets = angular.copy(self.crossplotModel.properties.pointsets);
             let curvesProperties = angular.copy(self.crossplotModel.properties.curvesProperties);
+            let wellsX = angular.copy(self.crossplotModel.properties.wellsX);
+            let wellsY = angular.copy(self.crossplotModel.properties.wellsY);
             delete self.crossplotModel.properties.config;
             delete self.crossplotModel.properties.curvesProperties;
             self.crossplotModel.properties.pointsets.forEach(ps => {
@@ -33,9 +35,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.config = self.crossplotModel.properties.config = config;
                 self.pointsets = self.crossplotModel.properties.pointsets = pointsets;
                 self.curvesProperties = self.crossplotModel.properties.curvesProperties = curvesProperties;
+                self.wellsX = self.crossplotModel.properties.wellsX = wellsX;
+                self.wellsY = self.crossplotModel.properties.wellsY = wellsY;
                 delete config;
                 delete pointsets;
                 delete curvesProperties;
+                delete wellsX;
+                delete wellsY;
                 cb();
             });
         }], function(err, result) {
@@ -600,10 +606,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                                     }
                                 }
                             ], function () {
-                                self.pointsets = xplotProps.pointsets;
-                                self.config = xplotProps.config;
-                                self.curvesProperties = xplotProps.curvesProperties;
-                                // _.extend(xplotProps.pointsets.find(pointSet => pointSet.idPointSet == curveProps.idPointSet), pointSet);
                                 next();
                             });
                         }, function (err) {
@@ -618,7 +620,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             self.curvesProperties = xplotProps.curvesProperties;
                             self.pointsets = xplotProps.pointsets;
                             self.config = xplotProps.config;
-                            self.crossplotModel.properties = xplotProps;
+                            self.wellsX = xplotProps.wellsX;
+                            self.wellsY = xplotProps.wellsY;
+                            Object.keys(xplotProps).forEach(key => {
+                                self.crossplotModel.properties[key] = xplotProps[key];
+                            });
                             self.viCrossplot.updateCrossplot(xplotProps);
                             if (!xplotProps.pointsets.length) {
                                 self.viCrossplot.footerContainer.selectAll('*').remove();
@@ -831,42 +837,51 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.showHisContextMenu = function(event, xy){
         if (event.button != 2) return;
-        let _histogram = xy=='x' ? self.histogramModelX: self.histogramModelY;
-        let visHistogram = xy=='x' ? self.xHistogram : self.yHistogram;
+        let _histogram = xy == 'x' ? self.histogramModelX : self.histogramModelY;
+        let visHistogram = xy == 'x' ? self.xHistogram : self.yHistogram;
         self.hisContextMenu = [{
             name: "ShowAsLine",
             label: "Show As Line",
-            "isCheckType": "true",
-            checked: _histogram ? (_histogram.properties.plot == "Curve") : false,
+            isCheckType: "true",
+            checked: _histogram ? (_histogram.config.plot == "Curve") : false,
             handler: function (index) {
-                if (_histogram.properties.plot == "Bar")
-                    _histogram.properties.plot = "Curve";
-                else _histogram.properties.plot = "Bar";
+                if (_histogram.config.plot == "Bar")
+                    _histogram.config.plot = "Curve";
+                else _histogram.config.plot = "Bar";
                 index = index || 0;
-                self.hisContextMenu[index].checked = _histogram ? (_histogram.properties.plot == "Curve") : false;
-                visHistogram.signal('histogram-update', "plot curve/bar");
+                self.hisContextMenu[index].checked = _histogram ? (_histogram.config.plot == "Curve") : false;
+                _histogram.curves.forEach(c => {
+                    c.options.plot = _histogram.config.plot;
+                });
+                visHistogram.updateHistogram(_histogram);
             }
         },
         {
             name: "ShowGaussian",
             label: "Show Gaussian Line",
-            "isCheckType": "true",
-            checked: _histogram ? _histogram.properties.showGaussian : false,
+            isCheckType: "true",
+            checked: _histogram ? _histogram.config.showGaussian : false,
             handler: function (index) {
-                _histogram.properties.showGaussian = !_histogram.properties.showGaussian;
-                self.hisContextMenu[index].checked = _histogram.properties.showGaussian;
-                visHistogram.signal('histogram-update', 'show/hide gaussian');
+                _histogram.config.showGaussian = !_histogram.config.showGaussian;
+                self.hisContextMenu[index].checked = _histogram.config.showGaussian;
+                _histogram.curves.forEach(c => {
+                    c.options.showGaussian = _histogram.config.showGaussian;
+                });
+                visHistogram.updateHistogram(_histogram);
             }
         },
         {
             name: "ShowCumulative",
             label: "Show Cumulative Line",
-            "isCheckType": "true",
-            checked: _histogram ? _histogram.properties.showCumulative : false,
+            isCheckType: "true",
+            checked: _histogram ? _histogram.config.showCumulative : false,
             handler: function (index) {
-                _histogram.properties.showCumulative = !_histogram.properties.showCumulative;
-                self.hisContextMenu[index].checked = _histogram.properties.showCumulative;
-                visHistogram.signal('histogram-update', "show/hide Cumulative curve");
+                _histogram.config.showCumulative = !_histogram.config.showCumulative;
+                self.hisContextMenu[index].checked = _histogram.config.showCumulative;
+                _histogram.curves.forEach(c => {
+                    c.options.showCumulative = _histogram.config.showCumulative;
+                });
+                visHistogram.updateHistogram(_histogram);
             }
         },
         {
@@ -880,32 +895,32 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     name: "DN25",
                     label: "25",
                     handler: function () {
-                        _histogram.properties.divisions = 25;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 25;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 },
                 {
                     name: "DN50",
                     label: "50",
                     handler: function () {
-                        _histogram.properties.divisions = 50;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 50;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 },
                 {
                     name: "DN75",
                     label: "75",
                     handler: function () {
-                        _histogram.properties.divisions = 75;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 75;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 },
                 {
                     name: "DN100",
                     label: "100",
                     handler: function () {
-                        _histogram.properties.divisions = 100;
-                        visHistogram.signal('histogram-update', "update division");
+                        _histogram.config.numOfDivisions = 100;
+                        visHistogram.updateHistogram(_histogram);
                     }
                 }
             ]
@@ -938,7 +953,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let self = this;
         if (this.viCrossplot && this.viCrossplot.pointsets) return;
         if (!props) return;
-        if (!props.pointsets && !props.pointsets.length) return;
+        if (!props.pointsets.length) return;
         async.eachSeries(props.pointsets, function (pointSet, next) {
             async.parallel([
                 function (cb) {
@@ -985,10 +1000,6 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 }
             ], function () {
                 if (!pointSet.pointColor) pointSet.pointColor = genRandomColor();
-                self.pointsets = props.pointsets;
-                self.config = props.config;
-                self.curvesProperties = props.curvesProperties;
-                // _.extend(props.pointsets.find(pointSet => pointSet.idPointSet == pointSet.idPointSet), pointSet);
                 next();
             });
         }, function (err) {
@@ -1000,6 +1011,14 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 props.userDefineLines = props.user_define_lines;
                 delete props.user_define_lines;
             }
+            self.pointsets = props.pointsets;
+            self.config = props.config;
+            self.curvesProperties = props.curvesProperties;
+            self.wellsX = props.wellsX;
+            self.wellsY = props.wellsY;
+            Object.keys(props).forEach(key => {
+                self.crossplotModel.properties[key] = props[key];
+            });
             self.viCrossplot = graph.createCrossplot(props, document.getElementById(self.crossplotAreaId));
             if (self.crossplotModel.properties.showHistogram) {
                 self.histogramXReady();
@@ -1357,7 +1376,7 @@ app.component(componentName, {
 });
 app.filter('toFixed2', function() {
     return function(item) {
-        if (item) return item.toFixed(2);
+        if (item) return (+item).toFixed(2);
     }
 });
 
