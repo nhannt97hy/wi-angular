@@ -178,6 +178,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     handlers.AddNewButtonClicked();
                 }
             }, {
+                name: "Export To Inventory",
+                label: "Export To Inventory",
+                icon: "arrow-right-16x16",
+                handler: function () {
+                    utils.exportWellToInventory();
+                }
+            }, {
                 name: "ImportASCII",
                 label: "Import ASCII",
                 icon: "ascii-import-16x16",
@@ -372,13 +379,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "annotation-16x16",
                         handler: function () {
                             utils.renameWell();
-                        }
-                    },  {
-                        name: "Export To Inventory",
-                        label: "Export To Inventory",
-                        icon: "arrow-right-16x16",
-                        handler: function () {
-                            utils.exportWellToInventory();
                         }
                     }, {
                         name: "DuplicateCurve",

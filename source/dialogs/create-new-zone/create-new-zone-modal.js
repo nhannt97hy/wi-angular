@@ -31,31 +31,6 @@ module.exports = function (ModalService, template, callback) {
         this.refreshTree();
 
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-        this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
-
-        // this.backgroundZone = function () {
-        //     DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.background, function (colorStr) {
-        //         self.zone.fill.pattern.background = colorStr;
-        //         console.log('bg', self.zone.background);
-        //     });
-        // };
-
-        // this.foregroundZone = function () {
-        //     DialogUtils.colorPickerDialog(ModalService, self.zone.fill.pattern.foreground, function (colorStr) {
-        //         self.zone.fill.pattern.foreground = colorStr;
-        //     });
-        // };
-        // this.choosePattern = function() {
-        //     DialogUtils.fillPatternDialog(ModalService, 
-        //                                 self.zone.fill.pattern.name, 
-        //                                 self.zone.fill.pattern.foreground, 
-        //                                 self.zone.fill.pattern.background, 
-        //                                 function(_name) {
-        //         if(_name) {
-        //             self.zone.fill.pattern.name = _name;
-        //         }
-        //     });
-        // }
         this.upTrigger = function (cb) {
             wiApiService.listZoneTemplate({}, function (templates) {
                 if (templates) {
@@ -102,6 +77,7 @@ module.exports = function (ModalService, template, callback) {
         this.clickFunction = function ($index, $event, node) {
             clickFunction($index, $event, node, self.config, true);
             let selectedNode = self.config.__SELECTED_NODES[0];
+            console.log('selectedNode', selectedNode);
             if(selectedNode) {
                 self.returnZone.name = selectedNode.name;
                 self.returnZone.background = selectedNode.background;
@@ -153,7 +129,7 @@ module.exports = function (ModalService, template, callback) {
             return {
                 idZoneTemplate: zone.idZoneTemplate,
                 template: zone.template,
-                type: 'zoneTeplate',
+                type: 'zoneTemplate',
                 background: zone.background,
                 foreground: zone.foreground,
                 pattern: zone.pattern,
