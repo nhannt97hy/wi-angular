@@ -223,14 +223,18 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
     */
     this.openPropertiesDialog = function () {
-        let options = {
+        let props = self.getProperties().controller.viTrack.getProperties();
+        props.wellProps = self.getWellProps();
+        props.zoneset = utils.getModel('zoneset', props.idZoneSet);
+        wiComponentService.emit("update-properties", {type: 'logtrack', props: props});
+        /*let options = {
             tabs: ['true', 'true', 'true']
         };
         DialogUtils.logTrackPropertiesDialog(ModalService, self.getProperties(), options, function (props) {
             if (props) {
                 console.log('logTrackPropertiesData', props);
             }
-        });
+        });*/
     }
     this.update = update;
     this.isIdle = false;
@@ -351,7 +355,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 let _promises = [];
                 async.eachSeries(self.viTrack.getCurves(), function(viCurve, cb) {
                     wiApiService.infoCurve(viCurve.idCurve, function(curveInfo) {
-                        if(viCurve.unit !== curveInfo.unit) {
+                        if(viCurve.unit !== curveInfo.unit && curveInfo.idFamily) {
                             wiApiService.getListUnit({idCurve: viCurve.idCurve}, function(units) {
                                 let defaultUnit = units.find(u => u.name === curveInfo.unit);
                                 let currUnit = units.find(u => u.name === viCurve.unit);

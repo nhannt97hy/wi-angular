@@ -1,27 +1,39 @@
 const componentName = 'wiProps';
 const moduleName = 'wi-props';
 
-function Controller ($scope, $http, $timeout, wiComponentService, ModalService) {
+function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, ModalService) {
     let self = this;
     window.wi = this;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
     this.fields = null;
+    this.curveUnits = null;
     this.$onInit = function() {
         wiComponentService.putComponent(self.name, self);
     }
     this.$onChanges = function(changeObj) {
-        if(changeObj.input || changeObj.config) {
+        if(changeObj.input || changeObj.config || changeObj.typeprops) {
             self.fields = obj2Array(self.input, self.config);
             self.section = sectionObj(self.config);
             self.shown =  self.getSections(self.section).map(s => true);
+            if(self.typeprops == 'curve') {
+                $timeout(function() {
+                    wiApiService.asyncGetListUnit({idCurve: self.input.idCurve}).then(r => {
+                        self.curveUnits = r;
+                    });
+                })
+            }
         }
     }
     this.doChange = function(field) {
-        onChangeDefault({key: field.name, value: field.value}, function() {
-            self.input[field.name] = field.value;
-        });
+        if( self.typeprops == 'well' || 
+            self.typeprops == 'dataset' || 
+            self.typeprops == 'curve' ) {
+            onChangeDefault({key: field.name, value: field.value}, function() {
+                self.input[field.name] = field.value;
+            });
+        } else self.input[field.name] = field.value;
     }
     function onChangeDefault(item, cb) {
         utils.editProperty(item, _.debounce(function () {
@@ -31,7 +43,7 @@ function Controller ($scope, $http, $timeout, wiComponentService, ModalService) 
     function obj2Array(obj, config) {
 
         let array = new Array();
-        if(!obj) return [];
+        if(!obj || !config) return [];
         for (let key of Object.keys(config)) {
             let item = {
                 name: key,
@@ -67,7 +79,7 @@ function Controller ($scope, $http, $timeout, wiComponentService, ModalService) 
         for (let key of Object.keys(sectionObj)){
             sectionHash[sectionObj[key]] = true;
         };
-        let ret = Object.keys(sectionHash).filter(sh => sh!='undefined');
+        let ret = Object.keys(sectionHash).filter(sh => (sh!='undefined' || sh!='null'));
         return ret;
     };
 
@@ -83,7 +95,6 @@ function Controller ($scope, $http, $timeout, wiComponentService, ModalService) 
         var typeName = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
         return typeName.replace("string", "text");;
     };
-
     this.changeColor = function(field, fields) {
         DialogUtils.colorPickerDialog(ModalService, field, function (colorStr) {
             fields[fields.indexOf(field)].value = colorStr;
@@ -109,10 +120,43 @@ function Controller ($scope, $http, $timeout, wiComponentService, ModalService) 
             if (!newFamily) return;
             field.value = newFamily;
             utils.editProperty({key: 'idFamily', value: newFamily.idFamily}, function() {
-
-            })
+                if(self.typeprops == 'curve') {
+                    $timeout(function() {
+                        wiApiService.asyncGetListUnit({idCurve: self.input.idCurve}).then(r => {
+                            self.curveUnits = r;
+                            /*let temp = fields.find(f => f.name == 'unit');
+                            let unit_temp = self.curveUnits.find(c => c.name == temp.value);*/
+                        });
+                    })
+                }
+            });
         });
     }
+    this.changeZoneSet = function(field, fields) {
+        DialogUtils.zoneSetEditDialog(ModalService, wiComponentService, field.value, self.input.wellProps, function (newZoneSet) {
+            if (!newZoneSet) return;
+            field.value = newZoneSet;
+        });
+    }
+    this.onChangeUnit = function(field, fields) {
+        let temp = fields.find(f => f.name == 'unit');
+        // self.fields[self.fields.indexOf(temp)].value = field.value;
+        let payload = {};
+        payload.srcUnit = self.curveUnits.find(u => u.name == temp.value);
+        payload.desUnit = self.curveUnits.find(u => u.name == field.value);
+        payload.idCurve = self.input.idCurve;
+        if( !payload.srcUnit || !payload.desUnit ) {
+            fields[fields.indexOf(temp)].value = field.value || self.curveUnits[0].name;
+            self.doChange(temp);
+            return;
+        }
+        wiApiService.convertCurveUnit(payload, function (response) {
+            utils.refreshProjectState().then(() => {
+                fields[fields.indexOf(temp)].value = field.value;
+            });
+        });
+    }
+    
 }
 
 let app = angular.module(moduleName, []);
@@ -123,7 +167,8 @@ app.component(componentName, {
     bindings: {
         name: "@",
         input: "<",
-        config: "<"
+        config: "<",
+        typeprops: "<"
     }
 });
 

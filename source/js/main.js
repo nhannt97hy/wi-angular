@@ -310,10 +310,13 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
     wiComponentService.on('update-properties', function(data){
-        $scope.inputProps = data.props;
-        $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
+        $timeout(function() {
+            $scope.inputProps = data.props;
+            $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
+            $scope.typeProps = data.type;
+        }, 200);
     })
-    $scope.myPropertiesConfig = {};
+    // $scope.myPropertiesConfig = {};
 
     $scope.sampleData={
         bottomDepth: 1000,

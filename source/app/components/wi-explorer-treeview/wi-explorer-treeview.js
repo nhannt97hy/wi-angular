@@ -243,6 +243,8 @@ function WiExpTreeController(
                 nodeProperties.startDepth = well.properties.topDepth;
                 nodeProperties.dataset = dataset.properties.name;
                 nodeProperties.exportName = nodeProperties.name;
+
+                nodeProperties.compatiableList = nodeProperties.unit;
                 //family
                 
                 break;
