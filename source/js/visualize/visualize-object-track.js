@@ -54,8 +54,10 @@ ObjectTrack.prototype.init = function (baseElement) {
         .on('mousedown', function () {
             self.setCurrentDrawing(null);
         });
-    this.svgContainer = this.plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-track-svg-container vi-object-svg-container');
+
+    this.svgContainer.classed('vi-object-svg-container', true);
+    // this.svgContainer = this.plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-track-svg-container vi-object-svg-container');
     
     this.svgTooltipContainer = this.plotContainer.append('svg')
         .attr('class', 'vi-track-drawing vi-track-svg-container vi-tooltip-svg-container')

@@ -102,41 +102,41 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         selectHandler(newNode, self.zoneSetConfig);
                     })
                 }
-                else {
-                    if (!parentWell.children.find(function (node) { return node.name == data.name })) {
-                        if (self.newZoneSet) {
-                            parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
-                        }
-                        let newNode = {
-                            idZoneSet: "",
-                            name: data.name,
-                            idWell: parentWell.idWell,
-                            type: 'zoneSet',
-                            data: {
-                                icon: 'mineral-zone-16x16',
-                                label: data.name,
-                                template: data.template,
-                                childExpanded: true
-                            },
-                            children: []
-                        }
-                        self.newZoneSet = newNode;
-                        self.lastSelectedZoneSet = newNode;
-                        parentWell.children.push(newNode);
-                        parentWell.data.childExpanded = true;
-                        unselectAllNodes(self.zoneSetConfig);
-                        selectHandler(newNode, self.zoneSetConfig);
-                        self.refreshZoneList();
-                    } else {
-                        if (self.newZoneSet) {
-                            parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
-                        }
-                        // alert('template name existed');
-                        unselectAllNodes(self.zoneSetConfig);
-                        selectHandler(parentWell.children.find(function (node) { return node.name == data.name }), self.zoneSetConfig);
-                        self.refreshZoneList();
-                    }
-                }
+                // else {
+                //     if (!parentWell.children.find(function (node) { return node.name == data.name })) {
+                //         if (self.newZoneSet) {
+                //             parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
+                //         }
+                //         let newNode = {
+                //             idZoneSet: "",
+                //             name: data.name,
+                //             idWell: parentWell.idWell,
+                //             type: 'zoneSet',
+                //             data: {
+                //                 icon: 'mineral-zone-16x16',
+                //                 label: data.name,
+                //                 template: data.template,
+                //                 childExpanded: true
+                //             },
+                //             children: []
+                //         }
+                //         self.newZoneSet = newNode;
+                //         self.lastSelectedZoneSet = newNode;
+                //         parentWell.children.push(newNode);
+                //         parentWell.data.childExpanded = true;
+                //         unselectAllNodes(self.zoneSetConfig);
+                //         selectHandler(newNode, self.zoneSetConfig);
+                //         self.refreshZoneList();
+                //     } else {
+                //         if (self.newZoneSet) {
+                //             parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
+                //         }
+                //         // alert('template name existed');
+                //         unselectAllNodes(self.zoneSetConfig);
+                //         selectHandler(parentWell.children.find(function (node) { return node.name == data.name }), self.zoneSetConfig);
+                //         self.refreshZoneList();
+                //     }
+                // }
             });
         }
     }
@@ -320,7 +320,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             if (data) {
                 // if (!self.newZoneSet) {
                 data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
-                wiApiService.createZone(data, function (zone) {
+                let dataCopy = angular.copy(data);
+                wiApiService.createZone(dataCopy, function (zone) {
                     self.refreshZoneList();
                 })
                 // } else {

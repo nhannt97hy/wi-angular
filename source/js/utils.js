@@ -1885,8 +1885,76 @@ exports.exportCurve = function () {
     });
 }
 
+exports.exportCurveToInventory = function () {
+    let selectedNode = getSelectedNode();
+    if(selectedNode.type!= 'curve') return;
+    let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let wiApiService = __GLOBAL.wiApiService;    
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    console.log('selectedNode', selectedNode);
+    wiApiService.getWellInfoByName(selectedNode.parentDataArr[1].label, projectLoaded.idProject, function(well, err) {
+        if(err) {
+            toastr.error(err);
+        } else {
+            wiOnlineInvService.importCurveFromProject([{
+                idCurve: selectedNode.properties.idCurve,
+                name: selectedNode.properties.name,
+                wellName: well.name,
+                datasetName: selectedNode.parentDataArr[0].label,
+                idProject: projectLoaded.idProject
+            }], function (result, err) {
+                if(err) {
+                    toastr.error(err);
+                } else {
+                    console.log('result', result);
+                }
+            })
+        }
+    })
+}
+
+exports.exportDatasetToInventory = function () {
+    let selectedNode = getSelectedNode();
+    if(selectedNode.type != 'dataset') return;
+    let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
+    wiOnlineInvService.wellInfoByName(selectedNode.parentData.label, function(well, err) {
+        if(err) {
+            toastr.error(err);
+        } else {
+            wiOnlineInvService.importDatasetFromProject([{
+                idDataset: selectedNode.properties.idDataset,
+                idDesWell: well.idWell,
+                name: selectedNode.properties.name,
+                idWell: selectedNode.properties.idWell,
+            }], function (result, err) {
+                if(err) {
+                    toastr.error(err);
+                } else {
+                    console.log(result);
+                }
+            })
+        }
+    })
+}
+
+exports.exportWellToInventory = function () {
+    let selectedNode = getSelectedNode();
+    if(selectedNode.type != 'well') return;
+    let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    wiOnlineInvService.importWellFromProject ({name: selectedNode.name, idProject: projectLoaded.idProject}, function (result, err){
+        if(err) {
+            toastr.error(err);
+        } else {
+            console.log('result', result);
+        }
+    })
+}
 exports.renameCurve = function renameCurve(newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
+
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;

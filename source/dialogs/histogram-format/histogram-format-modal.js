@@ -488,6 +488,7 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
         this.updateProperties = function () {
             console.log('sau getInputData');
             let datasets = self.taskConfig.inputData;
+            if (!datasets) return;
             datasets.forEach(set => {
                 let curve = set.children[0].data.value.properties;
                 let curveProps = {
@@ -541,6 +542,12 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                             curveProps.options = props.options;
                             self.curvesProperties[self.curvesProperties.indexOf(props)] = curveProps;
                         }
+                        self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                        self.inputDataClone.forEach(d => { delete d.children; });
+                        self.curvesPropertiesClone = self.curvesProperties.filter(cp => {
+                            return cp.flag != 'delete';
+                        });
+                        self.selectedDatasetProps = null;
                     }
                     self.histogramModelProps.curvesProperties = self.curvesProperties;
                 }
@@ -619,6 +626,12 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                             self.curvesProperties[self.curvesProperties.indexOf(props)].flag = 'delete';
                             self.taskConfig.inputData.splice(idx, 1);
                             self.datasetsList.splice(self.datasetsList.indexOf(d), 1);
+                            self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                            self.inputDataClone.forEach(d => { delete d.children; });
+                            self.curvesPropertiesClone = self.curvesProperties.filter(cp => {
+                                return cp.flag != 'delete';
+                            });
+                            self.selectedDatasetProps = null;
                         }
                     })
                     self.taskConfig.inputData.__SELECTED_NODES = [];
@@ -638,7 +651,7 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
             clickFunction($index, $event, node, self.projectConfig);
         };
 
-        this.taskClickFuntion = function ($index, $event, node) {
+        this.taskClickFunction = function ($index, $event, node) {
             if (node && node.type == 'dataset') {
                 let rootNode = self.taskConfig.inputData;
                 if (!Array.isArray(rootNode.__SELECTED_NODES)) rootNode.__SELECTED_NODES = [];
@@ -648,6 +661,17 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                 rootNode.__SELECTED_NODES = selectedNodes;
                 node.data.selected = true;
                 node.$index = $index;
+            }
+        }
+
+        this.datasetPropsClickFunction = function ($index, $event, node) {
+            if (node && node.type == 'dataset') {
+                if (!$event.ctrlKey) unselectAllNodes(self.inputDataClone);
+                node.data.selected = true;
+                node.$index = $index;
+                self.selectedDatasetProps = self.curvesPropertiesClone[$index];
+                self.selectedDatasetProps.name = self.taskConfig.inputData[$index].data.label;
+                console.log(self.selectedDatasetProps);
             }
         }
 
@@ -892,6 +916,7 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     plotType: self.config.plotType
                 };
                 wiApiService.editHistogram(dataRequest, function (hisProps) {
+                    if (!hisProps.idHistogram) return;
                     wiApiService.getHistogram(hisProps.idHistogram, function (histogram) {
                         async.eachSeries(histogram.curves, function (curve, cb) {
                             let props = self.curvesProperties.find(cp => {
@@ -907,15 +932,13 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                                 console.error(err);
                                 return;
                             }
+                            self.taskConfig.inputData.forEach(ipt => { ipt.flag = 'edit'; });
                             if (histogram.curves[0]) {
                                 self.config.showGaussian = histogram.curves[0].histogram_curve_set.showGaussian;
                                 self.config.showCumulative = histogram.curves[0].histogram_curve_set.showCumulative;
                                 self.config.plot = histogram.curves[0].histogram_curve_set.plot;
                             }
                             self.histogramModelProps = histogram;
-                            self.histogramModelProps.curves = self.curves = histogram.curves;
-                            self.histogramModelProps.config = self.config;
-                            self.histogramModelProps.curvesProperties = self.curvesProperties;
                             self.histogramModelProps.wells = new Object();
                             histogram.curves.forEach(curve => {
                                 let w = utils.findWellByCurve(curve.idCurve);
@@ -926,7 +949,12 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                                     step: w.step
                                 };
                                 self.histogramModelProps.wells[curve.idCurve] = well;
+                                let cp = self.curvesProperties.find(cp => { return cp.idCurve == curve.idCurve; });
+                                cp.flag = curve.flag = 'edit';
                             });
+                            self.histogramModelProps.curves = self.curves = histogram.curves;
+                            self.histogramModelProps.config = self.config;
+                            self.histogramModelProps.curvesProperties = self.curvesProperties;
                             _histogramModel.properties = self.histogramModelProps; // save change back to the data tree
                             if (callback) callback(self.histogramModelProps);
                         });
@@ -934,10 +962,8 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                 });
             } else {
                 self.histogramModelProps.curves = self.curves = [];
-                self.histogramModelProps.config = self.config;
-                self.histogramModelProps.curvesProperties = self.curvesProperties;
                 self.histogramModelProps.wells = new Object();
-                histogram.curves.forEach(curve => {
+                self.histogramModelProps.curves.forEach(curve => {
                     let w = utils.findWellByCurve(curve.idCurve);
                     let well = {
                         idWell: w.idWell,
@@ -946,7 +972,11 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                         step: w.step
                     };
                     self.histogramModelProps.wells[curve.idCurve] = well;
+                    let cp = self.curvesProperties.find(cp => { return cp.idCurve == curve.idCurve; });
+                    cp.flag = curve.flag = 'edit';
                 });
+                self.histogramModelProps.config = self.config;
+                self.histogramModelProps.curvesProperties = self.curvesProperties;
                 _histogramModel.properties = self.histogramModelProps; // save change back to the data tree
                 if (callback) callback(self.histogramModelProps);
             }

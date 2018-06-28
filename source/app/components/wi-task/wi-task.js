@@ -18,11 +18,13 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     const CURVE_SELECTION = "1";
     const FAMILY_SELECTION = "2";
     const FAMILY_GROUP_SELECTION = "3";
+    const TASK_SELECTION = "4";
     self.CURVE_SELECTION = CURVE_SELECTION;
     self.FAMILY_SELECTION = FAMILY_SELECTION;
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
+    self.TASK_SELECTION = TASK_SELECTION;
 
-    this.$onInit = function() {
+    this.$onInit = function () {
         wiComponentService.putComponent("wiTask" + self.id, self);
         self.taskConfig = self.taskConfig || defaultTaskConfig;
         // CONFIGURE INPUT TAB
@@ -38,6 +40,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         self.SelectionTreeName = name + 'SelectionTree';
         self.projectTreeName = name + 'projectTree';
         self.zonationTreeName = name + 'zonationTree';
+        self.taskTreeName = name + 'taskTree';
         self.taskDataTreeName = name + 'taskDataTree';
 
         self.idxTab = 0;
@@ -213,6 +216,19 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         self.filterText = "";
         self.selectionType = selType || self.selectionType;
         switch (self.selectionType) {
+            case TASK_SELECTION:
+                if (!self.wiFlowDesigner) break;
+                self.selectionList = self.wiFlowDesigner.getPreviousTasks(self.id).map(e => ({
+                    id: e.businessObject.get('idTask'),
+                    data: {
+                        label: e.businessObject.get('name'),
+                        icon: "workflow-16x16",
+                        selected: false
+                    },
+                    children: [],
+                    properties: {}
+                }));
+                break;
             case FAMILY_GROUP_SELECTION:
                 let temp = utils.getListFamily();
                 if (!temp) temp = list;
@@ -515,14 +531,9 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         $timeout(() => {
             domEle.draggable({
                 helper: "clone",
-                start: function(event, ui) {
-                    __dragging = true;
-                },
-                stop: function(event, ui) {
-                    __dragging = false;
-                },
+                scope: 'wi-task',
                 containment: "document",
-                appendTo: document.querySelector("wi-task #dragElement")
+                appendTo: `wi-task#${self.id} #dragElement`
             });
         }, 500);
     }
@@ -558,7 +569,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             matchCriterion.value == cModel.properties.idFamily
                         );
                     }
-                    return matchCriterion.value == cModel.idFamily;
+                    return matchCriterion.value == cModel.idFamily || matchCriterion.name == cModel.family;
                 });
             case CURVE_SELECTION:
                 return curves.filter(cModel => {
@@ -571,9 +582,10 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         return [];
     }
     this.droppableSetting = function() {
-        $("wi-task .wi-droppable").droppable({
+        $(`wi-task#${self.id} .wi-droppable`).droppable({
+            scope: 'wi-task',
             drop(event, ui) {
-                if (!__dragging) return;
+                if (!ui.draggable) return;
                 // check modal draggable
                 if (ui.draggable[0].className.includes("modal-content")) return;
                 const type = ($(ui.draggable[0]).attr("type"));
@@ -638,6 +650,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 }
                 switch(type){
                     case 'dataset':
+                    (async () => {
                         const idDataset = parseInt($(ui.draggable[0]).attr("data"));
                         for (const node of self.projectConfig) {
                             utils.visit(
@@ -679,6 +692,24 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                         );
                         if (existDataset) return;
 
+                        const prevTaskCurves = [];
+                        if (self.wiFlowDesigner) {
+                            const prevTasks = self.wiFlowDesigner.getPreviousTasks(self.id);
+                            await new Promise((resolve, reject) => {
+                                async.each(prevTasks, (taskElement, next) => {
+                                    const idTask = taskElement.businessObject.get('idTask');
+                                    wiApiService.getTask(idTask, (task) => {
+                                        const taskConfig = task.content;
+                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset)) prevTaskCurves.push(...taskConfig.outputs);
+                                        next();
+                                    });
+                                }, (err, result) => {
+                                    if (err) return reject(err);
+                                    resolve();
+                                })
+                            })
+                        }
+                        datasetModel.children.push(...prevTaskCurves.filter(taskCurve => !datasetModel.children.find(c => c.name == taskCurve.name)));
                         let inputItems = self.taskConfig.inputs.map(ipt => {
                             let tempItem = {
                                 data: {
@@ -736,6 +767,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             self.taskConfig.inputData.push(input);
                             // self.typeFilter = 'inputchoice';
                         })
+                    })();
                         break;
 
                     case 'zoneset':
@@ -1307,6 +1339,7 @@ app.component(name, {
         id: "<",
         taskConfig: '<',
         new: '<',
+        wiFlowDesigner: '<'
     }
 });
 
