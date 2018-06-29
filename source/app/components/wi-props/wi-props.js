@@ -27,18 +27,21 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         }
     }
     this.doChange = function(field) {
+        onChangeDefault(field, function() {
+            self.input[field.name] = field.value;
+        });
+    
+    }
+    function onChangeDefault(field, cb) {
         if( self.typeprops == 'well' || 
             self.typeprops == 'dataset' || 
             self.typeprops == 'curve' ) {
-            onChangeDefault({key: field.name, value: field.value}, function() {
-                self.input[field.name] = field.value;
-            });
+            utils.editProperty({key: field.name, value: field.value}, _.debounce(function () {
+                cb && cb();
+            }, 200));
+        } else if(self.typeprops == 'logtrack') {
+
         } else self.input[field.name] = field.value;
-    }
-    function onChangeDefault(item, cb) {
-        utils.editProperty(item, _.debounce(function () {
-            cb && cb();
-        }, 200));
     }
     function obj2Array(obj, config) {
 
