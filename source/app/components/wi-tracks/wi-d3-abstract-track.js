@@ -124,6 +124,10 @@ Controller.prototype.registerTrackCallback = function() {
             self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
             self.wiD3Ctrl && self.openPropertiesDialog();
         });
+        viTrack.on('dblclick', function () {
+            self.wiD3Ctrl && self.wiD3Ctrl.setCurrentTrack(trackComponent);
+            self.wiD3Ctrl && self.openPropertiesDialog();
+        });
     }
     viTrack.onVerticalResizerDrag(function () {
         if (trackComponent.idTrack) {
