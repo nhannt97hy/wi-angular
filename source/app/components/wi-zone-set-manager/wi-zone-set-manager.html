@@ -6,7 +6,7 @@
         }    
     </style>
     <div class="left-side">
-        <div class="template-tree">
+        <div class="template-tree" style="display: flex; flex-direction: column;">
             <div class='left-heading'>
                 <h5>Zonesets</h5>
                 <div class="button-area" style="position: relative">
@@ -21,17 +21,19 @@
                     </label>
                 </div>
             </div>
-            <div style='background-color:white;display: flex;padding-left: 7px; border-bottom: 1px solid #ccc;'>
-                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
-                <input type='text' id="focus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' ng-model="wiZoneSetManager.filter"
-                    placeholder="[Search]">
+            <div class="left-tree">
+                <div style='background-color:white;display: flex;padding-left: 7px; border-bottom: 1px solid #ccc; flex-basis:28px;'>
+                    <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                    <input type='text' id="focus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' ng-model="wiZoneSetManager.filter"
+                        placeholder="[Search]">
+                </div>
+                <wi-scroll id-scroll="'wzsmTreeScroll'" style='display:flex;height: 80%' up-trigger='wiInventory.upTrigger'
+                    down-trigger='wiInventory.downTrigger'>
+                    <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneSetManager.zoneSetConfig" container="wiZoneSetManager"
+                        on-click-function="wiZoneSetManager.clickFunction" filter="{{wiZoneSetManager.filter}}" show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
+                    </wi-base-treeview>
+                </wi-scroll>
             </div>
-            <wi-scroll id-scroll="'wzsmTreeScroll'" style='flex:1;display:flex;flex-direction:column;height: 80%' up-trigger='wiInventory.upTrigger'
-                down-trigger='wiInventory.downTrigger'>
-                <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneSetManager.zoneSetConfig" container="wiZoneSetManager"
-                    on-click-function="wiZoneSetManager.clickFunction" filter="{{wiZoneSetManager.filter}}" show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
-                </wi-base-treeview>
-            </wi-scroll>
         </div>
     </div>
     <div class="right-side" style="box-sizing:border-box">
@@ -40,7 +42,7 @@
                 Order by: </h5>
             <select ng-init="wiZoneSetManager.zoneOrder='none'" ng-model="wiZoneSetManager.zoneOrder" ng-show="wiZoneSetManager.zones.length !== 0">
                 <option value="none">None</option>
-                <option value="idZone" ng-hide="wiZoneSetManager.newZone">Zone id</option>
+                <option value="idZone">Zone id</option>
                 <option value="name">Zone name</option>
                 <option value="foreground">Foreground</option>
                 <option value="background">Background</option>
@@ -55,13 +57,13 @@
                 <label title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-plus" ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
                 </label>
-                <label class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="wiZoneSetManager.newZoneSet || !wiZoneSetManager.lastSelectedZoneSet">
+                <label class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-reload" ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
                 </label>
             </div>
         </div>
         <div class="content-area">
-            <div class="zone-area" style="padding-top: 15px">
+            <div class="zone-area">
                 <table class="text-on-table table table-bordered" ng-show="wiZoneSetManager.zones.length!==0">
                     <thead>
                         <tr>
@@ -69,9 +71,6 @@
                             <th width="15%">Zone name</th>
                             <th width="15%">Top Depth</th>
                             <th width="15%">Bottom Depth</th>
-                            <!-- <th width="15%">Sample</th>
-                            <th width="15%">Background</th>
-                            <th width="15%">Foreground</th> -->
                             <th width="20%">Pattern</th>
                         </tr>
                     </thead>
@@ -81,9 +80,6 @@
                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
                             </td>
                             <td width="20%">
-                                <!-- <input type="text" ng-model="zone.name" class="form-control" 
-                                        ng-change="wiZoneSetManager.onZoneChanged(zone);"
-                                        style="height: auto;"> -->
                                 {{zone.zone_template.name}}
                             </td>
                             <td width="20%">
@@ -94,30 +90,8 @@
                                 <input type="number" step="any" ng-model="zone.endDepth" class="form-control" ng-change="wiZoneSetManager.onZoneChanged(zone);"
                                     style="height: auto;">
                             </td>
-                            <!-- <td width="15%">
-                                <wi-canvas-rect name="{{zone.name}}" pattern="{{zone.fill.pattern.name}}" foreground="{{zone.fill.pattern.foreground}}" background="{{zone.fill.pattern.background}}"
-                                    width="80" height="20">
-                                </wi-canvas-rect>
-                            </td> -->
-                            <!-- <td width="15%"> -->
-                                <!-- <button ng-click="wiZoneSetManager.backgroundZone(zone);" ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control thick-border"
-                                        style="width: 103px; height: 28px; margin: auto;"> -->
-                                <!-- <label ng-style="{'background-color':zone.fill.pattern.background}" class="form-control wi-form-control thick-border" style="width: 103px; height: 28px; margin: auto;"> -->
-                                <!-- </label> -->
-                            <!-- </td> -->
-                            <!-- <td width="15%"> -->
-                                <!-- <button ng-click="wiZoneSetManager.foregroundZone(zone);" ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border"
-                                    style="width: 103px; height: 28px; margin: auto;">
-                                </button> -->
-                                <!-- <label ng-style="{'background-color':zone.fill.pattern.foreground}" class="form-control wi-form-control thick-border" style="width: 103px; height: 28px; margin: auto;"> -->
-                                <!-- </label> -->
                             </td>
                             <td width="30%">
-                                <!-- <button ng-click="wiZoneSetManager.choosePattern(zone)" class="btn btn-default thick-border padding-0">
-                                    <wi-canvas-rect name="rowZS_{{$index}}" pattern="{{zone.fill.pattern.name}}" width="100" height="26" foreground="{{zone.fill.pattern.foreground}}"
-                                        background='{{zone.fill.pattern.background}}'>
-                                    </wi-canvas-rect>
-                                </button> -->
                                 <label class="form-control wi-form-control thick-border" style="padding:0;margin:0;">
                                     <wi-canvas-rect name="rowZS_{{$index}}" pattern="{{zone.zone_template.pattern}}" width="100" height="26" foreground="{{zone.zone_template.foreground}}"
                                         background='{{zone.zone_template.background}}'>

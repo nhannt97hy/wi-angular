@@ -8,6 +8,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     this.idExportQueueItems = [];
     this.lasFiles = [];
     this.inventoryConfig = new Array();
+    this.fileFormat = 'Las2';
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let oUtils = require('./oinv-utils');
@@ -531,20 +532,45 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     }
     this.exportAllItems = function () {
         if (self.exportQueueItems.length > 0) {
-            wiOnlineInvService.exportAllItems(self.idExportQueueItems, function (response) {
-                if (response) {
-                    for (r of response) {
-                        if (r !== null) {
-                            let url = wiOnlineInvService.getFileUrl(r.path);
-                            self.lasFiles.push({
-                                name: r.datasetName + "_" + r.wellName,
-                                url: url
-                            })
+            console.log('export to format', self.fileFormat);
+            if(self.fileFormat == 'Las2') {
+                wiOnlineInvService.exportLas2(self.idExportQueueItems, function (response) {
+                    if (response) {
+                        for (r of response) {
+                            if (r !== null) {
+                                let url = wiOnlineInvService.getFileUrl(r.path);
+                                self.lasFiles.push({
+                                    name: r.datasetName + "_" + r.wellName,
+                                    url: url
+                                })
+                            }
                         }
                     }
-                }
-            });
-
+                });
+            } else {
+                wiOnlineInvService.exportLas3(self.idExportQueueItems, function (response) {
+                    if (response) {
+                        for (r of response) {
+                            if (r !== null) {
+                                let url = wiOnlineInvService.getFileUrl(r.path);
+                                self.lasFiles.push({
+                                    name: r.wellName,
+                                    url: url
+                                })
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+    this.fileFormatToggle = function () {
+        if (self.fileFormat == 'Las2') {
+            self.fileFormat = 'Las3';
+            console.log('==', self.fileFormat);            
+        } else {
+            self.fileFormat = 'Las2';
+            console.log('!=', self.fileFormat);
         }
     }
 }

@@ -18,9 +18,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.refreshZoneSetList = function () {
         self.lastSelectedWell = false;
         self.lastSelectedZoneSet = false;
-        self.newZoneSet = false;
         self.zoneSetConfig = [];
         self.zones = [];
+        self.selectedZones = [];        
         wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
             wells.sort(function (a, b) {
                 return parseInt(a.idWell) - parseInt(b.idWell);
@@ -56,7 +56,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         if (zone == info.zones[info.zones.length - 1]) {
                             returnData.push(zoneSetObj);
                             if (index == selectedNodes.length - 1) {
-                                // console.log('return data', JSON.stringify(returnData));
 
                                 let filename = 'zoneset';
                                 let blob = new Blob([angular.toJson(returnData, true)], { type: 'text/plain' });
@@ -189,11 +188,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.deleteZoneSet = function () {
         for (node of self.zoneSetConfig.__SELECTED_NODES) {
-            if (node == self.newZoneSet) {
-                let parentWell = getParentNode(node)
-                parentWell.children.splice(parentWell.children.indexOf(node), 1);
-                self.newZoneSet = false;
-            } else if (node.type == 'zoneSet') {
+            if (node.type == 'zoneSet') {
                 let parentWell = getParentNode(node);
                 let idZoneSet = node.idZoneSet;
                 wiApiService.removeZoneSet(idZoneSet, function () {
@@ -206,11 +201,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.clickFunction = function ($index, $event, node) {
         clickFunction($index, $event, node, self.zoneSetConfig);
-        if (self.newZoneSet && node != self.newZoneSet) {
-            let parentWell = self.zoneSetConfig.find(function (well) { return well.children.indexOf(self.newZoneSet) != -1 });
-            parentWell.children.splice(parentWell.children.indexOf(self.newZoneSet), 1);
-            self.newZoneSet = false;
-        }
         if (node.type == 'well') {
             self.zones = [];
             self.lastSelectedWell = node;
@@ -271,114 +261,60 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.newZone = false;
         self.selectedZones = [];
         self.zoneEditted = false;
-        if (self.newZoneSet) {
-            self.zones = []
-        } else {
-            wiApiService.getZoneSet(self.lastSelectedZoneSet.idZoneSet, function (info) {
-                if (info) {
-                    console.log('zones', info.zones);
-                    self.zones = info.zones;
-                }
-                else {
-                    console.log('no info');
-                }
-            })
-        }
+        wiApiService.getZoneSet(self.lastSelectedZoneSet.idZoneSet, function (info) {
+            if (info) {
+                console.log('zones', info.zones);
+                self.zones = info.zones;
+            }
+            else {
+                console.log('no info');
+            }
+        })
     }
     this.editZone = function () {
         console.log('editZone');
-        // if (self.newZone) {
-        //     let newZoneSet = {
-        //         name: self.newZoneSet.name,
-        //         idWell: self.newZoneSet.idWell
-        //     }
-        //     wiApiService.createZoneSet(newZoneSet, function (zoneSet) {
-        //         self.lastSelectedZoneSet.idZoneSet = zoneSet.idZoneSet;
-        //         for (zone of self.zones) {
-        //             zone.idZoneSet = zoneSet.idZoneSet;
-        //             self.newZoneSet = false;
-        //             wiApiService.createZone(zone, function (zone) {
-        //                 console.log('success', zone);
-        //             })
-        //         }
-        //     })
-        // }
-        // else if (self.zoneEditted) {
         for (zone of self.zones) {
-            if (zone.zoneEditted) {
+            if (zone.editted) {
                 wiApiService.editZone(zone, function () {
                     console.log('edit success');
-                    zone.zoneEditted = false;
+                    zone.editted = false;
                     self.zoneEditted = false;
                 });
             }
         }
-        // }
     }
     this.createZone = function () {
         DialogUtils.createNewZoneDialog(ModalService, self.zones[0].zone_template.template, function (data) {
             if (data) {
-                // if (!self.newZoneSet) {
                 data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
                 let dataCopy = angular.copy(data);
                 wiApiService.createZone(dataCopy, function (zone) {
                     self.refreshZoneList();
                 })
-                // } else {
-                //     self.newZone = true;
-                //     self.zones.push(data);
-                // }
             }
         });
     }
     this.deleteZone = function () {
-        // if (self.newZoneSet) {
-        //     self.zones = [];
-        //     let parentWell = getParentNode(self.newZoneSet);
-        //     parentWell.children.splice(parentWell.children.length - 1, 1);
-        // } else {
+        console.log('1111', self.zones)
         let length = self.zones.length
         for (z of self.zones) {
             if (z.flag) {
-                self.zones.splice(self.zones.indexOf(z), 1);
+                console.log('z', z);
                 wiApiService.removeZone(z.idZone, function () {
                     console.log('delete successfully');
                     self.selectedZones = [];
+                    if (self.zones.indexOf(z) == self.zones.length - 1) {
+                        self.refreshZoneList();
+                    }
                 })
             }
         }
-        // }
     }
-    // this.choosePattern = function (zone) {
-    //     DialogUtils.fillPatternDialog(ModalService,
-    //         zone.fill.pattern.name,
-    //         zone.fill.pattern.foreground,
-    //         zone.fill.pattern.background, function (_name) {
-    //             if (_name) {
-    //                 zone.fill.pattern.name = _name;
-    //                 self.onZoneChanged(zone);
-    //             }
-    //         });
-    // };
 
     this.onZoneChanged = function (zone) {
         self.zoneEditted = true;
-        zone.zoneEditted = true;
+        zone.editted = true;
     }
-
-    // this.backgroundZone = function (zone) {
-    //     DialogUtils.colorPickerDialog(ModalService, zone.fill.pattern.background, function (colorStr) {
-    //         zone.fill.pattern.background = colorStr;
-    //         self.onZoneChanged(zone);
-    //     });
-    // };
-    // this.foregroundZone = function (zone) {
-    //     let index = self.zones.indexOf(zone);
-    //     DialogUtils.colorPickerDialog(ModalService, zone.fill.pattern.foreground, function (colorStr) {
-    //         zone.fill.pattern.foreground = colorStr;
-    //         self.onZoneChanged(zone);
-    //     });
-    // };
 
     this.selectZoneToggle = function (zone) {
         if (!zone.flag) {

@@ -19,6 +19,8 @@ const AUTHENTICATION_SERVICE = 'http://login.sflow.me';
 const USER_INFO = '/user/info';
 
 const EXPORT_LAS2 = '/export/las2';
+const EXPORT_LAS3 = '/export/las3';
+
 
 const UPLOAD_FILES = '/upload/lases';
 
@@ -382,9 +384,13 @@ Service.prototype.deleteCurve = function (idCurve, callback) {
     this.post(DELETE_CURVE, {idCurve: idCurve}, callback);
 }
 
-Service.prototype.exportAllItems = function(idObj, callback){
+Service.prototype.exportLas2 = function(idObj, callback){
     console.log('idObj', idObj);
     this.post(EXPORT_LAS2, {idObjs: idObj}, callback);
+}
+
+Service.prototype.exportLas3 = function(idObj, callback){
+    this.post(EXPORT_LAS3, {idObjs: idObj}, callback);
 }
 
 Service.prototype.getFileUrl = function(url){
