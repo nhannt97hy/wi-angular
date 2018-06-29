@@ -1,0 +1,27 @@
+<div class="left-side">
+    <div class="heading">
+        <h5>Parameter Set List</h5>
+        <div class="button-area">
+            <label title="Refresh parameter set list" class='btn' ng-click="wiParameterSet.getParameterSetList()">
+                <i class="ti-reload"></i>
+            </label>
+        </div>
+    </div>
+    <div class="content-area">
+        <div class="list">
+            <div ng-repeat="paramSet in wiParameterSet.parameterSetList" ng-click="wiParameterSet.selectedParameterSet = paramSet" ng-class="{active: wiParameterSet.selectedParameterSet === paramSet}"
+                class="item">
+                {{paramSet.name}}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="right-side">
+    <div class="heading">
+        <h5>Parameter Set <span style="font-style: italic; color: steelblue">{{wiParameterSet.selectedParameterSet.name}}</span></h5>
+    </div>
+    <div class="content-area">
+        <wi-base-treeview config="wiParameterSet.parameterSetTreeConfig">
+        </wi-base-treeview>
+    </div>
+</div>

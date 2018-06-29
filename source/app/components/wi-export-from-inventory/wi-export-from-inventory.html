@@ -91,7 +91,10 @@
             <div class='panel panel-default export-right'>
                 <div class='panel-heading' style='display:flex;'>
                     <h5 style='flex:1;'>Las Files</h5>
-                    <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromInventory.lasFiles.length = 0;">
+                    <button style="margin:5px 0 5px 5px;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromInventory.fileFormatToggle()">
+                        <span>{{wiExportFromInventory.fileFormat}}</span>
+                    </button>
+                    <button style="margin:5px 0 5px 5px;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromInventory.lasFiles.length = 0;">
                         <span class='ti-brush-alt'></span>
                     </button>
                 </div>

@@ -533,7 +533,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 helper: "clone",
                 scope: 'wi-task',
                 containment: "document",
-                appendTo: `wi-task#${self.id} #dragElement`
+                appendTo: $('wi-task').filter('#' + self.id).find('#dragElement')
             });
         }, 500);
     }

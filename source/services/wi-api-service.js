@@ -90,6 +90,8 @@ const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
 const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 
 const EXPORT_LAS2 = '/export/las2';
+const EXPORT_LAS3 = '/export/las3';
+
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -2068,6 +2070,27 @@ Service.prototype.listTaskSpec = function (callback) {
 Service.prototype.exportLas2 = function(idObjs, callback) {
     this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
 }
+Service.prototype.exportLas3 = function(idObjs, callback) {
+    this.post(EXPORT_LAS3, {idObjs: idObjs}, callback);
+}
 Service.prototype.getLasFileUrl = function (url) {
     return BASE_URL + url;
+}
+
+// parameter set
+const PARAMETER_SET = '/project/parameter-set'
+Service.prototype.createParameterSet = function (payload, callback) {
+    this.post(PARAMETER_SET + '/new', payload, callback);
+}
+Service.prototype.getParameterSet = function (idParameterSet, callback) {
+    this.post(PARAMETER_SET + '/info', { idParameterSet }, callback);
+}
+Service.prototype.listParameterSet = function (idProject, callback) {
+    this.post(PARAMETER_SET + '/list', { idProject }, callback);
+}
+Service.prototype.editParameterSet = function (payload, callback) {
+    this.post(PARAMETER_SET + '/edit', payload, callback);
+}
+Service.prototype.removeParameterSet = function (idParameterSet, callback) {
+    this.post(PARAMETER_SET + '/delete', { idParameterSet }, callback);
 }
