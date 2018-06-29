@@ -1,7 +1,7 @@
 <div class="zone-template-manager">
     <div class="left-side">
         <div class="template-tree" style="display: flex; flex-direction: column;">
-            <div class='left-heading'>
+            <div class='left-heading' style='flex-basis:40px;'>
                 <h5>Templates</h5>
                 <div class="button-area" style="position:relative">
                     <label title="Create new template" class='btn pull-right' ng-click="wiZoneTemplateManager.createTemplate()">
@@ -18,10 +18,10 @@
             <div class="left-tree">
                 <div style='background-color:white;display: flex;padding-left: 7px; border-bottom: 1px solid #ccc; flex-basis:28px;'>
                     <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
-                    <input type='text' id="focus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' ng-model="wiZoneTemplateManager.filter"
+                    <input type='text' id="wztmFocus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' ng-model="wiZoneTemplateManager.filter"
                         placeholder="[Search]">
                 </div>
-                <wi-scroll id-scroll="'wztmTreeScroll'" style='display:flex;height:79%' up-trigger='wiZoneTemplateManager.upTrigger'
+                <wi-scroll id-scroll="'wztmTreeScroll'" style='display:flex;height:calc(100% - 68px);' up-trigger='wiZoneTemplateManager.upTrigger'
                     down-trigger='wiZoneTemplateManager.downTrigger'>
                     <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneTemplateManager.templateConfig" container="wiZoneTemplateManager"
                         on-click-function="wiZoneTemplateManager.templateClickFunction" filter="{{wiZoneTemplateManager.filter}}"
@@ -32,7 +32,7 @@
         </div>
     </div>
     <div class="right-side" style="box-sizing:border-box">
-        <div class="right-heading">
+        <div class="right-heading" style='flex-basis:40px'>
             <h5 style="margin: 6px; margin-right: 15px; font-weight:bold;display:inline-block" ng-show="wiZoneTemplateManager.zoneTemplates.length !== 0">
                 Order by: </h5>
             <select ng-init="wiZoneTemplateManager.zoneTemplateOrder='none'" ng-model="wiZoneTemplateManager.zoneTemplateOrder" ng-show="wiZoneTemplateManager.zoneTemplates.length !== 0">
