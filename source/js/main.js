@@ -57,6 +57,7 @@ let wiPlot = require('./wi-plot');
 let wiZoneTemplateManager = require('./wi-zone-template-manager');
 let wiZoneManager = require('./wi-zone-manager');
 let wiZoneSetManager = require('./wi-zone-set-manager');
+let wiParameterSet = require('./wi-parameter-set');
 
 let wiInventory = require('./wi-inventory');
 // let wiExport = require('./wi-export');
@@ -230,12 +231,12 @@ let app = angular.module('wiapp',
         wiMachineLearningApiService.name,
         wiOnlineInvService.name,
         wiComponentService.name,
+        wiPatternService.name,
+
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
-        wiPatternService.name,
-
-
+        wiParameterSet.name,
 
         wiCanvasRect.name,
         wiZone.name,
@@ -310,10 +311,13 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
     wiComponentService.on('update-properties', function(data){
-        $scope.inputProps = data.props;
-        $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
+        $timeout(function() {
+            $scope.inputProps = data.props;
+            $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
+            $scope.typeProps = data.type;
+        }, 200);
     })
-    $scope.myPropertiesConfig = {};
+    // $scope.myPropertiesConfig = {};
 
     $scope.sampleData={
         bottomDepth: 1000,

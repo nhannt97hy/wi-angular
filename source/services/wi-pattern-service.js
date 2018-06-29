@@ -87,7 +87,7 @@ Service.prototype.blendColor = function(image, foreground, background) {
 
     let ctx = canvas.getContext('2d');
 	ctx.drawImage(image, 0, 0);
-	let dataImg = ctx.getImageData(0, 0, 128, 128);
+	let dataImg = ctx.getImageData(0, 0, image.width, image.height);
     var pixels = dataImg.data;
     for(var i = 0; i < pixels.length; i+=4) {
         let existingAlpha = pixels[i+3]/255;

@@ -118,7 +118,7 @@ exports.ImportButtonClicked = function () {
         title: `<span class="logplot-blank-16x16"></span> <span>logplot5</span>`
     });*/
 }
-exports.ZoneSetManagerButtonClicked = function() {
+exports.ZonesetManagerButtonClicked = function() {
     console.log('zonesetManager button is clicked');
     let self = this;
     let wiComponentService = this.wiComponentService;
@@ -127,9 +127,25 @@ exports.ZoneSetManagerButtonClicked = function() {
     layoutManager.putTabRight({
         id: 'Zoneset-manager',
         title: 'Zoneset Manager',
+        tabIcon: 'zone-management-16x16',
         componentState: {
             html: `<wi-zone-manager></wi-zone-manager>`,
             name: 'wiZoneManager'
+        }
+    })
+}
+exports.ParameterSetsButtonClicked = function() {
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'parameter-set',
+        title: 'Parameter Set',
+        tabIcon: 'zone-management-16x16',
+        componentState: {
+            html: `<wi-parameter-set name="WiParameterSet"></wi-parameter-set>`,
+            name: 'wiParamaterSet'
         }
     })
 }

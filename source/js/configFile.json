@@ -128,15 +128,7 @@
             "translation": "Compatiable List",
             "option": "use",
             "section": "Informations",
-            "typeSpec": "select",
-            "function": null,
-            "defaultValue": null
-        },
-        "unknown": {
-            "translation": "Unknown",
-            "option": "use",
-            "section": "Informations",
-            "typeSpec": null,
+            "typeSpec": "wicompatiable",
             "function": null,
             "defaultValue": null
         },
@@ -192,6 +184,128 @@
             "translation": "Min Value",
             "option": "readonly",
             "section": "Value",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        }
+    },
+    "logtrack": {
+        "showTitle": {
+            "translation": "Show Title",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": "checkbox",
+            "function": null,
+            "defaultValue": null
+        },
+        "title": {
+            "translation": "Title",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "topJustification": {
+            "translation": "Justification",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "showLabels": {
+            "translation": "Show Label",
+            "option": "use",
+            "section": "Label",
+            "typeSpec": "checkbox",
+            "function": null,
+            "defaultValue": null
+        },
+        "showValueGrid": {
+            "translation": "Show Value Grid",
+            "option": "use",
+            "section": "Grid",
+            "typeSpec": "checkbox",
+            "function": null,
+            "defaultValue": null
+        },
+        "showDepthGrid": {
+            "translation": "Show Depth Grid",
+            "option": "use",
+            "section": "Grid",
+            "typeSpec": "checkbox",
+            "function": null,
+            "defaultValue": null
+        },
+        "majorTicks": {
+            "translation": "Major Ticks",
+            "option": "use",
+            "section": "Grid",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "minorTicks": {
+            "translation": "Minor Ticks",
+            "option": "use",
+            "section": "Grid",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "width": {
+            "translation": "Width",
+            "option": "use",
+            "section": "Geometry",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "color": {
+            "translation": "Color",
+            "option": "use",
+            "section": "Color",
+            "typeSpec": "wicolor",
+            "function": null,
+            "defaultValue": null
+        },
+        "showEndDepth": {
+            "translation": null,
+            "option": "notuse",
+            "section": null,
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "displayType": {
+            "translation": null,
+            "option": "notuse",
+            "section": null,
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "zoomFactor": {
+            "translation": "Zoom Factor",
+            "option": "use",
+            "section": "Geometry",
+            "typeSpec": null,
+            "function": null,
+            "defaultValue": null
+        },
+        "idZoneSet": {
+            "translation": "ZoneSet",
+            "option": "use",
+            "section": "Zonation",
+            "typeSpec": "wizoneset",
+            "function": null,
+            "defaultValue": null
+        },
+        "showZoneSet": {
+            "translation": null,
+            "option": "notuse",
+            "section": null,
             "typeSpec": null,
             "function": null,
             "defaultValue": null

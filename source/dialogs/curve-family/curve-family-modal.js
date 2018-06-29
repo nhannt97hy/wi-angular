@@ -14,14 +14,6 @@ module.exports = function (ModalService, wiComponentService, idFamily, listFamil
         this.familyConfig = [];
         this.selectedFamily = listFamily.find(f => f.idFamily === idFamily);
 
-        /*listFamily.forEach(family => {
-            // const groupKey = _.snakeCase(family.familyGroup);
-            const groupKey = family.familyGroup;
-
-            if (!this.familyGroups[groupKey]) this.familyGroups[groupKey] = [];
-            this.familyGroups[groupKey].push(family);
-            if (family === this.selectedFamily) this.selectedGroup[groupKey] = this.familyGroups[groupKey];
-        });*/
         for(let i = 0; i < listFamily.length; i++) {
             // const groupKey = _.snakeCase(family.familyGroup);
             const groupKey = listFamily[i].familyGroup;

@@ -2844,6 +2844,7 @@ function updateLinesOnCurveEdited(curveModel) {
     let idCurve = curveModel.properties.idCurve;
     let wellModel = findWellByCurve(idCurve);
     let logplotModels = wellModel.children.find(child => child.type == 'logplots');
+    if (!logplotModels) return;
     logplotModels.children.forEach(function (logplotModel) {
         let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
         if (!wiLogplotCtrl) return;
