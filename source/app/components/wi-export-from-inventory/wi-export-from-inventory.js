@@ -73,7 +73,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
         })
     }
 
-    this.upTriggerPrj = function (cb) {
+    this.upTrigger = function (cb) {
         console.log('up-trigger prj');
         // let wells = self.projectConfig;
         let wells = self.inventoryConfig;
@@ -114,7 +114,7 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
         else if (cb) cb(0);
     }
 
-    this.downTriggerPrj = function (cb) {
+    this.downTrigger = function (cb) {
         console.log('down-trigger prj');
         // let wells = self.projectConfig;
         let wells = self.inventoryConfig;

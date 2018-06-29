@@ -2719,8 +2719,16 @@ function sortObject(o) {
 
 exports.openZonemanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'Zoneset-manager',
+        title: 'Zoneset Manager',
+        tabIcon: 'zone-management-16x16',
+        componentState: {
+            html: `<wi-zone-manager idwell=${item.properties.idWell}></wi-zone-manager>`,
+            name: 'wiZoneManager'
+        }
+    })
 }
 /*exports.getScaleCurveIfNotFamily = function(idCurve) {
     __GLOBAL.wiApiService.scaleCurve(idCurve, function(rangeObj) {
