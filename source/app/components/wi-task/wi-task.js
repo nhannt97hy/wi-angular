@@ -533,7 +533,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 helper: "clone",
                 scope: 'wi-task',
                 containment: "document",
-                appendTo: `wi-task#${self.id} #dragElement`
+                appendTo: $('wi-task').filter('#' + self.id).find('#dragElement')
             });
         }, 500);
     }
@@ -709,7 +709,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                 })
                             })
                         }
-                        datasetModel.children.push(...prevTaskCurves.filter(taskCurve => !datasetModel.children.find(c => c.name == taskCurve.name)));
+                        datasetModel.children.push(...prevTaskCurves.filter(taskCurve => taskCurve.use && !datasetModel.children.find(c => c.name == taskCurve.name)));
                         let inputItems = self.taskConfig.inputs.map(ipt => {
                             let tempItem = {
                                 data: {
@@ -869,6 +869,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             rootNode.__SELECTED_NODES = selectedNodes;
             node.data.selected = true;
             node.$index = $index;
+        }
+    }
+
+    this.onToggleUseOutput = function(item){
+        if(item.use == false || self.taskConfig.outputs.filter(c => c.use).length > 1){
+            item.use = !item.use;
+        }else{
+            toastr.error('Must have at least one output!');
         }
     }
 

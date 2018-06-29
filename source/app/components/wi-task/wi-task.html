@@ -79,7 +79,7 @@
                     </div>
                     <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
                         <li style="display:flex;flex-direction:row; margin-bottom:5px;">
-                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Task Name</label>
+                            <div style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Task Name</div>
                             <input type="text" class='form-control' style='flex:2' ng-model='wiTask.name'>
                         </li>
                     </ul>
@@ -164,13 +164,19 @@
                     </div>
                     <ul style='padding-left: 0px;margin: 5px;border-bottom: 1px solid #ccc;'>
                         <li style="display:flex;flex-direction:row;">
+                            <label style='flex-basis:5em;text-align:center;line-height: 2.5em;font-size: 14px;'>Use</label>
                             <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Family</label>
                             <label style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;'>Curve Name</label>
                         </li>
                     </ul>
                     <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
-                        <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.outputs track by $index">
-                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.family}}</label>
+                        <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.outputs track by $index" ng-init="item.use = true">
+                            <div style='flex-basis:5em;text-align:center;display: flex;font-size: 14px;justify-content: center;align-items: center;'
+                            ng-click="wiTask.onToggleUseOutput(item)">
+                                <i class="fa fa-check" aria-hidden="true"
+                                ng-class='{"checked-on": item.use, "checked-off": !item.use}'></i>
+                            </div>
+                            <div style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.family}}</div>
                             <input type="text" class='form-control' style='flex:2' ng-model='item.name'>
                         </li>
                     </ul>
