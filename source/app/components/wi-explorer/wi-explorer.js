@@ -252,11 +252,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 label: "Zoneset Manager",
                 icon: "zone-management-16x16",
                 handler: function () {
-                    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-                    layoutManager.putTabRight({
-                        title: "Zoneset Manager",
-                        componentState: {html: '<wi-zone-manager></wi-zone-manager>'}
-                    });
+                    globalHandlers.ZonesetManagerButtonClicked();
                 }
             }
         ];

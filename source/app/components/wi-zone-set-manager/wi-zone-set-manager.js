@@ -20,15 +20,27 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.lastSelectedZoneSet = false;
         self.zoneSetConfig = [];
         self.zones = [];
-        self.selectedZones = [];        
+        self.selectedZones = [];
+        let selectedWell;
+        console.log('xxx', self.idwell);
         wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
-            wells.sort(function (a, b) {
-                return parseInt(a.idWell) - parseInt(b.idWell);
-            });
             if (wells) {
+                wells.sort(function (a, b) {
+                    return parseInt(a.idWell) - parseInt(b.idWell);
+                });
                 let cutWells = wells.slice(0, selectionLength);
+                if(self.idwell) {
+                    if(wells.find(function(well){return well.idWell == self.idwell})){
+                        wells.push(selectedWell);                                
+                    }
+                    selectedWell = self.zoneSetConfig.find(function(well){return well.idWell == self.idwell});
+                }
                 for (well of cutWells) {
                     self.zoneSetConfig.push(createWellModel(well));
+                }
+                if(self.idwell && selectedWell) {
+                    console.log('ccc', self.idwell, selectedWell);
+                    selectHandler(selectedWell, self.zoneSetConfig);                    
                 }
             }
         })
@@ -89,13 +101,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (parentWell) {
             DialogUtils.newZoneSetDialog(ModalService, function (data) {
                 if (!data) return;
-                else if (data.template.template) {
+                else {
                     wiApiService.createZoneSet({
                         name: data.name,
-                        template: data.template.template,
+                        template: data.template.template || "",
                         idWell: parentWell.idWell
                     }, function (res) {
                         let newNode = createZoneSetModel(res)
+                        newNode.template = data.template.template;
                         parentWell.children.push(newNode);
                         unselectAllNodes(self.zoneSetConfig);
                         selectHandler(newNode, self.zoneSetConfig);
@@ -139,6 +152,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         }
     }
+
     this.upTrigger = function (cb) {
         if (topIdx > 0) {
             wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
@@ -261,10 +275,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.newZone = false;
         self.selectedZones = [];
         self.zoneEditted = false;
+        self.lastSelectedZoneSet.template = false;
         wiApiService.getZoneSet(self.lastSelectedZoneSet.idZoneSet, function (info) {
             if (info) {
                 console.log('zones', info.zones);
                 self.zones = info.zones;
+                for(let z of self.zones) {
+                    z.orderDepth = z.startDepth;
+                }
+                if (!self.lastSelectedZoneSet.template && self.zones[0]) {
+                    self.lastSelectedZoneSet.template = self.zones[0].zone_template.template;
+                }
             }
             else {
                 console.log('no info');
@@ -275,22 +296,32 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         console.log('editZone');
         for (zone of self.zones) {
             if (zone.editted) {
-                wiApiService.editZone(zone, function () {
-                    console.log('edit success');
-                    zone.editted = false;
-                    self.zoneEditted = false;
-                });
+                if(checkValidZoneDepth(zone.startDepth, zone.endDepth, zone)) {
+                    wiApiService.editZone(zone, function () {
+                        console.log('edit success');
+                        zone.editted = false;
+                        self.zoneEditted = false;
+                        zone.orderDepth = zone.startDepth;
+                    });
+                } else {
+                    toastr.error('Cannot edit Zone' + zone.name + ', idZone: ' + zone.idZone + '. start and stop depth are not valid.');
+                }
             }
         }
     }
     this.createZone = function () {
-        DialogUtils.createNewZoneDialog(ModalService, self.zones[0].zone_template.template, function (data) {
+        DialogUtils.createNewZoneDialog(ModalService, self.lastSelectedZoneSet.template, function (data) {
             if (data) {
-                data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
-                let dataCopy = angular.copy(data);
-                wiApiService.createZone(dataCopy, function (zone) {
-                    self.refreshZoneList();
-                })
+                if(checkValidZoneDepth(data.startDepth, data.endDepth, null)) {
+                    console.log('data', data);
+                    data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
+                    let dataCopy = angular.copy(data);
+                    wiApiService.createZone(dataCopy, function (zone) {
+                        self.refreshZoneList();
+                    })
+                } else {
+                    toastr.error('start depth and stop depth are not valid');
+                }
             }
         });
     }
@@ -303,7 +334,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 wiApiService.removeZone(z.idZone, function () {
                     console.log('delete successfully');
                     self.selectedZones = [];
-                    if (self.zones.indexOf(z) == self.zones.length - 1) {
+                    if (self.zones.indexOf(z) == length - 1) {
                         self.refreshZoneList();
                     }
                 })
@@ -406,6 +437,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 label: well.name,
                 childExpanded: false
             },
+            properties: {
+                topDepth: well.topDepth,
+                bottomDepth: well.bottomDepth,
+                step: well.step
+            },
             children: []
         }
     }
@@ -445,6 +481,23 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 return well.children.indexOf(node) != -1;
             })
         }
+    }
+    function checkValidZoneDepth (startDepth, endDepth, zone) {
+        let parentWell = getParentNode(self.lastSelectedZoneSet);
+        if(startDepth>= endDepth) {
+            return false;
+        } else if(startDepth < parentWell.properties.topDepth || startDepth > parentWell.properties.bottomDepth || endDepth < parentWell.properties.topDepth || endDepth > parentWell.properties.bottomDepth) {
+            return false;
+        } else if (self.zones[0]) {
+            for( z of self.zones) {
+                if(z!=zone) {
+                    if((startDepth>=z.startDepth && startDepth<z.endDepth) || (endDepth>z.startDepth && endDepth<=z.endDepth) || (startDepth<z.startDepth && endDepth>z.endDepth)){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
 }
