@@ -291,12 +291,65 @@ function zoneSetToTreeConfig(zoneSet, options = {}) {
     return zoneSetModel;
 }
 
+function markerToTreeConfig(marker, options = {}) {
+    var makerModel = new Object();
+    setTimeout(() => {
+        let markerSetModel = getModel('markerset', marker.idMarkerSet);
+        let wellModel = getModel('well', markerSetModel.properties.idWell);
+        markerModel.parentDataArr = [wellModel.data, markerSetModel.data];
+    });
+    if (options.isDeleted) {
+        markerModel.name = 'marker-deleted-child';
+        markerModel.type = 'marker-deleted-child';
+    } else {
+        markerModel.name = marker.name;
+        markerModel.type = 'marker';
+    }
+    markerModel.id = marker.idMarker;
+    markerModel.properties = marker;
+    markerModel.data = {
+        icon: 'marker-properties-16x16',
+        label: `${marker.name}: ${marker.depth}`
+    }
+    zoneModel.parent = 'markerset' + marker.idMarkerSet;
+    return zoneModel;
+}
+
+function markerSetToTreeConfig(markerSet, options = {}) {
+    var markerSetModel = new Object();
+    markerSetModel.id = markerSet.idMarkerSet;
+    markerSetModel.properties = {
+        idWell: markerSet.idWell,
+        idMarkerSet: markerSet.idMarkerSet,
+        name: markerSet.name,
+    };
+    markerSetModel.data = {
+        childExpanded: false,
+        icon: 'project-16x16-edit',
+        label: markerSet.name
+    }
+    if (options.isDeleted) {
+        markerSetModel.name = 'markerset-deleted-child';
+        markerSetModel.type = 'markerset-deleted-child';
+        return markerSetModel;
+    }
+    markerSetModel.name = markerSet.name;
+    markerSetModel.type = 'markerset';
+    markerSetModel.children = new Array();
+    if (!markerSet.markers) return markerSetModel;
+    markerSet.markers.forEach(function (marker) {
+        markerSetModel.children.push(markerToTreeConfig(marker));
+    });
+    return markerSetModel;
+}
+exports.markerSetToTreeConfig = markerSetToTreeConfig;
+
 exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
 exports.createZoneSet = function createZoneSet(idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
-    if (selectedNode && selectedNode.type == 'zonesets') {
+    if (selectedNode && selectedNode.type == 'user-defined') {
         idWell = selectedNode.properties.idWell;
     }
     if (!idWell) return;
@@ -924,41 +977,44 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-function createZoneSetsNode(parent, options = {}) {
-    let zoneSetsModel = new Object();
+function createUserDefinedNode(parent, options = {}) {
+    let userDefinedModel = new Object();
     if (options.isDeleted) {
-        zoneSetsModel.name = 'zonesets-deleted';
-        zoneSetsModel.type = 'zonesets-deleted';
-        zoneSetsModel.data = {
+        userDefinedModel.name = 'zonesets-deleted';
+        userDefinedModel.type = 'zonesets-deleted';
+        userDefinedModel.data = {
             childExpanded: false,
             icon: 'user-define-16x16',
             label: "Zone Sets"
         };
     } else {
-        zoneSetsModel.name = 'zonesets';
-        zoneSetsModel.type = 'zonesets';
-        zoneSetsModel.data = {
+        userDefinedModel.name = 'user_defined';
+        userDefinedModel.type = 'user_defined';
+        userDefinedModel.data = {
             childExpanded: false,
             icon: 'user-define-16x16',
             label: "User Defined"
         };
     }
-    zoneSetsModel.children = new Array();
-    if (!parent || !parent.zonesets) return zoneSetsModel;
-    zoneSetsModel.properties = {
+    userDefinedModel.children = new Array();
+    if (!parent || !parent.zonesets) return userDefinedModel;
+    userDefinedModel.properties = {
         idWell: parent.idWell,
-        totalItems: parent.zonesets.length
+        totalItems: parent.zonesets.length + (parent.marker ? parent.markers.length:0)
     }
     if (options.isDeleted) {
         parent.zonesets.forEach(function (zoneSet) {
-            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet, {isDeleted: true}));
+            userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet, {isDeleted: true}));
         });
     } else {
         parent.zonesets.forEach(function (zoneSet) {
-            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+            userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet));
+        });
+        parent.marker && parent.markers.forEach(function (makerSet) {
+            userDefinedModel.children.push(markerSetToTreeConfig(markerSet)); 
         });
     }
-    return zoneSetsModel;
+    return userDefinedModel;
 }
 
 function createComboviewsNode(parent) {
@@ -1042,7 +1098,7 @@ function wellToTreeConfig(well, isDeleted) {
                 wellModel.children.push(datasetToTreeConfig(dataset, false, wellModel));
             });
         }
-        let zoneSetsNode = createZoneSetsNode(well);
+        let zoneSetsNode = createUserDefinedNode(well);
         // let logplotNode = createLogplotsNode(well, {wellModel});
         // let crossplotNode = createCrossplotsNode(well);
         // let histogramNode = createHistogramsNode(well);
@@ -1180,7 +1236,7 @@ function updateDustbinConfig(dustbin) {
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
     dustbinModel.children.push(createCurvesNode(dustbin));
-    dustbinModel.children.push(createZoneSetsNode(dustbin, {isDeleted: true}));
+    dustbinModel.children.push(createUserDefinedNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createZonesNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createLogplotsNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createCrossplotsNode(dustbin, {isDeleted: true}));
@@ -1189,7 +1245,6 @@ function updateDustbinConfig(dustbin) {
 }
 
 exports.updateDustbinConfig = updateDustbinConfig;
-
 
 function visit(node, callback, options) {
     if (options && options.found) return;
@@ -3082,7 +3137,7 @@ exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
 function getZoneSetsInWell(well) {
     let zoneSets = [];
     well.children.forEach(function (child) {
-        if (child.type == 'zonesets') zoneSets = angular.copy(child.children);
+        if (child.type == 'user-defined') zoneSets = angular.copy(child.children);
     })
     return zoneSets;
 }

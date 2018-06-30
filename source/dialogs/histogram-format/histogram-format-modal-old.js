@@ -25,7 +25,7 @@ module.exports = function (ModalService, wiHistogramId, callback, cancelCallback
                     self.datasets.push(child);
                     break;
 
-                case 'zonesets':
+                case 'user_defined':
                     self.zoneSetList = angular.copy(child.children);
                     break;
             }
