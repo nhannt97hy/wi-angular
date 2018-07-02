@@ -252,11 +252,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 label: "Zoneset Manager",
                 icon: "zone-management-16x16",
                 handler: function () {
-                    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-                    layoutManager.putTabRight({
-                        title: "Zoneset Manager",
-                        componentState: {html: '<wi-zone-manager></wi-zone-manager>'}
-                    });
+                    let node = utils.getSelectedNode();
+                    utils.openZonesetmanager(node);
                 }
             }
         ];
@@ -364,14 +361,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "dataset-new-16x16",
                         handler: function () {
                             utils.createDataset();
-                        }
-                    }, {
-                        name: "ZoneManager",
-                        label: "Zone Manager",
-                        icon: "zone-management-16x16",
-                        handler: function () {
-                            let wellModel = utils.getSelectedNode();
-                            utils.openZonemanager(wellModel);
                         }
                     }, {
                         name: "Rename",
@@ -594,7 +583,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         separator: '1'
                     }
                 ];
-            case 'zonesets':
+            case 'user_defined':
                 return [
                     {
                         name: "NewZoneSet",
@@ -604,12 +593,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             self.handlers.createZoneSet();
                         }
                     }, {
-                        name: "ZoneManager",
-                        label: "Zone Manager",
+                        name: "NewMarkerSet",
+                        label: "New Marker Set",
+                        icon: "well-marker-add-16x16",
+                        handler: function () {
+                            self.handlers.createMarkerSet();
+                        }
+                    }, {
+                        name: "ZonesetManager",
+                        label: "Zoneset Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zonesetsModel = utils.getSelectedNode();
-                            utils.openZonemanager(zonesetsModel);
+                            utils.openZonesetmanager(zonesetsModel);
                         }
                     },{
                         separator: '1'

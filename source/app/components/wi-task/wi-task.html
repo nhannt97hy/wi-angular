@@ -35,13 +35,13 @@
             height: 24px;
         }
 
-        .ui-select-bootstrap>ul.ui-select-choices,
-        .ui-select-bootstrap>ul.ui-select-no-choice {
+        /* wi-task .ui-select-bootstrap>ul.ui-select-choices,
+        wi-task .ui-select-bootstrap>ul.ui-select-no-choice {
             position: fixed;
             top: auto;
             left: auto;
             width: inherit;
-        }
+        } */
 
         #dragElement .wi-parent-node{
             padding: 5px;
@@ -165,19 +165,29 @@
                     <ul style='padding-left: 0px;margin: 5px;border-bottom: 1px solid #ccc;'>
                         <li style="display:flex;flex-direction:row;">
                             <label style='flex-basis:5em;text-align:center;line-height: 2.5em;font-size: 14px;'>Use</label>
-                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Family</label>
-                            <label style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;'>Curve Name</label>
+                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Curve Name</label>
+                            <label style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;'>Family</label>
+                            <label style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>Unit</label>
                         </li>
                     </ul>
                     <ul style='padding-left:0;margin: 5px;flex:1;overflow-y: auto;'>
                         <li style="display:flex;flex-direction:row; margin-bottom:5px;" ng-repeat="item in wiTask.taskConfig.outputs track by $index" ng-init="item.use = true">
-                            <div style='flex-basis:5em;text-align:center;display: flex;font-size: 14px;justify-content: center;align-items: center;'
+                            <div style='flex-basis:5em;text-align:center;display: flex;font-size: 14px;justify-content: center;align-items: center;cursor: pointer;'
                             ng-click="wiTask.onToggleUseOutput(item)">
                                 <i class="fa fa-check" aria-hidden="true"
                                 ng-class='{"checked-on": item.use, "checked-off": !item.use}'></i>
                             </div>
-                            <div style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'>{{item.family}}</div>
-                            <input type="text" class='form-control' style='flex:2' ng-model='item.name'>
+                            <input type="text" class='form-control' style='flex:1' ng-model='item.name'>
+                            <div style='flex:2;text-align:center;line-height: 2.5em;font-size: 14px;display:flex;'>
+                                <button class="btn btn-default" ng-click="wiTask.editFamily(item)"
+                                style="flex:1; margin: 0 1em;">{{item.family}}</button>
+                            </div>
+                            <div style='flex:1;text-align:center;line-height: 2.5em;font-size: 14px;'
+                            ng-init='wiTask.getListUnit(item, item.unit)'>
+                                <select ng-model='item.unit' class="form-control">
+                                    <option ng-value="unit.name" ng-repeat='unit in item.listUnit track by unit.idUnit'>{{unit.name}}</option>
+                                </select>
+                            </div>
                         </li>
                     </ul>
                     </div>

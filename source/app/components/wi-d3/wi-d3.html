@@ -3,7 +3,7 @@
  <!--    <svg id='{{wiD3.svgId}}' class='d3-region-svg' width='100%' height='100%'></svg> -->
         <wi-d3-correlation-track 
             ng-if="wiD3.shouldHaveCorrelationTrack($index)"
-            properties="{name: 'correlation' + $index,orderNum: track.orderNum + 'a', bgColor: 'white'}"
+            properties="{name: 'correlation' + $index,orderNum: track.orderNum, bgColor: 'white'}"
             name="correlation{{$index}}"
             wi-d3-ctrl='wiD3'
             min-y='wiD3._minY'

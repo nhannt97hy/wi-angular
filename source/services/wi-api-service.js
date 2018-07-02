@@ -371,6 +371,9 @@ const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
 const NEW_ZONE_TEMPLATE = '/zone-template/new';
 const GET_LIST_PATTERN = '/pattern/list';
 
+const GET_LIST_MARKER_TEMPLATE = '/marker-template/list';
+const CREATE_MARKER_SET = '/project/well/marker-set/new';
+
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
     this.$http = $http;
@@ -2093,4 +2096,12 @@ Service.prototype.editParameterSet = function (payload, callback) {
 }
 Service.prototype.removeParameterSet = function (idParameterSet, callback) {
     this.post(PARAMETER_SET + '/delete', { idParameterSet }, callback);
+}
+
+Service.prototype.listMarkerTemplate = function (payload, callback) {
+    this.post(GET_LIST_MARKER_TEMPLATE, payload, callback);
+}
+Service.prototype.createMarkerSet = function (data, callback) {
+    let self = this;
+    this.post(CREATE_MARKER_SET, data, callback);
 }

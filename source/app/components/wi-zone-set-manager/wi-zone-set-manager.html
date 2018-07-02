@@ -27,8 +27,8 @@
                     <input type='text' id="wzsmFocus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none' ng-model="wiZoneSetManager.filter"
                         placeholder="[Search]">
                 </div>
-                <wi-scroll id-scroll="'wzsmTreeScroll'" style='flex:1;display:flex;flex-direction:column;height: calc(100% - 68px);' up-trigger='wiInventory.upTrigger'
-                    down-trigger='wiInventory.downTrigger'>
+                <wi-scroll id-scroll="'wzsmTreeScroll'" style='flex:1;display:flex;flex-direction:column;height: calc(100% - 68px);' up-trigger='wiZoneSetManager.upTrigger'
+                    down-trigger='wiZoneSetManager.downTrigger'>
                     <wi-base-treeview name="zoneTemplateManagerTreeview" config="wiZoneSetManager.zoneSetConfig" container="wiZoneSetManager"
                         on-click-function="wiZoneSetManager.clickFunction" filter="{{wiZoneSetManager.filter}}" show-context-menu-function="wiZoneSetManager.showTreeContextMenuFunction">
                     </wi-base-treeview>
@@ -40,12 +40,10 @@
         <div class="right-heading" style="flex-basis:40px;">
             <h5 style="margin: 6px; font-weight:bold;display:inline-block" ng-show="wiZoneSetManager.zones.length !== 0">
                 Order by: </h5>
-            <select ng-init="wiZoneSetManager.zoneOrder='none'" ng-model="wiZoneSetManager.zoneOrder" ng-show="wiZoneSetManager.zones.length !== 0">
-                <option value="none">None</option>
+            <select ng-init="wiZoneSetManager.zoneOrder='idZone'" ng-model="wiZoneSetManager.zoneOrder" ng-show="wiZoneSetManager.zones.length !== 0">
                 <option value="idZone">Zone id</option>
-                <option value="name">Zone name</option>
-                <option value="foreground">Foreground</option>
-                <option value="background">Background</option>
+                <option value="zone_template.name">Zone name</option>
+                <option value="orderDepth">Depth</option>>
             </select>
             <div class="button-area">
                 <label class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.zoneEditted">

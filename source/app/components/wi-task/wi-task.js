@@ -6,7 +6,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     const self = this;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    //   const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let __selectionTop = 0;
     const __selectionLength = 50;
     const __selectionDelta = 10;
@@ -700,7 +700,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                     const idTask = taskElement.businessObject.get('idTask');
                                     wiApiService.getTask(idTask, (task) => {
                                         const taskConfig = task.content;
-                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset)) prevTaskCurves.push(...taskConfig.outputs);
+                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset && i.data.unused == false)) prevTaskCurves.push(...taskConfig.outputs);
                                         next();
                                     });
                                 }, (err, result) => {
@@ -879,6 +879,26 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             toastr.error('Must have at least one output!');
         }
     }
+    this.editFamily = function(item){
+        DialogUtils.curveFamilyDialog(ModalService, wiComponentService, item.idFamily, null, (ret)=>{
+            item.idFamily = ret.idFamily;
+            item.family = ret.name;
+            self.getListUnit(item);
+        })
+    }
+    this.getListUnit = function(item, defaultUnit){
+        if(!item.idFamily) {
+            const familyList = utils.getListFamily();
+            let family = familyList.find(f => f.name == item.family);
+            item.idFamily = (family || {}).idFamily || null;
+        }
+        if(item.idFamily){
+            wiApiService.getListUnit({idFamily: item.idFamily}, (listUnit) => {
+                item.listUnit = listUnit;
+                if(!defaultUnit) item.unit = listUnit[0].name;
+            })
+        }
+    }
 
     const inputContextMenu = [
         {
@@ -958,7 +978,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     }
 
     this.addToFlowClick = function(){
-        const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+        // const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         DialogUtils.openFlowDialog(ModalService, function (flow) {
             if (flow.task && flow.tasks.find(t => t.name === self.name)) {
                 toastr.error('Task name existed in this flow');
