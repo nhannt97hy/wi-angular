@@ -55,8 +55,9 @@ Annotation.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
     let self = this;
 
-    this.svgContainer = plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-annotation-container');
+    this.svgContainer = plotContainer.select('.vi-track-svg-container');
+    // this.svgContainer = plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-annotation-container');
 
     this.svgGroup = this.svgContainer.append('g')
         .attr('class', 'vi-annotation-svg-group')
