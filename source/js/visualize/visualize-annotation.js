@@ -120,7 +120,9 @@ Annotation.prototype.updateBoundingRect = function(x, y, width, height) {
 }
 
 Annotation.prototype.updateText = function() {
-    let rect = this.svgGroup.select('rect.vi-annotation-bounding-rect').node().getBBox();
+    let rectNode = this.svgGroup.select('rect.vi-annotation-bounding-rect').node();
+    if (!rectNode) return;
+    let rect = rectNode.getBBox();
     const PADDING = 5;
     const text = new d3plus.TextBox()
         .select(this.svgGroup.node())

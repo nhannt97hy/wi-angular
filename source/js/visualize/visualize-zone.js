@@ -118,6 +118,8 @@ Zone.prototype.init = function(plotContainer) {
                 .attr('stroke', gUtils.colorGenerator())
                 .attr('stroke-width', '2')
                 .style('cursor', 'col-resize');
+
+        this.controlLines.exit().remove();
     }
 }
 
