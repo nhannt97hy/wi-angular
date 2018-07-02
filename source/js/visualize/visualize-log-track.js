@@ -337,10 +337,10 @@ LogTrack.prototype.init = function(baseElement) {
         .style('cursor', 'crosshair')
         .style('overflow', 'visible');
 
-    // this.svgContainer.style('cursor', 'crosshair');
-    this.svgContainer = this.plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-track-svg-container')
-        .style('cursor', 'crosshair');
+    this.svgContainer.style('cursor', 'crosshair');
+    // this.svgContainer = this.plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-track-svg-container')
+    //     .style('cursor', 'crosshair');
     // .style('overflow', 'visible');
 
     this.xAxisGroup = this.axisContainer.append('g')
@@ -778,7 +778,7 @@ LogTrack.prototype.plotDrawing = function(drawing) {
     this.getImages().forEach(function (img) { img.lower(); });
     this.getMarkers().forEach(function(marker) { marker.raise(); });
     // this.getZones().forEach(zone => zone.lower());
-    this.svgContainer.raise();
+    this.plotContainer.selectAll('svg.vi-track-svg-container').raise();
     this.axisContainer.lower();
 }
 
@@ -1322,7 +1322,7 @@ LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
 
-******************************** END MOVING TO SUPPER CLASS **************************/
+******************************** END MOVING TO SUPER CLASS **************************/
 
 /**
  * Register event when drag curve

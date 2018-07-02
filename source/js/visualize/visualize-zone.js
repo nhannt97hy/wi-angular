@@ -304,10 +304,10 @@ Zone.prototype.createFillStyle = async function() {
     if(!this.fill) return null;
     let pattern = this.fill.pattern;
     // if (pattern.name == 'none') return pattern.background;
-    if(!pattern) return this.fill.background;
+    if(!pattern || pattern === 'none') return this.fill.background;
 
     // let src = patternList[pattern.name].src;
-    let src = patternList[pattern].src;
+    let src = (patternList[pattern] || {}).src;
     if (!src) return null;
 
     let patId = this.createPatternId(pattern);

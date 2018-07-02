@@ -18,7 +18,8 @@ module.exports = function (ModalService, callback) {
         this.getTemplateList = function (wiItemDropdownCtrl) {
             wiApiService.listMarkerTemplate({}, function (tmps) {
                 tmps.unshift({template: ''});
-                wiItemDropdownCtrl.items = tmps.map(function (tmp) {
+                let uniqTmps = _.uniq(tmps, 'template');
+                wiItemDropdownCtrl.items = uniqTmps.map(function (tmp) {
                     return {
                         data: {
                             label: tmp.template

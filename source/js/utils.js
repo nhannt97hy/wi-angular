@@ -292,7 +292,7 @@ function zoneSetToTreeConfig(zoneSet, options = {}) {
 }
 
 function markerToTreeConfig(marker, options = {}) {
-    var makerModel = new Object();
+    var markerModel = new Object();
     setTimeout(() => {
         let markerSetModel = getModel('markerset', marker.idMarkerSet);
         let wellModel = getModel('well', markerSetModel.properties.idWell);
@@ -302,17 +302,17 @@ function markerToTreeConfig(marker, options = {}) {
         markerModel.name = 'marker-deleted-child';
         markerModel.type = 'marker-deleted-child';
     } else {
-        markerModel.name = marker.name;
+        markerModel.name = marker.marker_template.name;
         markerModel.type = 'marker';
     }
     markerModel.id = marker.idMarker;
     markerModel.properties = marker;
     markerModel.data = {
         icon: 'marker-properties-16x16',
-        label: `${marker.name}: ${marker.depth}`
+        label: `${marker.marker_template.name}: ${marker.depth}`
     }
-    zoneModel.parent = 'markerset' + marker.idMarkerSet;
-    return zoneModel;
+    markerModel.parent = 'markerset' + marker.idMarkerSet;
+    return markerModel;
 }
 
 function markerSetToTreeConfig(markerSet, options = {}) {
@@ -336,7 +336,7 @@ function markerSetToTreeConfig(markerSet, options = {}) {
     markerSetModel.name = markerSet.name;
     markerSetModel.type = 'markerset';
     markerSetModel.children = new Array();
-    if (!markerSet.markers) return markerSetModel;
+    if (!markerSet.markers || !markerSet.markers.length) return markerSetModel;
     markerSet.markers.forEach(function (marker) {
         markerSetModel.children.push(markerToTreeConfig(marker));
     });
@@ -1010,8 +1010,8 @@ function createUserDefinedNode(parent, options = {}) {
         parent.zonesets.forEach(function (zoneSet) {
             userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet));
         });
-        parent.marker && parent.markers.forEach(function (makerSet) {
-            userDefinedModel.children.push(markerSetToTreeConfig(markerSet)); 
+        parent.markersets && parent.markersets.forEach(function (markerset) {
+            userDefinedModel.children.push(markerSetToTreeConfig(markerset)); 
         });
     }
     return userDefinedModel;
@@ -1098,12 +1098,12 @@ function wellToTreeConfig(well, isDeleted) {
                 wellModel.children.push(datasetToTreeConfig(dataset, false, wellModel));
             });
         }
-        let zoneSetsNode = createUserDefinedNode(well);
+        let userDefinedNode = createUserDefinedNode(well);
         // let logplotNode = createLogplotsNode(well, {wellModel});
         // let crossplotNode = createCrossplotsNode(well);
         // let histogramNode = createHistogramsNode(well);
         let comboviewNode = createComboviewsNode(well);
-        wellModel.children.push(zoneSetsNode);
+        wellModel.children.push(userDefinedNode);
         // wellModel.children.push(logplotNode);
         // wellModel.children.push(crossplotNode);
         // wellModel.children.push(histogramNode);
