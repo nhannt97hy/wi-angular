@@ -3362,8 +3362,8 @@ exports.onChangeHandlers =  {
         })
     },
     'logtrack' : function(props) {
-        __GLOBAL.wiApiService.editTrack(self.input, function (res) {
-            wiComponentService.emit('update-logtrack-' + res.idTrack);
+        __GLOBAL.wiApiService.editTrack(props, function (res) {
+            __GLOBAL.wiComponentService.emit('update-logtrack-' + res.idTrack);
             console.log("update longtrack")
         })
     }
