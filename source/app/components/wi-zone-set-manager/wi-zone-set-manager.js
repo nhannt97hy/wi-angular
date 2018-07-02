@@ -6,9 +6,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    this.idSelectedWell;
 
     this.$onInit = function () {
         wiComponentService.putComponent('wiZoneSetManager', self);
+        console.log('self.idwell', self.idwell);
+        self.idSelectedWell = self.idwell;
     }
 
     let topIdx = 0;
@@ -22,32 +25,37 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.zones = [];
         self.selectedZones = [];
         let selectedWell;
-        console.log('xxx', self.idwell);
-        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
-            if (wells) {
-                wells.sort(function (a, b) {
-                    return parseInt(a.idWell) - parseInt(b.idWell);
-                });
-                let cutWells = wells.slice(0, selectionLength);
-                if(self.idwell) {
-                    if(wells.find(function(well){return well.idWell == self.idwell})){
-                        wells.push(selectedWell);                                
+        $timeout(function () {
+            console.log('xxx', self.idSelectedWell);
+            wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+                if (wells) {
+                    wells.sort(function (a, b) {
+                        return parseInt(a.idWell) - parseInt(b.idWell);
+                    });
+                    let cutWells = wells.slice(0, selectionLength);
+                    for (well of cutWells) {
+                        self.zoneSetConfig.push(createWellModel(well));
                     }
-                    selectedWell = self.zoneSetConfig.find(function(well){return well.idWell == self.idwell});
+                    if (self.idSelectedWell) {
+                        if (!wells.find(function (well) { return well.idWell == self.idSelectedWell })) {
+                            wells.push(selectedWell);
+                        }
+                        selectedWell = self.zoneSetConfig.find(function (well) { return well.idWell == self.idSelectedWell });
+
+                        console.log('selectedWell', selectedWell);
+                        if (self.idSelectedWell && selectedWell) {
+                            console.log('ccc', self.idSelectedWell, selectedWell);
+                            selectHandler(selectedWell, self.zoneSetConfig);
+                            self.lastSelectedWell = selectedWell;
+                        }
+                    }
                 }
-                for (well of cutWells) {
-                    self.zoneSetConfig.push(createWellModel(well));
-                }
-                if(self.idwell && selectedWell) {
-                    console.log('ccc', self.idwell, selectedWell);
-                    selectHandler(selectedWell, self.zoneSetConfig);                    
-                }
-            }
+            })
         })
     }
     this.refreshZoneSetList();
 
-    this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
+    // this.selectPatterns = ['none', 'basement', 'chert', 'dolomite', 'limestone', 'sandstone', 'shale', 'siltstone'];
 
     this.exportZoneSets = function () {
         let selectedNodes = self.zoneSetConfig.__SELECTED_NODES;
@@ -221,13 +229,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.lastSelectedZoneSet = false;
             node.data.childExpanded = true;
         }
-        if (node.type == 'well' && node.children.length == 0) {
-            wiApiService.listZoneSet(node.idWell, function (zoneSets) {
-                for (zoneSet of zoneSets) {
-                    node.children.push(createZoneSetModel(zoneSet));
-                }
-            })
-        }
+        
     }
     function clickFunction($index, $event, node, rootNode, multiNodeFetch = false) {
         node.$index = $index;
@@ -280,10 +282,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             if (info) {
                 console.log('zones', info.zones);
                 self.zones = info.zones;
-                for(let z of self.zones) {
+                for (let z of self.zones) {
                     z.orderDepth = z.startDepth;
                 }
-                if (!self.lastSelectedZoneSet.template && self.zones[0]) {
+                if (!self.lastSelectedZoneSet.template && self.zones[0] && self.zones[0].template) {
                     self.lastSelectedZoneSet.template = self.zones[0].zone_template.template;
                 }
             }
@@ -296,7 +298,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         console.log('editZone');
         for (zone of self.zones) {
             if (zone.editted) {
-                if(checkValidZoneDepth(zone.startDepth, zone.endDepth, zone)) {
+                if (checkValidZoneDepth(zone.startDepth, zone.endDepth, zone)) {
                     wiApiService.editZone(zone, function () {
                         console.log('edit success');
                         zone.editted = false;
@@ -312,7 +314,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.createZone = function () {
         DialogUtils.createNewZoneDialog(ModalService, self.lastSelectedZoneSet.template, function (data) {
             if (data) {
-                if(checkValidZoneDepth(data.startDepth, data.endDepth, null)) {
+                if (checkValidZoneDepth(data.startDepth, data.endDepth, null)) {
                     console.log('data', data);
                     data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
                     let dataCopy = angular.copy(data);
@@ -416,6 +418,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 self.lastSelectedZoneSet = currentNode;
                 self.refreshZoneList();
             }
+            if (currentNode.type == 'well' && currentNode.children.length == 0) {
+                wiApiService.listZoneSet(currentNode.idWell, function (zoneSets) {
+                    currentNode.data.childExpanded = true;
+                    for (zoneSet of zoneSets) {
+                        currentNode.children.push(createZoneSetModel(zoneSet));
+                    }
+                })
+            }
             $timeout(function () { currentNode.data.selected = true; });
             let selectedNodes = rootNode.__SELECTED_NODES;
             if (!Array.isArray(selectedNodes))
@@ -482,16 +492,16 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             })
         }
     }
-    function checkValidZoneDepth (startDepth, endDepth, zone) {
+    function checkValidZoneDepth(startDepth, endDepth, zone) {
         let parentWell = getParentNode(self.lastSelectedZoneSet);
-        if(startDepth>= endDepth) {
+        if (startDepth >= endDepth) {
             return false;
-        } else if(startDepth < parentWell.properties.topDepth || startDepth > parentWell.properties.bottomDepth || endDepth < parentWell.properties.topDepth || endDepth > parentWell.properties.bottomDepth) {
+        } else if (startDepth < parentWell.properties.topDepth || startDepth > parentWell.properties.bottomDepth || endDepth < parentWell.properties.topDepth || endDepth > parentWell.properties.bottomDepth) {
             return false;
         } else if (self.zones[0]) {
-            for( z of self.zones) {
-                if(z!=zone) {
-                    if((startDepth>=z.startDepth && startDepth<z.endDepth) || (endDepth>z.startDepth && endDepth<=z.endDepth) || (startDepth<z.startDepth && endDepth>z.endDepth)){
+            for (z of self.zones) {
+                if (z != zone) {
+                    if ((startDepth >= z.startDepth && startDepth < z.endDepth) || (endDepth > z.startDepth && endDepth <= z.endDepth) || (startDepth < z.startDepth && endDepth > z.endDepth)) {
                         return false;
                     }
                 }

@@ -252,7 +252,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 label: "Zoneset Manager",
                 icon: "zone-management-16x16",
                 handler: function () {
-                    globalHandlers.ZonesetManagerButtonClicked();
+                    let node = utils.getSelectedNode();
+                    utils.openZonesetmanager(node);
                 }
             }
         ];
@@ -360,14 +361,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         icon: "dataset-new-16x16",
                         handler: function () {
                             utils.createDataset();
-                        }
-                    }, {
-                        name: "ZoneManager",
-                        label: "Zone Manager",
-                        icon: "zone-management-16x16",
-                        handler: function () {
-                            let wellModel = utils.getSelectedNode();
-                            utils.openZonemanager(wellModel);
                         }
                     }, {
                         name: "Rename",
@@ -600,8 +593,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             self.handlers.createZoneSet();
                         }
                     }, {
-                        name: "ZoneManager",
-                        label: "Zone Manager",
+                        name: "ZonesetManager",
+                        label: "Zoneset Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zonesetsModel = utils.getSelectedNode();

@@ -2717,15 +2717,23 @@ function sortObject(o) {
     return sorted;
 }
 
-exports.openZonemanager = function (item) {
+exports.openZonesetmanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    let idWell;
+    if(item.type == 'project') {
+        idWell = false;
+    } else if (item.type == 'well') {
+        idWell = item.idWell;
+    } else if(item.type == 'zonesets') {
+        idWell = item.properties.idWell;
+    }
     layoutManager.putTabRight({
         id: 'Zoneset-manager',
         title: 'Zoneset Manager',
         tabIcon: 'zone-management-16x16',
         componentState: {
-            html: `<wi-zone-manager idwell=${item.properties.idWell}></wi-zone-manager>`,
+            html: `<wi-zone-manager idwell=${idWell}></wi-zone-manager>`,
             name: 'wiZoneManager'
         }
     })
