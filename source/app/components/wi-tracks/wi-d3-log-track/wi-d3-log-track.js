@@ -245,7 +245,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         if(!trackProps.idTrack) {
-            // TO DO something without track id (anonymous track - for preview purpose)
+            // TODO something without track id (anonymous track - for preview purpose)
             if(self.zoneset) {
                 self.addZoneSetToTrack(self.zoneset);
             }

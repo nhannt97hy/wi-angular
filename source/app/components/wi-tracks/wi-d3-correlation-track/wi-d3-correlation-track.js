@@ -26,16 +26,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         this.registerTrackMouseEventHandlers();
         // if (this.wiD3Ctrl) {
         //     this.wiD3Ctrl.trackComponents.push(self.getProperties()); 
-        // }
+        // },
         if (this.leftTrack && this.leftTrack.controller) {
-            this.viTrack.left = {
-                well: this.leftTrack.controller.getWellProps()
-            }
+            this.viTrack.leftTrack = this.leftTrack.controller;
         }
         if (this.rightTrack && this.rightTrack.controller) {
-            this.viTrack.right = {
-                well: this.rightTrack.controller.getWellProps()
-            }
+            this.viTrack.rightTrack = this.rightTrack.controller;
             this.rightTrack.controller.correlationTrack = this;
         }
         this.viTrack.doPlot();
@@ -44,9 +40,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.$doCheck = function() {
         wiD3AbstractTrack.prototype.$doCheck.call(self);
         if(this.leftTrack && this.viTrack)
-            if(this.leftTrack.controller) {
-                if(this.leftTrack.controller.getWellProps().idWell != this.viTrack.left.well.idWell) {
-                    this.viTrack.left.well = this.leftTrack.controller.getWellProps();
+            if(this.leftTrack.controller && this.viTrack.leftTrack) {
+                if(this.leftTrack.controller.getWellProps().idWell != this.viTrack.leftTrack.getWellProps().idWell) {
+                    this.viTrack.leftTrack = this.leftTrack.controller;
                     this.viTrack.doPlot();
                 }
             }

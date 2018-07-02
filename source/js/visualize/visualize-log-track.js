@@ -337,11 +337,11 @@ LogTrack.prototype.init = function(baseElement) {
         .style('cursor', 'crosshair')
         .style('overflow', 'visible');
 
-    this.svgContainer.style('cursor', 'crosshair');
-    // this.svgContainer = this.plotContainer.append('svg')
-    //     .attr('class', 'vi-track-drawing vi-track-svg-container')
-    //     .style('cursor', 'crosshair');
-        // .style('overflow', 'visible');
+    // this.svgContainer.style('cursor', 'crosshair');
+    this.svgContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing vi-track-svg-container')
+        .style('cursor', 'crosshair');
+    // .style('overflow', 'visible');
 
     this.xAxisGroup = this.axisContainer.append('g')
         .attr('class', 'vi-track-axis');
@@ -883,6 +883,7 @@ LogTrack.prototype.onMarkerMouseDown = function(marker, cb) {
 LogTrack.prototype.onDrawingMouseDown = function(drawing, cb) {
     let self = this;
     drawing.on('mousedown', function() {
+        console.log('drawing mousedown event: ', drawing);
         self.drawingMouseDownCallback(drawing);
         cb();
     })

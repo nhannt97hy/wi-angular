@@ -111,7 +111,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         if(this.well) {
             this.well.children.forEach(function (child) {
                 if (child.type == 'dataset') self.datasets.push(child);
-                else if (child.type == 'zonesets') {
+                else if (child.type == 'user_defined') {
                     child.children.forEach(c => {
                         if(c.type == 'zoneset')
                             zonesets.push(c);
@@ -127,9 +127,10 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         if(wellChild.type == 'dataset') {
                             self.datasets.push(wellChild);
                         }
-                        else if (wellChild.type == 'zonesets') {
-                            wellChild.children.forEach(zoneset => {
-                                zonesets.push(zoneset);
+                        else if (wellChild.type == 'user_defined') {
+                            wellChild.children.forEach(c => {
+                                if(c.type == 'zoneset')
+                                    zonesets.push(zoneset);
                             })
                         }
                     })

@@ -3,6 +3,9 @@ module.exports = function (ModalService, wiComponentService, idFamily, listFamil
     function ModalController(close) {
         let self = this;
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+        if(!listFamily) {
+            listFamily = utils.getListFamily();
+        }
 
         let topIdx = 0;
         let selectionLength = 30;

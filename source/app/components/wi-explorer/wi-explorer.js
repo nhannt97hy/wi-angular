@@ -583,7 +583,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         separator: '1'
                     }
                 ];
-            case 'zonesets':
+            case 'user_defined':
                 return [
                     {
                         name: "NewZoneSet",
@@ -593,12 +593,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             self.handlers.createZoneSet();
                         }
                     }, {
+                        name: "NewMarkerSet",
+                        label: "New Marker Set",
+                        icon: "well-marker-add-16x16",
+                        handler: function () {
+                            self.handlers.createMarkerSet();
+                        }
+                    }, {
                         name: "ZonesetManager",
                         label: "Zoneset Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zonesetsModel = utils.getSelectedNode();
-                            utils.openZonemanager(zonesetsModel);
+                            utils.openZonesetmanager(zonesetsModel);
                         }
                     },{
                         separator: '1'

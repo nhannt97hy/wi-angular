@@ -196,7 +196,8 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
         let payload = {
             data: curveInfo.data,
             idDataset: curveInfo.idDataset,
-            idFamily: (family || {}).id || null
+            idFamily: (family || {}).idFamily || null,
+            unit: curveInfo.unit
         }
         wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
             if (curve.idCurve) {
