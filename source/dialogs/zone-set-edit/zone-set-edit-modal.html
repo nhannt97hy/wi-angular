@@ -67,7 +67,7 @@
                             <div class="zse-heading" style="padding: 0">
                                 <p class="text-heading" style="float: left; padding-left: 15px; padding-top: 3px">Zones</p>
                                 <div class="button-area" style="float: right;">
-                                    <label class='btn' ng-click="wiModal.editZone()" ng-disabled="!wiModal.zoneEditted">
+                                    <!-- <label class='btn' ng-click="wiModal.editZone()" ng-disabled="!wiModal.zoneEditted">
                                         <i class="ti-check" ng-class="{'color-blue': wiModal.zoneEditted, 'color-lightgray': !wiModal.zoneEditted}"></i>
                                     </label>
                                     <label class='btn' ng-click="wiModal.deleteZone()" ng-disabled="wiModal.selectedZones.length==0">
@@ -75,7 +75,7 @@
                                     </label>
                                     <label title="Create new zone" class='btn' ng-click="wiModal.createZone()" ng-disabled="!wiModal.lastSelectedZoneSet">
                                         <i class="ti-plus" ng-class="{'color-blue': wiModal.lastSelectedZoneSet, 'color-lightgray': !wiModal.lastSelectedZoneSet}"></i>
-                                    </label>
+                                    </label> -->
                                     <label class='btn' ng-click="wiModal.refreshZoneList()" ng-disabled="wiModal.newZoneSet || !wiModal.lastSelectedZoneSet">
                                         <i class="ti-reload" ng-class="{'color-blue': wiModal.lastSelectedZoneSet, 'color-lightgray': !wiModal.lastSelectedZoneSet}"></i>
                                     </label>
@@ -96,17 +96,17 @@
                                         <tbody style="border:1px solid #ccc; border-top:none;border-radius:5px;">
                                             <tr ng-repeat="zone in wiModal.zones | orderBy: wiModal.zoneOrder" ng-init="zone.flag = false" ng-class="{'selected': zone.flag}">
                                                 <td style="width: 10%; text-align: center;" class="border-right-gray" ng-click="wiModal.selectZoneToggle(zone)">
-                                                    <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
+                                                    <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.showOnTrack, 'color-lightgray': !zone.showOnTrack}"></i>
                                                 </td>
                                                 <td width="20%">
                                                     {{zone.zone_template.name}}
                                                 </td>
                                                 <td width="20%">
-                                                    <input type="number" step="any" ng-model="zone.startDepth" class="form-control" ng-change="wiModal.onZoneChanged(zone);"
+                                                    <input type="number" step="any" ng-model="zone.startDepth" class="form-control" ng-change="wiModal.onZoneChanged(zone);" readonly 
                                                         style="height: auto;">
                                                 </td>
                                                 <td width="20%">
-                                                    <input type="number" step="any" ng-model="zone.endDepth" class="form-control" ng-change="wiModal.onZoneChanged(zone);"
+                                                    <input type="number" step="any" ng-model="zone.endDepth" class="form-control" ng-change="wiModal.onZoneChanged(zone);" readonly 
                                                         style="height: auto;">
                                                 </td>
                                                 </td>

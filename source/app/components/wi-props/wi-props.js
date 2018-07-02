@@ -3,12 +3,12 @@ const moduleName = 'wi-props';
 
 function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, ModalService) {
     let self = this;
-    window.wi = this;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
     this.fields = null;
     this.curveUnits = null;
+    this.zoneSets = null;
     this.$onInit = function() {
         wiComponentService.putComponent(self.name, self);
     }
@@ -40,8 +40,12 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                 cb && cb();
             }, 200));
         } else if(self.typeprops == 'logtrack') {
-
-        } else self.input[field.name] = field.value;
+            delete self.input.wellProps;
+            wiApiService.editTrack(self.input, function (res) {
+                wiComponentService.emit('update-logtrack-' + res.idTrack);
+                cb && cb();
+            })
+        }
     }
     function obj2Array(obj, config) {
 
@@ -139,6 +143,8 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         DialogUtils.zoneSetEditDialog(ModalService, wiComponentService, field.value, self.input.wellProps, function (newZoneSet) {
             if (!newZoneSet) return;
             field.value = newZoneSet;
+            self.input.idZoneSet = newZoneSet.idZoneSet;
+            self.doChange(field);
         });
     }
     this.onChangeUnit = function(field, fields) {

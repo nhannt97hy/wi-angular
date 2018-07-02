@@ -294,7 +294,7 @@
             "function": null,
             "defaultValue": null
         },
-        "idZoneSet": {
+        "zoneSet": {
             "translation": "ZoneSet",
             "option": "use",
             "section": "Zonation",

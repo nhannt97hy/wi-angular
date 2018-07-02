@@ -5,7 +5,7 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         this.selectedZoneset = {};
-        this.selectedZones = [];
+        // this.selectedZones = [];
         
         this.zoneSetConfig = [];
         function createZoneSetModel(zoneSet) {
@@ -51,8 +51,8 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
         }
         this.refreshZoneList = function () {
             self.newZone = false;
-            self.selectedZones = [];
-            self.zoneEditted = false;
+            // self.selectedZones = [];
+            // self.zoneEditted = false;
             if (self.newZoneSet) {
                 self.zones = []
             } else {
@@ -64,20 +64,17 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
             }
         }
         this.selectZoneToggle = function (zone) {
-            if (!zone.flag) {
-                zone.flag = true;
-                self.selectedZones.push(zone);
-            } else {
-                zone.flag = false;
-                let index = self.selectedZones.indexOf(zone);
-                self.selectedZones.splice(index, 1);
-            }
+            zone.flag = !zone.flag;
+            zone.showOnTrack = !zone.showOnTrack;
+            wiApiService.editZone(zone, function(res) {
+                console.log("ok", res);
+            });
         }
-        this.onZoneChanged = function (zone) {
+        /*this.onZoneChanged = function (zone) {
             self.zoneEditted = true;
             zone.zoneEditted = true;
-        }
-        this.createZone = function () {
+        }*/
+        /*this.createZone = function () {
             dialogUtils.createNewZoneDialog(ModalService, self.zones[0].zone_template.template, function (data) {
                 if (data) {
                     data.idZoneSet = self.lastSelectedZoneSet.idZoneSet;
@@ -86,8 +83,8 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
                     })
                 }
             });
-        }
-        this.editZone = function () {
+        }*/
+        /*this.editZone = function () {
             for (zone of self.zones) {
                 if (zone.zoneEditted) {
                     wiApiService.editZone(zone, function () {
@@ -97,8 +94,8 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
                     });
                 }
             }
-        }
-        this.deleteZone = function () {
+        }*/
+        /*this.deleteZone = function () {
             let length = self.zones.length
             for (z of self.zones) {
                 if (z.flag) {
@@ -108,7 +105,7 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
                     })
                 }
             }
-        }
+        }*/
         this.onOkButtonClicked = function () {
             close(self.selectedZoneset);
         };

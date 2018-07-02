@@ -223,19 +223,23 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
     */
     this.openPropertiesDialog = function () {
-        let props = self.getProperties().controller.viTrack.getProperties();
-        props.wellProps = self.getWellProps();
-        props.zoneset = utils.getModel('zoneset', props.idZoneSet);
-        wiComponentService.emit("update-properties", {type: 'logtrack', props: props});
-        /*let options = {
+        let options = {
             tabs: ['true', 'true', 'true']
         };
         DialogUtils.logTrackPropertiesDialog(ModalService, self.getProperties(), options, function (props) {
             if (props) {
                 console.log('logTrackPropertiesData', props);
             }
-        });*/
+        });
     }
+    this.openPropertiesWindow = function () {
+        let props = self.getProperties().controller.viTrack.getProperties();
+        props.wellProps = self.getWellProps();
+        props.zoneSet = utils.getModel('zoneset', props.idZoneSet);
+        props.width = utils.pixelToInch(props.width);
+        wiComponentService.emit("update-properties", {type: 'logtrack', props: props});
+    }
+
     this.update = update;
     this.isIdle = false;
     function update(callback) {
@@ -974,7 +978,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                     self.addViSelectionToTrack(self.viTrack, selectionConfig);
                 })
             }
+            wiComponentService.on('update-logtrack-' + self.getProperties().idTrack, function() {
+               self.update();   
+            });
         });
+
     }
 
     function createVisualizeLogTrack(logTrack) {
