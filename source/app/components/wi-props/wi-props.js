@@ -40,10 +40,11 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                 cb && cb();
             }, 200));
         } else if(self.typeprops == 'logtrack') {
-            delete self.input.wellProps;
+            self.input[field.name] = field.value;
+            // delete self.input.wellProps;
             wiApiService.editTrack(self.input, function (res) {
                 wiComponentService.emit('update-logtrack-' + res.idTrack);
-                cb && cb();
+                // cb && cb();
             })
         }
     }
@@ -131,8 +132,6 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                     $timeout(function() {
                         wiApiService.asyncGetListUnit({idCurve: self.input.idCurve}).then(r => {
                             self.curveUnits = r;
-                            /*let temp = fields.find(f => f.name == 'unit');
-                            let unit_temp = self.curveUnits.find(c => c.name == temp.value);*/
                         });
                     })
                 }
@@ -140,7 +139,7 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         });
     }
     this.changeZoneSet = function(field, fields) {
-        DialogUtils.zoneSetEditDialog(ModalService, wiComponentService, field.value, self.input.wellProps, function (newZoneSet) {
+        DialogUtils.zoneSetEditDialog(ModalService, wiComponentService, field.value.idZoneSet, self.input.wellProps, function (newZoneSet) {
             if (!newZoneSet) return;
             field.value = newZoneSet;
             self.input.idZoneSet = newZoneSet.idZoneSet;
@@ -149,7 +148,6 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
     }
     this.onChangeUnit = function(field, fields) {
         let temp = fields.find(f => f.name == 'unit');
-        // self.fields[self.fields.indexOf(temp)].value = field.value;
         let payload = {};
         payload.srcUnit = self.curveUnits.find(u => u.name == temp.value);
         payload.desUnit = self.curveUnits.find(u => u.name == field.value);

@@ -28,11 +28,9 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
                 self.zoneSetConfig.push(createZoneSetModel(zoneSet));
             }
         })
-        this.clickFunction = function($index, $event, node) {
-            self.lastSelectedZoneSet = node;
-            setSelectedNode(node);
-            self.selectedZoneset = node.properties;
-            wiApiService.getZoneSet(node.idZoneSet, function (info) {
+        getZoneSets(idZoneSet);
+        function getZoneSets (idZoneSet) {
+            wiApiService.getZoneSet(idZoneSet, function (info) {
                 if (info) {
                     self.zones = info.zones;
                 }
@@ -40,6 +38,12 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
                     console.log('no info');
                 }
             })
+        }
+        this.clickFunction = function($index, $event, node) {
+            self.lastSelectedZoneSet = node;
+            setSelectedNode(node);
+            self.selectedZoneset = node.properties;
+            getZoneSets(node.idZoneSet);
         }
         function setSelectedNode(node) {
             self.zoneSetConfig.forEach(function (item) {

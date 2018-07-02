@@ -235,7 +235,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     this.openPropertiesWindow = function () {
         let props = self.getProperties().controller.viTrack.getProperties();
         props.wellProps = self.getWellProps();
-        props.zoneSet = utils.getModel('zoneset', props.idZoneSet);
+        props.zoneSet = utils.getModel('zoneset', props.idZoneSet).properties;
         props.width = utils.pixelToInch(props.width);
         wiComponentService.emit("update-properties", {type: 'logtrack', props: props});
     }
