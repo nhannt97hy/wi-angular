@@ -27,12 +27,17 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         }
     }
     this.doChange = function(field) {
-        onChangeDefault(field, function() {
+        if(self.input[field.name] !== field.value) {
             self.input[field.name] = field.value;
-        });
+            self.onchangefunc && self.onchangefunc(self.input);
+        }
+        
+        /*onChangeDefault(field, function() {
+            self.input[field.name] = field.value;
+        });*/
     
     }
-    function onChangeDefault(field, cb) {
+    /*function onChangeDefault(field, cb) {
         if( self.typeprops == 'well' || 
             self.typeprops == 'dataset' || 
             self.typeprops == 'curve' ) {
@@ -41,13 +46,12 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
             }, 200));
         } else if(self.typeprops == 'logtrack') {
             self.input[field.name] = field.value;
-            // delete self.input.wellProps;
             wiApiService.editTrack(self.input, function (res) {
                 wiComponentService.emit('update-logtrack-' + res.idTrack);
                 // cb && cb();
             })
         }
-    }
+    }*/
     function obj2Array(obj, config) {
 
         let array = new Array();
@@ -175,7 +179,8 @@ app.component(componentName, {
         name: "@",
         input: "<",
         config: "<",
-        typeprops: "<"
+        typeprops: "<",
+        onchangefunc: "<"
     }
 });
 

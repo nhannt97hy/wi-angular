@@ -28,7 +28,9 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
                 self.zoneSetConfig.push(createZoneSetModel(zoneSet));
             }
         })
-        getZoneSets(idZoneSet);
+        if(idZoneSet) {
+            getZoneSets(idZoneSet);
+        }
         function getZoneSets (idZoneSet) {
             wiApiService.getZoneSet(idZoneSet, function (info) {
                 if (info) {
@@ -68,7 +70,8 @@ module.exports = function (ModalService, wiComponentService, idZoneSet, wellProp
             }
         }
         this.selectZoneToggle = function (zone) {
-            zone.flag = !zone.flag;
+            self.zones.forEach(z => z.flag = false);
+            zone.flag = true;
             zone.showOnTrack = !zone.showOnTrack;
             wiApiService.editZone(zone, function(res) {
                 console.log("ok", res);

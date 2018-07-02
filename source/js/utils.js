@@ -3338,3 +3338,33 @@ function getWellColor(idWell) {
     return wellColorMap.getColor(idWell);
 }
 exports.getWellColor = getWellColor;
+
+exports.onChangeHandlers =  {
+    'well' : function(props) {
+        __GLOBAL.wiApiService.editWell(props, function () {
+            refreshProjectState().then(function () {
+                console.log("update well")
+            });
+        });
+    },
+    'dataset' : function(props) {
+        __GLOBAL.wiApiService.editDataset(props, function () {
+            refreshProjectState().then(function () {
+                console.log("update dataset");
+            });
+        });
+    },
+    'curve' : function(props) {
+        __GLOBAL.wiApiService.editCurve(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update curve");
+            });
+        })
+    },
+    'logtrack' : function(props) {
+        __GLOBAL.wiApiService.editTrack(self.input, function (res) {
+            wiComponentService.emit('update-logtrack-' + res.idTrack);
+            console.log("update longtrack")
+        })
+    }
+}

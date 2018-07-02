@@ -243,19 +243,28 @@ function WiExpTreeController(
                 nodeProperties.startDepth = well.properties.topDepth;
                 nodeProperties.dataset = dataset.properties.name;
                 nodeProperties.exportName = nodeProperties.name;
-
                 nodeProperties.compatiableList = nodeProperties.unit;
-                //family
-                
                 break;
                 
             }
-            
             default:
                 nodeProperties = node.properties;
                 break;
         }
-        wiComponentService.emit("update-properties", {type: node.type, props: nodeProperties});
+        /*function onChangeProperties(item, cb) {
+            if( node.type == 'well' || 
+                node.type == 'dataset' || 
+                node.type == 'curve' ) {
+                utils.editProperty(item, _.debounce(function () {
+                    cb && cb();
+                }, 200));
+            }
+        }*/
+        wiComponentService.emit("update-properties", {
+            type: node.type, 
+            props: nodeProperties/*, 
+            onChange: onChangeProperties*/
+        });
         let selectedNodes = wiComponentService.getComponent(
             wiComponentService.SELECTED_NODES
         );

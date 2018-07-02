@@ -270,6 +270,21 @@ let app = angular.module('wiapp',
         // 'chatModule'
     ]);
 
+/*var onChangeHandlers = {
+    'well' : function(props) {
+        console.log("onchangehandler for well", props);
+    },
+    'dataset' : function(props) {
+        console.log("onchangehandler for dataset", props);
+    },
+    'curve' : function(props) {
+        console.log("onchangehandler for curve", props);
+    },
+    'logplot' : function(props) {
+        console.log("onchangehandler for logplot", props);
+    }
+}*/
+
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     // SETUP HANDLER FUNCTIONS
     let globalHandlers = {};
@@ -315,6 +330,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
             $scope.inputProps = data.props;
             $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
             $scope.typeProps = data.type;
+            $scope.onChangeProps = utils.onChangeHandlers[data.type];
         }, 200);
     })
     // $scope.myPropertiesConfig = {};
