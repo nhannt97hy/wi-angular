@@ -1727,6 +1727,21 @@ function findHistogramModelById(idHistogram) {
     return his;
 }
 
+exports.findCrossplotModelById = findCrossplotModelById;
+
+function findCrossplotModelById(idCrossplot) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let cross = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'crossplot' && node.id == idCrossplot) {
+            cross = node;
+        }
+    });
+    return cross;
+}
+
 exports.findComboviewModelById = function (idComboview) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
