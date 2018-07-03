@@ -143,13 +143,17 @@
                                         <div class="row padding-bottom-0_5em">
                                             <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Left</label>
                                             <div class="col-sm-3 padding-right-0 padding-left-0">
-                                                <input type="number" class="form-control wi-form-control" id="scaleLeft" ng-model="wiModal.config.scale.left"
-                                                    ng-change="wiModal.checkLogValueX(wiModal.config.scale.left, 'scaleLeft')">
+                                                <input type="number" class="form-control wi-form-control" id="scaleLeft"
+                                                step="0.01"
+                                                ng-model="wiModal.config.scale.left"
+                                                ng-change="wiModal.checkLogValueX(wiModal.config.scale.left, 'scaleLeft')">
                                             </div>
                                             <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Right</label>
                                             <div class="col-sm-3 padding-right-0 padding-left-0">
-                                                <input type="number" class="form-control wi-form-control" id="scaleRight" ng-model="wiModal.config.scale.right"
-                                                    ng-change="wiModal.checkLogValueX(wiModal.config.scale.right, 'scaleRight')">
+                                                <input type="number" class="form-control wi-form-control" id="scaleRight"
+                                                step="0.01"
+                                                ng-model="wiModal.config.scale.right"
+                                                ng-change="wiModal.checkLogValueX(wiModal.config.scale.right, 'scaleRight')">
                                             </div>
                                             <div class="col-sm-2">
                                                 <label class="font-weight-normal">
@@ -160,13 +164,17 @@
                                         <div class="row">
                                             <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Bottom</label>
                                             <div class="col-sm-3 padding-right-0 padding-left-0">
-                                                <input type="number" class="form-control wi-form-control" id="scaleBottom" ng-model="wiModal.config.scale.bottom"
-                                                    ng-change="wiModal.checkLogValueY(wiModal.config.scale.bottom, 'scaleBottom')">
+                                                <input type="number" class="form-control wi-form-control" id="scaleBottom"
+                                                step="0.01"
+                                                ng-model="wiModal.config.scale.bottom"
+                                                ng-change="wiModal.checkLogValueY(wiModal.config.scale.bottom, 'scaleBottom')">
                                             </div>
                                             <label class="margin-bottom-0 margin-top-0_25em col-sm-2 font-weight-normal">Top</label>
                                             <div class="col-sm-3 padding-right-0 padding-left-0">
-                                                <input type="number" class="form-control wi-form-control" id="scaleTop" ng-model="wiModal.config.scale.top"
-                                                    ng-change="wiModal.checkLogValueY(wiModal.config.scale.top, 'scaleTop')">
+                                                <input type="number" class="form-control wi-form-control" id="scaleTop"
+                                                step="0.01"
+                                                ng-model="wiModal.config.scale.top"
+                                                ng-change="wiModal.checkLogValueY(wiModal.config.scale.top, 'scaleTop')">
                                             </div>
                                             <div class="col-sm-2">
                                                 <label class="font-weight-normal">
@@ -273,7 +281,7 @@
                 <button ng-show='!wiModal.hideApply' type="button" ng-click="wiModal.onApplyButtonClicked()" class="btn btn-default">
                     <span class="apply-16x16"></span>&nbsp;Apply</button>
                 <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default">
-                    <span class="ok-16x16"></span>&nbsp;OK</button>
+                    <span class="ok-16x16"></span>&nbsp;Ok</button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default">
                     <span class="close-16x16"></span>&nbsp;Cancel</button>
             </div>
@@ -295,7 +303,7 @@
             margin-top: 0.5em;
         }
 
-        wi-tabset>div {
+        .modal-body>wi-tabset>div {
             height: calc(100% - 180px);
         }
 

@@ -138,12 +138,14 @@
                                     <div class="col-sm-4 input-field">
                                         <label>Left</label>
                                         <input type="number" class="form-control wi-form-control" id="scaleLeft" ng-model="wiModal.config.scale.left"
-                                            ng-change="wiModal.checkLogaValue(wiModal.config.scale.left, 'scaleLeft')" style="margin-bottom:6px;">
+                                        step="0.01"
+                                        ng-change="wiModal.checkLogaValue(wiModal.config.scale.left, 'scaleLeft')" style="margin-bottom:6px;">
                                     </div>
                                     <div class="col-sm-4 input-field">
                                         <label>Right</label>
                                         <input type="number" class="form-control wi-form-control" id="scaleRight" ng-model="wiModal.config.scale.right"
-                                            ng-change="wiModal.checkLogaValue(wiModal.config.scale.right, 'scaleRight')" style="margin-bottom:6px;">
+                                        step="0.01"
+                                        ng-change="wiModal.checkLogaValue(wiModal.config.scale.right, 'scaleRight')" style="margin-bottom:6px;">
                                     </div>
                                     <div class="col-sm-4 input-field">
                                         <label>Divisions</label>
@@ -244,7 +246,7 @@
                     <span class="ok-16x16"></span>&nbsp;Ok
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked();" class="btn btn-default">
-                    <span class="close-16x16"></span>&nbsp;Close
+                    <span class="close-16x16"></span>&nbsp;Cancel
                 </button>
             </div>
         </div>
@@ -265,7 +267,7 @@
             margin-top: 0.5em;
         }
 
-        wi-tabset>div {
+        .modal-body>wi-tabset>div {
             height: calc(100% - 180px);
         }
 

@@ -266,11 +266,7 @@ exports.zoneToTreeConfig = zoneToTreeConfig;
 function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
     zoneSetModel.id = zoneSet.idZoneSet;
-    zoneSetModel.properties = {
-        idWell: zoneSet.idWell,
-        idZoneSet: zoneSet.idZoneSet,
-        name: zoneSet.name,
-    };
+    zoneSetModel.properties = zoneSet;
     zoneSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',
@@ -1729,6 +1725,21 @@ function findHistogramModelById(idHistogram) {
         }
     });
     return his;
+}
+
+exports.findCrossplotModelById = findCrossplotModelById;
+
+function findCrossplotModelById(idCrossplot) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let cross = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'crossplot' && node.id == idCrossplot) {
+            cross = node;
+        }
+    });
+    return cross;
 }
 
 exports.findComboviewModelById = function (idComboview) {
