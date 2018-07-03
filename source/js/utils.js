@@ -3373,3 +3373,74 @@ exports.onChangeHandlers =  {
         })
     }
 }
+exports.getIdObjectFromNode = function(node, rootNode) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    let idObject = {
+        idProject: projectLoaded.idProject,
+        idWell: "",
+        datasets: []
+    }
+    if(!rootNode) {
+        rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0].children;
+    }
+    if (node.type === "well") {
+        idObject.idWell = node.id;
+        for (let dataset of node.children) {
+            if(dataset.type == 'dataset'){
+                let idDatasetObj = {
+                    idDataset: dataset.id,
+                    idCurves: []
+                }
+                for (let curve of dataset.children) {
+                    if(curve.type == 'curve') {
+                        let idCurve = curve.id;
+                        idDatasetObj.idCurves.push(idCurve);
+                    }
+                }
+                __GLOBAL.$timeout(function () {
+                    idObject.datasets.push(idDatasetObj);
+                })
+            }
+        }
+        return idObject;
+    } else if (node.type == "dataset") {
+        if(node.properties && node.properties.idWell) {
+            idObject.idWell = node.properties.idWell; 
+            let idDatasetObj = {
+                idDataset: node.id,
+                idCurves: []
+            }
+            for (let curve of node.children) {
+                if(curve.type == 'curve') {
+                    let idCurve = curve.id;            
+                    idDatasetObj.idCurves.push(idCurve);
+                }
+            }
+            __GLOBAL.$timeout(function () {
+                idObject.datasets.push(idDatasetObj);
+            })        
+            return idObject;           
+        }   
+        return;        
+    }
+    else if (node.type == "curve") {
+        if(node.properties && node.properties.idDataset) {
+            let parentWell = rootNode.find(function(w) {
+                return w.children.find(function(d) {return d.id == node.properties.idDataset});
+            })
+            idObject.idWell = parentWell.id;
+            let idDatasetObj = {
+                idDataset: node.properties.idDataset,
+                idCurves: []
+            }
+            idDatasetObj.idCurves.push(node.id);
+            __GLOBAL.$timeout(function () {
+                idObject.datasets.push(idDatasetObj);
+            })
+            return idObject;
+        }
+        return;
+    }
+    return;
+}

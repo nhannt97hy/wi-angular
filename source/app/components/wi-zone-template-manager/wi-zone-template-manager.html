@@ -43,8 +43,8 @@
                 <label title="Apply changes" class='btn' ng-disabled="!wiZoneTemplateManager.zoneTemplateEditted" ng-click="wiZoneTemplateManager.editZoneTemplate()">
                     <i class="ti-check" ng-class="{'color-blue': wiZoneTemplateManager.zoneTemplateEditted, 'color-lightgray':!wiZoneTemplateManager.zoneTemplateEditted}"></i>
                 </label>
-                <label title="Delete selected zones" class='btn' ng-click="wiZoneTemplateManager.deleteZoneTemplate()" ng-disabled="wiZoneTemplateManager.selectedZoneTemplates.length==0">
-                    <i class="ti-close" ng-class="{'color-blue': wiZoneTemplateManager.selectedZoneTemplates.length!=0, 'color-lightgray': !wiZoneTemplateManager.selectedZoneTemplates.length!=0}"></i>
+                <label title="Delete zones" class='btn' ng-click="wiZoneTemplateManager.showDeleteContextMenu($event, $index)" ng-disabled="wiZoneTemplateManager.zoneTemplates.length==0">
+                    <i class="ti-close" ng-class="{'color-blue': wiZoneTemplateManager.zoneTemplates.length!==0, 'color-lightgray': wiZoneTemplateManager.zoneTemplates.length==0}"></i>
                 </label>
                 <label title="Create new zone" class='btn' ng-click="wiZoneTemplateManager.createZoneTemplate()" ng-disabled="!wiZoneTemplateManager.selectedTemplate">
                     <i class="ti-plus" ng-class="{'color-blue': wiZoneTemplateManager.selectedTemplate, 'color-lightgray': !wiZoneTemplateManager.selectedTemplate}"></i>
@@ -54,7 +54,7 @@
                 </label>
             </div>
         </div>
-        <div class="content-area">
+        <div class="content-area" id="zoneTemplateScroll">
             <div class="zone-area">
                 <table class="text-on-table table table-bordered" ng-show="wiZoneTemplateManager.zoneTemplates.length!==0">
                     <thead>

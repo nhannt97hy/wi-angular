@@ -178,13 +178,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                     handlers.AddNewButtonClicked();
                 }
             }, {
-                name: "Export To Inventory",
-                label: "Export To Inventory",
-                icon: "arrow-right-16x16",
-                handler: function () {
-                    utils.exportWellToInventory();
-                }
-            }, {
                 name: "ImportASCII",
                 label: "Import ASCII",
                 icon: "ascii-import-16x16",
@@ -356,6 +349,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 })
                 let wellContextMenu = [
                     {
+                        name: "Export",
+                        label: "Export",
+                        icon: "arrow-right-16x16",
+                        class: "has-more", 
+                        handler: function () {
+                            // utils.exportWellToInventory();
+                        }, childContextMenu: [
+                            {
+                                name: "Export to Las 2.0",
+                                label: "Export to Las 2.0",
+                                icon: "",
+                                handler: function() {
+                                    let selectedNode = utils.getSelectedNode();
+                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                }
+                            }, {
+                                name: "Export to Las 3.0",
+                                label: "Export to Las 3.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 3.0');
+                                }
+                            }, {
+                                name: "Export to Inventory",
+                                label: "Export to Inventory",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportWellToInventory();
+                                }
+                            }
+                        ]
+                    }, {
                         name: "NewDataset",
                         label: "New Dataset",
                         icon: "dataset-new-16x16",
@@ -458,12 +483,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.renameDataset();
                         }
                     }, {
-                        name: "Export to Inventory",
-                        label: "Export to Inventory",
+                        name: "Export",
+                        label: "Exporty",
                         icon: "arrow-right-16x16",
+                        class: "has-more",
                         handler: function () {
-                            utils.exportDatasetToInventory();
-                        }
+                            // utils.exportDatasetToInventory();
+                        }, childContextMenu: [
+                            {
+                                name: "Export to Las 2.0",
+                                label: "Export to Las 2.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 2.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                }
+                            }, {
+                                name: "Export to Las 3.0",
+                                label: "Export to Las 3.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 3.0');
+                                }
+                            }, {
+                                name: "Export to Inventory",
+                                label: "Export to Inventory",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportDatasetToInventory();
+                                }
+                            }
+                        ]
                     }, {
                         name: "DuplicateDataset",
                         label: "Duplicate",
@@ -505,13 +556,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }
                 return curveCtx.concat([
                     {
-                        name: "Export",
-                        label: "Export",
-                        icon: "save-16x16",
-                        handler: function() {
-                            utils.exportCurve();
-                        }
-                    }, {
                         name: "Copy",
                         label: "Copy",
                         icon: "copy-16x16",
@@ -519,12 +563,44 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.copyCurve();
                         }
                     }, {
-                        name: "Export to Inventory",
-                        label: "Export to Inventory",
+                        name: "Export",
+                        label: "Export",
                         icon: "arrow-right-16x16",
-                        handler: function() {
-                            utils.exportCurveToInventory();
-                        }
+                        class: "has-more",
+                        handler: function() {},
+                        childContextMenu: [
+                            {
+                                name: "Export to CSV",
+                                label: "Export to CSV",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportCurve();
+                                }
+                            }, {
+                                name: "Export to Las 2.0",
+                                label: "Export to Las 2.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 2.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                }
+                            }, {
+                                name: "Export to Las 3.0",
+                                label: "Export to Las 3.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 3.0');
+                                }
+                            }, {
+                                name: "Export to Inventory",
+                                label: "Export to Inventory",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportCurveToInventory();
+                                }
+                            }
+                        ]
                     }, {
                         name: "Cut",
                         label: "Cut",

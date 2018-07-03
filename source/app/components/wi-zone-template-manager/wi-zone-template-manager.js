@@ -129,6 +129,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.selectedZoneTemplate = [];
         wiApiService.listAllZoneByTemplate({ template: self.selectedTemplate.name }, function (zones) {
             self.zoneTemplates = zones;
+            var scroll = $('#zoneTemplateScroll');
+            scroll.animate({ scrollTop: 0 });
         })
     };
     this.templateClickFunction = function ($index, $event, node) {
@@ -298,21 +300,59 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             if (data) {
                 data.template = self.selectedTemplate.name;
                 wiApiService.createZoneTemplate(data, function (zone) {
-                    data.idZoneTemplate = zone.idZoneTemplate;
-                    self.zoneTemplates.push(data);
+                    if(zone) {
+                        data.idZoneTemplate = zone.idZoneTemplate;
+                        self.zoneTemplates.push(data);
+                    } else {
+                        console.log('Can not create zone template')
+                    }
                 })
             }
         });
     }
-    this.deleteZoneTemplate = function () {
-        
+    this.showDeleteContextMenu = function ($event, $index) {
+        if (self.selectedZoneTemplates.length == 0 && self.zoneTemplates[0]) {
+            self.zoneTemplates[self.zoneTemplates.length - 1].flag = true;
+            self.selectedZoneTemplates.push(self.zoneTemplates[self.zoneTemplates.length - 1]);
+            var scroll = $('#zoneTemplateScroll');
+            scroll.animate({ scrollTop: scroll.prop("scrollHeight") });
+        }
+        let contextMenu = self.getDeleteButtonCtxMenu(
+            $index,
+            this
+        );
+        wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, contextMenu);
+    };
+
+    this.getDeleteButtonCtxMenu = function ($index, treeviewCtrl) {
+        return [
+            {
+                name: "DeleteAllZoneTemplates",
+                label: "Delete All Zones",
+                icon: "",
+                handler: function () {
+                    self.deleteZoneTemplate(true);
+                }
+            }, {
+                name: "DeleteSelectedZoneTemplates",
+                label: "Delete Selected Zones",
+                icon: "",
+                handler: function () {
+                    self.deleteZoneTemplate(false);
+                }
+            }
+        ]
+    };
+    this.deleteZoneTemplate = function (isAll) {
         for (z of self.zoneTemplates) {
-            if (zonesets.flag) {
+            let index = self.zoneTemplates.indexOf(z);
+            if (z.flag || isAll) {
                 wiApiService.deleteZoneTemplate({ idZoneTemplate: z.idZoneTemplate }, function () {
                     console.log('deleted');
-                    if (self.zoneTemplates.indexOf(z) == self.zoneTemplates.length - 1) {
-                        self.refreshZoneTemplateList()
-                    }
+                    self.zoneTemplates.splice(index, 1);
+
                 })
             }
         }
