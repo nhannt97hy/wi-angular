@@ -24,9 +24,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         this.registerTrackCallback();
         this.registerTrackHorizontalResizerDragCallback();
         this.registerTrackMouseEventHandlers();
-        // if (this.wiD3Ctrl) {
-        //     this.wiD3Ctrl.trackComponents.push(self.getProperties()); 
-        // },
         if (this.leftTrack && this.leftTrack.controller) {
             this.viTrack.leftTrack = this.leftTrack.controller;
         }

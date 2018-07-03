@@ -255,8 +255,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
         if(!trackProps.idTrack) {
             // TODO something without track id (anonymous track - for preview purpose)
-            if(self.zoneset) {
-                self.addZoneSetToTrack(self.zoneset);
+            if (self.getProperties().zone_set) {
+                self.addZoneSetToTrack(self.getProperties().zone_set); 
             }
             if (self.getProperties().lines) {
                 let promises = [];
@@ -458,20 +458,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         return marker;
     }
-    this.addMarkerSetToTrack = function (markerSetConfig) {
+    this.addMarkerSetToTrack = function (markerSet) {
         this.viTrack.removeAllMarkers();
-        markerSetConfig.markers.forEach(function (markerConfig) {
-            if (markerConfig.showOnTrack) {
-                self.addMarkerToTrack(markerConfig); 
+        markerSet.markers.forEach(function (marker) {
+            if (marker) {
+                self.addMarkerToTrack(marker); 
             }
         })
     }
     this.addZoneSetToTrack = function (zoneset) {
+        self.properties.zone_set = zoneset;
         self.viTrack.removeAllZones();
         for(let zone of zoneset.zones) {
             console.log('zone config: ', zone);
-            if(zone.showOnTrack) {
-                // zone.properties.params = zone.children ? zone.children.map(c => c.data).filter(p => typeof(p.value) == 'number') : [];
+            if (zone.showOnTrack) {
                 let viZone = self.viTrack.addZone(zone);
                 viZone.svgGroup.style('pointer-events', 'none');
                 viZone.onControlinesDrag(function(param) {
