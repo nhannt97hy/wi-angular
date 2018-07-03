@@ -55,8 +55,9 @@ Annotation.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
     let self = this;
 
-    this.svgContainer = plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-annotation-container');
+    this.svgContainer = plotContainer.select('.vi-track-svg-container');
+    // this.svgContainer = plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-annotation-container');
 
     this.svgGroup = this.svgContainer.append('g')
         .attr('class', 'vi-annotation-svg-group')
@@ -119,7 +120,9 @@ Annotation.prototype.updateBoundingRect = function(x, y, width, height) {
 }
 
 Annotation.prototype.updateText = function() {
-    let rect = this.svgGroup.select('rect.vi-annotation-bounding-rect').node().getBBox();
+    let rectNode = this.svgGroup.select('rect.vi-annotation-bounding-rect').node();
+    if (!rectNode) return;
+    let rect = rectNode.getBBox();
     const PADDING = 5;
     const text = new d3plus.TextBox()
         .select(this.svgGroup.node())

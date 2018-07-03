@@ -3,12 +3,12 @@ const moduleName = 'wi-props';
 
 function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, ModalService) {
     let self = this;
-    window.wi = this;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
     this.fields = null;
     this.curveUnits = null;
+    this.zoneSets = null;
     this.$onInit = function() {
         wiComponentService.putComponent(self.name, self);
     }
@@ -27,12 +27,17 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         }
     }
     this.doChange = function(field) {
-        onChangeDefault(field, function() {
+        if(self.input[field.name] !== field.value) {
             self.input[field.name] = field.value;
-        });
+            self.onchangefunc && self.onchangefunc(self.input);
+        }
+        
+        /*onChangeDefault(field, function() {
+            self.input[field.name] = field.value;
+        });*/
     
     }
-    function onChangeDefault(field, cb) {
+    /*function onChangeDefault(field, cb) {
         if( self.typeprops == 'well' || 
             self.typeprops == 'dataset' || 
             self.typeprops == 'curve' ) {
@@ -40,9 +45,13 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                 cb && cb();
             }, 200));
         } else if(self.typeprops == 'logtrack') {
-
-        } else self.input[field.name] = field.value;
-    }
+            self.input[field.name] = field.value;
+            wiApiService.editTrack(self.input, function (res) {
+                wiComponentService.emit('update-logtrack-' + res.idTrack);
+                // cb && cb();
+            })
+        }
+    }*/
     function obj2Array(obj, config) {
 
         let array = new Array();
@@ -127,8 +136,6 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                     $timeout(function() {
                         wiApiService.asyncGetListUnit({idCurve: self.input.idCurve}).then(r => {
                             self.curveUnits = r;
-                            /*let temp = fields.find(f => f.name == 'unit');
-                            let unit_temp = self.curveUnits.find(c => c.name == temp.value);*/
                         });
                     })
                 }
@@ -136,14 +143,15 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         });
     }
     this.changeZoneSet = function(field, fields) {
-        DialogUtils.zoneSetEditDialog(ModalService, wiComponentService, field.value, self.input.wellProps, function (newZoneSet) {
+        DialogUtils.zoneSetEditDialog(ModalService, wiComponentService, field.value.idZoneSet, self.input.wellProps, function (newZoneSet) {
             if (!newZoneSet) return;
             field.value = newZoneSet;
+            self.input.idZoneSet = newZoneSet.idZoneSet;
+            self.doChange(field);
         });
     }
     this.onChangeUnit = function(field, fields) {
         let temp = fields.find(f => f.name == 'unit');
-        // self.fields[self.fields.indexOf(temp)].value = field.value;
         let payload = {};
         payload.srcUnit = self.curveUnits.find(u => u.name == temp.value);
         payload.desUnit = self.curveUnits.find(u => u.name == field.value);
@@ -171,7 +179,8 @@ app.component(componentName, {
         name: "@",
         input: "<",
         config: "<",
-        typeprops: "<"
+        typeprops: "<",
+        onchangefunc: "<"
     }
 });
 
