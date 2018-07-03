@@ -46,16 +46,16 @@
                 <option value="orderDepth">Depth</option>>
             </select>
             <div class="button-area">
-                <label class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.zoneEditted">
+                <label title="Apply changes" class='btn' ng-click="wiZoneSetManager.editZone()" ng-disabled="!wiZoneSetManager.zoneEditted">
                     <i class="ti-check" ng-class="{'color-blue': wiZoneSetManager.zoneEditted, 'color-lightgray': !wiZoneSetManager.zoneEditted}"></i>
                 </label>
-                <label class='btn' ng-click="wiZoneSetManager.deleteZone()" ng-disabled="wiZoneSetManager.selectedZones.length==0">
-                    <i class="ti-close" ng-class="{'color-blue': wiZoneSetManager.selectedZones.length!=0, 'color-lightgray': wiZoneSetManager.selectedZones.length==0}"></i>
+                <label title="Delete zones" class='btn' ng-click="wiZoneSetManager.showDeleteButtonContextMenuFunction($event, $index)" ng-disabled="wiZoneSetManager.zones.length==0">
+                    <i class="ti-close" ng-class="{'color-blue': wiZoneSetManager.zones.length!=0, 'color-lightgray':wiZoneSetManager.zones.length==0}"></i>
                 </label>
-                <label title="Create new zone" class='btn' ng-click="wiZoneSetManager.createZone()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
+                <label title="Create new zone" class='btn' ng-click="wiZoneSetManager.showCreateButtonContextMenuFunction($event, $index)" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-plus" ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
                 </label>
-                <label class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
+                <label tilte="Reload zone-list" class='btn' ng-click="wiZoneSetManager.refreshZoneList()" ng-disabled="!wiZoneSetManager.lastSelectedZoneSet">
                     <i class="ti-reload" ng-class="{'color-blue': wiZoneSetManager.lastSelectedZoneSet, 'color-lightgray': !wiZoneSetManager.lastSelectedZoneSet}"></i>
                 </label>
             </div>

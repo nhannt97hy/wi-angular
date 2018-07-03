@@ -2780,9 +2780,14 @@ exports.openZonesetmanager = function (item) {
         idWell = false;
     } else if (item.type == 'well') {
         idWell = item.idWell;
-    } else if(item.type == 'zonesets') {
+    } else if(item.type == 'user_defined') {
         idWell = item.properties.idWell;
     }
+    let childItem = layoutManager.getItemById('Zoneset-manager');
+    if(childItem) {
+        layoutManager.getItemById('right').removeChild(childItem);        
+    }
+    console.log('childItem', childItem);
     layoutManager.putTabRight({
         id: 'Zoneset-manager',
         title: 'Zoneset Manager',

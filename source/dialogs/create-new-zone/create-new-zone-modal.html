@@ -146,8 +146,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" ng-disabled="(!modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid))"
-                    ng-click="wiModal.onOkButtonClicked()">
+                <button type="button" class="btn btn-default" ng-click="wiModal.onOkButtonClicked()" ng-disabled="!wiModal.returnZone.startDepth || !wiModal.returnZone.endDepth">
                     <span class="ok-16x16"></span>&nbsp;OK
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default">
