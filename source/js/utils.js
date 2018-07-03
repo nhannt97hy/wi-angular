@@ -266,11 +266,7 @@ exports.zoneToTreeConfig = zoneToTreeConfig;
 function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
     zoneSetModel.id = zoneSet.idZoneSet;
-    zoneSetModel.properties = {
-        idWell: zoneSet.idWell,
-        idZoneSet: zoneSet.idZoneSet,
-        name: zoneSet.name,
-    };
+    zoneSetModel.properties = zoneSet;
     zoneSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',

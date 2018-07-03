@@ -79,10 +79,10 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if (self.props.general.width < 0 ) self.props.general.width = 0;
-            if (lastZoneset && self.props.general.idZoneSet != lastZoneset.properties.idZoneSet) {
-                trackComponent.controller.zoneset = utils.getModel('zoneset', self.props.general.idZoneSet);
+            if (lastZoneSet && self.props.general.idZoneSet != lastZoneSet.idZoneSet) {
+                trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             } else if(self.props.general.idZoneSet) {
-                trackComponent.controller.zoneset = utils.getModel('zoneset', self.props.general.idZoneSet);
+                trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             }
             wiApiService.editTrack(self.props.general, function (res) {
                 if (!res) return;
@@ -130,7 +130,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         else if (wellChild.type == 'user_defined') {
                             wellChild.children.forEach(c => {
                                 if(c.type == 'zoneset')
-                                    zonesets.push(zoneset);
+                                    zonesets.push(c);
                             })
                         }
                     })
@@ -138,7 +138,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             });
         }
 
-        let lastZoneset = utils.getModel('zoneset', this.props.general.idZoneSet);
+        let lastZoneSet = (utils.getModel('zoneset', this.props.general.idZoneSet) || {}).properties;
         this.getZonesetList = function(wiItemDropdownCtrl) {
             $timeout(function() {
                 if(!zonesets.length) return;
@@ -150,8 +150,8 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         properties: zoneset.properties
                     }
                 });
-                if(lastZoneset) {
-                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneset.properties.idZoneSet);
+                if(lastZoneSet) {
+                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneSet.idZoneSet);
                 }
             }, 10); 
         }
@@ -839,7 +839,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.onCancelButtonClicked = function () {
             close(null, 100);
             // wiD3Ctrl.updateTrack(viTrack);
-            trackComponent.controller.update();
+            // trackComponent.controller.update();
         };
     }
 
