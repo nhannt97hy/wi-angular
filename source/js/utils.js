@@ -314,11 +314,7 @@ function markerToTreeConfig(marker, options = {}) {
 function markerSetToTreeConfig(markerSet, options = {}) {
     var markerSetModel = new Object();
     markerSetModel.id = markerSet.idMarkerSet;
-    markerSetModel.properties = {
-        idWell: markerSet.idWell,
-        idMarkerSet: markerSet.idMarkerSet,
-        name: markerSet.name,
-    };
+    markerSetModel.properties = markerSet;
     markerSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',

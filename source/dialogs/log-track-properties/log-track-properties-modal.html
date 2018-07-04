@@ -165,58 +165,61 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <h5 class="normal-text">Zonation & MarkerSet</h5>
-                                <div ng-show="!!wiModal.well">
-                                    <div class="padding-left-10-percent">
-                                        
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-5" for="track">
-                                                Show ZoneSet
-                                            </label>
-                                            <div class="col-sm-6">
-                                                <input type="checkbox" ng-model="wiModal.props.general.showZoneSet"
-                                                        ng-change="wiModal.onShowZoneSet()">
-                                            </div>
+                                <div class="row" ng-show="!!wiModal.well">
+                                    <div class="col-sm-6">
+                                        <div class="padding-left-10-percent">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5" for="track">
+                                                    Show ZoneSet
+                                                </label>
+                                        <div class="col-sm-6">
+                                            <input type="checkbox" ng-model="wiModal.showZoneSet"
+                                                                   ng-change="wiModal.onShowZoneSet()">
                                         </div>
-                                        
-                                        <div class="form-group" ng-show="wiModal.props.general.showZoneSet">
-                                            <label class="control-label col-sm-5" for="track">
-                                                Select ZoneSet
-                                            </label>
-                                            <div class="col-sm-6">
-                                                <div class="float-left">
-                                                    <wi-item-dropdown 
-                                                     on-wi-dropdown-init="wiModal.getZonesetList"
-                                                     on-item-changed="wiModal.zonesetChanged"
-                                                     place-holder="Select zoneset"
-                                                     ctrl-btn-icon='fa fa-times-circle line-height-1_5'
-                                                    ></wi-item-dropdown> 
+                                            </div>
+
+                                            <div class="form-group" ng-show="wiModal.showZoneSet">
+                                                <label class="control-label col-sm-5" for="track">
+                                                    Select ZoneSet
+                                                </label>
+                                                <div class="col-sm-6">
+                                                    <div class="float-left">
+                                                        <wi-item-dropdown 
+                                                         on-wi-dropdown-init="wiModal.getZonesetList"
+                                                         on-item-changed="wiModal.zonesetChanged"
+                                                         place-holder="Select zoneset"
+                                                         ctrl-btn-icon='fa fa-times-circle line-height-1_5'
+                                                         ></wi-item-dropdown> 
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="padding-left-10-percent">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-5" for="track">
-                                                Show MarkerSet
-                                            </label>
-                                            <div class="col-sm-6">
-                                                <input type="checkbox" ng-model="wiModal.props.general.showMarkerSet">
+                                    <div class="col-sm-6">
+                                        <div class="padding-left-10-percent">
+                                            <div class="form-group">
+                                                <label class="control-label col-sm-5" for="track">
+                                                    Show MarkerSet
+                                                </label>
+                                                <div class="col-sm-6">
+                                                    <input type="checkbox" ng-model="wiModal.showMarkerSet">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group" ng-show="wiModal.props.general.showMarkerSet">
-                                            <label class="control-label col-sm-5" for="track">
-                                                Select MarkerSet
-                                            </label>
-                                            <div class="col-sm-6">
-                                                <div class="float-left">
-                                                    <wi-item-dropdown 
+                                            <div class="form-group" ng-show="wiModal.showMarkerSet">
+                                                <label class="control-label col-sm-5" for="track">
+                                                    Select MarkerSet
+                                                </label>
+                                                <div class="col-sm-6">
+                                                    <div class="float-left">
+                                                        <wi-item-dropdown 
                                                          on-wi-dropdown-init="wiModal.getMarkersetList"
                                                          on-item-changed="wiModal.markersetChanged"
                                                          place-holder="Select markerset"
                                                          ctrl-btn-icon='fa fa-times-circle line-height-1_5'
-                                                    ></wi-item-dropdown> 
+                                                         ></wi-item-dropdown> 
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
