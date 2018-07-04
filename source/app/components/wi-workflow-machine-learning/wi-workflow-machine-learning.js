@@ -966,7 +966,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     console.log(payload);
                     window.trainData = payload;
                     wiMachineLearningApiService.trainModel(payload, function (res) {
-                        if (res) {
+                        if (res) {//////////////// subscribe
                             toastr.success('Train model success');
                             console.log('train model success', res);
 
