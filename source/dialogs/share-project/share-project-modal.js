@@ -2,6 +2,7 @@ let helper = require('./DialogHelper');
 module.exports = function (ModalService, callback, groups, _users, company) {
     function ModalController($scope, close, wiApiService, wiComponentService, $timeout) {
         let self = this;
+        let currentUser = window.localStorage.getItem('username');
         window.SP = this;
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -474,7 +475,7 @@ module.exports = function (ModalService, callback, groups, _users, company) {
             })
         };*/
         function reload() {
-            wiApiService.listGroup({idCompany: company.idCompany}, function (groups) {
+            wiApiService.listGroup({idCompany: company.idCompany, username: currentUser}, function (groups) {
                 // $timeout(function () {
                     preGroup(groups);
                     self.groups = groups.filter(g => (g.isShared == true));

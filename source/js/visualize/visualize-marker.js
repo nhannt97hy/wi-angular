@@ -36,37 +36,46 @@ function Marker(config) {
     // Set default values
     this.id = config.idMarker || config.id;
     this.idTrack = config.idTrack;
-    this.name = 'Marker';
-    this.nameHAlign = 'Left';
-    this.nameVAlign = 'None';
-    this.depth = this.minY;
-    this.depthHAlign = 'Right';
-    this.depthVAlign = 'High';
+    
+    this.marker_template = {
+        color: 'black',
+        lineStyle: '[0]',
+        name: 'Marker'
+    }
+    // this.name = 'Marker';
+    // this.nameHAlign = 'Left';
+    // this.nameVAlign = 'None';
+    // this.depth = this.minY;
+    // this.depthHAlign = 'Right';
+    // this.depthVAlign = 'High';
     this.precision = 2;
     this.lineWidth = 2;
-    this.lineDash = [];
-    this.lineColor = 'black';
-    this.showSymbol = false;
-    this.symbolName = 'Circle';
-    this.symbolSize = 10;
-    this.symbolStrokeStyle = 'black';
-    this.symbolFillStyle = 'red';
-    this.symbolLineWidth = 1;
-    this.symbolLineDash = [];
+    // this.lineDash = [];
+    // this.lineColor = 'black';
+    // this.showSymbol = false;
+    // this.symbolName = 'Circle';
+    // this.symbolSize = 10;
+    // this.symbolStrokeStyle = 'black';
+    // this.symbolFillStyle = 'red';
+    // this.symbolLineWidth = 1;
+    // this.symbolLineDash = [];
 
     // Override default if config contains the key
     this.setProperties(config);
 }
 
+// Marker.prototype.PROPERTIES = [
+//     'name', 'nameHAlign', 'nameVAlign',
+//     'depth', 'depthHAlign', 'depthVAlign',
+//     'precision',
+//     'lineWidth', 'lineDash', 'lineColor',
+//     'showSymbol', 'symbolName', 'symbolSize',
+//     'symbolStrokeStyle', 'symbolFillStyle',
+//     'symbolLineWidth', 'symbolLineDash'
+// ];
 Marker.prototype.PROPERTIES = [
-    'name', 'nameHAlign', 'nameVAlign',
-    'depth', 'depthHAlign', 'depthVAlign',
-    'precision',
-    'lineWidth', 'lineDash', 'lineColor',
-    'showSymbol', 'symbolName', 'symbolSize',
-    'symbolStrokeStyle', 'symbolFillStyle',
-    'symbolLineWidth', 'symbolLineDash'
-];
+    'depth', 'marker_template'
+]
 Marker.prototype.FLOAT_PROPERTIES = ['depth'];
 Marker.prototype.INTEGER_PROPERTIES = ['precision', 'lineWidth', 'symbolSize', 'symbolLineWidth'];
 Marker.prototype.ARRAY_PROPERTIES = ['lineDash', 'symbolLineDash'];
@@ -75,8 +84,8 @@ Marker.prototype.getProperties = function() {
     let props = Utils.only(this, this.PROPERTIES);
     props.idMarker = this.id;
     props.idTrack = this.idTrack;
-    props.lineDash = JSON.stringify(this.lineDash);
-    props.symbolLineDash = JSON.stringify(this.symbolLineDash);
+    // props.lineDash = JSON.stringify(this.lineDash);
+    // props.symbolLineDash = JSON.stringify(this.symbolLineDash);
     return props;
 }
 
@@ -95,8 +104,9 @@ Marker.prototype.setProperties = function(props) {
 Marker.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
 
-    this.svgContainer = plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-marker-container');
+    this.svgContainer = plotContainer.select('.vi-track-svg-container');
+    // this.svgContainer = plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-marker-container');
     this.svgGroup = this.svgContainer.append('g')
         .classed('vi-marker-svg-group', true);
 
@@ -125,9 +135,13 @@ Marker.prototype.doPlot = function(highlight) {
         .attr('y1', y)
         .attr('x2', maxX)
         .attr('y2', y)
-        .attr('stroke', this.lineColor || 'black')
+        .attr('stroke', this.marker_template.color || 'black')
         .attr('stroke-width', this.lineWidth || 1)
-        .attr('stroke-dasharray', this.lineDash || '');
+        .attr('stroke-dasharray', this.marker_template.lineStyle || '');
+
+        // .attr('stroke', this.lineColor || 'black')
+        // .attr('stroke-width', this.lineWidth || 1)
+        // .attr('stroke-dasharray', this.lineDash || '');
 
     this.drawSymbol();
     this.drawText();
@@ -220,6 +234,8 @@ Marker.prototype.drawSymbol = function() {
 }
 
 Marker.prototype.updateTextPosition = function(element, hAlign, vAlign) {
+    let elementNode = element.node();
+    if (!elementNode) return;
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
 
@@ -228,7 +244,7 @@ Marker.prototype.updateTextPosition = function(element, hAlign, vAlign) {
     let maxX = d3.max(viewportX);
 
     let textX, textY;
-    let textRect = element.node().getBBox();
+    let textRect = elementNode.getBBox();
     element.attr('display', 'block');
     let padding = 5;
     switch (Utils.capitalize(hAlign)) {

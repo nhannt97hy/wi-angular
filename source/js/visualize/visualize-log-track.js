@@ -72,8 +72,6 @@ function LogTrack(config, wiApiService) {
 
     this.curvesRemoved = 0;
     this.mode = null;
-
-    this.showZoneSet = config.showZoneSet;
 }
 
 LogTrack.prototype.getProperties = function() {
@@ -97,7 +95,7 @@ LogTrack.prototype.getProperties = function() {
         labelFormat: this.labelFormat,
         zoomFactor: this.zoomFactor,
         idZoneSet: this.idZoneSet,
-        showZoneSet: this.showZoneSet
+        idMarkerSet: this.idMarkerSet
     }
 }
 
@@ -119,8 +117,8 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
     Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
     Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
-    Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);
-    Utils.setIfNotNull(this, 'showZoneSet', props.showZoneSet);
+    Utils.setIfNotUndefined(this, 'idZoneSet', props.idZoneSet);
+    Utils.setIfNotUndefined(this, 'idMarkerSet', props.idMarkerSet);
 }
 
 LogTrack.prototype.setMode = function(newMode) {
@@ -337,10 +335,11 @@ LogTrack.prototype.init = function(baseElement) {
         .style('cursor', 'crosshair')
         .style('overflow', 'visible');
 
-    this.svgContainer = this.plotContainer.append('svg')
-        .attr('class', 'vi-track-drawing vi-track-svg-container')
-        .style('cursor', 'crosshair');
-        // .style('overflow', 'visible');
+    this.svgContainer.style('cursor', 'crosshair');
+    // this.svgContainer = this.plotContainer.append('svg')
+    //     .attr('class', 'vi-track-drawing vi-track-svg-container')
+    //     .style('cursor', 'crosshair');
+    // .style('overflow', 'visible');
 
     this.xAxisGroup = this.axisContainer.append('g')
         .attr('class', 'vi-track-axis');
@@ -774,10 +773,11 @@ LogTrack.prototype.plotDrawing = function(drawing) {
         drawing.doPlot();
     }
     this.getShadings().filter(s => s !== this.currentDrawing).forEach(s => s.lower());
-    this.getImages().forEach(function (img) { img.lower(); });
-    this.getMarkers().forEach(function(marker) { marker.raise(); });
-    // this.getZones().forEach(zone => zone.lower());
-    this.svgContainer.raise();
+    // this.getImages().forEach(function (img) { img.lower(); });
+    // this.getMarkers().forEach(function(marker) { marker.svgGroup.raise(); });
+    // this.getAnnotations().forEach(ann => ann.svgGroup.raise());
+    this.getZones().forEach(zone => zone.svgGroup.lower());
+    this.plotContainer.selectAll('svg.vi-track-svg-container').raise();
     this.axisContainer.lower();
 }
 
@@ -882,6 +882,7 @@ LogTrack.prototype.onMarkerMouseDown = function(marker, cb) {
 LogTrack.prototype.onDrawingMouseDown = function(drawing, cb) {
     let self = this;
     drawing.on('mousedown', function() {
+        console.log('drawing mousedown event: ', drawing);
         self.drawingMouseDownCallback(drawing);
         cb();
     })
@@ -1320,7 +1321,7 @@ LogTrack.prototype.removeTooltipText = function() {
     this.svgContainer.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
 }
 
-******************************** END MOVING TO SUPPER CLASS **************************/
+******************************** END MOVING TO SUPER CLASS **************************/
 
 /**
  * Register event when drag curve
@@ -1437,7 +1438,7 @@ LogTrack.prototype.addZone = function(zoneConfig) {
     let self = this;
     let zone = new Zone(zoneConfig);
     zone.init(self.plotContainer);
-    zone.svgGroup.attr('fill-opacity', '0.5');
+    zone.svgGroup.attr('fill-opacity', '0.6');
     this.drawings.push(zone);
     return zone;
 }
@@ -1470,4 +1471,11 @@ LogTrack.prototype.drawControlLinesOnCurvesHeaders = function(params) {
 
 LogTrack.prototype.removeControlLinesOnCurvesHeaders = function() {
     this.getCurves().forEach(viCurve => viCurve.drawControlLines([]));
+}
+
+LogTrack.prototype.removeAllMarkers = function() {
+    let self = this;
+    this.getMarkers().forEach(viMarker => {
+        self.removeDrawing(viMarker); 
+    })
 }

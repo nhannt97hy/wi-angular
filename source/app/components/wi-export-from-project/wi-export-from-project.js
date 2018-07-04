@@ -9,13 +9,14 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     this.lasFiles = [];
     this.projectConfig = [];
     this.inventoryConfig = [];
+    this.fileFormat = 'Las2';
 
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let oUtils = require('./oinv-utils');
     let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
 
     let topIdx = 0;
-    let selectionLength = 8;
+    let selectionLength = 20;
     let delta = 5;
 
     oUtils.setGlobalObj({
@@ -77,6 +78,9 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     }
 
     function modelFrom(rootConfig, wells) {
+        if(!rootConfig) {
+            rootConfig = self.projectConfig;
+        }
         wells.forEach(well => {
             let wellModel = utils.createWellModel(well)
             rootConfig.push(wellModel);
@@ -92,82 +96,54 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
         })
     }
 
-    this.upTriggerPrj = function (cb) {
-        console.log('up-trigger prj');
-        // let wells = self.projectConfig;
-        let wells = self.projectConfig;
-        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
-            wiApiService.listWells({
-                idProject: __idProject,
-                start: wells[0].properties.idWell,
-                limit: 10,
-                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
-                forward: false
-            }, function (listOfWells) {
-                $timeout(function () {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
-                        let wellModel = utils.createWellModel(well)
-                        wells.unshift(wellModel);
-                        wellModel.data.toggle = self.labelToggle;
-                        // not necessary because well contain properties only (no eagger loading at serve side)
-                        if (well.datasets && well.datasets.length) {
-                            well.datasets.forEach(dataset => {
-                                let datasetModel = utils.createDatasetModel(dataset);
-                                wellModel.children.push(datasetModel);
-                                dataset.curves.forEach(curve => {
-                                    datasetModel.children.push(utils.createCurveModel(curve));
-                                })
-                            });
-                        }
-                        /*                        
-                        wellModel.data.toggle = self.labelToggle;
-                        wells.unshift(wellModel);
-                        wells.pop();
-                        */
+    this.upTrigger = function (cb) {
+        console.log('uptrigger');
+        if (topIdx > 0) {
+            wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+                if (wells) {
+                    wells.sort(function (a, b) {
+                        return parseInt(a.idWell) - parseInt(b.idWell);
+                    });
+                    if (topIdx > delta) {
+                        let newSource = wells.slice(topIdx - delta, topIdx).reverse();
+                        let newList = newSource.map(w => modelFrom(w));
+                        topIdx = topIdx - delta;
+                        cb(newList, self.projectConfig);
+                    } else {
+                        let newSource = wells.slice(0, topIdx).reverse();
+                        let newList = newSource.map(w => modelFrom(w));
+                        topIdx = 0;
+                        cb(newList, self.projectConfig);
                     }
-                    if (cb) cb(listOfWells.length);
-                });
-            });
-        }
-        else if (cb) cb(0);
-    }
+                }
+            })
+        } else cb([]);
+    };
 
-    this.downTriggerPrj = function (cb) {
-        console.log('down-trigger prj');
-        // let wells = self.projectConfig;
-        let wells = self.projectConfig;
-        if (wells.length && !isNaN(__idProject) && __idProject > 0) {
-            wiApiService.listWells({
-                idProject: __idProject,
-                start: wells[wells.length - 1].properties.idWell,
-                limit: 10,
-                match: (self.prjFilter && self.prjFilter.length) ? self.prjFilter : undefined,
-                forward: true
-            }, function (listOfWells) {
-                $timeout(function () {
-                    console.log(listOfWells);
-                    for (let well of listOfWells) {
-                        let wellModel = utils.createWellModel(well);
-                        wells.push(wellModel);
-                        wells.shift();
-                        // not necessary because well contain properties only (no eagger loading at serve side)
-                        if (well.datasets && well.datasets.length) {
-                            well.datasets.forEach(dataset => {
-                                let datasetModel = utils.createDatasetModel(dataset);
-                                wellModel.children.push(datasetModel);
-                                dataset.curves.forEach(curve => {
-                                    datasetModel.children.push(utils.createCurveModel(curve));
-                                })
-                            });
-                        }
-                    }
-                    if (cb) cb(listOfWells.length);
+    this.downTrigger = function (cb) {
+        console.log('downTrigger');
+        wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
+            if (wells) {
+                wells.sort(function (a, b) {
+                    return parseInt(a.idWell) - parseInt(b.idWell);
                 });
-            });
-        }
-        else if (cb) cb(0);
-    }
+                let bottomIdx = topIdx + selectionLength;
+                if (bottomIdx < wells.length) {
+                    if (wells.length - bottomIdx > delta) {
+                        let newSource = wells.slice(bottomIdx, delta + bottomIdx);
+                        let newList = newSource.map(w => modelFrom(w));
+                        topIdx = topIdx + delta;
+                        cb(newList, self.projectConfig);
+                    } else {
+                        let newSource = wells.slice(bottomIdx, wells.length);
+                        let newList = newSource.map(w => modelFrom(w));
+                        topIdx = topIdx + wells.length - bottomIdx;
+                        cb(newList, self.projectConfig);
+                    }
+                } else cb([]);
+            }
+        })
+    };
 
     this.prjClickFunction = function ($index, $event, node) {
         clickFunction($index, $event, node, self.projectConfig);
@@ -539,23 +515,48 @@ function Controller($scope, $timeout, $attrs, wiApiService, wiComponentService, 
     }
     this.exportAllItems = function () {
         if (self.exportQueueItems.length > 0) {
-            wiApiService.exportLas2(self.idExportQueueItems, function (response) {
-                if (response) {
-                    for (r of response) {
-                        if (r !== null) {
-                            let url = wiApiService.getLasFileUrl(r.path);
-                            self.lasFiles.push({
-                                name: r.datasetName + "_" + r.wellName,
-                                url: url
-                            })
+            console.log('export to format', self.fileFormat);            
+            if (self.fileFormat == 'Las2') {
+                wiApiService.exportLas2(self.idExportQueueItems, function (response) {
+                    if (response) {
+                        for (r of response) {
+                            if (r !== null) {
+                                let url = wiApiService.getLasFileUrl(r.path);
+                                self.lasFiles.push({
+                                    name: r.datasetName + "_" + r.wellName,
+                                    url: url
+                                })
+                            }
                         }
                     }
-                }
-            });
-
+                });
+            } else {
+                wiApiService.exportLas3(self.idExportQueueItems, function (response) {
+                    if (response) {
+                        for (r of response) {
+                            if (r !== null) {
+                                let url = wiApiService.getLasFileUrl(r.path);
+                                self.lasFiles.push({
+                                    name: r.wellName,
+                                    url: url
+                                })
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
-    
+
+    this.fileFormatToggle = function () {
+        if (self.fileFormat == 'Las2') {
+            self.fileFormat = 'Las3';
+            console.log('==', self.fileFormat);            
+        } else {
+            self.fileFormat = 'Las2';
+            console.log('!=', self.fileFormat);
+        }
+    }
 }
 
 

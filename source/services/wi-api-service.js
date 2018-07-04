@@ -90,6 +90,8 @@ const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
 const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 
 const EXPORT_LAS2 = '/export/las2';
+const EXPORT_LAS3 = '/export/las3';
+
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -173,10 +175,13 @@ const DELETE_SHADING = '/project/plot/track/shading/delete';
 const EDIT_SHADING = '/project/plot/track/shading/edit';
 const GET_SHADING = '/project/plot/track/shading/info';
 
-const CREATE_MARKER = '/project/plot/track/marker/new';
-const EDIT_MARKER = '/project/plot/track/marker/edit';
-const GET_MARKER = '/project/plot/track/marker/info';
-const DELETE_MARKER = '/project/plot/track/marker/delete';
+const CREATE_MARKER = '/project/well/marker-set/marker/new';
+const EDIT_MARKER = '/project/well/marker-set/marker/edit';
+const GET_MARKER = '/project/well/marker-set/marker/info';
+const DELETE_MARKER = '/project/well/marker-set/marker/delete';
+
+const LIST_MARKER_SET = '/project/well/marker-set/list';
+const GET_MARKER_SET = '/project/well/marker-set/info';
 
 const CREATE_ANNOTATION = '/project/plot/track/annotation/new';
 const EDIT_ANNOTATION = '/project/plot/track/annotation/edit';
@@ -368,6 +373,9 @@ const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
 const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
 const NEW_ZONE_TEMPLATE = '/zone-template/new';
 const GET_LIST_PATTERN = '/pattern/list';
+
+const GET_LIST_MARKER_TEMPLATE = '/marker-template/list';
+const CREATE_MARKER_SET = '/project/well/marker-set/new';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -2068,6 +2076,43 @@ Service.prototype.listTaskSpec = function (callback) {
 Service.prototype.exportLas2 = function(idObjs, callback) {
     this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
 }
+Service.prototype.exportLas3 = function(idObjs, callback) {
+    this.post(EXPORT_LAS3, {idObjs: idObjs}, callback);
+}
 Service.prototype.getLasFileUrl = function (url) {
     return BASE_URL + url;
+}
+
+// parameter set
+const PARAMETER_SET = '/project/parameter-set'
+Service.prototype.createParameterSet = function (payload, callback) {
+    this.post(PARAMETER_SET + '/new', payload, callback);
+}
+Service.prototype.getParameterSet = function (idParameterSet, callback) {
+    this.post(PARAMETER_SET + '/info', { idParameterSet }, callback);
+}
+Service.prototype.listParameterSet = function (idProject, callback) {
+    this.post(PARAMETER_SET + '/list', { idProject }, callback);
+}
+Service.prototype.editParameterSet = function (payload, callback) {
+    this.post(PARAMETER_SET + '/edit', payload, callback);
+}
+Service.prototype.removeParameterSet = function (idParameterSet, callback) {
+    this.post(PARAMETER_SET + '/delete', { idParameterSet }, callback);
+}
+
+Service.prototype.listMarkerTemplate = function (payload, callback) {
+    this.post(GET_LIST_MARKER_TEMPLATE, payload, callback);
+}
+Service.prototype.createMarkerSet = function (data, callback) {
+    let self = this;
+    this.post(CREATE_MARKER_SET, data, callback);
+}
+Service.prototype.listMarkerSet = function (idWell, callback) {
+    let self = this;
+    this.post(LIST_MARKER_SET, { idWell: idWell }, callback);
+}
+Service.prototype.getMarkerSet = function (idMarkerSet, callback) {
+    let self = this;
+    this.post(GET_MARKER_SET, { idMarkerSet: idMarkerSet }, callback);
 }

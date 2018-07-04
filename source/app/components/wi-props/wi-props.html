@@ -1,28 +1,29 @@
 <form class="form-horizontal properties-block">
 	<div ng-repeat="section in self.getSections(self.section)">
-		<div class="heading" ng-click="self.shown[$index]=!self.shown[$index]">
+		<div class="heading" ng-click="self.shown[$index]=!self.shown[$index]"
+			ng-if="section!='null'">
 			<span>{{section}}</span>
 			<span ng-if="!section && self.getFieldsOfSection(section, self.fields)">General</span>
 			<span style="float: right;" ng-if="self.getShown(section, self.getSections(self.section))"><i class="ti-minus"></i></span>
 			<span style="float: right;" ng-if="!self.getShown(section, self.getSections(self.section))"><i class="ti-plus"></i></span>
-
 		</div>
 		<div class='form-group properties-group' ng-if="self.getShown(section, self.getSections(self.section))"
 				ng-repeat="field in self.getFieldsOfSection(section, self.fields)" ng-hide="!field.use">
-			<label class="control-label col-sm-5" style=" text-align: left;">{{field.label || field.name}}</label>
+			<label class="control-label col-sm-5" style=" text-align: left; padding: 5px"
+					title="{{field.label || field.name}}">{{field.label || field.name}}</label>
 			<div class="col-sm-7" style="padding: 0">
-				<input ng-if="field.type=='text'||field.type=='number'"
+				<input ng-if="field.type=='text'||field.type=='number'||field.type=='checkbox'"
 						class="form-control props-input"
 						type="{{field.type||'text'}}" 
 						ng-model="field.value" placeholder="{{field.label||field.name}}" 
 						ng-readonly="{{field.readOnly}}"
-						wi-enter="$event.currentTarget.blur();" ng-blur="self.doChange(field)">
+						wi-enter="self.doChange(field);">
 				<div ng-if="field.type=='wicolor'" 
 					class="wicolor">
 					<button ng-click="self.changeColor(field, self.fields)" 
                             ng-style="{'background-color':field.value}"
                             class="form-control wi-form-control thick-border" 
-                            style="margin: 3px auto;width: 100px ;height: 20px;">
+                            style="margin:5px;width:100px;height:20px;">
                     </button>
 				</div>
 				<div ng-if="field.type=='wipattern'" 
@@ -45,29 +46,34 @@
                             {{field.value.name}}<span class="family-edit-16x16"></span>
                     </button>
 				</div>
-			</div>
-		</div>
-	</div>
-	<!-- <div ng-if="self.getFieldsNoSection(self.fields).length" ng-init="_shown=true">
-		<div class="heading" ng-click="_shown=!_shown">
-			<span>General</span>
-			<span style="float: right;" ng-if="_shown"><i class="ti-plus"></i></span>
-			<span style="float: right;" ng-if="!_shown"><i class="ti-minus"></i></span>
-		</div>
-		<div class='form-group properties-group' ng-if="_shown"
-				ng-repeat="field in self.getFieldsNoSection(self.fields)" ng-hide="!field.use">
-			<label class="control-label col-sm-5" style=" text-align: left;">{{field.label || field.name}}</label>
-			<div class="col-sm-7" style="padding-right: 0">
-				<input ng-if="field.type=='text'||field.type=='number'"
-						class="form-control props-input"
-						type="{{field.type||'text'}}" 
-						ng-model="field.value" placeholder="{{field.label||field.name}}" 
-						ng-change="self.doChange(field)"
-						ng-readonly="{{field.readOnly}}">
-				<div ng-if="field.type=='wicolor'" 
-					class="wicolor">
+				<div ng-if="field.type=='wizoneset'" 
+					style="padding:5px;">
+					<a ng-click="self.changeZoneSet(field, self.fields)"
+                        style="padding-right: 40%; cursor: pointer; text-decoration: none;">
+                        {{field.value.name}} &nbsp;<span class="zone-edit-16x16"></span>
+                    </a>
+				</div>
+				<div ng-if="field.type=='wimarkerset'" 
+					style="padding:5px;">
+					<a ng-click="self.changeMarkerSet(field, self.fields)"
+                        style="padding-right: 40%; cursor: pointer; text-decoration: none;">
+                        {{field.value.name}} &nbsp;<span class="marker-properties-16x16"></span>
+                    </a>
+				</div>
+				<div ng-if="field.type=='wicompatiable'" 
+					style="padding:5px;">
+					<select ng-model="field.value" style="width: 100%; border: none;" 
+							ng-options="unit.name as unit.name for unit in self.curveUnits"
+							ng-change="self.onChangeUnit(field, self.fields)">
+					</select>
+				</div>
+				<div ng-if="field.type=='wiref'" 
+					style="padding:5px;">
+					<span style="padding-right: 40%;">
+                        {{self.refFunc(field.ref)}} &nbsp;</span>
+                    </span>
 				</div>
 			</div>
 		</div>
-	</div> -->
+	</div>
 </form>

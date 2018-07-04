@@ -266,11 +266,7 @@ exports.zoneToTreeConfig = zoneToTreeConfig;
 function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
     zoneSetModel.id = zoneSet.idZoneSet;
-    zoneSetModel.properties = {
-        idWell: zoneSet.idWell,
-        idZoneSet: zoneSet.idZoneSet,
-        name: zoneSet.name,
-    };
+    zoneSetModel.properties = zoneSet;
     zoneSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',
@@ -291,12 +287,61 @@ function zoneSetToTreeConfig(zoneSet, options = {}) {
     return zoneSetModel;
 }
 
+function markerToTreeConfig(marker, options = {}) {
+    var markerModel = new Object();
+    setTimeout(() => {
+        let markerSetModel = getModel('markerset', marker.idMarkerSet);
+        let wellModel = getModel('well', markerSetModel.properties.idWell);
+        markerModel.parentDataArr = [wellModel.data, markerSetModel.data];
+    });
+    if (options.isDeleted) {
+        markerModel.name = 'marker-deleted-child';
+        markerModel.type = 'marker-deleted-child';
+    } else {
+        markerModel.name = marker.marker_template.name;
+        markerModel.type = 'marker';
+    }
+    markerModel.id = marker.idMarker;
+    markerModel.properties = marker;
+    markerModel.data = {
+        icon: 'marker-properties-16x16',
+        label: `${marker.marker_template.name}: ${marker.depth}`
+    }
+    markerModel.parent = 'markerset' + marker.idMarkerSet;
+    return markerModel;
+}
+
+function markerSetToTreeConfig(markerSet, options = {}) {
+    var markerSetModel = new Object();
+    markerSetModel.id = markerSet.idMarkerSet;
+    markerSetModel.properties = markerSet;
+    markerSetModel.data = {
+        childExpanded: false,
+        icon: 'project-16x16-edit',
+        label: markerSet.name
+    }
+    if (options.isDeleted) {
+        markerSetModel.name = 'markerset-deleted-child';
+        markerSetModel.type = 'markerset-deleted-child';
+        return markerSetModel;
+    }
+    markerSetModel.name = markerSet.name;
+    markerSetModel.type = 'markerset';
+    markerSetModel.children = new Array();
+    if (!markerSet.markers || !markerSet.markers.length) return markerSetModel;
+    markerSet.markers.forEach(function (marker) {
+        markerSetModel.children.push(markerToTreeConfig(marker));
+    });
+    return markerSetModel;
+}
+exports.markerSetToTreeConfig = markerSetToTreeConfig;
+
 exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
 exports.createZoneSet = function createZoneSet(idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
-    if (selectedNode && selectedNode.type == 'zonesets') {
+    if (selectedNode && selectedNode.type == 'user-defined') {
         idWell = selectedNode.properties.idWell;
     }
     if (!idWell) return;
@@ -924,41 +969,44 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-function createZoneSetsNode(parent, options = {}) {
-    let zoneSetsModel = new Object();
+function createUserDefinedNode(parent, options = {}) {
+    let userDefinedModel = new Object();
     if (options.isDeleted) {
-        zoneSetsModel.name = 'zonesets-deleted';
-        zoneSetsModel.type = 'zonesets-deleted';
-        zoneSetsModel.data = {
+        userDefinedModel.name = 'zonesets-deleted';
+        userDefinedModel.type = 'zonesets-deleted';
+        userDefinedModel.data = {
             childExpanded: false,
             icon: 'user-define-16x16',
             label: "Zone Sets"
         };
     } else {
-        zoneSetsModel.name = 'zonesets';
-        zoneSetsModel.type = 'zonesets';
-        zoneSetsModel.data = {
+        userDefinedModel.name = 'user_defined';
+        userDefinedModel.type = 'user_defined';
+        userDefinedModel.data = {
             childExpanded: false,
             icon: 'user-define-16x16',
             label: "User Defined"
         };
     }
-    zoneSetsModel.children = new Array();
-    if (!parent || !parent.zonesets) return zoneSetsModel;
-    zoneSetsModel.properties = {
+    userDefinedModel.children = new Array();
+    if (!parent || !parent.zonesets) return userDefinedModel;
+    userDefinedModel.properties = {
         idWell: parent.idWell,
-        totalItems: parent.zonesets.length
+        totalItems: parent.zonesets.length + (parent.marker ? parent.markers.length:0)
     }
     if (options.isDeleted) {
         parent.zonesets.forEach(function (zoneSet) {
-            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet, {isDeleted: true}));
+            userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet, {isDeleted: true}));
         });
     } else {
         parent.zonesets.forEach(function (zoneSet) {
-            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+            userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet));
+        });
+        parent.markersets && parent.markersets.forEach(function (markerset) {
+            userDefinedModel.children.push(markerSetToTreeConfig(markerset)); 
         });
     }
-    return zoneSetsModel;
+    return userDefinedModel;
 }
 
 function createComboviewsNode(parent) {
@@ -1042,12 +1090,12 @@ function wellToTreeConfig(well, isDeleted) {
                 wellModel.children.push(datasetToTreeConfig(dataset, false, wellModel));
             });
         }
-        let zoneSetsNode = createZoneSetsNode(well);
+        let userDefinedNode = createUserDefinedNode(well);
         // let logplotNode = createLogplotsNode(well, {wellModel});
         // let crossplotNode = createCrossplotsNode(well);
         // let histogramNode = createHistogramsNode(well);
         let comboviewNode = createComboviewsNode(well);
-        wellModel.children.push(zoneSetsNode);
+        wellModel.children.push(userDefinedNode);
         // wellModel.children.push(logplotNode);
         // wellModel.children.push(crossplotNode);
         // wellModel.children.push(histogramNode);
@@ -1180,7 +1228,7 @@ function updateDustbinConfig(dustbin) {
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
     dustbinModel.children.push(createCurvesNode(dustbin));
-    dustbinModel.children.push(createZoneSetsNode(dustbin, {isDeleted: true}));
+    dustbinModel.children.push(createUserDefinedNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createZonesNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createLogplotsNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createCrossplotsNode(dustbin, {isDeleted: true}));
@@ -1189,7 +1237,6 @@ function updateDustbinConfig(dustbin) {
 }
 
 exports.updateDustbinConfig = updateDustbinConfig;
-
 
 function visit(node, callback, options) {
     if (options && options.found) return;
@@ -1676,6 +1723,21 @@ function findHistogramModelById(idHistogram) {
     return his;
 }
 
+exports.findCrossplotModelById = findCrossplotModelById;
+
+function findCrossplotModelById(idCrossplot) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let cross = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'crossplot' && node.id == idCrossplot) {
+            cross = node;
+        }
+    });
+    return cross;
+}
+
 exports.findComboviewModelById = function (idComboview) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
@@ -1889,15 +1951,20 @@ exports.exportCurveToInventory = function () {
     let selectedNode = getSelectedNode();
     if(selectedNode.type!= 'curve') return;
     let wiOnlineInvService = __GLOBAL.wiOnlineInvService;
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let wiApiService = __GLOBAL.wiApiService;    
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     console.log('selectedNode', selectedNode);
-    wiOnlineInvService.datasetInfoByName(selectedNode.parentDataArr[0].label, selectedNode.parentDataArr[1].label, function(dataset, err) {
+    wiApiService.getWellInfoByName(selectedNode.parentDataArr[1].label, projectLoaded.idProject, function(well, err) {
         if(err) {
             toastr.error(err);
         } else {
             wiOnlineInvService.importCurveFromProject([{
                 idCurve: selectedNode.properties.idCurve,
-                idDesDataset: dataset.idDataset,
-                name: selectedNode.properties.name
+                name: selectedNode.properties.name,
+                wellName: well.name,
+                datasetName: selectedNode.parentDataArr[0].label,
+                idProject: projectLoaded.idProject
             }], function (result, err) {
                 if(err) {
                     toastr.error(err);
@@ -1949,6 +2016,7 @@ exports.exportWellToInventory = function () {
 }
 exports.renameCurve = function renameCurve(newName) {
     let wiComponentService = __GLOBAL.wiComponentService;
+
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
     if (selectedNode.type != 'curve') return;
@@ -2711,10 +2779,31 @@ function sortObject(o) {
     return sorted;
 }
 
-exports.openZonemanager = function (item) {
+exports.openZonesetmanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    let idWell;
+    if(item.type == 'project') {
+        idWell = false;
+    } else if (item.type == 'well') {
+        idWell = item.idWell;
+    } else if(item.type == 'user_defined') {
+        idWell = item.properties.idWell;
+    }
+    let childItem = layoutManager.getItemById('Zoneset-manager');
+    if(childItem) {
+        layoutManager.getItemById('right').removeChild(childItem);        
+    }
+    console.log('childItem', childItem);
+    layoutManager.putTabRight({
+        id: 'Zoneset-manager',
+        title: 'Zoneset Manager',
+        tabIcon: 'zone-management-16x16',
+        componentState: {
+            html: `<wi-zone-manager idwell=${idWell}></wi-zone-manager>`,
+            name: 'wiZoneManager'
+        }
+    })
 }
 /*exports.getScaleCurveIfNotFamily = function(idCurve) {
     __GLOBAL.wiApiService.scaleCurve(idCurve, function(rangeObj) {
@@ -2838,6 +2927,7 @@ function updateLinesOnCurveEdited(curveModel) {
     let idCurve = curveModel.properties.idCurve;
     let wellModel = findWellByCurve(idCurve);
     let logplotModels = wellModel.children.find(child => child.type == 'logplots');
+    if (!logplotModels) return;
     logplotModels.children.forEach(function (logplotModel) {
         let wiLogplotCtrl = wiComponentService.getComponent('logplot' + logplotModel.properties.idPlot);
         if (!wiLogplotCtrl) return;
@@ -3067,7 +3157,7 @@ exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
 function getZoneSetsInWell(well) {
     let zoneSets = [];
     well.children.forEach(function (child) {
-        if (child.type == 'zonesets') zoneSets = angular.copy(child.children);
+        if (child.type == 'user-defined') zoneSets = angular.copy(child.children);
     })
     return zoneSets;
 }
@@ -3260,3 +3350,120 @@ function getWellColor(idWell) {
     return wellColorMap.getColor(idWell);
 }
 exports.getWellColor = getWellColor;
+
+exports.onChangeHandlers =  {
+    'well' : function(props) {
+        __GLOBAL.wiApiService.editWell(props, function () {
+            refreshProjectState().then(function () {
+                console.log("update well")
+            });
+        });
+    },
+    'dataset' : function(props) {
+        __GLOBAL.wiApiService.editDataset(props, function () {
+            refreshProjectState().then(function () {
+                console.log("update dataset");
+            });
+        });
+    },
+    'curve' : function(props) {
+        __GLOBAL.wiApiService.editCurve(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update curve");
+            });
+        })
+    },
+    'd3-logtrack' : function(props) {
+        let props_bk = angular.copy(props);
+        delete props_bk.wellProps;
+        __GLOBAL.wiApiService.editTrack(props_bk, function (res) {
+            __GLOBAL.wiComponentService.emit('update-logtrack-' + res.idTrack);
+            console.log("update longtrack")
+        })
+    },
+    'zoneset' : function(props) {
+        __GLOBAL.wiApiService.editZoneSet(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update zoneset");
+            });
+        })
+    },
+    'zone' : function(props) {
+        __GLOBAL.wiApiService.editZone(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update zone");
+            });
+        })
+    }
+}
+exports.getIdObjectFromNode = function(node, rootNode) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    let idObject = {
+        idProject: projectLoaded.idProject,
+        idWell: "",
+        datasets: []
+    }
+    if(!rootNode) {
+        rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0].children;
+    }
+    if (node.type === "well") {
+        idObject.idWell = node.id;
+        for (let dataset of node.children) {
+            if(dataset.type == 'dataset'){
+                let idDatasetObj = {
+                    idDataset: dataset.id,
+                    idCurves: []
+                }
+                for (let curve of dataset.children) {
+                    if(curve.type == 'curve') {
+                        let idCurve = curve.id;
+                        idDatasetObj.idCurves.push(idCurve);
+                    }
+                }
+                __GLOBAL.$timeout(function () {
+                    idObject.datasets.push(idDatasetObj);
+                })
+            }
+        }
+        return idObject;
+    } else if (node.type == "dataset") {
+        if(node.properties && node.properties.idWell) {
+            idObject.idWell = node.properties.idWell; 
+            let idDatasetObj = {
+                idDataset: node.id,
+                idCurves: []
+            }
+            for (let curve of node.children) {
+                if(curve.type == 'curve') {
+                    let idCurve = curve.id;            
+                    idDatasetObj.idCurves.push(idCurve);
+                }
+            }
+            __GLOBAL.$timeout(function () {
+                idObject.datasets.push(idDatasetObj);
+            })        
+            return idObject;           
+        }   
+        return;        
+    }
+    else if (node.type == "curve") {
+        if(node.properties && node.properties.idDataset) {
+            let parentWell = rootNode.find(function(w) {
+                return w.children.find(function(d) {return d.id == node.properties.idDataset});
+            })
+            idObject.idWell = parentWell.id;
+            let idDatasetObj = {
+                idDataset: node.properties.idDataset,
+                idCurves: []
+            }
+            idDatasetObj.idCurves.push(node.id);
+            __GLOBAL.$timeout(function () {
+                idObject.datasets.push(idDatasetObj);
+            })
+            return idObject;
+        }
+        return;
+    }
+    return;
+}

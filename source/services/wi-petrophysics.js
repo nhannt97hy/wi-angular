@@ -196,7 +196,8 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
         let payload = {
             data: curveInfo.data,
             idDataset: curveInfo.idDataset,
-            idFamily: (family || {}).id || null
+            idFamily: (family || {}).idFamily || null,
+            unit: curveInfo.unit
         }
         wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
             if (curve.idCurve) {
@@ -227,7 +228,6 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
             override: true
         };
         wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
-            // self.idPlot = response.idPlot;
             let currentOrderNum = 'm';
             async.eachOfSeries(inputMap, function(item, idx, end){
                 let wfInput = item.inputs;
@@ -390,13 +390,18 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
                             taskConfig.outputData[idx].outputCurves[i].data = ret[i];
                         });
                         async.each(taskConfig.outputData[idx].outputCurves, function (d, cb2) {
-                            d.idDataset = data.idDataset;
-                            saveCurve(d, function (curveProps) {
-                                delete d.data;
-                                // updateChoices(curveProps);
+                            if(d.use){
+                                d.idDataset = data.idDataset;
+                                saveCurve(d, function (curveProps) {
+                                    delete d.data;
+                                    // updateChoices(curveProps);
+                                    cb2();
+                                });
+                            }else{
                                 cb2();
-                            });
+                            }
                         }, function (err) {
+                            taskConfig.outputData[idx].outputCurves = taskConfig.outputData[idx].outputCurves.filter(c => c.use);
                             callback();
                         });
                     })

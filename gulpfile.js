@@ -448,8 +448,8 @@ gulp.task('deploy-dev', function() {
             root: "build/",
             hostname: "dev.sflow.me",
             destination:"/opt/build",
-            username: "ec2-user",
-			port: 2221
+            username: "revotech",
+			port: 1124
     }));
 });
 
@@ -516,8 +516,7 @@ function sheetToJson(worksheet) {
                     option: getValueAtCell(R, 3, worksheet),
                     section: getValueAtCell(R, 4, worksheet),
                     typeSpec: getValueAtCell(R, 5, worksheet),
-                    function: getValueAtCell(R, 6, worksheet),
-                    defaultValue: getValueAtCell(R, 7, worksheet)
+                    refSpec: getValueAtCell(R, 6, worksheet)
                 }
                 classObj[getValueAtCell(R, 1, worksheet)] = propConfig;
             }

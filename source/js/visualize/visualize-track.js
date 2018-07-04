@@ -82,6 +82,14 @@ Track.prototype.isObjectTrack = function() {
 }
 
 /**
+ * Check if class of this instance is correlation track
+ * @returns {Boolean}
+ */
+Track.prototype.isCorrelationTrack = function() {
+    return this.constructor.name == 'CorrelationTrack';
+}
+
+/**
  * Set background color for the track
  * @param {String} color - CSS color string
  */
@@ -89,12 +97,11 @@ Track.prototype.setBackgroundColor = function(color) {
     if (!color) return;
     let wellProps = this.getWellProps();
     if(wellProps == undefined) {
-        this.trackContainer
+        this.bodyContainer
             .style('background-color', color);
     } else {
-        this.trackContainer
-            .style('background-color', 'gray');
         if(wellProps) {
+            this.bodyContainer.style('background-color', 'unset');
             if(!this.backgroundSvgContainer) 
                 this.backgroundSvgContainer = this.bodyContainer.append('svg')
                     .style('width', '100%')
@@ -108,10 +115,12 @@ Track.prototype.setBackgroundColor = function(color) {
                 bgRect.enter()
                     .append('rect')
                     .attr('x', 0)
-                    .attr('width', '100%');
+                    .attr('width', '100%')
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', .5);
                 bgRect.attr('y', minY)
                     .attr('height', maxY - minY)
-                    .attr('fill', d => d);
+                    .attr('fill', d => d)
             }
         }
     }
@@ -160,6 +169,7 @@ Track.prototype.createContainer = function() {
         .style('display', 'flex')
         .style('flex-direction', 'column')
         .style('outline', 'none')
+        .style('background-color', 'transparent');
         //.style('margin-left', '-3px');
 }
 Track.prototype.updateOrderNum = function() {
@@ -188,7 +198,7 @@ Track.prototype.createHeaderContainer = function() {
 
     this.headerContainer = this.trackContainer.append('div')
         .attr('class', 'vi-track-header-container')
-        .style('background-color', 'white')
+        .style('background-color', 'transparent')
         .style('position', 'relative')
         // .style('z-index', 11)
         .style('width', '100%')
@@ -255,6 +265,9 @@ Track.prototype.createBodyContainer = function() {
         .attr('class', 'vi-track-plot-container')
         .style('position', 'absolute');
         // .style('z-index', 1);
+
+    this.svgContainer = this.plotContainer.append('svg')
+        .attr('class', 'vi-track-drawing vi-track-svg-container');
 
     if (!existedPlot.empty()) {
         this.bodyContainer
@@ -678,6 +691,8 @@ Track.prototype.drawTooltipLines = function(depth, drawVertical) {
         .attr('x2', function(d) { return d.x2; })
         .attr('y1', function(d) { return d.y1; })
         .attr('y2', function(d) { return d.y2; });
+    lines
+        .exit().remove();
 }
 
 Track.prototype.removeTooltipLines = function() {
@@ -686,11 +701,64 @@ Track.prototype.removeTooltipLines = function() {
 
 Track.prototype.drawTooltipText = function(depth, showDepth) {
     let plotMouse = d3.mouse(this.plotContainer.node());
-    let plotRect = visUtils.getBoundingClientDimension(this.plotContainer.node());
+    // let plotRect = visUtils.getBoundingClientDimension(this.plotContainer.node());
     let y = this.getTransformY()(depth);
-    let svg = this.svgContainer;
-	let self = this;
+    let self = this;
+    let yFormatter = this.getDecimalFormatter(self.yDecimal || 2);
 
+    let textData = showDepth ? [{
+        text: 'Depth: ' + yFormatter(depth),
+        color: 'black'
+    }] : [];
+
+    if(this.getCurves) {
+        this.getCurves().forEach(curve => {
+            let xFormatter = self.getDecimalFormatter(self.xDecimal || 2);
+            let curveY = curve.getTransformY().invert(y);
+            curveY = curve.offsetY + visUtils.round(curveY - curve.offsetY, curve.yStep);
+			let value = curve.dataMap[curveY] == null ? null : xFormatter(curve.dataMap[curveY]);
+			textData.push({
+				text: curve.alias + ': ' + value,
+				color: curve.line ? curve.line.color : (curve.symbol ? curve.symbol.fillStyle : 'black')
+			});
+        })
+    }
+
+    let paddingX = 10;
+    let textContainer = this.svgContainer.select('text.tooltip-text');
+    if(!textContainer.node())
+        textContainer = this.svgContainer
+            .append('text')
+            .attr('class', 'tooltip-text');
+
+    let textSpan = textContainer.selectAll('tspan').data(textData);
+    textSpan.enter()
+        .append('tspan')
+            .attr('x', paddingX)
+            .attr('dy', '1.2em');
+    textSpan
+        .attr('fill', d => d.color)
+        .text(d => d.text);
+    textSpan
+        .exit()
+        .remove();
+
+    let bbox = textContainer.node().getBBox();
+    let rects = this.svgContainer.selectAll('rect.tooltip-rect').data([textData]);
+    rects.enter()
+        .append('rect')
+        .attr('class', 'tooltip-rect');
+    rects.attr('x', 0)
+        .attr('y', 0)
+        .attr('width', bbox.width + 2 * paddingX)
+        .attr('height', bbox.height + 5)
+        .raise();
+    textContainer.raise();
+    rects.exit()
+        .remove();
+    
+
+    /*
     svg.selectAll('text.tooltip-text, rect.tooltip-rect').remove();
     
 	// remove tool tip when have nothing to show (prevent showing a tiny square in top-right corner of track)
@@ -757,6 +825,7 @@ Track.prototype.drawTooltipText = function(depth, showDepth) {
     tooltip.attr('y', y)
 
     tooltip.raise();
+    */
 }
 
 Track.prototype.removeTooltipText = function() {

@@ -69,6 +69,10 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.adjustHeaderHeight = function(curViTrack) {
         self.trackComponents.forEach((tc) => {
+            if (tc.controller.correlationTrack) {
+                if (tc.controller.correlationTrack.viTrack !== curViTrack)
+                    tc.controller.correlationTrack.viTrack.horizontalResizerDragCallback();
+            }
             if (!tc.controller || !tc.controller.viTrack || tc.controller.viTrack == curViTrack) return;
             tc.controller.viTrack.horizontalResizerDragCallback();
         });
@@ -481,6 +485,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         if(!self.trackUnderMouse) return;
         let trackController = self.trackUnderMouse.controller;
+        if(!trackController || !trackController.viTrack) return;
         let mouse = d3.mouse(trackController.viTrack.plotContainer.node());
 		let depth = trackController.viTrack.getTransformY().invert(mouse[1]);
 		self.trackComponents.forEach(tc => tc.controller.drawTooltip(depth));
@@ -816,7 +821,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         let listWells = self.getListWells();
         for (let i = 0; i < tcs.length; i++) {
             let orderNum;
-            if(options.byWell) {
+            if(options && options.byWell) {
                 if(tcs[i].controller.getWellProps) {
                     let wellProps = tcs[i].controller.getWellProps();
                     idxWell = listWells.indexOf(wellProps);   

@@ -6,6 +6,14 @@
     z-index: 0;
 }
 
+.vi-correlation-track-container {
+    border-right: 1px solid black;
+    margin-right: 3px;
+    .vi-track-header-container {
+        filter: opacity(0);
+    }
+}
+
 .vi-zone-track-container {
     .vi-track-plot-container {
         .vi-zone-line {
@@ -155,7 +163,7 @@
     }
 }
 
-.vi-log-track-container, .vi-depth-track-container, .vi-image-track-container, .vi-object-track-container, .vi-zone-track-container{
+.vi-log-track-container, .vi-depth-track-container, .vi-image-track-container, .vi-object-track-container, .vi-zone-track-container, .vi-correlation-track-container{
     .tooltip-line {
         stroke: black;
         stroke-dasharray: 2, 1;
@@ -172,6 +180,8 @@
     }
 
     .tooltip-text {
+        pointer-events: none;
+
         tspan {
             dy: 1.2em;
         }

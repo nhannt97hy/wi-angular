@@ -1,5 +1,4 @@
 let helper = require('./DialogHelper');
-// module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
 module.exports = function (ModalService, trackComponent, options, callback) {
     let wiModal = null;
     function ModalController($scope, wiComponentService, wiApiService, $timeout, close) {
@@ -13,9 +12,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
-        // let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
-        // window.logTrack = this;
         this.groupFnTabCurve = function(item){
             let wellProps = utils.findWellByCurve(item.properties.idCurve).properties;
             return item.parent + ' (' + wellProps.name + ') ';
@@ -25,7 +22,6 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             return item.datasetName;
         }
 
-        // this.well = utils.findWellByLogplot(trackComponent.idPlot);
         this.well = null;
         let wellProps = trackComponent.controller.getWellProps();
         if(wellProps) {
@@ -79,42 +75,45 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if (self.props.general.width < 0 ) self.props.general.width = 0;
-            if (lastZoneset && self.props.general.idZoneSet != lastZoneset.properties.idZoneSet) {
-                trackComponent.controller.zoneset = utils.getModel('zoneset', self.props.general.idZoneSet);
+
+            if(!self.showZoneSet) self.props.general.idZoneSet = null;
+            else if (lastZoneSet && self.props.general.idZoneSet != lastZoneSet.idZoneSet) {
+                trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             } else if(self.props.general.idZoneSet) {
-                trackComponent.controller.zoneset = utils.getModel('zoneset', self.props.general.idZoneSet);
+                trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             }
+
+            if(!self.showMarkerSet) self.props.general.idMarkerSet = null;
+            else if (lastMarkerset && self.props.general.idMarkerSet != lastMarkerset.properties.idMarkerSet) {
+                trackComponent.marker_set = (utils.getModel('markerset', self.props.general.idMarkerSet) || {}).properties;
+            } else if(self.props.general.idMarkerSet) {
+                trackComponent.marker_set = (utils.getModel('markerset', self.props.general.idMarkerSet) || {}).properties;
+            }
+
             wiApiService.editTrack(self.props.general, function (res) {
                 if (!res) return;
                 let newProps = angular.copy(self.props);
                 newProps.general.width = utils.inchToPixel(self.props.general.width);
                 viTrack.setProperties(newProps.general);
-
-                // if (newProps.general.zoomFactor != savedZoomFactor) {
-                //     savedZoomFactor = newProps.general.zoomFactor;
-                //     wiD3Ctrl.processZoomFactor();
-                //     wiD3Ctrl.plotAll();
-                // }
-                // else {
-                //     viTrack.doPlot(true);
-                // }
-                viTrack.doPlot(true);
+                // viTrack.doPlot(true);
                 if (callback) callback();
             })
             return temp;
         }
-
         this.datasets = [];
         this.curvesArr = [];
 
         let zonesets = [];
+        let markersets = [];
         if(this.well) {
             this.well.children.forEach(function (child) {
                 if (child.type == 'dataset') self.datasets.push(child);
-                else if (child.type == 'zonesets') {
+                else if (child.type == 'user_defined') {
                     child.children.forEach(c => {
                         if(c.type == 'zoneset')
                             zonesets.push(c);
+                        if(c.type == 'markerset')
+                            markersets.push(c);
                     })    
                 }
             });
@@ -127,9 +126,12 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         if(wellChild.type == 'dataset') {
                             self.datasets.push(wellChild);
                         }
-                        else if (wellChild.type == 'zonesets') {
-                            wellChild.children.forEach(zoneset => {
-                                zonesets.push(zoneset);
+                        else if (wellChild.type == 'user_defined') {
+                            wellChild.children.forEach(c => {
+                                if(c.type == 'zoneset')
+                                    zonesets.push(c);
+                                if(c.type == 'markerset')
+                                    markersets.push(c)
                             })
                         }
                     })
@@ -137,7 +139,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             });
         }
 
-        let lastZoneset = utils.getModel('zoneset', this.props.general.idZoneSet);
+        let lastZoneSet = (utils.getModel('zoneset', this.props.general.idZoneSet) || {}).properties;
         this.getZonesetList = function(wiItemDropdownCtrl) {
             $timeout(function() {
                 if(!zonesets.length) return;
@@ -149,15 +151,38 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                         properties: zoneset.properties
                     }
                 });
-                if(lastZoneset) {
-                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneset.properties.idZoneSet);
+                if(lastZoneSet) {
+                    self.showZoneSet = true;
+                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneSet.idZoneSet);
                 }
             }, 10); 
         }
+
         this.zonesetChanged = function(selectedItem) {
             self.props.general.idZoneSet = selectedItem.idZoneSet;
         }
 
+        let lastMarkerset = utils.getModel('markerset', this.props.general.idMarkerSet);
+        this.getMarkersetList = function(wiItemDropdownCtrl) {
+            $timeout(function() {
+                if(!markersets.length) return;
+                wiItemDropdownCtrl.items = markersets.map(markerset => {
+                    return {
+                        data: {
+                            label: markerset.properties.name
+                        }, 
+                        properties: markerset.properties
+                    }
+                });
+                if(lastMarkerset) {
+                    self.showMarkerSet = true;
+                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idMarkerSet == lastMarkerset.properties.idMarkerSet);
+                }
+            }, 10); 
+        }
+        this.markersetChanged = function(selectedItem) {
+            self.props.general.idMarkerSet = selectedItem.idMarkerSet;
+        }
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {
                 if (item.type == 'curve') self.curvesArr.push(item);
@@ -838,7 +863,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.onCancelButtonClicked = function () {
             close(null, 100);
             // wiD3Ctrl.updateTrack(viTrack);
-            trackComponent.controller.update();
+            // trackComponent.controller.update();
         };
     }
 

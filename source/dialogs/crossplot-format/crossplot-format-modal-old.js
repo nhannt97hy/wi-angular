@@ -90,8 +90,8 @@ module.exports = function (ModalService, wiCrossplotId, callback, cancelCallback
         function getZonesAndCurvesInDataset(callback) {
             self.well.children.forEach(function (child, i) {
                 if (child.type == 'dataset') self.datasetsInWell.push(child);
-                // if (child.type == 'zonesets') self.zoneSets = angular.copy(child.children);
-                if (child.type == 'zonesets') self.zoneSets = child.children;
+                // if (child.type == 'user_defined') self.zoneSets = angular.copy(child.children);
+                if (child.type == 'user_defined') self.zoneSets = child.children;
 
                 if( i == self.well.children.length - 1) {
 

@@ -1,11 +1,18 @@
 .properties-block {
 	height: 100%;
 	overflow-y: auto;
+	background: #fff;
 	.heading {
 		font-style: italic;
 		font-weight: bold;
 		background: #eee;
 		padding: 3px;
+		border-bottom: 1px solid #ccc;
+		margin-bottom: 2px;
+		box-shadow: 2px 2px 5px #ccc;
+		span>i {
+			line-height: 1.5;
+		}
 	}
 	label {
 		font-weight: normal;
@@ -23,6 +30,10 @@
 		padding: 5px;
     	height: auto;
     	font-size:12px;
+	}
+	input[type='checkbox'] {
+		width: auto;
+		margin-left: 5px;
 	}
 	.properties-group {
 		margin: 0; 

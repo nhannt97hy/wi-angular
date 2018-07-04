@@ -30,7 +30,7 @@
                 <h5 class='text-left statistic-header'>
                     <label>Statistics</label>
                 </h5>
-                <div class="scroll-content" ng-show="wiHistogram.getwiD3Ctrl().histogramModel.properties.idCurve">
+                <div class="scroll-content" ng-show="wiHistogram.getwiD3Ctrl().histogramModel.properties.curves.length">
                     <div>
                         <div class="row">
                             <div class="col-sm-3"><label>Variables</label></div>
@@ -39,7 +39,7 @@
                             <div class="col-sm-3"></div>
                         </div>
                         <div class="row wi-small text-color-steelblue">
-                            <div class="col-sm-3 text-right"><label>{{wiHistogram.getwiD3Ctrl().curveModel.properties.name}}:</label></div>
+                            <div class="col-sm-3 text-right"><label>{{wiHistogram.getwiD3Ctrl().histogramModel.properties.curves[0].name}}:</label></div>
                             <div class="col-sm-3">
                                 <span ng-show="!wiHistogram.getwiD3Ctrl().histogramModel.properties.idZoneSet">[{{wiHistogram.getwiD3Ctrl().histogramModel.properties.intervalDepthTop}}-{{wiHistogram.getwiD3Ctrl().histogramModel.properties.intervalDepthBottom}}]</span>
                                 <span ng-show="wiHistogram.getwiD3Ctrl().histogramModel.properties.idZoneSet">[{{wiHistogram.getwiD3Ctrl().zoneSetModel.properties.name}}-Zonation]</span>

@@ -1,0 +1,49 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked()" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    <span class="user-define-16x16"></span>&nbsp; New Marker Set</h4>
+            </div>
+            <div class="modal-body">
+                <div class="">
+                    <h5 class="modal-infomation-title">
+                        <span class="user-define-16x16"></span>&nbsp;Marker Set
+                    </h5>
+                    <form class="form-horizontal" action="" name="modalNewProject">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="name">Marker Set name:</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" ng-model="name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3">Template</label>
+                            <wi-item-dropdown class='col-sm-9 height34px position-fixed adjust-width'
+                                              on-wi-dropdown-init="wiModal.getTemplateList"
+                                              on-item-changed="wiModal.templateChanged"
+                                              place-holder="Select Marker Template">
+                            </wi-item-dropdown>
+                            <!--<div class="col-sm-9">
+                                <input type="text" class="form-control" ng-model="spec">
+                            </div>-->
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        ng-disabled="!name"
+                        ng-click="wiModal.onOkButtonClicked()">
+                    <span class="ok-16x16"></span>&nbsp;OK
+                </button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default">
+                    <span class="close-16x16"></span>&nbsp;Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -147,3 +147,7 @@ exports.createNewZoneDialog = require('./create-new-zone-modal');
 exports.convertCurveUnit = require('./convert-curve-unit-modal');
 // exports.createNewZoneDialog = require('./create-new-zone-modal');
 exports.fillPatternDialog = require('./fill-pattern-modal');
+exports.zoneSetEditDialog = require('./zone-set-edit-modal');
+exports.newMarkerSetDialog = require('./new-marker-set-modal');
+exports.markerSetEditDialog = require('./marker-set-edit-modal');
+

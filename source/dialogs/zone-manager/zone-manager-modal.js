@@ -21,7 +21,7 @@ module.exports = function (ModalService, item) {
 /*
         let selectedNode = utils.getSelectedNode();
         let idWell = null;
-        if (selectedNode && selectedNode.type == 'zonesets') {
+        if (selectedNode && selectedNode.type == 'user_defined') {
             idWell = selectedNode.properties.idWell;
         }
         if (!idWell) return;
@@ -29,8 +29,8 @@ module.exports = function (ModalService, item) {
         this.SelectedWell = this.wellArr[0];
         //this.SelectedWell = utils.findWellById(idWell);
         this.zonesetsArr = self.SelectedWell.children.find(function (child) {
-            return child.name == 'zonesets';
-        }).children;
+            return child.type == 'user_defined';
+        }).children.filter(c => c.type == 'zoneset');
         this.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
 
         this.zoneArr = this.SelectedZoneSet ? angular.copy(this.SelectedZoneSet.children) : null;
@@ -45,71 +45,71 @@ module.exports = function (ModalService, item) {
         });
         switch (item.type) {
             case 'well':
-            self.wellArr.forEach(function(well, i){
-                if(well.id == item.id){
-                    self.SelectedWell = self.wellArr[i];
-                    self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                        return child.type == 'zonesets';
-                    }).children;
-                    self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
-                    self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
-                    self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
-                }
-            })
-            break;
-
-            case 'zonesets':
-            self.wellArr.forEach(function(well, i){
-                if(well.id == item.properties.idWell){
-                    self.SelectedWell = self.wellArr[i];
-                    self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                        return child.type == 'zonesets';
-                    }).children;
-                    self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
-                    _currentZoneSetId = self.SelectedZoneSet?self.SelectedZoneSet.properties.idZoneSet:null;
-                    self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
-                    self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
-                }
-            })
-            break;
-
-            case 'zoneset':
-            self.wellArr.forEach(function(well, i){
-                if(well.id == item.properties.idWell){
-                    self.SelectedWell = self.wellArr[i];
-                    self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                        return child.type == 'zonesets';
-                    }).children;
-
-                    _currentZoneSetId = item.id;
-                    setSelectedZoneSet(_currentZoneSetId);
-
-                }
-            })
-            break;
-
-            case 'zone':
-            self.wellArr.forEach(function(well, i){
-                let zonesetsArr = well.children.find(function (child) {
-                    return child.type == 'zonesets';
-                }).children;
-
-                zonesetsArr.forEach(function(zoneset, j){
-                    if(zoneset.id == item.properties.idZoneSet){
+                self.wellArr.forEach(function(well, i){
+                    if(well.id == item.id){
                         self.SelectedWell = self.wellArr[i];
-                        self.zonesetsArr = zonesetsArr;
-                        self.SelectedZoneSet = self.zonesetsArr[j];
+                        self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                            return child.type == 'user_defined';
+                        }).children.filter(c => c.type == 'zoneset');
+                        self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
                         self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
-
-                        self.zoneArr.forEach(function(zone, k){
-                            if(zone.id == item.id){
-                                self.SelectedZone = k;
-                            }
-                        });
+                        self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
                     }
                 })
-            })
-            break;
+                break;
+
+            case 'user_defined':
+                self.wellArr.forEach(function(well, i){
+                    if(well.id == item.properties.idWell){
+                        self.SelectedWell = self.wellArr[i];
+                        self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                            return child.type == 'user_defined';
+                        }).children.filter(c => c.type == 'zoneset');
+                        self.SelectedZoneSet = self.zonesetsArr.length ? self.zonesetsArr[0] : null;
+                        _currentZoneSetId = self.SelectedZoneSet?self.SelectedZoneSet.properties.idZoneSet:null;
+                        self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+                        self.SelectedZone = self.zoneArr && self.zoneArr.length ? 0 : -1;
+                    }
+                })
+                break;
+
+            case 'zoneset':
+                self.wellArr.forEach(function(well, i){
+                    if(well.id == item.properties.idWell){
+                        self.SelectedWell = self.wellArr[i];
+                        self.zonesetsArr = self.SelectedWell.children.find(function (child) {
+                            return child.type == 'user_defined';
+                        }).children.filter(c => c.type == 'zoneset');
+
+                        _currentZoneSetId = item.id;
+                        setSelectedZoneSet(_currentZoneSetId);
+
+                    }
+                })
+                break;
+
+            case 'zone':
+                self.wellArr.forEach(function(well, i){
+                    let zonesetsArr = well.children.find(function (child) {
+                        return child.type == 'user_defined';
+                    }).children.filter(c => c.type == 'zoneset');
+
+                    zonesetsArr.forEach(function(zoneset, j){
+                        if(zoneset.id == item.properties.idZoneSet){
+                            self.SelectedWell = self.wellArr[i];
+                            self.zonesetsArr = zonesetsArr;
+                            self.SelectedZoneSet = self.zonesetsArr[j];
+                            self.zoneArr = self.SelectedZoneSet ? angular.copy(self.SelectedZoneSet.children) : null;
+
+                            self.zoneArr.forEach(function(zone, k){
+                                if(zone.id == item.id){
+                                    self.SelectedZone = k;
+                                }
+                            });
+                        }
+                    })
+                })
+                break;
         }
 
         buildDisplayZoneArr();
@@ -166,8 +166,8 @@ module.exports = function (ModalService, item) {
                 return well.id == tmp;
             })
             self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                return child.name == 'zonesets';
-            }).children;
+                return child.name == 'user_defined';
+            }).children.filter(c => c.type == 'zoneset');
             buildDisplayZoneArr();
         }
         this.onAddZoneSet = function(){
@@ -179,8 +179,8 @@ module.exports = function (ModalService, item) {
 
         this.onChangeWell = function () {
             self.zonesetsArr = self.SelectedWell.children.find(function (child) {
-                return child.name == 'zonesets';
-            }).children;
+                return child.name == 'user_defined';
+            }).children.filter(c => c.type == 'zoneset');
 
             self.SelectedZoneSet = self.zonesetsArr[0];
         }
@@ -343,44 +343,44 @@ module.exports = function (ModalService, item) {
                 async.eachOfSeries(self.zoneArr, function(zone, i, callback){
                     switch (self.zoneArr[i].flag) {
                         case _FDEL:
-                        wiApiService.removeZone(self.zoneArr[i].id, function(){
-                            console.log('removeZone');
-                            callback();
-                        });
-                        break;
+                            wiApiService.removeZone(self.zoneArr[i].id, function(){
+                                console.log('removeZone');
+                                callback();
+                            });
+                            break;
 
                         case _FNEW:
-                        wiApiService.createZone(self.zoneArr[i].properties, function(data){
-                            self.zoneArr[i].id = data.idZone;
-                            self.zoneArr[i].properties.idZone = data.idZone;
-                            console.log('createZone');
-                            callback();
-                        });
-                        break;
+                            wiApiService.createZone(self.zoneArr[i].properties, function(data){
+                                self.zoneArr[i].id = data.idZone;
+                                self.zoneArr[i].properties.idZone = data.idZone;
+                                console.log('createZone');
+                                callback();
+                            });
+                            break;
 
                         case _FEDIT:
-                        wiApiService.editZone(self.zoneArr[i].properties, function(){
-                            console.log('editZone');
-                            callback();
-                        });
-                        break;
+                            wiApiService.editZone(self.zoneArr[i].properties, function(){
+                                console.log('editZone');
+                                callback();
+                            });
+                            break;
 
                         default:
-                        callback();
-                        break;
+                            callback();
+                            break;
                     }
 
                 },function(err){
                     for (let i = self.zoneArr.length - 1; i >= 0; i--){
                         switch (self.zoneArr[i].flag) {
                             case _FDEL:
-                            self.zoneArr.splice(i, 1);
-                            break;
+                                self.zoneArr.splice(i, 1);
+                                break;
 
                             case _FNEW:
                             case _FEDIT:
-                            delete self.zoneArr[i].flag;
-                            break;
+                                delete self.zoneArr[i].flag;
+                                break;
                         }
                     }
                     utils.refreshProjectState().then(function(){
@@ -407,10 +407,10 @@ module.exports = function (ModalService, item) {
         this.onOkButtonClicked = function(){
             console.log('Ok');
             if(self.verify()) {
-               doApply(function(){
-                   wiComponentService.emit('zone-updated');
-                   close(null);
-               });
+                doApply(function(){
+                    wiComponentService.emit('zone-updated');
+                    close(null);
+                });
             }else{
                 utils.error(errorMessage);
                 return;

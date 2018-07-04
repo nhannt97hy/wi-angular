@@ -245,11 +245,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 label: "Zoneset Manager",
                 icon: "zone-management-16x16",
                 handler: function () {
-                    let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-                    layoutManager.putTabRight({
-                        title: "Zoneset Manager",
-                        componentState: {html: '<wi-zone-manager></wi-zone-manager>'}
-                    });
+                    let node = utils.getSelectedNode();
+                    utils.openZonesetmanager(node);
                 }
             }
         ];
@@ -352,6 +349,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 })
                 let wellContextMenu = [
                     {
+                        name: "Export",
+                        label: "Export",
+                        icon: "arrow-right-16x16",
+                        class: "has-more", 
+                        handler: function () {
+                            // utils.exportWellToInventory();
+                        }, childContextMenu: [
+                            {
+                                name: "Export to Las 2.0",
+                                label: "Export to Las 2.0",
+                                icon: "",
+                                handler: function() {
+                                    let selectedNode = utils.getSelectedNode();
+                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                }
+                            }, {
+                                name: "Export to Las 3.0",
+                                label: "Export to Las 3.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 3.0');
+                                }
+                            }, {
+                                name: "Export to Inventory",
+                                label: "Export to Inventory",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportWellToInventory();
+                                }
+                            }
+                        ]
+                    }, {
                         name: "NewDataset",
                         label: "New Dataset",
                         icon: "dataset-new-16x16",
@@ -359,26 +388,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.createDataset();
                         }
                     }, {
-                        name: "ZoneManager",
-                        label: "Zone Manager",
-                        icon: "zone-management-16x16",
-                        handler: function () {
-                            let wellModel = utils.getSelectedNode();
-                            utils.openZonemanager(wellModel);
-                        }
-                    }, {
                         name: "Rename",
                         label: "Rename",
                         icon: "annotation-16x16",
                         handler: function () {
                             utils.renameWell();
-                        }
-                    },  {
-                        name: "Export To Inventory",
-                        label: "Export To Inventory",
-                        icon: "arrow-right-16x16",
-                        handler: function () {
-                            utils.exportWellToInventory();
                         }
                     }, {
                         name: "DuplicateCurve",
@@ -469,12 +483,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.renameDataset();
                         }
                     }, {
-                        name: "Export to Inventory",
-                        label: "Export to Inventory",
+                        name: "Export",
+                        label: "Exporty",
                         icon: "arrow-right-16x16",
+                        class: "has-more",
                         handler: function () {
-                            utils.exportDatasetToInventory();
-                        }
+                            // utils.exportDatasetToInventory();
+                        }, childContextMenu: [
+                            {
+                                name: "Export to Las 2.0",
+                                label: "Export to Las 2.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 2.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                }
+                            }, {
+                                name: "Export to Las 3.0",
+                                label: "Export to Las 3.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 3.0');
+                                }
+                            }, {
+                                name: "Export to Inventory",
+                                label: "Export to Inventory",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportDatasetToInventory();
+                                }
+                            }
+                        ]
                     }, {
                         name: "DuplicateDataset",
                         label: "Duplicate",
@@ -516,13 +556,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }
                 return curveCtx.concat([
                     {
-                        name: "Export",
-                        label: "Export",
-                        icon: "save-16x16",
-                        handler: function() {
-                            utils.exportCurve();
-                        }
-                    }, {
                         name: "Copy",
                         label: "Copy",
                         icon: "copy-16x16",
@@ -530,12 +563,44 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             utils.copyCurve();
                         }
                     }, {
-                        name: "Export to Inventory",
-                        label: "Export to Inventory",
+                        name: "Export",
+                        label: "Export",
                         icon: "arrow-right-16x16",
-                        handler: function() {
-                            utils.exportCurveToInventory();
-                        }
+                        class: "has-more",
+                        handler: function() {},
+                        childContextMenu: [
+                            {
+                                name: "Export to CSV",
+                                label: "Export to CSV",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportCurve();
+                                }
+                            }, {
+                                name: "Export to Las 2.0",
+                                label: "Export to Las 2.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 2.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                }
+                            }, {
+                                name: "Export to Las 3.0",
+                                label: "Export to Las 3.0",
+                                icon: "",
+                                handler: function() {
+                                    console.log('export to las 3.0');
+                                }
+                            }, {
+                                name: "Export to Inventory",
+                                label: "Export to Inventory",
+                                icon: "",
+                                handler: function() {
+                                    utils.exportCurveToInventory();
+                                }
+                            }
+                        ]
                     }, {
                         name: "Cut",
                         label: "Cut",
@@ -594,7 +659,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         separator: '1'
                     }
                 ];
-            case 'zonesets':
+            case 'user_defined':
                 return [
                     {
                         name: "NewZoneSet",
@@ -604,12 +669,19 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                             self.handlers.createZoneSet();
                         }
                     }, {
-                        name: "ZoneManager",
-                        label: "Zone Manager",
+                        name: "NewMarkerSet",
+                        label: "New Marker Set",
+                        icon: "well-marker-add-16x16",
+                        handler: function () {
+                            self.handlers.createMarkerSet();
+                        }
+                    }, {
+                        name: "ZonesetManager",
+                        label: "Zoneset Manager",
                         icon: "zone-management-16x16",
                         handler: function () {
                             let zonesetsModel = utils.getSelectedNode();
-                            utils.openZonemanager(zonesetsModel);
+                            utils.openZonesetmanager(zonesetsModel);
                         }
                     },{
                         separator: '1'

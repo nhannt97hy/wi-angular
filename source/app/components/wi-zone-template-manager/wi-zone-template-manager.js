@@ -33,7 +33,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.zoneTemplates = [];
         self.selectedZoneTemplates = [];
         self.selectedTemplate = false;
-        self.newTemplate = false;
 
 
         wiApiService.listZoneTemplate({}, function (templates) {
@@ -52,7 +51,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.onZoneTemplateChanged = function (item) {
         self.zoneTemplateEditted = true;
-        item.zoneTemplateEditted = true;
+        item.editted = true;
     }
 
     this.backgroundZoneTemplate = function (item) {
@@ -130,6 +129,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.selectedZoneTemplate = [];
         wiApiService.listAllZoneByTemplate({ template: self.selectedTemplate.name }, function (zones) {
             self.zoneTemplates = zones;
+            var scroll = $('#zoneTemplateScroll');
+            scroll.animate({ scrollTop: 0 });
         })
     };
     this.templateClickFunction = function ($index, $event, node) {
@@ -249,9 +250,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             if (!ret) return;
             else {
                 if (!self.templateConfig.find(function (node) { return node.name == ret })) {
-                    if (self.newTemplate) {
-                        self.templateConfig.splice(self.templateConfig.indexOf(self.newTemplate), 1);
-                    }
                     let newNode = {
                         name: ret,
                         type: 'template',
@@ -262,7 +260,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         },
                         children: []
                     }
-                    self.newTemplate = newNode;
                     self.templateConfig.push(newNode);
                     unselectAllNodes(self.templateConfig);
                     selectHandler(newNode, self.templateConfig);
@@ -302,41 +299,63 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         DialogUtils.createNewZoneTemplateDialog(ModalService, function (data) {
             if (data) {
                 data.template = self.selectedTemplate.name;
-                // if (self.zoneTemplates.length !== 0) {
                 wiApiService.createZoneTemplate(data, function (zone) {
-                    data.idZoneTemplate = zone.idZoneTemplate;
-                    self.zoneTemplates.push(data);
-                })
-                // } else {
-                //     self.newTemplate = true;
-                //     self.zoneTemplates.push(data);
-                // }
-            }
-        });
-    }
-    this.deleteZoneTemplate = function () {
-        // if (self.newTemplate) {
-        //     self.zoneTemplates = [];
-        //     let newTemplateIndex = self.templateConfig.indexOf(self.templateConfig.__SELECTED_NODES);
-        //     self.templateConfig.splice(newTemplateIndex, 1);
-        //     self.newTemplate = false;
-        // } else {
-        for (var z = 0; z < self.zoneTemplates.length; z++) {
-            console.log(self.zoneTemplates.length, z, self.zoneTemplates[z].flag);
-            if (self.zoneTemplates[z].flag) {
-                console.log('delete', self.zoneTemplates[z])
-                let idZoneTemplate = self.zoneTemplates[z].idZoneTemplate;
-                self.zoneTemplates.splice(z, 1);
-                z = z - 1;
-                wiApiService.deleteZoneTemplate({ idZoneTemplate: idZoneTemplate }, function () {
-                    console.log('deleted');
-                    if (z == self.zoneTemplates.length - 1) {
-                        self.selectedZoneTemplates = [];
+                    if(zone) {
+                        data.idZoneTemplate = zone.idZoneTemplate;
+                        self.zoneTemplates.push(data);
+                    } else {
+                        console.log('Can not create zone template')
                     }
                 })
             }
+        });
+    }
+    this.showDeleteContextMenu = function ($event, $index) {
+        if (self.selectedZoneTemplates.length == 0 && self.zoneTemplates[0]) {
+            self.zoneTemplates[self.zoneTemplates.length - 1].flag = true;
+            self.selectedZoneTemplates.push(self.zoneTemplates[self.zoneTemplates.length - 1]);
+            var scroll = $('#zoneTemplateScroll');
+            scroll.animate({ scrollTop: scroll.prop("scrollHeight") });
         }
-        // }
+        let contextMenu = self.getDeleteButtonCtxMenu(
+            $index,
+            this
+        );
+        wiComponentService
+            .getComponent("ContextMenu")
+            .open($event.clientX, $event.clientY, contextMenu);
+    };
+
+    this.getDeleteButtonCtxMenu = function ($index, treeviewCtrl) {
+        return [
+            {
+                name: "DeleteAllZoneTemplates",
+                label: "Delete All Zones",
+                icon: "",
+                handler: function () {
+                    self.deleteZoneTemplate(true);
+                }
+            }, {
+                name: "DeleteSelectedZoneTemplates",
+                label: "Delete Selected Zones",
+                icon: "",
+                handler: function () {
+                    self.deleteZoneTemplate(false);
+                }
+            }
+        ]
+    };
+    this.deleteZoneTemplate = function (isAll) {
+        for (z of self.zoneTemplates) {
+            let index = self.zoneTemplates.indexOf(z);
+            if (z.flag || isAll) {
+                wiApiService.deleteZoneTemplate({ idZoneTemplate: z.idZoneTemplate }, function () {
+                    console.log('deleted');
+                    self.zoneTemplates.splice(index, 1);
+
+                })
+            }
+        }
     }
 
     this.selectZoneTemplateToggle = function (zone) {
@@ -354,16 +373,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.editZoneTemplate = function () {
         console.log('editZoneTemplate');
-        // if (self.newTemplate) {
-        //     for (zone of self.zoneTemplates) {
-        //         zone.template = self.selectedTemplate.name;
-        //         wiApiService.createZoneTemplate(zone, function () {
-        //             self.newTemplate = false;
-        //         })
-        //     }
-        // } else {
         for (zone of self.zoneTemplates) {
-            if (zone.zoneTemplateEditted) {
+            if (zone.editted) {
                 console.log('idZoneTemplate', zone.idZoneTemplate)
                 wiApiService.editZoneTemplate({
                     idZoneTemplate: zone.idZoneTemplate,
@@ -374,13 +385,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }, function () {
                     wiApiService.listAllZoneByTemplate({ template: self.selectedTemplate.name }, function (zones) {
                         self.zoneTemplates = zones;
-                        zone.zoneTemplateEditted = false;
+                        zone.editted = false;
                         self.zoneTemplateEditted = false;
                     })
                 })
             }
         }
-        // }
     }
     this.unselectAllNodes = unselectAllNodes;
     function unselectAllNodes(rootNode) {

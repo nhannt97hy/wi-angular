@@ -447,7 +447,7 @@ exports.createZoneSet = function () {
     const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = utils.getSelectedNode();
     let idWell;
-    if (selectedNode && selectedNode.type === 'zonesets') {
+    if (selectedNode && selectedNode.type === 'user_defined') {
         idWell = selectedNode.properties.idWell;
     }
     dialogUtils.newZoneSetDialog(this.ModalService, function (data) {
@@ -465,6 +465,34 @@ exports.createZoneSet = function () {
                 utils.refreshProjectState();
             });
         }
+    });
+};
+exports.createMarkerSet = function() {
+    const wiApiService = this.wiApiService;
+    const wiComponentService = this.wiComponentService;
+    const utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    const dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let selectedNode = utils.getSelectedNode();
+    let idWell;
+    if (selectedNode && selectedNode.type === 'user_defined') {
+        idWell = selectedNode.properties.idWell;
+    }
+    dialogUtils.newMarkerSetDialog(this.ModalService, function (data) {
+        console.log("new marker set", data);
+        if (data.template.idMarkerTemplate) {
+            wiApiService.createMarkerSet({
+                name: data.name,
+                template: data.template.template,
+                idWell: idWell
+            }, function (res) {
+                utils.refreshProjectState();
+            });
+        } else {
+            wiApiService.createMarkerSet({name: data.name, idWell: idWell}, function (res) {
+                utils.refreshProjectState();
+            });
+        }
+
     });
 };
 exports.ConvertButtonClicked = function () {

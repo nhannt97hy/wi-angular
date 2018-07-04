@@ -362,7 +362,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         console.log('on delete zone track', model);
         switch(model.type) {
             case 'well':
-                let zonesetNodes = model.children.find(child => child.type == 'zonesets').children;
+                let zonesetNodes = model.children.find(child => child.type == 'user_defined').children.filter(uDefChild => uDefChild.type == 'zoneset');
                 if(zonesetNodes && Array.isArray(zonesetNodes)) {
                     let hasZoneSet = !!zonesetNodes.find(zoneset => zoneset.properties.idZoneSet == self.viTrack.idZoneSet);
                     if(hasZoneSet) { 

@@ -1,0 +1,137 @@
+<div class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="wiModal.onCancelButtonClicked();" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">ZoneSet</h4>
+            </div>
+            <div class="modal-body">
+                <form action="" class="form-horizontal">
+                    <div class="zone-set-edit" style="display: flex">
+                        <style>
+                            .col-body {
+                                display: flex;
+                                flex-direction: column;
+                                padding: 5px;
+                                height: 70%;
+                            }
+                            .zone-set-edit canvas{
+                                width: 100%;
+                                height: 26px;
+                            }  
+                            .left-side {
+                                border: 1px solid #eee;
+                                border-radius: 5px;
+                            }  
+                            .zse-heading {
+                                height: 30px;
+                                border: 1px solid #ccc;
+                                border-bottom: none;
+                                border-top-right-radius: 5px;
+                                border-top-left-radius: 5px;
+                                background: #eee;
+                            }
+                            .zone-area table td {
+                                vertical-align: middle;
+                            }
+                            .zse-search {
+                                background-color:white;
+                                display: flex;
+                                padding-left: 7px; 
+                                border: 1px solid #ccc;
+                            }
+                            .zse-search ::-webkit-input-placeholder {
+                               color: #ccc;
+                               font-style: italic;
+                            }
+                        </style>
+                        <div class="col-body" style="width: 40%">
+                            <div class="zse-heading" style="padding: 0">
+                                <p class="text-heading" style="float: left; padding-left: 15px; padding-top: 3px">Zonesets</p>
+                            </div>
+                            <div style='' class="zse-search">
+                                <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
+                                <input type='text' id="focus" style='flex:1; margin-left: -22px; padding-left: 32px;color:steelblue;border: none'        
+                                    ng-model="wiModal.filter"
+                                    placeholder="[Search]">
+                            </div>
+                            <wi-scroll id-scroll="'zsedit'" style='flex:1;display:flex;flex-direction:column;height: 60%;border:1px solid #ccc; border-top:none;border-bottom-right-radius: 5px;border-bottom-left-radius: 5px;' 
+                                        up-trigger='wiModal.upTrigger'
+                                        down-trigger='wiModal.downTrigger'>
+                                <wi-base-treeview name="zoneSetEditTreeview" config="wiModal.zoneSetConfig" container="wiModal"
+                                    on-click-function="wiModal.clickFunction" filter="{{wiModal.filter}}" show-context-menu-function="wiModal.showTreeContextMenuFunction">
+                                </wi-base-treeview>
+                            </wi-scroll>
+                        </div>
+                        <div class='col-body' style="width: 70%">
+                            <div class="zse-heading" style="padding: 0">
+                                <p class="text-heading" style="float: left; padding-left: 15px; padding-top: 3px">Zones</p>
+                                <div class="button-area" style="float: right;">
+                                    <!-- <label class='btn' ng-click="wiModal.editZone()" ng-disabled="!wiModal.zoneEditted">
+                                        <i class="ti-check" ng-class="{'color-blue': wiModal.zoneEditted, 'color-lightgray': !wiModal.zoneEditted}"></i>
+                                    </label>
+                                    <label class='btn' ng-click="wiModal.deleteZone()" ng-disabled="wiModal.selectedZones.length==0">
+                                        <i class="ti-close" ng-class="{'color-blue': wiModal.selectedZones.length!=0, 'color-lightgray': wiModal.selectedZones.length==0}"></i>
+                                    </label>
+                                    <label title="Create new zone" class='btn' ng-click="wiModal.createZone()" ng-disabled="!wiModal.lastSelectedZoneSet">
+                                        <i class="ti-plus" ng-class="{'color-blue': wiModal.lastSelectedZoneSet, 'color-lightgray': !wiModal.lastSelectedZoneSet}"></i>
+                                    </label> -->
+                                    <label class='btn' ng-click="wiModal.refreshZoneList()" ng-disabled="wiModal.newZoneSet || !wiModal.lastSelectedZoneSet">
+                                        <i class="ti-reload" ng-class="{'color-blue': wiModal.lastSelectedZoneSet, 'color-lightgray': !wiModal.lastSelectedZoneSet}"></i>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="content-area">
+                                <div class="zone-area">
+                                    <table class="text-on-table table table-bordered" ng-show="wiModal.zones.length!==0">
+                                        <thead>
+                                            <tr>
+                                                <th width="5%"></th>
+                                                <th width="15%">Zone name</th>
+                                                <th width="15%">Top Depth</th>
+                                                <th width="15%">Bottom Depth</th>
+                                                <th width="20%">Pattern</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="border:1px solid #ccc; border-top:none;border-radius:5px;">
+                                            <tr ng-repeat="zone in wiModal.zones | orderBy: wiModal.zoneOrder" ng-init="zone.flag = false" ng-class="{'selected': zone.flag}">
+                                                <td style="width: 10%; text-align: center;" class="border-right-gray" ng-click="wiModal.selectZoneToggle(zone)">
+                                                    <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.showOnTrack, 'color-lightgray': !zone.showOnTrack}"></i>
+                                                </td>
+                                                <td width="20%">
+                                                    {{zone.zone_template.name}}
+                                                </td>
+                                                <td width="20%">
+                                                    <input type="number" step="any" ng-model="zone.startDepth" class="form-control" ng-change="wiModal.onZoneChanged(zone);" readonly 
+                                                        style="height: auto;">
+                                                </td>
+                                                <td width="20%">
+                                                    <input type="number" step="any" ng-model="zone.endDepth" class="form-control" ng-change="wiModal.onZoneChanged(zone);" readonly 
+                                                        style="height: auto;">
+                                                </td>
+                                                </td>
+                                                <td width="30%">
+                                                    <label class="form-control wi-form-control thick-border" style="padding:0;margin:0;">
+                                                        <wi-canvas-rect name="ZSE_{{$index}}" pattern="{{zone.zone_template.pattern}}" 
+                                                                        width="100" height="26" 
+                                                                        foreground="{{zone.zone_template.foreground}}"
+                                                                        background='{{zone.zone_template.background}}'>
+                                                        </wi-canvas-rect>
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="wiModal.onOkButtonClicked()" class="btn btn-default"><span class="ok-16x16"></span>&nbsp;OK</button>
+                <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default"><span class="close-16x16"></span>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
