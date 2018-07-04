@@ -238,9 +238,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         props.zoneSet = props.idZoneSet ? 
                         utils.getModel('zoneset', props.idZoneSet).properties : 
                         {idZoneSet: null, name: null};
+        props.markerSet = props.idMarkerSet ? 
+                        utils.getModel('markerset', props.idMarkerSet).properties : 
+                        {idMarkerSet: null, name: null};
         props.width = utils.pixelToInch(props.width);
         wiComponentService.emit("update-properties", {
-            type: 'logtrack', 
+            type: 'd3-logtrack', 
             props: props
         });
     }
@@ -470,8 +473,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.properties.zone_set = zoneset;
         self.viTrack.removeAllZones();
         for(let zone of zoneset.zones) {
-            console.log('zone config: ', zone);
-            if (zone.showOnTrack) {
+            if(zone.showOnTrack) {
+                // zone.properties.params = zone.children ? zone.children.map(c => c.data).filter(p => typeof(p.value) == 'number') : [];
                 let viZone = self.viTrack.addZone(zone);
                 viZone.svgGroup.style('pointer-events', 'none');
                 viZone.onControlinesDrag(function(param) {

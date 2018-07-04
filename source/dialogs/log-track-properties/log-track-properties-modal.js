@@ -79,10 +79,17 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if (self.props.general.width < 0 ) self.props.general.width = 0;
-            if (lastZoneSet && self.props.general.idZoneSet != lastZoneSet.idZoneSet) {
+            if(!self.props.general.showZoneSet) self.props.general.idZoneSet = null;
+            else if (lastZoneSet && self.props.general.idZoneSet != lastZoneSet.idZoneSet) {
                 trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             } else if(self.props.general.idZoneSet) {
                 trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
+            }
+            if(!self.props.general.showMarkerSet) self.props.general.idMarkerSet = null;
+            else if (lastMarkerset && self.props.general.idMarkerSet != lastMarkerset.properties.idMarkerSet) {
+                trackComponent.controller.markerset = utils.getModel('markerset', self.props.general.idMarkerSet);
+            } else if(self.props.general.idMarkerSet) {
+                trackComponent.controller.markerset = utils.getModel('markerset', self.props.general.idMarkerSet);
             }
             wiApiService.editTrack(self.props.general, function (res) {
                 if (!res) return;
@@ -103,11 +110,11 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             })
             return temp;
         }
-
         this.datasets = [];
         this.curvesArr = [];
 
         let zonesets = [];
+        let markersets = [];
         if(this.well) {
             this.well.children.forEach(function (child) {
                 if (child.type == 'dataset') self.datasets.push(child);
@@ -115,6 +122,8 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                     child.children.forEach(c => {
                         if(c.type == 'zoneset')
                             zonesets.push(c);
+                        if(c.type == 'markerset')
+                            markersets.push(c);
                     })    
                 }
             });
@@ -131,6 +140,8 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                             wellChild.children.forEach(c => {
                                 if(c.type == 'zoneset')
                                     zonesets.push(c);
+                                if(c.type == 'markerset')
+                                    markersets.push(c)
                             })
                         }
                     })
@@ -158,7 +169,26 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         this.zonesetChanged = function(selectedItem) {
             self.props.general.idZoneSet = selectedItem.idZoneSet;
         }
-
+        let lastMarkerset = utils.getModel('markerset', this.props.general.idMarkerSet);
+        this.getMarkersetList = function(wiItemDropdownCtrl) {
+            $timeout(function() {
+                if(!markersets.length) return;
+                wiItemDropdownCtrl.items = markersets.map(markerset => {
+                    return {
+                        data: {
+                            label: markerset.properties.name
+                        }, 
+                        properties: markerset.properties
+                    }
+                });
+                if(lastMarkerset) {
+                    wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idMarkerSet == lastMarkerset.properties.idMarkerSet);
+                }
+            }, 10); 
+        }
+        this.markersetChanged = function(selectedItem) {
+            self.props.general.idMarkerSet = selectedItem.idMarkerSet;
+        }
         this.datasets.forEach(function (child) {
             child.children.forEach(function (item) {
                 if (item.type == 'curve') self.curvesArr.push(item);

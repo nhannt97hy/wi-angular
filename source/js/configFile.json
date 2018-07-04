@@ -5,40 +5,35 @@
             "option": "readonly",
             "section": "Depths",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "topDepth": {
             "translation": "Top Depth",
             "option": "readonly",
             "section": "Depths",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "step": {
             "translation": "Step",
             "option": "readonly",
             "section": "Depths",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "name": {
             "translation": "Name",
             "option": "use",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "unit": {
             "translation": "Unit",
             "option": "use",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         }
     },
     "dataset": {
@@ -47,16 +42,14 @@
             "option": "use",
             "section": "Properties",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "well": {
             "translation": "Well",
             "option": "readonly",
             "section": "Properties",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         }
     },
     "curve": {
@@ -64,251 +57,273 @@
             "translation": "End Depth",
             "option": "readonly",
             "section": "Depths",
-            "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "typeSpec": "wiref",
+            "refSpec": "well.bottomDepth"
         },
         "startDepth": {
             "translation": "Start Depth",
             "option": "readonly",
             "section": "Depths",
-            "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "typeSpec": "wiref",
+            "refSpec": "well.topDepth"
         },
         "alias": {
             "translation": "Alias",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "dataset": {
             "translation": "Curve Set Name",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "dataType": {
             "translation": "DataType",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "exportName": {
             "translation": "Export Name",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "name": {
             "translation": "Name",
             "option": "use",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "unit": {
             "translation": "Unit",
             "option": "use",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "compatiableList": {
             "translation": "Compatiable List",
             "option": "use",
             "section": "Informations",
             "typeSpec": "wicompatiable",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "longList": {
             "translation": "Long list",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "family": {
             "translation": "Family",
             "option": "use",
             "section": "Informations",
             "typeSpec": "wifamily",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "familyUnit": {
             "translation": "Family Unit",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "wellName": {
             "translation": "Well name",
             "option": "readonly",
             "section": "Informations",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "maxValue": {
             "translation": "Max Value",
             "option": "readonly",
             "section": "Value",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "meanValue": {
             "translation": "Mean Value",
             "option": "readonly",
             "section": "Value",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "minValue": {
             "translation": "Min Value",
             "option": "readonly",
             "section": "Value",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         }
     },
-    "logtrack": {
+    "d3-logtrack": {
         "showTitle": {
             "translation": "Show Title",
             "option": "use",
             "section": "Header",
             "typeSpec": "checkbox",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "title": {
             "translation": "Title",
             "option": "use",
             "section": "Header",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "topJustification": {
             "translation": "Justification",
             "option": "use",
             "section": "Header",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "showLabels": {
             "translation": "Show Label",
             "option": "use",
             "section": "Label",
             "typeSpec": "checkbox",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "showValueGrid": {
             "translation": "Show Value Grid",
             "option": "use",
             "section": "Grid",
             "typeSpec": "checkbox",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "showDepthGrid": {
             "translation": "Show Depth Grid",
             "option": "use",
             "section": "Grid",
             "typeSpec": "checkbox",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "majorTicks": {
             "translation": "Major Ticks",
             "option": "use",
             "section": "Grid",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "minorTicks": {
             "translation": "Minor Ticks",
             "option": "use",
             "section": "Grid",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "width": {
-            "translation": "Width",
+            "translation": "Width (inchs)",
             "option": "use",
             "section": "Geometry",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "color": {
             "translation": "Color",
             "option": "use",
             "section": "Color",
             "typeSpec": "wicolor",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "showEndDepth": {
             "translation": null,
             "option": "notuse",
             "section": null,
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "displayType": {
             "translation": null,
             "option": "notuse",
             "section": null,
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "zoomFactor": {
             "translation": "Zoom Factor",
             "option": "use",
             "section": "Geometry",
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
+        },
+        "markerSet": {
+            "translation": "MarkerSet",
+            "option": "use",
+            "section": "Zonation & MarkerSet",
+            "typeSpec": "wimarkerset",
+            "refSpec": null
         },
         "zoneSet": {
             "translation": "ZoneSet",
             "option": "use",
-            "section": "Zonation",
+            "section": "Zonation & MarkerSet",
             "typeSpec": "wizoneset",
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
         },
         "showZoneSet": {
             "translation": null,
             "option": "notuse",
             "section": null,
             "typeSpec": null,
-            "function": null,
-            "defaultValue": null
+            "refSpec": null
+        }
+    },
+    "zoneset": {
+        "name": {
+            "translation": "Name",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        }
+    },
+    "zone": {
+        "name": {
+            "translation": "Name",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "endDepth": {
+            "translation": "End Depth",
+            "option": "readonly",
+            "section": "Depths",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "startDepth": {
+            "translation": "Start Depth",
+            "option": "readonly",
+            "section": "Depths",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "showName": {
+            "translation": "Show Name",
+            "option": "use",
+            "section": "Options",
+            "typeSpec": "checkbox",
+            "refSpec": null
+        },
+        "showOnTrack": {
+            "translation": "Show On Track",
+            "option": "use",
+            "section": "Options",
+            "typeSpec": "checkbox",
+            "refSpec": null
         }
     }
 }

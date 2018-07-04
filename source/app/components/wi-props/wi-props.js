@@ -64,7 +64,8 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                 label: (config[key] && config[key].translation) ? config[key].translation : key,
                 use: false,
                 readOnly: false,
-                section: ""
+                section: "",
+                ref: config[key].refSpec
             }
             if (config[key] && config[key].option && config[key].option == "use") item.use = true;
             if (config[key] && config[key].option && config[key].option == "readonly") {
@@ -76,7 +77,6 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         }
         return array;
     }
-
     function sectionObj (config) {
         let section = new Object();
         if(!config) return {};
@@ -150,6 +150,14 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
             self.doChange(field);
         });
     }
+    this.changeMarkerSet = function(field, fields) {
+        DialogUtils.markerSetEditDialog(ModalService, wiComponentService, field.value.idMarkerSet, self.input.wellProps, function (newMarkerSet) {
+            if (!newMarkerSet) return;
+            field.value = newMarkerSet;
+            self.input.idMarkerSet = newMarkerSet.idMarkerSet;
+            self.doChange(field);
+        });
+    }
     this.onChangeUnit = function(field, fields) {
         let temp = fields.find(f => f.name == 'unit');
         let payload = {};
@@ -166,6 +174,14 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
                 fields[fields.indexOf(temp)].value = field.value;
             });
         });
+    }
+    this.refFunc = function(refSpec){
+        let ref = null;
+        if(self.typeprops == 'curve') {
+            let well = utils.findWellByCurve(self.input.idCurve);
+            ref = well[refSpec.split('.')[1]];
+        }
+        return ref;
     }
     
 }
