@@ -362,7 +362,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                                 icon: "",
                                 handler: function() {
                                     let selectedNode = utils.getSelectedNode();
-                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                    utils.exportNodeToLas2(selectedNode);                                    
                                 }
                             }, {
                                 name: "Export to Las 3.0",
@@ -370,6 +370,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                                 icon: "",
                                 handler: function() {
                                     console.log('export to las 3.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    utils.exportNodeToLas3(selectedNode); 
                                 }
                             }, {
                                 name: "Export to Inventory",
@@ -497,7 +499,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                                 handler: function() {
                                     console.log('export to las 2.0');
                                     let selectedNode = utils.getSelectedNode();
-                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                    utils.exportNodeToLas2(selectedNode); 
                                 }
                             }, {
                                 name: "Export to Las 3.0",
@@ -505,6 +507,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                                 icon: "",
                                 handler: function() {
                                     console.log('export to las 3.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    utils.exportNodeToLas3(selectedNode); 
                                 }
                             }, {
                                 name: "Export to Inventory",
@@ -583,7 +587,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                                 handler: function() {
                                     console.log('export to las 2.0');
                                     let selectedNode = utils.getSelectedNode();
-                                    console.log('export to las 2.0', utils.getIdObjectFromNode(selectedNode));
+                                    utils.exportNodeToLas2(selectedNode);
                                 }
                             }, {
                                 name: "Export to Las 3.0",
@@ -591,6 +595,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                                 icon: "",
                                 handler: function() {
                                     console.log('export to las 3.0');
+                                    let selectedNode = utils.getSelectedNode();
+                                    utils.exportNodeToLas3(selectedNode); 
                                 }
                             }, {
                                 name: "Export to Inventory",

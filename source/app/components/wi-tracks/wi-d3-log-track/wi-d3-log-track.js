@@ -256,8 +256,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+
+        // update track without track id (anonymous track - for preview purpose)
         if(!trackProps.idTrack) {
-            // TODO something without track id (anonymous track - for preview purpose)
             if (self.getProperties().zone_set) {
                 self.addZoneSetToTrack(self.getProperties().zone_set); 
             }
@@ -273,6 +274,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.isIdle = true;
             return;
         }
+
+        // update whole track by synchronizing with server
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
             // viTrack.getMarkers().forEach(viMarker => {
             //     let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
@@ -286,6 +289,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             //         self.addMarkerToTrack(viTrack, marker);
             //     } // add if marker not in viTrack
             // });
+
+            // update annotations
             viTrack.getAnnotations().forEach(viAnno => {
                 let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
                 viTrack.removeDrawing(viAnno);
@@ -300,6 +305,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
 
             let promises = [];
+            // update lines
             viTrack.getCurves().forEach(viCurve => {
                 let line = logTrack.lines.find(line => line.idLine == viCurve.id);
                 viTrack.removeDrawing(viCurve);
@@ -320,12 +326,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
 
             promises.push(new Promise(resolve => {
-                if(logTrack.zone_set) {
+                // update zoneset
+                if(logTrack.idZoneSet && logTrack.zone_set) {
                     self.addZoneSetToTrack(logTrack.zone_set); 
-                }
-                if(logTrack.marker_set) {
+                } else {
+                    viTrack.removeAllZones(); 
+                }                
+
+                // update markerset
+                if(logTrack.idMarkerSet && logTrack.marker_set) {
                     self.addMarkerSetToTrack(logTrack.marker_set); 
+                } else {
+                    viTrack.removeAllMarkers(); 
                 }
+
                 resolve();
             }))
             Promise.all(promises)

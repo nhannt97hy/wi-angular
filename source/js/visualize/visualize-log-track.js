@@ -117,8 +117,8 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
     Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
     Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
-    Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);
-    Utils.setIfNotNull(this, 'idMarkerSet', props.idMarkerSet);
+    Utils.setIfNotUndefined(this, 'idZoneSet', props.idZoneSet);
+    Utils.setIfNotUndefined(this, 'idMarkerSet', props.idMarkerSet);
 }
 
 LogTrack.prototype.setMode = function(newMode) {

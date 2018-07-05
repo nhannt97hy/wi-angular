@@ -314,11 +314,7 @@ function markerToTreeConfig(marker, options = {}) {
 function markerSetToTreeConfig(markerSet, options = {}) {
     var markerSetModel = new Object();
     markerSetModel.id = markerSet.idMarkerSet;
-    markerSetModel.properties = {
-        idWell: markerSet.idWell,
-        idMarkerSet: markerSet.idMarkerSet,
-        name: markerSet.name,
-    };
+    markerSetModel.properties = markerSet;
     markerSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',
@@ -3427,7 +3423,7 @@ exports.onChangeHandlers =  {
         })
     },
 }
-exports.getIdObjectFromNode = function(node, rootNode) {
+function getIdObjectFromNode (node, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let idObject = {
@@ -3497,4 +3493,39 @@ exports.getIdObjectFromNode = function(node, rootNode) {
         return;
     }
     return;
+}
+exports.exportNodeToLas2 = function (node, rootNode){
+    let idObjects = [];
+    let idObject = getIdObjectFromNode(node, rootNode);
+    idObjects.push(idObject);
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.exportLas2(idObjects, function (response) {
+        if (response) {
+            for (r of response) {
+                if (r !== null) {
+                    let url = wiApiService.getLasFileUrl(r.path);
+                    let a = $("<a></a>").attr("href", url);
+                    a.click();
+                }
+            }
+        }
+    });
+}
+
+exports.exportNodeToLas3 = function (node, rootNode){
+    let idObjects = [];
+    let idObject = getIdObjectFromNode(node, rootNode);
+    idObjects.push(idObject);
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.exportLas3(idObjects, function (response) {
+        if (response) {
+            for (r of response) {
+                if (r !== null) {
+                    let url = wiApiService.getLasFileUrl(r.path);
+                    let a = $("<a></a>").attr("href", url);
+                    a.click();
+                }
+            }
+        }
+    });
 }

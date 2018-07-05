@@ -27,8 +27,11 @@ CorrelationTrack.prototype.doPlot = function() {
     //     let rightZoneSet = this.rightTrack.getProperties().zone_set;
     //     if(leftZoneSet && rightZoneSet) {
     //         this.drawCorrelationZones(); 
-    //     }
+    //     } 
+    // } else {
+    //     this.removeAllCorrelationZones();
     // }
+
 }
 
 CorrelationTrack.prototype.drawCorrelationZones = function () {
@@ -72,6 +75,10 @@ CorrelationTrack.prototype.drawCorrelationZones = function () {
     polygons
         .exit()
         .remove();
+}
+
+CorrelationTrack.prototype.removeAllCorrelationZones = function() {
+    this.svgContainer.selectAll('polygon.vi-correlation-zone').remove();
 }
 
 CorrelationTrack.prototype.setBackgroundColor = function(color) {

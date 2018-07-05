@@ -1,5 +1,4 @@
 let helper = require('./DialogHelper');
-// module.exports = function (ModalService, currentTrack, wiLogplotCtrl, wiApiService, callback, options) {
 module.exports = function (ModalService, trackComponent, options, callback) {
     let wiModal = null;
     function ModalController($scope, wiComponentService, wiApiService, $timeout, close) {
@@ -13,9 +12,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
         let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         let utils = wiComponentService.getComponent(wiComponentService.UTILS);
         let graph = wiComponentService.getComponent('GRAPH');
-        // let wiD3Ctrl = wiLogplotCtrl.getwiD3Ctrl();
 
-        // window.logTrack = this;
         this.groupFnTabCurve = function(item){
             let wellProps = utils.findWellByCurve(item.properties.idCurve).properties;
             return item.parent + ' (' + wellProps.name + ') ';
@@ -25,7 +22,6 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             return item.datasetName;
         }
 
-        // this.well = utils.findWellByLogplot(trackComponent.idPlot);
         this.well = null;
         let wellProps = trackComponent.controller.getWellProps();
         if(wellProps) {
@@ -79,33 +75,27 @@ module.exports = function (ModalService, trackComponent, options, callback) {
             // utils.changeTrack(self.props.general, wiApiService);
             console.log('general', self.props.general);
             if (self.props.general.width < 0 ) self.props.general.width = 0;
-            if(!self.props.general.showZoneSet) self.props.general.idZoneSet = null;
+
+            if(!self.showZoneSet) self.props.general.idZoneSet = null;
             else if (lastZoneSet && self.props.general.idZoneSet != lastZoneSet.idZoneSet) {
                 trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             } else if(self.props.general.idZoneSet) {
                 trackComponent.zone_set = (utils.getModel('zoneset', self.props.general.idZoneSet) || {}).properties;
             }
-            if(!self.props.general.showMarkerSet) self.props.general.idMarkerSet = null;
+
+            if(!self.showMarkerSet) self.props.general.idMarkerSet = null;
             else if (lastMarkerset && self.props.general.idMarkerSet != lastMarkerset.properties.idMarkerSet) {
-                trackComponent.controller.markerset = utils.getModel('markerset', self.props.general.idMarkerSet);
+                trackComponent.marker_set = (utils.getModel('markerset', self.props.general.idMarkerSet) || {}).properties;
             } else if(self.props.general.idMarkerSet) {
-                trackComponent.controller.markerset = utils.getModel('markerset', self.props.general.idMarkerSet);
+                trackComponent.marker_set = (utils.getModel('markerset', self.props.general.idMarkerSet) || {}).properties;
             }
+
             wiApiService.editTrack(self.props.general, function (res) {
                 if (!res) return;
                 let newProps = angular.copy(self.props);
                 newProps.general.width = utils.inchToPixel(self.props.general.width);
                 viTrack.setProperties(newProps.general);
-
-                // if (newProps.general.zoomFactor != savedZoomFactor) {
-                //     savedZoomFactor = newProps.general.zoomFactor;
-                //     wiD3Ctrl.processZoomFactor();
-                //     wiD3Ctrl.plotAll();
-                // }
-                // else {
-                //     viTrack.doPlot(true);
-                // }
-                viTrack.doPlot(true);
+                // viTrack.doPlot(true);
                 if (callback) callback();
             })
             return temp;
@@ -162,13 +152,16 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                     }
                 });
                 if(lastZoneSet) {
+                    self.showZoneSet = true;
                     wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idZoneSet == lastZoneSet.idZoneSet);
                 }
             }, 10); 
         }
+
         this.zonesetChanged = function(selectedItem) {
             self.props.general.idZoneSet = selectedItem.idZoneSet;
         }
+
         let lastMarkerset = utils.getModel('markerset', this.props.general.idMarkerSet);
         this.getMarkersetList = function(wiItemDropdownCtrl) {
             $timeout(function() {
@@ -182,6 +175,7 @@ module.exports = function (ModalService, trackComponent, options, callback) {
                     }
                 });
                 if(lastMarkerset) {
+                    self.showMarkerSet = true;
                     wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(item => item.properties.idMarkerSet == lastMarkerset.properties.idMarkerSet);
                 }
             }, 10); 
