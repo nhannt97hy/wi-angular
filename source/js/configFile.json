@@ -325,5 +325,95 @@
             "typeSpec": "checkbox",
             "refSpec": null
         }
+    },
+    "markerset": {
+        "name": {
+            "translation": "Name",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        }
+    },
+    "marker": {
+        "name": {
+            "translation": "Name",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "depth": {
+            "translation": "Depth",
+            "option": "readonly",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "showOnTrack": {
+            "translation": "Show On Track",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": "checkbox",
+            "refSpec": null
+        }
+    },
+    "d3-depthtrack": {
+        "title": {
+            "translation": "Title",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "showTitle": {
+            "translation": "Show Title",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": "checkbox",
+            "refSpec": null
+        },
+        "justification": {
+            "translation": "Justification",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": "wiselect",
+            "refSpec": null
+        },
+        "color": {
+            "translation": "Background color",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": "wicolor",
+            "refSpec": null
+        },
+        "width": {
+            "translation": "Width (inchs)",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "depthType": {
+            "translation": "Depth Type",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": "wiselect",
+            "refSpec": null
+        },
+        "unitType": {
+            "translation": "Unit Type",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": "wiselect",
+            "refSpec": null
+        },
+        "decimals": {
+            "translation": "Decimals",
+            "option": "use",
+            "section": "Properties",
+            "typeSpec": null,
+            "refSpec": null
+        }
     }
 }

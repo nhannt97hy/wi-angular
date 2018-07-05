@@ -3382,7 +3382,7 @@ exports.onChangeHandlers =  {
         delete props_bk.wellProps;
         __GLOBAL.wiApiService.editTrack(props_bk, function (res) {
             __GLOBAL.wiComponentService.emit('update-logtrack-' + res.idTrack);
-            console.log("update longtrack")
+            console.log("update logtrack")
         })
     },
     'zoneset' : function(props) {
@@ -3398,7 +3398,34 @@ exports.onChangeHandlers =  {
                 console.log("update zone");
             });
         })
-    }
+    },
+    'markerset' : function(props) {
+        __GLOBAL.wiApiService.editMarkerSet(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update markerset");
+            });
+        })
+    },
+    'marker' : function(props) {
+        __GLOBAL.wiApiService.editMarker(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update marker");
+            });
+        })
+    },
+    'd3-depthtrack' : function(props) {
+        let props_bk = angular.copy(props);
+        delete props_bk.justification;
+        delete props_bk.depthType;
+        delete props_bk.unitType;
+        props_bk.justification = props.justification.model;
+        props_bk.depthType = props.depthType.model;
+        props_bk.unitType = props.unitType.model;
+        __GLOBAL.wiApiService.editDepthTrack(props_bk, function (res) {
+            /*__GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis);
+            console.log("update depthtrack")*/
+        })
+    },
 }
 exports.getIdObjectFromNode = function(node, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;

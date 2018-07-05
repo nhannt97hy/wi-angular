@@ -27,7 +27,7 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
         }
     }
     this.doChange = function(field) {
-        if(self.input[field.name] !== field.value) {
+        if(self.input[field.name] != field.value) {
             self.input[field.name] = field.value;
             self.onchangefunc && self.onchangefunc(self.input);
         }
@@ -52,6 +52,10 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
             })
         }
     }*/
+    this.selectChange = function (field) {
+        self.input[field.name] = field.value;
+        self.onchangefunc && self.onchangefunc(self.input);
+    }
     function obj2Array(obj, config) {
 
         let array = new Array();
