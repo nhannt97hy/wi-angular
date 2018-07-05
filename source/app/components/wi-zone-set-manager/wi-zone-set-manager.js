@@ -25,7 +25,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.zones = [];
         let selectedWell;
         $timeout(function () {
-            console.log('iidSelectedWell', self.idSelectedWell);
+            console.log('idSelectedWell', self.idSelectedWell);
             wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
                 if (wells) {
                     wells.sort(function (a, b) {
@@ -270,7 +270,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         })
     }
     this.editZone = function () {
-        console.log('editZone');
         for (zone of self.zones) {
             if (zone.editted) {
                 if (checkValidZoneDepth(zone.startDepth, zone.endDepth, zone)) {
@@ -288,11 +287,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.deleteZone = function (isAll) {
-        console.log('1111', self.zones)
         for (z of self.zones) {
             let index = self.zones.indexOf(z);
             if (z.flag || isAll) {
-                console.log('z', z);
                 wiApiService.removeZone(z.idZone, function (rs) {
                     console.log('delete successfully', rs);
                     self.zones.splice(index, 1);
@@ -309,42 +306,52 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.moveZoneUp = function () {
         let zoneToMove;
         let selectedZones = getSelectedZones();
-        let zoneArr = angular.copy(self.zones);
-        zoneArr.sort(sortZoneArrByDepth);
-        console.log('selectedZone.length', selectedZones.length);
-        for (let i = 0; i < selectedZones.length; i++) {
-            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZones[i].idZone }));
+        async.eachOfSeries(selectedZones, function (zone, i, done) {
+            let zoneArr = angular.copy(self.zones);
+            zoneArr.sort(sortZoneArrByDepth);
+            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
             if (index == 0) {
-                toastr.error('Can not move zone ' + selectedZones[i].name + ' up.');
+                toastr.error('Can not move zone ' + selectedZones[index].name + ' up.');
+                done();
             } else {
                 let indexToSwap = getNearestUnselectedZoneIndex(zoneArr[index], true);
                 console.log('indexToSwap', indexToSwap, index);
-                swapTwoZones(zoneArr[index], zoneArr[indexToSwap]);
-                let realZone = self.zones.find(function (z) { return z.idZone == selectedZones[i].idZone });
-                realZone.flag = true;
+                if (indexToSwap >= 0) {
+                    swapTwoZones(zoneArr[index], zoneArr[indexToSwap], function () {
+                        let realZone = self.zones.find(function (z) { return z.idZone == zone.idZone });
+                        realZone.flag = true;
+                        done();
+                    });
+                }
             }
-
-        }
+        }, function (err) {
+            console.log('err', err);
+        })
     }
     this.moveZoneDown = function () {
         let zoneToMove;
         let selectedZones = getSelectedZones();
-        let zoneArr = angular.copy(self.zones);
-        zoneArr.sort(sortZoneArrByDepth);
-        console.log('selectedZone.length', selectedZones.length);
-        for (let i = selectedZones.length - 1; i >= 0; i--) {
-            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZones[i].idZone }));
+        async.eachOfSeries(selectedZones.reverse(), function (zone, i, done) {
+            let zoneArr = angular.copy(self.zones);
+            zoneArr.sort(sortZoneArrByDepth);
+            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
             if (index == zoneArr.length - 1) {
-                toastr.error('Can not move zone ' + selectedZones[i].name + ' down.');
+                toastr.error('Can not move zone ' + zone.name + ' down.');
+                done();
             } else {
                 let indexToSwap = getNearestUnselectedZoneIndex(zoneArr[index], false);
                 console.log('indexToSwap', indexToSwap, index);
-                swapTwoZones(zoneArr[index], zoneArr[indexToSwap]);
-                let realZone = self.zones.find(function (z) { return z.idZone == selectedZones[i].idZone });
-                realZone.flag = true;
+                if (indexToSwap >= 0) {
+                    swapTwoZones(zoneArr[index], zoneArr[indexToSwap], function () {
+                        let realZone = self.zones.find(function (z) { return z.idZone == zone.idZone });
+                        realZone.flag = true;
+                        done();
+                    });
+                }
             }
-
-        }
+        }, function (err) {
+            console.log('done')
+        })
     }
     this.swapTwoZones = function () {
         let selectedZones = getSelectedZones();
@@ -358,33 +365,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         zone1.flag = true;
         zone2.flag = true;
     }
-    function swapTwoZones(zone1, zone2) {
-        console.log('swap', zone1, zone2);
+    function swapTwoZones(zone1, zone2, callback) {
         let start = angular.copy(zone1.startDepth);
         let end = angular.copy(zone1.endDepth);
+        let callbackCalled = false;
         zone1.startDepth = angular.copy(zone2.startDepth);
         zone1.endDepth = angular.copy(zone2.endDepth);
         zone2.startDepth = start;
         zone2.endDepth = end;
         $timeout(function () {
-            console.log(zone1.startDepth, zone1.endDepth, zone2.startDepth, zone2.endDepth);
-            console.log(zone1, zone2);
-
+            let realZone1 = self.zones.find(function (z) { return z.idZone == zone1.idZone });
+            realZone1.orderDepth = zone1.startDepth;
+            realZone1.startDepth = zone1.startDepth;
+            realZone1.endDepth = zone1.endDepth;
+            let realZone2 = self.zones.find(function (z) { return z.idZone == zone2.idZone });
+            realZone2.orderDepth = zone2.startDepth;
+            realZone2.startDepth = zone2.startDepth;
+            realZone2.endDepth = zone2.endDepth;
             wiApiService.editZone(zone1, function (rs) {
                 console.log('edit success', rs);
-                let realZone1 = self.zones.find(function (z) { return z.idZone == zone1.idZone });
-                realZone1.orderDepth = zone1.startDepth;
-                realZone1.startDepth = zone1.startDepth;
-                realZone1.endDepth = zone1.endDepth;
-
+                zone1.done = true;
+                if (zone1.done && zone2.done && !callbackCalled && callback) {
+                    callbackCalled = true;
+                    callback();
+                }
             });
             wiApiService.editZone(zone2, function (rs) {
-                let realZone2 = self.zones.find(function (z) { return z.idZone == zone2.idZone });
                 console.log('edit success', rs);
                 zone2.done = true;
-                realZone2.orderDepth = zone2.startDepth;
-                realZone2.startDepth = zone2.startDepth;
-                realZone2.endDepth = zone2.endDepth;
+                if (zone1.done && zone2.done && !callbackCalled && callback) {
+                    callbackCalled = true;
+                    callback();
+                }
             });
         })
     }
@@ -686,7 +698,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZone.idZone }));
         let free;
         if (isBelow) {
-            console.log('index', index);
             if (zoneArr[index + 1]) {
                 free = zoneArr[index + 1].startDepth - selectedZone.endDepth >= 50 ? 50 : zoneArr[index + 1].startDepth - selectedZone.endDepth;
             } else {
@@ -702,7 +713,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
 
         } else {
-            console.log('wellTopDepth', wellTopDepth);
             if (zoneArr[index - 1]) {
                 free = selectedZone.startDepth - zoneArr[index - 1].endDepth >= 50 ? 50 : selectedZone.startDepth - zoneArr[index - 1].endDepth;
             } else {
@@ -720,7 +730,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     function getSelectedZones() {
         let selectedZone = [];
-        for (zone of self.zones) {
+        let zoneArr = angular.copy(self.zones);
+        zoneArr.sort(sortZoneArrByDepth);
+        for (zone of zoneArr) {
             if (zone.flag) {
                 selectedZone.push(zone);
             }
@@ -730,20 +742,17 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getSelectedZones = getSelectedZones;
 
     function getNearestUnselectedZoneIndex(zone, isAbove) {
-        console.log('get Nearest called');
         let zoneArr = angular.copy(self.zones);
         zoneArr.sort(sortZoneArrByDepth);
-        let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }))
+        let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
         if (isAbove) {
             console.log('isAbove');
-            for (let i = index - 1; i >= 0; i++) {
-                console.log('flag', i, !zoneArr[i].flag);
+            for (let i = index - 1; i >= 0; i--) {
                 if (!zoneArr[i].flag) return i;
             }
         } else {
             console.log('!isAbove');
             for (let i = index + 1; i < zoneArr.length - 1; i++) {
-                console.log('flag', i, !zoneArr[i].flag);
                 if (!zoneArr[i].flag) return i;
             }
         }
