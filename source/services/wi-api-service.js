@@ -182,6 +182,7 @@ const DELETE_MARKER = '/project/well/marker-set/marker/delete';
 
 const LIST_MARKER_SET = '/project/well/marker-set/list';
 const GET_MARKER_SET = '/project/well/marker-set/info';
+const EDIT_MARKER_SET = '/project/well/marker-set/edit';
 
 const CREATE_ANNOTATION = '/project/plot/track/annotation/new';
 const EDIT_ANNOTATION = '/project/plot/track/annotation/edit';
@@ -2115,4 +2116,8 @@ Service.prototype.listMarkerSet = function (idWell, callback) {
 Service.prototype.getMarkerSet = function (idMarkerSet, callback) {
     let self = this;
     this.post(GET_MARKER_SET, { idMarkerSet: idMarkerSet }, callback);
+}
+Service.prototype.editMarkerSet = function (data, callback) {
+    let self = this;
+    this.post(EDIT_MARKER_SET, data, callback);
 }

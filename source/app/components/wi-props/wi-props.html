@@ -73,6 +73,13 @@
                         {{self.refFunc(field.ref)}} &nbsp;</span>
                     </span>
 				</div>
+				<div ng-if="field.type=='wiselect'" 
+					style="padding:5px;">
+					<select ng-model="field.value.model" style="width: 100%; border: none;" 
+							ng-options="item for item in field.value.selection"
+							ng-change="self.selectChange(field);">
+					</select>
+				</div>
 			</div>
 		</div>
 	</div>

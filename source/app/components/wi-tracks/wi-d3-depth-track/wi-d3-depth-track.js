@@ -39,6 +39,26 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             }
         });
     }
+    this.openPropertiesWindow = function () {
+        let props = self.viTrack.getProperties();
+        props.width = utils.pixelToInch(props.width);
+        props.justification = {
+            model : self.viTrack.getProperties().justification,
+            selection : ['Left', 'Center', 'Right']
+        };
+        props.depthType = {
+            model : self.viTrack.getProperties().depthType,
+            selection : ['MD', 'TVD', 'TVDSS']
+        };
+        props.unitType = {
+            model : self.viTrack.getProperties().unitType,
+            selection : ['Cm', 'Dm', 'M', 'Km', 'In', 'Ft', 'Yd', 'Mi']
+        };
+        wiComponentService.emit("update-properties", {
+            type: 'd3-depthtrack', 
+            props: props
+        });
+    }
 
     /* creational method */
     this.$onInit = function () {
