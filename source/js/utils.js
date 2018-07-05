@@ -3378,7 +3378,7 @@ exports.onChangeHandlers =  {
         delete props_bk.wellProps;
         __GLOBAL.wiApiService.editTrack(props_bk, function (res) {
             __GLOBAL.wiComponentService.emit('update-logtrack-' + res.idTrack);
-            console.log("update longtrack")
+            console.log("update logtrack")
         })
     },
     'zoneset' : function(props) {
@@ -3394,9 +3394,36 @@ exports.onChangeHandlers =  {
                 console.log("update zone");
             });
         })
-    }
+    },
+    'markerset' : function(props) {
+        __GLOBAL.wiApiService.editMarkerSet(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update markerset");
+            });
+        })
+    },
+    'marker' : function(props) {
+        __GLOBAL.wiApiService.editMarker(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update marker");
+            });
+        })
+    },
+    'd3-depthtrack' : function(props) {
+        let props_bk = angular.copy(props);
+        delete props_bk.justification;
+        delete props_bk.depthType;
+        delete props_bk.unitType;
+        props_bk.justification = props.justification.model;
+        props_bk.depthType = props.depthType.model;
+        props_bk.unitType = props.unitType.model;
+        __GLOBAL.wiApiService.editDepthTrack(props_bk, function (res) {
+            /*__GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis);
+            console.log("update depthtrack")*/
+        })
+    },
 }
-exports.getIdObjectFromNode = function(node, rootNode) {
+function getIdObjectFromNode (node, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
     let idObject = {
@@ -3466,4 +3493,39 @@ exports.getIdObjectFromNode = function(node, rootNode) {
         return;
     }
     return;
+}
+exports.exportNodeToLas2 = function (node, rootNode){
+    let idObjects = [];
+    let idObject = getIdObjectFromNode(node, rootNode);
+    idObjects.push(idObject);
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.exportLas2(idObjects, function (response) {
+        if (response) {
+            for (r of response) {
+                if (r !== null) {
+                    let url = wiApiService.getLasFileUrl(r.path);
+                    let a = $("<a></a>").attr("href", url);
+                    a.click();
+                }
+            }
+        }
+    });
+}
+
+exports.exportNodeToLas3 = function (node, rootNode){
+    let idObjects = [];
+    let idObject = getIdObjectFromNode(node, rootNode);
+    idObjects.push(idObject);
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.exportLas3(idObjects, function (response) {
+        if (response) {
+            for (r of response) {
+                if (r !== null) {
+                    let url = wiApiService.getLasFileUrl(r.path);
+                    let a = $("<a></a>").attr("href", url);
+                    a.click();
+                }
+            }
+        }
+    });
 }
