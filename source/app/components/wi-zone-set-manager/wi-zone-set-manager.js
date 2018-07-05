@@ -23,10 +23,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.lastSelectedZoneSet = false;
         self.zoneSetConfig = [];
         self.zones = [];
-        self.selectedZones = [];
         let selectedWell;
         $timeout(function () {
-            console.log('xxx', self.idSelectedWell);
+            console.log('iidSelectedWell', self.idSelectedWell);
             wiApiService.listWells({ idProject: projectLoaded.idProject }, function (wells) {
                 if (wells) {
                     wells.sort(function (a, b) {
@@ -42,9 +41,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                         }
                         selectedWell = self.zoneSetConfig.find(function (well) { return well.idWell == self.idSelectedWell });
 
-                        console.log('selectedWell', selectedWell);
                         if (self.idSelectedWell && selectedWell) {
-                            console.log('ccc', self.idSelectedWell, selectedWell);
                             selectHandler(selectedWell, self.zoneSetConfig);
                             self.lastSelectedWell = selectedWell;
                         }
@@ -61,7 +58,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (Array.isArray(selectedNodes)) {
             for (node of selectedNodes) {
                 let index = selectedNodes.indexOf(node);
-                console.log('selectedNOde', node);
                 let zoneSetObj = {
                     idZoneSet: node.idZoneSet,
                     name: node.name,
@@ -253,7 +249,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.refreshZoneList = function () {
         self.newZone = false;
-        self.selectedZones = [];
         self.zoneEditted = false;
         self.lastSelectedZoneSet.template = false;
         var scroll = $('#zoneScroll');
@@ -294,13 +289,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.deleteZone = function (isAll) {
         console.log('1111', self.zones)
-        for (z of self.zones) {  
+        for (z of self.zones) {
             let index = self.zones.indexOf(z);
             if (z.flag || isAll) {
                 console.log('z', z);
                 wiApiService.removeZone(z.idZone, function (rs) {
                     console.log('delete successfully', rs);
-                    self.selectedZones = [];
                     self.zones.splice(index, 1);
                 })
             }
@@ -312,15 +306,90 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         zone.editted = true;
     }
 
-    this.selectZoneToggle = function (zone) {
-        if (!zone.flag) {
-            zone.flag = true;
-            self.selectedZones.push(zone);
-        } else {
-            zone.flag = false;
-            let index = self.selectedZones.indexOf(zone);
-            self.selectedZones.splice(index, 1);
+    this.moveZoneUp = function () {
+        let zoneToMove;
+        let selectedZones = getSelectedZones();
+        let zoneArr = angular.copy(self.zones);
+        zoneArr.sort(sortZoneArrByDepth);
+        console.log('selectedZone.length', selectedZones.length);
+        for (let i = 0; i < selectedZones.length; i++) {
+            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZones[i].idZone }));
+            if (index == 0) {
+                toastr.error('Can not move zone ' + selectedZones[i].name + ' up.');
+            } else {
+                let indexToSwap = getNearestUnselectedZoneIndex(zoneArr[index], true);
+                console.log('indexToSwap', indexToSwap, index);
+                swapTwoZones(zoneArr[index], zoneArr[indexToSwap]);
+                let realZone = self.zones.find(function (z) { return z.idZone == selectedZones[i].idZone });
+                realZone.flag = true;
+            }
+
         }
+    }
+    this.moveZoneDown = function () {
+        let zoneToMove;
+        let selectedZones = getSelectedZones();
+        let zoneArr = angular.copy(self.zones);
+        zoneArr.sort(sortZoneArrByDepth);
+        console.log('selectedZone.length', selectedZones.length);
+        for (let i = selectedZones.length - 1; i >= 0; i--) {
+            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZones[i].idZone }));
+            if (index == zoneArr.length - 1) {
+                toastr.error('Can not move zone ' + selectedZones[i].name + ' down.');
+            } else {
+                let indexToSwap = getNearestUnselectedZoneIndex(zoneArr[index], false);
+                console.log('indexToSwap', indexToSwap, index);
+                swapTwoZones(zoneArr[index], zoneArr[indexToSwap]);
+                let realZone = self.zones.find(function (z) { return z.idZone == selectedZones[i].idZone });
+                realZone.flag = true;
+            }
+
+        }
+    }
+    this.swapTwoZones = function () {
+        let selectedZones = getSelectedZones();
+        let zone1 = selectedZones[0];
+        let zone2 = selectedZones[1];
+        let zoneArr = angular.copy(self.zones);
+        zoneArr.sort(sortZoneArrByDepth);
+        let z1 = zoneArr.find(function (z) { return zone1.idZone == z.idZone; });
+        let z2 = zoneArr.find(function (z) { return z.idZone == zone2.idZone; });
+        swapTwoZones(z1, z2);
+        zone1.flag = true;
+        zone2.flag = true;
+    }
+    function swapTwoZones(zone1, zone2) {
+        console.log('swap', zone1, zone2);
+        let start = angular.copy(zone1.startDepth);
+        let end = angular.copy(zone1.endDepth);
+        zone1.startDepth = angular.copy(zone2.startDepth);
+        zone1.endDepth = angular.copy(zone2.endDepth);
+        zone2.startDepth = start;
+        zone2.endDepth = end;
+        $timeout(function () {
+            console.log(zone1.startDepth, zone1.endDepth, zone2.startDepth, zone2.endDepth);
+            console.log(zone1, zone2);
+
+            wiApiService.editZone(zone1, function (rs) {
+                console.log('edit success', rs);
+                let realZone1 = self.zones.find(function (z) { return z.idZone == zone1.idZone });
+                realZone1.orderDepth = zone1.startDepth;
+                realZone1.startDepth = zone1.startDepth;
+                realZone1.endDepth = zone1.endDepth;
+
+            });
+            wiApiService.editZone(zone2, function (rs) {
+                let realZone2 = self.zones.find(function (z) { return z.idZone == zone2.idZone });
+                console.log('edit success', rs);
+                zone2.done = true;
+                realZone2.orderDepth = zone2.startDepth;
+                realZone2.startDepth = zone2.startDepth;
+                realZone2.endDepth = zone2.endDepth;
+            });
+        })
+    }
+    this.selectZoneToggle = function (zone) {
+        zone.flag = !zone.flag;
     }
 
     this.unselectAllNodes = unselectAllNodes;
@@ -376,23 +445,24 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     };
 
     this.showCreateButtonContextMenuFunction = function ($event, $index) {
-        if (self.selectedZones.length == 0 && self.zones[0]) {
+        let selectedZones = getSelectedZones();
+        if (selectedZones.length == 0 && self.zones[0]) {
             self.zones[self.zones.length - 1].flag = true;
-            self.selectedZones.push(self.zones[self.zones.length - 1]);
+            selectedZones.push(self.zones[self.zones.length - 1]);
             var scroll = $('#zoneScroll');
             scroll.animate({ scrollTop: scroll.prop("scrollHeight") });
         }
 
-        if (self.selectedZones.length > 1) {
-            let lastSelectedZone = self.selectedZones[self.selectedZones.length - 1];
+        if (selectedZones.length > 1) {
+            let lastSelectedZone = selectedZones[selectedZones.length - 1];
             console.log('last selectedZone', lastSelectedZone);
-            for (zone of self.selectedZones) {
+            for (zone of selectedZones) {
                 zone.flag = false;
             }
             if (lastSelectedZone) {
-                self.selectedZones = [];
+                selectedZones = [];
                 lastSelectedZone.flag = true;
-                self.selectedZones.push(lastSelectedZone);
+                selectedZones.push(lastSelectedZone);
             }
         }
         let contextMenu = self.getCreateButtonCtxMenu(
@@ -426,10 +496,9 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
 
     this.createZone = function (isBelow, isAbove) {
         let depthObj;
-
-        let lastSelectedZone = self.selectedZones[self.selectedZones.length - 1];
+        let selectedZones = getSelectedZones();
+        let lastSelectedZone = selectedZones.length != 0 ? selectedZones[selectedZones.length - 1] : null;
         depthObj = getNewZoneDepth(lastSelectedZone, isBelow);
-        console.log('sss', depthObj);
         if (depthObj == -1) {
             if (isAbove) {
                 toastr.error('Can not add zone above.');
@@ -462,13 +531,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
 
     this.showDeleteButtonContextMenuFunction = function ($event, $index) {
+        let selectedZones = getSelectedZones();
         let contextMenu = self.getDeleteButtonCtxMenu(
             $index,
             this
         );
-        if (self.selectedZones.length == 0 && self.zones[0]) {
+        if (selectedZones.length == 0 && self.zones[0]) {
             self.zones[self.zones.length - 1].flag = true;
-            self.selectedZones.push(self.zones[self.zones.length - 1]);
+            selectedZones.push(self.zones[self.zones.length - 1]);
             var scroll = $('#zoneScroll');
             scroll.animate({ scrollTop: scroll.prop("scrollHeight") });
         }
@@ -605,9 +675,14 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     function getNewZoneDepth(selectedZone, isBelow) {
         let wellTopDepth = self.lastSelectedWell.properties.topDepth;
         let wellBottomDepth = self.lastSelectedWell.properties.bottomDepth;
+        if (!selectedZone) {
+            return {
+                startDepth: isBelow ? Number(wellBottomDepth) - 50 : Number(wellTopDepth),
+                endDepth: isBelow ? Number(wellBottomDepth) : Number(wellTopDepth) + 50
+            }
+        }
         let zoneArr = angular.copy(self.zones);
         zoneArr.sort(sortZoneArrByDepth);
-        console.log('zzz', self.zones, 'xxx', zoneArr);
         let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZone.idZone }));
         let free;
         if (isBelow) {
@@ -642,6 +717,37 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }
             }
         }
+    }
+    function getSelectedZones() {
+        let selectedZone = [];
+        for (zone of self.zones) {
+            if (zone.flag) {
+                selectedZone.push(zone);
+            }
+        }
+        return selectedZone;
+    }
+    this.getSelectedZones = getSelectedZones;
+
+    function getNearestUnselectedZoneIndex(zone, isAbove) {
+        console.log('get Nearest called');
+        let zoneArr = angular.copy(self.zones);
+        zoneArr.sort(sortZoneArrByDepth);
+        let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }))
+        if (isAbove) {
+            console.log('isAbove');
+            for (let i = index - 1; i >= 0; i++) {
+                console.log('flag', i, !zoneArr[i].flag);
+                if (!zoneArr[i].flag) return i;
+            }
+        } else {
+            console.log('!isAbove');
+            for (let i = index + 1; i < zoneArr.length - 1; i++) {
+                console.log('flag', i, !zoneArr[i].flag);
+                if (!zoneArr[i].flag) return i;
+            }
+        }
+        return;
     }
 
 }
