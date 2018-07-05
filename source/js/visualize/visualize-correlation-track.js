@@ -21,39 +21,48 @@ CorrelationTrack.prototype.init = function(baseElement) {
 CorrelationTrack.prototype.doPlot = function() {
     Track.prototype.doPlot.call(this);
 
-    if (this.leftTrack && this.rightTrack && this.leftTrack.viTrack.showZoneSet && this.rightTrack.viTrack.showZoneSet) {
-        if(this.leftTrack.zoneset && this.rightTrack.zoneset && this.leftTrack.zoneset.idZoneTemplate == this.rightTrack.idZoneTemplate) {
-            this.drawCorrelationZones(); 
-        }
-    }
+    // if (this.leftTrack && this.rightTrack 
+    //     && this.leftTrack.viTrack.idZoneSet && this.rightTrack.viTrack.idZoneSet) {
+    //     let leftZoneSet = this.leftTrack.getProperties().zone_set;
+    //     let rightZoneSet = this.rightTrack.getProperties().zone_set;
+    //     if(leftZoneSet && rightZoneSet) {
+    //         this.drawCorrelationZones(); 
+    //     } 
+    // } else {
+    //     this.removeAllCorrelationZones();
+    // }
+
 }
 
-CorrelationTrack.prototype.drawCorrelationZones = function() {
-    let leftZones = this.leftTrack.zoneset.zones; 
-    let rightZones = this.rightTrack.zoneset.zones;
-    if (!leftZone || !rightZone || !leftZone.length || !rightZone.length) return;
+CorrelationTrack.prototype.drawCorrelationZones = function () {
+    let leftZones = this.leftTrack.getProperties().zone_set.zones; 
+    let rightZones = this.rightTrack.getProperties().zone_set.zones;
+    let leftViZones = this.leftTrack.viTrack.getZones();
+    if (!leftZones || !rightZones || !leftZones.length || !rightZones.length) return;
+    let self = this;
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
     let pointsList = [];
 
     leftZones.forEach((leftZone, leftIdx) => {
         let rightZone = rightZones[leftIdx];
-        if(!rightZone) return;
-        let minYLeft = transformY(leftZone.startDepth);
-        let maxYLeft = transformY(leftZone.endDepth);
-        let minYRight = transformY(rightZone.startDepth);
-        let maxYRight = transformY(rightZone.endDepth);
+        if(rightZone && leftZone.idZoneTemplate == rightZone.idZoneTemplate) {
+            let minYLeft = transformY(leftZone.startDepth);
+            let maxYLeft = transformY(leftZone.endDepth);
+            let minYRight = transformY(rightZone.startDepth);
+            let maxYRight = transformY(rightZone.endDepth);
 
-        let pointsGroup = [
-            {x: viewportX[0], y: minYLeft},
-            {x: viewportX[1], y: minYRight},
-            {x: viewportX[1], y: maxYRight},
-            {x: viewportX[0], y: maxYLeft},
-        ]
-        pointsList.push({
-            points: pointsGroup,
-            fill: 'black'
-        });
+            let pointsGroup = [
+                {x: viewportX[0], y: minYLeft},
+                {x: viewportX[1], y: minYRight},
+                {x: viewportX[1], y: maxYRight},
+                {x: viewportX[0], y: maxYLeft},
+            ]
+            pointsList.push({
+                points: pointsGroup,
+                fillStyle: leftViZones[leftIdx].rect.attr('fill')
+            });
+        }
     })
 
     let polygons = this.svgContainer.selectAll('polygon.vi-correlation-zone').data(pointsList);
@@ -62,10 +71,14 @@ CorrelationTrack.prototype.drawCorrelationZones = function() {
             .classed('vi-correlation-zone', true);
     polygons
         .attr('points', d => d.points.map(point => [point.x, point.y].join(',')).join(' '))
-        .attr('fill', d => fill);
+        .attr('fill', d => d.fillStyle);
     polygons
         .exit()
         .remove();
+}
+
+CorrelationTrack.prototype.removeAllCorrelationZones = function() {
+    this.svgContainer.selectAll('polygon.vi-correlation-zone').remove();
 }
 
 CorrelationTrack.prototype.setBackgroundColor = function(color) {

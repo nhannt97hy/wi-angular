@@ -175,10 +175,13 @@ const DELETE_SHADING = '/project/plot/track/shading/delete';
 const EDIT_SHADING = '/project/plot/track/shading/edit';
 const GET_SHADING = '/project/plot/track/shading/info';
 
-const CREATE_MARKER = '/project/plot/track/marker/new';
-const EDIT_MARKER = '/project/plot/track/marker/edit';
-const GET_MARKER = '/project/plot/track/marker/info';
-const DELETE_MARKER = '/project/plot/track/marker/delete';
+const CREATE_MARKER = '/project/well/marker-set/marker/new';
+const EDIT_MARKER = '/project/well/marker-set/marker/edit';
+const GET_MARKER = '/project/well/marker-set/marker/info';
+const DELETE_MARKER = '/project/well/marker-set/marker/delete';
+
+const LIST_MARKER_SET = '/project/well/marker-set/list';
+const GET_MARKER_SET = '/project/well/marker-set/info';
 
 const CREATE_ANNOTATION = '/project/plot/track/annotation/new';
 const EDIT_ANNOTATION = '/project/plot/track/annotation/edit';
@@ -2104,4 +2107,12 @@ Service.prototype.listMarkerTemplate = function (payload, callback) {
 Service.prototype.createMarkerSet = function (data, callback) {
     let self = this;
     this.post(CREATE_MARKER_SET, data, callback);
+}
+Service.prototype.listMarkerSet = function (idWell, callback) {
+    let self = this;
+    this.post(LIST_MARKER_SET, { idWell: idWell }, callback);
+}
+Service.prototype.getMarkerSet = function (idMarkerSet, callback) {
+    let self = this;
+    this.post(GET_MARKER_SET, { idMarkerSet: idMarkerSet }, callback);
 }

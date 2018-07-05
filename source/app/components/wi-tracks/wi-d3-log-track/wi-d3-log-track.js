@@ -238,9 +238,12 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         props.zoneSet = props.idZoneSet ? 
                         utils.getModel('zoneset', props.idZoneSet).properties : 
                         {idZoneSet: null, name: null};
+        props.markerSet = props.idMarkerSet ? 
+                        utils.getModel('markerset', props.idMarkerSet).properties : 
+                        {idMarkerSet: null, name: null};
         props.width = utils.pixelToInch(props.width);
         wiComponentService.emit("update-properties", {
-            type: 'logtrack', 
+            type: 'd3-logtrack', 
             props: props
         });
     }
@@ -253,10 +256,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
 
         let trackProps = viTrack.getProperties();
         let palettes = wiComponentService.getComponent(wiComponentService.PALETTES);
+
+        // update track without track id (anonymous track - for preview purpose)
         if(!trackProps.idTrack) {
-            // TODO something without track id (anonymous track - for preview purpose)
-            if(self.zoneset) {
-                self.addZoneSetToTrack(self.zoneset);
+            if (self.getProperties().zone_set) {
+                self.addZoneSetToTrack(self.getProperties().zone_set); 
             }
             if (self.getProperties().lines) {
                 let promises = [];
@@ -270,6 +274,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             self.isIdle = true;
             return;
         }
+
+        // update whole track by synchronizing with server
         wiApiService.infoTrack(trackProps.idTrack, function (logTrack) {
             // viTrack.getMarkers().forEach(viMarker => {
             //     let marker = logTrack.markers.find(marker => marker.idMarker == viMarker.id);
@@ -283,6 +289,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             //         self.addMarkerToTrack(viTrack, marker);
             //     } // add if marker not in viTrack
             // });
+
+            // update annotations
             viTrack.getAnnotations().forEach(viAnno => {
                 let anno = logTrack.annotations.find(anno => anno.idAnnotation == viAnno.id);
                 viTrack.removeDrawing(viAnno);
@@ -297,6 +305,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
 
             let promises = [];
+            // update lines
             viTrack.getCurves().forEach(viCurve => {
                 let line = logTrack.lines.find(line => line.idLine == viCurve.id);
                 viTrack.removeDrawing(viCurve);
@@ -317,12 +326,20 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
 
             promises.push(new Promise(resolve => {
-                if(logTrack.zone_set) {
+                // update zoneset
+                if(logTrack.idZoneSet && logTrack.zone_set) {
                     self.addZoneSetToTrack(logTrack.zone_set); 
-                }
-                if(logTrack.marker_set) {
+                } else {
+                    viTrack.removeAllZones(); 
+                }                
+
+                // update markerset
+                if(logTrack.idMarkerSet && logTrack.marker_set) {
                     self.addMarkerSetToTrack(logTrack.marker_set); 
+                } else {
+                    viTrack.removeAllMarkers(); 
                 }
+
                 resolve();
             }))
             Promise.all(promises)
@@ -458,18 +475,18 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         return marker;
     }
-    this.addMarkerSetToTrack = function (markerSetConfig) {
+    this.addMarkerSetToTrack = function (markerSet) {
         this.viTrack.removeAllMarkers();
-        markerSetConfig.markers.forEach(function (markerConfig) {
-            if (markerConfig.showOnTrack) {
-                self.addMarkerToTrack(markerConfig); 
+        markerSet.markers.forEach(function (marker) {
+            if (marker) {
+                self.addMarkerToTrack(marker); 
             }
         })
     }
     this.addZoneSetToTrack = function (zoneset) {
+        self.properties.zone_set = zoneset;
         self.viTrack.removeAllZones();
         for(let zone of zoneset.zones) {
-            console.log('zone config: ', zone);
             if(zone.showOnTrack) {
                 // zone.properties.params = zone.children ? zone.children.map(c => c.data).filter(p => typeof(p.value) == 'number') : [];
                 let viZone = self.viTrack.addZone(zone);

@@ -314,11 +314,7 @@ function markerToTreeConfig(marker, options = {}) {
 function markerSetToTreeConfig(markerSet, options = {}) {
     var markerSetModel = new Object();
     markerSetModel.id = markerSet.idMarkerSet;
-    markerSetModel.properties = {
-        idWell: markerSet.idWell,
-        idMarkerSet: markerSet.idMarkerSet,
-        name: markerSet.name,
-    };
+    markerSetModel.properties = markerSet;
     markerSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',
@@ -3377,10 +3373,26 @@ exports.onChangeHandlers =  {
             });
         })
     },
-    'logtrack' : function(props) {
-        __GLOBAL.wiApiService.editTrack(props, function (res) {
+    'd3-logtrack' : function(props) {
+        let props_bk = angular.copy(props);
+        delete props_bk.wellProps;
+        __GLOBAL.wiApiService.editTrack(props_bk, function (res) {
             __GLOBAL.wiComponentService.emit('update-logtrack-' + res.idTrack);
             console.log("update longtrack")
+        })
+    },
+    'zoneset' : function(props) {
+        __GLOBAL.wiApiService.editZoneSet(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update zoneset");
+            });
+        })
+    },
+    'zone' : function(props) {
+        __GLOBAL.wiApiService.editZone(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update zone");
+            });
         })
     }
 }

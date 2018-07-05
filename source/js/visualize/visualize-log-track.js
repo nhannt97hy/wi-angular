@@ -94,7 +94,8 @@ LogTrack.prototype.getProperties = function() {
         displayType: Utils.capitalize(this.scale),
         labelFormat: this.labelFormat,
         zoomFactor: this.zoomFactor,
-        idZoneSet: this.idZoneSet
+        idZoneSet: this.idZoneSet,
+        idMarkerSet: this.idMarkerSet
     }
 }
 
@@ -116,7 +117,8 @@ LogTrack.prototype.setProperties = function(props) {
     Utils.setIfNotNull(this, 'scale', Utils.lowercase(props.displayType));
     Utils.setIfNotUndefined(this, 'labelFormat', props.labelFormat);
     Utils.setIfNotNull(this, 'zoomFactor', props.zoomFactor);
-    Utils.setIfNotNull(this, 'idZoneSet', props.idZoneSet);
+    Utils.setIfNotUndefined(this, 'idZoneSet', props.idZoneSet);
+    Utils.setIfNotUndefined(this, 'idMarkerSet', props.idMarkerSet);
 }
 
 LogTrack.prototype.setMode = function(newMode) {
