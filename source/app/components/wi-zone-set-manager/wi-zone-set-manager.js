@@ -315,7 +315,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 done();
             } else {
                 let indexToSwap = getNearestUnselectedZoneIndex(zoneArr[index], true);
-                console.log('indexToSwap', indexToSwap, index);
                 if (indexToSwap >= 0) {
                     swapTwoZones(zoneArr[index], zoneArr[indexToSwap], function () {
                         let realZone = self.zones.find(function (z) { return z.idZone == zone.idZone });
@@ -340,7 +339,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 done();
             } else {
                 let indexToSwap = getNearestUnselectedZoneIndex(zoneArr[index], false);
-                console.log('indexToSwap', indexToSwap, index);
                 if (indexToSwap >= 0) {
                     swapTwoZones(zoneArr[index], zoneArr[indexToSwap], function () {
                         let realZone = self.zones.find(function (z) { return z.idZone == zone.idZone });
@@ -359,20 +357,38 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let zone2 = selectedZones[1];
         let zoneArr = angular.copy(self.zones);
         zoneArr.sort(sortZoneArrByDepth);
-        let z1 = zoneArr.find(function (z) { return zone1.idZone == z.idZone; });
-        let z2 = zoneArr.find(function (z) { return z.idZone == zone2.idZone; });
-        swapTwoZones(z1, z2);
-        zone1.flag = true;
-        zone2.flag = true;
+        if (zone1.endDepth - zone1.startDepth != zone2.endDepth - zone2.startDepth) {
+            console.log((zone1.endDepth - zone1.startDepth).toFixed(4), (zone2.endDepth - zone2.startDepth).toFixed(4), zone1.endDepth, zone1.startDepth, zone2.endDepth, zone2.startDepth)
+            toastr.error('Can not swap this zones.');
+        } else {
+            let z1 = zoneArr.find(function (z) { return zone1.idZone == z.idZone; });
+            let z2 = zoneArr.find(function (z) { return z.idZone == zone2.idZone; });
+            swapTwoZones(z1, z2);
+            zone1.flag = true;
+            zone2.flag = true;
+        }
     }
     function swapTwoZones(zone1, zone2, callback) {
-        let start = angular.copy(zone1.startDepth);
-        let end = angular.copy(zone1.endDepth);
         let callbackCalled = false;
-        zone1.startDepth = angular.copy(zone2.startDepth);
-        zone1.endDepth = angular.copy(zone2.endDepth);
-        zone2.startDepth = start;
-        zone2.endDepth = end;
+        if (zone1.startDepth == zone2.endDepth || zone1.endDepth == zone2.startDepth) {
+            let deep1 = zone1.endDepth - zone1.startDepth;
+            let deep2 = zone2.endDepth - zone2.startDepth;
+            let start1 = zone1.startDepth;
+            let start2 = zone2.startDepth;
+
+            zone1.startDepth = start1 < start2 ? start1 + deep2 : start2;
+            zone1.endDepth = start1 < start2 ? start1 + deep2 + deep1 : start2 + deep1;
+            zone2.startDepth = start1 < start2 ? start1 : start2 + deep1;
+            zone2.endDepth = start1 < start2 ? start1 + deep2 : start2 + deep1 + deep2;
+        } else {
+            let start1 = zone1.startDepth;
+            let end1 = zone1.endDepth;
+            zone1.startDepth = zone2.startDepth;
+            zone1.endDepth = zone2.endDepth;
+            zone2.startDepth = start1;
+            zone2.endDepth = end1;
+        }
+
         $timeout(function () {
             let realZone1 = self.zones.find(function (z) { return z.idZone == zone1.idZone });
             realZone1.orderDepth = zone1.startDepth;
@@ -382,8 +398,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             realZone2.orderDepth = zone2.startDepth;
             realZone2.startDepth = zone2.startDepth;
             realZone2.endDepth = zone2.endDepth;
+
             wiApiService.editZone(zone1, function (rs) {
-                console.log('edit success', rs);
                 zone1.done = true;
                 if (zone1.done && zone2.done && !callbackCalled && callback) {
                     callbackCalled = true;
@@ -391,7 +407,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 }
             });
             wiApiService.editZone(zone2, function (rs) {
-                console.log('edit success', rs);
                 zone2.done = true;
                 if (zone1.done && zone2.done && !callbackCalled && callback) {
                     callbackCalled = true;
@@ -400,8 +415,22 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
         })
     }
-    this.selectZoneToggle = function (zone) {
-        zone.flag = !zone.flag;
+    this.selectZoneToggle = function (zone, $event) {
+        if ($event.shiftKey && self.lastSelectedZone) {
+            let zoneArr = angular.copy(self.zones);
+            zoneArr.sort(sortZoneArrByDepth);
+            const zoneIndex = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == self.lastSelectedZone.idZone }));
+            const currIndex = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
+            let minIndex = Math.min(zoneIndex, currIndex);
+            let maxIndex = Math.max(zoneIndex, currIndex);
+            for (let i = minIndex; i <= maxIndex; i++) {
+                let index = self.zones.indexOf(self.zones.find(function (z) { return z.idZone == zoneArr[i].idZone }));
+                self.zones[index].flag = zoneArr[zoneIndex].flag;
+            }
+        } else {
+            zone.flag = !zone.flag;
+            self.lastSelectedZone = zone;
+        }
     }
 
     this.unselectAllNodes = unselectAllNodes;
@@ -752,7 +781,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             }
         } else {
             console.log('!isAbove');
-            for (let i = index + 1; i < zoneArr.length - 1; i++) {
+            for (let i = index + 1; i <= zoneArr.length - 1; i++) {
                 if (!zoneArr[i].flag) return i;
             }
         }
