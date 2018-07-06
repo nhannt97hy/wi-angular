@@ -16,7 +16,7 @@ module.exports = function (ModalService, callback) {
             close(null);
         };
         this.getTemplateList = function (wiItemDropdownCtrl) {
-            wiApiService.listMarkerTemplate({}, function (tmps) {
+            wiApiService.listMarkerTemplate(function (tmps) {
                 tmps.unshift({template: ''});
                 let uniqTmps = _.uniq(tmps, 'template');
                 wiItemDropdownCtrl.items = uniqTmps.map(function (tmp) {
@@ -31,8 +31,7 @@ module.exports = function (ModalService, callback) {
         };
         this.templateChanged = function (templateProp) {
             console.log(templateProp);
-            self.template.idMarkerTemplate = templateProp.idMarkerTemplate;
-            self.template.template = templateProp.template;
+            self.template = templateProp.template;
             console.log($scope.name);
         }
     }

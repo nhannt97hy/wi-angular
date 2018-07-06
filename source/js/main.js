@@ -57,6 +57,8 @@ let wiPlot = require('./wi-plot');
 let wiZoneTemplateManager = require('./wi-zone-template-manager');
 let wiZoneManager = require('./wi-zone-manager');
 let wiZoneSetManager = require('./wi-zone-set-manager');
+let wiMarkerManager = require('./wi-marker-manager');
+let wiMarkerTemplateManager = require('./wi-marker-template-manager');
 let wiParameterSet = require('./wi-parameter-set');
 
 let wiInventory = require('./wi-inventory');
@@ -201,6 +203,7 @@ let app = angular.module('wiapp',
         wiWFMachineLearning.name,
         wiNeuralNetwork.name,
         wiPlot.name,
+        wiProps.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -235,6 +238,8 @@ let app = angular.module('wiapp',
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
+        wiMarkerManager.name,
+        wiMarkerTemplateManager.name,
         wiParameterSet.name,
 
         wiCanvasRect.name,
@@ -321,7 +326,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     // config explorer block - treeview
     $scope.myTreeviewConfig = {};
     // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
-    
+
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
     wiComponentService.on('update-properties', function(data){
@@ -347,9 +352,9 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
             background: "#f00"
         }
     };
-    
+
     // $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES).well;
-    
+
 
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);

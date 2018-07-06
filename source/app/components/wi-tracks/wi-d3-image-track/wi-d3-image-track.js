@@ -82,6 +82,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             }
         });
     }
+    this.openPropertiesWindow = function () {
+        console.log("openPropertiesWindow");
+    }
     this.addImageZoneToTrack = function (track, config) {
         if (!track || !track.addImageZone) return;
         let imgzone = track.addImageZone(config, track);

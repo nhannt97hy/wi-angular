@@ -1238,7 +1238,7 @@ function updateDustbinConfig(dustbin) {
 
 exports.updateDustbinConfig = updateDustbinConfig;
 
-function visit(node, callback, options) {
+function visit(node, callback, options = {}) {
     if (options && options.found) return;
     if (node.data && node.data.deleted) return;
     if (options && options.path && options.path.push)
@@ -1248,6 +1248,10 @@ function visit(node, callback, options) {
     }
     if (node.children) {
         node.children.forEach(function (child) {
+            visit(child, callback, options);
+        });
+    } else if (Array.isArray(node)) {
+        node.forEach(function (child) {
             visit(child, callback, options);
         });
     }
@@ -3418,8 +3422,8 @@ exports.onChangeHandlers =  {
         props_bk.depthType = props.depthType.model;
         props_bk.unitType = props.unitType.model;
         __GLOBAL.wiApiService.editDepthTrack(props_bk, function (res) {
-            /*__GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis);
-            console.log("update depthtrack")*/
+            __GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis, res);
+            console.log("update depthtrack")
         })
     },
 }

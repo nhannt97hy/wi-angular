@@ -4,13 +4,14 @@ module.exports = function (ModalService, promptConfig, callback) {
     function ModalController($scope, close) {
         const self = this;
         this.title = promptConfig.title;
+        this.inputs = promptConfig.inputs;
         this.inputName = promptConfig.inputName;
         this.input = promptConfig.input;
         // type: [select, text]
-        this.type = promptConfig.type ? promptConfig.type : 'text';
+        this.type = promptConfig.type;
         this.options = promptConfig.options;
         this.onOkButtonClicked = function () {
-            close(self.input);
+            close(self.input || self.inputs);
         }
         this.onCancelButtonClicked = function () {
             close(null);
