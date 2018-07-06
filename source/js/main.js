@@ -201,6 +201,7 @@ let app = angular.module('wiapp',
         wiWFMachineLearning.name,
         wiNeuralNetwork.name,
         wiPlot.name,
+        wiProps.name,
 
         wiComboview.name,
         wiD3Comboview.name,
@@ -333,22 +334,6 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
         }, 200);
     })
     // $scope.myPropertiesConfig = {};
-
-    $scope.sampleData={
-        bottomDepth: 1000,
-        topDepth: 2000,
-        step: 1,
-        name: "Well1",
-        unit: "US",
-        background: "#000",
-        pattern: {
-            name: "none",
-            foreground: "#00f",
-            background: "#f00"
-        }
-    };
-    
-    // $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES).well;
     
 
     /* ========== IMPORTANT! ================== */

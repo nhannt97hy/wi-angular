@@ -3418,8 +3418,8 @@ exports.onChangeHandlers =  {
         props_bk.depthType = props.depthType.model;
         props_bk.unitType = props.unitType.model;
         __GLOBAL.wiApiService.editDepthTrack(props_bk, function (res) {
-            /*__GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis);
-            console.log("update depthtrack")*/
+            __GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis, res);
+            console.log("update depthtrack")
         })
     },
 }
