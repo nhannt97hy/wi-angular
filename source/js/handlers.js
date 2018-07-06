@@ -134,7 +134,30 @@ exports.ZonesetManagerButtonClicked = function() {
         }
     })
 }
-exports.ParameterSetsButtonClicked = function() {
+
+exports.MarkerManagerButtonClicked = function () {
+    const wiComponentService = this.wiComponentService;
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    layoutManager.putTabRight({
+        id: 'marker-set',
+        title: 'Marker Manager',
+        tabIcon: 'marker-properties-16x16',
+        componentState: {
+            html: `
+                <wi-tabset>
+                    <wi-tab heading="Marker Sets">
+                        <wi-marker-manager name="wiMarkerManager"></wi-marker-manager>
+                    </wi-tab>
+                    <wi-tab heading="Templates">
+                        <wi-marker-template-manager name="wiMarkerTemplateManager"></wi-marker-template-manager>
+                    </wi-tab>
+                </wi-tabset>
+            `
+        }
+    })
+}
+
+exports.ParameterManagerButtonClicked = function() {
     let self = this;
     let wiComponentService = this.wiComponentService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -149,6 +172,7 @@ exports.ParameterSetsButtonClicked = function() {
         }
     })
 }
+
 exports.ProjectButtonClicked = function () {
     console.log('ProjectButton is clicked');
     let wiComponentService = this.wiComponentService;

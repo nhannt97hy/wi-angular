@@ -1238,7 +1238,7 @@ function updateDustbinConfig(dustbin) {
 
 exports.updateDustbinConfig = updateDustbinConfig;
 
-function visit(node, callback, options) {
+function visit(node, callback, options = {}) {
     if (options && options.found) return;
     if (node.data && node.data.deleted) return;
     if (options && options.path && options.path.push)
@@ -1248,6 +1248,10 @@ function visit(node, callback, options) {
     }
     if (node.children) {
         node.children.forEach(function (child) {
+            visit(child, callback, options);
+        });
+    } else if (Array.isArray(node)) {
+        node.forEach(function (child) {
             visit(child, callback, options);
         });
     }

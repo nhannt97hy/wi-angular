@@ -1,0 +1,143 @@
+wi-marker-manager, wi-marker-template-manager {
+  display: flex;
+  width: 100%;
+  height: calc(~'100% - 2em');
+  padding: 1em;
+  > div {
+    background-color: #fff;
+    height: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    position: relative;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    .heading {
+      display: flex;
+      align-items: center;
+      padding: 5px 15px;
+      border-radius: 5px 5px 0 0;
+      border-bottom: 1px solid #ccc;
+      background-color: #eee;
+      h5 {
+        display: inline-block;
+      }
+    }
+    .button-area {
+      .btn {
+        color: blue;
+        &[disabled] {
+          color: lightgrey;
+        }
+      }
+    }
+    .content-area {
+      height: calc(~'100% - 46px');
+      overflow-y: auto;
+    }
+  }
+  .left-side {
+    flex: 1;
+    margin-right: 1em;
+    .heading {
+      .button-area {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+      }
+    }
+    .search-box {
+      background-color: white;
+      display: flex;
+      border-bottom: 1px solid #ccc;
+      flex-basis: 28px;
+      height: 33px;
+      .icon {
+        font-size: 16px;
+        line-height: 28px;
+        z-index: 1;
+        color: #aaa;
+        float: left;
+        margin: 0 5px;
+      }
+      .input {
+        flex: 1;
+        border: none;
+      }
+    }
+    .content-area {
+      .list {
+        .item {
+          padding: 0.7em 1em;
+          font-size: 1.2em;
+          cursor: pointer;
+          height: 45px;
+          &.active,
+          &.active:hover {
+            background-color: #eee;
+            font-weight: bold;
+          }
+          &:hover {
+            background-color: #f4f4f4;
+          }
+        }
+      }
+    }
+  }
+
+  .right-side {
+    flex: 3;
+    .heading {
+      display: flex;
+      .order {
+        display: flex;
+        .form-control {
+          flex: 1;
+        }
+      }
+      .search-box {
+        flex: 5;
+        position: relative;
+        margin: 0 1em;
+        width: 100%;
+        .icon {
+          position: absolute;
+          line-height: 34px;
+          left: 0.5em;
+          font-size: 16px;
+          color: #aaa;
+        }
+        .form-control {
+          text-indent: 1em;
+        }
+      }
+      .button-area {
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+      }
+    }
+    .content-area {
+      table {
+        th,
+        td {
+          text-align: center;
+        }
+        input[type='text'], input[type='number'] {
+          height: 28px;
+        }
+        .ui-select-match .ui-select-toggle {
+          height: 28px;
+        }
+        .selected {
+          background-color: #eee;
+          .check {
+            color: black;
+          }
+        }
+        .check {
+          color: #ccc;
+          line-height: 25px;
+        }
+      }
+    }
+  }
+}

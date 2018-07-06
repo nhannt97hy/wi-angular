@@ -478,21 +478,13 @@ exports.createMarkerSet = function() {
         idWell = selectedNode.properties.idWell;
     }
     dialogUtils.newMarkerSetDialog(this.ModalService, function (data) {
-        console.log("new marker set", data);
-        if (data.template.idMarkerTemplate) {
-            wiApiService.createMarkerSet({
-                name: data.name,
-                template: data.template.template,
-                idWell: idWell
-            }, function (res) {
-                utils.refreshProjectState();
-            });
-        } else {
-            wiApiService.createMarkerSet({name: data.name, idWell: idWell}, function (res) {
-                utils.refreshProjectState();
-            });
-        }
-
+        wiApiService.createMarkerSet({
+            name: data.name,
+            template: data.template,
+            idWell: idWell
+        }, function (res) {
+            utils.refreshProjectState();
+        });
     });
 };
 exports.ConvertButtonClicked = function () {
