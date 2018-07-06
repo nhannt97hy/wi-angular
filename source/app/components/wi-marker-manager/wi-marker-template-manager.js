@@ -36,7 +36,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.selectMst = function (mstName) {
         if (mstName && this.markerSetTemplates) {
             this.selectedMstName = mstName;
-            this.selectedMst = this.markerSetTemplates[mstName];
+            this.selectedMst = this.markerSetTemplates[mstName].map(mt => Object.assign(mt, { lineStyle: eval(mt.lineStyle) }));
         }
     }
     this.createTemplate = function () {

@@ -8,7 +8,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     const idProject = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED).idProject;
     let refreshMarkerSets = false;
     this.treeConfig = [];
-    this.selectedMarkerSet = [];
 
     this.$onInit = function () {
         wiComponentService.putComponent(self.name, self);
@@ -61,7 +60,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         this.selectedIdMarkerSet = idMarkerSet;
         wiApiService.getMarkerSet(idMarkerSet, (markerSet, err) => {
             if (err) return;
-            if (self.selectedMarkerSet.length && self.selectedMarkerSet[0].idMarkerSet != markerSet.idMarkerSet) self.selectedMarkerSet.length = 0;
+            if (_.get(self.selectedMarkerSet, '0, idMarkerSet') !== markerSet.idMarkerSet) self.selectedMarkerSet = [];
             const newMarkers = self.selectedMarkerSet.filter(m => {
                 m.flag = false;
                 return m.new;
