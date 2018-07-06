@@ -38,10 +38,10 @@
             <label title="Apply changes" class="btn" ng-disabled="!$ctrl.hasChanges" ng-click="$ctrl.saveChanges()">
                 <i class="ti-check"></i>
             </label>
-            <label title="Delete selected templates" class="btn" ng-click="$ctrl.deleteSelectedMarkers()" ng-disabled="$ctrl.getSelectedmarkers().length === 0">
+            <label title="Delete selected templates" class="btn" ng-click="$ctrl.deleteSelectedMarkers()" ng-disabled="!$ctrl.getSelectedMarkers().length">
                 <i class="ti-close"></i>
             </label>
-            <label title="Create new template" class="btn" ng-click="$ctrl.addMarker()" ng-disabled="$ctrl.selectedMarkerSet.length && $ctrl.getSelectedMarkers().length !== 1">
+            <label title="Create new template" class="btn" ng-click="$ctrl.addMarker()" ng-disabled="!$ctrl.selectedMarkerSet || $ctrl.selectedMarkerSet.length && $ctrl.getSelectedMarkers().length !== 1">
                 <i class="ti-plus"></i>
             </label>
             <label title="Refresh templates list" class="btn" ng-click="$ctrl.selectMarkerSet($ctrl.selectedIdMarkerSet)" ng-disabled="!$ctrl.selectedMarkerSet">

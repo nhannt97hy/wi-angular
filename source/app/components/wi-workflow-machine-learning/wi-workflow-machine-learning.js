@@ -31,7 +31,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     const PREDICT_STEP_NAME = 'Predict';
     ////////////////////////////////////////
 
-    const LINEAR_REGRESSION_PARAMS = [];
+    const LINEAR_REGRESSION_PARAMS = [{
+        name: 'degree',
+        type: 'number',
+        value: 2,
+        min: 1
+    }];
 
     const HUBER_REGRESSOR_PARAMS = [{
         name: 'max_iter',
@@ -49,6 +54,11 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }];
 
     const LASSO_PARAMS = [{
+        name: 'degree',
+        type: 'number',
+        value: 2,
+        min: 1
+    }, {
         name: 'max_iter',
         type: 'number',
         value: 1000,
@@ -57,12 +67,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }, {
         name: "alpha",
         type: 'number',
-        //value: 0.1,
-        //step: 0.1
         value: 0.0001,
         step: 0.0001,
         min: 0.0001,
         max: 1
+    }, {
+        name: "tol",
+        type: 'number',
+        value: 1,
+        step: 0.1,
+        min: 0
     }];
 
     const DECISION_TREE_PARAMS = [{
@@ -397,23 +411,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }];
 
     const NEURAL_NET_CLASSIFIER = [{
-        name: 'activation',
-        type: 'select',
-        value: {
-            name: "sigmoid",
-            value: 1
-        },
-        choices: [{
-            name: "sigmoid",
-            value: 1
-        },{
-            name: "tanh",
-            value: 2
-        },{
-            name: "relu",
-            value: 3
-        }]
-    },{
         name: 'algorithmn',
         type: 'select',
         choices: [{
@@ -427,7 +424,71 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: 'backprop',
             value: 'backprop'
         }
-    },{
+    }, {
+        name: 'Neuron Network Structure',
+        type: 'nnconfig',
+        value: {
+            nLayer: 3,
+            layerConfig: [{
+                name: "layer 0",
+                value: 10
+            }, {
+                name: "layer 1",
+                value: 20
+            }, {
+                name: "layer 2",
+                value: 10
+            }]
+        }
+    }];
+    this.click = function(a) {
+        console.log(a);
+    }
+    // const CLASSIFIER_PREDECT_PARAMS = [{
+    //     name: 'preprocess',
+    //     type: 'select',
+    //     value: {
+    //         name: "false",
+    //         value: false
+    //     },
+    //     choices: [{
+    //         name: "false",
+    //         value: false
+    //     }, {
+    //         name: "true",
+    //         value: true
+    //     }]
+    // }, {
+    //     name: 'threshold',
+    //     type: 'number',
+    //     value: 0.8,
+    //     step: 0.1,
+    //     min: 0,
+    //     max: 1
+    // }]
+    // const CLASSIFIER_VERIFY_PARAMS = [{
+    //     name: 'preprocess',
+    //     type: 'select',
+    //     value: {
+    //         name: "false",
+    //         value: false
+    //     },
+    //     choices: [{
+    //         name: "false",
+    //         value: false
+    //     }, {
+    //         name: "true",
+    //         value: true
+    //     }]
+    // }, {
+    //     name: 'threshold',
+    //     type: 'number',
+    //     value: 0.8,
+    //     step: 0.1,
+    //     min: 0,
+    //     max: 1
+    // }]
+    const NEURAL_NET_CLASSIFIER_ADV = [{
         name: 'batch_size',
         type: 'number',
         min: 0,
@@ -443,6 +504,26 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         min: 1,
         value: 10000
+    }, {
+        name: 'activation',
+        type: 'select',
+        value: {
+            name: "sigmoid",
+            value: 1
+        },
+        choices: [{
+            name: "elu",
+            value: 1
+        }, {
+            name: "sigmoid",
+            value: 3
+        },{
+            name: "tanh",
+            value: 4
+        },{
+            name: "relu",
+            value: 2
+        }]
     },{
         name: 'optimizer',
         type: 'select',
@@ -469,8 +550,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             value: 'nadam'
         }],
         value: {
-            name: 'adamax',
-            value: 'adamax'
+            name: 'nadam',
+            value: 'nadam'
         }
     },{
         name: 'warm_up',
@@ -483,8 +564,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             value: false
         }],
         value: {
-            name: 'true',  
-            value: true
+            name: 'false',  
+            value: false
         } 
     },{
         name: 'boosting_ops',
@@ -501,22 +582,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         name: 'population',
         type: 'number',
         min: 1,
-        value: 100
-    }, {
-        name: 'Neuron Network Structure',
-        type: 'nnconfig',
-        value: {
-            nLayer: 2,
-            layerConfig: [{
-                name: "layer 0",
-                value: 30
-            }, {
-                name: "layer 1",
-                value: 30
-            }]
-        }
-    }];
-
+        value: 50
+    }]
     this.regressionModelTypes = {
         name: 'model type',
         type: 'select',
@@ -589,7 +656,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         },{
             name: "NeuralNetClassifier",
             value: 5,
-            parameters: NEURAL_NET_CLASSIFIER
+            parameters: NEURAL_NET_CLASSIFIER,
+            parametersAdv: NEURAL_NET_CLASSIFIER_ADV
         }]
     }
     this.listModelType = {
@@ -651,7 +719,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         },{
             name: "NeuralNetClassifier",
             value: 14,
-            parameters: NEURAL_NET_CLASSIFIER
+            parameters: NEURAL_NET_CLASSIFIER,
+            parametersAdv: NEURAL_NET_CLASSIFIER_ADV
         }]
     };
 
@@ -908,6 +977,10 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             function getValueParam(name, modelType) {
                 let parameters = modelType.parameters;
                 let param = parameters.filter(function (param) { return param.name == name; });
+                if(!param.length && modelType.parametersAdv) {
+                    parameters = modelType.parametersAdv;
+                    param = parameters.filter(function (param) { return param.name == name; });
+                }
                 if (param.length) {
                     if (param[0].type == 'number') {
                         console.log(param[0].name, param[0].value);
@@ -940,6 +1013,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         params = {};
                     else {
                         params = {
+                            degree: getValueParam('degree', self.currentModelType),
                             max_iter: getValueParam('max_iter', self.currentModelType),
                             alpha: getValueParam('alpha', self.currentModelType),
                             max_features: getValueParam('max_features', self.currentModelType) == "None" ? null : getValueParam('max_features', self.currentModelType),
@@ -2624,7 +2698,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let payload = {
             idWell: idWell,
             name: plotName,
-            override: true
+            override: true,
+            idProject: self.idProject
         };
         wiApiService.post(wiApiService.CREATE_PLOT, payload, function (response, err) {
             if (err) return;
