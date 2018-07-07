@@ -153,6 +153,7 @@ let wiPatternService = require('./wi-pattern-service');
 
 
 let wiConditionNode = require('./wi-condition-node');
+let propertiesData = require('./configFile.json');
 
 let app = angular.module('wiapp',
     [
@@ -317,9 +318,9 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
     wiComponentService.putComponent(wiComponentService.COMBOVIEW_HANDLERS, comboviewHandlers);
-    $.getJSON( "./js/configFile.json", function(data) {
-        wiComponentService.putComponent(wiComponentService.LIST_CONFIG_PROPERTIES, data);
-    });
+    // $.getJSON( "./js/configFile.json", function(data) {
+    wiComponentService.putComponent(wiComponentService.LIST_CONFIG_PROPERTIES, propertiesData);
+    // });
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
@@ -465,10 +466,18 @@ function restoreProject($timeout, wiApiService, ModalService) {
             $timeout(function () {
                 wiApiService.getProjectInfo(lastProject.id, function (project, err) {
                     if (!err) {
-                        DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name + "</b>.</br>Do you want to open it?", function (ret) {
+                        let html = "The system recorded last time you are opening "
+                        + (lastProject.shared? "shared" : "")
+                        + " project <b>" + lastProject.name + "</b>"
+                        + (lastProject.owner ? ` owner by user <b>${lastProject.owner}</b>` : "")
+                        + ".</br>Do you want to open it?";
+                        DialogUtils.confirmDialog(ModalService, "Open Last Project", html, function (ret) {
                             if (ret) {
                                 wiApiService.getProject({
-                                    idProject: lastProject.id
+                                    idProject: lastProject.id,
+                                    name: lastProject.name,
+                                    owner: lastProject.owner,
+                                    shared: lastProject.shared
                                 }, function (projectData) {
                                     utils.projectOpen(projectData);
                                 });

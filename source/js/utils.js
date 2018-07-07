@@ -99,7 +99,7 @@ exports.projectOpen = function (projectData) {
     queryString += LProject.shared ? '&shared=' + LProject.shared : '';
     queryString += LProject.owner ? '&owner=' + LProject.owner : '';
     window.history.pushState(LProject, LProject.name, queryString);
-    document.title = LProject.name + " - Well Insight";
+    document.title = "Project " + LProject.name + " - I2G Cloud";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     putListFamily(function () {
