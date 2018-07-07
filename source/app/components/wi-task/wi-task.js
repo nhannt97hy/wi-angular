@@ -535,6 +535,18 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     }
     function property(attr){
         switch(attr){
+            case "Use":
+            if(self.visualizationMode == "Inputs"){
+                return {
+                    data: 'use',
+                    type: "dropdown",
+                    source: ['Yes', "No"]
+                }
+            }else {
+                return {
+                    data: "used"
+                }
+            }
             case "Well":
             return {
                 data: 'wellProps.name',
@@ -567,9 +579,11 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     }
     function initInputs(){
         if (!self.inputSettings) {
-            let header = ["Well", "Dataset"].concat(self.taskConfig.inputs.map(i => i.name));
+            let header = ["Use", "Well", "Dataset"].concat(self.taskConfig.inputs.map(i => i.name));
             self.inputSettings = {
+                data: self.taskConfig.inputData || [],
                 colHeaders: header,
+                rowHeaders: true,
                 manualColumnResize: true,
                 fixedColumnsLeft: 2,
                 contextMenu: {
@@ -580,8 +594,8 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                 let selected = dataCtrl.getSelected();
                                 let cols = new Set();
                                 selected.forEach(sel => {
-                                    let min = Math.min(sel[1], sel[3]);
-                                    let max = Math.max(sel[1], sel[3]);
+                                    let min = Math.min(sel[0], sel[2]);
+                                    let max = Math.max(sel[0], sel[2]);
                                     let i = min;
                                     while(i <= max){
                                         cols.add(i);
@@ -590,11 +604,16 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                 })
                                 let rm = Array.from(cols).sort((a, b) => b - a);
                                 rm.forEach(idx => {
-                                    idx != 0 && self.inputSettings[self.currentIndex].setting.columns.splice(idx, 1);
+                                    self.taskConfig.inputData.splice(idx, 1);
                                 })
                                 dataCtrl.updateSettings(
-                                    self.inputSettings
+                                    {data: self.taskConfig.inputData}
                                 );
+                            },
+                            disabled: function(){
+                                let selected = dataCtrl.getSelected();
+                                if(!selected) return true;
+                                return false;
                             }
                         },
                         hsep1: "---------",
@@ -613,7 +632,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                     if(col > 1){
                         let r = self.taskConfig.inputData[row] || {};
                         let inputs = r.inputs || [];
-                        let src = (inputs[col - 2] || {}).choices;
+                        let src = (inputs[col - 3] || {}).choices;
                         if(src){
                             cellProperties.source = src;
                             cellProperties.type = 'dropdown';
@@ -631,10 +650,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                     rows: false,
                     columns: true,
                     onlyTrimmed: true
-                }
+                },
+                dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2','filter_by_value', 'filter_action_bar'],
+                filters: true,
+                columnSorting: true,
+                sortIndicator: true
             };
         }
-        self.inputSettings.data = self.taskConfig.inputData || [];
+        // self.inputSettings.data = self.taskConfig.inputData || [];
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
                 inputDataTable,
@@ -811,7 +834,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                     const idTask = taskElement.businessObject.get('idTask');
                                     wiApiService.getTask(idTask, (task) => {
                                         const taskConfig = task.content;
-                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset && i.data.unused == false)) prevTaskCurves.push(...taskConfig.outputs);
+                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset && i.use == 'Yes')) prevTaskCurves.push(...taskConfig.outputs);
                                         next();
                                     });
                                 }, (err, result) => {
@@ -834,6 +857,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                         }, {});
 
                         let data = {
+                            use: 'Yes',
                             idDataset: idDataset,
                             wellProps: wellProps,
                             dataset: datasetName,
