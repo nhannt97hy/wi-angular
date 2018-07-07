@@ -9,7 +9,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     let __selectionTop = 0;
     const __selectionLength = 50;
     const __selectionDelta = 10;
-    let __dragging = false;
     let __familyList;
     let list;
     self.filterText = "";
@@ -302,9 +301,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         }
     };
 
-    this.onDeleteInput = function(idx) {
-        self.taskConfig.inputData.splice(idx, 1);
-    };
     this.upTrigger = function(cb) {
         if (self.selectionType == FAMILY_SELECTION) {
             if (__selectionTop > 0) {
@@ -544,19 +540,49 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 }
             }else {
                 return {
-                    data: "used"
+                    data: "data.use",
+                    readOnly: true
                 }
             }
             case "Well":
-            return {
-                data: 'wellProps.name',
-                readOnly: true
-            };
+            if(self.visualizationMode == "Inputs"){
+                return {
+                    data: 'wellProps.name',
+                    readOnly: true
+                }
+            }else {
+                return {
+                    data: 'data.wellProps.name',
+                    readOnly: true
+                }
+            }
             case "Dataset":
+            if(self.visualizationMode == "Inputs"){
+                return {
+                    data: 'dataset',
+                    readOnly: true
+                }
+            }else {
+                return {
+                    data: 'data.dataset',
+                    readOnly: true
+                }
+            }
+            case "Zone":
             return {
-                data: 'dataset',
+                data: 'properties.zone_template.name',
                 readOnly: true
-            };
+            }
+            case "Top":
+            return {
+                data: 'properties.startDepth',
+                readOnly: true
+            }
+            case "Bottom":
+            return {
+                data: 'properties.endDepth',
+                readOnly: true
+            }
             default:
             if(self.visualizationMode == "Inputs"){
                 let idx = self.taskConfig.inputs.findIndex(i => i.name == attr);
@@ -567,11 +593,12 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             }else{
                 let idx = self.taskConfig.parameters.findIndex(i => i.name == attr);
                 let colData = {
-                    data: 'inputs.' + idx + '.value',
+                    data: 'params.' + idx + '.value',
                     type: 'numeric'
                 };
                 if(self.taskConfig.parameters[idx].choices) {
                     colData.type = 'dropdown';
+                    colData.source = self.taskConfig.parameters[idx].choices.map(p => p.name);
                 }
                 return colData;
             }
@@ -585,7 +612,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 colHeaders: header,
                 rowHeaders: true,
                 manualColumnResize: true,
-                fixedColumnsLeft: 2,
+                fixedColumnsLeft: 3,
                 contextMenu: {
                     items: {
                         rm_col: {
@@ -604,6 +631,8 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                 })
                                 let rm = Array.from(cols).sort((a, b) => b - a);
                                 rm.forEach(idx => {
+                                    let idDataset = self.taskConfig.inputData[idx].idDataset;
+                                    self.taskConfig.paramData = self.taskConfig.paramData.filter(p => p.data.idDataset != idDataset);
                                     self.taskConfig.inputData.splice(idx, 1);
                                 })
                                 dataCtrl.updateSettings(
@@ -670,35 +699,39 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         }
     }
     function initParameters(){
-        if (!self.statisticSettings) {
-            self.statisticSettings = {
-                // data: getStatisticData(),
-                colHeaders: ["Name", "Family", "Unit", "Min value", "Max value", "Mean value", "Standard deviation", "Top", "Bottom", "Step", "Fraction of missing value", "Last modification date", "Description", "Quantile 5", "Quantile 10", "Quantile 25", "Quantile 50", "Quantile 75", "Quantile 90", "Quantile 95"],
+        if (!self.paramSettings) {
+            let header = ["Use", "Well", "Dataset", "Zone", "Top", "Bottom"].concat(self.taskConfig.parameters.map(i => i.name));
+            self.paramSettings = {
+                colHeaders: header,
                 rowHeaders: true,
                 manualColumnResize: true,
-                fixedColumnsLeft: 1,
+                fixedColumnsLeft: 3,
                 renderAllRows: false,
                 headerTooltips: {
                     rows: false,
                     columns: true,
                     onlyTrimmed: true
                 },
-                columns: function(col){
-                    return {
-                        readOnly: true
-                    }
-                }
+                columns: header.map(h => property(h)),
+                copyPaste: {
+                    columnsLimit: 1000,
+                    rowsLimit: 1000
+                },
+                dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2','filter_by_value', 'filter_action_bar'],
+                filters: true,
+                columnSorting: true,
+                sortIndicator: true
             };
         }
-        self.statisticSettings.data = getStatisticData();
+        self.paramSettings.data = self.taskConfig.paramData || [];
         if (!dataCtrl) {
             dataCtrl = new Handsontable(
                 inputDataTable,
-                self.statisticSettings
+                self.paramSettings
             );
         } else {
             dataCtrl.updateSettings(
-                self.statisticSettings
+                self.paramSettings
             );
         }
     }
@@ -712,7 +745,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     this.toggleVisualizationMode = function(mode){
         if(self.visualizationMode == mode) return;
         self.visualizationMode = mode;
-        console.log(self.visualizationMode);
         dataCtrl.destroy();
         dataCtrl = undefined;
         switchSetting();
@@ -720,7 +752,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     this.droppableSetting = function() {
         inputDataTable = document.getElementById(self.taskDataTreeName);
         switchSetting();
-        // dataCtrl.render();
         $(`#${self.taskDataTreeName}`).parent().droppable({
             scope: 'wi-task',
             drop(event, ui) {
@@ -732,7 +763,10 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 let idWell, wellModel;
                 let paramItems = function(){
                     return self.taskConfig.parameters.reduce((total, param, idx) => {
-                        total[idx] = param;
+                        total[idx] = {
+                            name: param.name,
+                            value: param.value
+                        };
                         return total;
                     }, {});
                 }
@@ -745,9 +779,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             let ret = zoneset.zones.reduce((total, zone) => {
                                 if(self.taskConfig.zonation.children.findIndex(c => c == zone.zone_template.name) >= 0){
                                     total.push({
-                                        idDataset: data.idDataset,
-                                        wellProps: data.wellProps,
-                                        dataset: data.datasetName,
+                                        data: data,
                                         params: paramItems(),
                                         properties: zone
                                     })
@@ -759,9 +791,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                     }
                     return [
                         {
-                            idDataset: data.idDataset,
-                            wellProps: data.wellProps,
-                            dataset: data.datasetName,
+                            data: data,
                             params: paramItems(),
                             properties: {
                                 endDepth: data.wellProps.bottomDepth,
@@ -960,19 +990,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         }
     }
 
-    // this.taskClickFuntion = function($index, $event, node){
-    //     if(node && node.type == 'dataset'){
-    //         let rootNode = self.taskConfig.inputData;
-    //         if (!Array.isArray(rootNode.__SELECTED_NODES)) rootNode.__SELECTED_NODES = [];
-    //         if(!$event.ctrlKey) unselectAllNodes(rootNode)
-    //         let selectedNodes = rootNode.__SELECTED_NODES;
-    //         if(!selectedNodes.includes(node)) selectedNodes.push(node);
-    //         rootNode.__SELECTED_NODES = selectedNodes;
-    //         node.data.selected = true;
-    //         node.$index = $index;
-    //     }
-    // }
-
     this.onToggleUseOutput = function(item){
         if(item.use == false || self.taskConfig.outputs.filter(c => c.use).length > 1){
             item.use = !item.use;
@@ -1000,51 +1017,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             })
         }
     }
-
-    // const inputContextMenu = [
-    //     {
-    //         name: "Enabled/Disabled",
-    //         label: "Enabled/Disabled",
-    //         icon: "fa fa-exchange",
-    //         handler: function(){
-    //             let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
-    //             selectedNodes.forEach(node => {
-    //                 node.data.unused = node.data.unused ? !node.data.unused : true;
-    //             })
-    //             self.taskConfig.inputData.__SELECTED_NODES = [];
-    //         }
-    //     },
-    //     {
-    //         name: "Delete",
-    //         label: "Delete",
-    //         icon: "delete-16x16",
-    //         handler: function () {
-    //             let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
-    //             selectedNodes.forEach(node => {
-    //                 let idx = self.taskConfig.inputData.findIndex(ip => ip.$index == node.$index);
-    //                 if(idx > -1) self.taskConfig.inputData.splice(idx, 1);
-    //             })
-    //             self.taskConfig.inputData.__SELECTED_NODES = [];
-    //         }
-    //     },
-    //     {
-    //         name: "Interactive",
-    //         label: "Interactive",
-    //         icon: "curve-interactive-edit-16x16",
-    //         handler: function () {
-    //             let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
-    //             console.log(selectedNodes);
-    //         }
-    //     }
-    // ]
-
-    // this.taskShowContextMenu = function($event, $index, node){
-    //     if(node && node.type == 'dataset'){
-    //         wiComponentService
-    //         .getComponent("ContextMenu")
-    //         .open($event.clientX, $event.clientY, inputContextMenu);
-    //     }
-    // }
 
     function clickFunction( $index, $event, node, rootNode) {
         // node.$index = $index;
@@ -1079,7 +1051,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     }
 
     this.addToFlowClick = function(){
-        // const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         DialogUtils.openFlowDialog(ModalService, function (flow) {
             if (flow.task && flow.tasks.find(t => t.name === self.name)) {
                 toastr.error('Task name existed in this flow');
@@ -1106,233 +1077,11 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         });
     }
 
-    // function updateChoices(newCurveProps) {
-    //     self.projectConfig.forEach(well => {
-    //         well.children.forEach(dataset => {
-    //             if(dataset.id == newCurveProps.idDataset && dataset.type == 'dataset'){
-    //                 let hasCurve = dataset.children.find(c => c.id == newCurveProps.idCurve);
-    //                 if(!hasCurve) $timeout(() => dataset.children.push(utils.createCurveModel(newCurveProps)));
-    //             }
-    //         })
-    //     })
-    // }
-
-/* 
-    function saveCurve(curveInfo, callback) {
-        getFamilyList(familyList => {
-            let family = familyList.find(f => f.data.label == curveInfo.family);
-            let payload = {
-                data: curveInfo.data,
-                idDataset: curveInfo.idDataset,
-                idFamily: (family || {}).id || null
-            }
-            wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
-                if (curve.idCurve) {
-                    payload.idDesCurve = curve.idCurve;
-                    curveInfo.idCurve = curve.idCurve;
-                } else {
-                    payload.curveName = curveInfo.name
-                }
-                wiApiService.processingDataCurve(payload, function (ret) {
-                    if(!curve.idCurve) curveInfo.idCurve = ret.idCurve;
-                    let _ret = null;
-                    if(!curve.idCurve) {
-                        _ret = ret;
-                    }else{
-                        _ret = curveInfo;
-                        _ret.idFamily = payload.idFamily;
-                    }
-
-                    callback(_ret);
-                })
-            })
-        });
-    }
-    function createLogplotFromResult(inputMap, callback) {
-        let payload = {
-            idProject: self.idProject,
-            name: self.name,
-            override: true
-        };
-
-        wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
-            self.idPlot = response.idPlot;
-            let currentOrderNum = 'm';
-            async.eachOfSeries(inputMap, function(item, idx, end){
-                let wfInput = item.inputs;
-                let wfOutput = self.taskConfig.outputData[idx];
-                async.parallel([
-                    function(_end1){
-                        wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                            async.eachSeries(wfInput, function(ipt, done1) {
-                                //create line
-                                wiApiService.createLine({
-                                    idTrack: trackData.idTrack,
-                                    idCurve: ipt.id,
-                                    orderNum: currentOrderNum
-                                }, function(line){
-                                    currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                                    done1();
-                                })
-                            },(err) => {
-                                _end1();
-                            });
-                        }, {
-                            title: 'Inputs'
-                        })
-                }, function (_end2) {
-                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                        async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
-                            // create line
-                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                            wiApiService.createLine({
-                                idTrack: trackData.idTrack,
-                                idCurve: opt.idCurve,
-                                orderNum: currentOrderNum
-                            }, function(line){
-                                let bgColor = null;
-                                switch (opt.family) {
-                                    case "Net Reservoir Flag":
-                                        bgColor = "green";
-                                        break;
-                                    case "Net Pay Flag":
-                                        bgColor = "red";
-                                        break;
-                                }
-                                if (!bgColor) {
-                                    done2();
-                                    return;
-                                }
-                                wiApiService.createShading({
-                                    idTrack:trackData.idTrack,
-                                    name:opt.name + "-left",
-                                    orderNum: 'm',
-                                    negativeFill : {
-                                        display: false,
-                                        sadingType: "pattern",
-                                        pattern: {
-                                            background : "blue",
-                                            foreground : "black",
-                                            name : "none"
-                                        }
-                                    },
-                                    positiveFill: {
-                                        display: false,
-                                        sadingType: "pattern",
-                                        pattern: {
-                                            background : "blue",
-                                            foreground : "black",
-                                            name : "none"
-                                        }
-                                    },
-                                    fill:{
-                                        display:true,
-                                        shadingType:"pattern",
-                                        pattern:{
-                                            name: "none",
-                                            foreground:"black",
-                                            background:bgColor
-                                        }
-                                    },
-                                    isNegPosFill:false,
-                                    idLeftLine:null,
-                                    idRightLine:line.idLine,
-                                    leftFixedValue:0,
-                                    idControlCurve:opt.idCurve
-                                }, function(shadingProps) {
-                                    done2();
-                                });
-                            })
-                        }, (err) => {
-                            _end2();
-                        })
-                    }, {
-                        title: 'Outputs'
-                    }
-                )}
-                ], function (err, result) {
-                    if (err) toastr.error(err);
-                    end();
-                })
-            }, (err) => {
-                callback();
-            })
-        })
-    }
-
-    this.runWorkflowClick = function(){
-        let runFunc = petrophysics[self.taskConfig.function];
-        if(!runFunc) {
-            toastr.error('Not yet implement');
-            return;
-        }
-        self.taskConfig.outputData = new Array();
-        let inputMap = self.taskConfig.inputData.reduce((total, d) => {
-            if(!d.data.unused){
-                let tmp =  {
-                    inputs: d.children[0].children.map(c => c.data.value),
-                    parameters: d.children[1].children.map(c => {
-                        return {
-                            endDepth: c.endDepth,
-                            startDepth: c.startDepth,
-                            param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
-                        }
-                    }),
-                    idDataset: d.idDataset,
-                    idWell: d.wellProps.idWell,
-                    dataset: d.dataset
-                };
-
-                tmp.parameters.step = parseFloat(d.wellProps.step);
-                tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
-                tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
-                total.push(tmp);
-            }
-            return total;
-        }, [])
-
-        async.eachOf(inputMap, function(data, idx, callback){
-            let curveData = [];
-            async.eachSeries(data.inputs, function(curve, cb){
-                wiApiService.dataCurve(curve.id, function(dataCurve){
-                    curveData.push(dataCurve.map(d => parseFloat(d.x)));
-                    cb();
-                })
-            }, function(err){
-                if(!err){
-                    runFunc(curveData, data.parameters, function(ret){
-                        let wf = self.taskConfig;
-                        wf.outputData[idx] = new Object();
-                        wf.outputData[idx].idDataset = data.idDataset;
-                        wf.outputData[idx].outputCurves = new Array();
-                        wf.outputs.forEach((o, i) => {
-                            wf.outputData[idx].outputCurves[i] = Object.assign({},o);
-                            wf.outputData[idx].outputCurves[i].data = ret[i];
-                        });
-                        async.each(wf.outputData[idx].outputCurves, function(d, cb2) {
-                            d.idDataset = data.idDataset;
-                            saveCurve(d, function(curveProps) {
-                                delete d.data;
-                                updateChoices(curveProps);
-                                cb2();
-                            });
-                        }, function(err) {
-                            callback();
-                        });
-                    })
-                }
-            })
-        }, function(err){
-            if(!err){
-                createLogplotFromResult(inputMap, function(){
-                    utils.refreshProjectState();
-                });
-            }
-        })
-    }
- */
     this.runTask = function () {
-        wiPetrophysics.execute(self, utils.refreshProjectState);
+        wiPetrophysics.execute(self, () =>{
+            utils.refreshProjectState()
+            .then(() => self.refreshProject());
+        });
     }
 
     /*************************** THANG: hard code for interative track *****************************/

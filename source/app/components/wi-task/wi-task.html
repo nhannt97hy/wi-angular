@@ -149,7 +149,7 @@
                                     <input type="number" class="form-control" ng-model="item.value" step="any"
                                     ng-if="item.type=='number'" style="flex:2;">
                                     <select class='form-control' ng-model='item.value'
-                                    ng-options="choice as choice.name for choice in item.choices track by choice.value"
+                                    ng-options="choice.name as choice.name for choice in item.choices track by choice.value"
                                     ng-if='item.type=="select"' style="flex:2;"></select>
                                 </li>
                             </ul>
@@ -250,18 +250,7 @@
                                     <span>Show Track</span>
                                 </label>
                             </div>
-                            <!-- <div style='margin: 5px;position: relative;'>
-                                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
-                                <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiTask.inputFilter' size='10'>
-                            </div> -->
                             <div style="flex: 1; overflow: hidden;">
-                                <!-- <wi-base-treeview id='{{wiTask.taskDataTreeName}}' name='{{wiTask.taskDataTreeName}}' style="margin-left: 0px;"
-                                config='wiTask.taskConfig.inputData'
-                                on-click-function='wiTask.taskClickFuntion'
-                                show-context-menu-function='wiTask.taskShowContextMenu'
-                                filter='{{wiTask.inputFilter}}' filter-by='{{wiTask.typeFilter}}'
-                                ></wi-base-treeview> -->
-                                <!-- <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET OR ZONESET HERE</div> -->
                                 <div id='{{wiTask.taskDataTreeName}}' wi-element-ready="wiTask.droppableSetting()" class='active'></div>
                             </div>
                         </div>
