@@ -43,11 +43,11 @@ function Marker(config) {
         name: 'Marker'
     }
     // this.name = 'Marker';
-    // this.nameHAlign = 'Left';
-    // this.nameVAlign = 'None';
+    this.nameHAlign = 'Left';
+    this.nameVAlign = 'High';
     // this.depth = this.minY;
-    // this.depthHAlign = 'Right';
-    // this.depthVAlign = 'High';
+    this.depthHAlign = 'Right';
+    this.depthVAlign = 'High';
     this.precision = 2;
     this.lineWidth = 2;
     // this.lineDash = [];
@@ -137,7 +137,7 @@ Marker.prototype.doPlot = function(highlight) {
         .attr('y2', y)
         .attr('stroke', this.marker_template.color || 'black')
         .attr('stroke-width', this.lineWidth || 1)
-        .attr('stroke-dasharray', this.marker_template.lineStyle || '');
+        .attr('stroke-dasharray', JSON.parse(this.marker_template.lineStyle || '[]').join(','));
 
         // .attr('stroke', this.lineColor || 'black')
         // .attr('stroke-width', this.lineWidth || 1)
@@ -204,7 +204,7 @@ Marker.prototype.drawText = function() {
     this.depthLabel.text(formatter(this.depth));
     this.updateTextPosition(this.depthLabel, this.depthHAlign, this.depthVAlign);
 
-    this.nameLabel.text(this.name);
+    this.nameLabel.text(this.marker_template.name);
     this.updateTextPosition(this.nameLabel, this.nameHAlign, this.nameVAlign);
 }
 
@@ -220,7 +220,7 @@ Marker.prototype.drawSymbol = function() {
         fillStyle: this.symbolFillStyle,
         strokeStyle: this.symbolStrokeStyle,
         lineWidth: this.symbolLineWidth,
-        lineDash: this.symbolLineDash,
+        lineDash: this.symbolLineDash || this.marker_template.lineStyle,
         size: this.symbolSize
     });
     let plotFunc = helper[Utils.lowercase(this.symbolName)];
