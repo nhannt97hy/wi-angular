@@ -53,11 +53,31 @@
                         {{field.value.name}} &nbsp;<span class="zone-edit-16x16"></span>
                     </a>
 				</div>
+				<div ng-if="field.type=='wimarkerset'" 
+					style="padding:5px;">
+					<a ng-click="self.changeMarkerSet(field, self.fields)"
+                        style="padding-right: 40%; cursor: pointer; text-decoration: none;">
+                        {{field.value.name}} &nbsp;<span class="marker-properties-16x16"></span>
+                    </a>
+				</div>
 				<div ng-if="field.type=='wicompatiable'" 
 					style="padding:5px;">
 					<select ng-model="field.value" style="width: 100%; border: none;" 
 							ng-options="unit.name as unit.name for unit in self.curveUnits"
 							ng-change="self.onChangeUnit(field, self.fields)">
+					</select>
+				</div>
+				<div ng-if="field.type=='wiref'" 
+					style="padding:5px;">
+					<span style="padding-right: 40%;">
+                        {{self.refFunc(field.ref)}} &nbsp;</span>
+                    </span>
+				</div>
+				<div ng-if="field.type=='wiselect'" 
+					style="padding:5px;">
+					<select ng-model="field.value.model" style="width: 100%; border: none;" 
+							ng-options="item for item in field.value.selection"
+							ng-change="self.selectChange(field);">
 					</select>
 				</div>
 			</div>

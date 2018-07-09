@@ -28,13 +28,36 @@
             <div style="flex:1;padding:10px 0;overflow:auto;width:100%;">
                 <div ng-repeat='wf in wiWorkflowMachineLearning.workflowConfig.steps' class='bordered panel panel-default' style='display:table;min-width:100%;'
                     wi-element-ready="wiWorkflowMachineLearning.droppableSetting(wf);" id="{{wf.name}}" ng-init="wf.expanded=true">
-                    <div class='panel-heading' style='background-color:#eee;'>
+                    <div class='panel-heading' style='background-color:#eee;display: list-item'>
                         <span class='control-button' ng-class="{'fa fa-chevron-up':  wf.expanded, 'fa fa-chevron-down': !wf.expanded}" ng-click='wf.expanded = !wf.expanded'
                             style='margin-right:5px;'>
                         </span>
-                        <span style='margin-right:10px;padding-right:2px;' ng-click="wiWorkflowMachineLearning.safeRunStep(wf);" class='fa fa-play control-button block-button'
-                            title="test run"></span>
-                        <span style='font-weight:700;'>{{wf.name}}</span>
+                        <span style='margin-right:10px;padding-right:2px;' ng-click="wiWorkflowMachineLearning.safeRunStep(wf);" 
+                            class='fa fa-play control-button block-button' title="test run">
+                        </span>
+                        <span style='font-weight:700;float: left;'>{{wf.name}}</span>
+                        <!-- <span class="form-group col-sm-3" ng-if="wiWorkflowMachineLearning.workflowConfig.model.type=='classification' && wf.name!='Train'">
+                                <label class="control-label col-sm-5">Preprocess</label>
+                                <div class='col-sm-7'>
+                                    <ui-select ng-model="wf.name=='Verify'?wiWorkflowMachineLearning.CLASSIFIER_VERIFY_PARAMS[0]:wiWorkflowMachineLearning.CLASSIFIER_PREDICT_PARAMS[0]" ng-change="wiWorkflowMachineLearning.saveWorkflow();">
+                                        <ui-select-match>
+                                            {{wiWorkflowMachineLearning.currentModelType.parametersPredict[0].value.name}}
+                                        </ui-select-match>
+                                        <ui-select-choices style="width: 100%;" repeat='choice in wiWorkflowMachineLearning.currentModelType.parametersPredict[0].choices'>
+                                            {{choice.name}}
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </span>
+                        <span class="form-group col-sm-3" ng-if="wiWorkflowMachineLearning.workflowConfig.model.type=='classification' && wf.name!='Train' && wiWorkflowMachineLearning.currentModelType.parametersPredict[0].value.value">
+                            <label class="control-label col-sm-5">Threshold</label>
+                            <div class='col-sm-7'>
+                                <input style="width: 100%;" class="form-control wi-form-control"
+                                    type="number" ng-model="wiWorkflowMachineLearning.currentModelType.parametersPredict[1].value" 
+                                    step='{{wiWorkflowMachineLearning.currentModelType.parametersPredict[1].step}}' min="{{wiWorkflowMachineLearning.currentModelType.parametersPredict[1].min}}" max="{{wiWorkflowMachineLearning.currentModelType.parametersPredict[1].max}}"
+                                    ng-change='wiWorkflowMachineLearning.saveWorkflow();'>
+                            </div>
+                        </span> -->
                     </div>
                     <div ng-show="wf.expanded" class='panel-body' style="border-top: 1px solid #eee;overflow:visible;">
                         <ul ng-if='wf.inputData.length' class='table-row table-head'>

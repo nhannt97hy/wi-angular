@@ -1,8 +1,8 @@
 <html>
 
 <head>
-    <title>Well Insight App</title>
-    <link rel="shortcut icon" href="img/Well_Insight.ico" type="image/x-icon">
+    <title>I2G Cloud</title>
+    <link rel="shortcut icon" href="img/i2g_fav.png" type="image/x-icon">
 
     <link href="vendor/css/bootstrap.min.css" rel="stylesheet">
     <link href="vendor/css/jquery-ui.css" rel="stylesheet">
@@ -83,6 +83,7 @@
     <link href='css/wi-zone-template-manager.css' rel='stylesheet'>
     <link href='css/wi-zone-set-manager.css' rel='stylesheet'>
     <link href='css/wi-parameter-set.css' rel='stylesheet'>
+    <link href='css/wi-marker-manager.css' rel='stylesheet'>
 
     <!-- Insert this line above script imports  -->
     <script>
@@ -124,7 +125,7 @@
     <script src="vendor/js/toastr.min.js"></script>
     <script type="text/javascript" src="vendor/js/angular-wizard.min.js"></script>
     <script src="vendor/js/handsontable.full.min.js"></script>
-    <!-- <script src="js/chat-module.bundle.js"></script> -->
+    <script src="vendor/js/chat-module.webpack.js"></script>
     <script src="js/main.js.bundle.js"></script>
 
     <!-- Insert this line after script imports -->
@@ -137,8 +138,8 @@
     <script src="vendor/js/mqtt-client.js"></script>
 </head>
 
-<body ng-app='wiapp'>
-    <div class='main' id="main" ng-controller="AppController as app">
+<body ng-app='wiapp' ng-controller="AppController as app">
+    <div class='main' id="main">
         <div class="ribbon-wrapper">
             @@include('./ribbon-block/index.html')
         </div>
@@ -156,7 +157,7 @@
 
     <template id='property-block'>
         <!-- <wi-properties name="WiProperties" list-config="myPropertiesConfig"></wi-properties> -->
-        <wi-props name="WiProps" input="inputProps" config="configData" typeprops="typeProps"></wi-props>
+        <wi-props name="WiProps" input="inputProps" config="configData" typeprops="typeProps" onchangefunc="onChangeProps"></wi-props>
     </template>
     <template id="stack-header-control">
         <div class="stack-header-control">
@@ -164,7 +165,8 @@
             <i class="fa fa-caret-right" aria-hidden="true" id="nextBtn" title="Next"></i>
         </div>
     </template>
-    <!-- <chat-module></chat-module> -->
+    <chat-module token="token()" username="username()" group-name="'Help_Desk'" group-owner="groupOwner()" show-chat-group="showChatGroup" show-help-desk="showHelpDesk" width="320"></chat-module>
+    <chat-module token="token()" username="username()" group-name="groupName()" group-owner="groupOwner()" show-help-desk="showHelpDesk" show-chat-group="showChatGroup" width="320"></chat-module>
     <div id="testElement"></div>
 </body>
 

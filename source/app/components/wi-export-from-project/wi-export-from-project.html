@@ -2,12 +2,12 @@
         <div class="left-container">
             <div class="panel panel-default export-left">
                 <div style='display:flex;' class='panel-heading'>
-                    <h5 style='margin-right:10px;'>Project</h5>
-                    <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default pull-right' title="Reload project" ng-click="wiExportFromProject.refreshInventory()">
+                    <h5 style='margin-right:10px;flex:1;'>Project</h5>
+                    <button style='margin:5px 0 5px 5px;padding:0 10px;' class='btn btn-default' title="Reload project" ng-click="wiExportFromProject.refreshInventory()">
                         <i class="fa fa-refresh"></i>
                     </button>
                     <button style='margin:5px 0px 5px 5px;padding:0 10px;' title="Toggle Well name/File name"
-                        class='btn btn-default pull-right'
+                        class='btn btn-default'
                         ng-click="wiExportFromProject.switchLabelTooltip(wiExportFromProject.inventoryConfig)">
                         <i class="fa fa-exchange"></i>
                     </button>
@@ -20,8 +20,7 @@
                     </form>
                 </div>
                 <div style="flex:1;display:flex;padding:0px;" class="panel-body">
-                    <wi-scroll id-scroll="exportTreeScroll" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiExportFromProject.upTriggerPrj'
-                        down-trigger='wiExportFromProject.downTriggerPrj'>
+                    <wi-scroll id-scroll="'efpTreeScroll'" style='flex:1;display:flex;flex-direction:column;' up-trigger='wiExportFromProject.upTrigger' down-trigger='wiExportFromProject.downTrigger'>
                         <wi-base-treeview name="exportTreeview" 
                         config="wiExportFromProject.projectConfig" 
                         container="wiExportFromProject" 
@@ -75,8 +74,11 @@
         <div class="right-container">
             <div class='panel panel-default export-right'>
                 <div class='panel-heading' style='display:flex;'>
-                    <h5 style='flex:1;'>Las Files</h5>
-                    <button style="margin:5px 0;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromProject.lasFiles.length = 0;">
+                    <h5 style='flex:1;'>Output</h5>
+                    <button style="margin:5px 0 5px 5px;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromProject.fileFormatToggle()">
+                        <span>{{wiExportFromProject.fileFormat}}</span>
+                    </button>
+                    <button style="margin:5px 0 5px 5px;padding:0 10px;" class='btn btn-default' title='purge' ng-click="wiExportFromProject.lasFiles.length = 0;">
                         <span class='ti-brush-alt'></span>
                     </button>
                 </div>
@@ -87,7 +89,7 @@
                             size='10'>
                     </form>
                 </div>
-                <ul>
+                <ul style="overflow-x: hidden; overflow-y:auto;">
                     <li ng-repeat='file in wiExportFromProject.lasFiles | filter: wiExportFromProject.lasFilesFilter'>
                         <a href="{{file.url}}">
                             <i style="font-size: 16px;z-index:1;color:#aaa;" class="fa fa-file"></i>

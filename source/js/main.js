@@ -57,6 +57,8 @@ let wiPlot = require('./wi-plot');
 let wiZoneTemplateManager = require('./wi-zone-template-manager');
 let wiZoneManager = require('./wi-zone-manager');
 let wiZoneSetManager = require('./wi-zone-set-manager');
+let wiMarkerManager = require('./wi-marker-manager');
+let wiMarkerTemplateManager = require('./wi-marker-template-manager');
 let wiParameterSet = require('./wi-parameter-set');
 
 let wiInventory = require('./wi-inventory');
@@ -151,6 +153,7 @@ let wiPatternService = require('./wi-pattern-service');
 
 
 let wiConditionNode = require('./wi-condition-node');
+let propertiesData = require('./configFile.json');
 
 let app = angular.module('wiapp',
     [
@@ -236,6 +239,8 @@ let app = angular.module('wiapp',
         wiZoneManager.name,
         wiZoneTemplateManager.name,
         wiZoneSetManager.name,
+        wiMarkerManager.name,
+        wiMarkerTemplateManager.name,
         wiParameterSet.name,
 
         wiCanvasRect.name,
@@ -267,8 +272,23 @@ let app = angular.module('wiapp',
         'mgo-angular-wizard',
 
         // chat module
-        // 'chatModule'
+        'chatModule'
     ]);
+
+/*var onChangeHandlers = {
+    'well' : function(props) {
+        console.log("onchangehandler for well", props);
+    },
+    'dataset' : function(props) {
+        console.log("onchangehandler for dataset", props);
+    },
+    'curve' : function(props) {
+        console.log("onchangehandler for curve", props);
+    },
+    'logplot' : function(props) {
+        console.log("onchangehandler for logplot", props);
+    }
+}*/
 
 function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService) {
     // SETUP HANDLER FUNCTIONS
@@ -298,16 +318,16 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
     wiComponentService.putComponent(wiComponentService.HISTOGRAM_HANDLERS, histogramHandlers);
 
     wiComponentService.putComponent(wiComponentService.COMBOVIEW_HANDLERS, comboviewHandlers);
-    $.getJSON( "./js/configFile.json", function(data) {
-        wiComponentService.putComponent(wiComponentService.LIST_CONFIG_PROPERTIES, data);
-    });
+    // $.getJSON( "./js/configFile.json", function(data) {
+    wiComponentService.putComponent(wiComponentService.LIST_CONFIG_PROPERTIES, propertiesData);
+    // });
     // Hook globalHandler into $scope
     $scope.handlers = wiComponentService.getComponent(wiComponentService.GLOBAL_HANDLERS);
 
     // config explorer block - treeview
     $scope.myTreeviewConfig = {};
     // wiComponentService.treeFunctions = bindAll(appConfig.TREE_FUNCTIONS, $scope, wiComponentService);
-    
+
     // config properties - list block
     // $scope.myPropertiesConfig = appConfig.LIST_CONFIG_TEST;
     wiComponentService.on('update-properties', function(data){
@@ -315,6 +335,7 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
             $scope.inputProps = data.props;
             $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES)[data.type];
             $scope.typeProps = data.type;
+            $scope.onChangeProps = utils.onChangeHandlers[data.type];
         }, 200);
     })
     // $scope.myPropertiesConfig = {};
@@ -332,9 +353,9 @@ function appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, Mo
             background: "#f00"
         }
     };
-    
+
     // $scope.configData = wiComponentService.getComponent(wiComponentService.LIST_CONFIG_PROPERTIES).well;
-    
+
 
     /* ========== IMPORTANT! ================== */
     wiComponentService.putComponent(wiComponentService.GRAPH, graph);
@@ -445,10 +466,18 @@ function restoreProject($timeout, wiApiService, ModalService) {
             $timeout(function () {
                 wiApiService.getProjectInfo(lastProject.id, function (project, err) {
                     if (!err) {
-                        DialogUtils.confirmDialog(ModalService, "Open Last Project", "The system recorded last time you are opening project <b>" + lastProject.name + "</b>.</br>Do you want to open it?", function (ret) {
+                        let html = "The system recorded last time you are opening "
+                        + (lastProject.shared? "shared" : "")
+                        + " project <b>" + lastProject.name + "</b>"
+                        + (lastProject.owner ? ` owner by user <b>${lastProject.owner}</b>` : "")
+                        + ".</br>Do you want to open it?";
+                        DialogUtils.confirmDialog(ModalService, "Open Last Project", html, function (ret) {
                             if (ret) {
                                 wiApiService.getProject({
-                                    idProject: lastProject.id
+                                    idProject: lastProject.id,
+                                    name: lastProject.name,
+                                    owner: lastProject.owner,
+                                    shared: lastProject.shared
                                 }, function (projectData) {
                                     utils.projectOpen(projectData);
                                 });
@@ -486,6 +515,25 @@ app.controller('AppController', function ($scope, $rootScope, $timeout, $compile
         appEntry($scope, $rootScope, $timeout, $compile, wiComponentService, ModalService, wiApiService, wiOnlineInvService);
         restoreProject($timeout, wiApiService, ModalService);
     }
+    $scope.token = function() {
+        return window.localStorage.getItem('token');
+    }
+    $scope.groupName = function() {
+        var lp = window.localStorage.getItem('LProject');
+        if(lp) lp = JSON.parse(lp);
+        return (lp || {}).name;
+    } 
+    $scope.groupOwner = function() {
+        var lp = window.localStorage.getItem('LProject');
+        var username = window.localStorage.getItem('username');
+        if(lp) lp = JSON.parse(lp);
+        return (lp || {}).owner || username;
+    }
+    $scope.username = function() {
+        return window.localStorage.getItem('username');
+    }
+    // $scope.showChatGroup = false;
+    // $scope.showHelpDesk = false;
 });
 
 

@@ -1,16 +1,14 @@
 const name = "wiTask";
 const moduleName = "wi-task";
-// let petrophysics = require('./petrophysics');
 
 function Controller(wiComponentService, wiApiService, $timeout, ModalService, wiPetrophysics, $scope) {
     const self = this;
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
-    //   const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let __selectionTop = 0;
     const __selectionLength = 50;
     const __selectionDelta = 10;
-    let __dragging = false;
     let __familyList;
     let list;
     self.filterText = "";
@@ -23,10 +21,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     self.FAMILY_SELECTION = FAMILY_SELECTION;
     self.FAMILY_GROUP_SELECTION = FAMILY_GROUP_SELECTION;
     self.TASK_SELECTION = TASK_SELECTION;
+    let inputDataTable;
+    let dataCtrl;
 
     this.$onInit = function () {
         wiComponentService.putComponent("wiTask" + self.id, self);
-        self.taskConfig = self.taskConfig || defaultTaskConfig;
+        self.taskConfig.inputData = new Array();
+        self.taskConfig.paramData = new Array();
+        self.visualizationMode = "Inputs";
         // CONFIGURE INPUT TAB
         self.selectionType = "3";
         wiApiService.listFamily(listF => {
@@ -41,7 +43,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         self.projectTreeName = name + 'projectTree';
         self.zonationTreeName = name + 'zonationTree';
         self.taskTreeName = name + 'taskTree';
-        self.taskDataTreeName = name + 'taskDataTree';
+        self.taskDataTreeName = name + 'taskDataTable';
 
         self.idxTab = 0;
 
@@ -159,55 +161,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             }
         }
     }
-    const defaultTaskConfig = {
-        inputs: [
-            {
-                name: "Gamma Ray"
-            }
-        ],
-        parameters: [
-            { name: "GR clean", type: "number", value: 10 },
-            { name: "GR clay", type: "number", value: 120 },
-            {
-                name: "Method",
-                type: "select",
-                choices: [
-                    {
-                        name: "Linear",
-                        value: 1
-                    },
-                    {
-                        name: "Clavier",
-                        value: 2
-                    },
-                    {
-                        name: "Larionov Tertiary rocks",
-                        value: 3
-                    },
-                    {
-                        name: "Larionov older rocks",
-                        value: 4
-                    },
-                    {
-                        name: "Stieber variation I",
-                        value: 5
-                    },
-                    {
-                        name: "Stieber - Miocene and Pliocene",
-                        value: 6
-                    },
-                    {
-                        name: "Stieber variation II",
-                        value: 7
-                    }
-                ]
-            }
-        ],
-        outputs: [
-            {name: "VCL_GR", family: "Clay Volume"}
-        ],
-        function: "calVCLfromGR"
-    };
 
     this.onSelectionTypeChanged = onSelectionTypeChanged;
 
@@ -348,9 +301,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         }
     };
 
-    this.onDeleteInput = function(idx) {
-        self.taskConfig.inputData.splice(idx, 1);
-    };
     this.upTrigger = function(cb) {
         if (self.selectionType == FAMILY_SELECTION) {
             if (__selectionTop > 0) {
@@ -417,12 +367,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     };
 
     // SELECT INPUT TAB
-    // function buildWellList(wells) {
-    //     wells.forEach(well => {
-    //         const wellModel = utils.createWellModel(well);
-    //         self.projectConfig.push(wellModel);
-    //     });
-    // }
     function buildZoneSetListFromServer(wells) {
         async.each(wells, function (well, __end) {
             wiApiService.getWell(well.idWell, function (wellProps) {
@@ -521,7 +465,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 wells => {
                     self.projectConfig.length = 0;
                     self.zone_set_list.length = 0;
-                    // buildWellList(wells);
                     buildZoneSetListFromServer(wells);
                 }
             );
@@ -546,10 +489,11 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         draggableSetting(domEle);
     }
     function matchCurves(curves, matchCriterion) {
+        let ret = [];
         switch (matchCriterion.type) {
             case FAMILY_GROUP_SELECTION:
                 const familyList = utils.getListFamily();
-                return curves.filter(cModel => {
+                ret = curves.filter(cModel => {
                     if (familyList) {
                         const group = familyList.find(f => {
                             if (cModel.properties) {
@@ -562,8 +506,9 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             : false;
                     }
                 });
+                break;
             case FAMILY_SELECTION:
-                return curves.filter(cModel => {
+                ret = curves.filter(cModel => {
                     if (cModel.properties) {
                         return (
                             matchCriterion.value == cModel.properties.idFamily
@@ -571,18 +516,243 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                     }
                     return matchCriterion.value == cModel.idFamily || matchCriterion.name == cModel.family;
                 });
+                break;
             case CURVE_SELECTION:
-                return curves.filter(cModel => {
+                ret = curves.filter(cModel => {
                     if (cModel.properties) {
                         return matchCriterion.value == cModel.properties.name;
                     }
                     return matchCriterion.value == cModel.name;
                 });
+                break;
         }
+        if(ret.length) return Array.from(new Set(ret.map(c => c.name)));
         return [];
     }
+    function property(attr){
+        switch(attr){
+            case "Use":
+            if(self.visualizationMode == "Inputs"){
+                return {
+                    data: 'use',
+                    type: "dropdown",
+                    source: ['Yes', "No"]
+                }
+            }else {
+                return {
+                    data: "data.use",
+                    readOnly: true
+                }
+            }
+            case "Well":
+            if(self.visualizationMode == "Inputs"){
+                return {
+                    data: 'wellProps.name',
+                    readOnly: true
+                }
+            }else {
+                return {
+                    data: 'data.wellProps.name',
+                    readOnly: true
+                }
+            }
+            case "Dataset":
+            if(self.visualizationMode == "Inputs"){
+                return {
+                    data: 'dataset',
+                    readOnly: true
+                }
+            }else {
+                return {
+                    data: 'data.dataset',
+                    readOnly: true
+                }
+            }
+            case "Zone":
+            return {
+                data: 'properties.zone_template.name',
+                readOnly: true
+            }
+            case "Top":
+            return {
+                data: 'properties.startDepth',
+                readOnly: true
+            }
+            case "Bottom":
+            return {
+                data: 'properties.endDepth',
+                readOnly: true
+            }
+            default:
+            if(self.visualizationMode == "Inputs"){
+                let idx = self.taskConfig.inputs.findIndex(i => i.name == attr);
+                let colData = {
+                    data: 'inputs.' + idx + '.value'
+                };
+                return colData;
+            }else{
+                let idx = self.taskConfig.parameters.findIndex(i => i.name == attr);
+                let colData = {
+                    data: 'params.' + idx + '.value',
+                    type: 'numeric'
+                };
+                if(self.taskConfig.parameters[idx].choices) {
+                    colData.type = 'dropdown';
+                    colData.source = self.taskConfig.parameters[idx].choices.map(p => p.name);
+                }
+                return colData;
+            }
+        }
+    }
+    function initInputs(){
+        if (!self.inputSettings) {
+            let header = ["Use", "Well", "Dataset"].concat(self.taskConfig.inputs.map(i => i.name));
+            self.inputSettings = {
+                data: self.taskConfig.inputData || [],
+                colHeaders: header,
+                rowHeaders: true,
+                manualColumnResize: true,
+                fixedColumnsLeft: 3,
+                contextMenu: {
+                    items: {
+                        rm_col: {
+                            name: "Remove row(s)",
+                            callback: function() {
+                                let selected = dataCtrl.getSelected();
+                                let cols = new Set();
+                                selected.forEach(sel => {
+                                    let min = Math.min(sel[0], sel[2]);
+                                    let max = Math.max(sel[0], sel[2]);
+                                    let i = min;
+                                    while(i <= max){
+                                        cols.add(i);
+                                        i++;
+                                    }
+                                })
+                                let rm = Array.from(cols).sort((a, b) => b - a);
+                                rm.forEach(idx => {
+                                    let idDataset = self.taskConfig.inputData[idx].idDataset;
+                                    self.taskConfig.paramData = self.taskConfig.paramData.filter(p => p.data.idDataset != idDataset);
+                                    self.taskConfig.inputData.splice(idx, 1);
+                                })
+                                dataCtrl.updateSettings(
+                                    {data: self.taskConfig.inputData}
+                                );
+                            },
+                            disabled: function(){
+                                let selected = dataCtrl.getSelected();
+                                if(!selected) return true;
+                                return false;
+                            }
+                        },
+                        hsep1: "---------",
+                        alignment: {},
+                        hsep2: "---------",
+                        undo: {},
+                        redo: {},
+                        hsep3: "---------",
+                        copy: {},
+                        cut: {}
+                    }
+                },
+                columns: header.map(h => property(h)),
+                cells: function(row, col, prop){
+                    let cellProperties = this;
+                    if(col > 1){
+                        let r = self.taskConfig.inputData[row] || {};
+                        let inputs = r.inputs || [];
+                        let src = (inputs[col - 3] || {}).choices;
+                        if(src){
+                            cellProperties.source = src;
+                            cellProperties.type = 'dropdown';
+                        }
+
+                    }
+                    return cellProperties;
+                },
+                copyPaste: {
+                    columnsLimit: 1000,
+                    rowsLimit: 1000
+                },
+                renderAllRows: false,
+                headerTooltips: {
+                    rows: false,
+                    columns: true,
+                    onlyTrimmed: true
+                },
+                dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2','filter_by_value', 'filter_action_bar'],
+                filters: true,
+                columnSorting: true,
+                sortIndicator: true
+            };
+        }
+        // self.inputSettings.data = self.taskConfig.inputData || [];
+        if (!dataCtrl) {
+            dataCtrl = new Handsontable(
+                inputDataTable,
+                self.inputSettings
+            );
+        } else {
+            dataCtrl.updateSettings(
+                self.inputSettings
+            );
+        }
+    }
+    function initParameters(){
+        if (!self.paramSettings) {
+            let header = ["Use", "Well", "Dataset", "Zone", "Top", "Bottom"].concat(self.taskConfig.parameters.map(i => i.name));
+            self.paramSettings = {
+                colHeaders: header,
+                rowHeaders: true,
+                manualColumnResize: true,
+                fixedColumnsLeft: 3,
+                renderAllRows: false,
+                headerTooltips: {
+                    rows: false,
+                    columns: true,
+                    onlyTrimmed: true
+                },
+                columns: header.map(h => property(h)),
+                copyPaste: {
+                    columnsLimit: 1000,
+                    rowsLimit: 1000
+                },
+                dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2','filter_by_value', 'filter_action_bar'],
+                filters: true,
+                columnSorting: true,
+                sortIndicator: true
+            };
+        }
+        self.paramSettings.data = self.taskConfig.paramData || [];
+        if (!dataCtrl) {
+            dataCtrl = new Handsontable(
+                inputDataTable,
+                self.paramSettings
+            );
+        } else {
+            dataCtrl.updateSettings(
+                self.paramSettings
+            );
+        }
+    }
+    function switchSetting(){
+        if(self.visualizationMode == 'Inputs'){
+            initInputs();
+        }else{
+            initParameters();
+        }
+    }
+    this.toggleVisualizationMode = function(mode){
+        if(self.visualizationMode == mode) return;
+        self.visualizationMode = mode;
+        dataCtrl.destroy();
+        dataCtrl = undefined;
+        switchSetting();
+    }
     this.droppableSetting = function() {
-        $(`wi-task#${self.id} .wi-droppable`).droppable({
+        inputDataTable = document.getElementById(self.taskDataTreeName);
+        switchSetting();
+        $(`#${self.taskDataTreeName}`).parent().droppable({
             scope: 'wi-task',
             drop(event, ui) {
                 if (!ui.draggable) return;
@@ -591,44 +761,28 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 const type = ($(ui.draggable[0]).attr("type"));
                 let options = new Object();
                 let idWell, wellModel;
-                let paramItems = self.taskConfig.parameters.map(param => {
-                    let tempItem = {
-                        data: {
-                            childExpanded: false,
-                            label: param.name,
-                            selected: false
-                        },
-                        type: 'zonechoice'
-                    }
-                    if(param.type == 'select'){
-                        tempItem.data.choices = angular.copy(param.choices);
-                        tempItem.data.value = param.value ? param.value : (tempItem.data.choices.length
-                            ? tempItem.data.choices[0]
-                            : null);
-                    }else{
-                        tempItem.data.value = param.value;
-                    }
-                    return tempItem;
-                })
-                let zoneItems = function(wellProps){
+                let paramItems = function(){
+                    return self.taskConfig.parameters.reduce((total, param, idx) => {
+                        total[idx] = {
+                            name: param.name,
+                            value: param.value
+                        };
+                        return total;
+                    }, {});
+                }
+                let zoneItems = function(data){
                     if(self.taskConfig.zonation){
                         let zoneset = self.zone_set_list.find(zs => {
-                            return zs.name == self.taskConfig.zonation.name && zs.idWell == wellProps.idWell;
+                            return zs.name == self.taskConfig.zonation.name && zs.idWell == data.wellProps.idWell;
                         });
                         if(zoneset && zoneset.zones.length){
                             let ret = zoneset.zones.reduce((total, zone) => {
                                 if(self.taskConfig.zonation.children.findIndex(c => c == zone.zone_template.name) >= 0){
                                     total.push({
-                                            data: {
-                                                childExpanded: true,
-                                                icon: 'zone-table-16x16',
-                                                label: `${zone.zone_template.name}: ${zone.startDepth} - ${zone.endDepth}` ,
-                                                selected: false
-                                            },
-                                            type: 'zone',
-                                            children: angular.copy(paramItems),
-                                            properties: zone
-                                        })
+                                        data: data,
+                                        params: paramItems(),
+                                        properties: zone
+                                    })
                                 }
                                 return total;
                             }, [])
@@ -637,14 +791,18 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                     }
                     return [
                         {
-                            data: {
-                                childExpanded: true,
-                                icon: 'zone-table-16x16',
-                                label: `ZONENATION_ALL: ${wellProps.topDepth} - ${wellProps.bottomDepth}` ,
-                                selected: false
-                            },
-                            type: 'zone',
-                            children: paramItems
+                            data: data,
+                            params: paramItems(),
+                            properties: {
+                                endDepth: data.wellProps.bottomDepth,
+                                startDepth: data.wellProps.topDepth,
+                                zone_template: {
+                                    name: "Zonation_all",
+                                    pattern: "none",
+                                    background: "rgba(255, 155, 100, 0.5)",
+                                    foreground: 'white'
+                                }
+                            }
                         }
                     ]
                 }
@@ -687,6 +845,12 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                         ) {
                             self.taskConfig.inputData = new Array();
                         }
+                        if (
+                            !self.taskConfig.paramData ||
+                            !Array.isArray(self.taskConfig.paramData)
+                        ) {
+                            self.taskConfig.paramData = new Array();
+                        }
                         const existDataset = self.taskConfig.inputData.find(
                             i => i.idDataset == idDataset
                         );
@@ -700,7 +864,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                     const idTask = taskElement.businessObject.get('idTask');
                                     wiApiService.getTask(idTask, (task) => {
                                         const taskConfig = task.content;
-                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset)) prevTaskCurves.push(...taskConfig.outputs);
+                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset && i.use == 'Yes')) prevTaskCurves.push(...taskConfig.outputs);
                                         next();
                                     });
                                 }, (err, result) => {
@@ -710,63 +874,31 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             })
                         }
                         datasetModel.children.push(...prevTaskCurves.filter(taskCurve => taskCurve.use && !datasetModel.children.find(c => c.name == taskCurve.name)));
-                        let inputItems = self.taskConfig.inputs.map(ipt => {
+                        let inputItems = self.taskConfig.inputs.reduce((total, ipt, idx) => {
                             let tempItem = {
-                                data: {
-                                    childExpanded: false,
-                                    icon: "curve-16x16",
-                                    label: ipt.name,
-                                    choices: matchCurves(datasetModel.children, ipt),
-                                    selected: false
-                                },
-                                type: "inputchoice"
+                                name: ipt.name,
+                                choices: matchCurves(datasetModel.children, ipt),
                             };
-                            tempItem.data.value = tempItem.data.choices.length
-                                ? tempItem.data.choices[0]
+                            tempItem.value = tempItem.choices.length
+                                ? tempItem.choices[0]
                                 : null;
-                            return tempItem;
-                        });
+                                total[idx] = tempItem;
+                            return total;
+                        }, {});
 
-                        let input = {
-                            type: 'dataset',
+                        let data = {
+                            use: 'Yes',
                             idDataset: idDataset,
                             wellProps: wellProps,
                             dataset: datasetName,
-                            data: {
-                                childExpanded: true,
-                                icon: "well-16x16",
-                                label: `${wellProps.name} / ${datasetModel.properties.name}`,
-                                selected: false
-                            },
-                            children: [
-                                {
-                                    data: {
-                                        childExpanded: true,
-                                        label: 'Inputs',
-                                        selected: false
-                                    },
-                                    children: inputItems,
-                                    type: 'input'
-                                },
-                                {
-                                    data: {
-                                        childExpanded: true,
-                                        label: 'Zonation',
-                                        selected: false
-                                    },
-                                    children: zoneItems(wellProps),
-                                    type: 'zoneset'
-                                }
-                            ]
+                            inputs: inputItems
                         };
-                        if(input.children[0].children.find(c => c.data.value == null)) {
+                        if(Object.values(data.inputs).find(c => c.value == null)) {
                             toastr.error('Dataset does not reach requirement inputs');
                             return;
                         }
-                        $timeout(() => {
-                            self.taskConfig.inputData.push(input);
-                            // self.typeFilter = 'inputchoice';
-                        })
+                        self.taskConfig.inputData.push(data);
+                        self.taskConfig.paramData.push(...zoneItems(data));
                     })();
                         break;
 
@@ -782,14 +914,13 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             name: zoneset.data.label,
                             children: child
                         }
-                        self.taskConfig.inputData && self.taskConfig.inputData.forEach(input => {
-                            $timeout(() => {
-                                input.children[1].children = zoneItems(input.wellProps);
-                            })
+                        self.taskConfig.paramData = new Array();
+                        self.taskConfig.inputData && self.taskConfig.inputData.forEach(data => {
+                            self.taskConfig.paramData.push(...zoneItems(data));
                         })
-                        // self.typeFilter = 'zonechoice';
                         break;
                 }
+                switchSetting();
             }
         });
     };
@@ -859,19 +990,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         }
     }
 
-    this.taskClickFuntion = function($index, $event, node){
-        if(node && node.type == 'dataset'){
-            let rootNode = self.taskConfig.inputData;
-            if (!Array.isArray(rootNode.__SELECTED_NODES)) rootNode.__SELECTED_NODES = [];
-            if(!$event.ctrlKey) unselectAllNodes(rootNode)
-            let selectedNodes = rootNode.__SELECTED_NODES;
-            if(!selectedNodes.includes(node)) selectedNodes.push(node);
-            rootNode.__SELECTED_NODES = selectedNodes;
-            node.data.selected = true;
-            node.$index = $index;
-        }
-    }
-
     this.onToggleUseOutput = function(item){
         if(item.use == false || self.taskConfig.outputs.filter(c => c.use).length > 1){
             item.use = !item.use;
@@ -879,49 +997,24 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             toastr.error('Must have at least one output!');
         }
     }
-
-    const inputContextMenu = [
-        {
-            name: "Enabled/Disabled",
-            label: "Enabled/Disabled",
-            icon: "fa fa-exchange",
-            handler: function(){
-                let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
-                selectedNodes.forEach(node => {
-                    node.data.unused = node.data.unused ? !node.data.unused : true;
-                })
-                self.taskConfig.inputData.__SELECTED_NODES = [];
-            }
-        },
-        {
-            name: "Delete",
-            label: "Delete",
-            icon: "delete-16x16",
-            handler: function () {
-                let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
-                selectedNodes.forEach(node => {
-                    let idx = self.taskConfig.inputData.findIndex(ip => ip.$index == node.$index);
-                    if(idx > -1) self.taskConfig.inputData.splice(idx, 1);
-                })
-                self.taskConfig.inputData.__SELECTED_NODES = [];
-            }
-        },
-        {
-            name: "Interactive",
-            label: "Interactive",
-            icon: "curve-interactive-edit-16x16",
-            handler: function () {
-                let selectedNodes = self.taskConfig.inputData.__SELECTED_NODES;
-                console.log(selectedNodes);
-            }
+    this.editFamily = function(item){
+        DialogUtils.curveFamilyDialog(ModalService, wiComponentService, item.idFamily, null, (ret)=>{
+            item.idFamily = ret.idFamily;
+            item.family = ret.name;
+            self.getListUnit(item);
+        })
+    }
+    this.getListUnit = function(item, defaultUnit){
+        if(!item.idFamily) {
+            const familyList = utils.getListFamily();
+            let family = familyList.find(f => f.name == item.family);
+            item.idFamily = (family || {}).idFamily || null;
         }
-    ]
-
-    this.taskShowContextMenu = function($event, $index, node){
-        if(node && node.type == 'dataset'){
-            wiComponentService
-            .getComponent("ContextMenu")
-            .open($event.clientX, $event.clientY, inputContextMenu);
+        if(item.idFamily){
+            wiApiService.getListUnit({idFamily: item.idFamily}, (listUnit) => {
+                item.listUnit = listUnit;
+                if(!defaultUnit) item.unit = listUnit[0].name;
+            })
         }
     }
 
@@ -958,7 +1051,6 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     }
 
     this.addToFlowClick = function(){
-        const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
         DialogUtils.openFlowDialog(ModalService, function (flow) {
             if (flow.task && flow.tasks.find(t => t.name === self.name)) {
                 toastr.error('Task name existed in this flow');
@@ -985,233 +1077,11 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         });
     }
 
-    function updateChoices(newCurveProps) {
-        self.projectConfig.forEach(well => {
-            well.children.forEach(dataset => {
-                if(dataset.id == newCurveProps.idDataset && dataset.type == 'dataset'){
-                    let hasCurve = dataset.children.find(c => c.id == newCurveProps.idCurve);
-                    if(!hasCurve) $timeout(() => dataset.children.push(utils.createCurveModel(newCurveProps)));
-                }
-            })
-        })
-    }
-
-/* 
-    function saveCurve(curveInfo, callback) {
-        getFamilyList(familyList => {
-            let family = familyList.find(f => f.data.label == curveInfo.family);
-            let payload = {
-                data: curveInfo.data,
-                idDataset: curveInfo.idDataset,
-                idFamily: (family || {}).id || null
-            }
-            wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
-                if (curve.idCurve) {
-                    payload.idDesCurve = curve.idCurve;
-                    curveInfo.idCurve = curve.idCurve;
-                } else {
-                    payload.curveName = curveInfo.name
-                }
-                wiApiService.processingDataCurve(payload, function (ret) {
-                    if(!curve.idCurve) curveInfo.idCurve = ret.idCurve;
-                    let _ret = null;
-                    if(!curve.idCurve) {
-                        _ret = ret;
-                    }else{
-                        _ret = curveInfo;
-                        _ret.idFamily = payload.idFamily;
-                    }
-
-                    callback(_ret);
-                })
-            })
-        });
-    }
-    function createLogplotFromResult(inputMap, callback) {
-        let payload = {
-            idProject: self.idProject,
-            name: self.name,
-            override: true
-        };
-
-        wiApiService.post(wiApiService.CREATE_PLOT, payload, (response, err) => {
-            self.idPlot = response.idPlot;
-            let currentOrderNum = 'm';
-            async.eachOfSeries(inputMap, function(item, idx, end){
-                let wfInput = item.inputs;
-                let wfOutput = self.taskConfig.outputData[idx];
-                async.parallel([
-                    function(_end1){
-                        wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                            async.eachSeries(wfInput, function(ipt, done1) {
-                                //create line
-                                wiApiService.createLine({
-                                    idTrack: trackData.idTrack,
-                                    idCurve: ipt.id,
-                                    orderNum: currentOrderNum
-                                }, function(line){
-                                    currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                                    done1();
-                                })
-                            },(err) => {
-                                _end1();
-                            });
-                        }, {
-                            title: 'Inputs'
-                        })
-                }, function (_end2) {
-                    wiApiService.createLogTrack(response.idPlot, currentOrderNum, function (trackData) {
-                        async.eachSeries(wfOutput.outputCurves, (opt, done2) => {
-                            // create line
-                            currentOrderNum = String.fromCharCode(currentOrderNum.charCodeAt(0) + 1);
-                            wiApiService.createLine({
-                                idTrack: trackData.idTrack,
-                                idCurve: opt.idCurve,
-                                orderNum: currentOrderNum
-                            }, function(line){
-                                let bgColor = null;
-                                switch (opt.family) {
-                                    case "Net Reservoir Flag":
-                                        bgColor = "green";
-                                        break;
-                                    case "Net Pay Flag":
-                                        bgColor = "red";
-                                        break;
-                                }
-                                if (!bgColor) {
-                                    done2();
-                                    return;
-                                }
-                                wiApiService.createShading({
-                                    idTrack:trackData.idTrack,
-                                    name:opt.name + "-left",
-                                    orderNum: 'm',
-                                    negativeFill : {
-                                        display: false,
-                                        sadingType: "pattern",
-                                        pattern: {
-                                            background : "blue",
-                                            foreground : "black",
-                                            name : "none"
-                                        }
-                                    },
-                                    positiveFill: {
-                                        display: false,
-                                        sadingType: "pattern",
-                                        pattern: {
-                                            background : "blue",
-                                            foreground : "black",
-                                            name : "none"
-                                        }
-                                    },
-                                    fill:{
-                                        display:true,
-                                        shadingType:"pattern",
-                                        pattern:{
-                                            name: "none",
-                                            foreground:"black",
-                                            background:bgColor
-                                        }
-                                    },
-                                    isNegPosFill:false,
-                                    idLeftLine:null,
-                                    idRightLine:line.idLine,
-                                    leftFixedValue:0,
-                                    idControlCurve:opt.idCurve
-                                }, function(shadingProps) {
-                                    done2();
-                                });
-                            })
-                        }, (err) => {
-                            _end2();
-                        })
-                    }, {
-                        title: 'Outputs'
-                    }
-                )}
-                ], function (err, result) {
-                    if (err) toastr.error(err);
-                    end();
-                })
-            }, (err) => {
-                callback();
-            })
-        })
-    }
-
-    this.runWorkflowClick = function(){
-        let runFunc = petrophysics[self.taskConfig.function];
-        if(!runFunc) {
-            toastr.error('Not yet implement');
-            return;
-        }
-        self.taskConfig.outputData = new Array();
-        let inputMap = self.taskConfig.inputData.reduce((total, d) => {
-            if(!d.data.unused){
-                let tmp =  {
-                    inputs: d.children[0].children.map(c => c.data.value),
-                    parameters: d.children[1].children.map(c => {
-                        return {
-                            endDepth: c.endDepth,
-                            startDepth: c.startDepth,
-                            param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
-                        }
-                    }),
-                    idDataset: d.idDataset,
-                    idWell: d.wellProps.idWell,
-                    dataset: d.dataset
-                };
-
-                tmp.parameters.step = parseFloat(d.wellProps.step);
-                tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
-                tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
-                total.push(tmp);
-            }
-            return total;
-        }, [])
-
-        async.eachOf(inputMap, function(data, idx, callback){
-            let curveData = [];
-            async.eachSeries(data.inputs, function(curve, cb){
-                wiApiService.dataCurve(curve.id, function(dataCurve){
-                    curveData.push(dataCurve.map(d => parseFloat(d.x)));
-                    cb();
-                })
-            }, function(err){
-                if(!err){
-                    runFunc(curveData, data.parameters, function(ret){
-                        let wf = self.taskConfig;
-                        wf.outputData[idx] = new Object();
-                        wf.outputData[idx].idDataset = data.idDataset;
-                        wf.outputData[idx].outputCurves = new Array();
-                        wf.outputs.forEach((o, i) => {
-                            wf.outputData[idx].outputCurves[i] = Object.assign({},o);
-                            wf.outputData[idx].outputCurves[i].data = ret[i];
-                        });
-                        async.each(wf.outputData[idx].outputCurves, function(d, cb2) {
-                            d.idDataset = data.idDataset;
-                            saveCurve(d, function(curveProps) {
-                                delete d.data;
-                                updateChoices(curveProps);
-                                cb2();
-                            });
-                        }, function(err) {
-                            callback();
-                        });
-                    })
-                }
-            })
-        }, function(err){
-            if(!err){
-                createLogplotFromResult(inputMap, function(){
-                    utils.refreshProjectState();
-                });
-            }
-        })
-    }
- */
     this.runTask = function () {
-        wiPetrophysics.execute(self, utils.refreshProjectState);
+        wiPetrophysics.execute(self, () =>{
+            utils.refreshProjectState()
+            .then(() => self.refreshProject());
+        });
     }
 
     /*************************** THANG: hard code for interative track *****************************/

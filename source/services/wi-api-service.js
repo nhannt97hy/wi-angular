@@ -90,6 +90,8 @@ const DUPLICATE_CURVE = '/project/well/dataset/curve/duplicate';
 const IS_EXISTED_CURVE = '/project/well/dataset/curve/is-existed';
 
 const EXPORT_LAS2 = '/export/las2';
+const EXPORT_LAS3 = '/export/las3';
+
 
 const PROCESSING_DATA_CURVE = '/project/well/dataset/curve/processing';
 
@@ -172,11 +174,6 @@ const CREATE_SHADING = '/project/plot/track/shading/new';
 const DELETE_SHADING = '/project/plot/track/shading/delete';
 const EDIT_SHADING = '/project/plot/track/shading/edit';
 const GET_SHADING = '/project/plot/track/shading/info';
-
-const CREATE_MARKER = '/project/plot/track/marker/new';
-const EDIT_MARKER = '/project/plot/track/marker/edit';
-const GET_MARKER = '/project/plot/track/marker/info';
-const DELETE_MARKER = '/project/plot/track/marker/delete';
 
 const CREATE_ANNOTATION = '/project/plot/track/annotation/new';
 const EDIT_ANNOTATION = '/project/plot/track/annotation/edit';
@@ -368,6 +365,9 @@ const IMPORT_ZONE_TEMPLATE = '/zone-template/import';
 const EXPORT_ZONE_TEMPLATE = '/zone-template/export';
 const NEW_ZONE_TEMPLATE = '/zone-template/new';
 const GET_LIST_PATTERN = '/pattern/list';
+
+const GET_LIST_MARKER_TEMPLATE = '/marker-template/list';
+const CREATE_MARKER_SET = '/project/well/marker-set/new';
 
 function Service(baseUrl, $http, wiComponentService, Upload) {
     this.baseUrl = baseUrl;
@@ -1281,32 +1281,6 @@ Service.prototype.infoShading = function (idShading, callback) {
     this.post(GET_SHADING, dataRequest, callback);
 }
 
-Service.prototype.createMarker = function (markerObj, callback) {
-    var self = this;
-    let dataRequest = markerObj;
-    this.post(CREATE_MARKER, dataRequest, callback);
-}
-Service.prototype.editMarker = function (markerObj, callback) {
-    let self = this;
-    let dataRequest = markerObj;
-
-    this.post(EDIT_MARKER, dataRequest, callback);
-}
-Service.prototype.getMarker = function (idMarker, callback) {
-    let self = this;
-    let dataRequest = {
-        idMarker: idMarker
-    };
-    this.post(GET_MARKER, dataRequest, callback);
-}
-Service.prototype.removeMarker = function (idMarker, callback) {
-    var self = this;
-    let dataRequest = {
-        idMarker: idMarker
-    };
-    this.delete(DELETE_MARKER, dataRequest, callback);
-}
-
 Service.prototype.createAnnotation = function (annotationObj, callback) {
     var self = this;
     let dataRequest = annotationObj;
@@ -2049,9 +2023,9 @@ Service.prototype.convertCurveUnit = function (payload, callback) {
 Service.prototype.asyncGetListUnit = function (payload) {
     let self = this;
     return new Promise(function (resolve) {
-         self.post(FAMILY_UNIT_LIST, payload, function (response) {
-             resolve(response);
-         });
+        self.post(FAMILY_UNIT_LIST, payload, function (response) {
+            resolve(response);
+        });
     });
 };
 Service.prototype.asyncGetAllUnit = function (payload) {
@@ -2067,6 +2041,9 @@ Service.prototype.listTaskSpec = function (callback) {
 }
 Service.prototype.exportLas2 = function(idObjs, callback) {
     this.post(EXPORT_LAS2, {idObjs: idObjs}, callback);
+}
+Service.prototype.exportLas3 = function(idObjs, callback) {
+    this.post(EXPORT_LAS3, {idObjs: idObjs}, callback);
 }
 Service.prototype.getLasFileUrl = function (url) {
     return BASE_URL + url;
@@ -2087,5 +2064,65 @@ Service.prototype.editParameterSet = function (payload, callback) {
     this.post(PARAMETER_SET + '/edit', payload, callback);
 }
 Service.prototype.removeParameterSet = function (idParameterSet, callback) {
-    this.post(PARAMETER_SET + '/delete', { idParameterSet }, callback);
+    this.delete(PARAMETER_SET + '/delete', { idParameterSet }, callback);
+}
+
+// marker template
+const MARKER_TEMPLATE = '/marker-template';
+Service.prototype.createMarkerTemplate = function (payload, callback) {
+    this.post(MARKER_TEMPLATE + '/new', payload, callback);
+}
+Service.prototype.getMarkerTemplate = function (idMarkerTemplate, callback) {
+    this.post(MARKER_TEMPLATE + '/info', { idMarkerTemplate }, callback);
+}
+Service.prototype.listMarkerTemplate = function (callback) {
+    this.post(MARKER_TEMPLATE + '/list', null, callback);
+}
+Service.prototype.editMarkerTemplate = function (payload, callback) {
+    this.post(MARKER_TEMPLATE + '/edit', payload, callback);
+}
+Service.prototype.removeMarkerTemplate = function (idMarkerTemplate, callback) {
+    this.delete(MARKER_TEMPLATE + '/delete', { idMarkerTemplate }, callback);
+}
+
+// marker set
+const MARKER_SET = '/project/well/marker-set';
+Service.prototype.createMarkerSet = function (payload, callback) {
+    this.post(MARKER_SET + '/new', payload, callback);
+}
+Service.prototype.getMarkerSet = function (idMarkerSet, callback) {
+    this.post(MARKER_SET + '/info', { idMarkerSet }, callback);
+}
+Service.prototype.listMarkerSet = function (idWell, callback) {
+    this.post(MARKER_SET + '/list', { idWell }, callback);
+}
+Service.prototype.editMarkerSet = function (payload, callback) {
+    this.post(MARKER_SET + '/edit', payload, callback);
+}
+Service.prototype.removeMarkerSet = function (idMarkerSet, callback) {
+    this.delete(MARKER_SET + '/delete', { idMarkerSet }, callback);
+}
+
+// marker
+const MARKER = '/project/well/marker-set/marker'
+Service.prototype.createMarker = function (markerObj, callback) {
+    let dataRequest = markerObj;
+    this.post(MARKER + '/new', dataRequest, callback);
+}
+Service.prototype.getMarker = function (idMarker, callback) {
+    let dataRequest = {
+        idMarker: idMarker
+    };
+    this.post(MARKER + '/info', dataRequest, callback);
+}
+Service.prototype.editMarker = function (markerObj, callback) {
+    let dataRequest = markerObj;
+
+    this.post(MARKER + '/edit', dataRequest, callback);
+}
+Service.prototype.removeMarker = function (idMarker, callback) {
+    let dataRequest = {
+        idMarker: idMarker
+    };
+    this.delete(MARKER + '/delete', dataRequest, callback);
 }

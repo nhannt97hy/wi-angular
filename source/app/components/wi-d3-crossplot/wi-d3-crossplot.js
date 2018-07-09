@@ -1320,27 +1320,80 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
 
         if (d3.event.ctrlKey) {
             const zoomFactor = 0.1;
+            let _left = this.config.scale.left;
+            let _right = this.config.scale.right;
+            let _bottom = this.config.scale.bottom;
+            let _top = this.config.scale.top;
             if (d3.event.deltaY < 0) {
-                newScale = {
-                    left: this.config.scale.left - Math.abs(this.config.scale.left - posX) * zoomFactor,
-                    right: this.config.scale.right + Math.abs(this.config.scale.right - posX) * zoomFactor,
-                    bottom: this.config.scale.bottom + Math.abs(this.config.scale.bottom - posY) * zoomFactor,
-                    top: this.config.scale.top - Math.abs(this.config.scale.top - posY) * zoomFactor
-                };
+                if (_left > _right && _bottom > _top) {
+                    newScale = {
+                        left: _left - Math.abs(_left - posX) * zoomFactor,
+                        right: _right + Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom - Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top + Math.abs(_top - posY) * zoomFactor
+                    }
+                } else if (_left > _right && _bottom < _top) {
+                    newScale = {
+                        left: _left - Math.abs(_left - posX) * zoomFactor,
+                        right: _right + Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom + Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top - Math.abs(_top - posY) * zoomFactor
+                    }
+                } else if (_left < _right && _bottom > _top) {
+                    newScale = {
+                        left: _left + Math.abs(_left - posX) * zoomFactor,
+                        right: _right - Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom - Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top + Math.abs(_top - posY) * zoomFactor
+                    }
+                } else if (_left < _right && _bottom < _top) {
+                    newScale = {
+                        left: _left + Math.abs(_left - posX) * zoomFactor,
+                        right: _right - Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom + Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top - Math.abs(_top - posY) * zoomFactor
+                    }
+                }
                 // this.viCrossplot.pointsets.forEach(pointSet => {
                 //     pointSet.pointSize *= (1 + zoomFactor);
                 // });
             } else {
-                newScale = {
-                    left: this.config.scale.left + Math.abs(this.config.scale.left - posX) * zoomFactor,
-                    right: this.config.scale.right - Math.abs(this.config.scale.right - posX) * zoomFactor,
-                    bottom: this.config.scale.bottom - Math.abs(this.config.scale.bottom - posY) * zoomFactor,
-                    top: this.config.scale.top + Math.abs(this.config.scale.top - posY) * zoomFactor
-                };
+                if (_left > _right && _bottom > _top) {
+                    newScale = {
+                        left: _left + Math.abs(_left - posX) * zoomFactor,
+                        right: _right - Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom + Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top - Math.abs(_top - posY) * zoomFactor
+                    }
+                } else if (_left > _right && _bottom < _top) {
+                    newScale = {
+                        left: _left + Math.abs(_left - posX) * zoomFactor,
+                        right: _right - Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom - Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top + Math.abs(_top - posY) * zoomFactor
+                    }
+                } else if (_left < _right && _bottom > _top) {
+                    newScale = {
+                        left: _left - Math.abs(_left - posX) * zoomFactor,
+                        right: _right + Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom + Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top - Math.abs(_top - posY) * zoomFactor
+                    }
+                } else if (_left < _right && _bottom < _top) {
+                    newScale = {
+                        left: _left - Math.abs(_left - posX) * zoomFactor,
+                        right: _right + Math.abs(_right - posX) * zoomFactor,
+                        bottom: _bottom - Math.abs(_bottom - posY) * zoomFactor,
+                        top: _top + Math.abs(_top - posY) * zoomFactor
+                    }
+                }
                 // this.viCrossplot.pointsets.forEach(pointSet => {
                 //     pointSet.pointSize /= (1 + zoomFactor);
                 // });
             }
+            Object.keys(newScale).forEach(k => {
+                newScale[k] = Math.round(newScale[k] * 100) / 100;
+            });
             this.config.scale = newScale;
             this.viCrossplot.config = this.config;
             this.viCrossplot.doPlot();

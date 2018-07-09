@@ -729,7 +729,7 @@ Track.prototype.drawTooltipText = function(depth, showDepth) {
     if(!textContainer.node())
         textContainer = this.svgContainer
             .append('text')
-            .attr('class', 'tooltip-text')
+            .attr('class', 'tooltip-text');
 
     let textSpan = textContainer.selectAll('tspan').data(textData);
     textSpan.enter()
@@ -744,17 +744,17 @@ Track.prototype.drawTooltipText = function(depth, showDepth) {
         .remove();
 
     let bbox = textContainer.node().getBBox();
-    let rect = this.svgContainer.selectAll('rect.tooltip-rect').data(textData);
-    rect.enter()
+    let rects = this.svgContainer.selectAll('rect.tooltip-rect').data([textData]);
+    rects.enter()
         .append('rect')
         .attr('class', 'tooltip-rect');
-    rect.attr('x', 0)
+    rects.attr('x', 0)
         .attr('y', 0)
         .attr('width', bbox.width + 2 * paddingX)
         .attr('height', bbox.height + 5)
         .raise();
     textContainer.raise();
-    rect.exit()
+    rects.exit()
         .remove();
     
 

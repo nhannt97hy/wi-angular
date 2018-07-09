@@ -9,8 +9,8 @@ function CorrelationTrack(config) {
     Track.call(this, config);
     this.name = config.name;
     this.width = config.width || 80;
-    this.left = config.left;
-    this.right = config.right;
+    this.leftTrack = config.leftTrack;
+    this.rightTrack = config.rightTrack;
 }
 
 CorrelationTrack.prototype.init = function(baseElement) {
@@ -20,23 +20,84 @@ CorrelationTrack.prototype.init = function(baseElement) {
 
 CorrelationTrack.prototype.doPlot = function() {
     Track.prototype.doPlot.call(this);
+
+    // if (this.leftTrack && this.rightTrack 
+    //     && this.leftTrack.viTrack.idZoneSet && this.rightTrack.viTrack.idZoneSet) {
+    //     let leftZoneSet = this.leftTrack.getProperties().zone_set;
+    //     let rightZoneSet = this.rightTrack.getProperties().zone_set;
+    //     if(leftZoneSet && rightZoneSet) {
+    //         this.drawCorrelationZones(); 
+    //     } 
+    // } else {
+    //     this.removeAllCorrelationZones();
+    // }
+
+}
+
+CorrelationTrack.prototype.drawCorrelationZones = function () {
+    let leftZones = this.leftTrack.getProperties().zone_set.zones; 
+    let rightZones = this.rightTrack.getProperties().zone_set.zones;
+    let leftViZones = this.leftTrack.viTrack.getZones();
+    if (!leftZones || !rightZones || !leftZones.length || !rightZones.length) return;
+    let self = this;
+    let transformY = this.getTransformY();
+    let viewportX = this.getViewportX();
+    let pointsList = [];
+
+    leftZones.forEach((leftZone, leftIdx) => {
+        let rightZone = rightZones[leftIdx];
+        if(rightZone && leftZone.idZoneTemplate == rightZone.idZoneTemplate) {
+            let minYLeft = transformY(leftZone.startDepth);
+            let maxYLeft = transformY(leftZone.endDepth);
+            let minYRight = transformY(rightZone.startDepth);
+            let maxYRight = transformY(rightZone.endDepth);
+
+            let pointsGroup = [
+                {x: viewportX[0], y: minYLeft},
+                {x: viewportX[1], y: minYRight},
+                {x: viewportX[1], y: maxYRight},
+                {x: viewportX[0], y: maxYLeft},
+            ]
+            pointsList.push({
+                points: pointsGroup,
+                fillStyle: leftViZones[leftIdx].rect.attr('fill')
+            });
+        }
+    })
+
+    let polygons = this.svgContainer.selectAll('polygon.vi-correlation-zone').data(pointsList);
+    polygons.enter()
+        .append('polygon')
+            .classed('vi-correlation-zone', true);
+    polygons
+        .attr('points', d => d.points.map(point => [point.x, point.y].join(',')).join(' '))
+        .attr('fill', d => d.fillStyle);
+    polygons
+        .exit()
+        .remove();
+}
+
+CorrelationTrack.prototype.removeAllCorrelationZones = function() {
+    this.svgContainer.selectAll('polygon.vi-correlation-zone').remove();
 }
 
 CorrelationTrack.prototype.setBackgroundColor = function(color) {
     this.trackContainer
         .style('background-color', 'transparent');
-    if(this.left && this.right) {
+    if(this.leftTrack && this.rightTrack) {
         if(!this.backgroundSvgContainer) 
             this.backgroundSvgContainer = this.bodyContainer.append('svg')
                 .style('width', '100%')
                 .attr('height', '100%')
                 .attr('class', 'vi-track-background');
         let transformY = this.getTransformY();
-        if (transformY) {
-            let minYLeft = transformY(this.left.well.topDepth);
-            let maxYLeft = transformY(this.left.well.bottomDepth);
-            let minYRight = transformY(this.right.well.topDepth);
-            let maxYRight = transformY(this.right.well.bottomDepth);
+        let leftWell = this.leftTrack.getWellProps();
+        let rightWell = this.rightTrack.getWellProps();
+        if (transformY && leftWell && rightWell) {
+            let minYLeft = transformY(leftWell.topDepth);
+            let maxYLeft = transformY(leftWell.bottomDepth);
+            let minYRight = transformY(rightWell.topDepth);
+            let maxYRight = transformY(rightWell.bottomDepth);
             let viewportX = this.getViewportX();
 
             let points = [

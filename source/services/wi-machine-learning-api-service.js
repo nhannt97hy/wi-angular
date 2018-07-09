@@ -14,17 +14,18 @@ function getAuthInfo() {
 }
 getAuthInfo();
 
-const mlToolkitUrl = "http://192.168.12.103:9000/wipm/api/task";
+const mlToolkitUrl = "http://192.168.12.101:9000/wipm";
+// const mlToolkitUrl = "http://54.169.149.206:9000/wipm";
 
 const ML_TOOL_KIT = {
-    TRAIN: mlToolkitUrl + '/regression/curve/model',
-    PREDICT_CURVE: mlToolkitUrl + '/regression/curve/predict',
-    PREDICT_ANFIS: mlToolkitUrl + '/regression/anfis/predict',
-    PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict',
-    TRAIN_CRP: mlToolkitUrl + '/classification/crp/model',
-    PREDICT_CRP: mlToolkitUrl + '/classification/crp/predict',
-    TRAIN_CLASSIFICATION: mlToolkitUrl + '/classification/curve/model',
-    PREDICT_CLASSIFICATION: mlToolkitUrl + '/classification/curve/predict'
+    TRAIN: mlToolkitUrl + '/regression/model',
+    PREDICT_CURVE: mlToolkitUrl + '/regression/predict',
+    PREDICT_ANFIS: mlToolkitUrl + '/anfis/predict',
+    // PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict',
+    TRAIN_CRP: mlToolkitUrl + '/crp/model',
+    PREDICT_CRP: mlToolkitUrl + '/crp/predict',
+    TRAIN_CLASSIFICATION: mlToolkitUrl + '/classification/model',
+    PREDICT_CLASSIFICATION: mlToolkitUrl + '/classification/predict'
 }
 
 const URL = ML_TOOL_KIT;
@@ -63,7 +64,7 @@ WiMachineLearningApi.prototype.doPost = function(url, paramObj, callback) {
     }, function(err) {
         wiComponentService.getComponent('SPINNER').hide();
         console.log(err);
-        toastr.error(err.message);
+        toastr.error(err.data.message);
         callback(null);
     });
 }

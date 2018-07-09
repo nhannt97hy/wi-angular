@@ -99,7 +99,7 @@ exports.projectOpen = function (projectData) {
     queryString += LProject.shared ? '&shared=' + LProject.shared : '';
     queryString += LProject.owner ? '&owner=' + LProject.owner : '';
     window.history.pushState(LProject, LProject.name, queryString);
-    document.title = LProject.name + " - Well Insight";
+    document.title = "Project " + LProject.name + " - I2G Cloud";
     sortProjectData(projectData);
     wiComponentService.putComponent(wiComponentService.PROJECT_LOADED, projectData);
     putListFamily(function () {
@@ -266,11 +266,7 @@ exports.zoneToTreeConfig = zoneToTreeConfig;
 function zoneSetToTreeConfig(zoneSet, options = {}) {
     var zoneSetModel = new Object();
     zoneSetModel.id = zoneSet.idZoneSet;
-    zoneSetModel.properties = {
-        idWell: zoneSet.idWell,
-        idZoneSet: zoneSet.idZoneSet,
-        name: zoneSet.name,
-    };
+    zoneSetModel.properties = zoneSet;
     zoneSetModel.data = {
         childExpanded: false,
         icon: 'project-16x16-edit',
@@ -291,12 +287,61 @@ function zoneSetToTreeConfig(zoneSet, options = {}) {
     return zoneSetModel;
 }
 
+function markerToTreeConfig(marker, options = {}) {
+    var markerModel = new Object();
+    setTimeout(() => {
+        let markerSetModel = getModel('markerset', marker.idMarkerSet);
+        let wellModel = getModel('well', markerSetModel.properties.idWell);
+        markerModel.parentDataArr = [wellModel.data, markerSetModel.data];
+    });
+    if (options.isDeleted) {
+        markerModel.name = 'marker-deleted-child';
+        markerModel.type = 'marker-deleted-child';
+    } else {
+        markerModel.name = marker.marker_template.name;
+        markerModel.type = 'marker';
+    }
+    markerModel.id = marker.idMarker;
+    markerModel.properties = marker;
+    markerModel.data = {
+        icon: 'marker-properties-16x16',
+        label: `${marker.marker_template.name}: ${marker.depth}`
+    }
+    markerModel.parent = 'markerset' + marker.idMarkerSet;
+    return markerModel;
+}
+
+function markerSetToTreeConfig(markerSet, options = {}) {
+    var markerSetModel = new Object();
+    markerSetModel.id = markerSet.idMarkerSet;
+    markerSetModel.properties = markerSet;
+    markerSetModel.data = {
+        childExpanded: false,
+        icon: 'project-16x16-edit',
+        label: markerSet.name
+    }
+    if (options.isDeleted) {
+        markerSetModel.name = 'markerset-deleted-child';
+        markerSetModel.type = 'markerset-deleted-child';
+        return markerSetModel;
+    }
+    markerSetModel.name = markerSet.name;
+    markerSetModel.type = 'markerset';
+    markerSetModel.children = new Array();
+    if (!markerSet.markers || !markerSet.markers.length) return markerSetModel;
+    markerSet.markers.forEach(function (marker) {
+        markerSetModel.children.push(markerToTreeConfig(marker));
+    });
+    return markerSetModel;
+}
+exports.markerSetToTreeConfig = markerSetToTreeConfig;
+
 exports.zoneSetToTreeConfig = zoneSetToTreeConfig;
 exports.createZoneSet = function createZoneSet(idWell, callback) {
     let wiComponentService = __GLOBAL.wiComponentService;
     let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let selectedNode = getSelectedNode();
-    if (selectedNode && selectedNode.type == 'zonesets') {
+    if (selectedNode && selectedNode.type == 'user-defined') {
         idWell = selectedNode.properties.idWell;
     }
     if (!idWell) return;
@@ -924,41 +969,44 @@ function createHistogramsNode(parent, options = {}) {
     return histogramsModel;
 }
 
-function createZoneSetsNode(parent, options = {}) {
-    let zoneSetsModel = new Object();
+function createUserDefinedNode(parent, options = {}) {
+    let userDefinedModel = new Object();
     if (options.isDeleted) {
-        zoneSetsModel.name = 'zonesets-deleted';
-        zoneSetsModel.type = 'zonesets-deleted';
-        zoneSetsModel.data = {
+        userDefinedModel.name = 'zonesets-deleted';
+        userDefinedModel.type = 'zonesets-deleted';
+        userDefinedModel.data = {
             childExpanded: false,
             icon: 'user-define-16x16',
             label: "Zone Sets"
         };
     } else {
-        zoneSetsModel.name = 'zonesets';
-        zoneSetsModel.type = 'zonesets';
-        zoneSetsModel.data = {
+        userDefinedModel.name = 'user_defined';
+        userDefinedModel.type = 'user_defined';
+        userDefinedModel.data = {
             childExpanded: false,
             icon: 'user-define-16x16',
             label: "User Defined"
         };
     }
-    zoneSetsModel.children = new Array();
-    if (!parent || !parent.zonesets) return zoneSetsModel;
-    zoneSetsModel.properties = {
+    userDefinedModel.children = new Array();
+    if (!parent || !parent.zonesets) return userDefinedModel;
+    userDefinedModel.properties = {
         idWell: parent.idWell,
-        totalItems: parent.zonesets.length
+        totalItems: parent.zonesets.length + (parent.marker ? parent.markers.length:0)
     }
     if (options.isDeleted) {
         parent.zonesets.forEach(function (zoneSet) {
-            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet, {isDeleted: true}));
+            userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet, {isDeleted: true}));
         });
     } else {
         parent.zonesets.forEach(function (zoneSet) {
-            zoneSetsModel.children.push(zoneSetToTreeConfig(zoneSet));
+            userDefinedModel.children.push(zoneSetToTreeConfig(zoneSet));
+        });
+        parent.markersets && parent.markersets.forEach(function (markerset) {
+            userDefinedModel.children.push(markerSetToTreeConfig(markerset)); 
         });
     }
-    return zoneSetsModel;
+    return userDefinedModel;
 }
 
 function createComboviewsNode(parent) {
@@ -1042,12 +1090,12 @@ function wellToTreeConfig(well, isDeleted) {
                 wellModel.children.push(datasetToTreeConfig(dataset, false, wellModel));
             });
         }
-        let zoneSetsNode = createZoneSetsNode(well);
+        let userDefinedNode = createUserDefinedNode(well);
         // let logplotNode = createLogplotsNode(well, {wellModel});
         // let crossplotNode = createCrossplotsNode(well);
         // let histogramNode = createHistogramsNode(well);
         let comboviewNode = createComboviewsNode(well);
-        wellModel.children.push(zoneSetsNode);
+        wellModel.children.push(userDefinedNode);
         // wellModel.children.push(logplotNode);
         // wellModel.children.push(crossplotNode);
         // wellModel.children.push(histogramNode);
@@ -1180,7 +1228,7 @@ function updateDustbinConfig(dustbin) {
     dustbinModel.children.push(createWellsNode(dustbin));
     dustbinModel.children.push(createDatasetsNode(dustbin));
     dustbinModel.children.push(createCurvesNode(dustbin));
-    dustbinModel.children.push(createZoneSetsNode(dustbin, {isDeleted: true}));
+    dustbinModel.children.push(createUserDefinedNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createZonesNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createLogplotsNode(dustbin, {isDeleted: true}));
     dustbinModel.children.push(createCrossplotsNode(dustbin, {isDeleted: true}));
@@ -1190,8 +1238,7 @@ function updateDustbinConfig(dustbin) {
 
 exports.updateDustbinConfig = updateDustbinConfig;
 
-
-function visit(node, callback, options) {
+function visit(node, callback, options = {}) {
     if (options && options.found) return;
     if (node.data && node.data.deleted) return;
     if (options && options.path && options.path.push)
@@ -1201,6 +1248,10 @@ function visit(node, callback, options) {
     }
     if (node.children) {
         node.children.forEach(function (child) {
+            visit(child, callback, options);
+        });
+    } else if (Array.isArray(node)) {
+        node.forEach(function (child) {
             visit(child, callback, options);
         });
     }
@@ -1674,6 +1725,21 @@ function findHistogramModelById(idHistogram) {
         }
     });
     return his;
+}
+
+exports.findCrossplotModelById = findCrossplotModelById;
+
+function findCrossplotModelById(idCrossplot) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let rootNodes = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig;
+    if (!rootNodes || !rootNodes.length) return;
+    let cross = null;
+    visit(rootNodes[0], function (node) {
+        if (node.type == 'crossplot' && node.id == idCrossplot) {
+            cross = node;
+        }
+    });
+    return cross;
 }
 
 exports.findComboviewModelById = function (idComboview) {
@@ -2717,10 +2783,31 @@ function sortObject(o) {
     return sorted;
 }
 
-exports.openZonemanager = function (item) {
+exports.openZonesetmanager = function (item) {
     let wiComponentService = __GLOBAL.wiComponentService;
-    let DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
-    DialogUtils.zoneManagerDialog(__GLOBAL.ModalService, item);
+    const layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
+    let idWell;
+    if(item.type == 'project') {
+        idWell = false;
+    } else if (item.type == 'well') {
+        idWell = item.idWell;
+    } else if(item.type == 'user_defined') {
+        idWell = item.properties.idWell;
+    }
+    let childItem = layoutManager.getItemById('Zoneset-manager');
+    if(childItem) {
+        layoutManager.getItemById('right').removeChild(childItem);        
+    }
+    console.log('childItem', childItem);
+    layoutManager.putTabRight({
+        id: 'Zoneset-manager',
+        title: 'Zoneset Manager',
+        tabIcon: 'zone-management-16x16',
+        componentState: {
+            html: `<wi-zone-manager idwell=${idWell}></wi-zone-manager>`,
+            name: 'wiZoneManager'
+        }
+    })
 }
 /*exports.getScaleCurveIfNotFamily = function(idCurve) {
     __GLOBAL.wiApiService.scaleCurve(idCurve, function(rangeObj) {
@@ -3074,7 +3161,7 @@ exports.convertRangeDepthToIndex = convertRangeDepthToIndex;
 function getZoneSetsInWell(well) {
     let zoneSets = [];
     well.children.forEach(function (child) {
-        if (child.type == 'zonesets') zoneSets = angular.copy(child.children);
+        if (child.type == 'user-defined') zoneSets = angular.copy(child.children);
     })
     return zoneSets;
 }
@@ -3267,3 +3354,182 @@ function getWellColor(idWell) {
     return wellColorMap.getColor(idWell);
 }
 exports.getWellColor = getWellColor;
+
+exports.onChangeHandlers =  {
+    'well' : function(props) {
+        __GLOBAL.wiApiService.editWell(props, function () {
+            refreshProjectState().then(function () {
+                console.log("update well")
+            });
+        });
+    },
+    'dataset' : function(props) {
+        __GLOBAL.wiApiService.editDataset(props, function () {
+            refreshProjectState().then(function () {
+                console.log("update dataset");
+            });
+        });
+    },
+    'curve' : function(props) {
+        __GLOBAL.wiApiService.editCurve(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update curve");
+            });
+        })
+    },
+    'd3-logtrack' : function(props) {
+        let props_bk = angular.copy(props);
+        delete props_bk.wellProps;
+        __GLOBAL.wiApiService.editTrack(props_bk, function (res) {
+            __GLOBAL.wiComponentService.emit('update-logtrack-' + res.idTrack);
+            console.log("update logtrack")
+        })
+    },
+    'zoneset' : function(props) {
+        __GLOBAL.wiApiService.editZoneSet(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update zoneset");
+            });
+        })
+    },
+    'zone' : function(props) {
+        __GLOBAL.wiApiService.editZone(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update zone");
+            });
+        })
+    },
+    'markerset' : function(props) {
+        __GLOBAL.wiApiService.editMarkerSet(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update markerset");
+            });
+        })
+    },
+    'marker' : function(props) {
+        __GLOBAL.wiApiService.editMarker(props, function(){
+            refreshProjectState().then(function () {
+                console.log("update marker");
+            });
+        })
+    },
+    'd3-depthtrack' : function(props) {
+        let props_bk = angular.copy(props);
+        delete props_bk.justification;
+        delete props_bk.depthType;
+        delete props_bk.unitType;
+        props_bk.justification = props.justification.model;
+        props_bk.depthType = props.depthType.model;
+        props_bk.unitType = props.unitType.model;
+        __GLOBAL.wiApiService.editDepthTrack(props_bk, function (res) {
+            __GLOBAL.wiComponentService.emit('update-depthtrack-' + res.idDepthAxis, res);
+            console.log("update depthtrack")
+        })
+    },
+}
+function getIdObjectFromNode (node, rootNode) {
+    let wiComponentService = __GLOBAL.wiComponentService;
+    let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
+    let idObject = {
+        idProject: projectLoaded.idProject,
+        idWell: "",
+        datasets: []
+    }
+    if(!rootNode) {
+        rootNode = wiComponentService.getComponent(wiComponentService.WI_EXPLORER).treeConfig[0].children;
+    }
+    if (node.type === "well") {
+        idObject.idWell = node.id;
+        for (let dataset of node.children) {
+            if(dataset.type == 'dataset'){
+                let idDatasetObj = {
+                    idDataset: dataset.id,
+                    idCurves: []
+                }
+                for (let curve of dataset.children) {
+                    if(curve.type == 'curve') {
+                        let idCurve = curve.id;
+                        idDatasetObj.idCurves.push(idCurve);
+                    }
+                }
+                __GLOBAL.$timeout(function () {
+                    idObject.datasets.push(idDatasetObj);
+                })
+            }
+        }
+        return idObject;
+    } else if (node.type == "dataset") {
+        if(node.properties && node.properties.idWell) {
+            idObject.idWell = node.properties.idWell; 
+            let idDatasetObj = {
+                idDataset: node.id,
+                idCurves: []
+            }
+            for (let curve of node.children) {
+                if(curve.type == 'curve') {
+                    let idCurve = curve.id;            
+                    idDatasetObj.idCurves.push(idCurve);
+                }
+            }
+            __GLOBAL.$timeout(function () {
+                idObject.datasets.push(idDatasetObj);
+            })        
+            return idObject;           
+        }   
+        return;        
+    }
+    else if (node.type == "curve") {
+        if(node.properties && node.properties.idDataset) {
+            let parentWell = rootNode.find(function(w) {
+                return w.children.find(function(d) {return d.id == node.properties.idDataset});
+            })
+            idObject.idWell = parentWell.id;
+            let idDatasetObj = {
+                idDataset: node.properties.idDataset,
+                idCurves: []
+            }
+            idDatasetObj.idCurves.push(node.id);
+            __GLOBAL.$timeout(function () {
+                idObject.datasets.push(idDatasetObj);
+            })
+            return idObject;
+        }
+        return;
+    }
+    return;
+}
+exports.exportNodeToLas2 = function (node, rootNode){
+    let idObjects = [];
+    let idObject = getIdObjectFromNode(node, rootNode);
+    idObjects.push(idObject);
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.exportLas2(idObjects, function (response) {
+        if (response) {
+            for (r of response) {
+                if (r !== null) {
+                    let url = wiApiService.getLasFileUrl(r.path);
+                    let a = $("<a></a>").attr("href", url);
+                    a.click();
+                }
+            }
+        }
+    });
+}
+
+exports.exportNodeToLas3 = function (node, rootNode){
+    let idObjects = [];
+    let idObject = getIdObjectFromNode(node, rootNode);
+    idObjects.push(idObject);
+    let wiApiService = __GLOBAL.wiApiService;
+    wiApiService.exportLas3(idObjects, function (response) {
+        if (response) {
+            for (r of response) {
+                if (r !== null) {
+                    let url = wiApiService.getLasFileUrl(r.path);
+                    let a = $("<a></a>").attr("href", url);
+                    a.click();
+                }
+            }
+        }
+    });
+}

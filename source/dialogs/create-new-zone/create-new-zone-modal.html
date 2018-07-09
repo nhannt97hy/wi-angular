@@ -37,14 +37,14 @@
                                 <h5 class="modal-infomation-title">
                                     <span class="user-define-16x16"></span>&nbsp;Template
                                 </h5>
-                                <div class="create-new-zone-modal-treeview col-sm-5" style="padding:5px; border: 1px solid #ddd">
+                                <div class="create-new-zone-modal-treeview col-sm-5" style="padding:5px; border: 1px solid #ddd;height:290px">
                                     <h4 style="margin:0; padding: 5px; font-size:15px; margin-bottom: 5px;">Template Tree</h4>
                                     <div style='background-color:white;display: flex;padding-left: 7px; border: 1px solid #eee; margin-bottom: 15px'>
                                         <i style="font-size: 16px; line-height:28px;z-index:1;color:#aaa;float: left;" class="fa fa-search"></i>
                                         <input type='text' id="createNewZoneSearch" style='flex:1; width:100%; padding-left: 32px;color:steelblue;border: none'
                                             ng-model="wiModal.filter" placeholder="Search">
                                     </div>
-                                    <wi-scroll id-scroll="'createNewZoneModalTreeScroll'" style='flex:1;display:flex;flex-direction:column;height: 30%;' up-trigger='wiModal.upTrigger'
+                                    <wi-scroll id-scroll="'createNewZoneModalTreeScroll'" style='flex:1;display:flex;flex-direction:column;height: calc(100% - 80px);' up-trigger='wiModal.upTrigger'
                                         down-trigger='wiModal.downTrigger'>
                                         <wi-base-treeview name="createNewZoneModalTreeview" config="wiModal.config" container="wiModal" on-click-function="wiModal.clickFunction"
                                             filter="{{wiModal.filter}}">
@@ -146,8 +146,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" ng-disabled="(!modalNewProject.$dirty || (modalNewProject.$dirty && modalNewProject.$invalid))"
-                    ng-click="wiModal.onOkButtonClicked()">
+                <button type="button" class="btn btn-default" ng-click="wiModal.onOkButtonClicked()" ng-disabled="!wiModal.returnZone.startDepth || !wiModal.returnZone.endDepth">
                     <span class="ok-16x16"></span>&nbsp;OK
                 </button>
                 <button type="button" ng-click="wiModal.onCancelButtonClicked()" class="btn btn-default">

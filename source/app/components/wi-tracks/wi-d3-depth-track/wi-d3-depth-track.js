@@ -33,10 +33,31 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }
     
     this.openPropertiesDialog = function () {
-        DialogUtils.depthTrackPropertiesDialog(ModalService, self.viTrack, function (props) {
+        /*DialogUtils.depthTrackPropertiesDialog(ModalService, self.viTrack, function (props) {
             if (props) {
                 console.log('depthTrackPropertiesData', props);
             }
+        });*/
+        console.log("openPropertiesDialog");
+    }
+    this.openPropertiesWindow = function () {
+        let props = self.viTrack.getProperties();
+        props.width = Utils.pixelToInch(props.width);
+        props.justification = {
+            model : self.viTrack.getProperties().justification,
+            selection : ['Left', 'Center', 'Right']
+        };
+        props.depthType = {
+            model : self.viTrack.getProperties().depthType,
+            selection : ['MD', 'TVD', 'TVDSS']
+        };
+        props.unitType = {
+            model : self.viTrack.getProperties().unitType,
+            selection : ['Cm', 'Dm', 'M', 'Km', 'In', 'Ft', 'Yd', 'Mi']
+        };
+        wiComponentService.emit("update-properties", {
+            type: 'd3-depthtrack', 
+            props: props
         });
     }
 
@@ -59,6 +80,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         self.registerTrackMouseEventHandlers();
         self.getProperties().controller = self;
         if(self.wiD3Ctrl) self.wiD3Ctrl.registerTrackDragCallback(self);
+        wiComponentService.on('update-depthtrack-' + self.viTrack.id, function(props) {
+            props.width = Utils.inchToPixel(props.width);
+            self.viTrack.setProperties(props);
+            self.viTrack.doPlot(true);  
+        });
     }
 
     this.$doCheck = function() {
