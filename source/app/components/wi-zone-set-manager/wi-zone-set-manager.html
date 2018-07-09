@@ -84,7 +84,7 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="zone in wiZoneSetManager.zones | orderBy: wiZoneSetManager.zoneOrder" ng-init="zone.flag = false" ng-class="{'selected': zone.flag}">
-                            <td style="width: 10%;" class="border-right-gray" ng-click="wiZoneSetManager.selectZoneToggle(zone)">
+                            <td style="width: 10%;" class="border-right-gray" ng-click="wiZoneSetManager.selectZoneToggle(zone, $event)">
                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
                             </td>
                             <td width="20%">

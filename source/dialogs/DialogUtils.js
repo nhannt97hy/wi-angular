@@ -150,4 +150,4 @@ exports.fillPatternDialog = require('./fill-pattern-modal');
 exports.zoneSetEditDialog = require('./zone-set-edit-modal');
 exports.newMarkerSetDialog = require('./new-marker-set-modal');
 exports.markerSetEditDialog = require('./marker-set-edit-modal');
-
+exports.createNewMarkerDialog = require('./create-new-marker-modal');

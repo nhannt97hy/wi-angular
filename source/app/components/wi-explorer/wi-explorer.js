@@ -34,7 +34,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             });
             $timeout(function(){
                 document.getElementById('treeContent').scrollTo(0,ScrollTmp);
-            },100);
+            }, 10);
         });
         wiComponentService.on(wiComponentService.DUSTBIN_REFRESH_EVENT, function () {
             wiApiService.getDustbin(self.treeConfig[0].id, function (dustbin) {

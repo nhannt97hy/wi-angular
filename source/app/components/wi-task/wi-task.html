@@ -149,7 +149,7 @@
                                     <input type="number" class="form-control" ng-model="item.value" step="any"
                                     ng-if="item.type=='number'" style="flex:2;">
                                     <select class='form-control' ng-model='item.value'
-                                    ng-options="choice as choice.name for choice in item.choices track by choice.value"
+                                    ng-options="choice.name as choice.name for choice in item.choices track by choice.value"
                                     ng-if='item.type=="select"' style="flex:2;"></select>
                                 </li>
                             </ul>
@@ -229,20 +229,20 @@
                             </wi-tabset>
                         </div>
                     </div>
-                    <div class='wi-droppable' style="flex:2;margin-left: 5px;" wi-element-ready="wiTask.droppableSetting();">
-                        <div class="panel panel-default" style='height: 100%;display:flex;flex-direction: column;'>
+                    <div style="flex:2;margin-left: 5px;display: flex;">
+                        <div class="panel panel-default" style='flex: 1;display:flex;flex-direction: column;margin-bottom: 0;'>
                             <div class="panel-heading">
-                                <label class="btn btn-default"
-                                ng-class='{active: wiTask.typeFilter=="inputchoice"}'
-                                style="margin-right: 5px;">
-                                    <input type="radio" name="filterBy" class="display-none" value='inputchoice' ng-model="wiTask.typeFilter">
+                                <button class="btn btn-default"
+                                ng-class='{active: wiTask.visualizationMode=="Inputs"}'
+                                style="margin-right: 5px;"
+                                ng-click="wiTask.toggleVisualizationMode('Inputs')">
                                     <span>Inputs</span>
-                                </label>
-                                <label class="btn btn-default" ng-class='{active: wiTask.typeFilter=="zonechoice"}'
-                                style="margin-right: 5px;">
-                                    <input type="radio" name="filterBy" class="display-none" value='zonechoice' ng-model="wiTask.typeFilter">
-                                    <span>Zonation</span>
-                                </label>
+                                </button>
+                                <button class="btn btn-default" ng-class='{active: wiTask.visualizationMode=="Parameters"}'
+                                style="margin-right: 5px;"
+                                ng-click="wiTask.toggleVisualizationMode('Parameters')">
+                                    <span>Parameters</span>
+                                </button>
                                 <label class='btn btn-default' 
                                     ng-class='{active: wiTask.showWFControlLine}'
                                     style='margin-right: 5px;'
@@ -250,18 +250,8 @@
                                     <span>Show Track</span>
                                 </label>
                             </div>
-                            <div style='margin: 5px;position: relative;'>
-                                <i style="position:absolute;line-height:2.5em;left:0.5em;font-size:14px;" class="fa fa-search"></i>
-                                <input type='text' class='form-control' style='text-indent:1.5em;' ng-model='wiTask.inputFilter' size='10'>
-                            </div>
-                            <div style="flex: 1; position: relative; overflow-y: auto;">
-                                <wi-base-treeview id='{{wiTask.taskDataTreeName}}' name='{{wiTask.taskDataTreeName}}' style="margin-left: 0px;"
-                                config='wiTask.taskConfig.inputData'
-                                on-click-function='wiTask.taskClickFuntion'
-                                show-context-menu-function='wiTask.taskShowContextMenu'
-                                filter='{{wiTask.inputFilter}}' filter-by='{{wiTask.typeFilter}}'
-                                ></wi-base-treeview>
-                                <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET OR ZONESET HERE</div>
+                            <div style="flex: 1; overflow: hidden;">
+                                <div id='{{wiTask.taskDataTreeName}}' wi-element-ready="wiTask.droppableSetting()" class='active'></div>
                             </div>
                         </div>
                     </div>

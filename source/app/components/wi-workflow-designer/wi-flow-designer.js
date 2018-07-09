@@ -95,7 +95,7 @@ function Controller($scope, $timeout, wiApiService, wiComponentService, ModalSer
       e.stopPropagation();
       e.preventDefault();
       const file = e.dataTransfer.files[0];
-      if (!file.name.includes('.bpmn')) return;
+      if (!file.name.endsWith('.bpmn')) return;
       const reader = new FileReader();
       reader.onload = function(e) {
         const xml = e.target.result;

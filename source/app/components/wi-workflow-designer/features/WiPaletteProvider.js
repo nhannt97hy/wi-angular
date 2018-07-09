@@ -44,12 +44,12 @@ function WiPaletteProvider(injector) {
     for (const key of Object.keys(actions)) {
       if (!actionsToKeep.includes(key)) delete actions[key];
     }
-    actions['create.serviceTask'] = createAction(
-      'bpmn:ServiceTask',
-      'activity',
-      'bpmn-icon-service-task',
-      'Create Service Task',
-    );
+    // actions['create.serviceTask'] = createAction(
+    //   'bpmn:ServiceTask',
+    //   'activity',
+    //   'bpmn-icon-service-task',
+    //   'Create Service Task',
+    // );
     return actions;
   };
 }

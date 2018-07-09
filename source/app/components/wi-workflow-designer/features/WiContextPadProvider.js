@@ -58,28 +58,20 @@ function WiContextPadProvider(injector, wiFlowDesigner, modeling) {
         delete actions['connect'];
       } else {
         // !endevent
-        actions['append.append-service-task'] = appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task');
-        const idTask = getBusinessObject(element).get('idTask');
-        if (idTask) {
-          actions['edit-task'] = {
-            group: 'edit',
-            className: 'bpmn-icon-service',
-            title: 'Edit Task',
-            action: {
-              click: function(event, element) {
-                wiFlowDesigner.openTask(idTask, element);
-              },
-            },
-          };
-          // actions['delete'] = Object.assign(actions['delete'], {
-          //   action: {
-          //     click: function (event, element) {
-          //       modeling.removeElements([element]);
-          //       wiFlowDesigner.deleteTask(idTask, element);
-          //     },
-          //   },
-          // })
-        }
+        // actions['append.append-service-task'] = appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task');
+        // const idTask = getBusinessObject(element).get('idTask');
+        // if (idTask) {
+        //   actions['edit-task'] = {
+        //     group: 'edit',
+        //     className: 'bpmn-icon-service',
+        //     title: 'Edit Task',
+        //     action: {
+        //       click: function(event, element) {
+        //         wiFlowDesigner.openTask(idTask, element);
+        //       },
+        //     },
+        //   };
+        // }
       }
     }
     const actionsOrder = ['append.append-service-task', 'edit-task'];

@@ -32,26 +32,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }, {
         separator: '1'
     }];
-    /*
-    this.showContextMenu = function (event) {
-        if(self.isImageZoneRightClicked) {
-            _imageZoneOnRightClick();
-            self.isImageZoneRightClicked = false;
-        } else {
-            let items = self.wiD3Ctrl.getCommonContextMenuItems();
-            let track = self.viTrack;
-            items.trackItemsCreation.push({
-                name: "AddImage",
-                label: "Add Image",
-                icon: "image-16x16",
-                handler: function () {
-                    track.setMode('AddImageZone');
-                }
-            });
-            self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
-        }
-    }
-    */
+
     this.getContextMenu = function () {
         if (self.isImageZoneRightClicked) {
             self.isImageZoneRightClicked = false;
@@ -60,6 +41,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
         }
     }
+
     this.openPropertiesDialog = function () {
         let viTrack = self.viTrack;
         let trackProps = viTrack.getProperties();
@@ -82,6 +64,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             }
         });
     }
+
     this.openPropertiesWindow = function () {
         let viTrack = self.viTrack;
         let props = viTrack.getProperties();
@@ -92,6 +75,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             props: props
         });
     }
+
     this.addImageZoneToTrack = function (track, config) {
         if (!track || !track.addImageZone) return;
         let imgzone = track.addImageZone(config, track);
@@ -139,6 +123,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
         return imgzone;
     }
+
     this.onTrackKeyPressCallback = function () {
         if(!d3.event) return;
         let track = self.viTrack;
@@ -159,10 +144,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 return;
         }
     }
+
     this.$onInit = function () {
         wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
+
     }
+
     this.onReady = function () {
         self.viTrack = createVisualizeImageTrack(self.getProperties());
         self.registerTrackCallback();
@@ -293,6 +281,16 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         });
     }
 
+    this.drawImageZone = function (imgzone, props, isNewDraw) {
+        if (!imgzone) return;
+        let imageConfig = {
+            fill: props.fill,
+            imageUrl: props.imageUrl,
+            smartDisplay: props.smartDisplay
+        };
+        imgzone.drawImage(imageConfig, isNewDraw);
+    }
+
     function createVisualizeImageTrack(imageTrack) {
         let config = angular.copy(imageTrack);
         config.id = imageTrack.idImageTrack;
@@ -311,11 +309,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         wiComponentService.putComponent('vi-image-track-' + config.id, track);
         return track;
     }
+
     function showImage() {
         let imgzone = self.viTrack.getCurrentImageZone();
         DialogUtils.showImageDialog(ModalService, imgzone.getProperties(), self.wiD3Ctrl.trackComponents, function () {
         });
     }
+
     function imageProperties() {
         let viTrack = self.viTrack;
         let track = viTrack;
@@ -355,6 +355,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             });
         });
     }
+
     function _getImageZoneContextMenu() {
         let viTrack = self.viTrack;
         let imgzone = viTrack.getCurrentImageZone();
@@ -405,20 +406,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         ]);
         */
     }
+
     function _imageZoneOnDoubleClick() {
         imageProperties();
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
-    this.drawImageZone = function (imgzone, props, isNewDraw) {
-        if (!imgzone) return;
-        let imageConfig = {
-            fill: props.fill,
-            imageUrl: props.imageUrl,
-            smartDisplay: props.smartDisplay
-        };
-        imgzone.drawImage(imageConfig, isNewDraw);
-    }
+
 }
 
 let app = angular.module(moduleName, []);

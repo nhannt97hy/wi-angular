@@ -25,6 +25,7 @@ wi-logplot.json
 wi-crossplot.json
 wi-histogram.json
 wi-explorer.json
+source/js/configFile.json
 .DS_Store
 
 # Logplot generate

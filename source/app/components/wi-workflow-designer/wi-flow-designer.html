@@ -4,7 +4,9 @@
   <wi-button icon="arrow-down-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.downloadDiagram" tooltip="Download Diagram"></wi-button>
   <wi-button icon="play-16x16" disabled="!wiFlowDesigner.flow.content" handler="wiFlowDesigner.execute" tooltip="Run Flow"></wi-button>
 </wi-toolbar>
-<div class="title" ng-bind="wiFlowDesigner.flow.name || 'New Flow'"></div>
+<div class="title">
+  <input type="text" ng-model="wiFlowDesigner.flow.name">
+</div>
 <div class="content" id="flow{{wiFlowDesigner.id}}">
   <div class="message error">
     <div class="note">

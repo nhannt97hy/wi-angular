@@ -37,30 +37,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     }, {
         separator: '1'
     }];
-    /*
-    this.showContextMenu = function (event) {
-        if(self.isZoneRightClicked) {
-            _zoneOnRightClick();
-            self.isZoneRightClicked = false;
-        } else {
-            let items = self.wiD3Ctrl.getCommonContextMenuItems();
-            let track = self.viTrack;
-            items.trackItemsCreation.push({
-                name: "AddZone",
-                label: "Add Zone",
-                icon: "zone-edit-16x16",
-                handler: function () {
-                    if (!track.idZoneSet) {
-                        Utils.error('Zone Set is required');
-                        return;
-                    }
-                    track.setMode('AddZone');
-                }
-            });
-            self.wiD3Ctrl.setContextMenu(self.wiD3Ctrl.buildContextMenu(items));
-        }
-    }
-    */
+
     this.getContextMenu = function () {
         if(self.isZoneRightClicked) {
             self.isZoneRightClicked = false;
@@ -69,6 +46,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             return _(contextMenu).concat(self.wiD3Ctrl.getContextMenu()).value();
         }
     }
+
     this.openPropertiesDialog = function () {
         // const zoneTrackProps = self.viTrack.getProperties();
         // zoneTrackProps.width = Utils.pixelToInch(zoneTrackProps.width);
@@ -102,12 +80,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
 
         function updateAllZones(zoneset) {
             return new Promise(function(resolve, reject) {
-                // updating all zones
                 self.viTrack.removeAllZones();
                 if(zoneset && zoneset.idZoneSet) {
                     wiApiService.getZoneSet(zoneset.idZoneSet, function(zonesetResponse) {
                         for (let zone of zonesetResponse.zones) {
-                            self.addZoneToTrack(self.viTrack, zone);
+                            self.addZoneToTrack(zone);
                         }
                         resolve();
                     })
@@ -139,7 +116,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             self.viTrack.updateHeader();
         }
     }
-    this.addZoneToTrack = function (track, config, controller) {
+
+    this.addZoneToTrack = function (config) {
+        let track = self.viTrack;
         if (!track || !track.addZone) return;
         if (!config || !config.idZoneSet) {
             config.idZoneSet = self.viTrack.isZoneTrack() ? self.viTrack.idZoneSet : undefined;
@@ -155,17 +134,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             }
             if (d3.event.button == 2) {
                 self.isZoneRightClicked = true;
-                if (controller)
-                    controller.isZoneRightClicked = true;
-                // _zoneOnRightClick();
             }
         });
         track.onZoneHeaderMouseDown(zone, function () {
             if (d3.event.button == 2) {
                 self.isZoneRightClicked = true;
-                if (controller)
-                    controller.isZoneRightClicked = true;
-                // _zoneOnRightClick();
             }
         });
         zone.on('dblclick', _zoneOnDoubleClick);
@@ -203,6 +176,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         })
         return zone;
     }
+
     this.onTrackKeyPressCallback = function () {
         if (!d3.event) return;
         let track = self.viTrack;
@@ -225,15 +199,15 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 if (track && track.setMode) track.setMode(null);
                 return;
         }
-
     }
 
     this.$onInit = function () {
         wiD3AbstractTrack.prototype.$onInit.call(self);
         self.plotAreaId = self.name + 'PlotArea';
     }
+
     this.onReady = function () {
-        self.viTrack = createVisualizeZoneTrack(self.getProperties());
+        self.viTrack = _createVisualizeZoneTrack(self.getProperties());
         self.registerTrackCallback();
         self.registerTrackHorizontalResizerDragCallback();
         self.viTrack.on('keydown', self.onTrackKeyPressCallback);
@@ -243,15 +217,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         wiComponentService.on(wiComponentService.DELETE_MODEL, self.onDelete);
         
         self.update();
-        /*
-        wiApiService.getZoneSet(self.viTrack.idZoneSet, function (zoneset) {
-            for (let zone of zoneset.zones) {
-                self.addZoneToTrack(self.viTrack, zone);
-            }
-        })
-        */
 
-        // Utils.listenEvent('zone-updated', function(eventData) {
         wiComponentService.on('zone-updated', function(eventData) {
             console.log('zone updated event', eventData, eventData == self.viTrack);
             if(eventData && eventData.isZoneTrack && eventData.isZoneTrack()) {
@@ -289,7 +255,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 zone = track.getCurrentZone();
 
                 if (!zone) {
-                    zone = self.addZoneToTrack(track, {
+                    zone = self.addZoneToTrack({
                         minY: track.minY,
                         maxY: track.maxY
                     });
@@ -378,6 +344,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             self.update();
         })
     }
+
     this.onDelete = function(model) {
         console.log('on delete zone track', model);
         switch(model.type) {
@@ -398,10 +365,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             default: 
                 break;
         }
-    
     }
 
-    function createVisualizeZoneTrack (trackProperties) {
+    function _createVisualizeZoneTrack (trackProperties) {
         let config = angular.copy(trackProperties);
         config.id = trackProperties.idZoneTrack;
         config.name = trackProperties.title;
@@ -420,10 +386,11 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         wiComponentService.putComponent('vi-zone-track-' + config.id, track );
         return track;
     }
+
 	function _splitZone(track, zone) {
         let props = Utils.objClone(zone.getProperties());
-        let zone1 = self.addZoneToTrack(track, {});
-        let zone2 = self.addZoneToTrack(track, {});
+        let zone1 = self.addZoneToTrack();
+        let zone2 = self.addZoneToTrack();
 
         zone1.setProperties(props);
         zone2.setProperties(props);
@@ -460,6 +427,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             })
         })
     }
+
     function _getZoneContextMenu() {
         let zone = self.viTrack.getCurrentZone();
         return [
@@ -480,7 +448,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 name: "ZoneProperties",
                 label: "Zone Properties",
                 icon: "zone-edit-16x16",
-                handler: zoneProperties
+                handler: _zoneProperties
             }, {
                 name: "RemoveZone",
                 label: "Remove Zone",
@@ -531,7 +499,7 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 name: "ZoneProperties",
                 label: "Zone Properties",
                 icon: "zone-edit-16x16",
-                handler: zoneProperties
+                handler: _zoneProperties
             }, {
                 name: "RemoveZone",
                 label: "Remove Zone",
@@ -561,7 +529,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         ]);
         */
     }
-    function zoneProperties() {
+
+    function _zoneProperties() {
         let _currentTrack = self.viTrack;
         let zone = _currentTrack.getCurrentZone();
         DialogUtils.zonePropertiesDialog(ModalService, zone.getProperties(), function (props) {
@@ -575,8 +544,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             })
         })
     }
+
     function _zoneOnDoubleClick() {
-        zoneProperties();
+        _zoneProperties();
         // Prevent track properties dialog from opening
         d3.event.stopPropagation();
     }
@@ -600,9 +570,10 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
             const zoneConfig = angular.copy(sourceZone);
             zoneConfig.idZoneTrack = viZoneTrack.id;
             // let wiD3 = wiComponentService.getComponent('logplot' + viZoneTrack.idPlot).getwiD3Ctrl();
-            self.addZoneToTrack(viZoneTrack, zoneConfig, self.wiD3Ctrl.getComponentCtrlByViTrack(viZoneTrack));
+            self.addZoneToTrack(zoneConfig);
         })
     }
+
     function _plotZoneSet(sourceZoneTrack) {
         let layoutManager = wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER);
         // plot this logplot
