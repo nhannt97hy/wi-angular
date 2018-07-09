@@ -1102,109 +1102,14 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
         minorTicks: 5,
         showZoneSet: true
     }
-    this.currentInput = {
-        zoneset: null,
-        curves: [],
-        well: {
-            topDepth: 0,
-            bottomDepth: 10000,
-        }
-    }
-    function updateTrack(config) {
-        let timerHandler = null;
-        if(!self.logTrackProps.controller) {
-            timerHandler = setInterval(function() {
-                if(self.logTrackProps.controller) {
-                    clearInterval(timerHandler);
-                    updateTrack();
-                } else {
-                    console.log('not ready yet');
-                }
-            }, 100);
-        } else {
-            // Ready for update track
-            console.log('ready for update track with config: ', config);
-            updateFunction(config);
-        }
 
-        function updateFunction(config) {
-            if(config.curves) {
-                self.currentInput.well = utils.findWellByCurve(config.curves[0].idCurve);
-                self.logTrackProps.lines = config.curves;
-                /*
-                async.eachSeries(config.curves, function(curveProps, cb) {
-                    wiApiService.dataCurve(curveProps.idCurve, function(dataCurve) {
-                        let controller = self.logTrackProps.controller;
-                        controller.addCurveToTrack(dataCurve, curveProps);
-                        cb();
-                    })
-                }, function(err) {
-                    self.currentInput.zoneset = self.taskConfig.inputData[0].children.find(c => c.type == 'zoneset');
-                })
-                */
-            }
-            self.currentInput.zoneset = self.taskConfig.inputData[0].children.find(c => c.type == 'zoneset');
-        }
-    }
     this.onShowTrackButtonClicked = function() {
-        self.showWFControlLine = !self.showWFControlLine;
-        console.log('task config: ', self.taskConfig);
-        if(!self.showWFControlLine) return;
-        // get input map for hard code data
-        let inputMap = self.taskConfig.inputData.map(d => {
-            let tmp =  {
-                inputs: d.children[0].children.map(c => c.data.value),
-                parameters: d.children[1].children.map(c => {
-                    return {
-                        endDepth: c.endDepth,
-                        startDepth: c.startDepth,
-                        name: c.name,
-                        fill: c.fill,
-                        params: c.children.map(cc => {
-                                return {
-                                    label: cc.data.label,
-                                    value: cc.data.value
-                                }
-                        }).filter(p => typeof(p.value) == 'number')
-                    }
-                }),
-                idDataset: d.idDataset,
-                idWell: d.wellProps.idWell,
-                dataset: d.dataset
-            };
-
-            tmp.parameters.step = parseFloat(d.wellProps.step);
-            tmp.parameters.topDepth = parseFloat(d.wellProps.topDepth);
-            tmp.parameters.bottomDepth = parseFloat(d.wellProps.bottomDepth);
-            return tmp;
-        });
-        console.log('input map: ', inputMap);
-        console.log('task config', self.taskConfig);
-        let config = {};
-        let promises = [];
-        promises.push(new Promise(function(resolve) {
-            let inputs = inputMap[0].inputs.map(node => node.properties);
-            async.eachSeries(inputs, function(inputCurve, callback) {
-                wiApiService.infoCurve(inputCurve.idCurve, function(curveInfo) {
-                    if(!config.curves || !Array.isArray(config.curves)) config.curves = [];
-                    config.curves.push(curveInfo);
-                    callback();
-                });
-            }, function(err) {
-                resolve();
-            })
-        }));
-        promises.push(new Promise(function(resolve) {
-            config.zoneset = {
-                name: 'zoneset',
-                zones: inputMap[0].parameters
-            };
-            resolve();
-        }))
-        Promise.all(promises)
-            .then(function() {
-                updateTrack(config);
-            });
+        this.logTrackProps.zone_set = {
+            zones: self.taskConfig.paramData.map(zoneNode => {
+                zoneNode.properties.params = Object.values(zoneNode.params);
+                return zoneNode.properties;
+            }) 
+        }
     }
     /*************************** END OF HARD CODE *****************************/
 }

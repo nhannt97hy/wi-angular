@@ -17,6 +17,10 @@ SvgHelper.prototype.line = function(x1, y1, x2, y2) {
     return line;
 }
 
+SvgHelper.prototype.drawSinLine = function() {
+
+}
+
 SvgHelper.prototype.circle = function(x, y) {
     let circle = this.svgGroup.append('circle')
         .attr('cx', x)

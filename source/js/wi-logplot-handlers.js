@@ -29,7 +29,7 @@ exports.SaveAsLogplotButtonClicked = function () {
             type: type
         });
         let a = document.createElement('a');
-        let fileName = wiLogplot.getLogplotModelAsync().properties.name + '.plot';
+        let fileName = wiLogplot.getLogplotModel().properties.name + '.plot';
         a.download = fileName;
         a.href = URL.createObjectURL(blob);
         a.style.display = 'none';

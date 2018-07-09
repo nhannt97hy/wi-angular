@@ -105,13 +105,23 @@ Marker.prototype.init = function(plotContainer) {
     Drawing.prototype.init.call(this, plotContainer);
 
     this.svgContainer = plotContainer.select('.vi-track-svg-container');
+
     // this.svgContainer = plotContainer.append('svg')
     //     .attr('class', 'vi-track-drawing vi-marker-container');
+
     this.svgGroup = this.svgContainer.append('g')
         .classed('vi-marker-svg-group', true);
 
-    this.line = this.svgGroup.append('line')
-        .attr('class', 'vi-marker-line');
+    this.lineConfig = d3.line()
+        .x(d => d.x)
+        .y(d => d.y)
+        .curve(d3.curveBasis);
+
+    this.path = this.svgGroup.append('path')
+        .attr('class', 'vi-marker-line')
+        .attr('fill', 'none');
+
+
     this.highlightGroup = this.svgGroup.append('g');
     this.symbol = null;
     this.nameLabel = this.svgGroup.append('text')
@@ -121,29 +131,56 @@ Marker.prototype.init = function(plotContainer) {
         .attr('class', 'vi-marker-depth');
 }
 
-Marker.prototype.doPlot = function(highlight) {
-    Drawing.prototype.doPlot.call(this, highlight);
+Marker.prototype.prepareLineData = function() {
     let transformY = this.getTransformY();
     let viewportX = this.getViewportX();
-
     let y = transformY(this.depth);
     let minX = d3.min(viewportX);
     let maxX = d3.max(viewportX);
 
-    this.line
-        .attr('x1', minX)
-        .attr('y1', y)
-        .attr('x2', maxX)
-        .attr('y2', y)
+    let data = [];
+
+    if(this.marker_template.lineStyle == 'sin') {
+        let range = maxX - minX;
+        let step = 5; // 7px
+        let waveHeight = 5; // 5px
+        let maxLoop = Math.ceil(range / (4*step));
+        for(let i = 0; i <= maxLoop; ++i) {
+            let stepData = [
+                {x: minX + step * i * 4, y: y},
+                {x: minX + step * (i * 4 + 1), y: y + waveHeight},
+                {x: minX + step * (i * 4 + 2), y: y},
+                {x: minX + step * (i * 4 + 3), y: y - waveHeight}
+            ];
+            data = data.concat(stepData);
+        }
+    } else {
+        data = [
+            { x: minX, y: y }, 
+            { x: maxX, y: y }
+        ];
+    }
+    return data;
+}
+
+Marker.prototype.doPlot = function(highlight) {
+    Drawing.prototype.doPlot.call(this, highlight);
+
+
+    let data = this.prepareLineData();
+
+    this.path
+        .datum(data)
+        .attr('d', this.lineConfig)
         .attr('stroke', this.marker_template.color || 'black')
         .attr('stroke-width', this.lineWidth || 1)
-        .attr('stroke-dasharray', JSON.parse(this.marker_template.lineStyle || '[]').join(','));
+        .attr('stroke-dasharray', this.marker_template.lineStyle=='sin' ? '':JSON.parse(this.marker_template.lineStyle || '[]').join(','));
 
         // .attr('stroke', this.lineColor || 'black')
         // .attr('stroke-width', this.lineWidth || 1)
         // .attr('stroke-dasharray', this.lineDash || '');
 
-    this.drawSymbol();
+    // this.drawSymbol();
     this.drawText();
     this.updateHighlight();
     this.highlightGroup.style('display', highlight ? 'block' : 'none');

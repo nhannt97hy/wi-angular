@@ -209,7 +209,7 @@ function Controller($scope, wiComponentService, wiApiService, $timeout) {
         let min = wiD3Controller.getMinDepth();
         let low = min + (max - min) * self.slidingBarState.top / 100.;
         let high = low + (max - min) * self.slidingBarState.range / 100.;
-        let logplotModel = await self.wiLogplotCtrl.getLogplotModelAsync(); 
+        let logplotModel = self.wiLogplotCtrl.getLogplotModel(); 
         let newLogplot = {
             idPlot: logplotModel.properties.idPlot,
             cropDisplay: self.wiLogplotCtrl.cropDisplay,
