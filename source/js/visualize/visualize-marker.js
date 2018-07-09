@@ -174,7 +174,7 @@ Marker.prototype.doPlot = function(highlight) {
         .attr('d', this.lineConfig)
         .attr('stroke', this.marker_template.color || 'black')
         .attr('stroke-width', this.lineWidth || 1)
-        .attr('stroke-dasharray', JSON.parse(this.marker_template.lineStyle || '[]').join(','));
+        .attr('stroke-dasharray', this.marker_template.lineStyle=='sin' ? '':JSON.parse(this.marker_template.lineStyle || '[]').join(','));
 
         // .attr('stroke', this.lineColor || 'black')
         // .attr('stroke-width', this.lineWidth || 1)
