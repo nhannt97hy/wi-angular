@@ -6,7 +6,7 @@ let wiD3AbstractTrack = require('./wi-d3-abstract-track.js');
 Controller.prototype = Object.create(wiD3AbstractTrack.prototype);
 Controller.prototype.constructor = Controller;
 
-function Controller ($scope, wiComponentService, wiApiService, ModalService, $element) {
+function Controller ($scope, wiComponentService, wiApiService, ModalService, $element, $timeout) {
     wiD3AbstractTrack.call(this, wiApiService, wiComponentService);
     let self = this;
     let Utils = wiComponentService.getComponent(wiComponentService.UTILS);
@@ -74,7 +74,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         // zoneTrackProps.width = Utils.pixelToInch(zoneTrackProps.width);
         DialogUtils.zoneTrackPropertiesDialog(ModalService, this.getProperties());
     }
-
+    this.openPropertiesWindow = function () {
+        let props = self.viTrack.getProperties();
+        props.width = utils.pixelToInch(props.width);
+        wiComponentService.emit("update-properties", {
+            type: 'd3-zonetrack', 
+            props: props
+        });
+    }
     this.isIdle = false;
     this.update = function (baseSource) {
         self.isIdle = false;
@@ -163,6 +170,8 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
         });
         zone.on('dblclick', _zoneOnDoubleClick);
         zone.header.on('dblclick', _zoneOnDoubleClick);
+        zone.on('click', _zoneOnClick);
+        zone.header.on('click', _zoneOnClick);
         zone.onLineDragEnd(function () {
             let zones = track.adjustZonesOnZoneChange(zone);
             let updatedZones = zones[0];
@@ -346,6 +355,17 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
                 })
             })
         );
+        $timeout(function() {
+            wiComponentService.on('update-zonetrack-' + self.getProperties().idZoneTrack, function() {
+               self.update();   
+            });
+
+            zone = track.getCurrentZone();
+            if (!zone) return;
+            wiComponentService.on('update-zone-' + zone.idZone, function(props) {   
+                self.update();
+            });
+        })
     }
 
     this.removeZoneSetFromTrack = function() {
@@ -558,6 +578,19 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $el
     function _zoneOnDoubleClick() {
         zoneProperties();
         // Prevent track properties dialog from opening
+        d3.event.stopPropagation();
+    }
+
+    function zonePropertiesWindow() {
+        let _currentTrack = self.viTrack;
+        let props = _currentTrack.getCurrentZone().getProperties();
+        wiComponentService.emit("update-properties", {
+            type: 'zone', 
+            props: props
+        });
+    }
+    function _zoneOnClick() {
+        zonePropertiesWindow();
         d3.event.stopPropagation();
     }
     function _plotZoneTrack(sourceViZoneTrack, viZoneTrack) {

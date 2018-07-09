@@ -292,7 +292,7 @@
     "zone": {
         "name": {
             "translation": "Name",
-            "option": "use",
+            "option": "readonly",
             "section": "Header",
             "typeSpec": null,
             "refSpec": null
@@ -330,7 +330,7 @@
         "name": {
             "translation": "Name",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": null,
             "refSpec": null
         }
@@ -339,21 +339,21 @@
         "name": {
             "translation": "Name",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": null,
             "refSpec": null
         },
         "depth": {
             "translation": "Depth",
             "option": "readonly",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": null,
             "refSpec": null
         },
         "showOnTrack": {
             "translation": "Show On Track",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": "checkbox",
             "refSpec": null
         }
@@ -362,56 +362,267 @@
         "title": {
             "translation": "Title",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": null,
             "refSpec": null
         },
         "showTitle": {
             "translation": "Show Title",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": "checkbox",
             "refSpec": null
         },
         "justification": {
             "translation": "Justification",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": "wiselect",
             "refSpec": null
         },
         "color": {
             "translation": "Background color",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": "wicolor",
             "refSpec": null
         },
         "width": {
             "translation": "Width (inchs)",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": null,
             "refSpec": null
         },
         "depthType": {
             "translation": "Depth Type",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": "wiselect",
             "refSpec": null
         },
         "unitType": {
             "translation": "Unit Type",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
             "typeSpec": "wiselect",
             "refSpec": null
         },
         "decimals": {
             "translation": "Decimals",
             "option": "use",
-            "section": "Properties",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        }
+    },
+    "d3-zonetrack": {
+        "showTitle": {
+            "translation": "Show Title",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": "checkbox",
+            "refSpec": null
+        },
+        "title": {
+            "translation": "Title",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "topJustification": {
+            "translation": "Justification",
+            "option": "use",
+            "section": "Header",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "color": {
+            "translation": "Background color",
+            "option": "use",
+            "section": "Color",
+            "typeSpec": "wicolor",
+            "refSpec": null
+        },
+        "width": {
+            "translation": "Width (inchs)",
+            "option": "use",
+            "section": "Geometry",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "zoomFactor": {
+            "translation": "Zoom Factor",
+            "option": "use",
+            "section": "Geometry",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "well": {
+            "translation": "Well",
+            "option": "use",
+            "section": "Parameters",
+            "typeSpec": null,
+            "refSpec": null
+        }
+    },
+    "d3-imagetrack": {
+        "showTitle": {
+            "translation": "Show Title",
+            "option": "use",
+            "section": "General",
+            "typeSpec": "checkbox",
+            "refSpec": null
+        },
+        "title": {
+            "translation": "Title",
+            "option": "use",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "topJustification": {
+            "translation": "Justification",
+            "option": "use",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "background": {
+            "translation": "Background color",
+            "option": "use",
+            "section": "General",
+            "typeSpec": "wicolor",
+            "refSpec": null
+        },
+        "width": {
+            "translation": "Width (inchs)",
+            "option": "use",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "zoomFactor": {
+            "translation": "Zoom Factor",
+            "option": "use",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        }
+    },
+    "line": {
+        "name": {
+            "translation": "Name",
+            "option": "readonly",
+            "section": "Header",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "showHeader": {
+            "translation": "Show Header",
+            "option": "readonly",
+            "section": "Header",
+            "typeSpec": "checkbox",
+            "refSpec": null
+        },
+        "minValue": {
+            "translation": "Left Value",
+            "option": "readonly",
+            "section": "Scales",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "maxValue": {
+            "translation": "Right Value",
+            "option": "readonly",
+            "section": "Scales",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "minDepth": {
+            "translation": "Min Depth",
+            "option": "readonly",
+            "section": "Scales",
+            "typeSpec": "wiref",
+            "refSpec": "well.bottomDepth"
+        },
+        "maxDepth": {
+            "translation": "Max Depth",
+            "option": "readonly",
+            "section": "Scales",
+            "typeSpec": "wiref",
+            "refSpec": "well.topDepth"
+        },
+        "displayAs": {
+            "translation": "Display As",
+            "option": "readonly",
+            "section": "Display Type",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "wrapMode": {
+            "translation": "Wrap Mode",
+            "option": "readonly",
+            "section": "Display Type",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "displayMode": {
+            "translation": "Display Mode",
+            "option": "readonly",
+            "section": "Display Type",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "displayType": {
+            "translation": "Display Type",
+            "option": "readonly",
+            "section": "Display Type",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "blockPosition": {
+            "translation": "Block Position",
+            "option": "readonly",
+            "section": "Display Type",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "unit": {
+            "translation": "Unit",
+            "option": "readonly",
+            "section": "Display Type",
+            "typeSpec": null,
+            "refSpec": null
+        }
+    },
+    "shading": {
+        "name": {
+            "translation": "Name",
+            "option": "readonly",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "rightCurve": {
+            "translation": "Curve 1",
+            "option": "readonly",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "leftCurve": {
+            "translation": "Curve 2",
+            "option": "readonly",
+            "section": "General",
+            "typeSpec": null,
+            "refSpec": null
+        },
+        "leftFixedValue": {
+            "translation": "Fixed Value",
+            "option": "readonly",
+            "section": "General",
             "typeSpec": null,
             "refSpec": null
         }

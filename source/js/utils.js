@@ -3389,9 +3389,9 @@ exports.onChangeHandlers =  {
         })
     },
     'zone' : function(props) {
-        __GLOBAL.wiApiService.editZone(props, function(){
+        __GLOBAL.wiApiService.editZone(props, function(res){
             refreshProjectState().then(function () {
-                console.log("update zone");
+                console.log("update zoneset");
             });
         })
     },
@@ -3422,6 +3422,18 @@ exports.onChangeHandlers =  {
             console.log("update depthtrack")
         })
     },
+    'd3-zonetrack' : function (props) {
+        __GLOBAL.wiApiService.editZoneTrack(props, function (res) {
+            __GLOBAL.wiComponentService.emit('update-zonetrack-' + res.idZoneTrack);
+            console.log("update zonetrack")
+        })
+    },
+    'd3-imagetrack' : function (props) {
+        __GLOBAL.wiApiService.editImageTrack(props, function (res) {
+            __GLOBAL.wiComponentService.emit('update-imagetrack-' + res.idImageTrack, res);
+            console.log("update imagetrack")
+        })
+    }
 }
 function getIdObjectFromNode (node, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;
