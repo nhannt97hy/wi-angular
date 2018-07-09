@@ -21,16 +21,16 @@ CorrelationTrack.prototype.init = function(baseElement) {
 CorrelationTrack.prototype.doPlot = function() {
     Track.prototype.doPlot.call(this);
 
-    // if (this.leftTrack && this.rightTrack 
-    //     && this.leftTrack.viTrack.idZoneSet && this.rightTrack.viTrack.idZoneSet) {
-    //     let leftZoneSet = this.leftTrack.getProperties().zone_set;
-    //     let rightZoneSet = this.rightTrack.getProperties().zone_set;
-    //     if(leftZoneSet && rightZoneSet) {
-    //         this.drawCorrelationZones(); 
-    //     } 
-    // } else {
-    //     this.removeAllCorrelationZones();
-    // }
+    if (this.leftTrack && this.rightTrack 
+        && this.leftTrack.viTrack.idZoneSet && this.rightTrack.viTrack.idZoneSet) {
+        let leftZoneSet = this.leftTrack.getProperties().zone_set;
+        let rightZoneSet = this.rightTrack.getProperties().zone_set;
+        if(leftZoneSet && rightZoneSet) {
+            this.drawCorrelationZones(); 
+        } 
+    } else {
+        this.removeAllCorrelationZones();
+    }
 
 }
 
@@ -68,10 +68,12 @@ CorrelationTrack.prototype.drawCorrelationZones = function () {
     let polygons = this.svgContainer.selectAll('polygon.vi-correlation-zone').data(pointsList);
     polygons.enter()
         .append('polygon')
-            .classed('vi-correlation-zone', true);
+            .classed('vi-correlation-zone', true)
+            .attr('stroke', 'black')
+            .attr('stroke-width', 0.5);
     polygons
         .attr('points', d => d.points.map(point => [point.x, point.y].join(',')).join(' '))
-        .attr('fill', d => d.fillStyle);
+        .attr('fill', d => d.fillStyle)
     polygons
         .exit()
         .remove();

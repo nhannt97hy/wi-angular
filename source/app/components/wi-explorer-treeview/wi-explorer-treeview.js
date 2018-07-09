@@ -71,7 +71,7 @@ function WiExpTreeController(
                         console.log('drop curve into slidingBar', errorCode);
                         if (errorCode > 0) {
                             wiSlidingBarCtrl.createPreview(idCurve);
-                            let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
+                            let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModel();
                             let logplotRequest = angular.copy(logplotModel.properties);
                             logplotRequest.referenceCurve = idCurve;
                             wiApiService.editLogplot(logplotRequest, function () {

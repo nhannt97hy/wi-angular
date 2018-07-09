@@ -19,7 +19,8 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         self.isFitWindow = false;
         self.isReferenceLine = true;
         self.isTooltip = true;
-        self.logplotModel = await self.getLogplotModelAsync();
+        // self.logplotModel = await self.getLogplotModelAsync();
+        self.logplotModel = self.getLogplotModel();
         self.wellModel = utils.getModel('well', self.logplotModel.properties.idWell);
         if (self.showToolbar == undefined || self.showToolbar == null) self.showToolbar = true;
         if (self.containerName == undefined || self.containerName == null) self.containerName = '';
@@ -49,9 +50,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         this.getSlidingbarCtrl().updateScale(scale);
     }
 
-    this.getLogplotModelAsync = function () {
-        return utils.findLogplotModelByIdAsync(self.id);
-    };
+    this.getLogplotModel = function() {
+        return utils.findLogplotModelById(self.id);
+    } 
+
+    // this.getLogplotModelAsync = function () {
+    //     return utils.findLogplotModelByIdAsync(self.id);
+    // };
 
     this.getSlidingbarCtrl = function () {
         return self.slidingBar = wiComponentService.getComponent(self.slidingbarName);

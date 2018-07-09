@@ -1366,7 +1366,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     console.log('drop curve into slidingBar', errorCode);
                     if (errorCode > 0) {
                         wiSlidingBarCtrl.createPreview(idCurve);
-                        let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
+                        let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModel();
                         let logplotRequest = angular.copy(logplotModel.properties);
                         logplotRequest.referenceCurve = idCurve;
                         apiService.editLogplot(logplotRequest, function () {
@@ -3275,6 +3275,7 @@ function getPattern(callback) {
 
 exports.getPattern = getPattern;
 
+/*
 exports.getWellAsync = function getWellAsync (idWell) {
     let wellModel;
     try {
@@ -3297,6 +3298,7 @@ exports.getWellAsync = function getWellAsync (idWell) {
     }
     return wellModel;
 }
+
 exports.findLogplotModelByIdAsync = function(idLogplot) {
     let logplotModel;
     try {
@@ -3320,6 +3322,7 @@ exports.findLogplotModelByIdAsync = function(idLogplot) {
     }
     return logplotModel;
 }
+*/
 
 var wellColorMap = (function () {
     let colorTable;
