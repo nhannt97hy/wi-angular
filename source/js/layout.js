@@ -4,7 +4,7 @@ let scopeObj;
 let layoutConfig = {
     settings: {
         hasHeaders: true,
-        showMaximiseIcon: false,
+        showMaximiseIcon: true,
         showCloseIcon: false,
         showPopoutIcon: false
     },

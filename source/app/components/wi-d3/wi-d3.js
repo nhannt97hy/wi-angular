@@ -635,7 +635,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     this.init = _.debounce(function () {
         Utils.getPalettes(async function (paletteList) {
             let logplotCtrl = self.wiLogplotCtrl;
-            let logplotModel = await logplotCtrl.getLogplotModelAsync();
+            let logplotModel = logplotCtrl.getLogplotModel();
             let wiD3Ctrl = self;
             let well = Utils.findWellByLogplot(logplotModel.properties.idPlot);
             wiApiService.getLogplot(logplotModel.id,

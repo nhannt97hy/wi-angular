@@ -38,10 +38,19 @@
             <label title="Apply changes" class="btn" ng-disabled="!$ctrl.hasChanges" ng-click="$ctrl.saveChanges()">
                 <i class="ti-check"></i>
             </label>
-            <label title="Delete selected templates" class="btn" ng-click="$ctrl.deleteSelectedMarkers()" ng-disabled="!$ctrl.getSelectedMarkers().length">
+            <label title="Swap two markers" class='btn' ng-click="$ctrl.swapTwoMarkers()" ng-disabled="$ctrl.selectedMarkers.length !== 2">
+                <i class="ti-arrows-vertical"></i>
+            </label>
+            <label title="Move Zone up" class='btn' ng-click="$ctrl.moveMarkerUp()" ng-disabled="!$ctrl.selectedMarkers.length">
+                <i class="ti-arrow-up"></i>
+            </label>
+            <label title="Move Zone down" class='btn' ng-click="$ctrl.moveMarkerDown()" ng-disabled="!$ctrl.selectedMarkers.length">
+                <i class="ti-arrow-down"></i>
+            </label>
+            <label title="Delete selected templates" class="btn" ng-click="$ctrl.deleteSelectedMarkers()" ng-disabled="!$ctrl.selectedMarkers.length">
                 <i class="ti-close"></i>
             </label>
-            <label title="Create new template" class="btn" ng-click="$ctrl.addMarker()" ng-disabled="!$ctrl.selectedMarkerSet || $ctrl.selectedMarkerSet.length && $ctrl.getSelectedMarkers().length !== 1">
+            <label title="Create new template" class="btn" ng-click="$ctrl.addMarker()" ng-disabled="!$ctrl.selectedMarkerSet || $ctrl.selectedMarkerSet.length && $ctrl.selectedMarkers.length !== 1">
                 <i class="ti-plus"></i>
             </label>
             <label title="Refresh templates list" class="btn" ng-click="$ctrl.selectMarkerSet($ctrl.selectedIdMarkerSet)" ng-disabled="!$ctrl.selectedMarkerSet">
@@ -72,8 +81,7 @@
                     </td>
                     <td>
                         <svg height="28" width="100%" style="padding: 0 12px">
-                            <line x1="0" y1="14" x2="100%" y2="14" stroke-dasharray="{{marker.markerTemplate.lineStyle.join(',')}}"
-                                    style="stroke: {{marker.markerTemplate.color}};"></line>
+                            <line x1="0" y1="14" x2="100%" y2="14" stroke-width="{{marker.markerTemplate.lineWidth}}" stroke-dasharray="{{marker.markerTemplate.lineStyle.dashArray.join(',')}}" stroke="{{marker.markerTemplate.color}}"></line>
                         </svg>
                     </td>
                     <td>{{marker.markerTemplate.description}}</td>

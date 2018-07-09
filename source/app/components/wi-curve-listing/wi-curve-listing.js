@@ -202,6 +202,9 @@ function Controller( $scope, wiComponentService, wiApiService, ModalService, $ti
                     rows: [],
                     indicators: false,
                     copyPasteEnabled: false
+                },
+                fillHandle: {
+                    autoInsertRow: false
                 }
             };
 

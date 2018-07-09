@@ -149,7 +149,7 @@
                                     <input type="number" class="form-control" ng-model="item.value" step="any"
                                     ng-if="item.type=='number'" style="flex:2;">
                                     <select class='form-control' ng-model='item.value'
-                                    ng-options="choice.name as choice.name for choice in item.choices track by choice.value"
+                                    ng-options="choice as choice for choice in item.choices"
                                     ng-if='item.type=="select"' style="flex:2;"></select>
                                 </li>
                             </ul>
@@ -250,8 +250,9 @@
                                     <span>Show Track</span>
                                 </label>
                             </div>
-                            <div style="flex: 1; overflow: hidden;">
-                                <div id='{{wiTask.taskDataTreeName}}' wi-element-ready="wiTask.droppableSetting()" class='active'></div>
+                            <div style="flex: 1; overflow: hidden;position: relative;">
+                                <div id='{{wiTask.taskDataTreeName}}' wi-element-ready="wiTask.droppableSetting()"></div>
+                                <div ng-if="!wiTask.taskConfig.inputData.length" class='dropLabel'>DROP DATASET OR ZONESET HERE</div>
                             </div>
                         </div>
                     </div>
@@ -259,11 +260,10 @@
                         <wi-d3-log-track
                             name='logTrackControlLine'
                             properties='wiTask.logTrackProps'
-                            zoneset='wiTask.currentInput.zoneset'
-                            min-y='wiTask.currentInput.well.topDepth'
-                            max-y='wiTask.currentInput.well.bottomDepth'
                             style='display: flex; flex-direction: column; outline: none;'
                         ></wi-d3-log-track>
+                            <!-- min-y='wiTask.currentInput.well.topDepth' -->
+                            <!-- max-y='wiTask.currentInput.well.bottomDepth' -->
                     </div>
                 </div>
             </wi-tab>
