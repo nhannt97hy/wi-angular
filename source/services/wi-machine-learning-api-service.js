@@ -14,17 +14,14 @@ function getAuthInfo() {
 }
 getAuthInfo();
 
-//const machineLearningUrl = "http://54.169.13.92:3002/atore/api"
-//const mlToolkitUrl = "http://54.169.13.92:4002/wipm/api/task/regression";
-const mlToolkitUrl = "http://13.251.24.65:4002/wipm/api/task";
-
+const mlToolkitUrl = "http://192.168.12.103:9000/wipm/api/task";
 
 const ML_TOOL_KIT = {
     TRAIN: mlToolkitUrl + '/regression/curve/model',
     PREDICT_CURVE: mlToolkitUrl + '/regression/curve/predict',
     PREDICT_ANFIS: mlToolkitUrl + '/regression/anfis/predict',
     PREDICT_FACIES:  mlToolkitUrl + '/classification/faces/predict',
-    TRAIN_CRP: mlToolkitUrl + '/classification/crp/train',
+    TRAIN_CRP: mlToolkitUrl + '/classification/crp/model',
     PREDICT_CRP: mlToolkitUrl + '/classification/crp/predict',
     TRAIN_CLASSIFICATION: mlToolkitUrl + '/classification/curve/model',
     PREDICT_CLASSIFICATION: mlToolkitUrl + '/classification/curve/predict'
