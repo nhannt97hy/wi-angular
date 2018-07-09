@@ -535,12 +535,12 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
             if(self.visualizationMode == "Inputs"){
                 return {
                     data: 'use',
-                    type: "dropdown",
-                    source: ['Yes', "No"]
+                    type: "checkbox"
                 }
             }else {
                 return {
                     data: "data.use",
+                    type: "checkbox",
                     readOnly: true
                 }
             }
@@ -683,7 +683,8 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2','filter_by_value', 'filter_action_bar'],
                 filters: true,
                 columnSorting: true,
-                sortIndicator: true
+                sortIndicator: true,
+                fillHandle: false
             };
         }
         // self.inputSettings.data = self.taskConfig.inputData || [];
@@ -720,7 +721,10 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                 dropdownMenu: ['filter_by_condition', 'filter_operators', 'filter_by_condition2','filter_by_value', 'filter_action_bar'],
                 filters: true,
                 columnSorting: true,
-                sortIndicator: true
+                sortIndicator: true,
+                fillHandle: {
+                    autoInsertRow: false
+                }
             };
         }
         self.paramSettings.data = self.taskConfig.paramData || [];
@@ -794,8 +798,8 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                             data: data,
                             params: paramItems(),
                             properties: {
-                                endDepth: data.wellProps.bottomDepth,
-                                startDepth: data.wellProps.topDepth,
+                                endDepth: parseFloat(data.wellProps.bottomDepth),
+                                startDepth: parseFloat(data.wellProps.topDepth),
                                 zone_template: {
                                     name: "Zonation_all",
                                     pattern: "none",
@@ -864,7 +868,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                                     const idTask = taskElement.businessObject.get('idTask');
                                     wiApiService.getTask(idTask, (task) => {
                                         const taskConfig = task.content;
-                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset && i.use == 'Yes')) prevTaskCurves.push(...taskConfig.outputs);
+                                        if (taskConfig.inputData.find(i => i.idDataset == idDataset && i.use)) prevTaskCurves.push(...taskConfig.outputs);
                                         next();
                                     });
                                 }, (err, result) => {
@@ -887,7 +891,7 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
                         }, {});
 
                         let data = {
-                            use: 'Yes',
+                            use: true,
                             idDataset: idDataset,
                             wellProps: wellProps,
                             dataset: datasetName,
