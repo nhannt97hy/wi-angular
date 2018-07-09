@@ -306,6 +306,7 @@ LogTrack.prototype.setCurrentDrawing = function(drawing) {
             scale: Utils.lowercase(drawing.scale)
         });
         this.updateAxis();
+        let props = drawing.getProperties();
     } else if (drawing && drawing.isZone()) {
         if(drawing.params) {
             this.drawControlLinesOnCurvesHeaders(drawing.params)
@@ -858,7 +859,14 @@ LogTrack.prototype.onPlotMouseDown = function(cb) {
             cb();
         });
 }
-
+LogTrack.prototype.onPlotClick = function(cb) {
+    let self = this;
+    this.plotContainer
+        .on('click', function() {
+            self.plotMouseDownCallback();
+            cb();
+        });
+}
 /**
  * Register event when double click the plot area
  */
