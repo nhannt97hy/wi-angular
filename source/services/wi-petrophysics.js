@@ -350,7 +350,7 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
                         return {
                             endDepth: z.properties.endDepth,
                             startDepth: z.properties.startDepth,
-                            param: Object.values(z.param).map(c=> c.value)
+                            param: Object.values(z.params).map(c=> c.value)
                         }
                     }),
                     idDataset: d.idDataset,

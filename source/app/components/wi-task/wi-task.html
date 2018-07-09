@@ -149,7 +149,7 @@
                                     <input type="number" class="form-control" ng-model="item.value" step="any"
                                     ng-if="item.type=='number'" style="flex:2;">
                                     <select class='form-control' ng-model='item.value'
-                                    ng-options="choice for choice in item.choices"
+                                    ng-options="choice as choice for choice in item.choices"
                                     ng-if='item.type=="select"' style="flex:2;"></select>
                                 </li>
                             </ul>
