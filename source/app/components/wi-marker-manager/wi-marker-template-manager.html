@@ -31,6 +31,7 @@
                 <option value="none">None</option>
                 <option value="name">Name</option>
                 <option value="color">Color</option>
+                <option value="lineWidth">Line Width</option>
                 <option value="lineStyle">Line Style</option>
                 <option value="description">Description</option>
             </select>
@@ -61,13 +62,14 @@
                     <th></th>
                     <th>Marker Template Name</th>
                     <th>Color</th>
+                    <th>Line Width</th>
                     <th width="20%">Line Style</th>
                     <th>Description</th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="markerTemplate in $ctrl.selectedMst | orderBy: $ctrl.markerTemplateOrder | filter: filterTemplate"
-                    ng-class="{selected: markerTemplate.flag}" ng-if="!markerTemplate.deleted">
+                <tr ng-repeat="markerTemplate in $ctrl.selectedMst | orderBy: $ctrl.markerTemplateOrder | filter: filterTemplate" ng-class="{selected: markerTemplate.flag}"
+                    ng-if="!markerTemplate.deleted">
                     <td ng-click="$ctrl.onSelect(markerTemplate, $event)">
                         <i class="check glyphicon glyphicon-ok"></i>
                     </td>
@@ -79,23 +81,25 @@
                             style="width: 103px; height: 28px; margin: auto;">
                     </td>
                     <td>
-                        <ui-select theme="bootstrap" ng-model="markerTemplate.lineStyle" ng-change="$ctrl.markerTemplateEdited(markerTemplate);" search-enabled="false">
+                        <input type="number" step="any" ng-model="markerTemplate.lineWidth" class="form-control" ng-change="$ctrl.markerTemplateEdited(markerTemplate);">
+                    </td>
+                    <td>
+                        <ui-select theme="bootstrap" ng-model="markerTemplate.lineStyle" ng-change="$ctrl.markerTemplateEdited(markerTemplate);"
+                            search-enabled="false">
                             <ui-select-match>
                                 <svg height="20" width="100%" style="padding: 0 12px">
-                                    <line x1="0" y1="10" x2="100%" y2="10" stroke-dasharray="{{$select.selected.join(',')}}"
-                                            style="stroke: {{markerTemplate.color}}; stroke-width: 1}"></line>
+                                    <line x1="0" y1="10" x2="100%" y2="10" stroke-dasharray="{{$select.selected.join(',')}}" stroke="{{markerTemplate.color}}" stroke-width="{{markerTemplate.lineWidth}}"></line>
                                 </svg>
                             </ui-select-match>
                             <ui-select-choices repeat="style in $ctrl.lineStyles">
                                 <svg height="20" width="100%">
-                                    <line x1="0" y1="10" x2="100%" y2="10" stroke-dasharray="{{style.join(',')}}"
-                                            style="stroke: {{markerTemplate.color}}; stroke-width: 1"></line>
+                                    <line x1="0" y1="10" x2="100%" y2="10" stroke-dasharray="{{style.join(',')}}" ng-style="{stroke: markerTemplate.color, 'stroke-width': markerTemplate.lineWidth}"></line>
                                 </svg>
                             </ui-select-choices>
                         </ui-select>
                     </td>
                     <td>
-                        <input type="text" ng-model="markerTemplate.description" class="form-control">
+                        <input type="text" ng-model="markerTemplate.description" class="form-control" ng-change="$ctrl.markerTemplateEdited(markerTemplate);">
                     </td>
                 </tr>
             </tbody>
