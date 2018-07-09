@@ -1,6 +1,5 @@
 const componentName = 'wiMarkerTemplateManager';
 const moduleName = 'wi-marker-template-manager';
-window.sin = ''; // temporary fix
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     const self = this;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -8,14 +7,31 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     const newMstNames = [];
 
     this.lineStyles = [
-        [0],
-        [2, 2],
-        [7, 2],
-        [7, 2, 2, 2],
-        [10, 0],
-        [8, 2],
-        [10, 4, 2, 4],
-        [10, 4, 2, 4, 2, 4]
+        {
+            shape: 'line',
+            dashArray: [0],
+        }, {
+            shape: 'line',
+            dashArray: [2, 2],
+        }, {
+            shape: 'line',
+            dashArray: [7, 2],
+        }, {
+            shape: 'line',
+            dashArray: [7, 2, 2, 2],
+        }, {
+            shape: 'line',
+            dashArray: [10, 0],
+        }, {
+            shape: 'line',
+            dashArray: [8, 2],
+        }, {
+            shape: 'line',
+            dashArray: [10, 4, 2, 4],
+        }, {
+            shape: 'sin',
+            dashArray: [0],
+        },
     ]
 
     // marker set template
@@ -27,6 +43,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getTemplateList = function () {
         wiApiService.listMarkerTemplate((listTemplate, err) => {
             if (err) return;
+            listTemplate.forEach(mt => {
+                mt.lineStyle = JSON.parse(mt.lineStyle);
+                mt.lineStyle.dashArray = JSON.parse(mt.lineStyle.dashArray);
+            });
             const markerTemplateGroups = _.groupBy(listTemplate, 'template');
             self.markerSetTemplates = markerTemplateGroups;
             self.markerSetTemplateNames = Object.keys(markerTemplateGroups);
@@ -36,7 +56,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.selectMst = function (mstName) {
         if (mstName && this.markerSetTemplates) {
             this.selectedMstName = mstName;
-            this.selectedMst = this.markerSetTemplates[mstName].map(mt => Object.assign(mt, { lineStyle: eval(mt.lineStyle) }));
+            this.selectedMst = this.markerSetTemplates[mstName]
         }
     }
     this.createTemplate = function () {
@@ -137,7 +157,10 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             template: this.selectedMstName,
             color: "#000",
             lineWidth: 1,
-            lineStyle: [0],
+            lineStyle: {
+                shape: 'line',
+                dashArray: [0],
+            },
             name: 'marker_template_' + newCount++,
             description: '',
         };

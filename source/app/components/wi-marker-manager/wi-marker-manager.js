@@ -67,7 +67,8 @@ function Controller(wiComponentService, wiApiService, ModalService) {
             });
             self.selectedMarkerSet = markerSet.markers.map(m => {
                 Object.assign(m, { markerTemplate: m.marker_template })
-                m.markerTemplate.lineStyle = eval(m.markerTemplate.lineStyle);
+                m.markerTemplate.lineStyle = JSON.parse(m.markerTemplate.lineStyle);
+                m.markerTemplate.lineStyle.dashArray = JSON.parse(m.markerTemplate.lineStyle.dashArray);
                 return m;
             }).concat(newMarkers);
             _sortByDepth(self.selectedMarkerSet);
