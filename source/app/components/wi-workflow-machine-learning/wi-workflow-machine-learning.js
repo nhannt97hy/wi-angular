@@ -2,18 +2,18 @@ const name = "wiWorkflowMachineLearning";
 const moduleName = "wi-workflow-machine-learning";
 
 var __USERINFO = {
-    username: window.localStorage.getItem('username'),
-    token: window.localStorage.getItem('token'),
+    username: null,
+    token: null,
     refreshToken: null
 };
 
-function Controller(wiComponentService, wiMachineLearningApiService, wiApiService, $timeout, $element, $scope) {
+function Controller(wiComponentService, wiMachineLearningApiService, wiApiService, $timeout, $scope, $element, $http) {
     let self = this;
     window.WFML = this;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
-    // let DialogUtils = wiComponentService.getComponent(
-    //     wiComponentService.DIALOG_UTILS
-    // );
+    let DialogUtils = wiComponentService.getComponent(
+        wiComponentService.DIALOG_UTILS
+    );
     this.currentModelType = null;
 
     ////////////////////////////////////////
@@ -301,8 +301,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }];
 
     const DECISION_TREE_CLASSIFIER = [{
-        name: 'criterion',
-        type: 'select',
+        name : 'criterion',
+        type : 'select',
         value: {
             name: 'entropy',
             value: 1
@@ -319,7 +319,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         min: 1,
         value: 5
-    }, {
+    },{
         name: "min_impurity_decrease",
         type: 'number',
         min: 0.0001,
@@ -330,9 +330,9 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     const KNN = [{
         name: "num_neighbors",
         type: 'number',
-        min: 1,
+        min : 1,
         value: 100
-    }, {
+    },{
         name: 'p',
         type: 'number',
         min: 1,
@@ -344,12 +344,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         min: 1,
         value: 20
-    }, {
+    },{
         name: 'max_iter',
         type: 'number',
         min: 1,
         value: 10000
-    }, {
+    },{
         name: 'solver',
         type: 'select',
         value: {
@@ -359,16 +359,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         choices: [{
             name: 'liblinear',
             value: 1
-        }, {
+        },{
             name: 'newton-cg',
             value: 1
-        }, {
+        },{
             name: 'lbfgs',
             value: 1
-        }, {
+        },{
             name: 'sag',
             value: 1
-        }, {
+        },{
             name: 'saga',
             value: 1
         }]
@@ -379,13 +379,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         min: 1,
         value: 150
-    }, {
+    },{
         name: 'criterion',
         type: 'select',
         choices: [{
             name: 'entropy',
             value: 'entropy'
-        }, {
+        },{
             name: 'gini',
             value: 'gini'
         }],
@@ -393,12 +393,12 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: 'entropy',
             value: 'entropy'
         }
-    }, {
+    },{
         name: 'min_samples_split',
         type: 'number',
         min: 1,
         value: 5
-    }, {
+    },{
         name: 'min_impurity_decrease',
         type: 'number',
         min: 0.0001,
@@ -416,7 +416,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         choices: [{
             name: 'backprop',
             value: 'backprop'
-        }, {
+        },{
             name: 'evolution',
             value: 'evolution'
         }],
@@ -493,13 +493,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         type: 'number',
         min: 0,
         value: 0
-    }, {
+    },{
         name: 'learning_rate',
         type: 'number',
         min: 0.001,
         value: 0.001,
         step: 0.001
-    }, {
+    },{
         name: 'num_epochs',
         type: 'number',
         min: 1,
@@ -514,15 +514,15 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         choices: [{
             name: "elu",
             value: 1
-        },{
-            name: "relu",
-            value: 2
         }, {
             name: "sigmoid",
             value: 3
         },{
             name: "tanh",
             value: 4
+        },{
+            name: "relu",
+            value: 2
         }]
     },{
         name: 'optimizer',
@@ -530,22 +530,22 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         choices: [{
             name: 'adamax',
             value: 'adamax'
-        }, {
+        },{
             name: 'sgd',
             value: 'sgd'
-        }, {
+        },{
             name: 'rmsprop',
             value: 'rmsprop'
-        }, {
+        },{
             name: 'adagrad',
             value: 'adagrad'
-        }, {
+        },{
             name: 'adadelta',
             value: 'adadelta'
-        }, {
+        },{
             name: 'adam',
             value: 'adam'
-        }, {
+        },{
             name: 'nadam',
             value: 'nadam'
         }],
@@ -553,13 +553,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: 'nadam',
             value: 'nadam'
         }
-    }, {
+    },{
         name: 'warm_up',
         type: 'select',
         choices: [{
             name: 'true',
             value: true
-        }, {
+        },{
             name: 'false',
             value: false
         }],
@@ -578,7 +578,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         min: 0.01,
         value: 0.01,
         step: 0.01
-    }, {
+    },{
         name: 'population',
         type: 'number',
         min: 1,
@@ -596,27 +596,27 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: "HuberRegressor",
             value: 2,
             parameters: HUBER_REGRESSOR_PARAMS
-        }, {
+        },{
             name: "Lasso",
             value: 3,
             parameters: LASSO_PARAMS
-        }, {
+        },{
             name: "DecisionTreeRegressor",
             value: 4,
             parameters: DECISION_TREE_PARAMS
-        }, {
+        },{
             name: "RandomForestRegressor",
             value: 5,
             parameters: RANDOM_FOREST_REGRESSOR_PARAMS
-        }, {
+        },{
             name: "SupportVectorMachine",
             value: 6,
             parameters: SUPPORT_VECTOR_MACHINE_PARAMS
-        }, {
+        },{
             name: "MultiPerceptron",
             value: 7,
             parameters: MULTIPERCEPTRON_PARAMS
-        }, {
+        },{
             name: "ConjugateGradient",
             value: 8,
             parameters: CONJUGATE_GRADIENT_PARAMS
@@ -641,19 +641,19 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: "DecisionTreeClassifier",
             value: 1,
             parameters: DECISION_TREE_CLASSIFIER
-        }, {
+        },{
             name: "KNN",
             value: 2,
             parameters: KNN
-        }, {
+        },{
             name: "LogisticRegression",
             value: 3,
             parameters: LOGISTIC_REGRESSION
-        }, {
+        },{
             name: "RandomForestClassifier",
             value: 4,
             parameters: RANDOM_FOREST_CLASSIFIER
-        }, {
+        },{
             name: "NeuralNetClassifier",
             value: 5,
             parameters: NEURAL_NET_CLASSIFIER,
@@ -672,51 +672,51 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             name: "HuberRegressor",
             value: 2,
             parameters: HUBER_REGRESSOR_PARAMS
-        }, {
+        },{
             name: "Lasso",
             value: 3,
             parameters: LASSO_PARAMS
-        }, {
+        },{
             name: "DecisionTreeRegressor",
             value: 4,
             parameters: DECISION_TREE_PARAMS
-        }, {
+        },{
             name: "RandomForestRegressor",
             value: 5,
             parameters: RANDOM_FOREST_REGRESSOR_PARAMS
-        }, {
+        },{
             name: "SupportVectorMachine",
             value: 6,
             parameters: SUPPORT_VECTOR_MACHINE_PARAMS
-        }, {
+        },{
             name: "MultiPerceptron",
             value: 7,
             parameters: MULTIPERCEPTRON_PARAMS
-        }, {
+        },{
             name: "ConjugateGradient",
             value: 8,
             parameters: CONJUGATE_GRADIENT_PARAMS
-        }, {
+        },{
             name: "CrossRecurrencePlot",
             value: 9,
             parameters: CROSS_RECURRENCE_PLOT_PARAMS
-        }, {
+        },{
             name: "DecisionTreeClassifier",
             value: 10,
             parameters: DECISION_TREE_CLASSIFIER
-        }, {
+        },{
             name: "KNN",
             value: 11,
             parameters: KNN
-        }, {
+        },{
             name: "LogisticRegression",
             value: 12,
             parameters: LOGISTIC_REGRESSION
-        }, {
+        },{
             name: "RandomForestClassifier",
             value: 13,
             parameters: RANDOM_FOREST_CLASSIFIER
-        }, {
+        },{
             name: "NeuralNetClassifier",
             value: 14,
             parameters: NEURAL_NET_CLASSIFIER,
@@ -746,21 +746,20 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     }
     this.runStep = runStep;
     function runStep(wf, cb) {
-        
-            switch (wf.name) {
-                case TRAIN_STEP_NAME:
-                    console.log('runstep train');
-                    train(cb);
-                    break;
-                case VERIFY_STEP_NAME:
-                    console.log('runstep verify');
-                    verify(cb);
-                    break;
-                case PREDICT_STEP_NAME:
-                    console.log('runstep predict');
-                    predict(cb);
-                    break;
-            };
+        switch (wf.name) {
+            case TRAIN_STEP_NAME:
+                console.log('runstep train');
+                train(cb);
+                break;
+            case VERIFY_STEP_NAME:
+                console.log('runstep verify');
+                verify(cb);
+                break;
+            case PREDICT_STEP_NAME:
+                console.log('runstep predict');
+                predict(cb);
+                break;
+        };
     }
     let well = [];
     function getDataCurves(step, callback) {
@@ -769,6 +768,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let inputData = step.inputData;
         if (inputData) {
             well = [];
+            console.log(inputData);
             async.forEachOfSeries(inputData, function (iptData, idx, _end) {
                 let inputSet = iptData;
                 listInputCurves[idx] = [];
@@ -777,7 +777,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     listInputCurves[idx][idx1] = [];
                     wiApiService.dataCurve(curveInfo.value.idCurve, function (curveData) {
                         listInputCurves[idx][idx1] = curveData.map(function (d) {
-                            if (idx == 0) well.push(wellName);
+                            if(idx==0) well.push(wellName);
                             return parseFloat(d.x);
                         });
                         __end();
@@ -799,6 +799,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         let inputData = step.inputData;
         if (inputData) {
             well = [];
+            console.log(inputData);
             async.forEachOfSeries(inputData, function (iptData, i, __done) {
                 let j = -1;
                 let wellName = iptData.well.name;
@@ -808,7 +809,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         if (i == 0) curveInputs[j] = [];
                         curveData.forEach(function (data) {
                             curveInputs[j].push(parseFloat(data.x));
-                            if (j == 0) well.push(wellName);
+                            if(j==0) well.push(wellName);
                         });
                         __end();
                     });
@@ -842,7 +843,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 }
             if (notNull)
                 for (let j = 0; j < l; j++) {
-                    if (j == 0) WELL.push(well[i]);
+                    if(j==0) WELL.push(well[i]);
                     filterCurves[j].push(curves[j][i]);
                 }
         }
@@ -889,7 +890,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     return false;
                 let lastTrainingInputCurve = trainingCurves[trainingCurves.length - 1];
                 return lastTrainingInputCurve.name + "-WF" + self.idWorkflow + '-' + shortName(self.currentModelType.name);
-
+                
             case PERMEABILITY_AI:
                 return 'PERM_CORE-WF' + self.idWorkflow;
             case FACIES_AI:
@@ -902,60 +903,59 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     function transformCurve(curve, idx) {
         let transform = self.workflowConfig.model.inputs[idx].transform;
         switch (transform) {
-            case 'logarithmic':
-                for (let i in curve) {
-                    if (isNaN(curve[i])) continue;
-                    try {
-                        curve[i] = Math.log10(curve[i]);
-                        if (!isFinite(curve[i])) curve[i] = NaN;
-                    }
-                    catch (err) {
-                        curve[i] = NaN;
-                    }
+        case 'logarithmic':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.log10(curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
                 }
-                break;
-            case 'exponential':
-                for (let i in curve) {
-                    if (isNaN(curve[i])) continue;
-                    try {
-                        curve[i] = Math.exp(curve[i]);
-                        if (!isFinite(curve[i])) curve[i] = NaN;
-                    }
-                    catch (err) {
-                        curve[i] = NaN;
-                    }
+                catch(err) {
+                    curve[i] = NaN;
                 }
+            }
+            break;
+        case 'exponential':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.exp(curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
+                }
+                catch(err) {
+                    curve[i] = NaN;
+                }
+            }
         }
     }
     function invTransformCurve(curve, idx) {
         let transform = self.workflowConfig.model.inputs[idx].transform;
         switch (transform) {
-            case 'logarithmic':
-                for (let i in curve) {
-                    if (isNaN(curve[i])) continue;
-                    try {
-                        curve[i] = Math.pow(10, curve[i]);
-                        if (!isFinite(curve[i])) curve[i] = NaN;
-                    }
-                    catch (err) {
-                        curve[i] = 0;
-                    }
+        case 'logarithmic':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.pow(10, curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
                 }
-                break;
-            case 'exponential':
-                for (let i in curve) {
-                    if (isNaN(curve[i])) continue;
-                    try {
-                        curve[i] = Math.log(curve[i]);
-                        if (!isFinite(curve[i])) curve[i] = NaN;
-                    }
-                    catch (err) {
-                        curve[i] = 0;
-                    }
+                catch(err) {
+                    curve[i] = 0;
                 }
+            }
+            break;
+        case 'exponential':
+            for(let i in curve) {
+                if (isNaN(curve[i])) continue;
+                try {
+                    curve[i] = Math.log(curve[i]);
+                    if (!isFinite(curve[i])) curve[i] = NaN;
+                }
+                catch(err) {
+                    curve[i] = 0;
+                }
+            }
         }
     }
-    
     function train(cb) {
         let step = self.workflowConfig.steps.filter(function (step) { return step.name == TRAIN_STEP_NAME; })[0];
         getDataCurvesAndJoin(step, function (list_curves) {
@@ -977,12 +977,18 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             function getValueParam(name, modelType) {
                 let parameters = modelType.parameters;
                 let param = parameters.filter(function (param) { return param.name == name; });
+                if(!param.length && modelType.parametersAdv) {
+                    parameters = modelType.parametersAdv;
+                    param = parameters.filter(function (param) { return param.name == name; });
+                }
                 if (param.length) {
                     if (param[0].type == 'number') {
+                        console.log(param[0].name, param[0].value);
                         let value = param[0].value;
                         if (value == undefined) {
                             value = param[0].max;
                         }
+                        console.log(value);
                         return value;
                     }
                     else if (param[0].type == 'select') {
@@ -1007,6 +1013,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         params = {};
                     else {
                         params = {
+                            degree: getValueParam('degree', self.currentModelType),
                             max_iter: getValueParam('max_iter', self.currentModelType),
                             alpha: getValueParam('alpha', self.currentModelType),
                             max_features: getValueParam('max_features', self.currentModelType) == "None" ? null : getValueParam('max_features', self.currentModelType),
@@ -1014,6 +1021,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                             gamma: getValueParam('gamma', self.currentModelType),
                             C: getValueParam('C', self.currentModelType),
                             n_estimators: getValueParam('n_estimators', self.currentModelType),
+                            // epochs: getValueParam('epochs', self.currentModelType),
                             learning_rate_init: getValueParam('learning_rate_init', self.currentModelType),
                             tol: getValueParam('tol', self.currentModelType),
                             hidden_layer_sizes: getValueParam('Neuron Network Structure', self.currentModelType),
@@ -1032,7 +1040,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     console.log(payload);
                     window.trainData = payload;
                     wiMachineLearningApiService.trainModel(payload, function (res) {
-                        if (res) {
+                        if (res) {//////////////// subscribe
                             toastr.success('Train model success');
                             console.log('train model success', res);
 
@@ -1057,14 +1065,13 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         }
                     });
                     break;
-                case ML_TOOLKIT_CLASSIFICATION:
+                case ML_TOOLKIT_CLASSIFICATION: 
                     params = {
-                        degree: getValueParam('degree', self.currentModelType),
-                        max_iter: getValueParam('max_iter', self.currentModelType),
-                        alpha: getValueParam('alpha', self.currentModelType),
-                        max_features: getValueParam('max_features', self.currentModelType) == "None" ? null : getValueParam('max_features', self.currentModelType),
-                        kernel: getValueParam('kernel', self.currentModelType),
-                        gamma: getValueParam('gamma', self.currentModelType),
+                        criterion: getValueParam('criterion', self.currentModelType),
+                        min_samples_split: getValueParam('min_samples_split', self.currentModelType),
+                        min_impurity_decrease: getValueParam('min_impurity_decrease', self.currentModelType),
+                        num_neighbors: getValueParam('num_neighbors', self.currentModelType),
+                        p: getValueParam('p', self.currentModelType),
                         C: getValueParam('C', self.currentModelType),
                         max_iter: getValueParam('max_iter', self.currentModelType),
                         solver: getValueParam('solver', self.currentModelType),
@@ -1131,7 +1138,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     }
                     payload = {
                         model_id: genModelId(),
-                        train: {
+                        data: {
                             well: WELL,//array of string
                             data: data,
                             target: target
@@ -1170,6 +1177,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         });
     }
 
+    // }
     function saveCurveAndCreatePlot(curveInfo, step, index, cb) {
         /*let _stepVerify = self.workflowConfig.steps.filter(function(step){
             return step.name==VERIFY_STEP_NAME;
@@ -1213,7 +1221,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             );
         });
     }
-    
     function verify(cb) {
         let _stepVerify = self.workflowConfig.steps.filter(function (step) { return step.name == VERIFY_STEP_NAME; })[0];
         let wfResult = self.workflowResults.find(function (wfr) {
@@ -1224,7 +1231,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             async.forEachOfSeries(list_input, function (list_curves, index, __done) {
                 if (!list_curves || !list_curves.length) {
                     toastr.error('No dataset');
-                    async.setImmediate(function () { __done('No dataset') });
+                    async.setImmediate(function() {__done('No dataset')});
                     return;
                 }
                 for (let i in list_curves) {
@@ -1235,12 +1242,16 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                 list_curves[length - 1].forEach(function (x) {
                     verifyCurve.push(x);
                 })
+                // verifyCurve  = list_curves.splice(list_curves.length-1, 1)[0];
+                // list_curves.splice(list_curves.length-1, 1);
                 list_curves.pop();
                 let indicesObj = filterNull(list_curves);
+                // indicesObj.filterCurves.splice(indicesObj.filterCurves.length-1, 1);
                 let dataCurves = indicesObj.filterCurves;
                 let nullPositions = indicesObj.fillNull;
                 let WELL = indicesObj.well;
                 let payload = null;
+                console.log(self.workflowConfig.model.type);
                 switch (self.workflowConfig.model.type) {
                     case ML_TOOLKIT:
                         if (!outputCurveName()) {
@@ -1265,6 +1276,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
                                     invTransformCurve(res.target, lastIdx);
                                     fillNullInCurve(nullPositions, res.target);
+                                    // for(let i =0; i<res.target.length; i++)
+                                    // console.log(verifyCurve[i],' - ', res.target[i]);
 
                                     let curveInfo = {
                                         idDataset: _stepVerify.inputData[index].dataset.idDataset,
@@ -1311,6 +1324,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                     let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
                                     invTransformCurve(res.target, lastIdx);
                                     fillNullInCurve(nullPositions, res.target);
+                                    // for(let i =0; i<res.target.length; i++)
+                                    // console.log(verifyCurve[i],' - ', res.target[i]);
 
                                     let curveInfo = {
                                         idDataset: _stepVerify.inputData[index].dataset.idDataset,
@@ -1341,7 +1356,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         } else {
                             payload = {
                                 model_id: genModelId(),
-                                input: {
+                                data: {
                                     well: WELL,//array of string
                                     data: dataCurves
                                 }
@@ -1357,6 +1372,8 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                                         window.tar.push(x);
                                     });
                                     fillNullInCurve(nullPositions, res.target);
+                                    // for(let i =0; i<res.target.length; i++)
+                                    // console.log(verifyCurve[i],' - ', res.target[i]);
 
                                     let lastIdx = _stepVerify.inputData[index].inputs.length - 1;
                                     let curveInfo = {
@@ -1447,7 +1464,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             });
         });
     };
-    
+
     function predict(cb) {
         let _stepPredict = self.workflowConfig.steps.filter(function (step) { return step.name == PREDICT_STEP_NAME; })[0];
         let _stepTrain = self.workflowConfig.steps.filter(function (step) { return step.name == TRAIN_STEP_NAME; })[0];
@@ -1459,7 +1476,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             async.forEachOfSeries(list_input, function (list_curves, index, __done) {
                 if (!list_curves || !list_curves.length) {
                     toastr.error('No dataset');
-                    async.setImmediate(function () { __done('No dataset') });
+                    async.setImmediate(function() {__done('No dataset')});
                     return;
                 }
                 for (let i in list_curves) {
@@ -1476,7 +1493,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     case ML_TOOLKIT:
                         if (!outputCurveName()) {
                             toastr.error('choose a dataset to train before predict');
-                            // __done('fail');
+                            __done('fail');
                         } else {
                             payload = {
                                 model_id: genModelId(),
@@ -1562,7 +1579,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                         } else {
                             payload = {
                                 model_id: genModelId(),
-                                input: {
+                                data: {
                                     well: WELL,//array of string
                                     data: dataCurves
                                 }
@@ -1712,23 +1729,25 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         );
         return (openProject || {}).idProject;
     };
-    
     this.$onInit = function () {
         self.idProject = getCurrentProjectId();
         if (self.name) wiComponentService.putComponent(self.name, self);
+        console.log(self.idWorkflow);
         if (self.idWorkflow) {
             wiApiService.getWorkflow(self.idWorkflow, function (workflow) {
                 self.workflowConfig = workflow.content;
                 self.workflowName = workflow.name;
+                console.log(self.workflowConfig);
                 self.currentModelType = self.workflowConfig.model.currentModelType;
 
                 if (self.workflowConfig.model.type == CROSS_RECURRENCE_PLOT) {
                     //self.currentModelType = self.listModelType.choices[self.listModelType.choices.length - 1];
-                    self.currentModelType = self.listModelType.choices.find(function (modelType) {
+                    self.currentModelType = self.listModelType.choices.find(function(modelType) {
                         return modelType.name == 'CrossRecurrencePlot';
                     });
                 }
-
+                
+                console.log(self.currentModelType);
                 self.workflowResults[1] = self.workflowConfig.steps.find(function (step) {
                     return step.name == self.workflowResults[1].name;
                 }).result || self.workflowResults[1];
@@ -1736,6 +1755,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
                     return step.name == self.workflowResults[2].name;
                 }).result || self.workflowResults[2];
                 let modelTypeDropdown = $element.find('wi-item-dropdown .ui-select-container');
+                console.log(modelTypeDropdown.scope().controller);
                 let wiItemDropdown = modelTypeDropdown.scope().wiItemDropdown;
                 if (wiItemDropdown && wiItemDropdown.items) {
                     wiItemDropdown.selectedItem = wiItemDropdown.items.find(function (item) {
@@ -2017,6 +2037,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     this.updateCurveSelection = function () {
         if (self.changeCurveSelection) {
             self.workflowConfig.steps.forEach(function (step) {
+                console.log(step.inputData);
                 step.inputData = [];
 
             });
@@ -2158,6 +2179,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     this.getProjectList = function (wiItemDropdownCtrl) {
         if (!self.idProject) {
             wiApiService.getProjectList(null, function (projectList) {
+                console.log(projectList);
                 wiItemDropdownCtrl.items = projectList.map(function (prj) {
                     return {
                         data: {
@@ -2418,6 +2440,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
     };
 
     function saveCurve(curveInfo, callback) {
+        console.log('save curve', curveInfo);
         getFamilyList(familyList => {
             let family = familyList.find(f => f.data.label == curveInfo.family);
             let payload = {
@@ -2484,7 +2507,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             }
         }
         else {
-            $timeout(function () {
+            $timeout(function() {
                 wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(function (item) {
                     return item.properties.name == self.currentModelType.name;
                 });
@@ -2535,7 +2558,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             }
         }
         else {
-            $timeout(function () {
+            $timeout(function() {
                 wiItemDropdownCtrl.selectedItem = wiItemDropdownCtrl.items.find(function (item) {
                     return item.properties.name == self.currentModelType.name;
                 });
@@ -2601,7 +2624,6 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
         })
         async.forEachOfSeries(self.workflowConfig.steps, function (step, idx, done) {
             if (step.inputData && step.inputData.length != 0) {
-                console.log(step.name);
                 self.runStep(step, done);
             } else {
                 toastr.error('can\'t ' + step.name + '! choose a datase for ' + step.name);
@@ -2654,6 +2676,7 @@ function Controller(wiComponentService, wiMachineLearningApiService, wiApiServic
             return;
         }
         let htmlTemplate = `<wi-plot style='height:100%;width:100%;display: flex;' configs='${plotConfig(odata)}' options='${plotOption(odata)}'></wi-plot>`;
+        console.log(htmlTemplate);
         rightContainer.addChild({
             type: 'component',
             id: tabId,
