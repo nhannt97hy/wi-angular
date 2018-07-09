@@ -1366,7 +1366,7 @@ exports.setupCurveDraggable = function (element, wiComponentService, apiService)
                     console.log('drop curve into slidingBar', errorCode);
                     if (errorCode > 0) {
                         wiSlidingBarCtrl.createPreview(idCurve);
-                        let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModelAsync();
+                        let logplotModel = wiSlidingBarCtrl.wiLogplotCtrl.getLogplotModel();
                         let logplotRequest = angular.copy(logplotModel.properties);
                         logplotRequest.referenceCurve = idCurve;
                         apiService.editLogplot(logplotRequest, function () {
@@ -3275,6 +3275,7 @@ function getPattern(callback) {
 
 exports.getPattern = getPattern;
 
+/*
 exports.getWellAsync = function getWellAsync (idWell) {
     let wellModel;
     try {
@@ -3297,6 +3298,7 @@ exports.getWellAsync = function getWellAsync (idWell) {
     }
     return wellModel;
 }
+
 exports.findLogplotModelByIdAsync = function(idLogplot) {
     let logplotModel;
     try {
@@ -3320,6 +3322,7 @@ exports.findLogplotModelByIdAsync = function(idLogplot) {
     }
     return logplotModel;
 }
+*/
 
 var wellColorMap = (function () {
     let colorTable;
@@ -3393,9 +3396,9 @@ exports.onChangeHandlers =  {
         })
     },
     'zone' : function(props) {
-        __GLOBAL.wiApiService.editZone(props, function(){
+        __GLOBAL.wiApiService.editZone(props, function(res){
             refreshProjectState().then(function () {
-                console.log("update zone");
+                console.log("update zoneset");
             });
         })
     },
@@ -3426,6 +3429,18 @@ exports.onChangeHandlers =  {
             console.log("update depthtrack")
         })
     },
+    'd3-zonetrack' : function (props) {
+        __GLOBAL.wiApiService.editZoneTrack(props, function (res) {
+            __GLOBAL.wiComponentService.emit('update-zonetrack-' + res.idZoneTrack);
+            console.log("update zonetrack")
+        })
+    },
+    'd3-imagetrack' : function (props) {
+        __GLOBAL.wiApiService.editImageTrack(props, function (res) {
+            __GLOBAL.wiComponentService.emit('update-imagetrack-' + res.idImageTrack, res);
+            console.log("update imagetrack")
+        })
+    }
 }
 function getIdObjectFromNode (node, rootNode) {
     let wiComponentService = __GLOBAL.wiComponentService;

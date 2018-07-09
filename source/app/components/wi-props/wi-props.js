@@ -181,7 +181,7 @@ function Controller ($scope, $http, $timeout, wiComponentService, wiApiService, 
     }
     this.refFunc = function(refSpec){
         let ref = null;
-        if(self.typeprops == 'curve') {
+        if(self.typeprops == 'curve' || self.typeprops == 'line') {
             let well = utils.findWellByCurve(self.input.idCurve);
             ref = well[refSpec.split('.')[1]];
         }

@@ -66,7 +66,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
 
     this.openPropertiesWindow = function () {
-        console.log("openPropertiesWindow");
+        let viTrack = self.viTrack;
+        let props = viTrack.getProperties();
+        props.width = utils.pixelToInch(props.width);
+
+        wiComponentService.emit("update-properties", {
+            type: 'd3-imagetrack', 
+            props: props
+        });
     }
 
     this.addImageZoneToTrack = function (track, config) {
@@ -265,6 +272,13 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
                 track.setMode(null);
             })
         );
+        wiComponentService.on('update-imagetrack-' + self.viTrack.id, function(res) {
+           $timeout(function () {
+                res.width = Utils.inchToPixel(res.width);
+                self.viTrack.setProperties(res);
+                self.viTrack.doPlot(true);
+            });   
+        });
     }
 
     this.drawImageZone = function (imgzone, props, isNewDraw) {

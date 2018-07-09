@@ -1,7 +1,7 @@
 const componentName = 'wiMarkerManager';
 const moduleName = 'wi-marker-manager';
 
-function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+function Controller(wiComponentService, wiApiService, ModalService) {
     const self = this;
     const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -71,7 +71,6 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
                 return m;
             }).concat(newMarkers);
             _sortByDepth(self.selectedMarkerSet);
-            console.log(self.selectedMarkerSet);
         })
     }
     this.getSelectedMarkerSet = function () {
@@ -118,10 +117,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         this.hasChanges = true;
         marker.edited = true;
     }
-    this.getSelectedMarkers = function () {
-        if (!this.selectedMarkerSet) return [];
-        return this.selectedMarkerSet.filter(t => t.flag);
-    }
+    Object.defineProperty(self, 'selectedMarkers', {
+        get: function () {
+            if (!this.selectedMarkerSet) return [];
+            return this.selectedMarkerSet.filter(t => t.flag);
+        }
+    });
     this.saveChanges = async function () {
         if (!this.hasChanges) return;
         const promises = [];
@@ -159,14 +160,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         });
     }
     this.deleteSelectedMarkers = function () {
-        const selectedMarkers = this.getSelectedMarkers();
-        for (const marker of selectedMarkers) {
+        for (const marker of this.selectedMarkers) {
             self.deleteMarker(marker);
         }
     }
     this.addMarker = function (isAbove) {
-        const selectedMarkers = this.getSelectedMarkers();
-        const selectedMarker = selectedMarkers.length === 1 ? selectedMarkers[0] : null;
+        const selectedMarker = this.selectedMarkers.length === 1 ? this.selectedMarkers[0] : null;
         let depth, markerSetModel;
         if (!selectedMarker) {
             markerSetModel = this.getSelectedMarkerSet();
@@ -195,6 +194,11 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             self.markerEdited(newMarker);
             _sortByDepth(self.selectedMarkerSet);
         });
+    }
+    this.swapTwoMarkers = function () {
+        const markers = this.selectedMarkers;
+        if (markers.length !== 2) return;
+
     }
 
 

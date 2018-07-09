@@ -5,6 +5,7 @@ const moduleName = 'wi-petrophysics';
 function calVCLfromGR(inputs, parameters, callback) {
     let grCurve = inputs[0];
     let result = new Array(grCurve.length).fill(null);
+    const methods = ["Linear", "Clavier", "Larionov Tertiary rocks", "Larionov older rocks", "Stieber variation I", "Stieber - Miocene and Pliocene", "Stieber variation II"];
 
     // cal GR index
     for (let i = 0; i < grCurve.length; i++) {
@@ -21,31 +22,31 @@ function calVCLfromGR(inputs, parameters, callback) {
                 result[i] = (grCurve[i] - clean) / (clay - clean);
             }
             // cal VCL by type
-            switch (type) {
-                case 1: // Linear
+            switch (methods.indexOf(type)) {
+                case 0: // Linear
                     break;
 
-                case 2: // Clavier
+                case 1: // Clavier
                     result[i] = 1.7 - Math.sqrt(3.38 - Math.pow(result[i] + 0.7, 2));
                     break;
 
-                case 3: // Larionov Tertiary
+                case 2: // Larionov Tertiary
                     result[i] = 0.083 * (Math.pow(2, 3.7 * result[i]) - 1);
                     break;
 
-                case 4: // Larionov rocks
+                case 3: // Larionov rocks
                     result[i] = 0.33 * (Math.pow(2, 3.7 * result[i]) - 1);
                     break;
 
-                case 5: // Stieber variation I
+                case 4: // Stieber variation I
                     result[i] = result[i] / (2 - result[i]);
                     break;
 
-                case 6: // Stieber : Miocene and Pliocene
+                case 5: // Stieber : Miocene and Pliocene
                     result[i] = result[i] / (3 - 2 * result[i]);
                     break;
 
-                case 7: // Stieber variation II
+                case 6: // Stieber variation II
                     result[i] = result[i] / (4 - 3 * result[i]);
                     break;
                 default:
@@ -191,12 +192,15 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
     const utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
     function saveCurve(curveInfo, callback) {
-        const familyList = utils.getListFamily();
-        let family = familyList.find(f => f.name == curveInfo.family);
+        if(!curveInfo.idFamily){
+            const familyList = utils.getListFamily();
+            let family = familyList.find(f => f.name == curveInfo.family);
+            curveInfo.idFamily = (family || {}).idFamily || null;
+        }
         let payload = {
             data: curveInfo.data,
             idDataset: curveInfo.idDataset,
-            idFamily: (family || {}).idFamily || null,
+            idFamily: curveInfo.idFamily,
             unit: curveInfo.unit
         }
         wiApiService.checkCurveExisted(curveInfo.name, curveInfo.idDataset, (curve) => {
@@ -339,14 +343,14 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
         }
         taskConfig.outputData = new Array();
         let inputMap = taskConfig.inputData.reduce((total, d) => {
-            if(!d.data.unused){
+            if(d.use){
                 let tmp =  {
-                    inputs: d.children[0].children.map(c => c.data.value),
-                    parameters: d.children[1].children.map(c => {
+                    inputs: Object.values(d.inputs),
+                    parameters: taskConfig.paramData.filter(p => p.data.idDataset == d.idDataset).map(z => {
                         return {
-                            endDepth: c.endDepth,
-                            startDepth: c.startDepth,
-                            param: c.children.map(cc => typeof(cc.data.value) != 'object' ? cc.data.value : cc.data.value.value)
+                            endDepth: z.properties.endDepth,
+                            startDepth: z.properties.startDepth,
+                            param: Object.values(z.param).map(c=> c.value)
                         }
                     }),
                     idDataset: d.idDataset,
@@ -364,21 +368,13 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
         async.eachOf(inputMap, function (data, idx, callback) {
             let curveData = [];
             async.eachSeries(data.inputs, function (curve, cb) {
-                (async () => {
-                    if (!curve.id) {
-                        await new Promise((resolve, reject) => {
-                            wiApiService.checkCurveExisted(curve.name, data.idDataset, (res, err) => {
-                                if (err || !res.idCurve) reject(res);
-                                curve.id = res.idCurve;
-                                resolve();
-                            });
-                        })
-                    }
+                wiApiService.checkCurveExisted(curve.value, data.idDataset, (res, err) => {
+                    curve.id = res.idCurve;
                     wiApiService.dataCurve(curve.id, function (dataCurve) {
                         curveData.push(dataCurve.map(d => parseFloat(d.x)));
                         cb();
                     })
-                })();
+                });
             }, function (err) {
                 if (!err) {
                     runFunc(curveData, data.parameters, function (ret) {
@@ -394,7 +390,6 @@ angular.module(moduleName, []).factory('wiPetrophysics', function (wiComponentSe
                                 d.idDataset = data.idDataset;
                                 saveCurve(d, function (curveProps) {
                                     delete d.data;
-                                    // updateChoices(curveProps);
                                     cb2();
                                 });
                             }else{

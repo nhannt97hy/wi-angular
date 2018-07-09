@@ -1572,7 +1572,7 @@ exports.PorosityDensityButtonClicked = function() {
     let layoutManager = this.wiComponentService.getComponent(this.wiComponentService.LAYOUT_MANAGER);
     let listSpec = this.wiComponentService.getComponent(this.wiComponentService.TASKSPEC);
     // let spec = listSpec.find(sp => sp.name == 'Density' && sp.group == 'Porosity');
-    let spec = listSpec[1];
+    let spec = listSpec[9];
     const now = Date.now();
     layoutManager.putTabRight({
         id: 'wiTask' + now,

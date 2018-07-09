@@ -1,6 +1,6 @@
 const componentName = 'wiMarkerTemplateManager';
 const moduleName = 'wi-marker-template-manager';
-
+window.sin = ''; // temporary fix
 function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
     const self = this;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -136,6 +136,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             idMarkerTemplate: Date.now(),
             template: this.selectedMstName,
             color: "#000",
+            lineWidth: 1,
             lineStyle: [0],
             name: 'marker_template_' + newCount++,
             description: '',

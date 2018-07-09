@@ -997,6 +997,9 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         track.onPlotMouseDown(function () {
             _onPlotMouseDownCallback(track);
         });
+        track.onPlotClick(function() {
+            _onPlotClickCallback(track);
+        })
         track.onHeaderMouseDown(function () {
             _onHeaderMouseDownCallback(track);
         });
@@ -1061,6 +1064,30 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         }
     }
 
+    function _onPlotClickCallback(track) {
+        if (d3.event.currentDrawing) {
+            if (d3.event.currentDrawing.isCurve()) {
+                let props = d3.event.currentDrawing.getProperties();
+                wiComponentService.emit('update-properties', {
+                    type: 'line',
+                    props: props
+                });
+            } else if (d3.event.currentDrawing.isShading()) {
+                let props = d3.event.currentDrawing.getProperties();
+                props.leftCurve = d3.event.currentDrawing.leftCurve ? d3.event.currentDrawing.leftCurve.alias : null;
+                props.rightCurve = d3.event.currentDrawing.rightCurve.alias;
+                wiComponentService.emit('update-properties', {
+                    type: 'shading',
+                    props: props
+                });
+            } else if (d3.event.currentDrawing.isAnnotation()) {
+                console.log("ann//");
+            } else if (d3.event.currentDrawing.isMarker()) {
+                console.log("marker//");
+            }
+        }
+        d3.event.stopPropagation();
+    }
     function _onHeaderMouseDownCallback(track) {
         track.setCurrentDrawing(null);
     }
@@ -1400,7 +1427,6 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
     }
 
     function _curveOnDoubleClick() {
-        let currentCurve = self.viTrack.getCurrentCurve();
         DialogUtils.curvePropertiesDialog(
             ModalService,
             // wiComponentService,
