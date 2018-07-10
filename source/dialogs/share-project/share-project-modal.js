@@ -104,7 +104,17 @@ module.exports = function (ModalService, callback, groups, _users, company) {
                 callback();
             });
         }
-
+        this.allPerm = {
+            get: true,
+            create: false,
+            update: false,
+            delete: false
+        }
+        this.onChangeAllPerm = function (perm) {
+            if(self.objects) {
+                self.objects.map(o => o[perm] = self.allPerm[perm]);
+            }
+        }
         function loadGroupPerm(group) {
             wiApiService.getGroupPermissionOfProject({
                 project_name: self.project.name,

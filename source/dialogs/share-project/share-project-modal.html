@@ -51,7 +51,6 @@
                                         container="wiModal"
                                         config="wiModal.groupsConfig"
                                         on-click-function='wiModal.groupClicked'
-                                        filter="{{wiModal.grFilter}}"
                                         filter-by="{{wiModal.filterBy}}">
                             </wi-base-treeview>
                         </wi-scroll>
@@ -84,18 +83,29 @@
                     <div style="width: 100%; text-align: center; padding: 4em;" ng-show="!wiModal.objects">
                         <p style="font-weight: bold; color: #ccc; font-size: 3em">NO INFORMATION</p>
                     </div>
-                    <div style="flex:1; overflow-y: overlay;" ng-show="wiModal.objects">
-                        <ul class="list-group">
-                            <li ng-repeat="object in wiModal.objects" class="list-group-item"
-                                style="display: flex; padding: 3px 15px"><span style="flex: 1; line-height: 25px; ">{{object.displayAs}}</span>
-                                <span style="padding: inherit">
-                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.get" ng-checked="{{object.get}}" ng-disabled="true">Get</label>
-                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.create" ng-checked="{{object.create}}">Create</label>
-                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.update" ng-checked="{{object.update}}">Update</label>
-                                    <label class="checkbox-inline"><input type="checkbox" ng-model="object.delete" ng-checked="{{object.delete}}">Delete</label>
-                                </span>
-                            </li>
-                        </ul>
+                    <div style="flex:1;" ng-show="wiModal.objects">
+                        <div style="display: flex; padding: 3px 15px; font-weight: bold;background: #ccc; margin-bottom: 2px;box-shadow:0px 2px 5px #888;">
+                            <span style="flex: 1;">Title</span>
+                            <span style="padding: 3px 15px; width: 40%">
+                                <label class="checkbox-inline control-label" style="width:20%"><input type="checkbox" ng-model="wiModal.allPerm.get" ng-checked="true" ng-disabled="true">Get</label>
+                                <label class="checkbox-inline control-label" style="width:20%"><input type="checkbox" ng-model="wiModal.allPerm.create" ng-checked="{{wiModal.allPerm.create}}" ng-change="wiModal.onChangeAllPerm('create')">Create</label>
+                                <label class="checkbox-inline control-label" style="width:20%"><input type="checkbox" ng-model="wiModal.allPerm.update" ng-checked="{{wiModal.allPerm.update}}" ng-change="wiModal.onChangeAllPerm('update')">Update</label>
+                                <label class="checkbox-inline control-label" style="width:20%"><input type="checkbox" ng-model="wiModal.allPerm.delete" ng-checked="{{wiModal.allPerm.delete}}" ng-change="wiModal.onChangeAllPerm('delete')">Delete</label>
+                            </span>
+                        </div>
+                        <div style="overflow-y: overlay; height: 80%;">
+                            <ul class="list-group">
+                                <li ng-repeat="object in wiModal.objects" class="list-group-item"
+                                    style="display: flex; padding: 3px 15px"><span style="flex: 1; line-height: 25px; ">{{object.displayAs}}</span>
+                                    <span style="padding: inherit; width: 40%">
+                                        <label class="checkbox-inline" style="width:20%"><input type="checkbox" ng-model="object.get" ng-checked="{{object.get}}" ng-disabled="true"></label>
+                                        <label class="checkbox-inline" style="width:20%"><input type="checkbox" ng-model="object.create" ng-checked="{{object.create}}"></label>
+                                        <label class="checkbox-inline" style="width:20%"><input type="checkbox" ng-model="object.update" ng-checked="{{object.update}}"></label>
+                                        <label class="checkbox-inline" style="width:20%"><input type="checkbox" ng-model="object.delete" ng-checked="{{object.delete}}"></label>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
