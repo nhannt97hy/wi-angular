@@ -1,41 +1,55 @@
 let helper = require('./DialogHelper');
-module.exports = function (ModalService, depthObj, callback) {
+module.exports = function (ModalService, selectedZoneTemplate, callback) {
     function ModalController($scope, close, wiApiService, wiComponentService, ModalService, $timeout) {
         let self = this;
-        self.template = { template: '' };
         let projectLoaded = wiComponentService.getComponent(wiComponentService.PROJECT_LOADED);
         this.config = [];
+        this.selectedZoneTemplate = selectedZoneTemplate;
 
         let topIdx = 0;
         let selectionLength = 8;
         let delta = 5;
 
-        self.returnZone = {
-            startDepth: depthObj.startDepth,
-            endDepth: depthObj.endDepth,
-            name: "",
-            foreground: "",
-            background: "",
-            pattern: "",
-            idZoneTemplate: ""
+        self.returnZoneTemplate = {
+            name: selectedZoneTemplate ? selectedZoneTemplate.name : null,
+            foreground: selectedZoneTemplate ? selectedZoneTemplate.foreground : null,
+            background: selectedZoneTemplate ? selectedZoneTemplate.background : null,
+            pattern: selectedZoneTemplate ? selectedZoneTemplate.pattern : null,
+            idZoneTemplate: selectedZoneTemplate ? selectedZoneTemplate.idZoneTemplate : null,
+            template: selectedZoneTemplate ? selectedZoneTemplate.template : null,
+            idZoneSet: selectedZoneTemplate ? selectedZoneTemplate.idZoneSet : null
         }
         this.refreshTree = function () {
             self.config = [];
             wiApiService.listZoneTemplate({}, function (templates) {
-                templates.sort(function (a, b) {
-                    return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
-                });
+                console.log('template', templates);
                 if (templates) {
+                    templates.sort(function (a, b) {
+                        return parseInt(a.idZoneTemplate) - parseInt(b.idZoneTemplate);
+                    });
                     let cutTemplates = templates.slice(0, selectionLength);
-
                     for (template of cutTemplates) {
-                        self.config.push(createTemplateModel(template))
-                        if (template == cutTemplates[0]) {
-                            selectHandler(self.config[0], self.config, function () {
-                                selectHandler(self.config[0].children[Math.floor(Math.random() * (self.config[0].children.length-1))], self.config);
-                            });
-                        }
+                        self.config.push(createTemplateModel(template));
                     }
+                    $timeout(function () {
+                        console.log('---', self.config);
+                        for (template of self.config) {
+                            if (selectedZoneTemplate && template.name == selectedZoneTemplate.template) {
+                                console.log(1);
+                                selectHandler(template, self.config, function () {
+                                    let templateNode = self.config.find(function (n) { return n.name = template.name });
+                                    let zoneNode = templateNode.children.find(function (z) { return z.idZoneTemplate == selectedZoneTemplate.idZoneTemplate });
+                                    console.log('1111', templateNode.children, selectedZoneTemplate.idZoneTemplate, zoneNode);
+                                    selectHandler(zoneNode, self.config);
+                                });
+                            } else if (self.config.length > 0) {
+                                let randomIndex = Math.floor(Math.random() * (self.config.length - 1));
+                                selectHandler(self.config[randomIndex], self.config, function () {
+                                    selectHandler(self.config[randomIndex].children[Math.floor(Math.random() * (self.config[randomIndex].children.length - 1))], self.config);
+                                })
+                            }
+                        }
+                    })
                 }
             })
         }
@@ -98,7 +112,6 @@ module.exports = function (ModalService, depthObj, callback) {
             node.$index = $index;
             if (!node) {
                 unselectAllNodes(rootNode);
-
                 return;
             }
             let selectedNodes = rootNode.__SELECTED_NODES;
@@ -116,11 +129,12 @@ module.exports = function (ModalService, depthObj, callback) {
             console.log('selectHandler', currentNode);
             if (currentNode.data) {
                 if (currentNode.type == 'zoneTemplate') {
-                    self.returnZone.name = currentNode.name;
-                    self.returnZone.background = currentNode.background;
-                    self.returnZone.foreground = currentNode.foreground;
-                    self.returnZone.pattern = currentNode.pattern;
-                    self.returnZone.idZoneTemplate = currentNode.idZoneTemplate;
+                    self.returnZoneTemplate.template = currentNode.template;
+                    self.returnZoneTemplate.background = currentNode.background;
+                    self.returnZoneTemplate.foreground = currentNode.foreground;
+                    self.returnZoneTemplate.pattern = currentNode.pattern;
+                    self.returnZoneTemplate.name = currentNode.name;
+                    self.returnZoneTemplate.idZoneTemplate = currentNode.idZoneTemplate;
                 }
                 if (currentNode.type == 'template' && currentNode.children.length == 0) {
                     wiApiService.listAllZoneByTemplate({ template: currentNode.name }, function (zones) {
@@ -129,7 +143,9 @@ module.exports = function (ModalService, depthObj, callback) {
                                 currentNode.children.push(createZoneModel(zone));
                             }
                             currentNode.data.childExpanded = true;
-                            callback();
+                            if (callback) {
+                                callback();
+                            }
                         }
                     })
                 }
@@ -183,31 +199,8 @@ module.exports = function (ModalService, depthObj, callback) {
             return node;
         }
 
-        // function getRandomTemplateIndex() {
-        //     let x = self.config[0].children.length;
-        //     if(x == 0 ) {
-        //         wiApiService.listAllZoneByTemplate({ template: self.config[0].template }, function (zones) {
-        //             for (zone of zones) {
-        //                 self.config[0].children.push(createZoneModel(zone));
-        //             }
-        //         })
-        //     }
-        //     $timeout(function () {
-        //         console.log('getRandomTemplate in', x, self.config[0].children[Math.floor(Math.random() * x)]);
-        //     })
-        //     console.log('getRandomTemplate', x, self.config[0].children[Math.floor(Math.random() * x)]);            
-        //     return self.config[0].children[Math.floor(Math.random() * x)];
-        // }
         this.onOkButtonClicked = function () {
-            let selectedNodes = self.config.__SELECTED_NODES;
-            if (self.returnZone.startDepth >= self.returnZone.endDepth) {
-                toastr.error('start depth and stop depth are not valid');
-            } else if (!self.returnZone.idZoneTemplate) {
-                toastr.error('no zone template was choosed');
-            }
-            else {
-                close(self.returnZone);
-            }
+            close(self.returnZoneTemplate);
         };
 
         this.onCancelButtonClicked = function () {
@@ -216,7 +209,7 @@ module.exports = function (ModalService, depthObj, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: 'create-new-zone-modal.html',
+        templateUrl: 'choose-zone-template-modal.html',
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

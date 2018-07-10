@@ -87,7 +87,7 @@
                             <td style="width: 10%;" class="border-right-gray" ng-click="wiZoneSetManager.selectZoneToggle(zone, $event)">
                                 <i class='glyphicon glyphicon-ok' ng-class="{'color-black': zone.flag, 'color-lightgray': !zone.flag}"></i>
                             </td>
-                            <td width="20%">
+                            <td width="20%" ng-click="wiZoneSetManager.chooseZoneTemplate(zone)">
                                 {{zone.zone_template.name}}
                             </td>
                             <td width="20%">
@@ -99,7 +99,7 @@
                                     style="height: auto;">
                             </td>
                             </td>
-                            <td width="30%">
+                            <td width="30%" ng-click="wiZoneSetManager.chooseZoneTemplate(zone)">
                                 <label class="form-control wi-form-control thick-border" style="padding:0;margin:0;">
                                     <wi-canvas-rect name="rowZS_{{$index}}" pattern="{{zone.zone_template.pattern}}" width="100" height="26" foreground="{{zone.zone_template.foreground}}"
                                         background='{{zone.zone_template.background}}'>
