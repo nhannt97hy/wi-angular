@@ -79,9 +79,12 @@
                     <td>
                         <input type="number" step="any" ng-model="marker.depth" class="form-control" ng-change="$ctrl.markerEdited(marker);">
                     </td>
-                    <td>
-                        <svg height="28" width="100%" style="padding: 0 12px">
-                            <line x1="0" y1="14" x2="100%" y2="14" stroke-width="{{marker.markerTemplate.lineWidth}}" stroke-dasharray="{{marker.markerTemplate.lineStyle.dashArray.join(',')}}" stroke="{{marker.markerTemplate.color}}"></line>
+                    <td style="padding: 14px;">
+                        <svg ng-if="marker.markerTemplate.lineStyle.html" height="16" width="100%" ng-bind-html="marker.markerTemplate.lineStyle.html">
+                        </svg>
+                        <svg ng-if="!marker.markerTemplate.lineStyle.html" height="16" width="100%">
+                            <line x1="0" y1="8" x2="100%" y2="8" stroke-width="{{marker.markerTemplate.lineWidth}}" stroke-dasharray="{{marker.markerTemplate.lineStyle.dashArray.join(',')}}"
+                                stroke="{{marker.markerTemplate.color}}"></line>
                         </svg>
                     </td>
                     <td>{{marker.markerTemplate.description}}</td>
