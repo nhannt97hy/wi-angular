@@ -127,7 +127,7 @@ module.exports = function (ModalService, selectedZoneTemplate, callback) {
         }
         function selectHandler(currentNode, rootNode, callback) {
             console.log('selectHandler', currentNode);
-            if (currentNode.data) {
+            if (currentNode && currentNode.data) {
                 if (currentNode.type == 'zoneTemplate') {
                     self.returnZoneTemplate.template = currentNode.template;
                     self.returnZoneTemplate.background = currentNode.background;

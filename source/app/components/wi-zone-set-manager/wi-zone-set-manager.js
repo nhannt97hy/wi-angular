@@ -51,50 +51,50 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     }
     this.refreshZoneSetList();
 
-    this.exportZoneSets = function () {
-        let selectedNodes = self.zoneSetConfig.__SELECTED_NODES;
-        let returnData = [];
-        if (Array.isArray(selectedNodes)) {
-            for (node of selectedNodes) {
-                let index = selectedNodes.indexOf(node);
-                let zoneSetObj = {
-                    idZoneSet: node.idZoneSet,
-                    name: node.name,
-                    idWell: node.idWell,
-                    zones: []
-                }
-                wiApiService.getZoneSet(node.idZoneSet, function (info) {
-                    if (info.zones) {
-                        for (zone of info.zones) {
-                            zoneSetObj.zones.push(createZoneModel(zone));
-                            if (zone == info.zones[info.zones.length - 1]) {
-                                returnData.push(zoneSetObj);
-                                if (index == selectedNodes.length - 1) {
+    // this.exportZoneSets = function () {
+    //     let selectedNodes = self.zoneSetConfig.__SELECTED_NODES;
+    //     let returnData = [];
+    //     if (Array.isArray(selectedNodes)) {
+    //         for (node of selectedNodes) {
+    //             let index = selectedNodes.indexOf(node);
+    //             let zoneSetObj = {
+    //                 idZoneSet: node.idZoneSet,
+    //                 name: node.name,
+    //                 idWell: node.idWell,
+    //                 zones: []
+    //             }
+    //             wiApiService.getZoneSet(node.idZoneSet, function (info) {
+    //                 if (info.zones) {
+    //                     for (zone of info.zones) {
+    //                         zoneSetObj.zones.push(createZoneModel(zone));
+    //                         if (zone == info.zones[info.zones.length - 1]) {
+    //                             returnData.push(zoneSetObj);
+    //                             if (index == selectedNodes.length - 1) {
 
-                                    let filename = 'zoneset';
-                                    let blob = new Blob([angular.toJson(returnData, true)], { type: 'text/plain' });
-                                    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-                                        window.navigator.msSaveOrOpenBlob(blob, filename);
-                                    } else {
-                                        var e = document.createEvent('MouseEvents'),
-                                            a = document.createElement('a');
-                                        a.download = filename;
-                                        a.href = window.URL.createObjectURL(blob);
-                                        a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-                                        e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-                                        a.dispatchEvent(e);
-                                        // window.URL.revokeObjectURL(url); // clean the url.createObjectURL resource
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        toastr.error(result.reason);
-                    }
-                })
-            }
-        }
-    }
+    //                                 let filename = 'zoneset';
+    //                                 let blob = new Blob([angular.toJson(returnData, true)], { type: 'text/plain' });
+    //                                 if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+    //                                     window.navigator.msSaveOrOpenBlob(blob, filename);
+    //                                 } else {
+    //                                     var e = document.createEvent('MouseEvents'),
+    //                                         a = document.createElement('a');
+    //                                     a.download = filename;
+    //                                     a.href = window.URL.createObjectURL(blob);
+    //                                     a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
+    //                                     e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    //                                     a.dispatchEvent(e);
+    //                                     // window.URL.revokeObjectURL(url); // clean the url.createObjectURL resource
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 } else {
+    //                     toastr.error(result.reason);
+    //                 }
+    //             })
+    //         }
+    //     }
+    // }
 
     this.createZoneSet = function () {
         let selectedNodes = self.zoneSetConfig.__SELECTED_NODES;
@@ -206,7 +206,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if (node.type == 'zoneSet') {
             let parentWell = getParentNode(node);
             let idZoneSet = node.idZoneSet;
-            let index = parentWell.children.indexOf(node);
+            let index = parentWell.children.findIndex(function (z) { return z == node });
             DialogUtils.chooseMarkerTemplateDialog(ModalService, function (data) {
                 if (data) {
                     wiApiService.createMarkerSet({
@@ -335,7 +335,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let doneNum = 0;
         let selectedZones = getSelectedZones();
         for (let z of self.zones) {
-            let index = self.zones.indexOf(z);
+            let index = self.zones.findIndex(function (zo) { return zo == z });
             if (z.flag || isAll) {
                 wiApiService.removeZone(z.idZone, function (rs) {
                     doneNum++;
@@ -358,7 +358,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         async.eachOfSeries(selectedZones, function (zone, i, done) {
             let zoneArr = angular.copy(self.zones);
             zoneArr.sort(sortZoneArrByDepth);
-            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
+            let index = zoneArr.findIndex(function (z) { return z == zoneArr.find(function (item) { return item.idZone == zone.idZone }) });
             if (index == 0) {
                 toastr.error('Can not move zone ' + zoneArr[0].zone_template.name + ' up.');
                 done();
@@ -383,7 +383,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         async.eachOfSeries(selectedZones.reverse(), function (zone, i, done) {
             let zoneArr = angular.copy(self.zones);
             zoneArr.sort(sortZoneArrByDepth);
-            let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
+            let index = zoneArr.findIndex(function (z) { return z == zoneArr.find(function (item) { return item.idZone == zone.idZone }) });
             if (index == zoneArr.length - 1) {
                 toastr.error('Can not move zone ' + zoneArr[zoneArr.length - 1].zone_template.name + ' down.');
                 done();
@@ -471,12 +471,12 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         if ($event.shiftKey && self.lastSelectedZone) {
             let zoneArr = angular.copy(self.zones);
             zoneArr.sort(sortZoneArrByDepth);
-            const zoneIndex = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == self.lastSelectedZone.idZone }));
-            const currIndex = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
+            const zoneIndex = zoneArr.findIndex(function (z) { return z == zoneArr.find(function (zone) { return zone.idZone == self.lastSelectedZone.idZone }) });
+            const currIndex = zoneArr.findIndex(function (z) { return z == zoneArr.find(function (zz) { return zz.idZone == zone.idZone }) });
             let minIndex = Math.min(zoneIndex, currIndex);
             let maxIndex = Math.max(zoneIndex, currIndex);
             for (let i = minIndex; i <= maxIndex; i++) {
-                let index = self.zones.indexOf(self.zones.find(function (z) { return z.idZone == zoneArr[i].idZone }));
+                let index = self.zones.findIndex(function (z) { return z == self.zones.find(function (zo) { return zo.idZone == zoneArr[i].idZone }) });
                 self.zones[index].flag = zoneArr[zoneIndex].flag;
             }
         } else {
@@ -521,13 +521,13 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     this.getDefaultTreeviewCtxMenu = function ($index, treeviewCtrl) {
         return [
             {
-                name: "Export to Json",
-                label: "Export Zone set",
-                icon: "file-export-16x16",
-                handler: function () {
-                    self.exportZoneSets();
-                }
-            }, {
+                //     name: "Export to Json",
+                //     label: "Export Zone set",
+                //     icon: "file-export-16x16",
+                //     handler: function () {
+                //         self.exportZoneSets();
+                //     }
+                // }, {
                 name: "Delete",
                 label: "Delete Zone set",
                 icon: "delete-16x16",
@@ -549,7 +549,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         let selectedZones = getSelectedZones();
         if (selectedZones.length == 0 && self.zones[0]) {
             let zoneArr = angular.copy(self.zones).sort(sortZoneArrByDepth);
-            let index = self.zones.indexOf(self.zones.find(function (z) { return z.idZone == zoneArr[zoneArr.length - 1].idZone }));
+            let index = self.zones.findIndex(function (z) { return z == self.zones.find(function (zo) { return zo.idZone == zoneArr[zoneArr.length - 1].idZone }) });
             self.zones[index].flag = true;
             var scroll = $('#zoneScroll');
             scroll.animate({ scrollTop: scroll.prop("scrollHeight") });
@@ -636,7 +636,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             zone.zone_template.idZoneTemplate = data.idZoneTemplate;
             zone.zone_template.name = data.name;
             wiApiService.editZone({ idZone: zone.idZone, idZoneTemplate: data.idZoneTemplate }, function (rs) {
-                if(rs) {
+                if (rs) {
                     console.log('edit success', rs);
                 } else {
                     toastr.error('Can not change zone template');
@@ -653,7 +653,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         );
         if (selectedZones.length == 0 && self.zones[0]) {
             let zoneArr = angular.copy(self.zones).sort(sortZoneArrByDepth);
-            let index = self.zones.indexOf(self.zones.find(function (z) { return z.idZone == zoneArr[zoneArr.length - 1].idZone }));
+            let index = self.zones.findIndex(function (z) { return z == self.zones.find(function (zo) { return zo.idZone == zoneArr[zoneArr.length - 1].idZone }) });
             self.zones[index].flag = true;
             var scroll = $('#zoneScroll');
             scroll.animate({ scrollTop: scroll.prop("scrollHeight") });
@@ -765,7 +765,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
             return self.zoneSetConfig;
         } else {
             return self.zoneSetConfig.find(function (well) {
-                return well.children.indexOf(node) != -1;
+                return well.children.findIndex(function (w) { return w == node }) != -1;
             })
         }
     }
@@ -808,7 +808,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }
         let zoneArr = angular.copy(self.zones);
         zoneArr.sort(sortZoneArrByDepth);
-        let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == selectedZone.idZone }));
+        let index = zoneArr.findIndex(function (z) { return z == zoneArr.find(function (zo) { return zo.idZone == selectedZone.idZone }) });
         let free;
         if (isBelow) {
             if (zoneArr[index + 1]) {
@@ -858,7 +858,7 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
     function getNearestUnselectedZoneIndex(zone, isAbove) {
         let zoneArr = angular.copy(self.zones);
         zoneArr.sort(sortZoneArrByDepth);
-        let index = zoneArr.indexOf(zoneArr.find(function (z) { return z.idZone == zone.idZone }));
+        let index = zoneArr.findIndex(function (z) { return z == zoneArr.find(function (zo) { return zo.idZone == zone.idZone }) });
         if (isAbove) {
             for (let i = index - 1; i >= 0; i--) {
                 if (!zoneArr[i].flag) return i;
