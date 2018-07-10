@@ -28,17 +28,21 @@ module.exports = function (ModalService, markerSetTemplate, depth, callback) {
                         childExpanded: true
                     },
                     properties: { template: name },
-                    children: markerTemplateGroups[name].map(mt => ({
-                        name: mt.name,
-                        type: 'marker-template',
-                        id: mt.idMarkerTemplate,
-                        data: {
-                            icon: 'marker-properties-16x16',
-                            label: mt.name,
-                            childExpanded: true
-                        },
-                        properties: Object.assign(mt, { lineStyle: eval(mt.lineStyle) }),
-                    }))
+                    children: markerTemplateGroups[name].map(mt => {
+                        mt.lineStyle = JSON.parse(mt.lineStyle);
+                        mt.lineStyle.dashArray = JSON.parse(mt.lineStyle.dashArray);
+                        return {
+                            name: mt.name,
+                            type: 'marker-template',
+                            id: mt.idMarkerTemplate,
+                            data: {
+                                icon: 'marker-properties-16x16',
+                                label: mt.name,
+                                childExpanded: true
+                            },
+                            properties: mt,
+                        }
+                    })
                 })))
             })
         }

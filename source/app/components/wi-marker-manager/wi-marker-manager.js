@@ -1,7 +1,9 @@
+const markerLineHelper = require('./markerLineHelper');
+
 const componentName = 'wiMarkerManager';
 const moduleName = 'wi-marker-manager';
 
-function Controller(wiComponentService, wiApiService, ModalService) {
+function Controller(wiComponentService, wiApiService, ModalService, $sce) {
     const self = this;
     const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -55,6 +57,32 @@ function Controller(wiComponentService, wiApiService, ModalService) {
         }
         node.data.selected = true;
     }
+    this.getLineHtml = function ({ color, lineWidth, lineStyle }) {
+        let dashArray = lineStyle.dashArray;
+        if (typeof markerLineHelper[lineStyle.shape] === 'function') {
+            const func = markerLineHelper[lineStyle.shape];
+            let width = 200, height, stepWidth;
+            switch (lineStyle.shape) {
+                case 'sin':
+                    height = 16;
+                    stepWidth = 16;
+                    break;
+                case 'fault':
+                    height = Math.sqrt((dashArray[0] ** 2) / 2);
+                    stepWidth = Math.sqrt((dashArray[0] ** 2) / 2);
+                    break;
+                default: break;
+            }
+            const elem = func({ width, height, stepWidth }).node();
+            $(elem).css({
+                'stroke': color,
+                'stroke-width': lineWidth,
+                'stroke-dasharray': lineStyle.dashArray,
+                transform: `translateY(${(16-height)/2}px)`,
+            })
+            return $sce.trustAsHtml(elem.outerHTML);
+        } else return null;
+    }
     this.selectMarkerSet = function (idMarkerSet) {
         if (!idMarkerSet) return;
         this.selectedIdMarkerSet = idMarkerSet;
@@ -66,9 +94,11 @@ function Controller(wiComponentService, wiApiService, ModalService) {
                 return m.new;
             });
             self.selectedMarkerSet = markerSet.markers.map(m => {
-                Object.assign(m, { markerTemplate: m.marker_template })
-                m.markerTemplate.lineStyle = JSON.parse(m.markerTemplate.lineStyle);
-                m.markerTemplate.lineStyle.dashArray = JSON.parse(m.markerTemplate.lineStyle.dashArray);
+                const mt = m.marker_template;
+                mt.lineStyle = JSON.parse(mt.lineStyle);
+                mt.lineStyle.dashArray = JSON.parse(mt.lineStyle.dashArray);
+                mt.lineStyle.html = self.getLineHtml(mt);
+                m.markerTemplate = mt;
                 return m;
             }).concat(newMarkers);
             _sortByDepth(self.selectedMarkerSet);
