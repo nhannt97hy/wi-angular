@@ -1,6 +1,8 @@
 const helper = require('./DialogHelper');
+const markerLineHelper = require('./markerLineHelper');
+
 module.exports = function (ModalService, markerSetTemplate, depth, callback) {
-    function ModalController($scope, close, wiApiService, wiComponentService, ModalService, $timeout) {
+    function ModalController($scope, close, wiApiService, wiComponentService, $sce) {
         const self = this;
         const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
@@ -54,6 +56,33 @@ module.exports = function (ModalService, markerSetTemplate, depth, callback) {
                 self.selectedTemplate = node.properties;
             }
             node.data.selected = true;
+        }
+
+        this.getLineHtml = function ({ color, lineWidth, lineStyle }) {
+            let dashArray = lineStyle.dashArray;
+            if (typeof markerLineHelper[lineStyle.shape] === 'function') {
+                const func = markerLineHelper[lineStyle.shape];
+                let width = 200, height, stepWidth;
+                switch (lineStyle.shape) {
+                    case 'sin':
+                        height = 16;
+                        stepWidth = 16;
+                        break;
+                    case 'fault':
+                        height = Math.sqrt((dashArray[0] ** 2) / 2);
+                        stepWidth = Math.sqrt((dashArray[0] ** 2) / 2);
+                        break;
+                    default: break;
+                }
+                const elem = func({ width, height, stepWidth }).node();
+                $(elem).css({
+                    'stroke': color,
+                    'stroke-width': lineWidth,
+                    'stroke-dasharray': lineStyle.dashArray,
+                    transform: `translateY(${(16-height)/2}px)`,
+                })
+                return $sce.trustAsHtml(elem.outerHTML);
+            } else return null;
         }
 
         // buttons
