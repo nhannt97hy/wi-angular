@@ -98,6 +98,7 @@ module.exports = function (ModalService, callback, groups, _users, company) {
             wiApiService.updateGroupPermissionOfProject({
                 project_name: self.project.name,
                 idGroup: self.selectedGroup.idGroup,
+                username: currentUser,
                 permission: _perm
             }, function (res) {
                 toastr.success("Successfull updated new permission for group : " + self.selectedGroup.name);
