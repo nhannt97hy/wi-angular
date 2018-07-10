@@ -453,6 +453,8 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     }
                     self.taskConfig.inputData.splice(idx, 1);
                     self.datasetsList.splice(self.datasetsList.indexOf(d), 1);
+                    self.inputDataClone = angular.copy(self.taskConfig.inputData);
+                    self.inputDataClone.forEach(d => { delete d.children; });
                 }
                 return;
             }
@@ -881,6 +883,17 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     $('#' + label).css('box-shadow', '');
                     }, 255)
                 }
+            }
+        }
+
+        this.printSettingChange = function () {
+            switch (this.config.print.ratio) {
+                case '4:3':
+                    this.config.print.size.height = this.config.print.size.width * 3 / 4;
+                    break;
+                case '16:9':
+                    this.config.print.size.height = this.config.print.size.width * 9 / 16;
+                    break;
             }
         }
 

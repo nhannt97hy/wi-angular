@@ -1,20 +1,150 @@
 exports.SaveFormatButtonClicked = function() {
     console.log('SaveFormatButton is clicked', this.wiHistogram);
-    var wiComponentService = this.wiComponentService;
+    let wiComponentService = this.wiComponentService;
     let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
     let ModalService = this.ModalService;
     let idHistogram = this.wiHistogram.id;
     let wiApiService = this.wiApiService;
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let histogramModel = utils.getModel("histogram", idHistogram);
-    wiApiService.editHistogram(histogramModel.properties, function(){
+    let hisD3Ctrl = this.wiHistogram.getwiD3Ctrl();
+    hisD3Ctrl.saveHistogramNow(function () {
         dialogUtils.warningMessageDialog(ModalService, 'Histogram plot is saved');
-    })
-
+    });
 }
 
 exports.PrintButtonClicked = function() {
     console.log('PrintButton is clicked');
+    let self = this;
+    let wiComponentService = this.wiComponentService;
+    let dialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
+    let utils = wiComponentService.getComponent(wiComponentService.UTILS);
+    let ModalService = this.ModalService;
+    let setting = this.wiHistogram.getwiD3Ctrl().config.print;
+    if (!setting.size.width || !setting.size.height) return;
+    let wiHistogramArea = d3.select(`wi-histogram[name=${self.wiHistogram.name}]`);
+    let wiD3HistogramArea = wiHistogramArea.select('wi-d3-histogram')
+        .classed('printArea', true);
+    let statisticsPane = wiHistogramArea.select('.statistic-pane')
+        .classed('resizedPane', true);
+    let pageArea = d3.select(wiD3HistogramArea.node().parentNode)
+        .classed('pageArea', true);
+    let body = d3.select('body');
+    let printStyle = body.append('style');
+    let paperWidth = setting.orientation == 'Portrait' ? 210 : 297;
+    let html = `
+        .pageArea {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: ${setting.size.width/paperWidth*100}% !important;
+            height: 100%;
+            z-index: 100;
+            background: white;
+            margin: 0 !important;
+            padding: 0 !important;
+            // border: 1px solid blue;
+        }
+        .printArea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: ${setting.size.height}mm !important;
+            width: 100% !important;
+            z-index: 200;
+            background: white;
+            margin: 0 !important;
+            padding: 0 !important;
+            //border: 1px solid red;
+        }
+        .resizedPane {
+            position: absolute;
+            top: ${setting.size.height}mm !important;
+            left: 0;
+            height: auto !important;
+            width: 100% !important;
+            z-index: 200;
+            background: white;
+            margin: 0 !important;
+            padding: 0 !important;
+            // border: 1px solid green;
+        }
+        .resizedPane > div {
+            overflow: hidden;
+        }
+    `;
+    printStyle.html(html);
+    wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
+    let printImg;
+    setTimeout(() => {
+        const hisHeight = wiD3HistogramArea.node().getBoundingClientRect().height;
+        const statsHeight = statisticsPane.node().getBoundingClientRect().height;
+        html += `
+            .pageArea {
+                height: ${hisHeight + statsHeight}px !important;
+            }
+        `;
+        printStyle.html(html);
+        domtoimage.toPng(pageArea.node())
+            .then((dataUrl) => {
+                printImg = new Image();
+                printImg.src = dataUrl;
+                d3.select(printImg).classed('printImg', true);
+                html += `
+                    body * {
+                        visibility: hidden !important;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .printImg {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        margin: 0;
+                        padding: 0;
+                        z-index: 1000;
+                        visibility: visible !important;
+                    }
+                    @media print {
+                        @page {
+                            // size: ${setting.size.width}mm;
+                            // margin: 0;
+                            // padding: 0;
+                            size: A4 ${setting.orientation};
+                        }
+                        body * {
+                            visibility: hidden !important;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .printImg {
+                            height: auto;
+                            visibility: visible !important;
+                            margin: 0;
+                            padding: 0;
+                            page-break-after: auto;
+                            page-break-inside: auto;
+                        }
+                    }
+                `;
+                printStyle.html(html);
+                document.body.appendChild(printImg);
+                setTimeout(() => {
+                    window.print();
+                }, 500);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+    }, 1000)
+    window.onafterprint = function () {
+        printStyle.remove();
+        if (printImg) document.body.removeChild(printImg);
+        pageArea.classed('pageArea', false);
+        wiD3HistogramArea.classed('printArea', false);
+        statisticsPane.classed('resizedPane', false);
+        wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
+    }
 }
 
 exports.EditFormatButtonClicked = function() {
