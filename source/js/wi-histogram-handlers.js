@@ -21,6 +21,7 @@ exports.PrintButtonClicked = function() {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let ModalService = this.ModalService;
     let setting = this.wiHistogram.getwiD3Ctrl().config.print;
+    if (!setting) return;
     if (!setting.size.width || !setting.size.height) return;
     let wiHistogramArea = d3.select(`wi-histogram[name=${self.wiHistogram.name}]`);
     let wiD3HistogramArea = wiHistogramArea.select('wi-d3-histogram')

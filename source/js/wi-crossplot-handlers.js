@@ -17,7 +17,7 @@ exports.PrintButtonClicked = function() {
     let utils = wiComponentService.getComponent(wiComponentService.UTILS);
     let ModalService = this.ModalService;
     let setting = this.wiCrossplot.getWiD3CrossplotCtrl().config.print;
-
+    if (!setting) return;
     if (!setting.size.width || !setting.size.height) return;
     let wiCrossplotArea = d3.select(`wi-crossplot[name=${self.wiCrossplot.name}]`);
     let wiD3CrossplotArea = wiCrossplotArea.select('wi-d3-crossplot')

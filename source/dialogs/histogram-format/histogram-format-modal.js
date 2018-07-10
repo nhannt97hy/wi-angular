@@ -926,7 +926,8 @@ module.exports = function (ModalService, wiD3HistogramCtrl, callback, cancelCall
                     // showCumulative: self.config.showCumulative,
                     flipHorizontal: self.config.flipHorizontal,
                     // plot: self.config.plot,
-                    plotType: self.config.plotType
+                    plotType: self.config.plotType,
+                    printSetting: JSON.stringify(self.config.print)
                 };
                 wiApiService.editHistogram(dataRequest, function (hisProps) {
                     if (!hisProps.idHistogram) return;

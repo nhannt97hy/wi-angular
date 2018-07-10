@@ -30,6 +30,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         delete self.histogramModel.properties.curvesProperties;
         delete self.histogramModel.properties.wells;
         self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
+        self.histogramModel.properties.printSetting = JSON.stringify(config.print);
         wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
             async.eachSeries(curves, function (curve, cb) {
                 wiApiService.editHistogramCurveSet(curve.options, function (retData) {
@@ -68,6 +69,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         delete self.histogramModel.properties.curvesProperties;
         delete self.histogramModel.properties.wells;
         self.histogramModel.properties.curves = self.histogramModel.properties.curves.map(c => { return c.idCurve; });
+        self.histogramModel.properties.printSetting = JSON.stringify(config.print);
         wiApiService.editHistogram(self.histogramModel.properties, function (returnData) {
             async.eachSeries(curves, function (curve, cb) {
                 wiApiService.editHistogramCurveSet(curve.options, function (retData) {
@@ -255,14 +257,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 },
                 isShowWiZone: hisProps.isShowWiZone,
                 referenceDisplay: hisProps.referenceDisplay,
-                print: {
-                    orientation: 'Portrait',
-                    size: {
-                        width: 0,
-                        height: 0
-                    },
-                    ratio: '16:9'
-                }
+                print: JSON.parse(hisProps.printSetting)
             };
             hisProps.showGaussian = self.config.showGaussian;
             hisProps.showCumulative = self.config.showCumulative;
@@ -403,6 +398,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
         } else {
             self.label = {};
         }
+        if (!self.config.print) {
+            self.config.print = {
+                orientation: 'Portrait',
+                size: {
+                    width: 0,
+                    height: 0
+                },
+                ratio: '16:9'
+            }
+        }
         DialogUtils.histogramFormatDialog(ModalService, self, function (histogramProperties) {
             if (!self.visHistogram || !Object.keys(self.visHistogram).length
                 || !self.visHistogram.curves || !self.visHistogram.curves.length) {
@@ -444,7 +449,9 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                             self.visHistogram.container.selectAll('*').remove();
                             delete self.visHistogram;
                         }
-                        loadStatistics();
+                        self.visHistogram.trap('data-processing-done', function (arg) {
+                            loadStatistics();
+                        });
                     });
                 });
             }

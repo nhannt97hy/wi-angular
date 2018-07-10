@@ -30,6 +30,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 delete ps.curveX;
                 delete ps.curveY;
             });
+            self.crossplotModel.properties.printSetting = JSON.stringify(config.print);
 
             wiApiService.editCrossplot(self.crossplotModel.properties, function (returnData) {
                 self.config = self.crossplotModel.properties.config = config;
@@ -217,14 +218,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 intervalDepthBottom: d3.max(intervalDepthBottomArr),
                 isShowWiZone: xplotProps.pointsets[0].isShowWiZone,
                 referenceDisplay: xplotProps.pointsets[0].referenceDisplay,
-                print: {
-                    orientation: 'Portrait',
-                    size: {
-                        width: 0,
-                        height: 0
-                    },
-                    ratio: '16:9'
-                }
+                print: JSON.parse(xplotProps.printSetting)
             };
             xplotProps.curvesProperties = self.curvesProperties;
             self.crossplotModel.properties = xplotProps;
@@ -560,6 +554,16 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 self.curvesProperties.forEach(cp => cp.flag = 'edit');
             } else {
                 self.labels = {};
+            }
+            if (!self.config.print) {
+                self.config.print = {
+                    orientation: 'Portrait',
+                    size: {
+                        width: 0,
+                        height: 0
+                    },
+                    ratio: '16:9'
+                }
             }
             DialogUtils.crossplotFormatDialog(ModalService, self, function (xplotProps) {
                 if (!self.viCrossplot || !Object.keys(self.viCrossplot).length
