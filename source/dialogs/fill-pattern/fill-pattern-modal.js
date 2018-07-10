@@ -10,11 +10,11 @@ module.exports = function (ModalService, name, foreground, background, callback)
         this.background = background;
         let selectPatterns = wiComponentService.getComponent(wiComponentService.PATTERN);
         this.filter = '';
-        
+        this.filterText = '';
         let topIdx = 0;
         let selectionLength = 30;
         let delta = 10;
-
+    
         let solidPattern = {
             Solid: {
                 full_name: "None",
@@ -76,6 +76,25 @@ module.exports = function (ModalService, name, foreground, background, callback)
                     if (n.name == node.name) n.data.selected = true;
                 });
             });
+        }
+        this.onFilterEnterKey = function (filterText) {
+            self.filterText = filterText;
+            topIdx = 0;
+            $timeout(function () {
+                self.selectPatterns = onFilterObject(Object.assign({}, solidPattern, selectPatterns), self.filterText);
+                self.config = [];
+                initConfig(self.config, self.selectPatterns);
+            });
+        };
+
+        function onFilterObject (obj, filterText) {
+            let newObj = {};
+            for(let key in obj) {
+                if(obj[key].full_name
+                            .toLowerCase()
+                            .includes(filterText.toLowerCase())) newObj[key] = obj[key];
+            }
+            return newObj;
         }
         this.upTrigger = function(cb) {
             let patternList = self.config;
