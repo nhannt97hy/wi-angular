@@ -103,7 +103,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
 
     this.getModel = function(){
-        return utils.findHistogramModelById(self.idHistogram || self.wiHistogramCtrl.id);
+        return self.histogramModel;
     }
     function getHistogramTitle(log) {
         if(!!self.histogramModel.properties.histogramTitle){
@@ -254,13 +254,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                     right: hisProps.rightScale
                 },
                 isShowWiZone: hisProps.isShowWiZone,
-                referenceDisplay: hisProps.referenceDisplay
+                referenceDisplay: hisProps.referenceDisplay,
+                print: {
+                    orientation: 'Portrait',
+                    size: {
+                        width: 0,
+                        height: 0
+                    },
+                    ratio: '16:9'
+                }
             };
             hisProps.showGaussian = self.config.showGaussian;
             hisProps.showCumulative = self.config.showCumulative;
             hisProps.plot = self.config.plot;
             hisProps.curvesProperties = self.curvesProperties;
             self.wells = hisProps.wells = new Object();
+            self.wellModels = new Array();
             hisProps.curves.forEach(curve => {
                 let w = utils.findWellByCurve(curve.idCurve);
                 let well = {
@@ -271,9 +280,22 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 };
                 self.wells[curve.idCurve] = hisProps.wells[curve.idCurve] = well;
                 curve.options = curve.histogram_curve_set;
+                self.wellModels.push(w);
             });
             self.histogramModel.properties = hisProps;
             self.createVisualizeHistogram(self.histogramModel.properties);
+            $timeout(() => {
+                let refWindCtrl = self.getWiRefWindCtrl();
+                if (refWindCtrl) refWindCtrl.update(
+                    self.wellModels,
+                    self.histogramModel.properties.reference_curves,
+                    self.histogramModel.properties.referenceScale,
+                    self.histogramModel.properties.referenceVertLineNumber,
+                    self.histogramModel.properties.referenceTopDepth,
+                    self.histogramModel.properties.referenceBottomDepth,
+                    self.histogramModel.properties.referenceShowDepthGrid
+                );
+            });
         });
         function handler () {
             self.visHistogram && self.visHistogram.doPlot && self.visHistogram.doPlot();
@@ -299,7 +321,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let wellModel = utils.findWellByCurve(idCurve);
                 if(wellModel.id == self.histogramModel.properties.idWell){
                     if (self.hasThisCurve(idCurve)) {
-                        self.unloadCurve();
+                        unloadCurve();
                     }
                 }
                 break;
@@ -307,7 +329,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 let idDataset = model.id;
                 if(model.properties.idWell == self.histogramModel.properties.idWell){
                     if (self.curveModel && self.curveModel.properties.idDataset == idDataset) {
-                        self.unloadCurve();
+                        unloadCurve();
                     }
                 }
             break;
@@ -353,7 +375,7 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
     }
     this.$onInit = function() {
         self.histogramAreaId = self.name + 'HistogramArea';
-        self.histogramModel = self.getModel();
+        self.histogramModel = utils.findHistogramModelById(self.idHistogram || self.wiHistogramCtrl.id);
         if (self.containerName == undefined || self.containerName == null) self.containerName = '';
         if (self.name) {
             wiComponentService.putComponent(self.name, self);
@@ -476,17 +498,33 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 label: "Reference Window",
                 icon: "ti-layout-tab-window",
                 handler: function () {
-                    DialogUtils.referenceWindowsDialog(ModalService, getWell(), self.histogramModel, function() {
+                    let props = self.histogramModel.properties;
+                    if (!self.wellModels) {
+                        self.wellModels = new Array();
+                        self.curves.forEach(curve => {
+                            self.wellModels.push(utils.findWellByCurve(curve.idCurve));
+                        });
+                    }
+                    if (!props.referenceTopDepth && !props.referenceBottomDepth) {
+                        props.referenceTopDepth = props.intervalDepthTop;
+                        props.referenceBottomDepth = props.intervalDepthBottom;
+                    }
+                    DialogUtils.referenceWindowsDialog(ModalService, self, function() {
                         saveHistogramNow(function () {
                             let refWindCtrl = self.getWiRefWindCtrl();
-                            if (refWindCtrl)
-                                refWindCtrl.update(getWell(),
+                            if (refWindCtrl) {
+                                console.warn('ref win dialog closed');
+                                refWindCtrl.update(
+                                    self.wellModels,
                                     self.histogramModel.properties.reference_curves,
                                     self.histogramModel.properties.referenceScale,
                                     self.histogramModel.properties.referenceVertLineNumber,
                                     self.histogramModel.properties.referenceTopDepth,
                                     self.histogramModel.properties.referenceBottomDepth,
-                                    self.histogramModel.properties.referenceShowDepthGrid);
+                                    self.histogramModel.properties.referenceShowDepthGrid
+                                );
+                                wiComponentService.getComponent(wiComponentService.LAYOUT_MANAGER).triggerResize();
+                            }
                         });
                     });
                 }
@@ -622,6 +660,13 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 return;
             }
 
+            Object.keys(hisProps.wells).forEach(w => {
+                if (!hisProps.intervalDepthTop || hisProps.intervalDepthTop > hisProps.wells[w].topDepth)
+                    hisProps.intervalDepthTop = hisProps.wells[w].topDepth;
+                if (!hisProps.intervalDepthBottom || hisProps.intervalDepthBottom < hisProps.wells[w].bottomDepth)
+                    hisProps.intervalDepthBottom = hisProps.wells[w].bottomDepth;
+            });
+
             self.curves = hisProps.curves;
             self.config = hisProps.config;
             self.curvesProperties = hisProps.curvesProperties;
@@ -636,10 +681,11 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
             self.histogramModel.properties.plot = self.config.plot;
 
             self.visHistogram = graph.createHistogram(hisProps, document.getElementById(self.histogramAreaId));
-            loadStatistics();
+            self.visHistogram.trap('data-processing-done', function (arg) {
+                loadStatistics();
+            });
         });
     }
-    this.unloadCurve = unloadCurve;
     function unloadCurve() {
         curveLoading = true;
         self.curveModel = null;

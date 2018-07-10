@@ -234,6 +234,49 @@
                             </form>
                         </div>
                     </wi-tab>
+                    <wi-tab heading="Print Setting">
+                        <div class="container-fluid">
+                            <form class="form-condensed">
+                                <div class="col-sm-12 input-field">
+                                    <div class="col-sm-3">
+                                        <input type="radio" name='orientation'
+                                        ng-model="wiModal.config.print.orientation" value="Portrait"
+                                        ng-change="wiModal.printSettingChange()">
+                                        <label>Portrait</label>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="radio" name='orientation'
+                                        ng-model="wiModal.config.print.orientation" value="Landscape"
+                                        ng-change="wiModal.printSettingChange()">
+                                        <label>Landscape</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 input-field">
+                                    <label class="col-sm-3" style="margin-top:8px">Width (mm)</label>
+                                    <div class="col-sm-3">
+                                        <input class="form-control" type="number" min="0"
+                                        ng-model="wiModal.config.print.size.width"
+                                        ng-change="wiModal.printSettingChange()"
+                                        required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 input-field" style="margin-bottom:12px">
+                                    <div class="col-sm-3">
+                                        <input type="radio" name='ratio'
+                                        ng-model="wiModal.config.print.ratio" value="16:9"
+                                        ng-change="wiModal.printSettingChange()">
+                                        <label>16:9</label>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="radio" name='ratio'
+                                        ng-model="wiModal.config.print.ratio" value="4:3"
+                                        ng-change="wiModal.printSettingChange()">
+                                        <label>4:3</label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </wi-tab>
                 </wi-tabset>
                 <div id="dragObjElement"></div>
             </div>

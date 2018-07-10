@@ -178,8 +178,8 @@ function Controller(wiComponentService, wiApiService, ModalService) {
         else {
             markerSetModel = Utils.getModel('marker-set', selectedMarker.idMarkerSet, self.treeConfig);
             const wellModel = Utils.getModel('well', markerSetModel.properties.idWell, self.treeConfig);
-            const aboveMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker)-1];
-            const belowMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker)+1];
+            const aboveMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker) - 1];
+            const belowMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker) + 1];
             const { topDepth, bottomDepth } = wellModel.properties;
             depth = isAbove ? selectedMarker.depth - 50 : selectedMarker.depth + 50;
             if (aboveMarker && depth <= aboveMarker.depth) depth = (aboveMarker.depth + selectedMarker.depth) / 2;
@@ -202,6 +202,69 @@ function Controller(wiComponentService, wiApiService, ModalService) {
 
     }
 
+    this.showTreeContextMenu = function ($event, $index) {
+        let selectedNode = _getSelectedNode(self.treeConfig);
+        if (selectedNode.type == 'marker-set') {
+            let contextMenu = getDefaultTreeviewCtxMenu(
+                $index,
+                this
+            );
+            wiComponentService
+                .getComponent("ContextMenu")
+                .open($event.clientX, $event.clientY, contextMenu);
+        }
+    };
+
+    this.exportToZoneset = function () {
+        let selectedNode = _getSelectedNode(self.treeConfig);
+        DialogUtils.chooseZoneTemplateDialog(ModalService, null, function (data) {
+            if (data) {
+                console.log('data')
+                wiApiService.createZoneSet({
+                    name: selectedNode.name,
+                    idWell: selectedNode.idWell
+                }, function (zoneset, err) {
+                    if (zoneset) {
+                        wiApiService.getMarkerSet(selectedNode.id, function (markers, err) {
+                            if (markers) {
+                                let depths = getDepthArrFromMarkerArr(markers.markers);
+                                depths.sort();
+                                let doneNum = 0;
+                                depths.map((d, i) => {
+                                    if (depths[i+1]) {
+                                        wiApiService.createZone({
+                                            background: data.background,
+                                            foreground: data.foreground,
+                                            pattern: data.pattern,
+                                            idZoneSet: zoneset.idZoneSet,
+                                            idZoneTemplate: data.idZoneTemplate,
+                                            template: data.template,
+                                            name: data.name,
+                                            startDepth: d,
+                                            endDepth: depths[i + 1]
+                                        }, function (zone, err) {
+                                            if (zone) {
+                                                doneNum++;
+                                                if (doneNum == depths.length - 2) {
+                                                    toastr.success('Export marker set to zone set successfully.');
+                                                }
+                                            } else {
+                                                toastr.error('Can not create zone.');
+                                            }
+                                        })
+                                    }
+                                })
+                            } else {
+                                toastr.error('Can not get markers.');
+                            }
+                        });
+                    } else {
+                        toastr.error('Can not create zone set.');
+                    }
+                })
+            }
+        })
+    }
 
     // private
     function _createWellModel(well) {
@@ -222,6 +285,7 @@ function Controller(wiComponentService, wiApiService, ModalService) {
             name: markerSet.name,
             type: 'marker-set',
             id: markerSet.idMarkerSet,
+            idWell: markerSet.idWell,
             data: {
                 icon: 'marker-properties-16x16',
                 label: markerSet.name,
@@ -250,6 +314,28 @@ function Controller(wiComponentService, wiApiService, ModalService) {
     }
     function _sortByDepth(markers) {
         markers.sort((a, b) => a.depth - b.depth);
+    }
+
+    function getDefaultTreeviewCtxMenu($index, treeviewCtrl) {
+        return [
+            {
+                name: "Export to Zoneset",
+                label: "Export to Zoneset",
+                icon: "mineral-zone-add-16x16",
+                handler: function () {
+                    self.exportToZoneset();
+                }
+            }
+        ]
+    };
+
+    function getDepthArrFromMarkerArr(markerArr) {
+        if (!markerArr || !Array.isArray(markerArr)) return;
+        let depths = new Set();
+        for (marker of markerArr) {
+            depths.add(marker.depth);
+        }
+        return Array.from(depths);
     }
 }
 

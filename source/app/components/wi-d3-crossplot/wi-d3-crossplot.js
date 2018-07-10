@@ -216,7 +216,15 @@ function Controller($scope, wiComponentService, $timeout, ModalService, wiApiSer
                 intervalDepthTop: d3.min(intervalDepthTopArr),
                 intervalDepthBottom: d3.max(intervalDepthBottomArr),
                 isShowWiZone: xplotProps.pointsets[0].isShowWiZone,
-                referenceDisplay: xplotProps.pointsets[0].referenceDisplay
+                referenceDisplay: xplotProps.pointsets[0].referenceDisplay,
+                print: {
+                    orientation: 'Portrait',
+                    size: {
+                        width: 0,
+                        height: 0
+                    },
+                    ratio: '16:9'
+                }
             };
             xplotProps.curvesProperties = self.curvesProperties;
             self.crossplotModel.properties = xplotProps;

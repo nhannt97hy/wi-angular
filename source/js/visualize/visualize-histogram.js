@@ -144,10 +144,6 @@ Histogram.prototype.filterF = function(d, idCurve, zoneIdx) {
                 ( tempDepth < zone.properties.endDepth ) && (parseFloat(d.x) >= left) && (parseFloat(d.x) <= right));
     }
     let xFloat = parseFloat(d.x);
-    // fake
-    this.histogramModel.intervalDepthTop = startDepth;
-    this.histogramModel.intervalDepthBottom = endDepth;
-    // end fake
     return (
         !isNaN(d.y) &&
         ( tempDepth >= this.histogramModel.intervalDepthTop ) &&
@@ -291,7 +287,7 @@ Histogram.prototype.prepareDrawContainer = function () {
                 .attr('height', self.rect.height);
 }
 
-Histogram.prototype.doPlot = function () {
+Histogram.prototype._doPlot = function () {
     if($(this.container.node()).width() < 0 || $(this.container.node()).height() < 0) return;
     this.adjustSize();
     this.clearPlot();
@@ -399,6 +395,7 @@ Histogram.prototype.generateHistogram = function () {
     this.mean = this.getAverage();
     this.standardDeviation = this.getStandardDeviation();
     this.bigData = this.getBigData();
+    this.signal('data-processing-done');
 }
 
 Histogram.prototype.plotAxesContainer = function () {
@@ -928,17 +925,15 @@ Histogram.prototype.reverseBins = function (bins) {
     }
 }
 
-// Histogram.prototype.doPlot = function() {
-//     let self = this;
-//     console.log('vihist doPlot');
-//     if (self.timerHandle) {
-//         clearTimeout(self.timerHandle)
-//     }
-//     self.timerHandle = setTimeout(function() {
-//         self.timerHandle = null;
-//         self._doPlot();
-//     }, 500);
-// }
+Histogram.prototype.doPlot = function() {
+    if (this.timerHandle) {
+        clearTimeout(this.timerHandle);
+    }
+    this.timerHandle = setTimeout(() => {
+        this.timerHandle = null;
+        this._doPlot();
+    }, 500);
+}
 
 Histogram.prototype.init = function(domElem) {
     let self = this;
