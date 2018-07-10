@@ -1,6 +1,8 @@
+const markerLineHelper = require('./markerLineHelper');
+
 const componentName = 'wiMarkerTemplateManager';
 const moduleName = 'wi-marker-template-manager';
-function Controller($scope, wiComponentService, wiApiService, ModalService, $timeout) {
+function Controller($scope, wiComponentService, wiApiService, ModalService, $sce) {
     const self = this;
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
 
@@ -31,21 +33,49 @@ function Controller($scope, wiComponentService, wiApiService, ModalService, $tim
         }, {
             shape: 'sin',
             dashArray: [0],
+        }, {
+            shape: 'fault',
+            dashArray: [5,5],
         },
     ]
-
     // marker set template
     this.$onInit = function () {
         wiComponentService.putComponent(self.name, self);
         this.getTemplateList();
     }
-
+    this.getLineHtml = function ({ color, lineWidth, lineStyle }) {
+        let dashArray = lineStyle.dashArray;
+        if (typeof markerLineHelper[lineStyle.shape] === 'function') {
+            const func = markerLineHelper[lineStyle.shape];
+            let width = 200, height, stepWidth;
+            switch (lineStyle.shape) {
+                case 'sin':
+                    height = 16;
+                    stepWidth = 16;
+                    break;
+                case 'fault':
+                    height = Math.sqrt((dashArray[0] ** 2) / 2);
+                    stepWidth = Math.sqrt((dashArray[0] ** 2) / 2);
+                    break;
+                default: break;
+            }
+            const elem = func({ width, height, stepWidth }).node();
+            $(elem).css({
+                'stroke': color,
+                'stroke-width': lineWidth,
+                'stroke-dasharray': lineStyle.dashArray,
+                transform: `translateY(${(16-height)/2}px)`,
+            })
+            return $sce.trustAsHtml(elem.outerHTML);
+        } else return null;
+    }
     this.getTemplateList = function () {
         wiApiService.listMarkerTemplate((listTemplate, err) => {
             if (err) return;
             listTemplate.forEach(mt => {
                 mt.lineStyle = JSON.parse(mt.lineStyle);
                 mt.lineStyle.dashArray = JSON.parse(mt.lineStyle.dashArray);
+                // mt.lineStyle.html = self.getLineHtml(mt);
             });
             const markerTemplateGroups = _.groupBy(listTemplate, 'template');
             self.markerSetTemplates = markerTemplateGroups;

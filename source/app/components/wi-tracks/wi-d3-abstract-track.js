@@ -25,6 +25,12 @@ Controller.prototype.registerTrackHorizontalResizerDragCallback = function() {
 }
 Controller.prototype.drawTooltip = function(depth) {
 	let self = this;
+    if (!depth) {
+        let mouse = d3.mouse(self.viTrack.plotContainer.node());
+        if(!mouse || !Array.isArray(mouse)) return;
+        let y = mouse[1];
+		depth = self.viTrack.getTransformY().invert(y);
+    }
     if (!self.wiD3Ctrl) {
         self.viTrack.drawTooltipLines(depth);
         self.viTrack.drawTooltipText(depth, true);

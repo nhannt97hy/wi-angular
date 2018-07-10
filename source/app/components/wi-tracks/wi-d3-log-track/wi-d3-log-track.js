@@ -186,16 +186,37 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
             if (self.getProperties().zone_set) {
                 self.addZoneSetToTrack(self.getProperties().zone_set); 
             }
-            if (self.getProperties().lines) {
+            let lines = self.getProperties().lines;
+            if (lines && lines.length) {
                 let promises = [];
-                self.viTrack.getCurves().forEach(viCurve => self.viTrack.removeDrawing(viCurve));
-                self.properties.lines.forEach(line => {
-                    wiApiService.dataCurve(line.idCurve, curveData => {
-                        self.addCurveToTrack(curveData, line);
-                    })
+                self.viTrack.getCurves().forEach(viCurve => {
+                    let line = lines.find(line => line.idCurve == viCurve.idCurve);
+                    viTrack.removeDrawing(viCurve)
+                    let curveData = viCurve.rawData;
+                    if(line && curveData && curveData.length) {
+                        self.addCurveToTrack(curveData, line); 
+                    }
+                });
+                lines.forEach(line => {
+                    if (!viTrack.getCurves().find(viCurve => viCurve.idCurve == line.idCurve)) {
+                        promises.push(new Promise((resolve) => {
+                            wiApiService.dataCurve(line.idCurve, curveData => {
+                                self.addCurveToTrack(curveData, line);
+                                resolve();
+                            })
+                        }));
+                    }
+                });
+
+                Promise.all(promises).then(() => {
+                    let wellProps = self.getWellProps();
+                    if(wellProps) {
+                        if(!self.minY) self.minY = Number(wellProps.topDepth);
+                        if(!self.maxY) self.maxY = Number(wellProps.bottomDepth);
+                    }
+                    self.isIdle = true;
                 })
             }
-            self.isIdle = true;
             return;
         }
 
@@ -415,14 +436,14 @@ function Controller ($scope, wiComponentService, wiApiService, ModalService, $ti
         self.viTrack.removeAllZones();
         for(let zone of zoneset.zones) {
             if(zone.showOnTrack) {
-                // zone.properties.params = zone.children ? zone.children.map(c => c.data).filter(p => typeof(p.value) == 'number') : [];
                 let viZone = self.viTrack.addZone(zone);
                 viZone.svgGroup.style('pointer-events', 'none');
-                viZone.onControlinesDrag(function(param) {
+                viZone.onControlLinesDrag(function(param) {
                     if(self.viTrack.currentDrawing != viZone) {
                         self.viTrack.setCurrentDrawing(viZone);
                     }
-                    self.viTrack.drawControlLinesOnCurvesHeaders(zone.properties.params); 
+                    self.drawTooltip();
+                    self.viTrack.drawControlLinesOnCurvesHeaders(zone.params); 
                     $scope.$apply();
                 });
                 self.viTrack.onDrawingMouseDown(viZone, function() {

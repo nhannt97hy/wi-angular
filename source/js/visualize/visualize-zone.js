@@ -123,7 +123,7 @@ Zone.prototype.init = function(plotContainer) {
     }
 }
 
-Zone.prototype.onControlinesDrag = function(cb) {
+Zone.prototype.onControlLinesDrag = function(cb) {
     let lastOpacity = null;
     if(this.controlLines) {
         let self = this;
@@ -160,7 +160,7 @@ Zone.prototype.drawControlLineText = function(params) {
     textGroup.select('text')
             .attr('y', yValue - 10)
             .attr('dx', d => transformX(d.value))
-            .html(d => d.label);
+            .html(d => d.name);
     let textBBox = textGroup.select('text').node() ? textGroup.select('text').node().getBBox():{width: 40, height: 20};
     textGroup.select('rect')
         .attr('width', textBBox.width + 10)
@@ -180,7 +180,7 @@ Zone.prototype.controlLineDragCallback = function(controlLine, cb) {
         .attr('x1', xValue)
         .attr('x2', xValue);
     let datum = controlLine.datum();
-    let param = self.params.find(p => p.label == datum.label);
+    let param = self.params.find(p => p.name == datum.name);
     param.value = transformX.invert(xValue);
     cb(param);
 }

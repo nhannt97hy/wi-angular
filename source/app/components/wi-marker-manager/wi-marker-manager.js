@@ -1,7 +1,9 @@
+const markerLineHelper = require('./markerLineHelper');
+
 const componentName = 'wiMarkerManager';
 const moduleName = 'wi-marker-manager';
 
-function Controller(wiComponentService, wiApiService, ModalService) {
+function Controller(wiComponentService, wiApiService, ModalService, $sce) {
     const self = this;
     const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
     const DialogUtils = wiComponentService.getComponent(wiComponentService.DIALOG_UTILS);
@@ -55,6 +57,32 @@ function Controller(wiComponentService, wiApiService, ModalService) {
         }
         node.data.selected = true;
     }
+    this.getLineHtml = function ({ color, lineWidth, lineStyle }) {
+        let dashArray = lineStyle.dashArray;
+        if (typeof markerLineHelper[lineStyle.shape] === 'function') {
+            const func = markerLineHelper[lineStyle.shape];
+            let width = 200, height, stepWidth;
+            switch (lineStyle.shape) {
+                case 'sin':
+                    height = 16;
+                    stepWidth = 16;
+                    break;
+                case 'fault':
+                    height = Math.sqrt((dashArray[0] ** 2) / 2);
+                    stepWidth = Math.sqrt((dashArray[0] ** 2) / 2);
+                    break;
+                default: break;
+            }
+            const elem = func({ width, height, stepWidth }).node();
+            $(elem).css({
+                'stroke': color,
+                'stroke-width': lineWidth,
+                'stroke-dasharray': lineStyle.dashArray,
+                transform: `translateY(${(16-height)/2}px)`,
+            })
+            return $sce.trustAsHtml(elem.outerHTML);
+        } else return null;
+    }
     this.selectMarkerSet = function (idMarkerSet) {
         if (!idMarkerSet) return;
         this.selectedIdMarkerSet = idMarkerSet;
@@ -66,9 +94,11 @@ function Controller(wiComponentService, wiApiService, ModalService) {
                 return m.new;
             });
             self.selectedMarkerSet = markerSet.markers.map(m => {
-                Object.assign(m, { markerTemplate: m.marker_template })
-                m.markerTemplate.lineStyle = JSON.parse(m.markerTemplate.lineStyle);
-                m.markerTemplate.lineStyle.dashArray = JSON.parse(m.markerTemplate.lineStyle.dashArray);
+                const mt = m.marker_template;
+                mt.lineStyle = JSON.parse(mt.lineStyle);
+                mt.lineStyle.dashArray = JSON.parse(mt.lineStyle.dashArray);
+                mt.lineStyle.html = self.getLineHtml(mt);
+                m.markerTemplate = mt;
                 return m;
             }).concat(newMarkers);
             _sortByDepth(self.selectedMarkerSet);
@@ -178,8 +208,8 @@ function Controller(wiComponentService, wiApiService, ModalService) {
         else {
             markerSetModel = Utils.getModel('marker-set', selectedMarker.idMarkerSet, self.treeConfig);
             const wellModel = Utils.getModel('well', markerSetModel.properties.idWell, self.treeConfig);
-            const aboveMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker)-1];
-            const belowMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker)+1];
+            const aboveMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker) - 1];
+            const belowMarker = this.selectedMarkerSet[this.selectedMarkerSet.indexOf(selectedMarker) + 1];
             const { topDepth, bottomDepth } = wellModel.properties;
             depth = isAbove ? selectedMarker.depth - 50 : selectedMarker.depth + 50;
             if (aboveMarker && depth <= aboveMarker.depth) depth = (aboveMarker.depth + selectedMarker.depth) / 2;
@@ -202,6 +232,69 @@ function Controller(wiComponentService, wiApiService, ModalService) {
 
     }
 
+    this.showTreeContextMenu = function ($event, $index) {
+        let selectedNode = _getSelectedNode(self.treeConfig);
+        if (selectedNode.type == 'marker-set') {
+            let contextMenu = getDefaultTreeviewCtxMenu(
+                $index,
+                this
+            );
+            wiComponentService
+                .getComponent("ContextMenu")
+                .open($event.clientX, $event.clientY, contextMenu);
+        }
+    };
+
+    this.exportToZoneset = function () {
+        let selectedNode = _getSelectedNode(self.treeConfig);
+        DialogUtils.chooseZoneTemplateDialog(ModalService, null, function (data) {
+            if (data) {
+                console.log('data')
+                wiApiService.createZoneSet({
+                    name: selectedNode.name,
+                    idWell: selectedNode.idWell
+                }, function (zoneset, err) {
+                    if (zoneset) {
+                        wiApiService.getMarkerSet(selectedNode.id, function (markers, err) {
+                            if (markers) {
+                                let depths = getDepthArrFromMarkerArr(markers.markers);
+                                depths.sort();
+                                let doneNum = 0;
+                                depths.map((d, i) => {
+                                    if (depths[i+1]) {
+                                        wiApiService.createZone({
+                                            background: data.background,
+                                            foreground: data.foreground,
+                                            pattern: data.pattern,
+                                            idZoneSet: zoneset.idZoneSet,
+                                            idZoneTemplate: data.idZoneTemplate,
+                                            template: data.template,
+                                            name: data.name,
+                                            startDepth: d,
+                                            endDepth: depths[i + 1]
+                                        }, function (zone, err) {
+                                            if (zone) {
+                                                doneNum++;
+                                                if (doneNum == depths.length - 2) {
+                                                    toastr.success('Export marker set to zone set successfully.');
+                                                }
+                                            } else {
+                                                toastr.error('Can not create zone.');
+                                            }
+                                        })
+                                    }
+                                })
+                            } else {
+                                toastr.error('Can not get markers.');
+                            }
+                        });
+                    } else {
+                        toastr.error('Can not create zone set.');
+                    }
+                })
+            }
+        })
+    }
 
     // private
     function _createWellModel(well) {
@@ -222,6 +315,7 @@ function Controller(wiComponentService, wiApiService, ModalService) {
             name: markerSet.name,
             type: 'marker-set',
             id: markerSet.idMarkerSet,
+            idWell: markerSet.idWell,
             data: {
                 icon: 'marker-properties-16x16',
                 label: markerSet.name,
@@ -250,6 +344,28 @@ function Controller(wiComponentService, wiApiService, ModalService) {
     }
     function _sortByDepth(markers) {
         markers.sort((a, b) => a.depth - b.depth);
+    }
+
+    function getDefaultTreeviewCtxMenu($index, treeviewCtrl) {
+        return [
+            {
+                name: "Export to Zoneset",
+                label: "Export to Zoneset",
+                icon: "mineral-zone-add-16x16",
+                handler: function () {
+                    self.exportToZoneset();
+                }
+            }
+        ]
+    };
+
+    function getDepthArrFromMarkerArr(markerArr) {
+        if (!markerArr || !Array.isArray(markerArr)) return;
+        let depths = new Set();
+        for (marker of markerArr) {
+            depths.add(marker.depth);
+        }
+        return Array.from(depths);
     }
 }
 

@@ -1104,12 +1104,23 @@ function Controller(wiComponentService, wiApiService, $timeout, ModalService, wi
     }
 
     this.onShowTrackButtonClicked = function() {
+        this.showWFControlLine = !this.showWFControlLine;
         this.logTrackProps.zone_set = {
             zones: self.taskConfig.paramData.map(zoneNode => {
-                zoneNode.properties.params = Object.values(zoneNode.params);
+                zoneNode.properties.params = Object.values(zoneNode.params).filter(p => typeof(p.value) == 'number');
                 return zoneNode.properties;
             }) 
         }
+        // construct lines properties
+        let inputs = this.taskConfig.inputData.filter(i => i.use);
+        let lines = [];
+        inputs.forEach(input => {
+            let datasetProps = utils.getModel('dataset', input.idDataset).properties;
+            let curve = datasetProps.curves.find(curveProp => curveProp.name == input.inputs[0].value && curveProp.family.name == input.inputs[0].name);
+            if(curve) lines.push(curve);
+        });
+        console.log('lines: ', lines);
+        this.logTrackProps.lines = lines;
     }
     /*************************** END OF HARD CODE *****************************/
 }

@@ -1,14 +1,12 @@
 const helper = require('./DialogHelper');
-const markerLineHelper = require('./markerLineHelper');
-
-module.exports = function (ModalService, markerSetTemplate, depth, callback) {
-    function ModalController($scope, close, wiApiService, wiComponentService, $sce) {
+module.exports = function (ModalService, callback) {
+    function ModalController($scope, close, wiApiService, wiComponentService, ModalService, $timeout) {
         const self = this;
         const Utils = wiComponentService.getComponent(wiComponentService.UTILS);
 
         this.treeConfig = [];
         this.marker = {
-            depth: +depth,
+            depth: null,
             idMarkerTemplate: null
         }
 
@@ -18,8 +16,7 @@ module.exports = function (ModalService, markerSetTemplate, depth, callback) {
                 if (err) return;
                 const markerTemplateGroups = _.groupBy(listTemplate, 'template');
                 const mstNames = Object.keys(markerTemplateGroups).filter(mstName => {
-                    if (!markerSetTemplate) return true;
-                    else return mstName === markerSetTemplate;
+                    return true;
                 });
                 _.merge(self.treeConfig, mstNames.map(name => ({
                     name,
@@ -30,22 +27,21 @@ module.exports = function (ModalService, markerSetTemplate, depth, callback) {
                         childExpanded: true
                     },
                     properties: { template: name },
-                    children: markerTemplateGroups[name].map(mt => {
-                        mt.lineStyle = JSON.parse(mt.lineStyle);
-                        mt.lineStyle.dashArray = JSON.parse(mt.lineStyle.dashArray);
-                        return {
-                            name: mt.name,
-                            type: 'marker-template',
-                            id: mt.idMarkerTemplate,
-                            data: {
-                                icon: 'marker-properties-16x16',
-                                label: mt.name,
-                                childExpanded: true
-                            },
-                            properties: mt,
-                        }
-                    })
+                    children: markerTemplateGroups[name].map(mt => ({
+                        name: mt.name,
+                        type: 'marker-template',
+                        id: mt.idMarkerTemplate,
+                        data: {
+                            icon: 'marker-properties-16x16',
+                            label: mt.name,
+                            childExpanded: true
+                        },
+                        properties: Object.assign(mt, { lineStyle: mt.lineStyle }),
+                    }))
                 })))
+
+                self.onTreeSelect(self.treeConfig[0].children[Math.floor(Math.random() * (self.treeConfig[0].children.length-1))]);
+
             })
         }
         this.refreshTree();
@@ -56,33 +52,6 @@ module.exports = function (ModalService, markerSetTemplate, depth, callback) {
                 self.selectedTemplate = node.properties;
             }
             node.data.selected = true;
-        }
-
-        this.getLineHtml = function ({ color, lineWidth, lineStyle }) {
-            let dashArray = lineStyle.dashArray;
-            if (typeof markerLineHelper[lineStyle.shape] === 'function') {
-                const func = markerLineHelper[lineStyle.shape];
-                let width = 200, height, stepWidth;
-                switch (lineStyle.shape) {
-                    case 'sin':
-                        height = 16;
-                        stepWidth = 16;
-                        break;
-                    case 'fault':
-                        height = Math.sqrt((dashArray[0] ** 2) / 2);
-                        stepWidth = Math.sqrt((dashArray[0] ** 2) / 2);
-                        break;
-                    default: break;
-                }
-                const elem = func({ width, height, stepWidth }).node();
-                $(elem).css({
-                    'stroke': color,
-                    'stroke-width': lineWidth,
-                    'stroke-dasharray': lineStyle.dashArray,
-                    transform: `translateY(${(16-height)/2}px)`,
-                })
-                return $sce.trustAsHtml(elem.outerHTML);
-            } else return null;
         }
 
         // buttons
@@ -105,7 +74,7 @@ module.exports = function (ModalService, markerSetTemplate, depth, callback) {
     }
 
     ModalService.showModal({
-        templateUrl: 'create-new-marker-modal.html',
+        templateUrl: 'choose-marker-template-modal.html',
         controller: ModalController,
         controllerAs: "wiModal"
     }).then(function (modal) {

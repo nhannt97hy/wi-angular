@@ -38,6 +38,7 @@ CorrelationTrack.prototype.drawCorrelationZones = function () {
     let leftZones = this.leftTrack.getProperties().zone_set.zones; 
     let rightZones = this.rightTrack.getProperties().zone_set.zones;
     let leftViZones = this.leftTrack.viTrack.getZones();
+    let rightViZones = this.rightTrack.viTrack.getZones();
     if (!leftZones || !rightZones || !leftZones.length || !rightZones.length) return;
     let self = this;
     let transformY = this.getTransformY();
@@ -46,22 +47,28 @@ CorrelationTrack.prototype.drawCorrelationZones = function () {
 
     leftZones.forEach((leftZone, leftIdx) => {
         let rightZone = rightZones[leftIdx];
-        if(rightZone && leftZone.idZoneTemplate == rightZone.idZoneTemplate) {
-            let minYLeft = transformY(leftZone.startDepth);
-            let maxYLeft = transformY(leftZone.endDepth);
-            let minYRight = transformY(rightZone.startDepth);
-            let maxYRight = transformY(rightZone.endDepth);
+        let viZone = leftViZones.find(viZ => viZ.id == leftZone.idZone);
+        if(!viZone) {
+            viZone = rightViZones.find(viZ => viZ.id == rightZone.idZone); 
+        }
+        if (viZone && leftZone.showOnTrack && rightZone.showOnTrack) {
+            if (rightZone && leftZone.idZoneTemplate == rightZone.idZoneTemplate) {
+                let minYLeft = transformY(leftZone.startDepth);
+                let maxYLeft = transformY(leftZone.endDepth);
+                let minYRight = transformY(rightZone.startDepth);
+                let maxYRight = transformY(rightZone.endDepth);
 
-            let pointsGroup = [
-                {x: viewportX[0], y: minYLeft},
-                {x: viewportX[1], y: minYRight},
-                {x: viewportX[1], y: maxYRight},
-                {x: viewportX[0], y: maxYLeft},
-            ]
-            pointsList.push({
-                points: pointsGroup,
-                fillStyle: leftViZones[leftIdx].rect.attr('fill')
-            });
+                let pointsGroup = [
+                    {x: viewportX[0], y: minYLeft},
+                    {x: viewportX[1], y: minYRight},
+                    {x: viewportX[1], y: maxYRight},
+                    {x: viewportX[0], y: maxYLeft},
+                ]
+                pointsList.push({
+                    points: pointsGroup,
+                    fillStyle: viZone.rect.attr('fill')
+                });
+            }
         }
     })
 

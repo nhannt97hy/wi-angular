@@ -93,6 +93,10 @@ Marker.prototype.setProperties = function(props) {
     let self = this;
     Utils.merge(this, Utils.only(props, this.PROPERTIES), function(props, key) {
         let value = props[key];
+        if (key == 'marker_template') {
+            value.lineStyle = JSON.parse(value.lineStyle);
+            return value;
+        } 
         if (self.FLOAT_PROPERTIES.indexOf(key) > -1) return parseFloat(value);
         if (self.INTEGER_PROPERTIES.indexOf(key) > -1) return parseInt(value);
         if (self.ARRAY_PROPERTIES.indexOf(key) > -1) return eval(value);
@@ -114,8 +118,8 @@ Marker.prototype.init = function(plotContainer) {
 
     this.lineConfig = d3.line()
         .x(d => d.x)
-        .y(d => d.y)
-        .curve(d3.curveBasis);
+        .y(d => d.y);
+        // .curve(d3.curveBasis);
 
     this.path = this.svgGroup.append('path')
         .attr('class', 'vi-marker-line')
@@ -140,9 +144,10 @@ Marker.prototype.prepareLineData = function() {
 
     let data = [];
 
-    if(this.marker_template.lineStyle == 'sin') {
+    if(this.marker_template.lineStyle.shape == 'sin') {
+        this.lineConfig.curve(d3.curveBasis);
         let range = maxX - minX;
-        let step = 5; // 7px
+        let step = 5; // 5px
         let waveHeight = 5; // 5px
         let maxLoop = Math.ceil(range / (4*step));
         for(let i = 0; i <= maxLoop; ++i) {
@@ -151,6 +156,20 @@ Marker.prototype.prepareLineData = function() {
                 {x: minX + step * (i * 4 + 1), y: y + waveHeight},
                 {x: minX + step * (i * 4 + 2), y: y},
                 {x: minX + step * (i * 4 + 3), y: y - waveHeight}
+            ];
+            data = data.concat(stepData);
+        }
+    } else if(this.marker_template.lineStyle.shape == 'fault') {
+        this.lineConfig.curve(d3.curveLinear);
+        this.marker_template.lineStyle.dashArray = '[5,5]'
+        let range = maxX - minX;
+        let step = 3;
+        let maxLoop = Math.ceil(range / (2*step));
+        let height = 2;
+        for(let i = 0; i <= maxLoop; ++i) {
+            let stepData = [
+                {x: minX + step * i * 2, y: y - height},
+                {x: minX + step * (i * 2) + 3, y: y + height}
             ];
             data = data.concat(stepData);
         }
@@ -174,7 +193,7 @@ Marker.prototype.doPlot = function(highlight) {
         .attr('d', this.lineConfig)
         .attr('stroke', this.marker_template.color || 'black')
         .attr('stroke-width', this.lineWidth || 1)
-        .attr('stroke-dasharray', this.marker_template.lineStyle=='sin' ? '':JSON.parse(this.marker_template.lineStyle || '[]').join(','));
+        .attr('stroke-dasharray', JSON.parse(this.marker_template.lineStyle.dashArray || '[]').join(','));
 
         // .attr('stroke', this.lineColor || 'black')
         // .attr('stroke-width', this.lineWidth || 1)
