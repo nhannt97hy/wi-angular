@@ -4,7 +4,8 @@ const moduleName = 'wi-base-treeview';
 function WiBaseTreeController(wiComponentService, $scope) {
     let self = this;
     function filterLabel (input) {
-        return input.data.label + "    " + (input.data.tooltip || '');
+        // return input.data.label + "    " + (input.data.tooltip || '');
+        return angular.toJson({data: input.data, properties: input.properties});
     }
     function filterType (input){
         if(!self.filterBy || !input.type) return true;
