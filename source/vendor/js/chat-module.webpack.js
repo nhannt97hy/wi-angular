@@ -155,16 +155,17 @@ function Controller(apiService, $timeout, $element){
 
         });
     }
+    let lenghtUrl = apiService.url.length;
     this.download = function(path) {
-        let p = path.slice(27);
-        return apiService.url + '/api/download/'+p+'?token='+self.token;
+        let p = path.slice(20);
+        return lengthUrl + 1 + '/api/download/'+p+'?token='+self.token;
     }
     this.thumb = function(path) {
-        let p = path.slice(27);
-        return apiService.url + '/api/thumb/'+p+'?token='+self.token;
+        let p = path.slice(20);
+        return lengthUrl + 1 + '/api/thumb/'+p+'?token='+self.token;
     }
     this.fileName = function(path) {
-        return path.substring(61+self.conver.name.length, path.length);
+        return path.substring(lengthUrl + 33 +self.conver.name.length, path.length);
     }
     socket.on('sendMessage', function (data) {
         if(self.conver.id == data.idConversation) {
@@ -348,7 +349,7 @@ if(false) {}
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<script>\n    var socket = io('http://54.169.149.206:5001');\n</script>\n<div ng-init=\"cm.draggable()\" ng-mousedown=\"cm.onMouseDown()\"\n    class=\"chat-module\" style=\"right: {{cm.right}};bottom: {{cm.bottom}}; width: {{cm.width}}px\" ng-if=\"cm.initChatGroup || cm.initHelpDesk\">\n    <div id=\"chat-frame\" ng-show=\"cm.showChatFrame()\">\n        <div class=\"panel with-nav-tabs panel-{{cm.class}}\">\n            <div class=\"panel-heading title-bar\">\n                <ul class=\"nav nav-tabs\">\n                    <li class=\"active tab-chat\" id=\"pill-active\" style=\"max-width: 100px\">\n                        <a href=\"#chat-{{cm.groupName}}\" data-toggle=\"tab\" style=\"white-space: nowrap;overflow-x: hidden;text-overflow: ellipsis;\">\n                            {{cm.groupName}}\n                        </a>\n                    </li>\n                    <li id=\"pill-active\" ng-if=\"cm.groupName!='Help_Desk'\" class=\"members\">\n                        <a href=\"#members-{{cm.groupName}}\" data-toggle=\"tab\">Members({{cm.groupName}})</a>\n                    </li>\n                    <li style=\"float: right\" class=\"cursor-pointer\" ng-click=\"cm.hideChatFrame()\">\n                        <i class=\"fa fa-minus config\"></i>\n                    </li>\n                </ul>\n            </div>\n            <div class=\"panel-body\">\n                <div class=\"tab-content\">\n                    <div class=\"tab-pane fade in active\" id=\"chat-{{cm.groupName}}\">\n                        <chat-group conver=\"cm.conver\" user=\"cm.user\" token=\"cm.token\" color=\"cm.color\"></chat-group>\n                    </div>\n                    <div class=\"tab-pane fade\" id=\"members-{{cm.groupName}}\" ng-if=\"cm.groupName!='Help_Desk'\">\n                        <list-user list-user=\"cm.listUser\" user=\"cm.user\" id-conversation=\"cm.conver.id\" token=\"cm.token\"></list-user>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>";
+module.exports = "<script>\n    var socket = io('http://chat.i2g.cloud');\n</script>\n<div ng-init=\"cm.draggable()\" ng-mousedown=\"cm.onMouseDown()\"\n    class=\"chat-module\" style=\"right: {{cm.right}};bottom: {{cm.bottom}}; width: {{cm.width}}px\" ng-if=\"cm.initChatGroup || cm.initHelpDesk\">\n    <div id=\"chat-frame\" ng-show=\"cm.showChatFrame()\">\n        <div class=\"panel with-nav-tabs panel-{{cm.class}}\">\n            <div class=\"panel-heading title-bar\">\n                <ul class=\"nav nav-tabs\">\n                    <li class=\"active tab-chat\" id=\"pill-active\" style=\"max-width: 100px\">\n                        <a href=\"#chat-{{cm.groupName}}\" data-toggle=\"tab\" style=\"white-space: nowrap;overflow-x: hidden;text-overflow: ellipsis;\">\n                            {{cm.groupName}}\n                        </a>\n                    </li>\n                    <li id=\"pill-active\" ng-if=\"cm.groupName!='Help_Desk'\" class=\"members\">\n                        <a href=\"#members-{{cm.groupName}}\" data-toggle=\"tab\">Members({{cm.groupName}})</a>\n                    </li>\n                    <li style=\"float: right\" class=\"cursor-pointer\" ng-click=\"cm.hideChatFrame()\">\n                        <i class=\"fa fa-minus config\"></i>\n                    </li>\n                </ul>\n            </div>\n            <div class=\"panel-body\">\n                <div class=\"tab-content\">\n                    <div class=\"tab-pane fade in active\" id=\"chat-{{cm.groupName}}\">\n                        <chat-group conver=\"cm.conver\" user=\"cm.user\" token=\"cm.token\" color=\"cm.color\"></chat-group>\n                    </div>\n                    <div class=\"tab-pane fade\" id=\"members-{{cm.groupName}}\" ng-if=\"cm.groupName!='Help_Desk'\">\n                        <list-user list-user=\"cm.listUser\" user=\"cm.user\" id-conversation=\"cm.conver.id\" token=\"cm.token\"></list-user>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>";
 
 /***/ }),
 
@@ -1200,7 +1201,7 @@ module.exports = function (css) {
 const moduleName = 'apiServiceModule';
 const serviceName = 'apiService';
 const GET_LIST_USER_OF_PROJECT = 'http://login.sflow.me/user/list';
-const wiMessengerUrl = 'http://54.169.149.206:5001';
+const wiMessengerUrl = 'http://chat.i2g.cloud';
 
 const GET_CONVERSATION = wiMessengerUrl + '/api/conversation';
 const POST_MESSAGE = wiMessengerUrl + '/api/message/new';
